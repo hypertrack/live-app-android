@@ -5,10 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,11 +37,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.json.JSONArray;
+import com.google.gson.Gson;
+import com.hypertrack.apps.assettracker.HyperTrack;
+import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
+import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
 import io.hypertrack.meta.model.ETAInfo;
+import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
+import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.util.HTConstants;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -64,6 +68,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
     private LatLng destinationLocation;
     private Marker destinationLocationMarker;
     private Button shareEtaButton;
+    private HTTransmitterService transmitterService;
+    private String userId;
+    private String tripId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +122,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 null);
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
+        setUpShareEtaButton();
+        setUpHyperTrackSDK();
+    }
+
+    private void setUpHyperTrackSDK() {
+        HyperTrack.setAPIKey("cb50db86ff63f556f7856d7690ebc305a7a27c69");
+        HyperTrack.setLoggable(true);
+        //Setup order details
+        transmitterService =  HTTransmitterService.getInstance(this);
+        int userIdInt = getUserIdFromPreferences();
+        userId = String.valueOf(userIdInt);
+    }
+
+    private int getUserIdFromPreferences() {
+        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+         return settings.getInt(HTConstants.USER_ID, -1);
     }
 
     @Override
@@ -133,6 +156,18 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+
+            transmitterService.endTrip(Integer.valueOf(tripId), new HTTripStatusCallback() {
+                @Override
+                public void onError(Exception e) {
+                    Toast.makeText(Home.this, "Inside OnError", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                public void onSuccess(String s) {
+                    Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
+                }
+            });
             return true;
         }
 
@@ -323,6 +358,78 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         mAutocompleteView.setVisibility(View.GONE);
     }
 
+    private void setUpShareEtaButton() {
+        shareEtaButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initShareEtaFlow();
+            }
+        });
+    }
+
+    private void initShareEtaFlow() {
+        startTrip();
+    }
+
+    private void startTrip() {
+        if (TextUtils.isEmpty(userId) || userId.equals("-1")) {
+            Toast.makeText(this, "User id not found", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        transmitterService.setOrderDetails(userId);
+        transmitterService.startTrip(new HTTripStatusCallback() {
+            @Override
+            public void onError(Exception e) {
+                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onSuccess(String id) {
+                Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
+                tripId = id;
+                getShareEtaURL(id);
+            }
+        });
+    }
+
+    private void getShareEtaURL(String tripId) {
+
+        UserTrip userTrip = new UserTrip(userId, tripId);
+        Gson gson = new Gson();
+        String jsonBody = gson.toJson(userTrip);
+
+        String url = "https://meta-api-staging.herokuapp.com/api/v1/trips/";
+
+        HTCustomPostRequest<UserTrip> requestObject = new HTCustomPostRequest<UserTrip>(1,url,
+                jsonBody, UserTrip.class,
+                new Response.Listener<UserTrip>() {
+                    @Override
+                    public void onResponse(UserTrip response) {
+                        Toast.makeText(Home.this, "URL: " + response.getTrackUri(), Toast.LENGTH_LONG).show();
+                        shareUrl(response.getTrackUri());
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Home.this, "Inside Error", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(requestObject);
+    }
+
+    private void shareUrl(String uri) {
+
+        String shareBody = "Track me @ https://meta-api-staging.herokuapp.com" + uri;
+
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
+        startActivity(sharingIntent);
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
