@@ -15,4 +15,17 @@
         android:layout_height="match_parent"
         tools:context="io.hypertrack.meta.Home" />
 
+
+    <AutoCompleteTextView
+        android:id="@+id/autocomplete_places"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:hint="@string/autocomplete_hint"
+        android:singleLine="true"
+        android:layout_margin="8dp"
+        android:background="@android:color/white"
+        android:padding="8dp"
+        android:elevation="16dp"/>
+
 </RelativeLayout>

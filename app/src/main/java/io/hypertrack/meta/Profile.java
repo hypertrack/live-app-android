@@ -1,5 +1,7 @@
 package io.hypertrack.meta;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -33,8 +35,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
+
+import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.util.HTConstants;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -167,7 +177,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(lastName)) {
+        if (TextUtils.isEmpty(lastName)) {
             mLastNameView.setError(getString(R.string.error_field_required));
             focusView = mLastNameView;
             cancel = true;
@@ -188,9 +198,60 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(firstName, lastName);
-            mAuthTask.execute((Void) null);
+            updateUserProfile(firstName, lastName);
+
+            //mAuthTask = new UserLoginTask(firstName, lastName);
+            //mAuthTask.execute((Void) null);
         }
+    }
+
+    private void updateUserProfile(String firstName, String lastName) {
+
+        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+        int userId =  settings.getInt(HTConstants.USER_ID, -1);
+
+        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+userId+"/";
+
+        User user = new User(firstName, lastName);
+        Gson gson = new Gson();
+        String jsonObjectBody = gson.toJson(user);
+
+        Log.d("Response", "Request Body - " + jsonObjectBody);
+
+        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
+                7,
+                url,
+                jsonObjectBody,
+                User.class,
+                new Response.Listener<User>() {
+                    @Override
+                    public void onResponse(User response) {
+                        Log.d("Response", "User :" + response.toString());
+
+                        showProgress(false);
+
+                        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putBoolean("isUserOnboard", true);
+                        editor.commit();
+
+                        Intent intent = new Intent(Profile.this, Home.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(request);
+
+
     }
 
     private boolean isEmailValid(String email) {
@@ -305,8 +366,21 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         int MIME_TYPE = 2;
     }
 
+    private void populateAutoCompleteUsingAccountManager() {
+
+        if (BuildConfig.DEBUG) {
+            mFirstNameView.setText("Suhas");
+            mLastNameView.setText("Mandrawadkar");
+        }
+
+    }
 
     private void addNamesToAutoComplete(List<String> namesCollection) {
+
+        if (namesCollection.size() == 0) {
+            populateAutoCompleteUsingAccountManager();
+            return;
+        }
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
                 new ArrayAdapter<>(Profile.this,
@@ -321,12 +395,12 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private final String mEmail;
-        private final String mPassword;
+        private final String mFirstName;
+        private final String mLastName;
 
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
+        UserLoginTask(String firstName, String lastName) {
+            mFirstName = firstName;
+            mLastName = lastName;
         }
 
         @Override
@@ -340,13 +414,13 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 return false;
             }
 
-            for (String credential : DUMMY_CREDENTIALS) {
+       /*     for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
+                if (pieces[0].equals(mFirstName)) {
                     // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
+                    return pieces[1].equals(mLastName);
                 }
-            }
+            }*/
 
             // TODO: register the new account here.
             return true;
@@ -363,8 +437,10 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 editor.putBoolean("isUserOnboard", true);
                 editor.commit();
 
-                startActivity(new Intent(Profile.this, Home.class));
-                finish();
+                Intent intent = new Intent(Profile.this, Home.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+
             } else {
                 mLastNameView.setError(getString(R.string.error_incorrect_password));
                 mLastNameView.requestFocus();
