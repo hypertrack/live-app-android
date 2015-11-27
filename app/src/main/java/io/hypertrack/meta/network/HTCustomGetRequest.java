@@ -79,7 +79,8 @@ public class HTCustomGetRequest<T> extends Request<T> {
     protected Response<T> parseNetworkResponse(NetworkResponse response) {
         try {
 
-            Log.d("Response", "Status Code: " + response.statusCode + " Headers:" + response.headers);
+            if (response != null)
+                Log.d("Response", "Status Code: " + response.statusCode + " Headers:" + response.headers);
 
             String json = new String(
                     response.data, HttpHeaderParser.parseCharset(response.headers));
@@ -94,7 +95,26 @@ public class HTCustomGetRequest<T> extends Request<T> {
 
     @Override
     protected VolleyError parseNetworkError(VolleyError volleyError) {
-        Log.d("Response", " " + volleyError.networkResponse.statusCode + volleyError.networkResponse.data);
+
+        if (volleyError != null) {
+
+            if (volleyError.networkResponse != null) {
+
+                Log.d("Error", " " + volleyError.networkResponse.statusCode);
+
+                if (volleyError.networkResponse.data != null && volleyError.networkResponse.headers != null) {
+                    try {
+                        String json = new String(
+                                volleyError.networkResponse.data, HttpHeaderParser.parseCharset(volleyError.networkResponse.headers));
+                        Log.d("Error", " " + json);
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }
+
         return super.parseNetworkError(volleyError);
     }
 

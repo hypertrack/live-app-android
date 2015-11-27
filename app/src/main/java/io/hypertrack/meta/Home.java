@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -83,6 +84,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 .addConnectionCallbacks(this)
                 .build();
 
+        retrieveIntentData();
+
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -130,6 +133,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         HyperTrack.setAPIKey("cb50db86ff63f556f7856d7690ebc305a7a27c69");
         HyperTrack.setLoggable(true);
         //Setup order details
+
         transmitterService =  HTTransmitterService.getInstance(this);
         int userIdInt = getUserIdFromPreferences();
         userId = String.valueOf(userIdInt);
@@ -439,6 +443,20 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
 
     @Override
     public void onConnectionSuspended(int i) {
+
+    }
+
+    private void retrieveIntentData() {
+
+        Intent intent = getIntent();
+        //String action = intent.getAction();
+        Uri data = intent.getData();
+        Toast.makeText(Home.this, "Uri: " + data, Toast.LENGTH_LONG).show();
+
+        getTripId(data);
+    }
+
+    private void getTripId(Uri data) {
 
     }
 }

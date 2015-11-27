@@ -35,6 +35,20 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <intent-filter android:label="mETA app">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "https://meta-api-staging.herokuapp.com/trips” -->
+                <data android:scheme="https"
+                    android:host="meta-api-staging.herokuapp.com"
+                    android:pathPrefix="/trips" />
+                <!-- note that the leading "/" is required for pathPrefix-->
+                <!-- Accepts URIs that begin with "example://gizmos”
+                <data android:scheme="example"
+                      android:host="gizmos" />
+                -->
+            </intent-filter>
         </activity>
         <activity
             android:name=".Login"
@@ -67,9 +81,9 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/. 
         -->
-        <meta-data
+      <!--  <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="@string/google_maps_key" />-->
 
         <activity
             android:name=".Profile"
