@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="io.hypertrack.meta.Trip">
+
+    <fragment
+        android:id="@+id/htMapfragment"
+        android:name="com.hypertrack.android.sdk.base.view.HTMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout="@layout/fragment_map" />
+
+
+</RelativeLayout>

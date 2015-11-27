@@ -84,8 +84,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 .addConnectionCallbacks(this)
                 .build();
 
-        retrieveIntentData();
-
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -446,17 +444,4 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
 
     }
 
-    private void retrieveIntentData() {
-
-        Intent intent = getIntent();
-        //String action = intent.getAction();
-        Uri data = intent.getData();
-        Toast.makeText(Home.this, "Uri: " + data, Toast.LENGTH_LONG).show();
-
-        getTripId(data);
-    }
-
-    private void getTripId(Uri data) {
-
-    }
 }

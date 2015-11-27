@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.hypertrack.meta" >
+    package="io.hypertrack.meta">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.SEND_SMS" />
@@ -17,6 +16,7 @@
          location permissions for the 'MyLocation' functionality. 
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".MetaApplication"
@@ -28,40 +28,25 @@
         <activity
             android:name=".Home"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter android:label="mETA app">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with "https://meta-api-staging.herokuapp.com/trips” -->
-                <data android:scheme="https"
-                    android:host="meta-api-staging.herokuapp.com"
-                    android:pathPrefix="/trips" />
-                <!-- note that the leading "/" is required for pathPrefix-->
-                <!-- Accepts URIs that begin with "example://gizmos”
-                <data android:scheme="example"
-                      android:host="gizmos" />
-                -->
-            </intent-filter>
         </activity>
         <activity
             android:name=".Login"
             android:label="@string/title_activity_login"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".Verify"
             android:label="@string/title_activity_verify"
             android:parentActivityName=".Login"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="io.hypertrack.meta.Login" />
@@ -73,6 +58,31 @@
             </intent-filter>
         </receiver>
 
+        <activity
+            android:name=".Trip"
+            android:parentActivityName=".Home"
+            android:screenOrientation="portrait"
+            >
+
+            <intent-filter android:label="mETA app">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with "https://meta-api-staging.herokuapp.com/trips” -->
+                <data
+                    android:host="meta-api-staging.herokuapp.com"
+                    android:pathPrefix="/trips"
+                    android:scheme="https" />
+                <!-- note that the leading "/" is required for pathPrefix -->
+                <!--
+                Accepts URIs that begin with "example://gizmos”
+                <data android:scheme="example"
+                      android:host="gizmos" />
+                -->
+            </intent-filter>
+        </activity>
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -81,19 +91,20 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/. 
         -->
-      <!--  <meta-data
+        <!--
+            <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />-->
+            android:value="@string/google_maps_key" />
+        -->
 
         <activity
             android:name=".Profile"
-            android:label="@string/title_activity_generated_login" >
-        </activity>
+            android:label="@string/title_activity_generated_login"></activity>
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
+
     </application>
 
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
