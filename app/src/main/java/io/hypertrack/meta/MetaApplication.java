@@ -6,6 +6,8 @@ import android.text.TextUtils;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by suhas on 11/11/15.
@@ -19,6 +21,7 @@ public class MetaApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
         mInstance = this;
     }
 
@@ -37,11 +40,13 @@ public class MetaApplication extends Application {
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         // set the default tag if tag is empty
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        req.setShouldCache(false);
         getRequestQueue().add(req);
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
         req.setTag(TAG);
+        req.setShouldCache(false);
         getRequestQueue().add(req);
     }
 

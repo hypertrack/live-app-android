@@ -81,9 +81,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 .addApi(Places.GEO_DATA_API)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
                 .build();
-
 
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -117,9 +115,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 findViewById(R.id.autocomplete_places);
 
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
-
         mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY,
                 null);
+
+
+        mAutocompleteView.setAdapter(mAdapter);
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
         setUpShareEtaButton();
@@ -298,7 +298,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         }
 
 
-        addMarkerToSelectedDestination(new LatLng(19.158004, 72.991996));
+        //addMarkerToSelectedDestination(new LatLng(19.158004, 72.991996));
     }
 
     private void addMarkerToSelectedDestination(LatLng destinationLocation) {
@@ -434,7 +434,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-
         addMarkerToCurrentLocation();
     }
 

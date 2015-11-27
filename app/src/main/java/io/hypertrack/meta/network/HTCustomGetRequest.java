@@ -83,11 +83,7 @@ public class HTCustomGetRequest<T> extends Request<T> {
 
             String json = new String(
                     response.data, HttpHeaderParser.parseCharset(response.headers));
-
-            Log.d("Response", "RESPONSE: " + json);
-
-            return Response.success(
-                    gson.fromJson(json, responseType), HttpHeaderParser.parseCacheHeaders(response));
+            return Response.success(gson.fromJson(json, responseType), HttpHeaderParser.parseCacheHeaders(response));
 
         } catch (UnsupportedEncodingException e) {
             return Response.error(new ParseError(e));

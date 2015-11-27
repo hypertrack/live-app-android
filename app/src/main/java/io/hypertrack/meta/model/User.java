@@ -21,7 +21,7 @@ public class User {
     private String photo;
 
     @SerializedName("hypertrack_courier_id")
-    private Integer hypertrackCourierId;
+    private String hypertrackCourierId;
 
 
     public User(String number) {
@@ -31,6 +31,10 @@ public class User {
     public User(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public User() {
+
     }
 
     public Integer getId() {
@@ -73,11 +77,11 @@ public class User {
         this.photo = photo;
     }
 
-    public Integer getHypertrackCourierId() {
+    public String getHypertrackCourierId() {
         return hypertrackCourierId;
     }
 
-    public void setHypertrackCourierId(Integer hypertrackCourierId) {
+    public void setHypertrackCourierId(String hypertrackCourierId) {
         this.hypertrackCourierId = hypertrackCourierId;
     }
 
