@@ -44,7 +44,8 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.17'
     compile 'com.google.code.gson:gson:2.3.1'
     compile 'io.hypertrack:hypertrack-driver-sdk:0.1.3'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {`
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
         transitive = true;
     }
 
+}
