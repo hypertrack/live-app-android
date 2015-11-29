@@ -361,6 +361,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         if (destinationLocation != null) {
             // Add a marker in destination and move the camera
             this.destinationLocation = destinationLocation;
+
+            if (destinationLocationMarker != null) {
+                destinationLocationMarker.remove();
+            }
+
             destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this.destinationLocation).title("Your destination"));
             destinationLocationMarker.showInfoWindow();
 
@@ -418,8 +423,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         int etaInMinutes = eta / 60;
         shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
         shareEtaButton.setVisibility(View.VISIBLE);
-        mAutocompleteView.setVisibility(View.GONE);
-        endTripButton.setVisibility(View.VISIBLE);
 
         mProgressDialog.dismiss();
     }
@@ -442,6 +445,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
             }
             shareUrl(uri);
         } else {
+
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
@@ -469,6 +473,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 tripId = id;
                 getShareEtaURL(id);
                 saveTripInSharedPreferences(id);
+
+                mAutocompleteView.setVisibility(View.GONE);
+                endTripButton.setVisibility(View.VISIBLE);
             }
         });
     }

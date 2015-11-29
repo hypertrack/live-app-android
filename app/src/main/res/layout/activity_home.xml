@@ -35,10 +35,11 @@
         android:id="@+id/shareEtaButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_gravity="bottom"
+        android:layout_margin="8dp"
         android:textColor="#ffffff"
         android:padding="16dp"
-        android:layout_margin="8dp"
+        android:elevation="16dp"
         android:visibility="gone"
         />
 
