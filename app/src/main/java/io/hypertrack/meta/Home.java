@@ -78,6 +78,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
     private ProgressDialog mProgressDialog;
 
     private InputMethodManager mIMEMgr;
+    private Button endTripButton;
 
 
     @Override
@@ -132,6 +133,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         mAutocompleteView.setAdapter(mAdapter);
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
+        endTripButton = (Button) findViewById(R.id.endtrip_button);
+        endTripButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                endTrip();
+            }
+        });
+
         setUpShareEtaButton();
         setUpHyperTrackSDK();
     }
@@ -182,14 +191,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
 
                 @Override
                 public void onSuccess(String s) {
-                    Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
-
-                    SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putBoolean(HTConstants.TRIP_STATUS, false);
-                    editor.putString(HTConstants.TRIP_URI, "None");
-                    resetViewsOnEndTrip();
-                    editor.commit();
+                        endTrip();
                 }
             });
             return true;
@@ -198,9 +200,22 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         return super.onOptionsItemSelected(item);
     }
 
+    private void endTrip() {
+
+        Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putBoolean(HTConstants.TRIP_STATUS, false);
+        editor.putString(HTConstants.TRIP_URI, "None");
+        editor.commit();
+
+        resetViewsOnEndTrip();
+    }
+
     private void resetViewsOnEndTrip() {
 
         shareEtaButton.setVisibility(View.GONE);
+        endTripButton.setVisibility(View.GONE);
 
         mAutocompleteView.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
@@ -208,6 +223,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         if ( destinationLocationMarker != null) {
             destinationLocationMarker.remove();
         }
+
     }
 
     /**
@@ -403,6 +419,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
         shareEtaButton.setVisibility(View.VISIBLE);
         mAutocompleteView.setVisibility(View.GONE);
+        endTripButton.setVisibility(View.VISIBLE);
 
         mProgressDialog.dismiss();
     }
