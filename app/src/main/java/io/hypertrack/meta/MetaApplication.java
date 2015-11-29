@@ -3,6 +3,7 @@ package io.hypertrack.meta;
 import android.app.Application;
 import android.text.TextUtils;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
@@ -17,6 +18,8 @@ public class MetaApplication extends Application {
     private static final String TAG = MetaApplication.class.getSimpleName();
     private RequestQueue mRequestQueue;
     private static MetaApplication mInstance;
+    private static final int TIMEOUT_MILLISECONDS = 30000;
+    private static final int MAX_RETRIES = -1;
 
     @Override
     public void onCreate() {
@@ -40,12 +43,16 @@ public class MetaApplication extends Application {
     public <T> void addToRequestQueue(Request<T> req, String tag) {
         // set the default tag if tag is empty
         req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
+        req.setRetryPolicy(new DefaultRetryPolicy(TIMEOUT_MILLISECONDS, MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         req.setShouldCache(false);
         getRequestQueue().add(req);
     }
 
     public <T> void addToRequestQueue(Request<T> req) {
         req.setTag(TAG);
+        req.setRetryPolicy(new DefaultRetryPolicy(TIMEOUT_MILLISECONDS, MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         req.setShouldCache(false);
         getRequestQueue().add(req);
     }

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">mETA</string>
     <string name="action_settings">Settings</string>
+    <string name="action_endtrip">End Trip</string>
     <string name="title_activity_on_boarding">Sign in</string>
     <string name="autocomplete_hint">Enter place name or address</string>
 

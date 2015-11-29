@@ -1,5 +1,6 @@
 package io.hypertrack.meta;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +21,7 @@ public class Trip extends AppCompatActivity {
 
     private HTMapFragment htMapFragment;
     private HyperTrackClient mHyperTrackClient;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,11 @@ public class Trip extends AppCompatActivity {
 
     private void getTripId(Uri data) {
 
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Fetching trip data ...");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
         String uriString = data.getPath();
         String uriId = uriString.substring(7, uriString.indexOf(":"));
         Toast.makeText(Trip.this, "Uri ID: " + uriId, Toast.LENGTH_LONG).show();
@@ -63,11 +70,13 @@ public class Trip extends AppCompatActivity {
                         Log.d("Response", "Inside onResponse");
                         Toast.makeText(Trip.this, "HyperTrack Trip ID: " + response.getHypertrackTripId(), Toast.LENGTH_LONG).show();
                         mHyperTrackClient.setId(response.getHypertrackTripId());
+                        mProgressDialog.dismiss();
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("Response", "Inside onError");
+                        mProgressDialog.dismiss();
                     }
                 });
 

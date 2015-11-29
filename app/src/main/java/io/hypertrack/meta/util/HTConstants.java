@@ -5,4 +5,8 @@ package io.hypertrack.meta.util;
  */
 public class HTConstants {
     public static final String USER_ID = "user_id";
+    public static final String TRIP_ID = "trip_id";
+    public static final String TRIP_URI = "trip_uri";
+    public static final String TRIP_STATUS = "trip_live";
+    public static final String SHARED_PREFERENCES_NAME = "io.hypertrack.meta";
 }

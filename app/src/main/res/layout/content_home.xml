@@ -25,7 +25,7 @@
         android:singleLine="true"
         android:layout_margin="8dp"
         android:background="@android:color/white"
-        android:padding="8dp"
+        android:padding="16dp"
         android:elevation="16dp"/>
 
 </RelativeLayout>

@@ -1,5 +1,6 @@
 package io.hypertrack.meta;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -43,6 +45,7 @@ import com.hypertrack.apps.assettracker.HyperTrack;
 import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
 import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
+import butterknife.internal.ListenerClass;
 import io.hypertrack.meta.model.ETAInfo;
 import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
@@ -72,6 +75,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
     private HTTransmitterService transmitterService;
     private String userId;
     private String tripId;
+    private ProgressDialog mProgressDialog;
+
+    private InputMethodManager mIMEMgr;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +94,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
         boolean isUserOnboard = settings.getBoolean("isUserOnboard", false);
@@ -132,14 +141,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         HyperTrack.setLoggable(true);
         //Setup order details
 
-        transmitterService =  HTTransmitterService.getInstance(this);
+        transmitterService = HTTransmitterService.getInstance(this);
         int userIdInt = getUserIdFromPreferences();
         userId = String.valueOf(userIdInt);
     }
 
     private int getUserIdFromPreferences() {
         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-         return settings.getInt(HTConstants.USER_ID, -1);
+        return settings.getInt(HTConstants.USER_ID, -1);
     }
 
     @Override
@@ -159,6 +168,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
 
+            if (tripId == null)
+                tripId = getTripFromSharedPreferences();
+
+            if (tripId.equalsIgnoreCase("None"))
+                return true;
+
             transmitterService.endTrip(Integer.valueOf(tripId), new HTTripStatusCallback() {
                 @Override
                 public void onError(Exception e) {
@@ -168,12 +183,31 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 @Override
                 public void onSuccess(String s) {
                     Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
+
+                    SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                    editor.putBoolean(HTConstants.TRIP_STATUS, false);
+                    editor.putString(HTConstants.TRIP_URI, "None");
+                    resetViewsOnEndTrip();
+                    editor.commit();
                 }
             });
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void resetViewsOnEndTrip() {
+
+        shareEtaButton.setVisibility(View.GONE);
+
+        mAutocompleteView.setVisibility(View.VISIBLE);
+        mAutocompleteView.setText("");
+
+        if ( destinationLocationMarker != null) {
+            destinationLocationMarker.remove();
+        }
     }
 
     /**
@@ -282,7 +316,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
             Log.v(TAG, "Location: " + location);
 
             if (location != null) {
-                // Add a marker in Mumbai and move the camera
+
+                if (currentLocationMarker != null)
+                    currentLocationMarker.remove();
+
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("You are here"));
                 currentLocationMarker.showInfoWindow();
@@ -321,10 +358,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
 
         }
 
+        mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
         getEtaForDestination();
     }
 
     private void getEtaForDestination() {
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
 
         String url = "https://meta-api-staging.herokuapp.com/api/v1/eta/?origin="
                 + currentLocation.latitude + "," + currentLocation.longitude
@@ -342,7 +384,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        mProgressDialog.dismiss();
                         Log.d("Response", "Inside onError");
+                        Toast.makeText(Home.this, "There was an error fetching ETA. Please try again.", Toast.LENGTH_LONG).show();
+                        mAutocompleteView.setText("");
+                        mIMEMgr.showSoftInputFromInputMethod(mAutocompleteView.getWindowToken(), 0);
                     }
                 });
 
@@ -353,11 +399,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
     private void showShareEtaButton(ETAInfo[] etaInfoList) {
 
         int eta = etaInfoList[0].getDuration();
-        int etaInMinutes = eta/60;
+        int etaInMinutes = eta / 60;
         shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
         shareEtaButton.setVisibility(View.VISIBLE);
-
         mAutocompleteView.setVisibility(View.GONE);
+
+        mProgressDialog.dismiss();
     }
 
     private void setUpShareEtaButton() {
@@ -370,7 +417,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
     }
 
     private void initShareEtaFlow() {
-        startTrip();
+
+        if (getTripStatusFromSharedPreferences()) {
+            String uri = getTripUriFromSharedPreferences();
+            if (TextUtils.isEmpty(uri) || uri.equalsIgnoreCase("None")) {
+                return;
+            }
+            shareUrl(uri);
+        } else {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+            startTrip();
+        }
     }
 
     private void startTrip() {
@@ -384,6 +443,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
             @Override
             public void onError(Exception e) {
                 Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                mProgressDialog.dismiss();
             }
 
             @Override
@@ -391,9 +451,41 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
                 Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
                 tripId = id;
                 getShareEtaURL(id);
+                saveTripInSharedPreferences(id);
             }
         });
     }
+
+    public void saveTripInSharedPreferences(String tripId) {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(HTConstants.TRIP_ID, tripId);
+        editor.putBoolean(HTConstants.TRIP_STATUS, true);
+        editor.commit();
+    }
+
+    public String getTripFromSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(HTConstants.TRIP_ID, "None");
+    }
+
+    public String getTripUriFromSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(HTConstants.TRIP_URI, "None");
+    }
+
+    public boolean getTripStatusFromSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getBoolean(HTConstants.TRIP_STATUS, false);
+    }
+
+    public void saveTripUriInSharedPreferences(String tripUri) {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        editor.putString(HTConstants.TRIP_URI, tripUri);
+        editor.commit();
+    }
+
 
     private void getShareEtaURL(String tripId) {
 
@@ -403,13 +495,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback, Googl
 
         String url = "https://meta-api-staging.herokuapp.com/api/v1/trips/";
 
-        HTCustomPostRequest<UserTrip> requestObject = new HTCustomPostRequest<UserTrip>(1,url,
+        HTCustomPostRequest<UserTrip> requestObject = new HTCustomPostRequest<UserTrip>(1, url,
                 jsonBody, UserTrip.class,
                 new Response.Listener<UserTrip>() {
                     @Override
                     public void onResponse(UserTrip response) {
                         Toast.makeText(Home.this, "URL: " + response.getTrackUri(), Toast.LENGTH_LONG).show();
-                        shareUrl(response.getTrackUri());
+                        mProgressDialog.dismiss();
+                        String uri = response.getTrackUri();
+                        saveTripUriInSharedPreferences(uri);
+                        shareUrl(uri);
                     }
                 },
                 new Response.ErrorListener() {

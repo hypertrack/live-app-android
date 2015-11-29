@@ -36,8 +36,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
+        android:textColor="#ffffff"
+        android:padding="16dp"
+        android:layout_margin="8dp"
         android:visibility="gone"
-        android:background="@android:color/white"/>
+        />
 
 </android.support.design.widget.CoordinatorLayout>
