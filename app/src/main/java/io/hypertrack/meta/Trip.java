@@ -28,7 +28,7 @@ public class Trip extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip);
         //"cb50db86ff63f556f7856d7690ebc305a7a27c69"
-        HyperTrack.setPublishableApiKey("cb50db86ff63f556f7856d7690ebc305a7a27c69");
+        HyperTrack.setPublishableApiKey("pk_cf0f02c843560e9738ea366f49c728dbee8308ec");
         htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.htMapfragment);
         htMapFragment.disableCourierInfoLayout(true);
         mHyperTrackClient = HyperTrackClient.getInstance(this);

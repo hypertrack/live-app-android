@@ -1,5 +1,6 @@
 package io.hypertrack.meta;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,6 +37,8 @@ public class Verify extends AppCompatActivity {
     @Bind(R.id.register)
     public Button registerButtonView;
 
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,9 +48,11 @@ public class Verify extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ButterKnife.bind(this);
 
+        /*
         if(BuildConfig.DEBUG) {
             verificationCodeView.setText("1234");
         }
+        */
     }
 
     @OnClick(R.id.register)
@@ -67,6 +72,10 @@ public class Verify extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
         int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
         String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+ userId + "/verify_phone_number/";
 
         Verification verification = new Verification(number);
@@ -79,6 +88,7 @@ public class Verify extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        mProgressDialog.dismiss();
                         Log.d("response", response.toString());
                         Toast.makeText(Verify.this, "Registered", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(Verify.this, Profile.class));
@@ -87,7 +97,8 @@ public class Verify extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        mProgressDialog.dismiss();
+                        Toast.makeText(Verify.this, "Inside OnError", Toast.LENGTH_SHORT).show();
                     }
                 }
         );

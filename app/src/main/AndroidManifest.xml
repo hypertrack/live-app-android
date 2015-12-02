@@ -40,7 +40,7 @@
             android:name=".Login"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Verify"
             android:label="@string/title_activity_verify"
@@ -61,9 +61,7 @@
         <activity
             android:name=".Trip"
             android:parentActivityName=".Home"
-            android:screenOrientation="portrait"
-            >
-
+            android:screenOrientation="portrait">
             <intent-filter android:label="mETA app">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -99,7 +97,7 @@
 
         <activity
             android:name=".Profile"
-            android:label="@string/title_activity_generated_login"></activity>
+            android:label="@string/title_activity_generated_login" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
