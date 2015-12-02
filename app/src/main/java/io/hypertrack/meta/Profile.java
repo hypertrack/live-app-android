@@ -84,7 +84,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         setContentView(R.layout.activity_profile);
         // Set up the login form.
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.firstName);
-        populateAutoComplete();
+        //populateAutoComplete();
 
         mLastNameView = (EditText) findViewById(R.id.lastName);
         mLastNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {

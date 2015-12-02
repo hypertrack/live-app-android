@@ -1,5 +1,6 @@
 package io.hypertrack.meta;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -27,6 +28,7 @@ public class Login extends AppCompatActivity {
 
     @Bind(R.id.phoneNumber)
     public EditText phoneNumberView;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +42,13 @@ public class Login extends AppCompatActivity {
 
         poulatePhoneNumberIfAvailable();
 
+        /*
         if(BuildConfig.DEBUG) {
             String number = phoneNumberView.getText().toString();
             if(TextUtils.isEmpty(number))
                 phoneNumberView.setText("9819705422");
         }
+        */
 
     }
 
@@ -72,6 +76,10 @@ public class Login extends AppCompatActivity {
 
         String url = "https://meta-api-staging.herokuapp.com/api/v1/users/";
 
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
         User user = new User(number);
         Gson gson = new Gson();
         String jsonObjectBody = gson.toJson(user);
@@ -86,6 +94,7 @@ public class Login extends AppCompatActivity {
                 new Response.Listener<User>() {
                     @Override
                     public void onResponse(User response) {
+                        mProgressDialog.dismiss();
                         Log.d("Response", "ID :" + response.getId());
                         Intent intent = new Intent(Login.this, Verify.class);
                         intent.putExtra(HTConstants.USER_ID, response.getId());
@@ -93,6 +102,7 @@ public class Login extends AppCompatActivity {
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putInt(HTConstants.USER_ID, response.getId());
+                        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.getHypertrackCourierId());
                         editor.commit();
 
                         startActivity(intent);
@@ -101,6 +111,7 @@ public class Login extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        mProgressDialog.dismiss();
                         Log.d("Response", "Inside OnError");
                     }
                 }
