@@ -103,6 +103,7 @@
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
+        <activity android:name=".AddAddress"></activity>
     </application>
 
 </manifest>
