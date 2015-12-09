@@ -26,7 +26,9 @@ import org.json.JSONObject;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.model.Verification;
+import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
 
 public class Verify extends AppCompatActivity {
@@ -81,6 +83,37 @@ public class Verify extends AppCompatActivity {
         Verification verification = new Verification(number);
         Gson gson = new Gson();
         String jsonObjectBody = gson.toJson(verification);
+
+        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
+                1,
+                url,
+                jsonObjectBody,
+                User.class,
+                new Response.Listener<User>() {
+                    @Override
+                    public void onResponse(User response) {
+                        mProgressDialog.dismiss();
+                        Log.d("response", response.toString());
+                        Toast.makeText(Verify.this, "Registered", Toast.LENGTH_SHORT).show();
+
+                        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(HTConstants.USER_AUTH_TOKEN, response.getToken());
+                        HTConstants.setPublishableApiKey(response.getToken());
+                        editor.commit();
+                        startActivity(new Intent(Verify.this, Profile.class));
+
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        mProgressDialog.dismiss();
+                        Log.d("Response", "Inside OnError");
+                    }
+                }
+        );
+        /*
         JsonObjectRequest  request = new JsonObjectRequest(
                 1,
                 url,
@@ -102,6 +135,7 @@ public class Verify extends AppCompatActivity {
                     }
                 }
         );
+        */
 
         MetaApplication.getInstance().addToRequestQueue(request);
 

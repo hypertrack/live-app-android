@@ -102,7 +102,6 @@ public class Login extends AppCompatActivity {
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putInt(HTConstants.USER_ID, response.getId());
-                        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.getHypertrackCourierId());
                         editor.commit();
 
                         startActivity(intent);

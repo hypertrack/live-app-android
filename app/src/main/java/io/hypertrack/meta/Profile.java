@@ -232,6 +232,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.getHypertrackCourierId());
                         editor.putBoolean("isUserOnboard", true);
                         editor.commit();
 

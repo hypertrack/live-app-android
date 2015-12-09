@@ -23,6 +23,7 @@ public class User {
     @SerializedName("hypertrack_courier_id")
     private String hypertrackCourierId;
 
+    private String token;
 
     public User(String number) {
         phoneNumber = number;
@@ -85,6 +86,14 @@ public class User {
         this.hypertrackCourierId = hypertrackCourierId;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -93,7 +102,8 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
-                ", hypertrackCourierId=" + hypertrackCourierId +
+                ", hypertrackCourierId='" + hypertrackCourierId + '\'' +
+                ", token='" + token + '\'' +
                 '}';
     }
 

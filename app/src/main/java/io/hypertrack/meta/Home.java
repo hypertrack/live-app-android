@@ -181,7 +181,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     }
 
     private void setUpHyperTrackSDK() {
-        HyperTrack.setAPIKey("pk_cf0f02c843560e9738ea366f49c728dbee8308ec");
+        HyperTrack.setAPIKey("pk_65801d4211efccf3128d74101254e7637e655356");
         HyperTrack.setLoggable(true);
         //Setup order details
 
@@ -430,7 +430,9 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 + currentLocation.latitude + "," + currentLocation.longitude
                 + "&destination=" + destinationLocation.latitude + "," + destinationLocation.longitude;
 
-        Log.d(TAG, "Url: " + url);
+        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+
+        Log.d(TAG, "Url: " + url + "Token: " + getTokenFromSharedPreferences());
 
         HTCustomGetRequest<ETAInfo[]> requestObject =
                 new HTCustomGetRequest<ETAInfo[]>(url, ETAInfo[].class, new Response.Listener<ETAInfo[]>() {
@@ -500,6 +502,8 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
         String courier_id = settings.getString(HTConstants.HYPERTRACK_COURIER_ID, "None");
 
+        Log.d(TAG, "courier_id: " + courier_id);
+
         if (TextUtils.equals(courier_id, "None")) {
             Toast.makeText(this, "User id not found", Toast.LENGTH_LONG).show();
             return;
@@ -542,6 +546,11 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     public String getTripUriFromSharedPreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         return sharedpreferences.getString(HTConstants.TRIP_URI, "None");
+    }
+
+    public String getTokenFromSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, "None");
     }
 
     public String getTripEtaFromSharedPreferences() {
