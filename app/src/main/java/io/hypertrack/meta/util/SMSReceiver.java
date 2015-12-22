@@ -34,7 +34,7 @@ public class SMSReceiver extends BroadcastReceiver
                     strMessage += "\n";
                 }
 
-                Toast.makeText(context, strMessage, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(context, strMessage, Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -15,9 +15,6 @@ public class MetaLocation {
     private static byte LONGITUDE_INDEX =  1;
     private static byte LATITUDE_INDEX =  0;
 
-    @SerializedName("google_places_id")
-    private String googlePlacesId;
-
     public String getType() {
         return type;
     }
@@ -38,20 +35,11 @@ public class MetaLocation {
         return new LatLng(coordinates[LONGITUDE_INDEX],coordinates[LATITUDE_INDEX]);
     }
 
-    public String getGooglePlacesId() {
-        return googlePlacesId;
-    }
-
-    public void setGooglePlacesId(String googlePlacesId) {
-        this.googlePlacesId = googlePlacesId;
-    }
-
     @Override
     public String toString() {
         return "MetaLocation{" +
                 "type='" + type + '\'' +
                 ", coordinates=" + Arrays.toString(coordinates) +
-                ", googlePlacesId='" + googlePlacesId + '\'' +
                 '}';
     }
 

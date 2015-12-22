@@ -7,12 +7,43 @@ import com.google.gson.annotations.SerializedName;
  */
 public class CustomAddress {
 
+    private Integer id;
     private String name;
     private String address;
     private String city;
     private String state;
     private String country;
     private MetaLocation location;
+
+    @SerializedName("hypertrack_place_id")
+    private String hypertrackPlaceId;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getHypertrackPlaceId() {
+        return hypertrackPlaceId;
+    }
+
+    public void setHypertrackPlaceId(String hypertrackPlaceId) {
+        this.hypertrackPlaceId = hypertrackPlaceId;
+    }
+
+    @SerializedName("google_places_id")
+    private String googlePlacesId;
+
+    public String getGooglePlacesId() {
+        return googlePlacesId;
+    }
+
+    public void setGooglePlacesId(String googlePlacesId) {
+        this.googlePlacesId = googlePlacesId;
+    }
 
     @SerializedName("postal_code")
     private String postalCode;
@@ -76,12 +107,15 @@ public class CustomAddress {
     @Override
     public String toString() {
         return "CustomAddress{" +
-                "name='" + name + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", city='" + city + '\'' +
                 ", state='" + state + '\'' +
                 ", country='" + country + '\'' +
                 ", location=" + location +
+                ", hypertrackPlaceId='" + hypertrackPlaceId + '\'' +
+                ", googlePlacesId='" + googlePlacesId + '\'' +
                 ", postalCode='" + postalCode + '\'' +
                 '}';
     }

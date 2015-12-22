@@ -44,11 +44,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.hypertrack.apps.assettracker.HyperTrack;
+import com.hypertrack.apps.assettracker.model.HTTripParams;
+import com.hypertrack.apps.assettracker.model.HTTripParamsBuilder;
 import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
 import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
 import butterknife.internal.ListenerClass;
+import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.ETAInfo;
+import io.hypertrack.meta.model.MetaLocation;
 import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
@@ -82,6 +86,8 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     private InputMethodManager mIMEMgr;
     private Button endTripButton;
     private static final long INTERVAL_TIME = 5000;
+    private CustomAddress customAddress;
+    private String endPlaceId;
 
 
     @Override
@@ -147,7 +153,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 if (tripId.equalsIgnoreCase("None"))
                     return;
 
-                transmitterService.endTrip(Integer.valueOf(tripId), new HTTripStatusCallback() {
+                transmitterService.endTrip(new HTTripStatusCallback() {
                     @Override
                     public void onError(Exception e) {
                         Toast.makeText(Home.this, "Inside OnError", Toast.LENGTH_LONG).show();
@@ -181,7 +187,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     }
 
     private void setUpHyperTrackSDK() {
-        HyperTrack.setAPIKey("pk_65801d4211efccf3128d74101254e7637e655356");
+        HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
         HyperTrack.setLoggable(true);
         //Setup order details
 
@@ -219,7 +225,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             if (tripId.equalsIgnoreCase("None"))
                 return true;
 
-            transmitterService.endTrip(Integer.valueOf(tripId), new HTTripStatusCallback() {
+            transmitterService.endTrip(new HTTripStatusCallback() {
                 @Override
                 public void onError(Exception e) {
                     Toast.makeText(Home.this, "Inside OnError", Toast.LENGTH_LONG).show();
@@ -302,7 +308,6 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             final AutocompletePrediction item = mAdapter.getItem(position);
             final String placeId = item.getPlaceId();
             final CharSequence primaryText = item.getPrimaryText(null);
-
             Log.d(TAG, "Autocomplete item selected: " + primaryText);
 
             /*
@@ -353,12 +358,39 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             }*/
 
             Log.i(TAG, "Place details received: " + place.getName());
-            addMarkerToSelectedDestination(place.getLatLng());
 
+            populateCustomAddress(place);
+
+            addMarkerToSelectedDestination(place.getLatLng());
             places.release();
 
         }
     };
+
+    private void populateCustomAddress(Place place) {
+
+        //name and location are compulsary
+
+        customAddress = new CustomAddress();
+
+        if (place.getLatLng() != null) {
+            double[] ll = {place.getLatLng().longitude, place.getLatLng().latitude};
+            MetaLocation metaLocation = new MetaLocation();
+            metaLocation.setType("Point");
+            metaLocation.setCoordinates(ll);
+            customAddress.setLocation(metaLocation);
+        }
+
+        if (!TextUtils.isEmpty(place.getId()))
+        customAddress.setGooglePlacesId(place.getId());
+
+        if (!TextUtils.isEmpty(place.getName()))
+        customAddress.setName(place.getName().toString());
+
+        if (!TextUtils.isEmpty(place.getAddress()))
+        customAddress.setAddress(place.getAddress().toString());
+
+    }
 
     private void addMarkerToCurrentLocation() {
 
@@ -418,6 +450,40 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
         mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
         getEtaForDestination();
+        updateMetaEndPlaceId();
+    }
+
+    private void updateMetaEndPlaceId() {
+
+        String url = "https://meta-api-staging.herokuapp.com/api/v1/places/";
+        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+
+        Log.d(TAG, "Url: " + url + "Token: " + getTokenFromSharedPreferences());
+
+        Gson gson = new Gson();
+        String jsonBody = gson.toJson(customAddress);
+
+
+        HTCustomPostRequest<CustomAddress> requestObject = new HTCustomPostRequest<CustomAddress>(1, url,
+                jsonBody, CustomAddress.class,
+                new Response.Listener<CustomAddress>() {
+                    @Override
+                    public void onResponse(CustomAddress response) {
+                        Toast.makeText(Home.this, "End Place ID: " + response.getHypertrackPlaceId(), Toast.LENGTH_LONG).show();
+                        endPlaceId = response.getHypertrackPlaceId();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Home.this, "Inside Error", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(requestObject);
+
+
     }
 
     private void getEtaForDestination() {
@@ -502,6 +568,17 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
         String courier_id = settings.getString(HTConstants.HYPERTRACK_COURIER_ID, "None");
 
+        if (TextUtils.isEmpty(courier_id)) {
+            return;
+        }
+
+        if (TextUtils.isEmpty(endPlaceId)) {
+            return;
+        }
+
+        int courierId = Integer.valueOf(courier_id);
+        int endPlace = Integer.valueOf(endPlaceId);
+
         Log.d(TAG, "courier_id: " + courier_id);
 
         if (TextUtils.equals(courier_id, "None")) {
@@ -509,8 +586,12 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             return;
         }
 
-        transmitterService.setOrderDetails(courier_id);
-        transmitterService.startTrip(new HTTripStatusCallback() {
+        HTTripParamsBuilder htTripParamsBuilder = new HTTripParamsBuilder();
+        HTTripParams htTripParams = htTripParamsBuilder.setCourierId(courierId)
+                .setEndPlaceId(endPlace)
+                .createHTTripParams();
+
+        transmitterService.startTrip(htTripParams, new HTTripStatusCallback() {
             @Override
             public void onError(Exception e) {
                 Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
