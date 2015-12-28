@@ -3,12 +3,13 @@ package io.hypertrack.meta.model;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * Created by suhas on 09/12/15.
  */
-public class MetaLocation {
+public class MetaLocation implements Serializable {
 
     private String type;
     private double[] coordinates;

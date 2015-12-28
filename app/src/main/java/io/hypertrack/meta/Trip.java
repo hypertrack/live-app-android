@@ -56,7 +56,7 @@ public class Trip extends AppCompatActivity {
 
         String uriString = data.getPath();
         String uriId = uriString.substring(7, uriString.indexOf(":"));
-        Toast.makeText(Trip.this, "Uri ID: " + uriId, Toast.LENGTH_LONG).show();
+        //Toast.makeText(Trip.this, "Uri ID: " + uriId, Toast.LENGTH_LONG).show();
 
         getHyperTrackTripId(uriId);
         // /trips/29:ahsdhfasfif
@@ -78,7 +78,8 @@ public class Trip extends AppCompatActivity {
                     @Override
                     public void onResponse(UserTrip response) {
                         Log.d("Response", "Inside onResponse");
-                        Toast.makeText(Trip.this, "HyperTrack Trip ID: " + response.getHypertrackTripId(), Toast.LENGTH_LONG).show();
+                        //Toast.makeText(Trip.this, "HyperTrack Trip ID: " + response.getHypertrackTripId(), Toast.LENGTH_LONG).show();
+                        HTConstants.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
                         mHyperTrackClient.setId(response.getHypertrackTripId());
                         mProgressDialog.dismiss();
                     }

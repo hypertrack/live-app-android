@@ -49,12 +49,6 @@ public class Verify extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ButterKnife.bind(this);
-
-        /*
-        if(BuildConfig.DEBUG) {
-            verificationCodeView.setText("1234");
-        }
-        */
     }
 
     @OnClick(R.id.register)
@@ -75,6 +69,7 @@ public class Verify extends AppCompatActivity {
         int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
         mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("verifying code");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -94,7 +89,6 @@ public class Verify extends AppCompatActivity {
                     public void onResponse(User response) {
                         mProgressDialog.dismiss();
                         Log.d("response", response.toString());
-                        Toast.makeText(Verify.this, "Registered", Toast.LENGTH_SHORT).show();
 
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();

@@ -29,6 +29,21 @@
         android:elevation="16dp"/>
 
     <Button
+        android:id="@+id/customAddress_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="8dp"
+        android:layout_below="@id/autocomplete_places"
+        android:background="@android:color/holo_blue_light"
+        android:textColor="@android:color/white"
+        android:text="Add Custom Address"
+        android:padding="16dp"
+        android:elevation="16dp"
+        android:visibility="visible"/>
+
+
+    <Button
         android:id="@+id/endtrip_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

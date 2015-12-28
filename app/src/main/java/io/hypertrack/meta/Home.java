@@ -1,13 +1,18 @@
 package io.hypertrack.meta;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import com.google.android.gms.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -33,6 +38,7 @@ import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -73,6 +79,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(
             new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
 
+    private LatLngBounds mBounds;
     private LatLng currentLocation;
     private Marker currentLocationMarker;
     private LatLng destinationLocation;
@@ -88,11 +95,16 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     private static final long INTERVAL_TIME = 5000;
     private CustomAddress customAddress;
     private String endPlaceId;
+    private Button addAddressButton;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_home);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 0 /* clientId */, this)
@@ -100,10 +112,6 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
-
-        setContentView(R.layout.activity_home);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -135,11 +143,15 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 findViewById(R.id.autocomplete_places);
 
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, BOUNDS_GREATER_SYDNEY,
-                null);
 
+        addAddressButton = (Button) findViewById(R.id.customAddress_button);
 
-        mAutocompleteView.setAdapter(mAdapter);
+        addAddressButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getCustomAddressFromTheUser();
+            }
+        });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
         endTripButton = (Button) findViewById(R.id.endtrip_button);
@@ -170,13 +182,13 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
         setUpShareEtaButton();
         setUpHyperTrackSDK();
-
         setUpInitView();
     }
 
     private void setUpInitView() {
         if (getTripStatusFromSharedPreferences()) {
             mAutocompleteView.setVisibility(View.GONE);
+            addAddressButton.setVisibility(View.GONE);
             endTripButton.setVisibility(View.VISIBLE);
 
             if (!TextUtils.equals(getTripEtaFromSharedPreferences(), "None")) {
@@ -261,6 +273,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         endTripButton.setVisibility(View.GONE);
 
         mAutocompleteView.setVisibility(View.VISIBLE);
+        addAddressButton.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
 
         if ( destinationLocationMarker != null) {
@@ -318,8 +331,6 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
 
-            Toast.makeText(getApplicationContext(), "Clicked: " + primaryText,
-                    Toast.LENGTH_SHORT).show();
             Log.d(TAG, "Called getPlaceById to get Place details for " + placeId);
         }
     };
@@ -405,14 +416,38 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 if (currentLocationMarker != null)
                     currentLocationMarker.remove();
 
+                Log.e(TAG, "Setting bounds");
+                mBounds = getBounds(location, 100000);
+
+                Log.e(TAG, "Setting adapter");
+                mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mBounds,
+                        null);
+
+
+                mAutocompleteView.setAdapter(mAdapter);
+
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("You are here"));
                 currentLocationMarker.showInfoWindow();
 
+                if (currentLocation != null && destinationLocation != null) {
+
+                    LatLngBounds.Builder b = new LatLngBounds.Builder();
+                    b.include(currentLocation);
+                    b.include(destinationLocation);
+                    LatLngBounds bounds = b.build();
+
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 250);
+                    mMap.animateCamera(cu, 1000, null);
+
+                    return;
+
+                }
+
                 CameraPosition cameraPosition =
                         new CameraPosition.Builder()
                                 .target(currentLocation)
-                                .zoom(mMap.getCameraPosition().zoom >= 10 ? mMap.getCameraPosition().zoom : 10)
+                                .zoom(mMap.getCameraPosition().zoom >= 16 ? mMap.getCameraPosition().zoom : 16)
                                 .build();
 
                 mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
@@ -438,6 +473,16 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this.destinationLocation).title("Your destination"));
             destinationLocationMarker.showInfoWindow();
 
+
+            LatLngBounds.Builder b = new LatLngBounds.Builder();
+            b.include(currentLocation);
+            b.include(this.destinationLocation);
+            LatLngBounds bounds = b.build();
+
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 250);
+            mMap.animateCamera(cu, 3000, null);
+
+            /*
             CameraPosition cameraPosition =
                     new CameraPosition.Builder()
                             .target(destinationLocation)
@@ -445,6 +490,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                             .build();
 
             mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            */
 
         }
 
@@ -469,7 +515,6 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 new Response.Listener<CustomAddress>() {
                     @Override
                     public void onResponse(CustomAddress response) {
-                        Toast.makeText(Home.this, "End Place ID: " + response.getHypertrackPlaceId(), Toast.LENGTH_LONG).show();
                         endPlaceId = response.getHypertrackPlaceId();
                     }
                 },
@@ -489,6 +534,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     private void getEtaForDestination() {
 
         mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Getting ETA for the selected destination");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -600,12 +646,13 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
             @Override
             public void onSuccess(String id) {
-                Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
+                //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
                 tripId = id;
                 getShareEtaURL(id);
                 saveTripInSharedPreferences(id);
 
                 mAutocompleteView.setVisibility(View.GONE);
+                addAddressButton.setVisibility(View.GONE);
                 endTripButton.setVisibility(View.VISIBLE);
             }
         });
@@ -665,9 +712,10 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 new Response.Listener<UserTrip>() {
                     @Override
                     public void onResponse(UserTrip response) {
-                        Toast.makeText(Home.this, "URL: " + response.getTrackUri(), Toast.LENGTH_LONG).show();
+                        //Toast.makeText(Home.this, "URL: " + response.toString(), Toast.LENGTH_LONG).show();
                         mProgressDialog.dismiss();
-                        String uri = response.getTrackUri();
+
+                        String uri = response.getShortUrl();
                         saveTripUriInSharedPreferences(uri);
                         shareUrl(uri);
                     }
@@ -685,7 +733,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
     private void shareUrl(String uri) {
 
-        String shareBody = "Track me @ https://meta-api-staging.herokuapp.com" + uri;
+        String shareBody = "Track me @ " + uri;
 
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
@@ -713,12 +761,52 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         locationRequest.setFastestInterval(INTERVAL_TIME);
 
         LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, locationRequest,this);
+                mGoogleApiClient, locationRequest, this);
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        addMarkerToCurrentLocation();
+        //addMarkerToCurrentLocation();
+    }
+
+
+    private static final int CUSTOM_ADDRESS_DATA = 101;
+
+    private void getCustomAddressFromTheUser() {
+        Intent intent = new Intent(this, AddAddress.class);
+        startActivityForResult(intent, CUSTOM_ADDRESS_DATA);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        if (resultCode == CUSTOM_ADDRESS_DATA) {
+            CustomAddress ca = (CustomAddress)data.getSerializableExtra("custom_address");
+            if (ca != null) {
+                customAddress = ca;
+                Log.d(TAG, ca.toString());
+
+                addMarkerToSelectedDestination(ca.getLocation().getLatLng());
+            }
+        }
+    }
+
+    private LatLngBounds getBounds(Location location, int mDistanceInMeters ){
+
+        double latRadian = Math.toRadians(location.getLatitude());
+
+        double degLatKm = 110.574235;
+        double degLongKm = 110.572833 * Math.cos(latRadian);
+        double deltaLat = mDistanceInMeters / 1000.0 / degLatKm;
+        double deltaLong = mDistanceInMeters / 1000.0 / degLongKm;
+
+        double minLat = location.getLatitude() - deltaLat;
+        double minLong = location.getLongitude() - deltaLong;
+        double maxLat = location.getLatitude() + deltaLat;
+        double maxLong = location.getLongitude() + deltaLong;
+
+        return new LatLngBounds(new LatLng(minLat, minLong), new LatLng(maxLat, maxLong));
+
     }
 
 }

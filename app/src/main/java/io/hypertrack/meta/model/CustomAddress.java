@@ -2,10 +2,12 @@ package io.hypertrack.meta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 /**
  * Created by suhas on 09/12/15.
  */
-public class CustomAddress {
+public class CustomAddress implements Serializable {
 
     private Integer id;
     private String name;
