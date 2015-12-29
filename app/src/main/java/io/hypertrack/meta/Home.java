@@ -18,6 +18,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -105,6 +106,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private String userId;
     private String tripId;
     private ProgressDialog mProgressDialog;
+    private Handler handler;
 
     private InputMethodManager mIMEMgr;
     private Button endTripButton;
@@ -115,6 +117,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
+    private int etaInMinutes;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     
     @Override
@@ -597,16 +600,46 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void showShareEtaButton(ETAInfo[] etaInfoList) {
 
         int eta = etaInfoList[0].getDuration();
-        int etaInMinutes = eta / 60;
+        etaInMinutes = eta / 60;
 
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString(HTConstants.TRIP_ETA, String.valueOf(etaInMinutes));
         editor.commit();
 
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.setTitle(etaInMinutes + " mins");
+            destinationLocationMarker.showInfoWindow();
+        }
+
         shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
         shareEtaButton.setVisibility(View.VISIBLE);
         mProgressDialog.dismiss();
+    }
+
+    final Runnable updateTask=new Runnable() {
+        @Override
+        public void run() {
+
+            if (etaInMinutes <= 0) {
+                return;
+            }
+            updateETA();
+
+            handler.postDelayed(this,60000);
+        }
+    };
+
+    private void updateETA() {
+
+        etaInMinutes = etaInMinutes -1;
+
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.setTitle(etaInMinutes+ " mins");
+            destinationLocationMarker.showInfoWindow();
+        }
+
+        shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
     }
 
     private void setUpShareEtaButton() {
@@ -678,6 +711,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 getShareEtaURL(id);
                 saveTripInSharedPreferences(id);
                 requestForGeofenceSetup();
+
+                handler = new Handler();
+                handler.postDelayed(updateTask,60000);
 
                 mAutocompleteView.setVisibility(View.GONE);
                 addAddressButton.setVisibility(View.GONE);
