@@ -807,9 +807,19 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onLocationChanged(Location location) {
         Log.v(TAG, "Location Changed - Update from meta");
-        addMarkerToCurrentLocation();
+        updateCurrentMarkerLocation(location);
     }
 
+    private void updateCurrentMarkerLocation(Location location) {
+
+        if (currentLocationMarker != null)
+            currentLocationMarker.remove();
+
+        currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("You are here"));
+        currentLocationMarker.showInfoWindow();
+
+    }
 
     private static final int CUSTOM_ADDRESS_DATA = 101;
 
