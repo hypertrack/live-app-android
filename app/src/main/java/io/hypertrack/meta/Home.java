@@ -437,7 +437,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                     b.include(destinationLocation);
                     LatLngBounds bounds = b.build();
 
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 250);
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 300);
                     mMap.animateCamera(cu, 1000, null);
 
                     return;
@@ -479,7 +479,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             b.include(this.destinationLocation);
             LatLngBounds bounds = b.build();
 
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 250);
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 300);
             mMap.animateCamera(cu, 3000, null);
 
             /*
@@ -604,6 +604,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setCancelable(false);
+            mProgressDialog.setMessage("Fetching URL to share... ");
             mProgressDialog.show();
             startTrip();
         }

@@ -80,6 +80,7 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
                 .addConnectionCallbacks(this)
                 .build();
 
+        /*
         if (BuildConfig.DEBUG) {
             locationNameEditText.setText("Suhas' Home");
             addressEditText.setText("B203, Riddhi Siddhi Heritage");
@@ -88,6 +89,7 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
             stateEditText.setText("Maharashtra");
             countryEditText.setText("India");
         }
+        */
     }
 
     @OnClick(R.id.setCustomAddress)

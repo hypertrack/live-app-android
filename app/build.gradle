@@ -23,13 +23,27 @@ android {
         applicationId "io.hypertrack.meta"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        versionCode buildVersionCode()
+        versionName version
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    //def formattedDate = new Date().format('yyyyMMddHHmmss')
+                    def newName = output.outputFile.name
+                    newName = newName.replace("app-", "$rootProject.ext.appName-")
+                    newName = newName.replace("-release", "-release-" + version)
+                    newName = newName.replace("-debug", "-debug-" + version)
+                    //noinspection GroovyAssignabilityCheck
+                    output.outputFile = new File(output.outputFile.parent, newName)
+                }
+            }
+        }
+        debug {
+            ext.betaDistributionReleaseNotes="Testing BETA distribution via Gradle"
         }
     }
 }
