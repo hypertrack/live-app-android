@@ -1,18 +1,27 @@
 package io.hypertrack.meta;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+
+import com.google.android.gms.common.api.Result;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -20,6 +29,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -55,6 +65,8 @@ import com.hypertrack.apps.assettracker.model.HTTripParamsBuilder;
 import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
 import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
+import java.util.ArrayList;
+
 import butterknife.internal.ListenerClass;
 import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.ETAInfo;
@@ -64,9 +76,13 @@ import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
 
-public class Home extends AppCompatActivity implements LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = AppCompatActivity.class.getSimpleName();
+    private static final String GEOFENCE_REQUEST_ID = "geofence";
+    private static final float GEOFENCE_RADIUS_IN_METERS = 1000;
+    public static final int LOITERING_DELAY_MS = 30000;
+    public static final int EXPIRATION_DURATION = 600000;
 
     private GoogleMap mMap;
 
@@ -96,22 +112,21 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
     private CustomAddress customAddress;
     private String endPlaceId;
     private Button addAddressButton;
-
-
+    private ArrayList<Geofence> mGeofenceList;
+    private PendingIntent mGeofencePendingIntent;
+    private SupportMapFragment mMapFragment;
+    //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_home);
+        mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, 0 /* clientId */, this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .build();
+        initGoogleClient();
 
         mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
@@ -158,31 +173,24 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         endTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (tripId == null)
-                    tripId = getTripFromSharedPreferences();
-
-                if (tripId.equalsIgnoreCase("None"))
-                    return;
-
-                transmitterService.endTrip(new HTTripStatusCallback() {
-                    @Override
-                    public void onError(Exception e) {
-                        Toast.makeText(Home.this, "Inside OnError", Toast.LENGTH_LONG).show();
-                    }
-
-                    @Override
-                    public void onSuccess(String s) {
-                        Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
-                        endTrip();
-                    }
-                });
+                endTripClicked();
             }
         });
 
         setUpShareEtaButton();
         setUpHyperTrackSDK();
         setUpInitView();
+    }
+
+    private void initGoogleClient() {
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, 0 /* clientId */, this)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .build();
+
     }
 
     private void setUpInitView() {
@@ -230,25 +238,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-
-            if (tripId == null)
-                tripId = getTripFromSharedPreferences();
-
-            if (tripId.equalsIgnoreCase("None"))
-                return true;
-
-            transmitterService.endTrip(new HTTripStatusCallback() {
-                @Override
-                public void onError(Exception e) {
-                    Toast.makeText(Home.this, "Inside OnError", Toast.LENGTH_LONG).show();
-                }
-
-                @Override
-                public void onSuccess(String s) {
-                    Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
-                    endTrip();
-                }
-            });
+            endTripClicked();
             return true;
         }
 
@@ -263,6 +253,11 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         editor.putString(HTConstants.TRIP_URI, "None");
         editor.putString(HTConstants.TRIP_ETA, "None");
         editor.commit();
+
+        LocationServices.GeofencingApi.removeGeofences(
+                mGoogleApiClient,
+                getGeofencePendingIntent()
+        ).setResultCallback(this);
 
         resetViewsOnEndTrip();
     }
@@ -479,24 +474,55 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
             b.include(this.destinationLocation);
             LatLngBounds bounds = b.build();
 
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 300);
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
+                    this.getResources().getDisplayMetrics().widthPixels,
+                    this.getResources().getDisplayMetrics().heightPixels - 1000,
+                    300);
             mMap.animateCamera(cu, 3000, null);
 
-            /*
-            CameraPosition cameraPosition =
-                    new CameraPosition.Builder()
-                            .target(destinationLocation)
-                            .zoom(mMap.getCameraPosition().zoom >= 10 ? mMap.getCameraPosition().zoom : 10)
-                            .build();
-
-            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            */
+            if (mGeofenceList == null)
+                mGeofenceList = new ArrayList<Geofence>();
+            
+            mGeofenceList.add(new Geofence.Builder()
+                    // Set the request ID of the geofence. This is a string to identify this
+                    // geofence.
+                    .setRequestId(GEOFENCE_REQUEST_ID)
+                    .setCircularRegion(
+                            destinationLocation.latitude,
+                            destinationLocation.longitude,
+                            GEOFENCE_RADIUS_IN_METERS
+                    )
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                    .setLoiteringDelay(LOITERING_DELAY_MS)
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    .build());
 
         }
+
+        mGeofencePendingIntent = getGeofencePendingIntent();
 
         mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
         getEtaForDestination();
         updateMetaEndPlaceId();
+    }
+
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofences(mGeofenceList);
+        return builder.build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (mGeofencePendingIntent != null) {
+            return mGeofencePendingIntent;
+        }
+        Intent intent = new Intent(this, GeofenceTransitionsIntentService.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        return PendingIntent.getService(this, 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
     }
 
     private void updateMetaEndPlaceId() {
@@ -651,6 +677,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 tripId = id;
                 getShareEtaURL(id);
                 saveTripInSharedPreferences(id);
+                requestForGeofenceSetup();
 
                 mAutocompleteView.setVisibility(View.GONE);
                 addAddressButton.setVisibility(View.GONE);
@@ -749,6 +776,18 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
         requestForLocationUpdates();
     }
 
+
+    private void requestForGeofenceSetup() {
+
+        Log.v(TAG, "Adding geofencing");
+
+        LocationServices.GeofencingApi.addGeofences(
+                mGoogleApiClient,
+                getGeofencingRequest(),
+                getGeofencePendingIntent()
+        ).setResultCallback(this);
+    }
+
     @Override
     public void onConnectionSuspended(int i) {
 
@@ -767,7 +806,8 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
     @Override
     public void onLocationChanged(Location location) {
-        //addMarkerToCurrentLocation();
+        Log.v(TAG, "Location Changed - Update from meta");
+        addMarkerToCurrentLocation();
     }
 
 
@@ -788,6 +828,7 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
                 Log.d(TAG, ca.toString());
 
                 addMarkerToSelectedDestination(ca.getLocation().getLatLng());
+
             }
         }
     }
@@ -810,4 +851,74 @@ public class Home extends AppCompatActivity implements LocationListener, OnMapRe
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!getTripStatusFromSharedPreferences() && !TextUtils.equals(getTripUriFromSharedPreferences(), "None")) {
+            endTripClicked();
+        }
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
+                new IntentFilter("trip_ended"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Unregister since the activity is not visible
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            boolean result = intent.getBooleanExtra("end_trip", false);
+
+            if (result)
+                endTripClicked();
+
+            Log.d("receiver", "Got message: " + result);
+        }
+    };
+
+    private void endTripClicked() {
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setMessage("Stopping trip ... ");
+        mProgressDialog.show();
+
+        if (tripId == null)
+            tripId = getTripFromSharedPreferences();
+
+        if (tripId.equalsIgnoreCase("None"))
+            return;
+
+        transmitterService.endTrip(new HTTripStatusCallback() {
+            @Override
+            public void onError(Exception e) {
+                mProgressDialog.dismiss();
+                Toast.makeText(Home.this, "Inside OnError", Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onSuccess(String s) {
+                mProgressDialog.dismiss();
+                Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
+                endTrip();
+            }
+        });
+    }
+
+    @Override
+    public void onResult(Status status) {
+        if (status.isSuccess()) {
+            Log.v(TAG, "Geofencing added successfully");
+        } else {
+            Log.v(TAG, "Geofencing not added. There was an error");
+        }
+    }
 }

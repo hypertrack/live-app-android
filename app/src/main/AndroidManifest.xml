@@ -6,7 +6,7 @@
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality. 
+         location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -55,7 +55,6 @@
             android:name=".Trip"
             android:screenOrientation="portrait">
             <intent-filter android:label="mETA app">
-
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -76,9 +75,9 @@
         <activity
             android:name=".AddAddress"
             android:label="Custom Address"
+            android:launchMode="singleTop"
             android:parentActivityName=".Home"
-            android:screenOrientation="portrait"
-            android:launchMode="singleTop"/>
+            android:screenOrientation="portrait" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -86,7 +85,7 @@
              Note that the API key is linked to the encryption key used to sign the APK.
              You need a different API key for each encryption key, including the release key that is used to
              sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <!--
             <meta-data
@@ -102,10 +101,15 @@
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
-        <activity android:name=".SelectDestination"
+        <activity
+            android:name=".SelectDestination"
             android:label="Select Destination"
             android:parentActivityName=".AddAddress"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".GeofenceTransitionsIntentService"
+            android:exported="false" />
     </application>
 
 </manifest>
