@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
@@ -99,14 +100,27 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
             Intent intent=new Intent();
 
             CustomAddress customAddress = new CustomAddress();
-            customAddress.setName(locationNameEditText.getText().toString());
-            customAddress.setAddress(addressEditText.getText().toString());
-            customAddress.setCity(cityEditText.getText().toString());
-            customAddress.setState(stateEditText.getText().toString());
-            customAddress.setPostalCode(postalCodeEditText.getText().toString());
-            customAddress.setCountry(countryEditText.getText().toString());
 
-            customAddress.setLocation(metaLocation);
+            if (!TextUtils.isEmpty(locationNameEditText.getText().toString()))
+                customAddress.setName(locationNameEditText.getText().toString());
+
+            if (!TextUtils.isEmpty(addressEditText.getText().toString()))
+                customAddress.setAddress(addressEditText.getText().toString());
+
+            if (!TextUtils.isEmpty(cityEditText.getText().toString()))
+                customAddress.setCity(cityEditText.getText().toString());
+
+            if (!TextUtils.isEmpty(stateEditText.getText().toString()))
+                customAddress.setState(stateEditText.getText().toString());
+
+            if (!TextUtils.isEmpty(postalCodeEditText.getText().toString()))
+                customAddress.setPostalCode(postalCodeEditText.getText().toString());
+
+            if (!TextUtils.isEmpty(countryEditText.getText().toString()))
+                customAddress.setCountry(countryEditText.getText().toString());
+
+            if (metaLocation != null)
+                customAddress.setLocation(metaLocation);
 
             intent.putExtra("custom_address", customAddress);
             setResult(101, intent);

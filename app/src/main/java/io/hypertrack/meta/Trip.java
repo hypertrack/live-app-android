@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,12 +17,15 @@ import com.hypertrack.android.sdk.base.network.HyperTrack;
 import com.hypertrack.android.sdk.base.network.HyperTrackClient;
 import com.hypertrack.android.sdk.base.view.HTMapFragment;
 
+import java.util.List;
+
 import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.util.HTConstants;
 
 public class Trip extends AppCompatActivity {
 
+    private static final String TAG = Trip.class.getSimpleName();
     private HTMapFragment htMapFragment;
     private HyperTrackClient mHyperTrackClient;
     private ProgressDialog mProgressDialog;
@@ -44,54 +48,28 @@ public class Trip extends AppCompatActivity {
         //String action = intent.getAction();
         Uri data = intent.getData();
         if(data != null)
-            getTripId(data);
+            setUpConsumerClientForTrackingTrip(data);
+        //getTripId(data);
     }
 
-    private void getTripId(Uri data) {
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Fetching trip data ...");
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
+    private void setUpConsumerClientForTrackingTrip(Uri data) {
 
         String uriString = data.getPath();
-        String uriId = uriString.substring(7, uriString.indexOf(":"));
-        //Toast.makeText(Trip.this, "Uri ID: " + uriId, Toast.LENGTH_LONG).show();
+        Log.v(TAG, uriString);
 
-        getHyperTrackTripId(uriId);
-        // /trips/29:ahsdhfasfif
+        List<String> segments = data.getPathSegments();
+        for (String s:segments) {
+            Log.v(TAG, s);
+        }
+
+        String hyperTrackIdSegment = segments.get(1);
+        String hyperTrackIdSegmentToken[] = hyperTrackIdSegment.split(":");
+        for (int i=0; i < hyperTrackIdSegmentToken.length; i++) {
+            Log.v(TAG, hyperTrackIdSegmentToken[i]);
+        }
+
+        Log.d(TAG, "HyperTrack Trip ID: " + hyperTrackIdSegmentToken[0]);
+        mHyperTrackClient.setId(hyperTrackIdSegmentToken[0]);
     }
 
-    public String getTokenFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, "None");
-    }
-
-    private void getHyperTrackTripId(String metaTripId) {
-
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/trips/" + metaTripId + "/";
-        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
-        Log.d("Request", "Url: " + url + " Token: " + getTokenFromSharedPreferences());
-
-        HTCustomGetRequest<UserTrip> requestObject =
-                new HTCustomGetRequest<UserTrip>(url, UserTrip.class, new Response.Listener<UserTrip>() {
-                    @Override
-                    public void onResponse(UserTrip response) {
-                        Log.d("Response", "Inside onResponse");
-                        //Toast.makeText(Trip.this, "HyperTrack Trip ID: " + response.getHypertrackTripId(), Toast.LENGTH_LONG).show();
-                        HTConstants.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
-                        mHyperTrackClient.setId(response.getHypertrackTripId());
-                        mProgressDialog.dismiss();
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Response", "Inside onError");
-                        mProgressDialog.dismiss();
-                    }
-                });
-
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
-
-    }
 }

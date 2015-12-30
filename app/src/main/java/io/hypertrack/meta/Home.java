@@ -1,6 +1,8 @@
 package io.hypertrack.meta;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -27,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Property;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -228,7 +231,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_home, menu);
+        //getMenuInflater().inflate(R.menu.menu_home, menu);
         return true;
     }
 
@@ -261,6 +264,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 mGoogleApiClient,
                 getGeofencePendingIntent()
         ).setResultCallback(this);
+
+        //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
 
         resetViewsOnEndTrip();
     }
@@ -478,8 +483,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             LatLngBounds bounds = b.build();
 
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
-                    this.getResources().getDisplayMetrics().widthPixels,
-                    this.getResources().getDisplayMetrics().heightPixels - 1000,
+                    //this.getResources().getDisplayMetrics().widthPixels,
+                    //this.getResources().getDisplayMetrics().heightPixels - 1000,
                     300);
             mMap.animateCamera(cu, 3000, null);
 
@@ -967,4 +972,5 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             Log.v(TAG, "Geofencing not added. There was an error");
         }
     }
+
 }
