@@ -134,6 +134,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         initGoogleClient();
 
+        Intent intent = new Intent(this, RegistrationIntentService.class);
+        startService(intent);
+
         mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -486,7 +489,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                     //this.getResources().getDisplayMetrics().widthPixels,
                     //this.getResources().getDisplayMetrics().heightPixels - 1000,
                     300);
-            mMap.animateCamera(cu, 3000, null);
+            mMap.moveCamera(cu);
 
             if (mGeofenceList == null)
                 mGeofenceList = new ArrayList<Geofence>();

@@ -11,6 +11,14 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+
     <application
         android:name=".MetaApplication"
         android:allowBackup="true"
@@ -110,6 +118,35 @@
         <service
             android:name=".GeofenceTransitionsIntentService"
             android:exported="false" />
+
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="io.hypertrack.meta" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".GcmListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".MyInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".RegistrationIntentService"
+            android:exported="false">
+        </service>
+
     </application>
 
 </manifest>
