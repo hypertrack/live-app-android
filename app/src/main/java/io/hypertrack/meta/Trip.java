@@ -4,15 +4,23 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.Uri;
 import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.android.PolyUtil;
 import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
 import com.hypertrack.android.sdk.base.network.HTConsumerClient;
 import com.hypertrack.android.sdk.base.network.HyperTrack;
@@ -71,10 +79,15 @@ public class Trip extends AppCompatActivity {
         }
 
         Log.d(TAG, "HyperTrack Trip ID: " + hyperTrackIdSegmentToken[0]);
-        mHyperTrackClient.setId("2091"/*String.valueOf(hyperTrackIdSegmentToken[0])*/, this, new HTStatusCallBack() {
+        mHyperTrackClient.setId(String.valueOf(hyperTrackIdSegmentToken[0]), this, new HTStatusCallBack() {
             @Override
             public void onSuccess(String s) {
                 Log.v(TAG, "Tracking successful.");
+
+                if (mHyperTrackClient.getStatus().equalsIgnoreCase(HTConsumerClient.ORDER_STATUS_DELIVERED)) {
+                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG ).show();
+                    drawPolyline();
+                }
             }
 
             @Override
@@ -82,6 +95,33 @@ public class Trip extends AppCompatActivity {
                 Log.w(TAG, "Couldn't be tracked.");
             }
         });
+    }
+
+    private void drawPolyline() {
+        String encodedLine = mHyperTrackClient.getTripInfo();
+        if (TextUtils.isEmpty(encodedLine))
+            return;
+
+        List<LatLng> list = PolyUtil.decode(encodedLine);
+        PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE);
+        options.addAll(list);
+
+        htMapFragment.getmMap().addPolyline(options);
+
+        if (list.size() >= 2) {
+
+            LatLngBounds.Builder b = new LatLngBounds.Builder();
+            Log.v(TAG, "Setting up bounds for polyline");
+            Log.v(TAG, "including " + list.get(0));
+            b.include(list.get(0));
+
+            Log.v(TAG, "including " + list.get(list.size() - 1));
+            b.include(list.get(list.size() - 1));
+            LatLngBounds bounds = b.build();
+
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
+            htMapFragment.getmMap().moveCamera(cu);//Camera(cu, 1000, null);
+        }
     }
 
 }
