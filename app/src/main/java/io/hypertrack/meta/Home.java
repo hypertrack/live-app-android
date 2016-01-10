@@ -263,13 +263,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.putString(HTConstants.TRIP_ETA, "None");
         editor.commit();
 
-        LocationServices.GeofencingApi.removeGeofences(
-                mGoogleApiClient,
-                getGeofencePendingIntent()
-        ).setResultCallback(this);
-
+        if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            LocationServices.GeofencingApi.removeGeofences(
+                    mGoogleApiClient,
+                    getGeofencePendingIntent()
+            ).setResultCallback(this);
+        }
         //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
         resetViewsOnEndTrip();
     }
 
@@ -909,9 +909,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onResume() {
         super.onResume();
 
+
         if (!getTripStatusFromSharedPreferences() && !TextUtils.equals(getTripUriFromSharedPreferences(), "None")) {
-            endTripClicked();
+            endTrip();
         }
+
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("trip_ended"));
@@ -932,7 +934,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             boolean result = intent.getBooleanExtra("end_trip", false);
 
             if (result)
-                endTripClicked();
+                endTrip();//endTripClicked();
 
             Log.d("receiver", "Got message: " + result);
         }

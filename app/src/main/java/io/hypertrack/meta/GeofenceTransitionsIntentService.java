@@ -6,9 +6,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.hypertrack.apps.assettracker.HyperTrack;
+import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
+import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
 import java.util.List;
 
@@ -24,6 +28,7 @@ import io.hypertrack.meta.util.HTConstants;
 public class GeofenceTransitionsIntentService extends IntentService {
 
     protected static final String TAG = "GeofenceTransitionsIS";
+    private HTTransmitterService transmitterService;
 
     /**
      * This constructor is required, and calls the super IntentService(String)
@@ -82,9 +87,34 @@ public class GeofenceTransitionsIntentService extends IntentService {
     }
 
     private void sendMessage() {
-        Intent intent = new Intent("trip_ended");
-        intent.putExtra("end_trip", true);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String tripId = sharedpreferences.getString(HTConstants.TRIP_ID, "None");
+
+        if (tripId.equalsIgnoreCase("None"))
+            return;
+
+        if (transmitterService == null) {
+            HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
+            HyperTrack.setLoggable(true);
+            transmitterService = HTTransmitterService.getInstance(this);
+        }
+
+        transmitterService.endTrip(new HTTripStatusCallback() {
+            @Override
+            public void onError(Exception e) {
+                Log.v(TAG, "Error while Ending trip" + e.getMessage());
+            }
+
+            @Override
+            public void onSuccess(String s) {
+                Log.v(TAG, "Trip Ended. Broadcasting intent.");
+
+                Intent intent = new Intent("trip_ended");
+                intent.putExtra("end_trip", true);
+                LocalBroadcastManager.getInstance(GeofenceTransitionsIntentService.this).sendBroadcast(intent);
+            }
+        });
     }
 
 }

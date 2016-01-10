@@ -13,8 +13,9 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
+import com.hypertrack.android.sdk.base.network.HTConsumerClient;
 import com.hypertrack.android.sdk.base.network.HyperTrack;
-import com.hypertrack.android.sdk.base.network.HyperTrackClient;
 import com.hypertrack.android.sdk.base.view.HTMapFragment;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class Trip extends AppCompatActivity {
 
     private static final String TAG = Trip.class.getSimpleName();
     private HTMapFragment htMapFragment;
-    private HyperTrackClient mHyperTrackClient;
+    private HTConsumerClient mHyperTrackClient;
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -36,9 +37,10 @@ public class Trip extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         //"cb50db86ff63f556f7856d7690ebc305a7a27c69"
         HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
+        HyperTrack.setLogLevel(Log.VERBOSE);
         htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.htMapfragment);
         htMapFragment.disableCourierInfoLayout(true);
-        mHyperTrackClient = HyperTrackClient.getInstance(this);
+        mHyperTrackClient = HTConsumerClient.getInstance(this);
         retrieveIntentData();
     }
 
@@ -69,7 +71,17 @@ public class Trip extends AppCompatActivity {
         }
 
         Log.d(TAG, "HyperTrack Trip ID: " + hyperTrackIdSegmentToken[0]);
-        mHyperTrackClient.setId(hyperTrackIdSegmentToken[0]);
+        mHyperTrackClient.setId("2091"/*String.valueOf(hyperTrackIdSegmentToken[0])*/, this, new HTStatusCallBack() {
+            @Override
+            public void onSuccess(String s) {
+                Log.v(TAG, "Tracking successful.");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.w(TAG, "Couldn't be tracked.");
+            }
+        });
     }
 
 }
