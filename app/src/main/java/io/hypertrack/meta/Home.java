@@ -1,8 +1,5 @@
 package io.hypertrack.meta;
 
-import android.Manifest;
-import android.animation.ObjectAnimator;
-import android.animation.TypeEvaluator;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -10,10 +7,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 
-import com.google.android.gms.common.api.Result;
+import com.android.volley.NetworkResponse;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
@@ -21,19 +20,15 @@ import com.google.android.gms.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import android.provider.ContactsContract;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Property;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -63,6 +58,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.hypertrack.apps.assettracker.HyperTrack;
 import com.hypertrack.apps.assettracker.model.HTTripParams;
 import com.hypertrack.apps.assettracker.model.HTTripParamsBuilder;
@@ -71,9 +67,9 @@ import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
 import java.util.ArrayList;
 
-import butterknife.internal.ListenerClass;
 import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.ETAInfo;
+import io.hypertrack.meta.model.ETARecipients;
 import io.hypertrack.meta.model.MetaLocation;
 import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
@@ -87,6 +83,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private static final float GEOFENCE_RADIUS_IN_METERS = 1000;
     public static final int LOITERING_DELAY_MS = 30000;
     public static final int EXPIRATION_DURATION = 600000;
+    private static final int REQUEST_SHARE_CONTACT_CODE = 1;
 
     private GoogleMap mMap;
 
@@ -121,6 +118,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
     private int etaInMinutes;
+    private String metaId;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     
     @Override
@@ -788,6 +786,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         mProgressDialog.dismiss();
 
                         String uri = response.getShortUrl();
+                        metaId = response.getId();
                         saveTripUriInSharedPreferences(uri);
                         shareUrl(uri);
                     }
@@ -807,10 +806,50 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         String shareBody = "Track me @ " + uri;
 
+        Uri uri1 = Uri.parse("content://contacts");
+        Intent intent = new Intent(Intent.ACTION_PICK, uri1);
+        intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+        startActivityForResult(intent, REQUEST_SHARE_CONTACT_CODE);
+
+        /*
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(sharingIntent);
+        */
+
+    }
+
+    private void notifySelectedContact(String number) {
+
+        String url = "https://meta-api-staging.herokuapp.com/api/v1/trips/" + metaId + "/send_eta/";
+        String[] recipientArray = {number};
+
+        ETARecipients etaRecipients = new ETARecipients();
+        etaRecipients.setRecipients(recipientArray);
+
+        Gson gson = new Gson();
+        String jsonBody = gson.toJson(etaRecipients);
+
+        HTCustomPostRequest<String> requestObject = new HTCustomPostRequest<String>(1, url,
+                jsonBody, String.class,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                       //Log.v(TAG,"Recipients Response:" + response.toString());
+                        //200 - sending notification
+                        //400, 201 - fall to smses
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Home.this, "Couldn't send notification to the selected number.", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(requestObject);
     }
 
     @Override
@@ -882,6 +921,27 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 Log.d(TAG, ca.toString());
 
                 addMarkerToSelectedDestination(ca.getLocation().getLatLng());
+
+            }
+        }
+        if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
+            if (resultCode == RESULT_OK) {
+                Uri uri = data.getData();
+                String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
+
+                Cursor cursor = getContentResolver().query(uri, projection,
+                        null, null, null);
+                cursor.moveToFirst();
+
+                int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(numberColumnIndex);
+
+                int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                String name = cursor.getString(nameColumnIndex);
+
+                notifySelectedContact(number);
+
+                Log.d(TAG, "ZZZ number : " + number +" , name : "+name);
 
             }
         }
