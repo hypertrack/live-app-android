@@ -118,8 +118,14 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
             if (!TextUtils.isEmpty(countryEditText.getText().toString()))
                 customAddress.setCountry(countryEditText.getText().toString());
 
-            if (metaLocation != null)
-                customAddress.setLocation(metaLocation);
+            if (metaLocation == null) {
+                double[] ll = {currentLocation.longitude, currentLocation.latitude};
+                metaLocation = new MetaLocation();
+                metaLocation.setType("Point");
+                metaLocation.setCoordinates(ll);
+            }
+
+            customAddress.setLocation(metaLocation);
 
             intent.putExtra("custom_address", customAddress);
             setResult(101, intent);
