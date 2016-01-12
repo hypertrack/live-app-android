@@ -300,7 +300,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setZoomControlsEnabled(false);
         /*
         if (getTripStatusFromSharedPreferences()) {
             destinationLocation = getTripDestinationFromSharedPreferences();
