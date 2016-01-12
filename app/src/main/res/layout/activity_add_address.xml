@@ -77,6 +77,8 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:text="Add Address"
-        android:textColor="@android:color/white"/>
+        android:background="@android:color/holo_blue_light"
+        android:textColor="@android:color/white"
+        />
 
 </LinearLayout>

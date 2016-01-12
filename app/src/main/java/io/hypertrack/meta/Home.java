@@ -202,6 +202,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void setUpInitView() {
         if (getTripStatusFromSharedPreferences()) {
+
             mAutocompleteView.setVisibility(View.GONE);
             addAddressButton.setVisibility(View.GONE);
             endTripButton.setVisibility(View.VISIBLE);
@@ -259,7 +260,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.putBoolean(HTConstants.TRIP_STATUS, false);
         editor.putString(HTConstants.TRIP_URI, "None");
         editor.putString(HTConstants.TRIP_ETA, "None");
-        editor.commit();
+        editor.putString(HTConstants.TRIP_DESTINATION, "None");
+        editor.apply();
 
         if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             LocationServices.GeofencingApi.removeGeofences(
@@ -298,6 +300,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
+        /*
+        if (getTripStatusFromSharedPreferences()) {
+            destinationLocation = getTripDestinationFromSharedPreferences();
+            if (destinationLocation != null) {
+                addDestinationMarker(destinationLocation);
+            }
+        }*/
     }
 
     @Override
@@ -464,51 +474,57 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         //addMarkerToSelectedDestination(new LatLng(19.158004, 72.991996));
     }
 
+    private void addDestinationMarker(LatLng destinationLocation) {
+
+        this.destinationLocation = destinationLocation;
+
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.remove();
+        }
+
+        destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this.destinationLocation).title("Your destination"));
+        destinationLocationMarker.showInfoWindow();
+
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        b.include(currentLocation);
+        b.include(this.destinationLocation);
+        LatLngBounds bounds = b.build();
+
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
+                //this.getResources().getDisplayMetrics().widthPixels,
+                //this.getResources().getDisplayMetrics().heightPixels - 1000,
+                300);
+        mMap.moveCamera(cu);
+
+        saveTripDestinationSharedPreferences(destinationLocation);
+
+        if (mGeofenceList == null)
+            mGeofenceList = new ArrayList<Geofence>();
+
+        mGeofenceList.add(new Geofence.Builder()
+                // Set the request ID of the geofence. This is a string to identify this
+                // geofence.
+                .setRequestId(GEOFENCE_REQUEST_ID)
+                .setCircularRegion(
+                        destinationLocation.latitude,
+                        destinationLocation.longitude,
+                        GEOFENCE_RADIUS_IN_METERS
+                )
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(LOITERING_DELAY_MS)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .build());
+
+        mGeofencePendingIntent = getGeofencePendingIntent();
+
+    }
+
     private void addMarkerToSelectedDestination(LatLng destinationLocation) {
 
         if (destinationLocation != null) {
             // Add a marker in destination and move the camera
-            this.destinationLocation = destinationLocation;
-
-            if (destinationLocationMarker != null) {
-                destinationLocationMarker.remove();
-            }
-
-            destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this.destinationLocation).title("Your destination"));
-            destinationLocationMarker.showInfoWindow();
-
-
-            LatLngBounds.Builder b = new LatLngBounds.Builder();
-            b.include(currentLocation);
-            b.include(this.destinationLocation);
-            LatLngBounds bounds = b.build();
-
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
-                    //this.getResources().getDisplayMetrics().widthPixels,
-                    //this.getResources().getDisplayMetrics().heightPixels - 1000,
-                    300);
-            mMap.moveCamera(cu);
-
-            if (mGeofenceList == null)
-                mGeofenceList = new ArrayList<Geofence>();
-            
-            mGeofenceList.add(new Geofence.Builder()
-                    // Set the request ID of the geofence. This is a string to identify this
-                    // geofence.
-                    .setRequestId(GEOFENCE_REQUEST_ID)
-                    .setCircularRegion(
-                            destinationLocation.latitude,
-                            destinationLocation.longitude,
-                            GEOFENCE_RADIUS_IN_METERS
-                    )
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
-                    .setLoiteringDelay(LOITERING_DELAY_MS)
-                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                    .build());
-
+            addDestinationMarker(destinationLocation);
         }
-
-        mGeofencePendingIntent = getGeofencePendingIntent();
 
         mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
         getEtaForDestination();
@@ -664,7 +680,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             if (TextUtils.isEmpty(uri) || uri.equalsIgnoreCase("None")) {
                 return;
             }
-            shareUrl(uri);
+            shareUrl();
         } else {
 
             mProgressDialog = new ProgressDialog(this);
@@ -733,7 +749,23 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString(HTConstants.TRIP_ID, tripId);
         editor.putBoolean(HTConstants.TRIP_STATUS, true);
-        editor.commit();
+        editor.apply();
+    }
+
+    public void saveTripDestinationSharedPreferences(LatLng destinationLocation) {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedpreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(destinationLocation);
+        editor.putString(HTConstants.TRIP_DESTINATION, json);
+        editor.apply();
+    }
+
+    public LatLng getTripDestinationFromSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String latLngString = sharedpreferences.getString(HTConstants.TRIP_DESTINATION, "None");
+        Gson gson = new Gson();
+        return gson.fromJson(latLngString, LatLng.class);
     }
 
     public String getTripFromSharedPreferences() {
@@ -788,7 +820,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         String uri = response.getShortUrl();
                         metaId = response.getId();
                         saveTripUriInSharedPreferences(uri);
-                        shareUrl(uri);
+                        shareUrl();
                     }
                 },
                 new Response.ErrorListener() {
@@ -802,21 +834,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         MetaApplication.getInstance().addToRequestQueue(requestObject);
     }
 
-    private void shareUrl(String uri) {
-
-        String shareBody = "Track me @ " + uri;
+    private void shareUrl() {
 
         Uri uri1 = Uri.parse("content://contacts");
         Intent intent = new Intent(Intent.ACTION_PICK, uri1);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         startActivityForResult(intent, REQUEST_SHARE_CONTACT_CODE);
 
-        /*
+    }
+
+    private void shareUrlViaShare() {
+
+        String shareBody = "Track me @ " + getTripUriFromSharedPreferences();
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(sharingIntent);
-        */
 
     }
 
@@ -844,7 +877,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Home.this, "Couldn't send notification to the selected number.", Toast.LENGTH_LONG).show();
+                        shareUrlViaShare();
+                        Log.d(TAG,"Couldn't send notification to the selected number.");
                     }
                 }
         );
@@ -938,10 +972,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
                 String name = cursor.getString(nameColumnIndex);
-
+                name = name.replaceAll("\\s","");
+                Log.d(TAG, "Number : " + number + " , name : "+name);
                 notifySelectedContact(number);
-
-                Log.d(TAG, "ZZZ number : " + number +" , name : "+name);
 
             }
         }
