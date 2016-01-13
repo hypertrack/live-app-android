@@ -20,13 +20,19 @@ public class GcmListenerService extends com.google.android.gms.gcm.GcmListenerSe
     public void onMessageReceived(String from, Bundle data) {
 
         String message = data.getString("message");
+        String tripID = data.getString("trip_id");
+
+        Log.d(TAG, "Bundle: " + data.toString());
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
-        sendNotification(message);
+        Log.d(TAG, "Trip ID: " + tripID);
+        sendNotification(message, tripID);
     }
 
-    private void sendNotification(String message) {
-        Intent intent = new Intent(this, Home.class);
+    private void sendNotification(String message, String tripId) {
+
+        Intent intent = new Intent(this, Trip.class);
+        intent.putExtra("trip_id", tripId);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);

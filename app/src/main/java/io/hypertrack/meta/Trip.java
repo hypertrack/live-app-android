@@ -43,7 +43,6 @@ public class Trip extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip);
-        //"cb50db86ff63f556f7856d7690ebc305a7a27c69"
         HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
         HyperTrack.setLogLevel(Log.VERBOSE);
         htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.htMapfragment);
@@ -55,11 +54,17 @@ public class Trip extends AppCompatActivity {
     private void retrieveIntentData() {
 
         Intent intent = getIntent();
-        //String action = intent.getAction();
-        Uri data = intent.getData();
-        if(data != null)
-            setUpConsumerClientForTrackingTrip(data);
-        //getTripId(data);
+        Bundle extras = getIntent().getExtras();
+        if(extras !=null) {
+            String tripId = extras.getString("trip_id");
+            if (!TextUtils.isEmpty(tripId)) {
+                trackTrip(tripId);
+            } else {
+                Uri data = intent.getData();
+                if(data != null)
+                    setUpConsumerClientForTrackingTrip(data);
+            }
+        }
     }
 
     private void setUpConsumerClientForTrackingTrip(Uri data) {
@@ -77,9 +82,12 @@ public class Trip extends AppCompatActivity {
         for (int i=0; i < hyperTrackIdSegmentToken.length; i++) {
             Log.v(TAG, hyperTrackIdSegmentToken[i]);
         }
-
         Log.d(TAG, "HyperTrack Trip ID: " + hyperTrackIdSegmentToken[0]);
-        mHyperTrackClient.setId(String.valueOf(hyperTrackIdSegmentToken[0]), this, new HTStatusCallBack() {
+        trackTrip(hyperTrackIdSegmentToken[0]);
+    }
+
+    private void trackTrip(String tripId) {
+        mHyperTrackClient.setId(tripId, this, new HTStatusCallBack() {
             @Override
             public void onSuccess(String s) {
                 Log.v(TAG, "Tracking successful.");
