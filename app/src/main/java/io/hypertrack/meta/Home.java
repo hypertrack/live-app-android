@@ -9,14 +9,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
-
-import com.android.volley.NetworkResponse;
-import com.android.volley.toolbox.JsonRequest;
-import com.android.volley.toolbox.StringRequest;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,6 +33,10 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompletePrediction;
@@ -58,7 +54,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.hypertrack.apps.assettracker.HyperTrack;
 import com.hypertrack.apps.assettracker.model.HTTripParams;
 import com.hypertrack.apps.assettracker.model.HTTripParamsBuilder;
@@ -431,13 +426,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 if (currentLocationMarker != null)
                     currentLocationMarker.remove();
 
-                Log.e(TAG, "Setting bounds");
                 mBounds = getBounds(location, 100000);
 
-                Log.e(TAG, "Setting adapter");
                 mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mBounds,
                         null);
-
 
                 mAutocompleteView.setAdapter(mAdapter);
 
@@ -995,7 +987,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         double maxLat = location.getLatitude() + deltaLat;
         double maxLong = location.getLongitude() + deltaLong;
 
-        return new LatLngBounds(new LatLng(minLat, minLong), new LatLng(maxLat, maxLong));
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        b.include(new LatLng(minLat, minLong));
+        b.include(new LatLng(maxLat, maxLong));
+        LatLngBounds bounds = b.build();
+
+        return bounds;
 
     }
 
