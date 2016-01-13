@@ -207,7 +207,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
     private void updateUserProfile(String firstName, String lastName) {
 
-        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
         String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+userId+"/";

@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -65,6 +66,7 @@ import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 import java.util.ArrayList;
 
 import io.hypertrack.meta.model.CustomAddress;
+import io.hypertrack.meta.model.DeviceInfo;
 import io.hypertrack.meta.model.ETAInfo;
 import io.hypertrack.meta.model.ETARecipients;
 import io.hypertrack.meta.model.MetaLocation;
@@ -130,9 +132,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         initGoogleClient();
 
-        Intent intent = new Intent(this, RegistrationIntentService.class);
-        startService(intent);
-
         mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
@@ -142,6 +141,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             startActivity(new Intent(this, Login.class));
             finish();
         }
+
+        Intent intent = new Intent(this, RegistrationIntentService.class);
+        startService(intent);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -185,6 +187,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         setUpShareEtaButton();
         setUpHyperTrackSDK();
         setUpInitView();
+        updateDeviceInfo();
     }
 
     private void initGoogleClient() {
@@ -544,6 +547,51 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         // calling addGeofences() and removeGeofences().
         return PendingIntent.getService(this, 0, intent, PendingIntent.
                 FLAG_UPDATE_CURRENT);
+    }
+
+    private void updateDeviceInfo() {
+
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String token = sharedpreferences.getString(HTConstants.GCM_REGISTRATION_TOKEN, "None");
+
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        int userId =  settings.getInt(HTConstants.USER_ID, -1);
+
+        if (TextUtils.equals("None", token) || userId == -1){
+            return;
+        }
+
+        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+ userId +"/add_device/";
+        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        DeviceInfo deviceInfo = new DeviceInfo();
+        deviceInfo.setRegistrationId(token);
+        deviceInfo.setDeviceId(deviceId);
+
+        Gson gson = new Gson();
+        String jsonBody = gson.toJson(deviceInfo);
+
+        Log.d(TAG, "Device Info" + deviceInfo.toString());
+
+        HTCustomPostRequest<String> requestObject = new HTCustomPostRequest<String>(1, url,
+                jsonBody, String.class,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        //200, 201
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //400
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(requestObject);
+
     }
 
     private void updateMetaEndPlaceId() {

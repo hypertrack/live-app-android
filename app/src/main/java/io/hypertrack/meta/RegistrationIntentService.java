@@ -1,13 +1,17 @@
 package io.hypertrack.meta;
 
 import android.app.IntentService;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
 import java.io.IOException;
+
+import io.hypertrack.meta.util.HTConstants;
 
 /**
  * Created by suhas on 04/01/16.
@@ -26,11 +30,21 @@ public class RegistrationIntentService extends IntentService {
         try {
             token = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-
             Log.i(TAG, "GCM Registration Token: " + token);
+            updateRegistrationToken(token);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+    }
+
+    private void updateRegistrationToken(String token) {
+
+            SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putString(HTConstants.GCM_REGISTRATION_TOKEN, token);
+            editor.apply();
 
     }
 }
