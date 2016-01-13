@@ -54,6 +54,8 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
+import com.hypertrack.android.sdk.base.network.HTConsumerClient;
 import com.hypertrack.apps.assettracker.HyperTrack;
 import com.hypertrack.apps.assettracker.model.HTTripParams;
 import com.hypertrack.apps.assettracker.model.HTTripParamsBuilder;
@@ -114,6 +116,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private SupportMapFragment mMapFragment;
     private int etaInMinutes;
     private String metaId;
+    private HTConsumerClient mHyperTrackClient;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     
     @Override
@@ -636,9 +639,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void run() {
 
-            if (etaInMinutes <= 0) {
+            if (mHyperTrackClient.getEstimatedTimeOfArrivalInMinutes() == null) {
+                Log.v(TAG, "ETA is null");
                 return;
             }
+            Log.v(TAG, "ETA is " + mHyperTrackClient.getEstimatedTimeOfArrivalInMinutes());
             updateETA();
 
             handler.postDelayed(this,60000);
@@ -647,7 +652,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void updateETA() {
 
-        etaInMinutes = etaInMinutes -1;
+        etaInMinutes = mHyperTrackClient.getEstimatedTimeOfArrivalInMinutes();
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.setTitle(etaInMinutes+ " mins");
@@ -727,14 +732,36 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 saveTripInSharedPreferences(id);
                 requestForGeofenceSetup();
 
-                handler = new Handler();
-                handler.postDelayed(updateTask,60000);
-
+                initETAUpateTask();
                 mAutocompleteView.setVisibility(View.GONE);
                 addAddressButton.setVisibility(View.GONE);
                 endTripButton.setVisibility(View.VISIBLE);
             }
         });
+    }
+
+    private void initETAUpateTask(){
+
+        com.hypertrack.android.sdk.base.network.HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
+        com.hypertrack.android.sdk.base.network.HyperTrack.setLogLevel(Log.VERBOSE);
+
+        mHyperTrackClient = HTConsumerClient.getInstance(this);
+        mHyperTrackClient.setId(tripId, this, new HTStatusCallBack() {
+            @Override
+            public void onSuccess(String s) {
+                setTimerForEtaUpdate();
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.v(TAG, "Inside error: " + e.getMessage());
+            }
+        });
+    }
+
+    private void setTimerForEtaUpdate() {
+        handler = new Handler();
+        handler.postDelayed(updateTask,60000);
     }
 
     public void saveTripInSharedPreferences(String tripId) {
@@ -916,7 +943,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.v(TAG, "Location Changed - Update from meta");
         updateCurrentMarkerLocation(location);
     }
 
