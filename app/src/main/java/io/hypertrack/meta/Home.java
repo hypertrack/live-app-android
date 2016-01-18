@@ -56,6 +56,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
 import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
 import com.hypertrack.android.sdk.base.network.HTConsumerClient;
 import com.hypertrack.apps.assettracker.HyperTrack;
@@ -1050,9 +1053,32 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
                 String name = cursor.getString(nameColumnIndex);
-                name = name.replaceAll("\\s","");
+                number = number.replaceAll("\\s","");
                 Log.d(TAG, "Number : " + number + " , name : "+name);
+
+                PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+                try {
+                    Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, "IN");
+                    Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
+
+                    boolean isValid = phoneUtil
+                            .isValidNumber(phoneNumber);
+
+                    if (isValid) {
+                        String internationalFormat = phoneUtil.format(
+                                phoneNumber,
+                                PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+
+                       number = internationalFormat;
+
+                    }
+
+                } catch (NumberParseException e) {
+                    System.err.println("NumberParseException was thrown: " + e.toString());
+                }
+
                 notifySelectedContact(number);
+                Log.d(TAG, "International Number Format: " + number + " , name : " + name);
 
             }
         }

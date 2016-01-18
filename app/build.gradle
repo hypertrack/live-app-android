@@ -74,6 +74,8 @@ android {
             versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionBuild})"
             minSdkVersion 19
             targetSdkVersion 23
+
+            multiDexEnabled true
         }
 
     } else {
@@ -115,5 +117,6 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
         transitive = true;
     }
+    compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
     compile project(':hypertrack-sdk-debug')
 }
