@@ -49,6 +49,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -440,7 +441,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 mAutocompleteView.setAdapter(mAdapter);
 
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("You are here"));
+                currentLocationMarker = mMap.addMarker(new MarkerOptions()
+                        .position(currentLocation)
+                        .title("You are here")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
                 currentLocationMarker.showInfoWindow();
 
                 if (currentLocation != null && destinationLocation != null) {
@@ -450,7 +454,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                     b.include(destinationLocation);
                     LatLngBounds bounds = b.build();
 
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 300);
+                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 100);
                     mMap.animateCamera(cu, 1000, null);
 
                     return;
@@ -481,7 +485,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             destinationLocationMarker.remove();
         }
 
-        destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(this.destinationLocation).title("Your destination"));
+        destinationLocationMarker = mMap.addMarker(new MarkerOptions()
+                .position(this.destinationLocation)
+                .title("Your destination")
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
         destinationLocationMarker.showInfoWindow();
 
         LatLngBounds.Builder b = new LatLngBounds.Builder();
@@ -492,7 +499,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
                 //this.getResources().getDisplayMetrics().widthPixels,
                 //this.getResources().getDisplayMetrics().heightPixels - 1000,
-                300);
+                100);
         mMap.moveCamera(cu);
 
         saveTripDestinationSharedPreferences(destinationLocation);
@@ -1000,7 +1007,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             currentLocationMarker.remove();
 
         currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation).title("You are here"));
+        currentLocationMarker = mMap.addMarker(
+                new MarkerOptions()
+                        .position(currentLocation)
+                        .title("You are here")
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
         currentLocationMarker.showInfoWindow();
 
     }
