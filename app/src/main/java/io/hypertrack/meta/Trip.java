@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -45,6 +46,10 @@ public class Trip extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
         HyperTrack.setLogLevel(Log.VERBOSE);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
         htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.htMapfragment);
         htMapFragment.disableCourierInfoLayout(true);
         mHyperTrackClient = HTConsumerClient.getInstance(this);
@@ -93,7 +98,7 @@ public class Trip extends AppCompatActivity {
                 Log.v(TAG, "Tracking successful.");
 
                 if (mHyperTrackClient.getStatus().equalsIgnoreCase(HTConsumerClient.ORDER_STATUS_DELIVERED)) {
-                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG ).show();
+                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG).show();
                     drawPolyline();
                 }
             }
@@ -104,6 +109,25 @@ public class Trip extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        switch (menuItem.getItemId()) {
+            case android.R.id.home:
+                startActivityAfterCleanup(Home.class);
+                return true;
+        }
+        return super.onOptionsItemSelected(menuItem);
+    }
+
+    private void startActivityAfterCleanup(Class<?> cls) {
+        Intent intent = new Intent(getApplicationContext(), cls);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        startActivityIfNeeded(intent, 0);
+        finish();
+    }
+
 
     private void drawPolyline() {
         String encodedLine = mHyperTrackClient.getTripInfo();
