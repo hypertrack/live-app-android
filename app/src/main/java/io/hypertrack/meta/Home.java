@@ -1058,7 +1058,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
                 try {
-                    Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, "IN");
+
+                    String locale = getResources().getConfiguration().locale.getCountry();
+                    Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, locale);
                     Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
 
                     boolean isValid = phoneUtil
