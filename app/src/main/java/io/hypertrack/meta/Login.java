@@ -114,14 +114,27 @@ public class Login extends AppCompatActivity {
                     @Override
                     public void onResponse(User response) {
                         mProgressDialog.dismiss();
+
                         Log.d("Response", "ID :" + response.getId());
+                        Log.d("Response", "First Name :" + response.getFirstName());
+                        Log.d("Response", "Last name :" + response.getLastName());
+
                         Intent intent = new Intent(Login.this, Verify.class);
                         intent.putExtra(HTConstants.USER_ID, response.getId());
 
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putInt(HTConstants.USER_ID, response.getId());
-                        editor.commit();
+
+                        if (!TextUtils.isEmpty(response.getFirstName())) {
+                            editor.putString(HTConstants.USER_FIRSTNAME, response.getFirstName());
+                        }
+
+                        if (!TextUtils.isEmpty(response.getLastName())) {
+                            editor.putString(HTConstants.USER_LASTNAME, response.getLastName());
+                        }
+
+                        editor.apply();
 
                         startActivity(intent);
                     }

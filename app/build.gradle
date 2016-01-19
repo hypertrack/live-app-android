@@ -20,13 +20,12 @@ repositories {
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
-/*
+
 slack {
     url 'https://hooks.slack.com/services/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'
     dependsOnTasks 'crashlyticsUploadDistributionDebug'
     title 'New version of Send ETA available on Beta'
 }
-*/
 
 def getDate() {
     def date = new Date()
@@ -52,7 +51,7 @@ android {
         def value = 0
 
         def runTasks = gradle.startParameter.taskNames
-        if ('betaRelease' in runTasks || 'bR' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks) {
+        if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks) {
             value = 1;
         }
 
@@ -98,7 +97,7 @@ android {
         }
         debug {
             ext.betaDistributionReleaseNotes = "Testing BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="suhas@hypertrack.io, tapan@hypertrack.io"
         }
     }
 }
