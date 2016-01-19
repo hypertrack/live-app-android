@@ -3,20 +3,21 @@
     package="io.hypertrack.meta">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality. 
+         location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
 
     <application
         android:name=".MetaApplication"
@@ -60,7 +61,6 @@
 
         <activity
             android:name=".Trip"
-            android:parentActivityName=".Home"
             android:screenOrientation="portrait">
             <intent-filter android:label="mETA app">
                 <action android:name="android.intent.action.VIEW" />
@@ -71,7 +71,7 @@
                 <data
                     android:host="meta-api-staging.herokuapp.com"
                     android:pathPrefix="/trips"
-                    android:scheme="https" />
+                    android:scheme="http" />
                 <!-- note that the leading "/" is required for pathPrefix -->
                 <!--
                 Accepts URIs that begin with "example://gizmos”
@@ -80,6 +80,12 @@
                 -->
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AddAddress"
+            android:label="Custom Address"
+            android:launchMode="singleTop"
+            android:parentActivityName=".Home"
+            android:screenOrientation="portrait" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -87,7 +93,7 @@
              Note that the API key is linked to the encryption key used to sign the APK.
              You need a different API key for each encryption key, including the release key that is used to
              sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <!--
             <meta-data
@@ -102,6 +108,44 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
+
+        <activity
+            android:name=".SelectDestination"
+            android:label="Select Destination"
+            android:parentActivityName=".AddAddress"
+            android:screenOrientation="portrait" />
+
+        <service
+            android:name=".GeofenceTransitionsIntentService"
+            android:exported="false" />
+
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="io.hypertrack.meta" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".GcmListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".MyInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".RegistrationIntentService"
+            android:exported="false">
+        </service>
 
     </application>
 

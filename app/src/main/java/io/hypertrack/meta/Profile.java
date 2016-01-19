@@ -84,7 +84,6 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         setContentView(R.layout.activity_profile);
         // Set up the login form.
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.firstName);
-        //populateAutoComplete();
 
         mLastNameView = (EditText) findViewById(R.id.lastName);
         mLastNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -97,6 +96,8 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 return false;
             }
         });
+
+        populateAutoComplete();
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -111,12 +112,25 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     }
 
     private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            Log.d(TAG, "Request not granted");
-            return;
+
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String userFirstName =  settings.getString(HTConstants.USER_FIRSTNAME, null);
+        String userLastName =  settings.getString(HTConstants.USER_LASTNAME, null);
+
+        if(!TextUtils.isEmpty(userFirstName)) {
+            mFirstNameView.setText(userFirstName);
         }
 
-        getLoaderManager().initLoader(0, null, this);
+        if(!TextUtils.isEmpty(userLastName)) {
+            mLastNameView.setText(userLastName);
+        }
+
+        //if (!mayRequestContacts()) {
+        //    Log.d(TAG, "Request not granted");
+        //    return;
+        //}
+
+        //getLoaderManager().initLoader(0, null, this);
     }
 
     private boolean mayRequestContacts() {
@@ -207,7 +221,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
     private void updateUserProfile(String firstName, String lastName) {
 
-        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
         String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+userId+"/";
@@ -232,6 +246,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
+                        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.getHypertrackCourierId());
                         editor.putBoolean("isUserOnboard", true);
                         editor.commit();
 

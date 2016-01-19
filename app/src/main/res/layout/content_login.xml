@@ -13,32 +13,57 @@
     tools:showIn="@layout/activity_login">
 
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/countryCodeInputLayout"
+            android:layout_weight=".85">
+
+        <EditText
+            android:id="@+id/countryCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberSigned"
+            android:ems="10"
+            android:hint="Code"
+            android:text="+"/>
+
+        </android.support.design.widget.TextInputLayout>
+
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/phoneNumberInputLayout"
-        android:layout_centerInParent="true">
+        android:layout_weight=".15">
 
         <EditText
             android:id="@+id/phoneNumber"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
             android:hint="Enter Phone Number"
             android:inputType="phone"
             android:imeActionId="@+id/login"
-            android:imeActionLabel="@string/action_sign_in_short"
-            android:imeOptions="actionUnspecified"
             />
     </android.support.design.widget.TextInputLayout>
+
+
+    </LinearLayout>
 
     <Button
         android:id="@+id/verify"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/phoneNumberInputLayout"
+        android:layout_below="@+id/linearLayout"
         android:layout_centerHorizontal="true"
-        android:text="Verify" />
+        android:text="Register"
+        android:textColor="@android:color/white"/>
 
 </RelativeLayout>

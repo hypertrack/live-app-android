@@ -1,10 +1,14 @@
 package io.hypertrack.meta;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
@@ -28,6 +32,10 @@ public class Login extends AppCompatActivity {
 
     @Bind(R.id.phoneNumber)
     public EditText phoneNumberView;
+
+    @Bind(R.id.countryCode)
+    public EditText countryCodeView;
+
     private ProgressDialog mProgressDialog;
 
     @Override
@@ -40,7 +48,7 @@ public class Login extends AppCompatActivity {
         toolbar.setTitle("Verify");
         ButterKnife.bind(this);
 
-        poulatePhoneNumberIfAvailable();
+        //poulatePhoneNumberIfAvailable();
 
         /*
         if(BuildConfig.DEBUG) {
@@ -49,6 +57,13 @@ public class Login extends AppCompatActivity {
                 phoneNumberView.setText("9819705422");
         }
         */
+
+        if(checkPermission()) {
+
+        } else {
+            requestPermission();
+        }
+
 
     }
 
@@ -62,10 +77,13 @@ public class Login extends AppCompatActivity {
 
     @OnClick(R.id.verify)
     public void verifyPhoneNumber() {
+
         String phoneNumber = phoneNumberView.getText().toString();
-        if(!TextUtils.isEmpty(phoneNumber) && phoneNumber.length() == 10) {
-            Toast.makeText(Login.this, String.format("Verifying phone number %s",phoneNumber), Toast.LENGTH_SHORT).show();
-            sendPhoneNumber("+91"+phoneNumber);
+        String countryCode = countryCodeView.getText().toString();
+
+        if(!TextUtils.isEmpty(phoneNumber) && phoneNumber.length() == 10 && !TextUtils.isEmpty(countryCode)) {
+            //Toast.makeText(Login.this, String.format("Verifying phone number %s",phoneNumber), Toast.LENGTH_SHORT).show();
+            sendPhoneNumber(countryCode+phoneNumber);
 
         } else {
             phoneNumberView.setError("Please enter a valid number");
@@ -77,6 +95,7 @@ public class Login extends AppCompatActivity {
         String url = "https://meta-api-staging.herokuapp.com/api/v1/users/";
 
         mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("registering phone number");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -95,15 +114,27 @@ public class Login extends AppCompatActivity {
                     @Override
                     public void onResponse(User response) {
                         mProgressDialog.dismiss();
+
                         Log.d("Response", "ID :" + response.getId());
+                        Log.d("Response", "First Name :" + response.getFirstName());
+                        Log.d("Response", "Last name :" + response.getLastName());
+
                         Intent intent = new Intent(Login.this, Verify.class);
                         intent.putExtra(HTConstants.USER_ID, response.getId());
 
                         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putInt(HTConstants.USER_ID, response.getId());
-                        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.getHypertrackCourierId());
-                        editor.commit();
+
+                        if (!TextUtils.isEmpty(response.getFirstName())) {
+                            editor.putString(HTConstants.USER_FIRSTNAME, response.getFirstName());
+                        }
+
+                        if (!TextUtils.isEmpty(response.getLastName())) {
+                            editor.putString(HTConstants.USER_LASTNAME, response.getLastName());
+                        }
+
+                        editor.apply();
 
                         startActivity(intent);
                     }
@@ -119,6 +150,53 @@ public class Login extends AppCompatActivity {
 
         MetaApplication.getInstance().addToRequestQueue(request);
 
+    }
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
+
+    private boolean checkPermission(){
+
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if (result == PackageManager.PERMISSION_GRANTED){
+
+            return true;
+
+        } else {
+
+            return false;
+
+        }
+
+    }
+
+    private void requestPermission(){
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
+
+            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
+
+        } else {
+
+            ActivityCompat.requestPermissions(this,new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
+
+                } else {
+
+                    Toast.makeText(this,"Permission Denied, You cannot access location data.",Toast.LENGTH_LONG).show();
+
+                }
+                break;
+        }
     }
 
 }

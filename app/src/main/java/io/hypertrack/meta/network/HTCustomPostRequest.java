@@ -71,8 +71,9 @@ public class HTCustomPostRequest<T> extends JsonRequest<T> {
     public Map<String, String> getHeaders() throws AuthFailureError {
 
         Map<String, String> params = new HashMap<String, String>();
+        //Authorization: Token <token>
         if(API_TOKEN !=null) {
-            //params.put("Authorization", "Token " + API_TOKEN);
+            params.put("Authorization", "Token " + API_TOKEN);
             //params.put("User-agent", "Hypertrack (Android " + Build.VERSION.RELEASE + ") ConsumerSDK/" + BuildConfig.VERSION_NAME);
         }
         return params;

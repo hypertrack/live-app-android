@@ -17,6 +17,9 @@ public class UserTrip {
     @SerializedName("track_uri")
     private String trackUri;
 
+    @SerializedName("short_url")
+    private String shortUrl;
+
     public UserTrip(String user, String hypertrackTripId) {
         this.user = user;
         this.hypertrackTripId = hypertrackTripId;
@@ -54,6 +57,14 @@ public class UserTrip {
         this.trackUri = trackUri;
     }
 
+    public String getShortUrl() {
+        return shortUrl;
+    }
+
+    public void setShortUrl(String shortUrl) {
+        this.shortUrl = shortUrl;
+    }
+
     @Override
     public String toString() {
         return "UserTrip{" +
@@ -61,6 +72,7 @@ public class UserTrip {
                 ", hypertrackTripId='" + hypertrackTripId + '\'' +
                 ", id='" + id + '\'' +
                 ", trackUri='" + trackUri + '\'' +
+                ", shortUrl='" + shortUrl + '\'' +
                 '}';
     }
 }
