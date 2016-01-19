@@ -14,29 +14,44 @@ import android.support.v7.widget.Toolbar;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.hypertrack.meta.model.Country;
+import io.hypertrack.meta.model.CountryMaster;
+import io.hypertrack.meta.model.CountrySpinnerAdapter;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
 
 public class Login extends AppCompatActivity {
 
+    private static final String TAG = Login.class.getSimpleName();
+
     @Bind(R.id.phoneNumber)
     public EditText phoneNumberView;
 
-    @Bind(R.id.countryCode)
-    public EditText countryCodeView;
-
     private ProgressDialog mProgressDialog;
+    private CountryMaster cm;
+    private Spinner spinner;
+    private CountrySpinnerAdapter adapter;
+    private String isoCode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +63,35 @@ public class Login extends AppCompatActivity {
         toolbar.setTitle("Verify");
         ButterKnife.bind(this);
 
-        //poulatePhoneNumberIfAvailable();
+        cm = CountryMaster.getInstance(this);
+        final ArrayList<Country> countries = cm.getCountries();
+        String countryIsoCode = cm.getDefaultCountryIso();
+        Country country = cm.getCountryByIso(countryIsoCode);
 
-        /*
-        if(BuildConfig.DEBUG) {
-            String number = phoneNumberView.getText().toString();
-            if(TextUtils.isEmpty(number))
-                phoneNumberView.setText("9819705422");
+        spinner = (Spinner) findViewById(R.id.spinner_countries);
+        adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
+        spinner.setAdapter(adapter);
+
+        Log.v(TAG, "From Locale: " + getResources().getConfiguration().locale.getCountry());
+        Log.v(TAG, "Country ISO: " + countryIsoCode);
+
+        for (Country c: countries) {
+            if (c.mCountryIso.equalsIgnoreCase(getResources().getConfiguration().locale.getCountry())) {;
+                spinner.setSelection(adapter.getPosition(c));
+            }
         }
-        */
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                isoCode = countries.get(position).mCountryIso;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
         if(checkPermission()) {
 
@@ -78,12 +113,21 @@ public class Login extends AppCompatActivity {
     @OnClick(R.id.verify)
     public void verifyPhoneNumber() {
 
-        String phoneNumber = phoneNumberView.getText().toString();
-        String countryCode = countryCodeView.getText().toString();
+        String number = phoneNumberView.getText().toString();
 
-        if(!TextUtils.isEmpty(phoneNumber) && phoneNumber.length() == 10 && !TextUtils.isEmpty(countryCode)) {
-            //Toast.makeText(Login.this, String.format("Verifying phone number %s",phoneNumber), Toast.LENGTH_SHORT).show();
-            sendPhoneNumber(countryCode+phoneNumber);
+        if(!TextUtils.isEmpty(number) && number.length() == 10) {
+            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+            Phonenumber.PhoneNumber phoneNumber = null;
+            try {
+                phoneNumber = phoneUtil.parse(number, isoCode);
+                String internationalFormat = phoneUtil.format(
+                        phoneNumber,
+                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+                sendPhoneNumber(internationalFormat);
+                Log.v(TAG, "International Format: " + internationalFormat);
+            } catch (NumberParseException e) {
+                e.printStackTrace();
+            }
 
         } else {
             phoneNumberView.setError("Please enter a valid number");
