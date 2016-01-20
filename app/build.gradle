@@ -12,7 +12,6 @@ buildscript {
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'com.google.gms.google-services'
 apply plugin: 'com.mindera.gradle.slack'
 
 repositories {
@@ -20,12 +19,13 @@ repositories {
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
-
+/*
 slack {
     url 'https://hooks.slack.com/services/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'
     dependsOnTasks 'crashlyticsUploadDistributionDebug'
     title 'New version of Send ETA available on Beta'
 }
+*/
 
 def getDate() {
     def date = new Date()
@@ -108,10 +108,10 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.google.android.gms:play-services:8.3.0'
     compile 'com.mcxiaoke.volley:library:1.0.17'
     compile 'com.google.code.gson:gson:2.4'
-    compile 'io.hypertrack:hypertrack-driver-sdk:0.1.3'
+    compile 'com.google.code.gson:gson:2.4'
+    compile 'io.hypertrack:hypertrack-driver-sdk:0.1.14'
     compile 'com.google.maps.android:android-maps-utils:0.4+'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
         transitive = true;
@@ -119,3 +119,5 @@ dependencies {
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
     compile project(':hypertrack-sdk-debug')
 }
+
+apply plugin: 'com.google.gms.google-services'

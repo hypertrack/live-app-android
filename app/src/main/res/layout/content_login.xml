@@ -19,39 +19,30 @@
         android:id="@+id/linearLayout"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_countries"
+            android:layout_weight=".8"
+            android:spinnerMode="dropdown" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/countryCodeInputLayout"
-            android:layout_weight=".85">
+            android:id="@+id/phoneNumberInputLayout"
+            android:layout_weight=".2">
 
-        <EditText
-            android:id="@+id/countryCode"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="numberSigned"
-            android:ems="10"
-            android:hint="Code"
-            android:text="+"/>
-
-        </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/phoneNumberInputLayout"
-        android:layout_weight=".15">
-
-        <EditText
-            android:id="@+id/phoneNumber"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter Phone Number"
-            android:inputType="phone"
-            android:imeActionId="@+id/login"
-            />
+            <EditText
+                android:id="@+id/phoneNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Enter Phone Number"
+                android:inputType="phone"
+                android:imeActionId="@+id/login"
+                />
     </android.support.design.widget.TextInputLayout>
 
 

@@ -10,12 +10,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.hypertrack.apps.assettracker.HyperTrack;
-import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
-import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
 import java.util.List;
 
+import io.hypertrack.lib.httransmitter.HyperTrack;
+import io.hypertrack.lib.httransmitter.model.HTTrip;
+import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
+import io.hypertrack.lib.httransmitter.service.HTTransmitterService;
 import io.hypertrack.meta.util.HTConstants;
 
 
@@ -96,7 +97,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
         if (transmitterService == null) {
             HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
-            HyperTrack.setLoggable(true);
+            HyperTrack.setLogLevel(Log.VERBOSE);
             transmitterService = HTTransmitterService.getInstance(this);
         }
 
@@ -107,7 +108,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             }
 
             @Override
-            public void onSuccess(String s) {
+            public void onSuccess(HTTrip tripDetails) {
                 Log.v(TAG, "Trip Ended. Broadcasting intent.");
 
                 Intent intent = new Intent("trip_ended");
