@@ -61,14 +61,21 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
 import com.hypertrack.android.sdk.base.network.HTConsumerClient;
-import com.hypertrack.apps.assettracker.HyperTrack;
-import com.hypertrack.apps.assettracker.model.HTTripParams;
-import com.hypertrack.apps.assettracker.model.HTTripParamsBuilder;
-import com.hypertrack.apps.assettracker.model.HTTripStatusCallback;
-import com.hypertrack.apps.assettracker.service.HTTransmitterService;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
+import io.hypertrack.lib.httransmitter.HyperTrack;
+import io.hypertrack.lib.httransmitter.model.HTTrip;
+import io.hypertrack.lib.httransmitter.model.HTTripParams;
+import io.hypertrack.lib.httransmitter.model.HTTripParamsBuilder;
+import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
+import io.hypertrack.lib.httransmitter.service.HTTransmitterService;
 import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.DeviceInfo;
 import io.hypertrack.meta.model.ETAInfo;
@@ -221,7 +228,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void setUpHyperTrackSDK() {
         HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
-        HyperTrack.setLoggable(true);
+        HyperTrack.setLogLevel(Log.DEBUG);
         //Setup order details
 
         transmitterService = HTTransmitterService.getInstance(this);
@@ -697,20 +704,26 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void run() {
 
-            if (mHyperTrackClient.getEstimatedTimeOfArrivalInMinutes() == null) {
-                Log.v(TAG, "ETA is null");
-                return;
-            }
-            Log.v(TAG, "ETA is " + mHyperTrackClient.getEstimatedTimeOfArrivalInMinutes());
-            updateETA();
+            transmitterService.refreshTrip(tripId, new HTTripStatusCallback() {
+                @Override
+                public void onError(Exception e) {
+                    Log.e(TAG, "Inside refresh trip error");
+                }
+
+                @Override
+                public void onSuccess(HTTrip htTrip) {
+                    Log.v(TAG, htTrip.toString());
+                    updateETA(htTrip.getEstimatedTripEndTime());
+                }
+            });
 
             handler.postDelayed(this,60000);
         }
     };
 
-    private void updateETA() {
+    private void updateETA(String estimatedTripEndTime) {
 
-        etaInMinutes = mHyperTrackClient.getEstimatedTimeOfArrivalInMinutes();
+        etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.setTitle(etaInMinutes+ " mins");
@@ -783,11 +796,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             }
 
             @Override
-            public void onSuccess(String id) {
+            public void onSuccess(HTTrip tripDetails) {
                 //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
-                tripId = id;
-                getShareEtaURL(id);
-                saveTripInSharedPreferences(id);
+                tripId = String.valueOf(tripDetails.getId());
+                getShareEtaURL(tripId);
+                saveTripInSharedPreferences(tripId);
                 requestForGeofenceSetup();
 
                 initETAUpateTask();
@@ -800,21 +813,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void initETAUpateTask(){
 
-        com.hypertrack.android.sdk.base.network.HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
-        com.hypertrack.android.sdk.base.network.HyperTrack.setLogLevel(Log.VERBOSE);
-
-        mHyperTrackClient = HTConsumerClient.getInstance(this);
-        mHyperTrackClient.setId(tripId, this, new HTStatusCallBack() {
-            @Override
-            public void onSuccess(String s) {
-                setTimerForEtaUpdate();
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.v(TAG, "Inside error: " + e.getMessage());
-            }
-        });
+        setTimerForEtaUpdate();
     }
 
     private void setTimerForEtaUpdate() {
@@ -1165,7 +1164,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             }
 
             @Override
-            public void onSuccess(String s) {
+            public void onSuccess(HTTrip tripDetails) {
                 mProgressDialog.dismiss();
                 Toast.makeText(Home.this, "Trip Stopped :)", Toast.LENGTH_LONG).show();
                 endTrip();
@@ -1180,6 +1179,42 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         } else {
             Log.v(TAG, "Geofencing not added. There was an error");
         }
+    }
+
+    public static int getTheEstimatedTime(String estimatedTime) {
+
+        String currentTime = getCurrentTime();
+
+        long seconds = 0;
+        int minutes = 0;
+
+        String currentTimeString = currentTime.substring(0,currentTime.length()-5);
+        String estimatedTimeString = estimatedTime.substring(0,estimatedTime.length()-1);
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+        try {
+
+            Date startDate = df.parse(currentTimeString);
+            Date endDate = df.parse(estimatedTimeString);
+            seconds = (endDate.getTime() - startDate.getTime())/1000;
+            minutes = (int)seconds/60;
+
+        } catch(ParseException ex) {
+            ex.printStackTrace();
+        }
+
+        if(minutes < 0) minutes=0;
+
+        return minutes; // return in seconds - Check duration
+    }
+
+    private static String getCurrentTime() {
+
+        SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String cDateTime=dateFormat.format(new Date());
+        return  cDateTime;
+
     }
 
 }
