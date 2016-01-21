@@ -287,6 +287,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void resetViewsOnEndTrip() {
 
+        if (handler != null)
+         handler.removeCallbacks(updateTask);
+
         shareEtaButton.setVisibility(View.GONE);
         endTripButton.setVisibility(View.GONE);
 
