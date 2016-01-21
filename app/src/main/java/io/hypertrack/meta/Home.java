@@ -85,6 +85,7 @@ import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.PhoneUtils;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -1061,7 +1062,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
                 try {
 
-                    String locale = getResources().getConfiguration().locale.getCountry();
+                    String locale = PhoneUtils.getCountryRegionFromPhone(this);
                     Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, locale);
                     Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
 
