@@ -35,7 +35,7 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
         TextView countryName = (TextView)layout.findViewById(R.id.tv_country_name);
         ImageView countryFlag = (ImageView)layout.findViewById(R.id.iv_flag);
 
-        countryName.setText(countries.get(position).mCountryIso);
+        countryName.setText(countries.get(position).mCountryName);
         countryFlag.setImageResource(countries.get(position).mImageId);
 
         return layout;
@@ -51,6 +51,20 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
     // It gets a View that displays the data at the specified position
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return getCustomView(position, convertView, parent);
+        return getCustomView2(position, convertView, parent);
+    }
+
+    public View getCustomView2(int position, View convertView,
+                              ViewGroup parent) {
+
+        View layout = inflater.inflate(R.layout.view_country_list_item, parent, false);
+
+        TextView countryName = (TextView)layout.findViewById(R.id.tv_country_name);
+        ImageView countryFlag = (ImageView)layout.findViewById(R.id.iv_flag);
+
+        countryName.setText("+ " + countries.get(position).mDialPrefix);
+        countryFlag.setImageResource(countries.get(position).mImageId);
+
+        return layout;
     }
 }

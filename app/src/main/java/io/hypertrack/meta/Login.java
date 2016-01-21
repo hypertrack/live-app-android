@@ -79,7 +79,6 @@ public class Login extends AppCompatActivity {
         if (!TextUtils.isEmpty(isoCountryCode)) {
             for (Country c : countries) {
                 if (c.mCountryIso.equalsIgnoreCase(isoCountryCode)) {
-                    ;
                     spinner.setSelection(adapter.getPosition(c));
                 }
             }
