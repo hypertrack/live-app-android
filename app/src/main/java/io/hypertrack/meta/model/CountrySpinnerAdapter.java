@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.hypertrack.meta.R;
 
@@ -27,8 +26,8 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
         countries = list;
     }
 
-    public View getCustomView(int position, View convertView,
-                              ViewGroup parent) {
+    public View getCustomDialogView(int position, View convertView,
+                                    ViewGroup parent) {
 
         View layout = inflater.inflate(R.layout.view_country_list_item, parent, false);
 
@@ -45,17 +44,17 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
     @Override
     public View getDropDownView(int position, View convertView,
                                 ViewGroup parent) {
-        return getCustomView(position, convertView, parent);
+        return getCustomDialogView(position, convertView, parent);
     }
 
     // It gets a View that displays the data at the specified position
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        return getCustomView2(position, convertView, parent);
+        return getCustomSelectionView(position, convertView, parent);
     }
 
-    public View getCustomView2(int position, View convertView,
-                              ViewGroup parent) {
+    public View getCustomSelectionView(int position, View convertView,
+                                       ViewGroup parent) {
 
         View layout = inflater.inflate(R.layout.view_country_list_item, parent, false);
 
