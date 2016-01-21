@@ -39,6 +39,7 @@ import io.hypertrack.meta.model.CountrySpinnerAdapter;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.PhoneUtils;
 
 public class Login extends AppCompatActivity {
 
@@ -72,12 +73,14 @@ public class Login extends AppCompatActivity {
         adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         spinner.setAdapter(adapter);
 
-        Log.v(TAG, "From Locale: " + getResources().getConfiguration().locale.getCountry());
-        Log.v(TAG, "Country ISO: " + countryIsoCode);
+        String isoCountryCode = PhoneUtils.getCountryRegionFromPhone(this);
+        Log.v(TAG, "Region ISO: " + isoCountryCode);
 
-        for (Country c: countries) {
-            if (c.mCountryIso.equalsIgnoreCase(getResources().getConfiguration().locale.getCountry())) {;
-                spinner.setSelection(adapter.getPosition(c));
+        if (!TextUtils.isEmpty(isoCountryCode)) {
+            for (Country c : countries) {
+                if (c.mCountryIso.equalsIgnoreCase(isoCountryCode)) {
+                    spinner.setSelection(adapter.getPosition(c));
+                }
             }
         }
 
