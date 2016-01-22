@@ -93,7 +93,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private static final String TAG = AppCompatActivity.class.getSimpleName();
     private static final String GEOFENCE_REQUEST_ID = "geofence";
-    private static final float GEOFENCE_RADIUS_IN_METERS = 1000;
+    private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     public static final int LOITERING_DELAY_MS = 30000;
     public static final int EXPIRATION_DURATION = 600000;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
