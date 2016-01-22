@@ -18,6 +18,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,6 +67,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -131,6 +133,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private int etaInMinutes;
     private String metaId;
     private HTConsumerClient mHyperTrackClient;
+    private String estimateArrivalOfTime;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     
     @Override
@@ -806,6 +809,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             public void onSuccess(HTTrip tripDetails) {
                 //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
                 tripId = String.valueOf(tripDetails.getId());
+                estimateArrivalOfTime = tripDetails.getEstimatedTripEndTime();
                 getShareEtaURL(tripId);
                 saveTripInSharedPreferences(tripId);
                 requestForGeofenceSetup();
@@ -930,7 +934,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void shareUrlViaShare() {
 
-        String shareBody = "Track me @ " + getTripUriFromSharedPreferences();
+
+        String shareBody = "I'm on my way. Will be there by "+ getEstimatedTimeOfArrival() + ". Track me live" + getTripUriFromSharedPreferences();
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
@@ -1223,6 +1228,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         String cDateTime=dateFormat.format(new Date());
         return  cDateTime;
 
+    }
+
+    private String getEstimatedTimeOfArrival() {
+
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.MINUTE, etaInMinutes);
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
+        return df.format(now.getTime());
     }
 
 }
