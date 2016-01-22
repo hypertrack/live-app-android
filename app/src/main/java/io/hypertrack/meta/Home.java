@@ -459,7 +459,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         .position(currentLocation)
                         .title("You are here")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
-                currentLocationMarker.showInfoWindow();
+                //currentLocationMarker.showInfoWindow();
 
                 if (currentLocation != null && destinationLocation != null) {
 
@@ -501,9 +501,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         destinationLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(this.destinationLocation)
-                .title("Your destination")
+                //.title("Your destination")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
-        destinationLocationMarker.showInfoWindow();
+        //destinationLocationMarker.showInfoWindow();
 
         LatLngBounds.Builder b = new LatLngBounds.Builder();
         b.include(currentLocation);
@@ -695,8 +695,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.commit();
 
         if (destinationLocationMarker != null) {
-            destinationLocationMarker.setTitle(etaInMinutes + " mins");
-            destinationLocationMarker.showInfoWindow();
+            //destinationLocationMarker.setTitle(etaInMinutes + " mins");
+            //destinationLocationMarker.showInfoWindow();
         }
 
         shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
@@ -730,8 +730,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
 
         if (destinationLocationMarker != null) {
-            destinationLocationMarker.setTitle(etaInMinutes+ " mins");
-            destinationLocationMarker.showInfoWindow();
+            //destinationLocationMarker.setTitle(etaInMinutes+ " mins");
+            //destinationLocationMarker.showInfoWindow();
         }
 
         shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
@@ -1016,9 +1016,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         currentLocationMarker = mMap.addMarker(
                 new MarkerOptions()
                         .position(currentLocation)
-                        .title("You are here")
+                        //.title("You are here")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
-        currentLocationMarker.showInfoWindow();
+        //currentLocationMarker.showInfoWindow();
 
     }
 
