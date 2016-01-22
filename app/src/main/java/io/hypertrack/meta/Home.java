@@ -318,6 +318,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.setPadding(0,250,0,100);
         /*
         if (getTripStatusFromSharedPreferences()) {
             destinationLocation = getTripDestinationFromSharedPreferences();
