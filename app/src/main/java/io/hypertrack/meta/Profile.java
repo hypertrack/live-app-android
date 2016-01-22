@@ -91,7 +91,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     private EditText mLastNameView;
     private View mProgressView;
     private View mProfileFormView;
-    private ImageButton mProfileImageButton;
+    //private ImageButton mProfileImageButton;
     private File profileImage;
 
     private final String twoHyphens = "--";
@@ -106,7 +106,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         setContentView(R.layout.activity_profile);
         // Set up the login form.
 
-        mProfileImageButton = (ImageButton) findViewById(R.id.profileImageView);
+        //mProfileImageButton = (ImageButton) findViewById(R.id.profileImageView);
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.firstName);
 
         mLastNameView = (EditText) findViewById(R.id.lastName);
@@ -137,12 +137,14 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     }
 
     private void initViews() {
+        /*
         mProfileImageButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 EasyImage.openChooser(Profile.this, "Please select", true);
             }
         });
+        */
     }
 
     private void populateAutoComplete() {
@@ -581,6 +583,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        /*
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
@@ -596,6 +599,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 Log.v(TAG, "PhotoName: " + imageFile.getName());
             }
         });
+        */
     }
 }
 
