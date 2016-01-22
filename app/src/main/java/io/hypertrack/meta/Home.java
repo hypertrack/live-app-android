@@ -221,7 +221,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             endTripButton.setVisibility(View.VISIBLE);
 
             if (!TextUtils.equals(getTripEtaFromSharedPreferences(), "None")) {
-                shareEtaButton.setText(getTripEtaFromSharedPreferences() + " minutes - " + "SHARE ETA");
+                shareEtaButton.setText("Send ETA (" + getTripEtaFromSharedPreferences() + " mins)");
                 shareEtaButton.setVisibility(View.VISIBLE);
             }
         }
@@ -701,7 +701,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             //destinationLocationMarker.showInfoWindow();
         }
 
-        shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
+        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
         shareEtaButton.setVisibility(View.VISIBLE);
         mProgressDialog.dismiss();
     }
@@ -736,7 +736,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             //destinationLocationMarker.showInfoWindow();
         }
 
-        shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
+        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
     }
 
     private void setUpShareEtaButton() {
@@ -755,7 +755,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             if (TextUtils.isEmpty(uri) || uri.equalsIgnoreCase("None")) {
                 return;
             }
-            shareUrl();
+            //shareUrl();
+            shareUrlViaShare();
         } else {
 
             mProgressDialog = new ProgressDialog(this);
