@@ -30,6 +30,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!--
+            <ImageButton
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:padding="8dp"
+                android:id="@+id/profileImageView"
+                android:layout_gravity="center_horizontal"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                android:src="@drawable/default_profile_pic"/>
+                -->
+
             <android.support.design.widget.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">

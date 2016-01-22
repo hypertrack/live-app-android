@@ -9,6 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -33,18 +36,29 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.network.HTMultipartRequest;
 import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.images.DefaultCallback;
+import io.hypertrack.meta.util.images.EasyImage;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -77,12 +91,22 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     private EditText mLastNameView;
     private View mProgressView;
     private View mProfileFormView;
+    //private ImageButton mProfileImageButton;
+    private File profileImage;
+
+    private final String twoHyphens = "--";
+    private final String lineEnd = "\r\n";
+    private final String boundary = "apiclient-" + System.currentTimeMillis();
+    private final String mimeType = "multipart/form-data; boundary=" + boundary;
+    private byte[] multipartBody;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         // Set up the login form.
+
+        //mProfileImageButton = (ImageButton) findViewById(R.id.profileImageView);
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.firstName);
 
         mLastNameView = (EditText) findViewById(R.id.lastName);
@@ -97,6 +121,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
             }
         });
 
+        initViews();
         populateAutoComplete();
 
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
@@ -109,6 +134,17 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
         mProfileFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+    }
+
+    private void initViews() {
+        /*
+        mProfileImageButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EasyImage.openChooser(Profile.this, "Please select", true);
+            }
+        });
+        */
     }
 
     private void populateAutoComplete() {
@@ -266,7 +302,81 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
         MetaApplication.getInstance().addToRequestQueue(request);
 
+        if (profileImage == null)
+            return;
 
+        byte[] fileData1 = readContentIntoByteArray(profileImage);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
+        try {
+            // the first file
+            buildPart(dos, fileData1);
+            // send multipart form data necesssary after file data
+            dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+            // pass to multipart body
+            multipartBody = bos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        HTMultipartRequest htMultipartRequest = new HTMultipartRequest(url, mimeType, multipartBody, new Response.Listener<NetworkResponse>() {
+            @Override
+            public void onResponse(NetworkResponse response) {
+                Log.v(TAG, "Successfully Uploaded File !");
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Error in uploading the file!");
+            }
+        });
+
+        MetaApplication.getInstance().addToRequestQueue(htMultipartRequest);
+
+    }
+
+    private void buildPart(DataOutputStream dataOutputStream, byte[] fileData) throws IOException {
+        dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"photo\";" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+
+        ByteArrayInputStream fileInputStream = new ByteArrayInputStream(fileData);
+        int bytesAvailable = fileInputStream.available();
+
+        int maxBufferSize = 1024 * 1024;
+        int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        byte[] buffer = new byte[bufferSize];
+
+        // read file and write it into form...
+        int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+        while (bytesRead > 0) {
+            dataOutputStream.write(buffer, 0, bufferSize);
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+        }
+
+        dataOutputStream.writeBytes(lineEnd);
+    }
+
+    private static byte[] readContentIntoByteArray(File file)
+    {
+        FileInputStream fileInputStream = null;
+        byte[] bFile = new byte[(int) file.length()];
+        try
+        {
+            //convert file into array of bytes
+            fileInputStream = new FileInputStream(file);
+            fileInputStream.read(bFile);
+            fileInputStream.close();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        return bFile;
     }
 
     private boolean isEmailValid(String email) {
@@ -467,6 +577,29 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        /*
+        EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
+            @Override
+            public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
+                //Some error handling
+            }
+
+            @Override
+            public void onImagePicked(File imageFile, EasyImage.ImageSource source) {
+                //Handle the image
+                profileImage = imageFile;
+                Bitmap myBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                mProfileImageButton.setImageBitmap(myBitmap);
+                Log.v(TAG, "PhotoName: " + imageFile.getName());
+            }
+        });
+        */
     }
 }
 

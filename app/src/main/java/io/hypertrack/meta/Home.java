@@ -221,7 +221,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             endTripButton.setVisibility(View.VISIBLE);
 
             if (!TextUtils.equals(getTripEtaFromSharedPreferences(), "None")) {
-                shareEtaButton.setText(getTripEtaFromSharedPreferences() + " minutes - " + "SHARE ETA");
+                shareEtaButton.setText("Send ETA (" + getTripEtaFromSharedPreferences() + " mins)");
                 shareEtaButton.setVisibility(View.VISIBLE);
             }
         }
@@ -318,6 +318,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.setPadding(0,250,0,100);
         /*
         if (getTripStatusFromSharedPreferences()) {
             destinationLocation = getTripDestinationFromSharedPreferences();
@@ -459,7 +460,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         .position(currentLocation)
                         .title("You are here")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
-                currentLocationMarker.showInfoWindow();
+                //currentLocationMarker.showInfoWindow();
 
                 if (currentLocation != null && destinationLocation != null) {
 
@@ -501,9 +502,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         destinationLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(this.destinationLocation)
-                .title("Your destination")
+                        //.title("Your destination")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
-        destinationLocationMarker.showInfoWindow();
+        //destinationLocationMarker.showInfoWindow();
 
         LatLngBounds.Builder b = new LatLngBounds.Builder();
         b.include(currentLocation);
@@ -675,6 +676,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         mProgressDialog.dismiss();
                         Log.d("Response", "Inside onError");
                         Toast.makeText(Home.this, "There was an error fetching ETA. Please try again.", Toast.LENGTH_LONG).show();
+                        shareEtaButton.setVisibility(View.INVISIBLE);
                         mAutocompleteView.setText("");
                         mIMEMgr.showSoftInputFromInputMethod(mAutocompleteView.getWindowToken(), 0);
                     }
@@ -695,11 +697,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.commit();
 
         if (destinationLocationMarker != null) {
-            destinationLocationMarker.setTitle(etaInMinutes + " mins");
-            destinationLocationMarker.showInfoWindow();
+            //destinationLocationMarker.setTitle(etaInMinutes + " mins");
+            //destinationLocationMarker.showInfoWindow();
         }
 
-        shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
+        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
         shareEtaButton.setVisibility(View.VISIBLE);
         mProgressDialog.dismiss();
     }
@@ -730,11 +732,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
 
         if (destinationLocationMarker != null) {
-            destinationLocationMarker.setTitle(etaInMinutes+ " mins");
-            destinationLocationMarker.showInfoWindow();
+            //destinationLocationMarker.setTitle(etaInMinutes+ " mins");
+            //destinationLocationMarker.showInfoWindow();
         }
 
-        shareEtaButton.setText(etaInMinutes + " minutes - " + "SHARE ETA");
+        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
     }
 
     private void setUpShareEtaButton() {
@@ -753,7 +755,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             if (TextUtils.isEmpty(uri) || uri.equalsIgnoreCase("None")) {
                 return;
             }
-            shareUrl();
+            //shareUrl();
+            shareUrlViaShare();
         } else {
 
             mProgressDialog = new ProgressDialog(this);
@@ -901,7 +904,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         String uri = response.getShortUrl();
                         metaId = response.getId();
                         saveTripUriInSharedPreferences(uri);
-                        shareUrl();
+                        //shareUrl();
+                        shareUrlViaShare();
                     }
                 },
                 new Response.ErrorListener() {
@@ -1016,9 +1020,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         currentLocationMarker = mMap.addMarker(
                 new MarkerOptions()
                         .position(currentLocation)
-                        .title("You are here")
+                                //.title("You are here")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
-        currentLocationMarker.showInfoWindow();
+        //currentLocationMarker.showInfoWindow();
 
     }
 

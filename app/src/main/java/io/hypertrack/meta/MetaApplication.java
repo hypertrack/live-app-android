@@ -18,7 +18,7 @@ public class MetaApplication extends Application {
     private static final String TAG = MetaApplication.class.getSimpleName();
     private RequestQueue mRequestQueue;
     private static MetaApplication mInstance;
-    private static final int TIMEOUT_MILLISECONDS = 30000;
+    private static final int TIMEOUT_MILLISECONDS = 60000;
     private static final int MAX_RETRIES = -1;
 
     @Override

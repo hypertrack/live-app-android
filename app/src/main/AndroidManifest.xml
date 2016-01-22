@@ -66,19 +66,14 @@
             <intent-filter android:label="mETA app">
                 <action android:name="android.intent.action.VIEW" />
 
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "https://meta-api-staging.herokuapp.com/trips” -->
-                <data
-                    android:host="meta-api-staging.herokuapp.com"
-                    android:pathPrefix="/trips"
-                    android:scheme="http" />
-                <!-- note that the leading "/" is required for pathPrefix -->
-                <!--
-                Accepts URIs that begin with "example://gizmos”
-                <data android:scheme="example"
-                      android:host="gizmos" />
-                -->
+                <!-- <data
+                   android:host="meta-api-staging.herokuapp.com"
+                   android:pathPrefix="/trips"
+                   android:scheme="http" /> -->
             </intent-filter>
         </activity>
         <activity
