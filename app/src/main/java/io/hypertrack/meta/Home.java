@@ -583,7 +583,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+ userId +"/add_device/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+ userId +"/add_device/";
         HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
 
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -618,7 +618,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void updateMetaEndPlaceId() {
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/places/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/places/";
         HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
 
         Log.d(TAG, "Url: " + url + "Token: " + getTokenFromSharedPreferences());
@@ -655,7 +655,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/eta/?origin="
+        String url = HTConstants.API_ENDPOINT + "/api/v1/eta/?origin="
                 + currentLocation.latitude + "," + currentLocation.longitude
                 + "&destination=" + destinationLocation.latitude + "," + destinationLocation.longitude;
 
@@ -891,7 +891,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         Gson gson = new Gson();
         String jsonBody = gson.toJson(userTrip);
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/trips/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/trips/";
 
         HTCustomPostRequest<UserTrip> requestObject = new HTCustomPostRequest<UserTrip>(1, url,
                 jsonBody, UserTrip.class,
@@ -940,7 +940,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void notifySelectedContact(String number) {
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/trips/" + metaId + "/send_eta/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/trips/" + metaId + "/send_eta/";
         String[] recipientArray = {number};
 
         ETARecipients etaRecipients = new ETARecipients();

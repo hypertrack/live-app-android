@@ -260,7 +260,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+userId+"/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+userId+"/";
 
         User user = new User(firstName, lastName);
         Gson gson = new Gson();

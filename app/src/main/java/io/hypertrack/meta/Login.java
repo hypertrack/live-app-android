@@ -139,7 +139,7 @@ public class Login extends AppCompatActivity {
 
     private void sendPhoneNumber(String number) {
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/users/";
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("registering phone number");

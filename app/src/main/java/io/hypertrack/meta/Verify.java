@@ -73,7 +73,7 @@ public class Verify extends AppCompatActivity {
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+ userId + "/verify_phone_number/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+ userId + "/verify_phone_number/";
 
         Verification verification = new Verification(number);
         Gson gson = new Gson();

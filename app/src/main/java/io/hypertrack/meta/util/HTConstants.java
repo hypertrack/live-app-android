@@ -25,6 +25,7 @@ public class HTConstants {
     public static final String TRIP_ETA = "trip_eta";
     public static final String TRIP_STATUS = "trip_live";
     public static final String SHARED_PREFERENCES_NAME = "io.hypertrack.meta";
+    public static final String API_ENDPOINT = "https://meta-api-staging.herokuapp.com";
 
     public static void setPublishableApiKey(String publishableKey) {
 
