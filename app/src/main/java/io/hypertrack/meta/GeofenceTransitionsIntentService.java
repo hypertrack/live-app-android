@@ -96,7 +96,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             return;
 
         if (transmitterService == null) {
-            HyperTrack.setPublishableApiKey("pk_65801d4211efccf3128d74101254e7637e655356");
+            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY);
             HyperTrack.setLogLevel(Log.VERBOSE);
             transmitterService = HTTransmitterService.getInstance(this);
         }
