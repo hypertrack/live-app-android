@@ -502,7 +502,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         destinationLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(this.destinationLocation)
-                //.title("Your destination")
+                        //.title("Your destination")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
         //destinationLocationMarker.showInfoWindow();
 
@@ -676,6 +676,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         mProgressDialog.dismiss();
                         Log.d("Response", "Inside onError");
                         Toast.makeText(Home.this, "There was an error fetching ETA. Please try again.", Toast.LENGTH_LONG).show();
+                        shareEtaButton.setVisibility(View.INVISIBLE);
                         mAutocompleteView.setText("");
                         mIMEMgr.showSoftInputFromInputMethod(mAutocompleteView.getWindowToken(), 0);
                     }
@@ -902,7 +903,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         String uri = response.getShortUrl();
                         metaId = response.getId();
                         saveTripUriInSharedPreferences(uri);
-                        shareUrl();
+                        //shareUrl();
+                        shareUrlViaShare();
                     }
                 },
                 new Response.ErrorListener() {
@@ -1017,7 +1019,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         currentLocationMarker = mMap.addMarker(
                 new MarkerOptions()
                         .position(currentLocation)
-                        //.title("You are here")
+                                //.title("You are here")
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
         //currentLocationMarker.showInfoWindow();
 
