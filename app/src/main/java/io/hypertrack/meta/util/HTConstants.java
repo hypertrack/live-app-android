@@ -4,6 +4,7 @@ import android.util.Log;
 
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.network.HTMultipartRequest;
 
 
 /**
@@ -34,6 +35,7 @@ public class HTConstants {
 
             HTCustomPostRequest.setApiToken(publishableKey);
             HTCustomGetRequest.setApiToken(publishableKey);
+            HTMultipartRequest.setApiToken(publishableKey);
 
         } catch (Exception e) {
             Log.wtf(TAG, "Please verify your publishable key.", e);
