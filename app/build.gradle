@@ -136,6 +136,8 @@ dependencies {
     }
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
     compile project(':hypertrack-sdk-debug')
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta3'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
 }
 
 apply plugin: 'com.google.gms.google-services'
