@@ -92,7 +92,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     private View mProgressView;
     private View mProfileFormView;
     //private ImageButton mProfileImageButton;
-    private File profileImage;
+    //private File profileImage;
 
     private final String twoHyphens = "--";
     private final String lineEnd = "\r\n";
@@ -267,6 +267,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         String jsonObjectBody = gson.toJson(user);
 
         Log.d("Response", "Request Body - " + jsonObjectBody);
+        Log.d("Response", "URL - " + url);
 
         HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
                 7,
@@ -295,13 +296,15 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        showProgress(false);
+                        Log.v(TAG, "Inside on Error");
                     }
                 }
         );
 
         MetaApplication.getInstance().addToRequestQueue(request);
 
+        /*
         if (profileImage == null)
             return;
 
@@ -333,6 +336,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         });
 
         MetaApplication.getInstance().addToRequestQueue(htMultipartRequest);
+        */
 
     }
 

@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/imageButton"
         android:layout_above="@+id/fakeView"
-        android:layout_centerHorizontal="true" android:src="@drawable/marker_icon"
+        android:layout_centerHorizontal="true" android:src="@drawable/destination_marker"
         android:background="@null"/>
 
 </RelativeLayout>

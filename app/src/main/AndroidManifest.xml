@@ -42,7 +42,8 @@
             android:name=".Login"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan"/>
         <activity
             android:name=".Verify"
             android:label="@string/title_activity_verify"
@@ -51,7 +52,8 @@
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.hypertrack.meta.Login" />
+                android:value="io.hypertrack.meta.Login"
+                android:windowSoftInputMode="adjustPan"/>
         </activity>
 
         <receiver android:name=".util.SMSReceiver">
@@ -99,7 +101,8 @@
 
         <activity
             android:name=".Profile"
-            android:label="@string/title_activity_generated_login" />
+            android:label="@string/title_activity_generated_login"
+            android:windowSoftInputMode="adjustPan"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"
