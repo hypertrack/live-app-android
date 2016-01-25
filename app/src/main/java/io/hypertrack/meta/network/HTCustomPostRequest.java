@@ -9,6 +9,7 @@ import com.android.volley.ParseError;
 import com.android.volley.Response;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
+import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.google.gson.Gson;
@@ -79,4 +80,25 @@ public class HTCustomPostRequest<T> extends JsonRequest<T> {
         return params;
     }
 
+    @Override
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
+        if (volleyError == null || volleyError.networkResponse == null)
+            return super.parseNetworkError(volleyError);
+
+        String json = "";
+        try {
+            json = new String(
+                    volleyError.networkResponse.data, HttpHeaderParser.parseCharset(volleyError.networkResponse.headers));
+
+           Log.d("response", "Status Code: " + volleyError.networkResponse.statusCode +
+                    " Data: " + json);
+
+        } catch (UnsupportedEncodingException e) {
+            Log.d("response", e.getMessage(), e);
+        } catch (Exception e) {
+            Log.d("response", e.getMessage(), e);
+        }
+
+        return super.parseNetworkError(volleyError);
+    }
 }

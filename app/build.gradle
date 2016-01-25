@@ -18,7 +18,6 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
-
 /*
 slack {
     url 'https://hooks.slack.com/services/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'
@@ -34,6 +33,16 @@ def getDate() {
 }
 
 android {
+
+    signingConfigs {
+        releaseConfig {
+            keyAlias 'meta-release'
+            keyPassword 'Hyp3rTr@ck123#'
+            storeFile file('/Users/suhas/Hypertrack/keystores/android.jks')
+            storePassword 'iygn67u9'
+        }
+    }
+
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
@@ -51,7 +60,8 @@ android {
         def value = 0
 
         def runTasks = gradle.startParameter.taskNames
-        if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks) {
+        if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks
+                || 'cUDR' in runTasks || 'crashlyticsUploadDistributionRelease' in runTasks) {
             value = 1;
         }
 
@@ -94,10 +104,17 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "API_KEY", '"pk_8df4a9c1a6c258ed9c09e6a445b068455ad6e88b"'
+            buildConfigField "String", "BASE_URL",'"http://api.sendeta.com"'
+            signingConfig signingConfigs.releaseConfig
+            ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
+            ext.betaDistributionEmails="suhas@hypertrack.io"
         }
         debug {
-            ext.betaDistributionReleaseNotes = "Testing BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io, tapan@hypertrack.io"
+            buildConfigField "String", "API_KEY", '"pk_65801d4211efccf3128d74101254e7637e655356"'
+            buildConfigField "String", "BASE_URL",'"https://meta-api-staging.herokuapp.com"'
+            ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
+            ext.betaDistributionEmails="suhas@hypertrack.io"
         }
     }
 }
@@ -110,13 +127,18 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.mcxiaoke.volley:library:1.0.17'
     compile 'com.google.code.gson:gson:2.4'
-    compile 'io.hypertrack:hypertrack-driver-sdk:0.1.14'
+    compile('io.hypertrack:hypertrack-driver-sdk:0.1.15:debug@aar') {
+        transitive = true;
+    }
     compile 'com.google.maps.android:android-maps-utils:0.4+'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
         transitive = true;
     }
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
     compile project(':hypertrack-sdk-debug')
+    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta3'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
+    compile "com.squareup.picasso:picasso:2.4.0"
 }
 
 apply plugin: 'com.google.gms.google-services'

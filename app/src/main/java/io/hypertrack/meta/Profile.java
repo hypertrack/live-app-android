@@ -1,7 +1,7 @@
 package io.hypertrack.meta;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
+import android.*;
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
@@ -11,78 +11,51 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
-import io.hypertrack.meta.network.HTMultipartRequest;
+import io.hypertrack.meta.network.retrofit.ServiceGenerator;
+import io.hypertrack.meta.network.retrofit.UserService;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
-
-import static android.Manifest.permission.READ_CONTACTS;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 
 /**
  * A login screen that offers login via email/password.
  */
-public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
-    private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+public class Profile extends AppCompatActivity {
 
     private static final String TAG = Profile.class.getSimpleName();
 
@@ -91,7 +64,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     private EditText mLastNameView;
     private View mProgressView;
     private View mProfileFormView;
-    //private ImageButton mProfileImageButton;
+    private ImageButton mProfileImageButton;
     private File profileImage;
 
     private final String twoHyphens = "--";
@@ -105,21 +78,10 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
         // Set up the login form.
-
-        //mProfileImageButton = (ImageButton) findViewById(R.id.profileImageView);
+        mProfileImageButton = (ImageButton) findViewById(R.id.profileImageView);
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.firstName);
 
         mLastNameView = (EditText) findViewById(R.id.lastName);
-        mLastNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
-                }
-                return false;
-            }
-        });
 
         initViews();
         populateAutoComplete();
@@ -134,17 +96,22 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
 
         mProfileFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        if (checkPermission()) {
+
+        } else {
+            requestPermission();
+        }
     }
 
     private void initViews() {
-        /*
+
         mProfileImageButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 EasyImage.openChooser(Profile.this, "Please select", true);
             }
         });
-        */
     }
 
     private void populateAutoComplete() {
@@ -152,6 +119,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         String userFirstName =  settings.getString(HTConstants.USER_FIRSTNAME, null);
         String userLastName =  settings.getString(HTConstants.USER_LASTNAME, null);
+        String urlProfilePic = settings.getString(HTConstants.USER_PROFILE_PIC, null);
 
         if(!TextUtils.isEmpty(userFirstName)) {
             mFirstNameView.setText(userFirstName);
@@ -161,49 +129,15 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
             mLastNameView.setText(userLastName);
         }
 
-        //if (!mayRequestContacts()) {
-        //    Log.d(TAG, "Request not granted");
-        //    return;
-        //}
+        if(!TextUtils.isEmpty(urlProfilePic)) {
+            Picasso.with(this)
+                    .load(urlProfilePic)
+                    .placeholder(R.drawable.default_profile_pic) // optional
+                    .error(R.drawable.default_profile_pic)         // optional
+                    .into(mProfileImageButton);
+        }
 
-        //getLoaderManager().initLoader(0, null, this);
     }
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mFirstNameView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
-    }
-
-    /**
-     * Callback received when a permissions request has been completed.
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_CONTACTS) {
-            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                populateAutoComplete();
-            }
-        }
-    }
-
 
     /**
      * Attempts to sign in or register the account specified by the login form.
@@ -211,9 +145,6 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
 
         // Reset errors.
         mFirstNameView.setError(null);
@@ -248,11 +179,76 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            updateUserProfile(firstName, lastName);
+            updateUserProfileRetro(firstName, lastName);
 
             //mAuthTask = new UserLoginTask(firstName, lastName);
             //mAuthTask.execute((Void) null);
         }
+    }
+
+    private void updateUserProfileRetro(String firstName, String lastName) {
+
+        UserService userService = ServiceGenerator.createService(UserService.class, BuildConfig.API_KEY);
+
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        int userId =  settings.getInt(HTConstants.USER_ID, -1);
+
+        User user = new User(firstName, lastName);
+
+        Call<User> call = userService.updateUserName(String.valueOf(userId), user);
+
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(retrofit2.Response<User> response) {
+                Log.v(TAG, "Response from Retrofit");
+
+                Log.d("Response", "User :" + response.body().toString());
+
+                showProgress(false);
+
+                SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.body().getHypertrackCourierId());
+                editor.putBoolean("isUserOnboard", true);
+                editor.commit();
+
+                Intent intent = new Intent(Profile.this, Home.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
+            }
+        });
+
+        //Upload photo
+        if (profileImage == null)
+            return;
+
+        RequestBody requestBody =
+                RequestBody.create(MediaType.parse("image/*"), profileImage);
+
+        Map<String, RequestBody> requestBodyMap = new HashMap<>();
+        String uuid = UUID.randomUUID().toString();
+        String fileName = "photo\"; filename=\"" + uuid + ".jpg";
+        requestBodyMap.put(fileName, requestBody);
+
+        Call<User> updatePicCall = userService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
+        updatePicCall.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(retrofit2.Response<User> response) {
+                Log.v(TAG, "Pic updated successfully");
+                Log.v(TAG, response.headers().toString());
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                Log.v(TAG, "Error while updating profile pic. " + t.getMessage());
+            }
+        });
     }
 
     private void updateUserProfile(String firstName, String lastName) {
@@ -260,13 +256,14 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
-        String url = "https://meta-api-staging.herokuapp.com/api/v1/users/"+userId+"/";
+        String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+userId+"/";
 
         User user = new User(firstName, lastName);
         Gson gson = new Gson();
         String jsonObjectBody = gson.toJson(user);
 
         Log.d("Response", "Request Body - " + jsonObjectBody);
+        Log.d("Response", "URL - " + url);
 
         HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
                 7,
@@ -295,13 +292,15 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        showProgress(false);
+                        Log.v(TAG, "Inside on Error");
                     }
                 }
         );
 
         MetaApplication.getInstance().addToRequestQueue(request);
 
+        /*
         if (profileImage == null)
             return;
 
@@ -333,6 +332,7 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
         });
 
         MetaApplication.getInstance().addToRequestQueue(htMultipartRequest);
+        */
 
     }
 
@@ -426,164 +426,9 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(this,
-                // Retrieve data rows for the device user's 'profile' contact.
-                Uri.withAppendedPath(ContactsContract.Profile.CONTENT_URI,
-                        ContactsContract.Contacts.Data.CONTENT_DIRECTORY), ProfileQuery.PROJECTION,
-
-                // Select only structured names.
-                ContactsContract.Contacts.Data.MIMETYPE +
-                        " = ?", new String[]{ContactsContract.CommonDataKinds.StructuredName
-                .CONTENT_ITEM_TYPE},
-
-                // Show primary email addresses first. Note that there won't be
-                // a primary email address if the user hasn't specified one.
-                ContactsContract.Contacts.Data.IS_PRIMARY + " DESC");
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-
-        List<String> names = new ArrayList<>();
-        cursor.moveToFirst();
-        String mimeType;
-        while (!cursor.isAfterLast()) {
-            mimeType = cursor.getString(ProfileQuery.MIME_TYPE);
-            switch (mimeType) {
-
-                case ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE:
-                    String name = cursor.getString(ProfileQuery.GIVEN_NAME) + " " + cursor.getString(ProfileQuery.FAMILY_NAME);
-                    if (!TextUtils.isEmpty(name)) {
-                        names.add(name);
-                        Log.d(TAG, name);
-                    }
-                    break;
-            }
-        }
-
-        addNamesToAutoComplete(names);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
-
-    }
-
-    private interface ProfileQuery {
-        String[] PROJECTION = {
-                ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME,
-                ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
-                ContactsContract.Contacts.Data.MIMETYPE
-        };
-
-        /**
-         * Column index for the family name in the profile query results
-         */
-        int FAMILY_NAME = 0;
-        /**
-         * Column index for the given name in the profile query results
-         */
-        int GIVEN_NAME = 1;
-        /**
-         * Column index for the MIME type in the profile query results
-         */
-        int MIME_TYPE = 2;
-    }
-
-    private void populateAutoCompleteUsingAccountManager() {
-
-        if (BuildConfig.DEBUG) {
-            mFirstNameView.setText("Suhas");
-            mLastNameView.setText("Mandrawadkar");
-        }
-
-    }
-
-    private void addNamesToAutoComplete(List<String> namesCollection) {
-
-        if (namesCollection.size() == 0) {
-            populateAutoCompleteUsingAccountManager();
-            return;
-        }
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(Profile.this,
-                        android.R.layout.simple_dropdown_item_1line, namesCollection);
-
-        mFirstNameView.setAdapter(adapter);
-    }
-
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mFirstName;
-        private final String mLastName;
-
-        UserLoginTask(String firstName, String lastName) {
-            mFirstName = firstName;
-            mLastName = lastName;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-       /*     for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mFirstName)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mLastName);
-                }
-            }*/
-
-            // TODO: register the new account here.
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putBoolean("isUserOnboard", true);
-                editor.commit();
-
-                Intent intent = new Intent(Profile.this, Home.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-
-            } else {
-                mLastNameView.setError(getString(R.string.error_incorrect_password));
-                mLastNameView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        /*
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
@@ -599,7 +444,54 @@ public class Profile extends AppCompatActivity implements LoaderCallbacks<Cursor
                 Log.v(TAG, "PhotoName: " + imageFile.getName());
             }
         });
-        */
     }
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
+
+    private boolean checkPermission(){
+
+        int result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+        if (result == PackageManager.PERMISSION_GRANTED){
+
+            return true;
+
+        } else {
+
+            return false;
+
+        }
+
+    }
+
+    private void requestPermission(){
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission_group.STORAGE)){
+
+            Toast.makeText(this, "Storage access permission allows read and write image files related to you profile pic. Please allow in App Settings for additional functionality.", Toast.LENGTH_LONG).show();
+
+        } else {
+
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission_group.STORAGE}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
+
+                } else {
+
+                    Toast.makeText(this,"Permission Denied, You cannot access storage.",Toast.LENGTH_LONG).show();
+
+                }
+                break;
+        }
+    }
+
 }
 

@@ -21,6 +21,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -189,7 +190,9 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
                     currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 }
 
-                currentLocationMarker = mMap.addMarker(new MarkerOptions().position(currentLocation));
+                currentLocationMarker = mMap.addMarker(new MarkerOptions()
+                        .position(currentLocation)
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
                 currentLocationMarker.showInfoWindow();
 
                 CameraPosition cameraPosition =

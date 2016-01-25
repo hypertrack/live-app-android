@@ -1,1 +1,1 @@
-include ':app', ':hypertrack-sdk-debug'
+include ':app', ':hypertrack-sdk-debug', ':hypertrack-sdk-release'
