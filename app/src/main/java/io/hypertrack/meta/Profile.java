@@ -29,6 +29,9 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
@@ -204,13 +207,19 @@ public class Profile extends AppCompatActivity {
             return;
 
         RequestBody requestBody =
-                RequestBody.create(MediaType.parse("multipart/form-data"), profileImage);
+                RequestBody.create(MediaType.parse("image/*"), profileImage);
 
-        Call<User> updatePicCall = userService.updateUserProfilePic(String.valueOf(userId), requestBody);
+        Map<String, RequestBody> requestBodyMap = new HashMap<>();
+        String uuid = UUID.randomUUID().toString();
+        String fileName = "photo\"; filename=\"" + uuid + ".jpg";
+        requestBodyMap.put(fileName, requestBody);
+
+        Call<User> updatePicCall = userService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
         updatePicCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(retrofit2.Response<User> response) {
                 Log.v(TAG, "Pic updated successfully");
+                Log.v(TAG, response.headers().toString());
             }
 
             @Override
