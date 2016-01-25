@@ -1,15 +1,20 @@
 package io.hypertrack.meta;
 
+import android.*;
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -19,10 +24,12 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
@@ -89,6 +96,12 @@ public class Profile extends AppCompatActivity {
 
         mProfileFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+
+        if (checkPermission()) {
+
+        } else {
+            requestPermission();
+        }
     }
 
     private void initViews() {
@@ -106,6 +119,7 @@ public class Profile extends AppCompatActivity {
         SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         String userFirstName =  settings.getString(HTConstants.USER_FIRSTNAME, null);
         String userLastName =  settings.getString(HTConstants.USER_LASTNAME, null);
+        String urlProfilePic = settings.getString(HTConstants.USER_PROFILE_PIC, null);
 
         if(!TextUtils.isEmpty(userFirstName)) {
             mFirstNameView.setText(userFirstName);
@@ -113,6 +127,14 @@ public class Profile extends AppCompatActivity {
 
         if(!TextUtils.isEmpty(userLastName)) {
             mLastNameView.setText(userLastName);
+        }
+
+        if(!TextUtils.isEmpty(urlProfilePic)) {
+            Picasso.with(this)
+                    .load(urlProfilePic)
+                    .placeholder(R.drawable.default_profile_pic) // optional
+                    .error(R.drawable.default_profile_pic)         // optional
+                    .into(mProfileImageButton);
         }
 
     }
@@ -423,5 +445,53 @@ public class Profile extends AppCompatActivity {
             }
         });
     }
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
+
+    private boolean checkPermission(){
+
+        int result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+        if (result == PackageManager.PERMISSION_GRANTED){
+
+            return true;
+
+        } else {
+
+            return false;
+
+        }
+
+    }
+
+    private void requestPermission(){
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission_group.STORAGE)){
+
+            Toast.makeText(this, "Storage access permission allows read and write image files related to you profile pic. Please allow in App Settings for additional functionality.", Toast.LENGTH_LONG).show();
+
+        } else {
+
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission_group.STORAGE}, PERMISSION_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
+
+                } else {
+
+                    Toast.makeText(this,"Permission Denied, You cannot access storage.",Toast.LENGTH_LONG).show();
+
+                }
+                break;
+        }
+    }
+
 }
 

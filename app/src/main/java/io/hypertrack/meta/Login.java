@@ -181,6 +181,10 @@ public class Login extends AppCompatActivity {
                             editor.putString(HTConstants.USER_LASTNAME, response.getLastName());
                         }
 
+                        if (!TextUtils.isEmpty(response.getPhoto())) {
+                            editor.putString(HTConstants.USER_PROFILE_PIC, response.getPhoto());
+                        }
+
                         editor.apply();
 
                         startActivity(intent);

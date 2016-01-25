@@ -17,6 +17,7 @@ public class HTConstants {
     public static final String USER_ID = "user_id";
     public static final String USER_FIRSTNAME = "user_firstname";
     public static final String USER_LASTNAME = "user_lastname";
+    public static final String USER_PROFILE_PIC = "user_profile_pic";
     public static final String HYPERTRACK_COURIER_ID = "hypertrack_courier_id";
     public static final String USER_AUTH_TOKEN = "user_auth_token";
     public static final String GCM_REGISTRATION_TOKEN = "gcm_registration_token";
