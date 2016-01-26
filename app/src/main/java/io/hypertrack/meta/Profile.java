@@ -450,7 +450,7 @@ public class Profile extends AppCompatActivity {
 
     private boolean checkPermission(){
 
-        int result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION);
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
         if (result == PackageManager.PERMISSION_GRANTED){
 
             return true;
@@ -465,14 +465,14 @@ public class Profile extends AppCompatActivity {
 
     private void requestPermission(){
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission_group.STORAGE)){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
 
             Toast.makeText(this, "Storage access permission allows read and write image files related to you profile pic. Please allow in App Settings for additional functionality.", Toast.LENGTH_LONG).show();
 
         } else {
 
             ActivityCompat.requestPermissions(this, new String[]{
-                    Manifest.permission_group.STORAGE}, PERMISSION_REQUEST_CODE);
+                    Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
         }
     }
 
