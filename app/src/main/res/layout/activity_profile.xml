@@ -38,7 +38,7 @@
                 android:layout_gravity="center_horizontal"
                 android:adjustViewBounds="true"
                 android:background="@android:color/transparent"
-                android:scaleType="fitXY"
+                android:scaleType="centerInside"
                 android:src="@drawable/default_profile_pic"/>
 
             <android.support.design.widget.TextInputLayout
