@@ -44,17 +44,17 @@
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustResize"/>
         <activity
             android:name=".Verify"
             android:label="@string/title_activity_verify"
             android:parentActivityName=".Login"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.hypertrack.meta.Login"
-                android:windowSoftInputMode="adjustPan"/>
+                android:value="io.hypertrack.meta.Login" />
         </activity>
 
         <receiver android:name=".util.SMSReceiver">
@@ -103,7 +103,7 @@
         <activity
             android:name=".Profile"
             android:label="@string/title_activity_generated_login"
-            android:windowSoftInputMode="adjustPan"/>
+            android:windowSoftInputMode="adjustResize"/>
 
         <meta-data
             android:name="io.fabric.ApiKey"

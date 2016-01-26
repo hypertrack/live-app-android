@@ -103,6 +103,7 @@ public class Verify extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         mProgressDialog.dismiss();
+                        Toast.makeText(Verify.this, "Apologies, there was an error while verifying your number. Please try again.",Toast.LENGTH_LONG).show();
                         Log.d("Response", "Inside OnError");
                     }
                 }

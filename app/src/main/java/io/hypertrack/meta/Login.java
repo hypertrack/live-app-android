@@ -118,7 +118,7 @@ public class Login extends AppCompatActivity {
 
         String number = phoneNumberView.getText().toString();
 
-        if(!TextUtils.isEmpty(number) && number.length() == 10) {
+        if(!TextUtils.isEmpty(number) && number.length() < 20) {
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
             Phonenumber.PhoneNumber phoneNumber = null;
             try {
@@ -133,7 +133,7 @@ public class Login extends AppCompatActivity {
             }
 
         } else {
-            phoneNumberView.setError("Please enter a valid number");
+            phoneNumberView.setError("Please enter a valid number.");
         }
     }
 
@@ -195,6 +195,7 @@ public class Login extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         mProgressDialog.dismiss();
                         Log.d("Response", "Inside OnError");
+                        Toast.makeText(Login.this, "Apologies, we could process your request. Please verify your number.", Toast.LENGTH_LONG).show();
                     }
                 }
         );
