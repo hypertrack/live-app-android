@@ -1,6 +1,5 @@
 package io.hypertrack.meta;
 
-import android.*;
 import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -11,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -35,6 +35,8 @@ import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +60,7 @@ import retrofit2.Callback;
 public class Profile extends AppCompatActivity {
 
     private static final String TAG = Profile.class.getSimpleName();
+    private static final int MAX_IMAGE_DIMENSION = 400;
 
     // UI references.
     private AutoCompleteTextView mFirstNameView;
@@ -228,8 +231,9 @@ public class Profile extends AppCompatActivity {
         if (profileImage == null)
             return;
 
+
         RequestBody requestBody =
-                RequestBody.create(MediaType.parse("image/*"), profileImage);
+                RequestBody.create(MediaType.parse("image/*"), saveBitmapToFile(profileImage));
 
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
         String uuid = UUID.randomUUID().toString();
@@ -438,9 +442,9 @@ public class Profile extends AppCompatActivity {
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source) {
                 //Handle the image
-                profileImage = imageFile;
-                Bitmap myBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-                mProfileImageButton.setImageBitmap(myBitmap);
+                profileImage = imageFile;;
+                Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+                mProfileImageButton.setImageBitmap(srcBitmap);
                 Log.v(TAG, "PhotoName: " + imageFile.getName());
             }
         });
@@ -492,6 +496,50 @@ public class Profile extends AppCompatActivity {
                 break;
         }
     }
+
+    public File saveBitmapToFile(File file){
+        try {
+
+            // BitmapFactory options to downsize the image
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            o.inSampleSize = 6;
+            // factor of downsizing the image
+
+            FileInputStream inputStream = new FileInputStream(file);
+            //Bitmap selectedBitmap = null;
+            BitmapFactory.decodeStream(inputStream, null, o);
+            inputStream.close();
+
+            // The new size we want to scale to
+            final int REQUIRED_SIZE=75;
+
+            // Find the correct scale value. It should be the power of 2.
+            int scale = 1;
+            while(o.outWidth / scale / 2 >= REQUIRED_SIZE &&
+                    o.outHeight / scale / 2 >= REQUIRED_SIZE) {
+                scale *= 2;
+            }
+
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize = scale;
+            inputStream = new FileInputStream(file);
+
+            Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStream, null, o2);
+            inputStream.close();
+
+            // here i override the original image file
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+
+            selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50 , outputStream);
+
+            return file;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
 }
 
