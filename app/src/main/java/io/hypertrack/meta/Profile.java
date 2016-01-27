@@ -10,7 +10,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -35,7 +36,6 @@ import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -444,8 +444,26 @@ public class Profile extends AppCompatActivity {
                 //Handle the image
                 profileImage = imageFile;;
                 Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-                mProfileImageButton.setImageBitmap(srcBitmap);
-                Log.v(TAG, "PhotoName: " + imageFile.getName());
+
+                ExifInterface exif = null;
+                try {
+
+                    exif = new ExifInterface(imageFile.getName());
+                    String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+                    int orientation = orientString != null ? Integer.parseInt(orientString) :  ExifInterface.ORIENTATION_NORMAL;
+
+                    int rotationAngle = 0;
+                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+                    if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
+                    if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
+
+                    Matrix matrix = new Matrix();
+                    matrix.setRotate(rotationAngle, (float) srcBitmap.getWidth() / 2, (float) srcBitmap.getHeight() / 2);
+                    Bitmap rotatedBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
+                    mProfileImageButton.setImageBitmap(rotatedBitmap);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }

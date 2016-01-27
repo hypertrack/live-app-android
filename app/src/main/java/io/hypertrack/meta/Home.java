@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
@@ -141,6 +143,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_home);
+
+        /*
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(),0);
+            if (packageInfo.packageName.equals("io.hypertrack.meta.debug")) {
+                setTitle(getTitle() + " (DEBUG)");
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        */
+
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
