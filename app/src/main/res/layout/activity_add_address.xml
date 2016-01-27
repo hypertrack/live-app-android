@@ -16,7 +16,8 @@
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/locationName"
-        android:hint="Location Name" />
+        android:hint="Location Name"
+        android:maxLength="256"/>
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -38,7 +39,8 @@
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/address"
-        android:hint="Address" />
+        android:hint="Address"
+        android:maxLength="256"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -46,7 +48,8 @@
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/postalCode"
-        android:hint="Postal Code" />
+        android:hint="Postal Code"
+        android:maxLength="16" />
 
     <EditText
         android:layout_width="match_parent"
@@ -54,7 +57,8 @@
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/city"
-        android:hint="City" />
+        android:hint="City"
+        android:maxLength="64"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -62,7 +66,8 @@
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/state"
-        android:hint="State" />
+        android:hint="State"
+        android:maxLength="64"/>
 
     <EditText
         android:layout_width="match_parent"
@@ -70,7 +75,8 @@
         android:inputType="textPostalAddress"
         android:ems="10"
         android:id="@+id/country"
-        android:hint="Country" />
+        android:hint="Country"
+        android:maxLength="64"/>
 
     <Button
         android:id="@+id/setCustomAddress"
