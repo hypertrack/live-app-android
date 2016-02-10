@@ -1,5 +1,6 @@
 package io.hypertrack.meta;
 
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -28,7 +29,9 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,6 +39,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -70,6 +75,7 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.hypertrack.android.sdk.base.network.HTConsumerClient;
+import com.hypertrack.android.sdk.base.utils.HTCircleImageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -145,6 +151,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private HTConsumerClient mHyperTrackClient;
     private String estimateArrivalOfTime;
     private Bitmap profilePicBitmap;
+    private HTCircleImageView profileViewProfileImage;
+    private View customMarkerView;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     
     @Override
@@ -266,6 +274,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             endTripButton.setVisibility(View.VISIBLE);
             shareEtaButton.setVisibility(View.VISIBLE);
 
+
+
             setUpHyperTrackSDK();
             tripId = getTripFromSharedPreferences();
             String etaString = getTripEtaFromSharedPreferences();
@@ -275,7 +285,44 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             updateShareETAButton();
             initETAUpateTask();
         }
+
+        initCustomMarkerView();
     }
+
+    private void initCustomMarkerView() {
+
+        customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
+        profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
+
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String urlProfilePic = settings.getString(HTConstants.USER_PROFILE_PIC, null);
+
+        if(!TextUtils.isEmpty(urlProfilePic)) {
+            Picasso.with(this)
+                    .load(urlProfilePic)
+                    .placeholder(R.drawable.default_profile_pic)
+                    .error(R.drawable.default_profile_pic)
+                    .into(profileViewProfileImage);
+        }
+
+    }
+
+    private Bitmap createDrawableFromView(Context context, View view) {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
+
+        return bitmap;
+    }
+
 
     private void setUpHyperTrackSDK() {
         HyperTrack.setPublishableApiKey(BuildConfig.API_KEY);
@@ -1130,8 +1177,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         currentLocationMarker = mMap.addMarker(
                 new MarkerOptions()
                         .position(currentLocation)
-                        .icon(BitmapDescriptorFactory.fromBitmap(mutableBitmap)));
+                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,customMarkerView))));
 
+    //BitmapDescriptorFactory.fromBitmap(mutableBitmap))
 
     }
 
