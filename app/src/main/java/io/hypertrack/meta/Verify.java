@@ -1,12 +1,15 @@
 package io.hypertrack.meta;
 
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -20,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.gson.Gson;
+import com.hypertrack.android.sdk.base.network.HTConsumerClient;
 
 import org.json.JSONObject;
 
@@ -30,6 +34,7 @@ import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.model.Verification;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.SMSReceiver;
 
 public class Verify extends AppCompatActivity {
 
@@ -41,6 +46,17 @@ public class Verify extends AppCompatActivity {
 
     private ProgressDialog mProgressDialog;
 
+    BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String code = intent.getStringExtra(SMSReceiver.VERIFICATION_CODE);
+            if (!TextUtils.isEmpty(code)) {
+                verificationCodeView.setText(code);
+                registerButtonView.callOnClick();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +65,22 @@ public class Verify extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ButterKnife.bind(this);
+    }
+
+    @Override
+    protected void onResume() {
+
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(SMSReceiver.SENDETA_SMS_RECIEVED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, filter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     @OnClick(R.id.register)

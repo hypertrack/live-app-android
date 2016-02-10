@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Telephony;
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsMessage;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 /**
@@ -14,6 +16,10 @@ import android.widget.Toast;
  */
 public class SMSReceiver extends BroadcastReceiver
 {
+
+    public static final String SENDETA_SMS_RECIEVED = "SENDETA_SMS_RECIEVED";
+    public static final String VERIFICATION_CODE = "VERIFICATION_CODE";
+
     public void onReceive(Context context, Intent intent)
     {
         Bundle myBundle = intent.getExtras();
@@ -23,7 +29,7 @@ public class SMSReceiver extends BroadcastReceiver
         if (myBundle != null)
         {
 
-            if(Build.VERSION.SDK_INT>=19) { //KITKAT
+            if(Build.VERSION.SDK_INT>=19) {
                 SmsMessage[] msgs = Telephony.Sms.Intents.getMessagesFromIntent(intent);
                 messages = msgs;
 
@@ -32,6 +38,16 @@ public class SMSReceiver extends BroadcastReceiver
                     strMessage += " : ";
                     strMessage += messages[i].getMessageBody();
                     strMessage += "\n";
+
+                    if (messages[i].getOriginatingAddress().contains("ETAFYI")) {
+
+                        String message = messages[i].getMessageBody();
+                        String code = message.substring(message.length()-4);
+                        Intent receivedIntent = new Intent(SENDETA_SMS_RECIEVED);
+                        receivedIntent.putExtra(VERIFICATION_CODE, code);
+
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(receivedIntent);
+                    }
                 }
 
                 //Toast.makeText(context, strMessage, Toast.LENGTH_SHORT).show();
