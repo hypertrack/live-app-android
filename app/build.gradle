@@ -127,18 +127,30 @@ dependencies {
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.mcxiaoke.volley:library:1.0.17'
     compile 'com.google.code.gson:gson:2.4'
-    compile('io.hypertrack:hypertrack-driver-sdk:0.1.15:debug@aar') {
+
+    debugCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:debug@aar') {
         transitive = true;
     }
+    releaseCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:release@aar') {
+        transitive = true;
+    }
+
+    debugCompile('io.hypertrack:hypertrack-sdk:0.1.3:debug@aar') {
+        transitive = true;
+    }
+    releaseCompile('io.hypertrack:hypertrack-sdk:0.1.3:release@aar') {
+        transitive = true;
+    }
+
     compile 'com.google.maps.android:android-maps-utils:0.4+'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
         transitive = true;
     }
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
-    compile project(':hypertrack-sdk-debug')
     compile 'com.squareup.retrofit2:retrofit:2.0.0-beta3'
     compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
     compile "com.squareup.picasso:picasso:2.4.0"
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3.1'
 }
 
 apply plugin: 'com.google.gms.google-services'

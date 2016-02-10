@@ -23,7 +23,7 @@ public class HTConstants {
     public static final String GCM_REGISTRATION_TOKEN = "gcm_registration_token";
     public static final String TRIP_ID = "trip_id";
     public static final String TRIP_DESTINATION = "trip_destination";
-    public static final String TRIP_URI = "trip_uri";
+    public static final String TRIP_SHARE_URI = "trip_uri";
     public static final String TRIP_ETA = "trip_eta";
     public static final String TRIP_STATUS = "trip_live";
     public static final String SHARED_PREFERENCES_NAME = "io.hypertrack.meta";

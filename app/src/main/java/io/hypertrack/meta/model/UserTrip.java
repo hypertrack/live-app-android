@@ -14,11 +14,16 @@ public class UserTrip {
 
     private String id;
 
-    @SerializedName("track_uri")
-    private String trackUri;
+    @SerializedName("share_url")
+    private String shareUrl;
 
-    @SerializedName("short_url")
-    private String shortUrl;
+    public String getShareUrl() {
+        return shareUrl;
+    }
+
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
+    }
 
     public UserTrip(String user, String hypertrackTripId) {
         this.user = user;
@@ -49,30 +54,13 @@ public class UserTrip {
         this.id = id;
     }
 
-    public String getTrackUri() {
-        return trackUri;
-    }
-
-    public void setTrackUri(String trackUri) {
-        this.trackUri = trackUri;
-    }
-
-    public String getShortUrl() {
-        return shortUrl;
-    }
-
-    public void setShortUrl(String shortUrl) {
-        this.shortUrl = shortUrl;
-    }
-
     @Override
     public String toString() {
         return "UserTrip{" +
                 "user='" + user + '\'' +
                 ", hypertrackTripId='" + hypertrackTripId + '\'' +
                 ", id='" + id + '\'' +
-                ", trackUri='" + trackUri + '\'' +
-                ", shortUrl='" + shortUrl + '\'' +
+                ", shareUrl='" + shareUrl + '\'' +
                 '}';
     }
 }

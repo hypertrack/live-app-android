@@ -7,9 +7,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,7 +28,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -62,8 +69,9 @@ import com.google.gson.Gson;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
 import com.hypertrack.android.sdk.base.network.HTConsumerClient;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -136,6 +144,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private String metaId;
     private HTConsumerClient mHyperTrackClient;
     private String estimateArrivalOfTime;
+    private Bitmap profilePicBitmap;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     
     @Override
@@ -212,6 +221,25 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 endTripClicked();
             }
         });
+
+        Picasso.with(this)
+                .load(getUserProfilePicFromSharedPreferences())
+                .into(new Target() {
+                    @Override
+                    public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+                        profilePicBitmap = bitmap;
+                    }
+
+                    @Override
+                    public void onBitmapFailed(Drawable errorDrawable) {
+                        profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+                    }
+
+                    @Override
+                    public void onPrepareLoad(Drawable placeHolderDrawable) {
+                        profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+                    }
+                });
 
         setUpShareEtaButton();
         setUpHyperTrackSDK();
@@ -293,7 +321,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putBoolean(HTConstants.TRIP_STATUS, false);
-        editor.putString(HTConstants.TRIP_URI, "None");
+        editor.putString(HTConstants.TRIP_SHARE_URI, "None");
         editor.putString(HTConstants.TRIP_ETA, "None");
         editor.putString(HTConstants.TRIP_DESTINATION, "None");
         editor.apply();
@@ -486,10 +514,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 mAutocompleteView.setAdapter(mAdapter);
 
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                currentLocationMarker = mMap.addMarker(new MarkerOptions()
-                        .position(currentLocation)
-                        .title("You are here")
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
+                updateCurrentMarkerLocation(location);
                 //currentLocationMarker.showInfoWindow();
 
                 if (currentLocation != null && destinationLocation != null) {
@@ -793,7 +818,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void initShareEtaFlow() {
 
         if (getTripStatusFromSharedPreferences()) {
-            String uri = getTripUriFromSharedPreferences();
+            String uri = getTripShareUrlInSharedPreferences();
             if (TextUtils.isEmpty(uri) || uri.equalsIgnoreCase("None")) {
                 return;
             }
@@ -868,7 +893,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void setTimerForEtaUpdate() {
         handler = new Handler();
-        handler.postDelayed(updateTask,0);
+        handler.postDelayed(updateTask, 0);
     }
 
     public void saveTripInSharedPreferences(String tripId) {
@@ -904,9 +929,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return sharedpreferences.getString(HTConstants.TRIP_ID, "None");
     }
 
-    public String getTripUriFromSharedPreferences() {
+    public String getUserProfilePicFromSharedPreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.TRIP_URI, "None");
+        return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC, "None");
+    }
+
+    public String getTripShareUrlInSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(HTConstants.TRIP_SHARE_URI, "None");
     }
 
     public String getTokenFromSharedPreferences() {
@@ -924,10 +954,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return sharedpreferences.getBoolean(HTConstants.TRIP_STATUS, false);
     }
 
-    public void saveTripUriInSharedPreferences(String tripUri) {
+    public void saveTripShareUrlInSharedPreferences(String tripUri) {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(HTConstants.TRIP_URI, tripUri);
+        editor.putString(HTConstants.TRIP_SHARE_URI, tripUri);
         editor.commit();
     }
 
@@ -948,9 +978,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         //Toast.makeText(Home.this, "URL: " + response.toString(), Toast.LENGTH_LONG).show();
                         mProgressDialog.dismiss();
 
-                        String uri = response.getShortUrl();
+                        String uri = response.getShareUrl();
                         metaId = response.getId();
-                        saveTripUriInSharedPreferences(uri);
+                        saveTripShareUrlInSharedPreferences(uri);
                         //shareUrl();
                         shareUrlViaShare();
                     }
@@ -978,7 +1008,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void shareUrlViaShare() {
 
 
-        String shareBody = "I'm on my way. Will be there by "+ getEstimatedTimeOfArrival() + ". Track me live " + getTripUriFromSharedPreferences();
+        String shareBody = "I'm on my way. Will be there by "+ getEstimatedTimeOfArrival() + ". Track me live " + getTripShareUrlInSharedPreferences();
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
@@ -1064,14 +1094,68 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (currentLocationMarker != null)
             currentLocationMarker.remove();
 
+        //creates a base bitmap
+        Bitmap bmp = BitmapFactory.decodeResource(getResources(),
+                R.drawable.car_marker);
+        Bitmap mutableBitmap = bmp.copy(Bitmap.Config.ARGB_8888, true);
+
+        /*
+        //Converts that bitmap to canvas
+        Canvas canvas1 = new Canvas(mutableBitmap);
+
+        //Prepared another bitmap
+        //BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic)
+
+        final int width = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, getResources().getDisplayMetrics());
+        final int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, getResources().getDisplayMetrics());
+
+        Bitmap bitmap = ThumbnailUtils.extractThumbnail(getCircleBitmap(profilePicBitmap), mutableBitmap.getWidth()-width, mutableBitmap.getHeight()-height);
+        //BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic)
+
+        Paint paint = new Paint();
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        //paint.setStrokeWidth(0.5f);
+        paint.setAntiAlias(true);
+
+        //Draws second bitmap over first one
+        final int x = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
+        final int y = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
+        canvas1.drawBitmap(bitmap, x, y, paint);
+        //canvas1.drawCircle(50, 50, 3, paint);
+
+        */
+
         currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         currentLocationMarker = mMap.addMarker(
                 new MarkerOptions()
                         .position(currentLocation)
-                                //.title("You are here")
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
-        //currentLocationMarker.showInfoWindow();
+                        .icon(BitmapDescriptorFactory.fromBitmap(mutableBitmap)));
 
+
+    }
+
+    private Bitmap getCircleBitmap(Bitmap bitmap) {
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
+                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+
+        final int color = Color.RED;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawOval(rectF, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        //bitmap.recycle();
+
+        return output;
     }
 
     private static final int CUSTOM_ADDRESS_DATA = 101;
@@ -1169,7 +1253,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         super.onResume();
 
 
-        if (!getTripStatusFromSharedPreferences() && !TextUtils.equals(getTripUriFromSharedPreferences(), "None")) {
+        if (!getTripStatusFromSharedPreferences() && !TextUtils.equals(getTripShareUrlInSharedPreferences(), "None")) {
             endTrip();
         }
 
