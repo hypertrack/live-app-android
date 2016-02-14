@@ -161,6 +161,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         setContentView(R.layout.activity_home);
 
+
+
         /*
         try {
             PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(),0);

@@ -75,10 +75,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "https://meta-api-staging.herokuapp.com/trips” -->
-                <!-- <data
+                <data
                    android:host="meta-api-staging.herokuapp.com"
                    android:pathPrefix="/trips"
-                   android:scheme="http" /> -->
+                   android:scheme="http" />
             </intent-filter>
         </activity>
         <activity
