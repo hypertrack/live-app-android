@@ -207,13 +207,14 @@ public class Profile extends AppCompatActivity {
 
                 Log.d("Response", "User :" + response.body().toString());
 
-                showProgress(false);
-
                 SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.body().getHypertrackCourierId());
+                editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
                 editor.putBoolean("isUserOnboard", true);
-                editor.commit();
+                editor.apply();
+
+                showProgress(false);
 
                 Intent intent = new Intent(Profile.this, Home.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

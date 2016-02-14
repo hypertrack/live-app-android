@@ -103,6 +103,7 @@ android {
     */
     buildTypes {
         release {
+            debuggable true
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", '"pk_8df4a9c1a6c258ed9c09e6a445b068455ad6e88b"'

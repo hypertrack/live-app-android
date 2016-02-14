@@ -141,6 +141,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
     private int etaInMinutes;
+
     final Runnable updateTask=new Runnable() {
         @Override
         public void run() {
@@ -161,6 +162,24 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             handler.postDelayed(this,60000);
         }
     };
+
+    Target target = new Target() {
+        @Override
+        public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
+            profilePicBitmap = bitmap;
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+        }
+    };
+
     private String metaId;
     private HTConsumerClient mHyperTrackClient;
     private String estimateArrivalOfTime;
@@ -361,24 +380,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             }
         });
 
+        String picUrl = getUserProfilePicFromSharedPreferences();
         Picasso.with(this)
-                .load(getUserProfilePicFromSharedPreferences())
-                .into(new Target() {
-                    @Override
-                    public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
-                        profilePicBitmap = bitmap;
-                    }
-
-                    @Override
-                    public void onBitmapFailed(Drawable errorDrawable) {
-                        profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
-                    }
-
-                    @Override
-                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                        profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
-                    }
-                });
+                .load(picUrl)
+                .into(target);
 
         setUpShareEtaButton();
         setUpHyperTrackSDK();
@@ -417,7 +422,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             initETAUpateTask();
         }
 
-        initCustomMarkerView();
+        //initCustomMarkerView();
     }
 
     private void initCustomMarkerView() {
@@ -431,7 +436,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if(!TextUtils.isEmpty(urlProfilePic)) {
             Picasso.with(this)
                     .load(urlProfilePic)
-                    .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
                     .into(profileViewProfileImage);
         }
@@ -1191,6 +1195,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         if (currentLocationMarker != null)
             currentLocationMarker.remove();
+
+
+        customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
+        profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
+        profileViewProfileImage.setImageBitmap(profilePicBitmap);
 
         currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         currentLocationMarker = mMap.addMarker(
