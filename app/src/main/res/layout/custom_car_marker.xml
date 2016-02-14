@@ -17,7 +17,7 @@
         android:layout_marginLeft="13dp"
         android:layout_marginTop="4dp"
         android:background="@null"
-        android:src="@drawable/ht_profile_image"
+        android:src="@drawable/default_profile_pic"
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true" />
 

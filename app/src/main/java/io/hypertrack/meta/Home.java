@@ -107,24 +107,20 @@ import io.hypertrack.meta.util.PhoneUtils;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
+    public static final int LOITERING_DELAY_MS = 30000;
+    public static final int EXPIRATION_DURATION = 600000;
     private static final String TAG = AppCompatActivity.class.getSimpleName();
     private static final String GEOFENCE_REQUEST_ID = "geofence";
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
-    public static final int LOITERING_DELAY_MS = 30000;
-    public static final int EXPIRATION_DURATION = 600000;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
-
-    private GoogleMap mMap;
-
-    protected GoogleApiClient mGoogleApiClient;
-
-    private PlaceAutocompleteAdapter mAdapter;
-
-    private AutoCompleteTextView mAutocompleteView;
-
     private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(
             new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
-
+    private static final long INTERVAL_TIME = 5000;
+    private static final int CUSTOM_ADDRESS_DATA = 101;
+    protected GoogleApiClient mGoogleApiClient;
+    private GoogleMap mMap;
+    private PlaceAutocompleteAdapter mAdapter;
+    private AutoCompleteTextView mAutocompleteView;
     private LatLngBounds mBounds;
     private LatLng currentLocation;
     private Marker currentLocationMarker;
@@ -136,10 +132,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private String tripId;
     private ProgressDialog mProgressDialog;
     private Handler handler;
-
     private InputMethodManager mIMEMgr;
     private Button endTripButton;
-    private static final long INTERVAL_TIME = 5000;
     private CustomAddress customAddress;
     private String endPlaceId;
     private Button addAddressButton;
@@ -147,14 +141,149 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
     private int etaInMinutes;
+    final Runnable updateTask=new Runnable() {
+        @Override
+        public void run() {
+
+            transmitterService.refreshTrip(tripId, new HTTripStatusCallback() {
+                @Override
+                public void onError(Exception e) {
+                    Log.e(TAG, "Inside refresh trip error");
+                }
+
+                @Override
+                public void onSuccess(HTTrip htTrip) {
+                    Log.v(TAG, htTrip.toString());
+                    updateETA(htTrip.getEstimatedTripEndTime());
+                }
+            });
+
+            handler.postDelayed(this,60000);
+        }
+    };
     private String metaId;
     private HTConsumerClient mHyperTrackClient;
     private String estimateArrivalOfTime;
     private Bitmap profilePicBitmap;
+    //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
-    //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
-    
+    /**
+     * Callback for results from a Places Geo Data API query that shows the first place result in
+     * the details view on screen.
+     */
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                // Request did not complete successfully
+                Log.d(TAG, "Place query did not complete. Error: " + places.getStatus().toString());
+                places.release();
+                return;
+            }
+
+
+            // Get the Place object from the buffer.
+            final Place place = places.get(0);
+
+           /* // Format details of the place for display and show it in a TextView.
+            mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(),
+                    place.getId(), place.getAddress(), place.getPhoneNumber(),
+                    place.getWebsiteUri()));
+
+            // Display the third party attributions if set.
+            final CharSequence thirdPartyAttribution = places.getAttributions();
+            if (thirdPartyAttribution == null) {
+                mPlaceDetailsAttribution.setVisibility(View.GONE);
+            } else {
+                mPlaceDetailsAttribution.setVisibility(View.VISIBLE);
+                mPlaceDetailsAttribution.setText(Html.fromHtml(thirdPartyAttribution.toString()));
+            }*/
+
+            Log.i(TAG, "Place details received: " + place.getName());
+
+            populateCustomAddress(place);
+
+            addMarkerToSelectedDestination(place.getLatLng());
+            places.release();
+
+        }
+    };
+    private AdapterView.OnItemClickListener mAutocompleteClickListener
+            = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            /*
+             Retrieve the place ID of the selected item from the Adapter.
+             The adapter stores each Place suggestion in a AutocompletePrediction from which we
+             read the place ID and title.
+              */
+            final AutocompletePrediction item = mAdapter.getItem(position);
+            final String placeId = item.getPlaceId();
+            final CharSequence primaryText = item.getPrimaryText(null);
+            Log.d(TAG, "Autocomplete item selected: " + primaryText);
+
+            /*
+             Issue a request to the Places Geo Data API to retrieve a Place object with additional
+             details about the place.
+              */
+            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                    .getPlaceById(mGoogleApiClient, placeId);
+            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+
+            Log.d(TAG, "Called getPlaceById to get Place details for " + placeId);
+        }
+    };
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Extract data included in the Intent
+            boolean result = intent.getBooleanExtra("end_trip", false);
+
+            if (result)
+                endTrip();//endTripClicked();
+
+            Log.d("receiver", "Got message: " + result);
+        }
+    };
+
+    public static int getTheEstimatedTime(String estimatedTime) {
+
+        String currentTime = getCurrentTime();
+
+        long seconds = 0;
+        int minutes = 0;
+
+        String currentTimeString = currentTime.substring(0,currentTime.length()-5);
+        String estimatedTimeString = estimatedTime.substring(0,estimatedTime.length()-1);
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+        try {
+
+            Date startDate = df.parse(currentTimeString);
+            Date endDate = df.parse(estimatedTimeString);
+            seconds = (endDate.getTime() - startDate.getTime())/1000;
+            minutes = (int)seconds/60;
+
+        } catch(ParseException ex) {
+            ex.printStackTrace();
+        }
+
+        if(minutes < 0) minutes=0;
+
+        return minutes; // return in seconds - Check duration
+    }
+
+    private static String getCurrentTime() {
+
+        SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String cDateTime=dateFormat.format(new Date());
+        return  cDateTime;
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -325,7 +454,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return bitmap;
     }
 
-
     private void setUpHyperTrackSDK() {
         HyperTrack.setPublishableApiKey(BuildConfig.API_KEY);
         HyperTrack.setLogLevel(Log.DEBUG);
@@ -418,7 +546,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
-        int paddingInDpForTop = 150;
+        int paddingInDpForTop = 175;
         int paddingInDpForBottom = 50;
         final float scale = getResources().getDisplayMetrics().density;
         int paddingInPxForTop = (int) (paddingInDpForTop * scale + 0.5f);
@@ -447,75 +575,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
 
     }
-
-    private AdapterView.OnItemClickListener mAutocompleteClickListener
-            = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            /*
-             Retrieve the place ID of the selected item from the Adapter.
-             The adapter stores each Place suggestion in a AutocompletePrediction from which we
-             read the place ID and title.
-              */
-            final AutocompletePrediction item = mAdapter.getItem(position);
-            final String placeId = item.getPlaceId();
-            final CharSequence primaryText = item.getPrimaryText(null);
-            Log.d(TAG, "Autocomplete item selected: " + primaryText);
-
-            /*
-             Issue a request to the Places Geo Data API to retrieve a Place object with additional
-             details about the place.
-              */
-            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
-                    .getPlaceById(mGoogleApiClient, placeId);
-            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-
-            Log.d(TAG, "Called getPlaceById to get Place details for " + placeId);
-        }
-    };
-
-    /**
-     * Callback for results from a Places Geo Data API query that shows the first place result in
-     * the details view on screen.
-     */
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
-            = new ResultCallback<PlaceBuffer>() {
-        @Override
-        public void onResult(PlaceBuffer places) {
-            if (!places.getStatus().isSuccess()) {
-                // Request did not complete successfully
-                Log.d(TAG, "Place query did not complete. Error: " + places.getStatus().toString());
-                places.release();
-                return;
-            }
-
-
-            // Get the Place object from the buffer.
-            final Place place = places.get(0);
-
-           /* // Format details of the place for display and show it in a TextView.
-            mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(),
-                    place.getId(), place.getAddress(), place.getPhoneNumber(),
-                    place.getWebsiteUri()));
-
-            // Display the third party attributions if set.
-            final CharSequence thirdPartyAttribution = places.getAttributions();
-            if (thirdPartyAttribution == null) {
-                mPlaceDetailsAttribution.setVisibility(View.GONE);
-            } else {
-                mPlaceDetailsAttribution.setVisibility(View.VISIBLE);
-                mPlaceDetailsAttribution.setText(Html.fromHtml(thirdPartyAttribution.toString()));
-            }*/
-
-            Log.i(TAG, "Place details received: " + place.getName());
-
-            populateCustomAddress(place);
-
-            addMarkerToSelectedDestination(place.getLatLng());
-            places.release();
-
-        }
-    };
 
     private void populateCustomAddress(Place place) {
 
@@ -600,16 +659,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         this.destinationLocation = destinationLocation;
 
-        if (destinationLocationMarker != null) {
-            destinationLocationMarker.remove();
-        }
+        updateDestinationMarker();
 
-        destinationLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(this.destinationLocation)
-                        //.title("Your destination")
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination_marker)));
-        //destinationLocationMarker.showInfoWindow();
-        Log.v(TAG, "Current Location: " + currentLocation);
         if (currentLocation != null && destinationLocation != null) {
             LatLngBounds.Builder b = new LatLngBounds.Builder();
             b.include(currentLocation);
@@ -617,8 +668,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             LatLngBounds bounds = b.build();
 
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
-                    //this.getResources().getDisplayMetrics().widthPixels,
-                    //this.getResources().getDisplayMetrics().heightPixels - 1000,
                     100);
             mMap.moveCamera(cu);
         }
@@ -644,6 +693,31 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         mGeofencePendingIntent = getGeofencePendingIntent();
 
+    }
+
+    private void updateDestinationMarker() {
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.remove();
+        }
+
+        View markerView = createCustomMarkerView();
+
+        destinationLocationMarker = mMap.addMarker(new MarkerOptions()
+                .position(this.destinationLocation)
+                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,markerView))));
+    }
+
+    private View createCustomMarkerView() {
+
+        View marker = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_destination_marker_layout, null);
+        TextView etaTxt = (TextView) marker.findViewById(R.id.eta_txt);
+
+        int eta = etaInMinutes;
+        if (eta != 0) {
+            etaTxt.setText(eta + "m");
+        }
+
+        return marker;
     }
 
     private void addMarkerToSelectedDestination(LatLng destinationLocation) {
@@ -807,8 +881,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         saveTripEtaInSharePreferences();
 
         if (destinationLocationMarker != null) {
-            //destinationLocationMarker.setTitle(etaInMinutes + " mins");
-            //destinationLocationMarker.showInfoWindow();
+            updateDestinationMarker();
         }
 
         updateShareETAButton();
@@ -821,35 +894,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareEtaButton.setVisibility(View.VISIBLE);
     }
 
-    final Runnable updateTask=new Runnable() {
-        @Override
-        public void run() {
-
-            transmitterService.refreshTrip(tripId, new HTTripStatusCallback() {
-                @Override
-                public void onError(Exception e) {
-                    Log.e(TAG, "Inside refresh trip error");
-                }
-
-                @Override
-                public void onSuccess(HTTrip htTrip) {
-                    Log.v(TAG, htTrip.toString());
-                    updateETA(htTrip.getEstimatedTripEndTime());
-                }
-            });
-
-            handler.postDelayed(this,60000);
-        }
-    };
-
     private void updateETA(String estimatedTripEndTime) {
 
         etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
         saveTripEtaInSharePreferences();
 
         if (destinationLocationMarker != null) {
-            //destinationLocationMarker.setTitle(etaInMinutes+ " mins");
-            //destinationLocationMarker.showInfoWindow();
+            updateDestinationMarker();
         }
 
         shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
@@ -1010,7 +1061,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.commit();
     }
 
-
     private void getShareEtaURL(String tripId) {
 
         UserTrip userTrip = new UserTrip(userId, tripId);
@@ -1105,7 +1155,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         requestForLocationUpdates();
     }
 
-
     private void requestForGeofenceSetup() {
 
         Log.v(TAG, "Adding geofencing");
@@ -1143,72 +1192,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (currentLocationMarker != null)
             currentLocationMarker.remove();
 
-        //creates a base bitmap
-        Bitmap bmp = BitmapFactory.decodeResource(getResources(),
-                R.drawable.car_marker);
-        Bitmap mutableBitmap = bmp.copy(Bitmap.Config.ARGB_8888, true);
-
-        /*
-        //Converts that bitmap to canvas
-        Canvas canvas1 = new Canvas(mutableBitmap);
-
-        //Prepared another bitmap
-        //BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic)
-
-        final int width = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, getResources().getDisplayMetrics());
-        final int height = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 25, getResources().getDisplayMetrics());
-
-        Bitmap bitmap = ThumbnailUtils.extractThumbnail(getCircleBitmap(profilePicBitmap), mutableBitmap.getWidth()-width, mutableBitmap.getHeight()-height);
-        //BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic)
-
-        Paint paint = new Paint();
-        paint.setColor(Color.RED);
-        paint.setStyle(Paint.Style.FILL_AND_STROKE);
-        //paint.setStrokeWidth(0.5f);
-        paint.setAntiAlias(true);
-
-        //Draws second bitmap over first one
-        final int x = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 10, getResources().getDisplayMetrics());
-        final int y = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 7, getResources().getDisplayMetrics());
-        canvas1.drawBitmap(bitmap, x, y, paint);
-        //canvas1.drawCircle(50, 50, 3, paint);
-
-        */
-
         currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
         currentLocationMarker = mMap.addMarker(
                 new MarkerOptions()
                         .position(currentLocation)
                         .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,customMarkerView))));
 
-    //BitmapDescriptorFactory.fromBitmap(mutableBitmap))
 
     }
-
-    private Bitmap getCircleBitmap(Bitmap bitmap) {
-        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
-                bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        final Canvas canvas = new Canvas(output);
-
-        final int color = Color.RED;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawOval(rectF, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        //bitmap.recycle();
-
-        return output;
-    }
-
-    private static final int CUSTOM_ADDRESS_DATA = 101;
 
     private void getCustomAddressFromTheUser() {
         Intent intent = new Intent(this, AddAddress.class);
@@ -1320,19 +1311,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Extract data included in the Intent
-            boolean result = intent.getBooleanExtra("end_trip", false);
-
-            if (result)
-                endTrip();//endTripClicked();
-
-            Log.d("receiver", "Got message: " + result);
-        }
-    };
-
     private void endTripClicked() {
 
         mProgressDialog = new ProgressDialog(this);
@@ -1368,42 +1346,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         } else {
             Log.v(TAG, "Geofencing not added. There was an error");
         }
-    }
-
-    public static int getTheEstimatedTime(String estimatedTime) {
-
-        String currentTime = getCurrentTime();
-
-        long seconds = 0;
-        int minutes = 0;
-
-        String currentTimeString = currentTime.substring(0,currentTime.length()-5);
-        String estimatedTimeString = estimatedTime.substring(0,estimatedTime.length()-1);
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
-        try {
-
-            Date startDate = df.parse(currentTimeString);
-            Date endDate = df.parse(estimatedTimeString);
-            seconds = (endDate.getTime() - startDate.getTime())/1000;
-            minutes = (int)seconds/60;
-
-        } catch(ParseException ex) {
-            ex.printStackTrace();
-        }
-
-        if(minutes < 0) minutes=0;
-
-        return minutes; // return in seconds - Check duration
-    }
-
-    private static String getCurrentTime() {
-
-        SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        String cDateTime=dateFormat.format(new Date());
-        return  cDateTime;
-
     }
 
     private String getEstimatedTimeOfArrival() {
