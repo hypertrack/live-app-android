@@ -546,7 +546,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
-        int paddingInDpForTop = 150;
+        int paddingInDpForTop = 175;
         int paddingInDpForBottom = 50;
         final float scale = getResources().getDisplayMetrics().density;
         int paddingInPxForTop = (int) (paddingInDpForTop * scale + 0.5f);
