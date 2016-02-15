@@ -29,6 +29,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -380,15 +381,33 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             }
         });
 
+        /*
         String picUrl = getUserProfilePicFromSharedPreferences();
         Picasso.with(this)
                 .load(picUrl)
                 .into(target);
+        */
+
+        if (!TextUtils.equals("None", getImageToPreferences())) {
+            profilePicBitmap = decodeToBase64(getImageToPreferences());
+        } else {
+            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+        }
 
         setUpShareEtaButton();
         setUpHyperTrackSDK();
         setUpInitView();
         updateDeviceInfo();
+    }
+
+    private String getImageToPreferences() {
+        SharedPreferences myPrefrence = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return myPrefrence.getString(HTConstants.USER_PROFILE_PIC_ENCODED, "None");
+    }
+
+    public static Bitmap decodeToBase64(String decodeImageString) {
+        byte[] decodedByte = Base64.decode(decodeImageString, 0);
+        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
 
     private void initGoogleClient() {

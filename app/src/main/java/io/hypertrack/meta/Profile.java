@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,6 +34,7 @@ import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -297,7 +299,7 @@ public class Profile extends AppCompatActivity {
 
                         showProgress(false);
 
-                        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+                        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
                         SharedPreferences.Editor editor = settings.edit();
                         editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.getHypertrackCourierId());
                         editor.putBoolean("isUserOnboard", true);
@@ -568,10 +570,31 @@ public class Profile extends AppCompatActivity {
 
             selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50 , outputStream);
 
+            saveImageToPreferences(encodeToBase64(selectedBitmap));
+
             return file;
         } catch (Exception e) {
             return null;
         }
+
+    }
+
+    public static String encodeToBase64(Bitmap image) {
+        Bitmap immage = image;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        immage.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        byte[] b = baos.toByteArray();
+        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
+
+        Log.d("Image Log:", imageEncoded);
+        return imageEncoded;
+    }
+
+    private void saveImageToPreferences(String encodedImage) {
+        SharedPreferences myPrefrence = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = myPrefrence.edit();
+        editor.putString(HTConstants.USER_PROFILE_PIC_ENCODED, encodedImage);
+        editor.apply();
     }
 
 
