@@ -203,22 +203,27 @@ public class Profile extends AppCompatActivity {
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(retrofit2.Response<User> response) {
-                Log.v(TAG, "Response from Retrofit");
 
-                Log.d("Response", "User :" + response.body().toString());
+                if (response.isSuccess()) {
+                    Log.v(TAG, "Response from Retrofit");
 
-                SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.body().getHypertrackCourierId());
-                editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
-                editor.putBoolean("isUserOnboard", true);
-                editor.apply();
+                    Log.d("Response", "User :" + response.body().toString());
 
-                showProgress(false);
+                    SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.body().getHypertrackCourierId());
+                    editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
+                    editor.putBoolean("isUserOnboard", true);
+                    editor.apply();
 
-                Intent intent = new Intent(Profile.this, Home.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                    showProgress(false);
+
+                    Intent intent = new Intent(Profile.this, Home.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(Profile.this, "Oops. We could not process your request at the moment. Please try again in sometime.", Toast.LENGTH_LONG).show();
+                }
 
             }
 
@@ -245,8 +250,18 @@ public class Profile extends AppCompatActivity {
         updatePicCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(retrofit2.Response<User> response) {
-                Log.v(TAG, "Pic updated successfully");
-                Log.v(TAG, response.headers().toString());
+                if (response.isSuccess()) {
+                    Log.v(TAG, "Pic updated successfully");
+                    Log.v(TAG, response.headers().toString());
+
+                    SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
+                    editor.putBoolean("isUserOnboard", true);
+                    editor.apply();
+                } else {
+                    Toast.makeText(Profile.this, "Oops. We could not process your request at the moment. Please try again in sometime.", Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
