@@ -377,6 +377,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
         shareButton = (Button) findViewById(R.id.shareButton);
 
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                shareUrlViaShare();
+            }
+        });
+
         /*
         String picUrl = getUserProfilePicFromSharedPreferences();
         Picasso.with(this)
