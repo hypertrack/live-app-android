@@ -268,6 +268,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             Log.d("receiver", "Got message: " + result);
         }
     };
+    private Button shareButton;
 
     public static int getTheEstimatedTime(String estimatedTime) {
 
@@ -374,6 +375,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
+        shareButton = (Button) findViewById(R.id.shareButton);
 
         /*
         String picUrl = getUserProfilePicFromSharedPreferences();
@@ -421,8 +423,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             mAutocompleteView.setVisibility(View.GONE);
             addAddressButton.setVisibility(View.GONE);
             shareEtaButton.setVisibility(View.VISIBLE);
-
-
+            shareButton.setVisibility(View.VISIBLE);
 
             setUpHyperTrackSDK();
             tripId = getTripFromSharedPreferences();
@@ -535,6 +536,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
          handler.removeCallbacks(updateTask);
 
         shareEtaButton.setVisibility(View.GONE);
+        shareButton.setVisibility(View.GONE);
         mAutocompleteView.setVisibility(View.VISIBLE);
         addAddressButton.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
@@ -999,6 +1001,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 initETAUpateTask();
                 mAutocompleteView.setVisibility(View.GONE);
                 addAddressButton.setVisibility(View.GONE);
+                shareButton.setVisibility(View.VISIBLE);
             }
         });
     }

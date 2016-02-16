@@ -31,15 +31,34 @@
           android:layout_margin="@dimen/fab_margin"
           android:src="@android:drawable/ic_input_add" />-->
 
-    <Button
-        android:id="@+id/shareEtaButton"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        android:textColor="#ffffff"
-        android:padding="16dp"
-        android:layout_margin="8dp"
-        android:visibility="gone"
-        />
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/shareButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:text="SHARE"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/shareEtaButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/shareButton"
+            android:gravity="center"
+            android:textColor="#ffffff"
+            android:padding="16dp"
+            android:layout_margin="8dp"
+            android:visibility="gone" />
+
+    </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>
