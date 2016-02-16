@@ -20,6 +20,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -134,7 +136,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private ProgressDialog mProgressDialog;
     private Handler handler;
     private InputMethodManager mIMEMgr;
-    private Button endTripButton;
     private CustomAddress customAddress;
     private String endPlaceId;
     private Button addAddressButton;
@@ -267,6 +268,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             Log.d("receiver", "Got message: " + result);
         }
     };
+    private Button shareButton;
 
     public static int getTheEstimatedTime(String estimatedTime) {
 
@@ -373,11 +375,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
-        endTripButton = (Button) findViewById(R.id.endtrip_button);
-        endTripButton.setOnClickListener(new View.OnClickListener() {
+        shareButton = (Button) findViewById(R.id.shareButton);
+
+        shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                endTripClicked();
+                shareUrlViaShare();
             }
         });
 
@@ -426,10 +429,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             mAutocompleteView.setVisibility(View.GONE);
             addAddressButton.setVisibility(View.GONE);
-            endTripButton.setVisibility(View.VISIBLE);
             shareEtaButton.setVisibility(View.VISIBLE);
-
-
+            shareButton.setVisibility(View.VISIBLE);
 
             setUpHyperTrackSDK();
             tripId = getTripFromSharedPreferences();
@@ -542,8 +543,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
          handler.removeCallbacks(updateTask);
 
         shareEtaButton.setVisibility(View.GONE);
-        endTripButton.setVisibility(View.GONE);
-
+        shareButton.setVisibility(View.GONE);
         mAutocompleteView.setVisibility(View.VISIBLE);
         addAddressButton.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
@@ -926,14 +926,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             updateDestinationMarker();
         }
 
-        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
+        shareEtaButton.setText("End Trip (" + etaInMinutes + " mins)");
     }
 
     private void setUpShareEtaButton() {
         shareEtaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                initShareEtaFlow();
+                if(!getTripStatusFromSharedPreferences()) {
+                    initShareEtaFlow();
+                } else {
+                    endTripClicked();
+                }
             }
         });
     }
@@ -1004,7 +1008,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 initETAUpateTask();
                 mAutocompleteView.setVisibility(View.GONE);
                 addAddressButton.setVisibility(View.GONE);
-                endTripButton.setVisibility(View.VISIBLE);
+                shareButton.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -1349,6 +1353,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (tripId == null)
             tripId = getTripFromSharedPreferences();
 
+        //Toast.makeText(Home.this, "Is internet available: " + isNetworkAvailable(), Toast.LENGTH_SHORT).show();
+
         if (tripId.equalsIgnoreCase("None"))
             return;
 
@@ -1356,7 +1362,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void onError(Exception e) {
                 mProgressDialog.dismiss();
-                Toast.makeText(Home.this, "This request could not be processed. Please try again later.", Toast.LENGTH_LONG).show();
+                Toast.makeText(Home.this, e.getMessage() + ". This request could not be processed. Please try again later.", Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -1382,6 +1388,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         now.add(Calendar.MINUTE, etaInMinutes);
         SimpleDateFormat df = new SimpleDateFormat("HH:mm");
         return df.format(now.getTime());
+    }
+
+    public boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
+            return true;
+        }
+
+        return false;
     }
 
 }

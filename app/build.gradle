@@ -127,7 +127,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.1.1'
     compile 'com.android.support:design:23.1.1'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.mcxiaoke.volley:library:1.0.17'
+    compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.google.code.gson:gson:2.4'
 
     debugCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:debug@aar') {
