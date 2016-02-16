@@ -136,7 +136,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private ProgressDialog mProgressDialog;
     private Handler handler;
     private InputMethodManager mIMEMgr;
-    private Button endTripButton;
     private CustomAddress customAddress;
     private String endPlaceId;
     private Button addAddressButton;
@@ -375,13 +374,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
-        endTripButton = (Button) findViewById(R.id.endtrip_button);
-        endTripButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                endTripClicked();
-            }
-        });
 
         /*
         String picUrl = getUserProfilePicFromSharedPreferences();
@@ -428,7 +420,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             mAutocompleteView.setVisibility(View.GONE);
             addAddressButton.setVisibility(View.GONE);
-            endTripButton.setVisibility(View.VISIBLE);
             shareEtaButton.setVisibility(View.VISIBLE);
 
 
@@ -544,8 +535,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
          handler.removeCallbacks(updateTask);
 
         shareEtaButton.setVisibility(View.GONE);
-        endTripButton.setVisibility(View.GONE);
-
         mAutocompleteView.setVisibility(View.VISIBLE);
         addAddressButton.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
@@ -928,14 +917,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             updateDestinationMarker();
         }
 
-        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
+        shareEtaButton.setText("End Trip (" + etaInMinutes + " mins)");
     }
 
     private void setUpShareEtaButton() {
         shareEtaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                initShareEtaFlow();
+                if(!getTripStatusFromSharedPreferences()) {
+                    initShareEtaFlow();
+                } else {
+                    endTripClicked();
+                }
             }
         });
     }
@@ -1006,7 +999,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 initETAUpateTask();
                 mAutocompleteView.setVisibility(View.GONE);
                 addAddressButton.setVisibility(View.GONE);
-                endTripButton.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -1351,7 +1343,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (tripId == null)
             tripId = getTripFromSharedPreferences();
 
-        Toast.makeText(Home.this, "Is internet available: " + isNetworkAvailable(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(Home.this, "Is internet available: " + isNetworkAvailable(), Toast.LENGTH_SHORT).show();
 
         if (tripId.equalsIgnoreCase("None"))
             return;
