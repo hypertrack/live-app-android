@@ -58,6 +58,10 @@ public class Trip extends AppCompatActivity {
 
     private void retrieveIntentData() {
 
+        trackTrip("8796");
+        return;
+
+        /*
         Intent intent = getIntent();
         Bundle extras = getIntent().getExtras();
         if(extras !=null) {
@@ -69,7 +73,7 @@ public class Trip extends AppCompatActivity {
                 if(data != null)
                     setUpConsumerClientForTrackingTrip(data);
             }
-        }
+        }*/
     }
 
     private void setUpConsumerClientForTrackingTrip(Uri data) {
@@ -92,7 +96,7 @@ public class Trip extends AppCompatActivity {
     }
 
     private void trackTrip(String tripId) {
-        mHyperTrackClient.setId(tripId, this, new HTStatusCallBack() {
+        mHyperTrackClient.trackTrip(tripId, this, new HTStatusCallBack() {
             @Override
             public void onSuccess(String s) {
                 Log.v(TAG, "Tracking successful.");
