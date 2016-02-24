@@ -43,6 +43,7 @@
             android:textColor="#ffffff"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
+            android:background="@android:color/holo_green_light"
             android:text="SHARE"
             android:padding="16dp"
             android:layout_marginRight="8dp"
@@ -55,6 +56,7 @@
             android:layout_below="@+id/shareButton"
             android:gravity="center"
             android:textColor="#ffffff"
+            android:background="@android:color/holo_blue_light"
             android:padding="16dp"
             android:layout_margin="8dp"
             android:visibility="gone" />

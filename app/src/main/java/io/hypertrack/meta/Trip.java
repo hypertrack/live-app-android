@@ -24,14 +24,11 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
 import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
 import com.hypertrack.android.sdk.base.network.HTConsumerClient;
-import com.hypertrack.android.sdk.base.network.HyperTrack;
 import com.hypertrack.android.sdk.base.view.HTMapFragment;
 
 import java.util.List;
 
-import io.hypertrack.meta.model.UserTrip;
-import io.hypertrack.meta.network.HTCustomGetRequest;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.common.HyperTrack;
 
 public class Trip extends AppCompatActivity {
 
@@ -51,7 +48,7 @@ public class Trip extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.htMapfragment);
-        htMapFragment.disableCourierInfoLayout(true);
+        htMapFragment.setDriverInfoLayoutVisibility(true);
         mHyperTrackClient = HTConsumerClient.getInstance(this);
         retrieveIntentData();
     }

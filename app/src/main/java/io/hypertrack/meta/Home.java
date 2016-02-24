@@ -12,12 +12,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -91,8 +85,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import io.hypertrack.lib.httransmitter.HyperTrack;
-import io.hypertrack.lib.httransmitter.model.HTTrip;
+import io.hypertrack.common.HyperTrack;
+import io.hypertrack.common.model.HTTrip;
 import io.hypertrack.lib.httransmitter.model.HTTripParams;
 import io.hypertrack.lib.httransmitter.model.HTTripParamsBuilder;
 import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
@@ -157,7 +151,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 @Override
                 public void onSuccess(HTTrip htTrip) {
                     Log.v(TAG, htTrip.toString());
-                    updateETA(htTrip.getEstimatedTripEndTime());
+                    updateETA(htTrip.getEstimatedEndTime());
                 }
             });
 
@@ -401,6 +395,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         setUpHyperTrackSDK();
         setUpInitView();
         updateDeviceInfo();
+
+        if (!isConnectedToInternet()) {
+            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean isConnectedToInternet() {
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
+
     }
 
     private String getImageToPreferences() {
@@ -841,12 +851,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Home.this, "Inside Error", Toast.LENGTH_LONG).show();
+                        if (error != null) {
+                            if (error.networkResponse != null) {
+                                Log.v(TAG, "Error: " + error.networkResponse.statusCode);
+                            }
+                        }
                     }
                 }
         );
 
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
+        MetaApplication.getInstance().addToRequestQueue(requestObject, TAG);
 
 
     }
@@ -879,13 +893,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         mProgressDialog.dismiss();
                         Log.d("Response", "Inside onError");
                         Toast.makeText(Home.this, "There was an error fetching ETA. Please try again.", Toast.LENGTH_LONG).show();
+
+                        if (destinationLocationMarker != null)
+                            destinationLocationMarker.remove();
+
                         shareEtaButton.setVisibility(View.INVISIBLE);
                         mAutocompleteView.setText("");
                         mIMEMgr.showSoftInputFromInputMethod(mAutocompleteView.getWindowToken(), 0);
                     }
                 });
 
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
+        MetaApplication.getInstance().addToRequestQueue(requestObject, TAG);
 
     }
 
@@ -1000,7 +1018,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             public void onSuccess(HTTrip tripDetails) {
                 //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
                 tripId = String.valueOf(tripDetails.getId());
-                estimateArrivalOfTime = tripDetails.getEstimatedTripEndTime();
+                estimateArrivalOfTime = tripDetails.getEstimatedEndTime();
                 getShareEtaURL(tripId);
                 saveTripInSharedPreferences(tripId);
                 requestForGeofenceSetup();
@@ -1362,7 +1380,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void onError(Exception e) {
                 mProgressDialog.dismiss();
-                Toast.makeText(Home.this, e.getMessage() + ". This request could not be processed. Please try again later.", Toast.LENGTH_LONG).show();
+                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
@@ -1401,4 +1419,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return false;
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+        MetaApplication.getInstance().cancelPendingRequests(TAG);
+    }
 }

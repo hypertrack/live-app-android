@@ -220,11 +220,15 @@ public class Profile extends AppCompatActivity {
 
                     showProgress(false);
 
+                    //Upload photo
+                    if (profileImage != null)
+                        updateUserProfilePic();
+
                     Intent intent = new Intent(Profile.this, Home.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(intent);
                 } else {
-                    Toast.makeText(Profile.this, "Oops. We could not process your request at the moment. Please try again in sometime.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(Profile.this, "We had problem connecting with the server. Please try again in sometime.", Toast.LENGTH_LONG).show();
                 }
 
             }
@@ -235,10 +239,14 @@ public class Profile extends AppCompatActivity {
             }
         });
 
-        //Upload photo
-        if (profileImage == null)
-            return;
+    }
 
+    private void updateUserProfilePic() {
+
+        UserService userService = ServiceGenerator.createService(UserService.class, BuildConfig.API_KEY);
+
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        int userId =  settings.getInt(HTConstants.USER_ID, -1);
 
         RequestBody requestBody =
                 RequestBody.create(MediaType.parse("image/*"), saveBitmapToFile(profileImage));
@@ -259,10 +267,9 @@ public class Profile extends AppCompatActivity {
                     SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
                     editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
-                    editor.putBoolean("isUserOnboard", true);
                     editor.apply();
                 } else {
-                    Toast.makeText(Profile.this, "Oops. We could not process your request at the moment. Please try again in sometime.", Toast.LENGTH_LONG).show();
+                    Log.d(TAG, "User profile could not be uploaded");
                 }
             }
 

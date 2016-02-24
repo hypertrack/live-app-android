@@ -13,12 +13,11 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-import io.hypertrack.lib.httransmitter.HyperTrack;
-import io.hypertrack.lib.httransmitter.model.HTTrip;
+import io.hypertrack.common.HyperTrack;
+import io.hypertrack.common.model.HTTrip;
 import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
 import io.hypertrack.lib.httransmitter.service.HTTransmitterService;
 import io.hypertrack.meta.util.HTConstants;
-
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in

@@ -195,7 +195,7 @@ public class Login extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         mProgressDialog.dismiss();
                         Log.d("Response", "Inside OnError");
-                        Toast.makeText(Login.this, "Apologies, we could process your request. Please verify your number.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(Login.this, "Apologies, we could process your request at this moment.", Toast.LENGTH_LONG).show();
                     }
                 }
         );
