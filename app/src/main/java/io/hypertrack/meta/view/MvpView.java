@@ -1,8 +1,7 @@
 package io.hypertrack.meta.view;
 
-import android.view.View;
+import android.content.Context;
 
 public interface MvpView {
-    void attachView(View view);
-    void detachView();
+    Context getContext();
 }
