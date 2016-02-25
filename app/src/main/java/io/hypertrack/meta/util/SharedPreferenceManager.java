@@ -20,13 +20,13 @@ public class SharedPreferenceManager {
         this.ctx = ctx;
     }
 
-    public void setUserId(String id) {
-        editor.putInt(HTConstants.USER_ID, Integer.valueOf(id));
+    public void setUserId(int id) {
+        editor.putInt(HTConstants.USER_ID, id);
         editor.apply();
     }
 
     public int getUserId() {
-        return sharedpreferences.getInt(HTConstants.USER_ID, 0);
+        return sharedpreferences.getInt(HTConstants.USER_ID, -1);
     }
 
     public void setFirstName(String firstName) {
@@ -54,6 +54,15 @@ public class SharedPreferenceManager {
 
     public String getUserPhoto() {
         return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC, HTConstants.DEFAULT_STRING_VALUE);
+    }
+
+    public void setUserAuthToken(String userAuthToken) {
+        editor.putString(HTConstants.USER_AUTH_TOKEN, userAuthToken);
+        editor.apply();
+    }
+
+    public String getUserAuthToken() {
+        return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, HTConstants.DEFAULT_STRING_VALUE);
     }
 
 }

@@ -1,19 +1,13 @@
 package io.hypertrack.meta.interactor;
 
-import android.app.ProgressDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
 import io.hypertrack.meta.MetaApplication;
-import io.hypertrack.meta.Verify;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
@@ -45,6 +39,11 @@ public class RegisterInteractor {
                             + " Last name :" + response.getLastName());
 
                         SharedPreferenceManager spm = new SharedPreferenceManager(MetaApplication.getInstance());
+
+                        if (response.getId() != null) {
+                            spm.setUserId(response.getId());
+                        }
+
 
                         if (!TextUtils.isEmpty(response.getFirstName())) {
                             spm.setFirstName(response.getFirstName());

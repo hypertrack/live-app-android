@@ -19,8 +19,8 @@ public class RegisterPresenter implements Presenter<RegisterView>, OnRegisterLis
 
     @Override
     public void attachView(RegisterView view) {
-        view = view;
-
+        this.view = view;
+        registerInteractor = new RegisterInteractor();
     }
 
     @Override
@@ -44,12 +44,12 @@ public class RegisterPresenter implements Presenter<RegisterView>, OnRegisterLis
                 Log.v(TAG, "International Format: " + internationalFormat);
 
             } catch (NumberParseException e) {
-
+                view.showValidationError();
                 Log.wtf(TAG, e);
             }
 
         } else {
-
+            view.showValidationError();
         }
     }
 

@@ -50,7 +50,7 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".Verify"
+            android:name=".view.Verify"
             android:label="@string/title_activity_verify"
             android:parentActivityName=".view.Login"
             android:screenOrientation="portrait"

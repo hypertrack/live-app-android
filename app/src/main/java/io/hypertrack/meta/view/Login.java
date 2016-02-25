@@ -2,9 +2,7 @@ package io.hypertrack.meta.view;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -20,13 +18,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.Gson;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
-
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -34,12 +25,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.Verify;
 import io.hypertrack.meta.model.Country;
 import io.hypertrack.meta.model.CountryMaster;
 import io.hypertrack.meta.model.CountrySpinnerAdapter;
-import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.presenter.RegisterPresenter;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.PhoneUtils;
@@ -89,8 +77,8 @@ public class Login extends AppCompatActivity implements RegisterView {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
+        super.onDestroy();
         resgisterPresenter.detachView();
     }
 
