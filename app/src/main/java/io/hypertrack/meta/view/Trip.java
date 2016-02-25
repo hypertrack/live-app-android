@@ -1,12 +1,9 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,8 +11,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -29,6 +24,8 @@ import com.hypertrack.android.sdk.base.view.HTMapFragment;
 import java.util.List;
 
 import io.hypertrack.common.HyperTrack;
+import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.R;
 
 public class Trip extends AppCompatActivity {
 

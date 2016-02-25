@@ -33,7 +33,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Home"
+            android:name=".view.Home"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
@@ -68,7 +68,7 @@
         </receiver>
 
         <activity
-            android:name=".Trip"
+            android:name=".view.Trip"
             android:screenOrientation="portrait">
             <intent-filter android:label="mETA app">
                 <action android:name="android.intent.action.VIEW" />
@@ -87,10 +87,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddAddress"
+            android:name=".view.AddAddress"
             android:label="Custom Address"
             android:launchMode="singleTop"
-            android:parentActivityName=".Home"
+            android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 
         <!--
@@ -117,9 +117,9 @@
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
         <activity
-            android:name=".SelectDestination"
+            android:name=".view.SelectDestination"
             android:label="Select Destination"
-            android:parentActivityName=".AddAddress"
+            android:parentActivityName=".view.AddAddress"
             android:screenOrientation="portrait" />
 
         <service

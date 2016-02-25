@@ -1,10 +1,6 @@
 package io.hypertrack.meta.interactor;
 
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.File;
 import java.util.HashMap;
@@ -12,12 +8,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.hypertrack.meta.BuildConfig;
-import io.hypertrack.meta.Home;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendEtaService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
-import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;

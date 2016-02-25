@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import io.hypertrack.meta.view.Trip;
+
 /**
  * Created by suhas on 04/01/16.
  */

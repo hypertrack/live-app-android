@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -91,6 +91,12 @@ import io.hypertrack.lib.httransmitter.model.HTTripParams;
 import io.hypertrack.lib.httransmitter.model.HTTripParamsBuilder;
 import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
 import io.hypertrack.lib.httransmitter.service.HTTransmitterService;
+import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.GeofenceTransitionsIntentService;
+import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.PlaceAutocompleteAdapter;
+import io.hypertrack.meta.R;
+import io.hypertrack.meta.RegistrationIntentService;
 import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.DeviceInfo;
 import io.hypertrack.meta.model.ETAInfo;
@@ -101,7 +107,6 @@ import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.PhoneUtils;
-import io.hypertrack.meta.view.Login;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -111,8 +116,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private static final String GEOFENCE_REQUEST_ID = "geofence";
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
-    private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(
-            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
     private static final long INTERVAL_TIME = 5000;
     private static final int CUSTOM_ADDRESS_DATA = 101;
     protected GoogleApiClient mGoogleApiClient;
@@ -168,7 +171,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+            profilePicBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
         }
 
         @Override
@@ -306,19 +309,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_home);
-
-
-
-        /*
-        try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(),0);
-            if (packageInfo.packageName.equals("io.hypertrack.meta.debug")) {
-                setTitle(getTitle() + " (DEBUG)");
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        */
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);

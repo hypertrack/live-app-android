@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".Home"
+    tools:context=".view.Home"
     tools:showIn="@layout/activity_home">
 
     <fragment
@@ -13,7 +13,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="io.hypertrack.meta.Home" />
+        tools:context=".view.Home" />
 
 
     <AutoCompleteTextView
