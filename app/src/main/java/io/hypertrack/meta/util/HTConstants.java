@@ -16,6 +16,7 @@ public class HTConstants {
 
     public static final String SHARED_PREFERENCES_NAME = "io.hypertrack.meta";
     public static final String USER_ID = "user_id";
+    public static final String USER_ONBOARD = "isUserOnboard";
     public static final String USER_FIRSTNAME = "user_firstname";
     public static final String USER_LASTNAME = "user_lastname";
     public static final String USER_PROFILE_PIC = "user_profile_pic";

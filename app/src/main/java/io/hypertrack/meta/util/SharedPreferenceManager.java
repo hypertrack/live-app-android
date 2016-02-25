@@ -65,4 +65,31 @@ public class SharedPreferenceManager {
         return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, HTConstants.DEFAULT_STRING_VALUE);
     }
 
+    public void setHypertrackCourierId(String courierId) {
+        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, courierId);
+        editor.apply();
+    }
+
+    public String getHypertrackCourierId() {
+        return sharedpreferences.getString(HTConstants.HYPERTRACK_COURIER_ID, HTConstants.DEFAULT_STRING_VALUE);
+    }
+
+    public void setUserOnBoard(boolean flag) {
+        editor.putBoolean(HTConstants.USER_ONBOARD, flag);
+        editor.apply();
+    }
+
+    public boolean isUserOnBoard() {
+        return sharedpreferences.getBoolean(HTConstants.USER_ONBOARD, false);
+    }
+
+    public void setProfileImage(String encodedImage) {
+        editor.putString(HTConstants.USER_PROFILE_PIC_ENCODED, encodedImage);
+        editor.apply();
+    }
+
+    public String getProfileImage() {
+        return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC_ENCODED, HTConstants.DEFAULT_STRING_VALUE);
+    }
+
 }

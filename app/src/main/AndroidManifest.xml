@@ -108,7 +108,7 @@
         -->
 
         <activity
-            android:name=".Profile"
+            android:name=".view.Profile"
             android:label="@string/title_activity_generated_login"
             android:windowSoftInputMode="adjustResize"/>
 

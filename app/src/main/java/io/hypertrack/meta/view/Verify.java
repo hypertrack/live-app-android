@@ -5,32 +5,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.Gson;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.hypertrack.meta.MetaApplication;
-import io.hypertrack.meta.Profile;
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.model.Verification;
-import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.presenter.VerifyPresenter;
-import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.SMSReceiver;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
