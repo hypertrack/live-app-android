@@ -103,7 +103,7 @@ android {
     */
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", '"pk_8df4a9c1a6c258ed9c09e6a445b068455ad6e88b"'
@@ -113,6 +113,8 @@ android {
             ext.betaDistributionEmails="suhas@hypertrack.io"
         }
         debug {
+            debuggable true
+            applicationIdSuffix ".debug"
             buildConfigField "String", "API_KEY", '"pk_65801d4211efccf3128d74101254e7637e655356"'
             buildConfigField "String", "BASE_URL",'"https://meta-api-staging.herokuapp.com"'
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
@@ -153,6 +155,25 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
     compile "com.squareup.picasso:picasso:2.4.0"
 
+}
+
+task switchToDebug(type: Copy) {
+    description = 'Switches to DEBUG google-services.json'
+    from "src/debug"
+    include "google-services.json"
+    into "."
+}
+
+task switchToRelease(type: Copy) {
+    description = 'Switches to RELEASE google-services.json'
+    from "src/release"
+    include "google-services.json"
+    into "."
+}
+
+afterEvaluate {
+    processDebugGoogleServices.dependsOn switchToDebug
+    processReleaseGoogleServices.dependsOn switchToRelease
 }
 
 apply plugin: 'com.google.gms.google-services'

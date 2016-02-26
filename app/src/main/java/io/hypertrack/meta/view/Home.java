@@ -107,6 +107,7 @@ import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.PhoneUtils;
+import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -206,20 +207,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             // Get the Place object from the buffer.
             final Place place = places.get(0);
 
-           /* // Format details of the place for display and show it in a TextView.
-            mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(),
-                    place.getId(), place.getAddress(), place.getPhoneNumber(),
-                    place.getWebsiteUri()));
-
-            // Display the third party attributions if set.
-            final CharSequence thirdPartyAttribution = places.getAttributions();
-            if (thirdPartyAttribution == null) {
-                mPlaceDetailsAttribution.setVisibility(View.GONE);
-            } else {
-                mPlaceDetailsAttribution.setVisibility(View.VISIBLE);
-                mPlaceDetailsAttribution.setText(Html.fromHtml(thirdPartyAttribution.toString()));
-            }*/
-
             Log.i(TAG, "Place details received: " + place.getName());
 
             populateCustomAddress(place);
@@ -267,6 +254,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     };
     private Button shareButton;
+    private SharedPreferenceManager sharedPreferenceManager;
 
     public static int getTheEstimatedTime(String estimatedTime) {
 
@@ -306,7 +294,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+
+        checkIfUseIsOnBoard();
 
         setContentView(R.layout.activity_home);
 
@@ -316,42 +307,21 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         initGoogleClient();
 
-        mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        boolean isUserOnboard = settings.getBoolean("isUserOnboard", false);
-
-        if (!isUserOnboard) {
-            startActivity(new Intent(this, Login.class));
-            finish();
-        }
-
         Intent intent = new Intent(this, RegistrationIntentService.class);
         startService(intent);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
+        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        mMapFragment.getMapAsync(this);
 
         mAutocompleteView = (AutoCompleteTextView)
                 findViewById(R.id.autocomplete_places);
-
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
 
         addAddressButton = (Button) findViewById(R.id.customAddress_button);
-
         addAddressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -360,21 +330,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
-        shareButton = (Button) findViewById(R.id.shareButton);
 
+        shareButton = (Button) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 shareUrlViaShare();
             }
         });
-
-        /*
-        String picUrl = getUserProfilePicFromSharedPreferences();
-        Picasso.with(this)
-                .load(picUrl)
-                .into(target);
-        */
 
         if (!TextUtils.equals("None", getImageToPreferences())) {
             profilePicBitmap = decodeToBase64(getImageToPreferences());
@@ -390,6 +353,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (!isConnectedToInternet()) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void checkIfUseIsOnBoard() {
+
+        boolean isUserOnboard = sharedPreferenceManager.isUserOnBoard();
+        if (!isUserOnboard) {
+            startActivity(new Intent(this, Login.class));
+            finish();
+        }
+
     }
 
     private boolean isConnectedToInternet() {
@@ -443,7 +416,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             initETAUpateTask();
         }
 
-        //initCustomMarkerView();
     }
 
     private void initCustomMarkerView() {

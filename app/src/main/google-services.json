@@ -11,7 +11,7 @@
         "client_id": "android:io.hypertrack.meta",
         "client_type": 1,
         "android_client_info": {
-          "package_name": "io.hypertrack.meta.debug"
+          "package_name": "io.hypertrack.meta"
         }
       },
       "oauth_client": [],
