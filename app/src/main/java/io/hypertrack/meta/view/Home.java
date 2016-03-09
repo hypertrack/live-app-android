@@ -297,6 +297,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         super.onCreate(savedInstanceState);
 
+        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
         checkIfUseIsOnBoard();
 
         setContentView(R.layout.activity_home);
@@ -311,9 +314,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         startService(intent);
 
         mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         mMapFragment.getMapAsync(this);
 
