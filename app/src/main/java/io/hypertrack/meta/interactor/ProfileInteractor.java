@@ -39,7 +39,7 @@ public class ProfileInteractor {
                     Log.d("Response", "User :" + response.body().toString());
 
                     SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-                    sharedPreferenceManager.setHypertrackCourierId(response.body().getHypertrackCourierId());
+                    sharedPreferenceManager.setHyperTrackDriverID(response.body().getHypertrackDriverID());
                     sharedPreferenceManager.setUserPhoto(response.body().getPhoto());
                     sharedPreferenceManager.setUserOnBoard(true);
 

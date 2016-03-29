@@ -358,7 +358,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
                     SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putString(HTConstants.HYPERTRACK_COURIER_ID, response.body().getHypertrackCourierId());
+                    editor.putString(HTConstants.HYPERTRACK_DRIVER_ID, response.body().getHypertrackDriverID());
                     editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
                     editor.putBoolean("isUserOnboard", true);
                     editor.apply();

@@ -65,13 +65,13 @@ public class SharedPreferenceManager {
         return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, HTConstants.DEFAULT_STRING_VALUE);
     }
 
-    public void setHypertrackCourierId(String courierId) {
-        editor.putString(HTConstants.HYPERTRACK_COURIER_ID, courierId);
+    public void setHyperTrackDriverID(String courierId) {
+        editor.putString(HTConstants.HYPERTRACK_DRIVER_ID, courierId);
         editor.apply();
     }
 
-    public String getHypertrackCourierId() {
-        return sharedpreferences.getString(HTConstants.HYPERTRACK_COURIER_ID, HTConstants.DEFAULT_STRING_VALUE);
+    public String getHyperTrackDriverID() {
+        return sharedpreferences.getString(HTConstants.HYPERTRACK_DRIVER_ID, HTConstants.DEFAULT_STRING_VALUE);
     }
 
     public void setUserOnBoard(boolean flag) {

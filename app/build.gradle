@@ -39,7 +39,7 @@ android {
         releaseConfig {
             keyAlias 'meta-release'
             keyPassword 'Hyp3rTr@ck123#'
-            storeFile file('/Users/suhas/Hypertrack/keystores/android.jks')
+            storeFile file('/Users/ulhas/Hypertrack/keystores/android.jks')
             storePassword 'iygn67u9'
         }
     }
@@ -84,8 +84,6 @@ android {
             versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionBuild})"
             minSdkVersion 19
             targetSdkVersion 23
-
-            multiDexEnabled true
         }
 
     } else {
@@ -106,19 +104,19 @@ android {
             debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_KEY", '"pk_8df4a9c1a6c258ed9c09e6a445b068455ad6e88b"'
+            buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL",'"http://api.sendeta.com"'
             signingConfig signingConfigs.releaseConfig
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
         debug {
             debuggable true
             applicationIdSuffix ".debug"
-            buildConfigField "String", "API_KEY", '"pk_65801d4211efccf3128d74101254e7637e655356"'
+            buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL",'"https://meta-api-staging.herokuapp.com"'
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
     }
 }

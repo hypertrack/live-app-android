@@ -72,8 +72,6 @@ public class Login extends AppCompatActivity implements RegisterView {
         } else {
             requestPermission();
         }
-
-
     }
 
     @Override

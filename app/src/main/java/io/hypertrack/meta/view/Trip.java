@@ -17,13 +17,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
-import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
-import com.hypertrack.android.sdk.base.network.HTConsumerClient;
-import com.hypertrack.android.sdk.base.view.HTMapFragment;
 
 import java.util.List;
 
-import io.hypertrack.common.HyperTrack;
+import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
+import io.hypertrack.lib.consumer.view.HTMapFragment;
 import io.hypertrack.meta.BuildConfig;
 import io.hypertrack.meta.R;
 
@@ -52,8 +51,8 @@ public class Trip extends AppCompatActivity {
 
     private void retrieveIntentData() {
 
-        trackTrip("8796");
-        return;
+//        trackTrip("8796");
+//        return;
 
         /*
         Intent intent = getIntent();
@@ -90,22 +89,22 @@ public class Trip extends AppCompatActivity {
     }
 
     private void trackTrip(String tripId) {
-        mHyperTrackClient.trackTrip(tripId, this, new HTStatusCallBack() {
-            @Override
-            public void onSuccess(String s) {
-                Log.v(TAG, "Tracking successful.");
-
-                if (mHyperTrackClient.getStatus().equalsIgnoreCase(HTConsumerClient.ORDER_STATUS_DELIVERED)) {
-                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG).show();
-                    drawPolyline();
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.w(TAG, "Couldn't be tracked.");
-            }
-        });
+//        mHyperTrackClient.trackTrip(tripId, this, new HTStatusCallBack() {
+//            @Override
+//            public void onSuccess(String s) {
+//                Log.v(TAG, "Tracking successful.");
+//
+//                if (mHyperTrackClient.getStatus().equalsIgnoreCase(HTConsumerClient.ORDER_STATUS_DELIVERED)) {
+//                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG).show();
+//                    drawPolyline();
+//                }
+//            }
+//
+//            @Override
+//            public void onError(Exception e) {
+//                Log.w(TAG, "Couldn't be tracked.");
+//            }
+//        });
     }
 
     @Override
@@ -128,7 +127,7 @@ public class Trip extends AppCompatActivity {
 
 
     private void drawPolyline() {
-        String encodedLine = mHyperTrackClient.getTripInfo();
+        String encodedLine = mHyperTrackClient.getTaskStore().getTask().getEncodedPolyline();
         if (TextUtils.isEmpty(encodedLine))
             return;
 

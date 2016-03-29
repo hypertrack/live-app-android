@@ -23,10 +23,11 @@ public class HTConstants {
     public static final String DEFAULT_STRING_VALUE = "none";
 
     public static final String USER_PROFILE_PIC_ENCODED = "user_profile_pic_encoded";
-    public static final String HYPERTRACK_COURIER_ID = "hypertrack_courier_id";
+    public static final String HYPERTRACK_DRIVER_ID = "hypertrack_driver_id";
     public static final String USER_AUTH_TOKEN = "user_auth_token";
     public static final String GCM_REGISTRATION_TOKEN = "gcm_registration_token";
     public static final String TRIP_ID = "trip_id";
+    public static final String TASK_ID = "task_id";
     public static final String TRIP_DESTINATION = "trip_destination";
     public static final String TRIP_SHARE_URI = "trip_uri";
     public static final String TRIP_ETA = "trip_eta";

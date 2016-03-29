@@ -70,7 +70,7 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_add_address);
         ButterKnife.bind(this);
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(com.hypertrack.android.sdk.R.id.map);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(io.hypertrack.lib.consumer.R.id.map);
         mapFragment.getMapAsync(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)

@@ -39,7 +39,7 @@ public class SelectDestination extends AppCompatActivity implements OnMapReadyCa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_destination);
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(com.hypertrack.android.sdk.R.id.map);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(io.hypertrack.lib.consumer.R.id.map);
         mapFragment.getMapAsync(this);
 
         imageButton = (ImageButton) findViewById(R.id.imageButton);

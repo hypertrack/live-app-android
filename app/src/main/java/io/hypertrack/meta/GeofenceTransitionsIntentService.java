@@ -13,10 +13,10 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-import io.hypertrack.common.HyperTrack;
-import io.hypertrack.common.model.HTTrip;
-import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
-import io.hypertrack.lib.httransmitter.service.HTTransmitterService;
+import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.lib.transmitter.model.HTTrip;
+import io.hypertrack.lib.transmitter.model.HTTripStatusCallback;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.meta.util.HTConstants;
 
 /**
