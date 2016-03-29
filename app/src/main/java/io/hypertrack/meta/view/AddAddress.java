@@ -1,8 +1,7 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.content.Intent;
 import android.location.Location;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -15,12 +14,10 @@ import android.widget.EditText;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -30,6 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.MetaLocation;
 
@@ -72,7 +70,7 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
         setContentView(R.layout.activity_add_address);
         ButterKnife.bind(this);
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(com.hypertrack.android.sdk.R.id.map);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(io.hypertrack.lib.consumer.R.id.map);
         mapFragment.getMapAsync(this);
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -81,22 +79,13 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
                 .addConnectionCallbacks(this)
                 .build();
 
-        /*
-        if (BuildConfig.DEBUG) {
-            locationNameEditText.setText("Suhas' Home");
-            addressEditText.setText("B203, Riddhi Siddhi Heritage");
-            postalCodeEditText.setText("400708");
-            cityEditText.setText("Navi Mumbai");
-            stateEditText.setText("Maharashtra");
-            countryEditText.setText("India");
-        }
-        */
     }
 
     @OnClick(R.id.setCustomAddress)
     public void setCustomAddress() {
 
         if (validated()) {
+
             Intent intent=new Intent();
 
             CustomAddress customAddress = new CustomAddress();

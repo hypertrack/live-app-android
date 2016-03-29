@@ -39,7 +39,7 @@ android {
         releaseConfig {
             keyAlias 'meta-release'
             keyPassword 'Hyp3rTr@ck123#'
-            storeFile file('/Users/suhas/Hypertrack/keystores/android.jks')
+            storeFile file('/Users/ulhas/Hypertrack/keystores/android.jks')
             storePassword 'iygn67u9'
         }
     }
@@ -84,8 +84,6 @@ android {
             versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionBuild})"
             minSdkVersion 19
             targetSdkVersion 23
-
-            multiDexEnabled true
         }
 
     } else {
@@ -103,20 +101,22 @@ android {
     */
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_KEY", '"pk_8df4a9c1a6c258ed9c09e6a445b068455ad6e88b"'
+            buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL",'"http://api.sendeta.com"'
             signingConfig signingConfigs.releaseConfig
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
         debug {
-            buildConfigField "String", "API_KEY", '"pk_65801d4211efccf3128d74101254e7637e655356"'
+            debuggable true
+            applicationIdSuffix ".debug"
+            buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL",'"https://meta-api-staging.herokuapp.com"'
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
     }
 }
@@ -130,17 +130,17 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.google.code.gson:gson:2.4'
 
-    debugCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:0.3.1:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.3.1:release@aar') {
         transitive = true;
     }
 
-    debugCompile('io.hypertrack:hypertrack-sdk:0.1.3:debug@aar') {
+    debugCompile('io.hypertrack:consumer:0.3.1:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:hypertrack-sdk:0.1.3:release@aar') {
+    releaseCompile('io.hypertrack:consumer:0.3.1:release@aar') {
         transitive = true;
     }
 
@@ -152,6 +152,26 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.0.0-beta3'
     compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
     compile "com.squareup.picasso:picasso:2.4.0"
+
+}
+
+task switchToDebug(type: Copy) {
+    description = 'Switches to DEBUG google-services.json'
+    from "src/debug"
+    include "google-services.json"
+    into "."
+}
+
+task switchToRelease(type: Copy) {
+    description = 'Switches to RELEASE google-services.json'
+    from "src/release"
+    include "google-services.json"
+    into "."
+}
+
+afterEvaluate {
+    processDebugGoogleServices.dependsOn switchToDebug
+    processReleaseGoogleServices.dependsOn switchToRelease
 }
 
 apply plugin: 'com.google.gms.google-services'

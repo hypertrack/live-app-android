@@ -33,7 +33,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".Home"
+            android:name=".view.Home"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
@@ -44,21 +44,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Login"
+            android:name=".view.Login"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize"/>
         <activity
-            android:name=".Verify"
+            android:name=".view.Verify"
             android:label="@string/title_activity_verify"
-            android:parentActivityName=".Login"
+            android:parentActivityName=".view.Login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="io.hypertrack.meta.Login" />
+                android:value=".view.Login" />
         </activity>
 
         <receiver android:name=".util.SMSReceiver">
@@ -68,7 +68,7 @@
         </receiver>
 
         <activity
-            android:name=".Trip"
+            android:name=".view.Trip"
             android:screenOrientation="portrait">
             <intent-filter android:label="mETA app">
                 <action android:name="android.intent.action.VIEW" />
@@ -77,19 +77,20 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with " http://eta.fyi/r4eN” -->
-
+                <!--
                 <data
                    android:host="eta.fyi"
                    android:pathPrefix="/"
                    android:scheme="http" />
+                -->
 
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddAddress"
+            android:name=".view.AddAddress"
             android:label="Custom Address"
             android:launchMode="singleTop"
-            android:parentActivityName=".Home"
+            android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 
         <!--
@@ -107,7 +108,7 @@
         -->
 
         <activity
-            android:name=".Profile"
+            android:name=".view.Profile"
             android:label="@string/title_activity_generated_login"
             android:windowSoftInputMode="adjustResize"/>
 
@@ -116,9 +117,9 @@
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
         <activity
-            android:name=".SelectDestination"
+            android:name=".view.SelectDestination"
             android:label="Select Destination"
-            android:parentActivityName=".AddAddress"
+            android:parentActivityName=".view.AddAddress"
             android:screenOrientation="portrait" />
 
         <service

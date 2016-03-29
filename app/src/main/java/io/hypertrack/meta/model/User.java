@@ -20,8 +20,8 @@ public class User {
 
     private String photo;
 
-    @SerializedName("hypertrack_courier_id")
-    private String hypertrackCourierId;
+    @SerializedName("hypertrack_driver_id")
+    private String hypertrackDriverID;
 
     private String token;
 
@@ -78,12 +78,12 @@ public class User {
         this.photo = photo;
     }
 
-    public String getHypertrackCourierId() {
-        return hypertrackCourierId;
+    public String getHypertrackDriverID() {
+        return hypertrackDriverID;
     }
 
-    public void setHypertrackCourierId(String hypertrackCourierId) {
-        this.hypertrackCourierId = hypertrackCourierId;
+    public void setHypertrackDriverID(String hypertrackDriverID) {
+        this.hypertrackDriverID = hypertrackDriverID;
     }
 
     public String getToken() {
@@ -102,7 +102,7 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
-                ", hypertrackCourierId='" + hypertrackCourierId + '\'' +
+                ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
                 ", token='" + token + '\'' +
                 '}';
     }

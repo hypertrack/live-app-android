@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -12,12 +12,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
@@ -77,8 +71,6 @@ import com.google.gson.Gson;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import com.hypertrack.android.sdk.base.network.HTConsumerClient;
-import com.hypertrack.android.sdk.base.utils.HTCircleImageView;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -91,12 +83,23 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import io.hypertrack.lib.httransmitter.HyperTrack;
-import io.hypertrack.lib.httransmitter.model.HTTrip;
-import io.hypertrack.lib.httransmitter.model.HTTripParams;
-import io.hypertrack.lib.httransmitter.model.HTTripParamsBuilder;
-import io.hypertrack.lib.httransmitter.model.HTTripStatusCallback;
-import io.hypertrack.lib.httransmitter.service.HTTransmitterService;
+
+import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.lib.common.network.HTGson;
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
+import io.hypertrack.lib.consumer.utils.HTCircleImageView;
+import io.hypertrack.lib.transmitter.model.HTCompleteTaskStatusCallback;
+import io.hypertrack.lib.transmitter.model.HTTripParams;
+import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
+import io.hypertrack.lib.transmitter.model.HTTripStatusCallback;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
+import io.hypertrack.lib.transmitter.model.HTTrip;
+import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.GeofenceTransitionsIntentService;
+import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.PlaceAutocompleteAdapter;
+import io.hypertrack.meta.R;
+import io.hypertrack.meta.RegistrationIntentService;
 import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.DeviceInfo;
 import io.hypertrack.meta.model.ETAInfo;
@@ -107,6 +110,7 @@ import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.PhoneUtils;
+import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -116,8 +120,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private static final String GEOFENCE_REQUEST_ID = "geofence";
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
-    private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(
-            new LatLng(-34.041458, 150.790100), new LatLng(-33.682247, 151.383362));
     private static final long INTERVAL_TIME = 5000;
     private static final int CUSTOM_ADDRESS_DATA = 101;
     protected GoogleApiClient mGoogleApiClient;
@@ -137,7 +139,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private Handler handler;
     private InputMethodManager mIMEMgr;
     private CustomAddress customAddress;
-    private String endPlaceId;
+    private String taskID;
     private Button addAddressButton;
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
@@ -157,7 +159,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 @Override
                 public void onSuccess(HTTrip htTrip) {
                     Log.v(TAG, htTrip.toString());
-                    updateETA(htTrip.getEstimatedTripEndTime());
+                    updateETA(htTrip.getETA());
                 }
             });
 
@@ -173,7 +175,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
+            profilePicBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
         }
 
         @Override
@@ -183,8 +185,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     };
 
     private String metaId;
-    private HTConsumerClient mHyperTrackClient;
-    private String estimateArrivalOfTime;
     private Bitmap profilePicBitmap;
     //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     private HTCircleImageView profileViewProfileImage;
@@ -204,23 +204,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 return;
             }
 
+            if (places.getCount() == 0) {
+                Log.d(TAG, "Places is empty");
+                places.release();
+                return;
+            }
+
 
             // Get the Place object from the buffer.
             final Place place = places.get(0);
-
-           /* // Format details of the place for display and show it in a TextView.
-            mPlaceDetailsText.setText(formatPlaceDetails(getResources(), place.getName(),
-                    place.getId(), place.getAddress(), place.getPhoneNumber(),
-                    place.getWebsiteUri()));
-
-            // Display the third party attributions if set.
-            final CharSequence thirdPartyAttribution = places.getAttributions();
-            if (thirdPartyAttribution == null) {
-                mPlaceDetailsAttribution.setVisibility(View.GONE);
-            } else {
-                mPlaceDetailsAttribution.setVisibility(View.VISIBLE);
-                mPlaceDetailsAttribution.setText(Html.fromHtml(thirdPartyAttribution.toString()));
-            }*/
 
             Log.i(TAG, "Place details received: " + place.getName());
 
@@ -228,7 +220,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             addMarkerToSelectedDestination(place.getLatLng());
             places.release();
-
         }
     };
     private AdapterView.OnItemClickListener mAutocompleteClickListener
@@ -269,8 +260,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     };
     private Button shareButton;
+    private SharedPreferenceManager sharedPreferenceManager;
 
-    public static int getTheEstimatedTime(String estimatedTime) {
+    public static int getTheEstimatedTime(Date estimatedTime) {
 
         String currentTime = getCurrentTime();
 
@@ -278,16 +270,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         int minutes = 0;
 
         String currentTimeString = currentTime.substring(0,currentTime.length()-5);
-        String estimatedTimeString = estimatedTime.substring(0,estimatedTime.length()-1);
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         try {
 
             Date startDate = df.parse(currentTimeString);
-            Date endDate = df.parse(estimatedTimeString);
-            seconds = (endDate.getTime() - startDate.getTime())/1000;
+            seconds = (estimatedTime.getTime() - startDate.getTime())/1000;
             minutes = (int)seconds/60;
-
         } catch(ParseException ex) {
             ex.printStackTrace();
         }
@@ -308,22 +298,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
+        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
+        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+
+        checkIfUseIsOnBoard();
+
         setContentView(R.layout.activity_home);
-
-
-
-        /*
-        try {
-            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(),0);
-            if (packageInfo.packageName.equals("io.hypertrack.meta.debug")) {
-                setTitle(getTitle() + " (DEBUG)");
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        */
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -331,42 +314,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         initGoogleClient();
 
-        mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        boolean isUserOnboard = settings.getBoolean("isUserOnboard", false);
-
-        if (!isUserOnboard) {
-            startActivity(new Intent(this, Login.class));
-            finish();
-        }
-
         Intent intent = new Intent(this, RegistrationIntentService.class);
         startService(intent);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
+        mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
+        mMapFragment.getMapAsync(this);
 
         mAutocompleteView = (AutoCompleteTextView)
                 findViewById(R.id.autocomplete_places);
-
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
 
         addAddressButton = (Button) findViewById(R.id.customAddress_button);
-
         addAddressButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -375,21 +334,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
-        shareButton = (Button) findViewById(R.id.shareButton);
 
+        shareButton = (Button) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 shareUrlViaShare();
             }
         });
-
-        /*
-        String picUrl = getUserProfilePicFromSharedPreferences();
-        Picasso.with(this)
-                .load(picUrl)
-                .into(target);
-        */
 
         if (!TextUtils.equals("None", getImageToPreferences())) {
             profilePicBitmap = decodeToBase64(getImageToPreferences());
@@ -401,6 +353,30 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         setUpHyperTrackSDK();
         setUpInitView();
         updateDeviceInfo();
+
+        if (!isConnectedToInternet()) {
+            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void checkIfUseIsOnBoard() {
+
+        boolean isUserOnboard = sharedPreferenceManager.isUserOnBoard();
+        if (!isUserOnboard || sharedPreferenceManager.getHyperTrackDriverID() == null) {
+            startActivity(new Intent(this, Login.class));
+            finish();
+        }
+    }
+
+    private boolean isConnectedToInternet() {
+        ConnectivityManager cm =
+                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        return isConnected;
     }
 
     private String getImageToPreferences() {
@@ -442,7 +418,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             initETAUpateTask();
         }
 
-        //initCustomMarkerView();
     }
 
     private void initCustomMarkerView() {
@@ -525,7 +500,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.putString(HTConstants.TRIP_SHARE_URI, "None");
         editor.putString(HTConstants.TRIP_ETA, "None");
         editor.putString(HTConstants.TRIP_DESTINATION, "None");
+        editor.putString(HTConstants.TASK_ID, "None");
         editor.apply();
+
+        tripId = null;
+        taskID = null;
 
         if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             LocationServices.GeofencingApi.removeGeofences(
@@ -674,7 +653,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         }
 
-
         //addMarkerToSelectedDestination(new LatLng(19.158004, 72.991996));
     }
 
@@ -715,7 +693,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 .build());
 
         mGeofencePendingIntent = getGeofencePendingIntent();
-
     }
 
     private void updateDestinationMarker() {
@@ -752,7 +729,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
         getEtaForDestination();
-        updateMetaEndPlaceId();
     }
 
     private GeofencingRequest getGeofencingRequest() {
@@ -794,7 +770,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         deviceInfo.setRegistrationId(token);
         deviceInfo.setDeviceId(deviceId);
 
-        Gson gson = new Gson();
+        Gson gson = HTGson.gson();
         String jsonBody = gson.toJson(deviceInfo);
 
         Log.d(TAG, "Device Info" + deviceInfo.toString());
@@ -816,38 +792,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         );
 
         MetaApplication.getInstance().addToRequestQueue(requestObject);
-
-    }
-
-    private void updateMetaEndPlaceId() {
-
-        String url = HTConstants.API_ENDPOINT + "/api/v1/places/";
-        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
-
-        Log.d(TAG, "Url: " + url + "Token: " + getTokenFromSharedPreferences());
-
-        Gson gson = new Gson();
-        String jsonBody = gson.toJson(customAddress);
-
-
-        HTCustomPostRequest<CustomAddress> requestObject = new HTCustomPostRequest<CustomAddress>(1, url,
-                jsonBody, CustomAddress.class,
-                new Response.Listener<CustomAddress>() {
-                    @Override
-                    public void onResponse(CustomAddress response) {
-                        endPlaceId = response.getHypertrackPlaceId();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Home.this, "Inside Error", Toast.LENGTH_LONG).show();
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
-
 
     }
 
@@ -879,13 +823,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         mProgressDialog.dismiss();
                         Log.d("Response", "Inside onError");
                         Toast.makeText(Home.this, "There was an error fetching ETA. Please try again.", Toast.LENGTH_LONG).show();
+
+                        if (destinationLocationMarker != null)
+                            destinationLocationMarker.remove();
+
                         shareEtaButton.setVisibility(View.INVISIBLE);
                         mAutocompleteView.setText("");
                         mIMEMgr.showSoftInputFromInputMethod(mAutocompleteView.getWindowToken(), 0);
                     }
                 });
 
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
+        MetaApplication.getInstance().addToRequestQueue(requestObject, TAG);
 
     }
 
@@ -917,7 +865,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareEtaButton.setVisibility(View.VISIBLE);
     }
 
-    private void updateETA(String estimatedTripEndTime) {
+    private void updateETA(Date estimatedTripEndTime) {
 
         etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
         saveTripEtaInSharePreferences();
@@ -957,36 +905,65 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             mProgressDialog.setCancelable(false);
             mProgressDialog.setMessage("Fetching URL to share... ");
             mProgressDialog.show();
-            startTrip();
+            createTask();
         }
+    }
+
+    private void createTask() {
+        String createTaskAPI = HTConstants.API_ENDPOINT + "/api/v1/users/" + userId + "/create_task/";
+        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+
+        Gson gson = HTGson.gson();
+        String jsonBody = gson.toJson(customAddress);
+
+        HTCustomPostRequest<CustomAddress> request = new HTCustomPostRequest<>(1, createTaskAPI, jsonBody, CustomAddress.class, new Response.Listener<CustomAddress>() {
+            @Override
+            public void onResponse(CustomAddress response) {
+                taskID = response.getId();
+                startTrip();
+            }
+        },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(Home.this, error.getMessage(), Toast.LENGTH_LONG).show();
+                        mProgressDialog.dismiss();
+                    }
+                });
+
+        MetaApplication.getInstance().addToRequestQueue(request);
     }
 
     private void startTrip() {
 
-        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-        String courier_id = settings.getString(HTConstants.HYPERTRACK_COURIER_ID, "None");
+        String driverID = sharedPreferenceManager.getHyperTrackDriverID();
 
-        if (TextUtils.isEmpty(courier_id)) {
+        if (TextUtils.isEmpty(driverID)) {
+            Toast.makeText(this, "Driver id not found", Toast.LENGTH_LONG).show();
+            mProgressDialog.dismiss();
             return;
         }
 
-        if (TextUtils.isEmpty(endPlaceId)) {
+        if (TextUtils.isEmpty(taskID)) {
+            Toast.makeText(this, "Task id not found", Toast.LENGTH_LONG).show();
+            mProgressDialog.dismiss();
             return;
         }
 
-        int courierId = Integer.valueOf(courier_id);
-        int endPlace = Integer.valueOf(endPlaceId);
+        Log.d(TAG, "driverID: " + driverID);
 
-        Log.d(TAG, "courier_id: " + courier_id);
-
-        if (TextUtils.equals(courier_id, "None")) {
+        if (TextUtils.equals(driverID, "None")) {
             Toast.makeText(this, "User id not found", Toast.LENGTH_LONG).show();
+            mProgressDialog.dismiss();
             return;
         }
+
+        ArrayList<String> taskIDs = new ArrayList<>();
+        taskIDs.add(taskID);
 
         HTTripParamsBuilder htTripParamsBuilder = new HTTripParamsBuilder();
-        HTTripParams htTripParams = htTripParamsBuilder.setCourierId(courierId)
-                .setEndPlaceId(endPlace)
+        HTTripParams htTripParams = htTripParamsBuilder.setDriverID(driverID)
+                .setTaskIDs(taskIDs)
                 .createHTTripParams();
 
         transmitterService.startTrip(htTripParams, new HTTripStatusCallback() {
@@ -999,10 +976,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void onSuccess(HTTrip tripDetails) {
                 //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
-                tripId = String.valueOf(tripDetails.getId());
-                estimateArrivalOfTime = tripDetails.getEstimatedTripEndTime();
-                getShareEtaURL(tripId);
-                saveTripInSharedPreferences(tripId);
+                tripId = tripDetails.getId();
+                getShareEtaURL();
+                saveTripInSharedPreferences();
                 requestForGeofenceSetup();
 
                 initETAUpateTask();
@@ -1023,10 +999,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         handler.postDelayed(updateTask, 0);
     }
 
-    public void saveTripInSharedPreferences(String tripId) {
+    public void saveTripInSharedPreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         editor.putString(HTConstants.TRIP_ID, tripId);
+        editor.putString(HTConstants.TASK_ID, taskID);
         editor.putBoolean(HTConstants.TRIP_STATUS, true);
         editor.apply();
     }
@@ -1034,7 +1011,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     public void saveTripDestinationSharedPreferences(LatLng destinationLocation) {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        Gson gson = new Gson();
+        Gson gson = HTGson.gson();
         String json = gson.toJson(destinationLocation);
         editor.putString(HTConstants.TRIP_DESTINATION, json);
         editor.apply();
@@ -1043,7 +1020,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     public LatLng getTripDestinationFromSharedPreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         String latLngString = sharedpreferences.getString(HTConstants.TRIP_DESTINATION, "None");
-        Gson gson = new Gson();
+        Gson gson = HTGson.gson();
         if (!TextUtils.isEmpty(latLngString)) {
             return gson.fromJson(latLngString,LatLng.class);
         }
@@ -1088,10 +1065,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.commit();
     }
 
-    private void getShareEtaURL(String tripId) {
+    private void getShareEtaURL() {
 
-        UserTrip userTrip = new UserTrip(userId, tripId);
-        Gson gson = new Gson();
+        UserTrip userTrip = new UserTrip(userId, tripId, taskID);
+        Gson gson = HTGson.gson();
         String jsonBody = gson.toJson(userTrip);
 
         String url = HTConstants.API_ENDPOINT + "/api/v1/trips/";
@@ -1150,7 +1127,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         ETARecipients etaRecipients = new ETARecipients();
         etaRecipients.setRecipients(recipientArray);
 
-        Gson gson = new Gson();
+        Gson gson = HTGson.gson();
         String jsonBody = gson.toJson(etaRecipients);
 
         HTCustomPostRequest<String> requestObject = new HTCustomPostRequest<String>(1, url,
@@ -1248,7 +1225,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 Log.d(TAG, ca.toString());
 
                 addMarkerToSelectedDestination(ca.getLocation().getLatLng());
-
             }
         }
         if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
@@ -1318,18 +1294,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LatLngBounds bounds = b.build();
 
         return bounds;
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-
         if (!getTripStatusFromSharedPreferences() && !TextUtils.equals(getTripShareUrlInSharedPreferences(), "None")) {
             endTrip();
         }
-
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("trip_ended"));
@@ -1358,17 +1331,28 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (tripId.equalsIgnoreCase("None"))
             return;
 
-        transmitterService.endTrip(new HTTripStatusCallback() {
+        transmitterService.completeTask(taskID, new HTCompleteTaskStatusCallback() {
             @Override
             public void onError(Exception e) {
                 mProgressDialog.dismiss();
-                Toast.makeText(Home.this, e.getMessage() + ". This request could not be processed. Please try again later.", Toast.LENGTH_LONG).show();
+                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
             }
 
             @Override
-            public void onSuccess(HTTrip tripDetails) {
-                mProgressDialog.dismiss();
-                endTrip();
+            public void onSuccess(String s) {
+                transmitterService.endTrip(new HTTripStatusCallback() {
+                    @Override
+                    public void onError(Exception e) {
+                        mProgressDialog.dismiss();
+                        Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+
+                    @Override
+                    public void onSuccess(HTTrip tripDetails) {
+                        mProgressDialog.dismiss();
+                        endTrip();
+                    }
+                });
             }
         });
     }
@@ -1401,4 +1385,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return false;
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+        MetaApplication.getInstance().cancelPendingRequests(TAG);
+    }
 }

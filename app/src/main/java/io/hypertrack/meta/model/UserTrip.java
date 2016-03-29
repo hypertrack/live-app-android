@@ -10,7 +10,10 @@ public class UserTrip {
     private String user;
 
     @SerializedName("hypertrack_trip_id")
-    private String hypertrackTripId;
+    private String hypertrackTripID;
+
+    @SerializedName("hypertrack_task_id")
+    private String hypertrackTaskID;
 
     private String id;
 
@@ -25,9 +28,10 @@ public class UserTrip {
         this.shareUrl = shareUrl;
     }
 
-    public UserTrip(String user, String hypertrackTripId) {
+    public UserTrip(String user, String hypertrackTripID, String hypertrackTaskID) {
         this.user = user;
-        this.hypertrackTripId = hypertrackTripId;
+        this.hypertrackTripID = hypertrackTripID;
+        this.hypertrackTaskID = hypertrackTaskID;
     }
 
     public String getUser() {
@@ -38,12 +42,12 @@ public class UserTrip {
         this.user = user;
     }
 
-    public String getHypertrackTripId() {
-        return hypertrackTripId;
+    public String getHypertrackTripID() {
+        return hypertrackTripID;
     }
 
-    public void setHypertrackTripId(String hypertrackTripId) {
-        this.hypertrackTripId = hypertrackTripId;
+    public void setHypertrackTripID(String hypertrackTripID) {
+        this.hypertrackTripID = hypertrackTripID;
     }
 
     public String getId() {
@@ -54,11 +58,20 @@ public class UserTrip {
         this.id = id;
     }
 
+    public String getHypertrackTaskID() {
+        return hypertrackTaskID;
+    }
+
+    public void setHypertrackTaskID(String hypertrackTaskID) {
+        this.hypertrackTaskID = hypertrackTaskID;
+    }
+
     @Override
     public String toString() {
         return "UserTrip{" +
                 "user='" + user + '\'' +
-                ", hypertrackTripId='" + hypertrackTripId + '\'' +
+                ", hypertrackTripID='" + hypertrackTripID + '\'' +
+                ", hypertrackTaskID='" + hypertrackTaskID + '\'' +
                 ", id='" + id + '\'' +
                 ", shareUrl='" + shareUrl + '\'' +
                 '}';

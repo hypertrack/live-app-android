@@ -1,10 +1,8 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.Manifest;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -18,41 +16,38 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.google.gson.Gson;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
 
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.Country;
 import io.hypertrack.meta.model.CountryMaster;
 import io.hypertrack.meta.model.CountrySpinnerAdapter;
-import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.presenter.RegisterPresenter;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.PhoneUtils;
+import io.hypertrack.meta.util.SharedPreferenceManager;
 
-public class Login extends AppCompatActivity {
+public class Login extends AppCompatActivity implements RegisterView {
 
     private static final String TAG = Login.class.getSimpleName();
 
     @Bind(R.id.phoneNumber)
     public EditText phoneNumberView;
 
+    @Bind(R.id.spinner_countries)
+    public Spinner spinner;
+
     private ProgressDialog mProgressDialog;
-    private CountryMaster cm;
-    private Spinner spinner;
     private CountrySpinnerAdapter adapter;
     private String isoCode;
+    private RegisterPresenter resgisterPresenter;
+    private SharedPreferenceManager sharedPreferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,14 +57,37 @@ public class Login extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle("Verify");
+
         ButterKnife.bind(this);
 
-        cm = CountryMaster.getInstance(this);
+        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
+
+        resgisterPresenter = new RegisterPresenter();
+        resgisterPresenter.attachView(this);
+
+        initCountryFlagSpinner();
+
+        if(checkPermission()) {
+
+        } else {
+            requestPermission();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        resgisterPresenter.detachView();
+    }
+
+    private void initCountryFlagSpinner() {
+
+
+        CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
         String countryIsoCode = cm.getDefaultCountryIso();
-        Country country = cm.getCountryByIso(countryIsoCode);
+        //Country country = cm.getCountryByIso(countryIsoCode);
 
-        spinner = (Spinner) findViewById(R.id.spinner_countries);
         adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         spinner.setAdapter(adapter);
 
@@ -96,13 +114,6 @@ public class Login extends AppCompatActivity {
             }
         });
 
-        if(checkPermission()) {
-
-        } else {
-            requestPermission();
-        }
-
-
     }
 
     private void  poulatePhoneNumberIfAvailable() {
@@ -118,89 +129,12 @@ public class Login extends AppCompatActivity {
 
         String number = phoneNumberView.getText().toString();
 
-        if(!TextUtils.isEmpty(number) && number.length() < 20) {
-            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-            Phonenumber.PhoneNumber phoneNumber = null;
-            try {
-                phoneNumber = phoneUtil.parse(number, isoCode);
-                String internationalFormat = phoneUtil.format(
-                        phoneNumber,
-                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-                sendPhoneNumber(internationalFormat);
-                Log.v(TAG, "International Format: " + internationalFormat);
-            } catch (NumberParseException e) {
-                e.printStackTrace();
-            }
-
-        } else {
-            phoneNumberView.setError("Please enter a valid number.");
-        }
-    }
-
-    private void sendPhoneNumber(String number) {
-
-        String url = HTConstants.API_ENDPOINT + "/api/v1/users/";
-
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("registering phone number");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        User user = new User(number);
-        Gson gson = new Gson();
-        String jsonObjectBody = gson.toJson(user);
-
-        Log.d("Response", "Request Body - " + jsonObjectBody);
-
-        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
-                1,
-                url,
-                jsonObjectBody,
-                User.class,
-                new Response.Listener<User>() {
-                    @Override
-                    public void onResponse(User response) {
-                        mProgressDialog.dismiss();
-
-                        Log.d("Response", "ID :" + response.getId());
-                        Log.d("Response", "First Name :" + response.getFirstName());
-                        Log.d("Response", "Last name :" + response.getLastName());
-
-                        Intent intent = new Intent(Login.this, Verify.class);
-                        intent.putExtra(HTConstants.USER_ID, response.getId());
-
-                        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = settings.edit();
-                        editor.putInt(HTConstants.USER_ID, response.getId());
-
-                        if (!TextUtils.isEmpty(response.getFirstName())) {
-                            editor.putString(HTConstants.USER_FIRSTNAME, response.getFirstName());
-                        }
-
-                        if (!TextUtils.isEmpty(response.getLastName())) {
-                            editor.putString(HTConstants.USER_LASTNAME, response.getLastName());
-                        }
-
-                        if (!TextUtils.isEmpty(response.getPhoto())) {
-                            editor.putString(HTConstants.USER_PROFILE_PIC, response.getPhoto());
-                        }
-
-                        editor.apply();
-
-                        startActivity(intent);
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        mProgressDialog.dismiss();
-                        Log.d("Response", "Inside OnError");
-                        Toast.makeText(Login.this, "Apologies, we could process your request. Please verify your number.", Toast.LENGTH_LONG).show();
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(request);
+        resgisterPresenter.attemptRegistration(number, isoCode);
 
     }
 
@@ -251,4 +185,29 @@ public class Login extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void registrationFailed() {
+
+        mProgressDialog.dismiss();
+        Toast.makeText(Login.this, "Apologies, we could process your request at this moment.", Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void navigateToVerificationScreen() {
+
+        mProgressDialog.dismiss();
+
+        int userId = sharedPreferenceManager.getUserId();
+
+        Intent intent = new Intent(Login.this, Verify.class);
+        intent.putExtra(HTConstants.USER_ID, userId);
+        startActivity(intent);
+
+    }
+
+    @Override
+    public void showValidationError() {
+        mProgressDialog.dismiss();
+        phoneNumberView.setError("Please enter a valid number.");
+    }
 }

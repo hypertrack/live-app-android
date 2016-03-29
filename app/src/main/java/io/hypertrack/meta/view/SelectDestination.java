@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.content.Intent;
 import android.location.Location;
@@ -21,6 +21,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import io.hypertrack.meta.R;
+
 public class SelectDestination extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private MapFragment mapFragment;
@@ -33,10 +35,11 @@ public class SelectDestination extends AppCompatActivity implements OnMapReadyCa
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_destination);
 
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(com.hypertrack.android.sdk.R.id.map);
+        mapFragment = (MapFragment) getFragmentManager().findFragmentById(io.hypertrack.lib.consumer.R.id.map);
         mapFragment.getMapAsync(this);
 
         imageButton = (ImageButton) findViewById(R.id.imageButton);

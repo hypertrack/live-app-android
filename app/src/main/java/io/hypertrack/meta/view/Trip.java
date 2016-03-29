@@ -1,12 +1,9 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.view;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
-import android.nfc.Tag;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -14,24 +11,20 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
-import com.hypertrack.android.sdk.base.model.HTStatusCallBack;
-import com.hypertrack.android.sdk.base.network.HTConsumerClient;
-import com.hypertrack.android.sdk.base.network.HyperTrack;
-import com.hypertrack.android.sdk.base.view.HTMapFragment;
 
 import java.util.List;
 
-import io.hypertrack.meta.model.UserTrip;
-import io.hypertrack.meta.network.HTCustomGetRequest;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
+import io.hypertrack.lib.consumer.view.HTMapFragment;
+import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.R;
 
 public class Trip extends AppCompatActivity {
 
@@ -51,15 +44,15 @@ public class Trip extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.htMapfragment);
-        htMapFragment.disableCourierInfoLayout(true);
+        htMapFragment.setDriverInfoLayoutVisibility(true);
         mHyperTrackClient = HTConsumerClient.getInstance(this);
         retrieveIntentData();
     }
 
     private void retrieveIntentData() {
 
-        trackTrip("8796");
-        return;
+//        trackTrip("8796");
+//        return;
 
         /*
         Intent intent = getIntent();
@@ -96,22 +89,22 @@ public class Trip extends AppCompatActivity {
     }
 
     private void trackTrip(String tripId) {
-        mHyperTrackClient.trackTrip(tripId, this, new HTStatusCallBack() {
-            @Override
-            public void onSuccess(String s) {
-                Log.v(TAG, "Tracking successful.");
-
-                if (mHyperTrackClient.getStatus().equalsIgnoreCase(HTConsumerClient.ORDER_STATUS_DELIVERED)) {
-                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG).show();
-                    drawPolyline();
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.w(TAG, "Couldn't be tracked.");
-            }
-        });
+//        mHyperTrackClient.trackTrip(tripId, this, new HTStatusCallBack() {
+//            @Override
+//            public void onSuccess(String s) {
+//                Log.v(TAG, "Tracking successful.");
+//
+//                if (mHyperTrackClient.getStatus().equalsIgnoreCase(HTConsumerClient.ORDER_STATUS_DELIVERED)) {
+//                    Toast.makeText(Trip.this, "The Trip has ended", Toast.LENGTH_LONG).show();
+//                    drawPolyline();
+//                }
+//            }
+//
+//            @Override
+//            public void onError(Exception e) {
+//                Log.w(TAG, "Couldn't be tracked.");
+//            }
+//        });
     }
 
     @Override
@@ -134,7 +127,7 @@ public class Trip extends AppCompatActivity {
 
 
     private void drawPolyline() {
-        String encodedLine = mHyperTrackClient.getTripInfo();
+        String encodedLine = mHyperTrackClient.getTaskStore().getTask().getEncodedPolyline();
         if (TextUtils.isEmpty(encodedLine))
             return;
 
