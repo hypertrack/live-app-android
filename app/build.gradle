@@ -145,7 +145,7 @@ dependencies {
     }
 
     compile 'com.google.maps.android:android-maps-utils:0.4+'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
