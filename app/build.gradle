@@ -132,17 +132,17 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.19'
     compile 'com.google.code.gson:gson:2.4'
 
-    debugCompile('io.hypertrack:transmitter:0.2.2:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:0.3.1:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:0.2.2:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.3.1:release@aar') {
         transitive = true;
     }
 
-    debugCompile('io.hypertrack:consumer:0.2.0:debug@aar') {
+    debugCompile('io.hypertrack:consumer:0.3.1:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:consumer:0.2.0:release@aar') {
+    releaseCompile('io.hypertrack:consumer:0.3.1:release@aar') {
         transitive = true;
     }
 
