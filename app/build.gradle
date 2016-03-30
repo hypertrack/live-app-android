@@ -39,7 +39,7 @@ android {
         releaseConfig {
             keyAlias 'meta-release'
             keyPassword 'Hyp3rTr@ck123#'
-            storeFile file('/Users/ulhas/Hypertrack/keystores/android.jks')
+            storeFile file('/Users/ulhas/Workspace/HyperTrack/keystores/android.jks')
             storePassword 'iygn67u9'
         }
     }
