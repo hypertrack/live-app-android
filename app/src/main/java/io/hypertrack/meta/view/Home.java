@@ -1033,6 +1033,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return sharedpreferences.getString(HTConstants.TRIP_ID, "None");
     }
 
+    public String getTaskFromSharedPreferences() {
+        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(HTConstants.TASK_ID, "None");
+    }
+
     public String getUserProfilePicFromSharedPreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC, "None");
@@ -1331,7 +1336,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (tripId.equalsIgnoreCase("None"))
             return;
 
-        transmitterService.completeTask(taskID, new HTCompleteTaskStatusCallback() {
+        transmitterService.completeTask(this.getTaskFromSharedPreferences(), new HTCompleteTaskStatusCallback() {
             @Override
             public void onError(Exception e) {
                 mProgressDialog.dismiss();
