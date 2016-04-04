@@ -150,7 +150,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void run() {
 
-            transmitterService.refreshTrip(tripId, new HTTripStatusCallback() {
+            transmitterService.refreshTrip(new HTTripStatusCallback() {
                 @Override
                 public void onError(Exception e) {
                     Log.e(TAG, "Inside refresh trip error");
@@ -609,11 +609,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
 
-            Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            Location location = null;
 
-            Log.v(TAG, "Location: " + location);
+            try{
+                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            } catch (SecurityException exception) {
+                Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_LONG).show();
+            }
 
             if (location != null) {
+
+                Log.v(TAG, "Location: " + location);
 
                 if (currentLocationMarker != null)
                     currentLocationMarker.remove();
@@ -1170,11 +1176,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         Log.v(TAG, "Adding geofencing");
 
-        LocationServices.GeofencingApi.addGeofences(
+        try {
+            LocationServices.GeofencingApi.addGeofences(
                 mGoogleApiClient,
                 getGeofencingRequest(),
                 getGeofencePendingIntent()
         ).setResultCallback(this);
+        } catch (SecurityException exception) {
+            Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -1189,8 +1199,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         locationRequest.setInterval(INTERVAL_TIME);
         locationRequest.setFastestInterval(INTERVAL_TIME);
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, locationRequest, this);
+        try {
+            LocationServices.FusedLocationApi.requestLocationUpdates(
+                    mGoogleApiClient, locationRequest, this);
+        } catch (SecurityException exception) {
+            Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
