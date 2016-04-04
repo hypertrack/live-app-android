@@ -85,6 +85,7 @@ import java.util.TimeZone;
 
 
 import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.network.HTGson;
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
@@ -972,6 +973,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         HTTripParamsBuilder htTripParamsBuilder = new HTTripParamsBuilder();
         HTTripParams htTripParams = htTripParamsBuilder.setDriverID(driverID)
                 .setTaskIDs(taskIDs)
+                .setVehicleType(HTDriverVehicleType.CAR)
                 .createHTTripParams();
 
         transmitterService.startTrip(htTripParams, new HTTripStatusCallback() {
