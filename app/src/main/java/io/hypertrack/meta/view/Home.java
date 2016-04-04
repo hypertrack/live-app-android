@@ -362,7 +362,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void checkIfUseIsOnBoard() {
 
         boolean isUserOnboard = sharedPreferenceManager.isUserOnBoard();
-        if (!isUserOnboard || sharedPreferenceManager.getHyperTrackDriverID() == null) {
+        if (!isUserOnboard
+                || sharedPreferenceManager.getHyperTrackDriverID() == null
+                || sharedPreferenceManager.getHyperTrackDriverID().equalsIgnoreCase(HTConstants.DEFAULT_STRING_VALUE)) {
             startActivity(new Intent(this, Login.class));
             finish();
         }
