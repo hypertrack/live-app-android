@@ -44,22 +44,30 @@ public class RegisterPresenter implements Presenter<RegisterView>, OnRegisterLis
                 Log.v(TAG, "International Format: " + internationalFormat);
 
             } catch (NumberParseException e) {
-                view.showValidationError();
+                if (view != null) {
+                    view.showValidationError();
+                }
                 Log.wtf(TAG, e);
             }
 
         } else {
-            view.showValidationError();
+            if (view != null) {
+                view.showValidationError();
+            }
         }
     }
 
     @Override
     public void OnSuccess() {
-        view.navigateToVerificationScreen();
+        if (view != null) {
+            view.navigateToVerificationScreen();
+        }
     }
 
     @Override
     public void OnError() {
-        view.registrationFailed();
+        if (view != null) {
+            view.registrationFailed();
+        }
     }
 }

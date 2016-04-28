@@ -201,7 +201,7 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (resultCode == SELECTED_LOCATION_DATA) {
-            LatLng latLng = (LatLng)data.getParcelableExtra("selected_location");
+            LatLng latLng = data.getParcelableExtra("selected_location");
             Log.d(TAG, "Received selected Location: " + latLng.toString());
             if (latLng != null) {
                 double[] ll = {latLng.longitude, latLng.latitude};

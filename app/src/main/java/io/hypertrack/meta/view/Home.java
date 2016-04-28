@@ -1401,11 +1401,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         ConnectivityManager connectivityManager =
                 (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
-        }
+        return netInfo != null && netInfo.isConnectedOrConnecting();
 
-        return false;
     }
 
     @Override

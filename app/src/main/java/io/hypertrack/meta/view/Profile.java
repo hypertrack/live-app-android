@@ -99,17 +99,15 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         populateAutoComplete();
 
-        if (checkPermission()) {
-
-        } else {
+        if (!checkPermission()) {
             requestPermission();
         }
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         presenter.detachView();
+        super.onDestroy();
     }
 
     @OnClick(R.id.email_sign_in_button)
@@ -204,7 +202,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source) {
                 //Handle the image
-                profileImage = imageFile;;
+                profileImage = imageFile;
                 Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 
                 ExifInterface exif = null;
@@ -235,15 +233,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
     private boolean checkPermission(){
 
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED){
-
-            return true;
-
-        } else {
-
-            return false;
-
-        }
+        return result == PackageManager.PERMISSION_GRANTED;
 
     }
 

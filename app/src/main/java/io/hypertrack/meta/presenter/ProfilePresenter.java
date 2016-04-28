@@ -31,27 +31,34 @@ public class ProfilePresenter implements Presenter<ProfileView>, ProfileUpdateLi
     public void attemptLogin(String userFirstName, String userLastName, int userId, File profileImage) {
 
         if (TextUtils.isEmpty(userFirstName)) {
-            view.showFirstNameValidationError();
+            if (view != null) {
+                view.showFirstNameValidationError();
+            }
             return;
         }
 
         if (TextUtils.isEmpty(userLastName)) {
-            view.showLastNameValidationError();
+            if (view != null) {
+                view.showLastNameValidationError();
+            }
             return;
         }
 
         profileInteractor.updateUserProfileRetro(this, userFirstName, userLastName, userId, profileImage);
-
     }
 
     @Override
     public void OnSuccess() {
-        view.navigateToHomeScreen();
+        if (view != null) {
+            view.navigateToHomeScreen();
+        }
     }
 
     @Override
     public void OnError() {
-        view.showErrorMessage();
+        if (view != null) {
+            view.showErrorMessage();
+        }
     }
 
 }

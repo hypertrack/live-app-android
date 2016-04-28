@@ -143,15 +143,7 @@ public class Login extends AppCompatActivity implements RegisterView {
     private boolean checkPermission(){
 
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if (result == PackageManager.PERMISSION_GRANTED){
-
-            return true;
-
-        } else {
-
-            return false;
-
-        }
+        return result == PackageManager.PERMISSION_GRANTED;
 
     }
 

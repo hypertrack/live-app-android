@@ -27,17 +27,23 @@ public class VerifyPresenter implements Presenter<VerifyView>, OnVerificationLis
         if (!TextUtils.isEmpty(verificationCode) && verificationCode.length() == 4) {
             verificationInteractor.validateVerificationCode(this, verificationCode, userId);
         } else {
-            view.showValidationError();
+            if (view != null) {
+                view.showValidationError();
+            }
         }
     }
 
     @Override
     public void OnSuccess() {
-        view.navigateToProfileScreen();
+        if (view != null) {
+            view.navigateToProfileScreen();
+        }
     }
 
     @Override
     public void OnError() {
-        view.verificationFailed();
+        if (view != null) {
+            view.verificationFailed();
+        }
     }
 }
