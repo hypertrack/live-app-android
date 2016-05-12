@@ -1250,7 +1250,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 customAddress = ca;
                 Log.d(TAG, ca.toString());
 
-                addMarkerToSelectedDestination(ca.getLocation().getLatLng());
+                MetaLocation location = ca.getLocation();
+                if (location != null) {
+                    addMarkerToSelectedDestination(location.getLatLng());
+                }
             }
         }
         if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
