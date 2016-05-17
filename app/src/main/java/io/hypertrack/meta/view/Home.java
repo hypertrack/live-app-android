@@ -814,6 +814,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
+        if (currentLocation == null || destinationLocation == null) {
+            return;
+        }
+
         String url = HTConstants.API_ENDPOINT + "/api/v1/eta/?origin="
                 + currentLocation.latitude + "," + currentLocation.longitude
                 + "&destination=" + destinationLocation.latitude + "," + destinationLocation.longitude;
