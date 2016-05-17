@@ -100,6 +100,10 @@ public class PlaceAutocompleteAdapter
      */
     @Override
     public int getCount() {
+        if (mResultList == null) {
+            return 0;
+        }
+
         return mResultList.size();
     }
 
@@ -108,6 +112,10 @@ public class PlaceAutocompleteAdapter
      */
     @Override
     public AutocompletePrediction getItem(int position) {
+        if (mResultList == null) {
+            return null;
+        }
+
         return mResultList.get(position);
     }
 
