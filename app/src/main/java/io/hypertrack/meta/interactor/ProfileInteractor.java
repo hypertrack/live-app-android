@@ -17,6 +17,7 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 public class ProfileInteractor {
 
@@ -30,10 +31,10 @@ public class ProfileInteractor {
 
         Call<User> call = sendEtaService.updateUserName(String.valueOf(userId), user);
         call.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(retrofit2.Response<User> response) {
 
-                if (response.isSuccess()) {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
 
                     Log.v(TAG, "Response from Retrofit");
                     Log.d("Response", "User :" + response.body().toString());
@@ -52,11 +53,10 @@ public class ProfileInteractor {
                 } else {
                     profileUpdateListener.OnError();
                 }
-
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
                 profileUpdateListener.OnError();
             }
@@ -79,8 +79,8 @@ public class ProfileInteractor {
         Call<User> updatePicCall = sendEtaService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
         updatePicCall.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(retrofit2.Response<User> response) {
-                if (response.isSuccess()) {
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
                     Log.v(TAG, "Pic updated successfully");
                     Log.v(TAG, response.headers().toString());
 
@@ -95,7 +95,7 @@ public class ProfileInteractor {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 Log.v(TAG, "Error while updating profile pic. " + t.getMessage());
             }
         });

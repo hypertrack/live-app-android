@@ -56,6 +56,7 @@ import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Profile extends AppCompatActivity implements ProfileView {
 
@@ -339,9 +340,9 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(retrofit2.Response<User> response) {
+            public void onResponse(Call<User> call, Response<User> response) {
 
-                if (response.isSuccess()) {
+                if (response.isSuccessful()) {
                     Log.v(TAG, "Response from Retrofit");
 
                     Log.d("Response", "User :" + response.body().toString());
@@ -369,7 +370,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
             }
         });
@@ -394,8 +395,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
         Call<User> updatePicCall = sendEtaService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
         updatePicCall.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(retrofit2.Response<User> response) {
-                if (response.isSuccess()) {
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
                     Log.v(TAG, "Pic updated successfully");
                     Log.v(TAG, response.headers().toString());
 
@@ -409,7 +410,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
             }
 
             @Override
-            public void onFailure(Throwable t) {
+            public void onFailure(Call<User> call, Throwable t) {
                 Log.v(TAG, "Error while updating profile pic. " + t.getMessage());
             }
         });
