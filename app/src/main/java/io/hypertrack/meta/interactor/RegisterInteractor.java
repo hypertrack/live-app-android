@@ -15,7 +15,7 @@ import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class RegisterInteractor {
 
-    public void registerPhoneNumber(final OnRegisterListener onRegisterListener, String number) {
+    public void registerPhoneNumber(String number, final OnRegisterCallback onRegisterCallback) {
 
         String url = HTConstants.API_ENDPOINT + "/api/v1/users/";
 
@@ -57,7 +57,9 @@ public class RegisterInteractor {
                             spm.setUserPhoto(response.getPhoto());
                         }
 
-                        onRegisterListener.OnSuccess();
+                        if (onRegisterCallback != null) {
+                            onRegisterCallback.OnSuccess();
+                        }
 
                     }
                 },
@@ -65,7 +67,10 @@ public class RegisterInteractor {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("Response", "Inside OnError");
-                        onRegisterListener.OnError();
+
+                        if (onRegisterCallback != null) {
+                            onRegisterCallback.OnError();
+                        }
                     }
                 }
         );

@@ -2,11 +2,11 @@ package io.hypertrack.meta.presenter;
 
 import android.text.TextUtils;
 
-import io.hypertrack.meta.interactor.OnVerificationListener;
+import io.hypertrack.meta.interactor.OnVerificationCallback;
 import io.hypertrack.meta.interactor.VerificationInteractor;
 import io.hypertrack.meta.view.VerifyView;
 
-public class VerifyPresenter implements Presenter<VerifyView>, OnVerificationListener {
+public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
 
     private static final String TAG = VerifyPresenter.class.getSimpleName();
     private VerifyView view;
@@ -23,27 +23,28 @@ public class VerifyPresenter implements Presenter<VerifyView>, OnVerificationLis
         view = null;
     }
 
+    @Override
     public void attemptVerification(String verificationCode, int userId) {
         if (!TextUtils.isEmpty(verificationCode) && verificationCode.length() == 4) {
-            verificationInteractor.validateVerificationCode(this, verificationCode, userId);
+            verificationInteractor.validateVerificationCode(verificationCode, userId, new OnVerificationCallback() {
+                @Override
+                public void OnSuccess() {
+                    if (view != null) {
+                        view.navigateToProfileScreen();
+                    }
+                }
+
+                @Override
+                public void OnError() {
+                    if (view != null) {
+                        view.verificationFailed();
+                    }
+                }
+            });
         } else {
             if (view != null) {
                 view.showValidationError();
             }
-        }
-    }
-
-    @Override
-    public void OnSuccess() {
-        if (view != null) {
-            view.navigateToProfileScreen();
-        }
-    }
-
-    @Override
-    public void OnError() {
-        if (view != null) {
-            view.verificationFailed();
         }
     }
 }

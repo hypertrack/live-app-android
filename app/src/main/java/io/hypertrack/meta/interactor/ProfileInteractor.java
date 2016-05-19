@@ -23,7 +23,7 @@ public class ProfileInteractor {
 
     private static final String TAG = ProfileInteractor.class.getSimpleName();
 
-     public void updateUserProfileRetro(final ProfileUpdateListener profileUpdateListener, String firstName, String lastName, final int userId, final File profileImage) {
+     public void updateUserProfileRetro(String firstName, String lastName, final int userId, final File profileImage, final OnProfileUpdateCallback onProfileUpdateCallback) {
 
         SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
 
@@ -44,21 +44,25 @@ public class ProfileInteractor {
                     sharedPreferenceManager.setUserPhoto(response.body().getPhoto());
                     sharedPreferenceManager.setUserOnBoard(true);
 
-                    profileUpdateListener.OnSuccess();
+                    if (onProfileUpdateCallback != null) {
+                        onProfileUpdateCallback.OnSuccess();
+                    }
 
                     //Upload photo
                     if (profileImage != null)
                         updateUserProfilePic(userId, profileImage);
 
                 } else {
-                    profileUpdateListener.OnError();
+                    if (onProfileUpdateCallback != null) {
+                        onProfileUpdateCallback.OnError();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
-                profileUpdateListener.OnError();
+                onProfileUpdateCallback.OnError();
             }
         });
 

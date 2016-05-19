@@ -19,6 +19,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.presenter.IVerifyPresenter;
 import io.hypertrack.meta.presenter.VerifyPresenter;
 import io.hypertrack.meta.util.SMSReceiver;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -32,7 +33,7 @@ public class Verify extends AppCompatActivity implements VerifyView {
     public Button registerButtonView;
 
     private ProgressDialog mProgressDialog;
-    private VerifyPresenter presenter;
+    private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
     private SharedPreferenceManager sharedPreferenceManager;
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -50,21 +51,22 @@ public class Verify extends AppCompatActivity implements VerifyView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         ButterKnife.bind(this);
 
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
 
-        presenter = new VerifyPresenter();
         presenter.attachView(this);
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         presenter.detachView();
+        super.onDestroy();
     }
 
     @Override

@@ -7,11 +7,11 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
-import io.hypertrack.meta.interactor.OnRegisterListener;
+import io.hypertrack.meta.interactor.OnRegisterCallback;
 import io.hypertrack.meta.interactor.RegisterInteractor;
 import io.hypertrack.meta.view.RegisterView;
 
-public class RegisterPresenter implements Presenter<RegisterView>, OnRegisterListener {
+public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
 
     private static final String TAG = RegisterPresenter.class.getSimpleName();
     private RegisterView view;
@@ -28,19 +28,34 @@ public class RegisterPresenter implements Presenter<RegisterView>, OnRegisterLis
         view = null;
     }
 
+    @Override
     public void attemptRegistration(String number, String isoCode) {
 
         if(!TextUtils.isEmpty(number) && number.length() < 20) {
 
             PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-            Phonenumber.PhoneNumber phoneNumber = null;
+            Phonenumber.PhoneNumber phoneNumber;
             try {
                 phoneNumber = phoneUtil.parse(number, isoCode);
                 String internationalFormat = phoneUtil.format(
                         phoneNumber,
                         PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
 
-                registerInteractor.registerPhoneNumber(RegisterPresenter.this, internationalFormat);
+                registerInteractor.registerPhoneNumber(internationalFormat, new OnRegisterCallback() {
+                    @Override
+                    public void OnSuccess() {
+                        if (view != null) {
+                            view.navigateToVerificationScreen();
+                        }
+                    }
+
+                    @Override
+                    public void OnError() {
+                        if (view != null) {
+                            view.registrationFailed();
+                        }
+                    }
+                });
                 Log.v(TAG, "International Format: " + internationalFormat);
 
             } catch (NumberParseException e) {
@@ -54,20 +69,6 @@ public class RegisterPresenter implements Presenter<RegisterView>, OnRegisterLis
             if (view != null) {
                 view.showValidationError();
             }
-        }
-    }
-
-    @Override
-    public void OnSuccess() {
-        if (view != null) {
-            view.navigateToVerificationScreen();
-        }
-    }
-
-    @Override
-    public void OnError() {
-        if (view != null) {
-            view.registrationFailed();
         }
     }
 }

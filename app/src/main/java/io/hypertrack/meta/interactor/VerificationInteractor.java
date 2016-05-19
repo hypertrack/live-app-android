@@ -15,7 +15,7 @@ import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class VerificationInteractor {
 
-    public void validateVerificationCode(final OnVerificationListener onVerificationListener, String verificationCode, int userId) {
+    public void validateVerificationCode(String verificationCode, int userId, final OnVerificationCallback onVerificationCallback) {
 
         String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+ userId + "/verify_phone_number/";
 
@@ -39,14 +39,19 @@ public class VerificationInteractor {
                         SharedPreferenceManager spm = new SharedPreferenceManager(MetaApplication.getInstance());
                         spm.setUserAuthToken(response.getToken());
 
-                        onVerificationListener.OnSuccess();
+                        if (onVerificationCallback != null) {
+                            onVerificationCallback.OnSuccess();
+                        }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("Response", "Inside OnError");
-                        onVerificationListener.OnError();
+
+                        if (onVerificationCallback != null) {
+                            onVerificationCallback.OnError();
+                        }
                     }
                 }
         );

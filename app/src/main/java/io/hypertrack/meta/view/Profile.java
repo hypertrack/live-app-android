@@ -47,6 +47,7 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.network.retrofit.SendEtaService;
+import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -85,7 +86,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
     private File profileImage;
 
     private SharedPreferenceManager sharedPreferenceManager;
-    private ProfilePresenter presenter;
+    private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,7 +96,6 @@ public class Profile extends AppCompatActivity implements ProfileView {
         ButterKnife.bind(this);
 
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-        presenter = new ProfilePresenter();
         presenter.attachView(this);
 
         populateAutoComplete();

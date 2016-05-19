@@ -28,6 +28,7 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.Country;
 import io.hypertrack.meta.model.CountryMaster;
 import io.hypertrack.meta.model.CountrySpinnerAdapter;
+import io.hypertrack.meta.presenter.IRegisterPresenter;
 import io.hypertrack.meta.presenter.RegisterPresenter;
 import io.hypertrack.meta.util.HTConstants;
 import io.hypertrack.meta.util.PhoneUtils;
@@ -46,7 +47,7 @@ public class Login extends AppCompatActivity implements RegisterView {
     private ProgressDialog mProgressDialog;
     private CountrySpinnerAdapter adapter;
     private String isoCode;
-    private RegisterPresenter resgisterPresenter;
+    private IRegisterPresenter<RegisterView> registerPresenter = new RegisterPresenter();
     private SharedPreferenceManager sharedPreferenceManager;
 
     @Override
@@ -54,6 +55,7 @@ public class Login extends AppCompatActivity implements RegisterView {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle("Verify");
@@ -62,22 +64,20 @@ public class Login extends AppCompatActivity implements RegisterView {
 
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
 
-        resgisterPresenter = new RegisterPresenter();
-        resgisterPresenter.attachView(this);
+        registerPresenter.attachView(this);
 
         initCountryFlagSpinner();
+        poulatePhoneNumberIfAvailable();
 
-        if(checkPermission()) {
-
-        } else {
+        if(!checkPermission()) {
             requestPermission();
         }
     }
 
     @Override
     protected void onDestroy() {
+        registerPresenter.detachView();
         super.onDestroy();
-        resgisterPresenter.detachView();
     }
 
     private void initCountryFlagSpinner() {
@@ -116,9 +116,10 @@ public class Login extends AppCompatActivity implements RegisterView {
 
     }
 
-    private void  poulatePhoneNumberIfAvailable() {
+    private void poulatePhoneNumberIfAvailable() {
         TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
         String number = tm.getLine1Number();
+
         if(!TextUtils.isEmpty(number)) {
             phoneNumberView.setText(number);
         }
@@ -134,17 +135,14 @@ public class Login extends AppCompatActivity implements RegisterView {
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        resgisterPresenter.attemptRegistration(number, isoCode);
-
+        registerPresenter.attemptRegistration(number, isoCode);
     }
 
     private static final int PERMISSION_REQUEST_CODE = 1;
 
     private boolean checkPermission(){
-
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         return result == PackageManager.PERMISSION_GRANTED;
-
     }
 
     private void requestPermission(){
