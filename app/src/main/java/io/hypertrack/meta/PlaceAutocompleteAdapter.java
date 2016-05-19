@@ -116,6 +116,10 @@ public class PlaceAutocompleteAdapter
             return null;
         }
 
+        if (position >= mResultList.size()) {
+            return null;
+        }
+
         return mResultList.get(position);
     }
 
