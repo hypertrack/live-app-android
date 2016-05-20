@@ -15,7 +15,7 @@ import java.util.List;
 
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.transmitter.model.HTTrip;
-import io.hypertrack.lib.transmitter.model.HTTripStatusCallback;
+import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.meta.util.HTConstants;
 
@@ -95,7 +95,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             return;
 
         if (transmitterService == null) {
-            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY);
+            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, this);
             HyperTrack.setLogLevel(Log.VERBOSE);
             transmitterService = HTTransmitterService.getInstance(this);
         }

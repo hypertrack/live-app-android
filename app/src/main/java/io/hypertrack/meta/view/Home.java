@@ -90,10 +90,10 @@ import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.network.HTGson;
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
-import io.hypertrack.lib.transmitter.model.HTCompleteTaskStatusCallback;
+import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
-import io.hypertrack.lib.transmitter.model.HTTripStatusCallback;
+import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.BuildConfig;
@@ -460,7 +460,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setUpHyperTrackSDK() {
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY);
+        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
         HyperTrack.setLogLevel(Log.DEBUG);
         //Setup order details
 

@@ -37,7 +37,7 @@ public class Trip extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip);
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY);
+        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
         HyperTrack.setLogLevel(Log.VERBOSE);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
