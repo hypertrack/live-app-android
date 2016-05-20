@@ -1,4 +1,4 @@
-package io.hypertrack.meta.interactor;
+package io.hypertrack.meta.interactor.callback;
 
 /**
  * Created by suhas on 25/02/16.

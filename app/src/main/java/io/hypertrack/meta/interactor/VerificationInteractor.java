@@ -7,6 +7,7 @@ import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
 import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.model.Verification;
 import io.hypertrack.meta.network.HTCustomPostRequest;

@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import java.io.File;
 
 import io.hypertrack.meta.interactor.ProfileInteractor;
-import io.hypertrack.meta.interactor.OnProfileUpdateCallback;
+import io.hypertrack.meta.interactor.callback.OnProfileUpdateCallback;
 import io.hypertrack.meta.view.ProfileView;
 
 /**

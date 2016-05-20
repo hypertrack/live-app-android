@@ -1,4 +1,4 @@
-package io.hypertrack.meta.interactor;
+package io.hypertrack.meta.interactor.callback;
 
 public abstract class OnProfileUpdateCallback {
     public abstract void OnSuccess();

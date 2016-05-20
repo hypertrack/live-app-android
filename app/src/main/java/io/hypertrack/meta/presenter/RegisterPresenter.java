@@ -7,7 +7,7 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
-import io.hypertrack.meta.interactor.OnRegisterCallback;
+import io.hypertrack.meta.interactor.callback.OnRegisterCallback;
 import io.hypertrack.meta.interactor.RegisterInteractor;
 import io.hypertrack.meta.view.RegisterView;
 

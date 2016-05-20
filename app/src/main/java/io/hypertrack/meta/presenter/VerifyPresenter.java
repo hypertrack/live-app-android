@@ -2,7 +2,7 @@ package io.hypertrack.meta.presenter;
 
 import android.text.TextUtils;
 
-import io.hypertrack.meta.interactor.OnVerificationCallback;
+import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.interactor.VerificationInteractor;
 import io.hypertrack.meta.view.VerifyView;
 

@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import io.hypertrack.meta.BuildConfig;
 import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.interactor.callback.OnProfileUpdateCallback;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendEtaService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
