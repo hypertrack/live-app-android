@@ -10,7 +10,8 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".view.Login"
-    tools:showIn="@layout/activity_login">
+    tools:showIn="@layout/activity_login"
+    android:background="@color/colorBackground">
 
 
     <LinearLayout
@@ -46,16 +47,6 @@
                 />
     </android.support.design.widget.TextInputLayout>
 
-
     </LinearLayout>
-
-    <Button
-        android:id="@+id/verify"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/linearLayout"
-        android:layout_centerHorizontal="true"
-        android:text="Register"
-        android:textColor="@android:color/white"/>
 
 </RelativeLayout>

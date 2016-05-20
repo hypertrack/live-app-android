@@ -131,7 +131,7 @@ public class Login extends AppCompatActivity implements RegisterView {
         String number = phoneNumberView.getText().toString();
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("registering phone number");
+        mProgressDialog.setMessage(getString(R.string.registration_phone_number));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -152,7 +152,6 @@ public class Login extends AppCompatActivity implements RegisterView {
             Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
 
         } else {
-
             ActivityCompat.requestPermissions(this,new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_CODE);
         }
