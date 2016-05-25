@@ -49,7 +49,7 @@ import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.network.retrofit.SendEtaService;
 import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
@@ -135,15 +135,15 @@ public class Profile extends AppCompatActivity implements ProfileView {
         String userLastName =  sharedPreferenceManager.getLastName();
         String urlProfilePic = sharedPreferenceManager.getUserPhoto();
 
-        if(!TextUtils.equals(userFirstName, HTConstants.DEFAULT_STRING_VALUE)) {
+        if(!TextUtils.equals(userFirstName, Constants.DEFAULT_STRING_VALUE)) {
             mFirstNameView.setText(userFirstName);
         }
 
-        if(!TextUtils.equals(userLastName, HTConstants.DEFAULT_STRING_VALUE)) {
+        if(!TextUtils.equals(userLastName, Constants.DEFAULT_STRING_VALUE)) {
             mLastNameView.setText(userLastName);
         }
 
-        if(!TextUtils.equals(urlProfilePic, HTConstants.DEFAULT_STRING_VALUE)) {
+        if(!TextUtils.equals(urlProfilePic, Constants.DEFAULT_STRING_VALUE)) {
             Picasso.with(this)
                     .load(urlProfilePic)
                     .placeholder(R.drawable.default_profile_pic) // optional
@@ -331,8 +331,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
 
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId =  settings.getInt(HTConstants.USER_ID, -1);
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        int userId =  settings.getInt(Constants.USER_ID, -1);
 
         User user = new User(firstName, lastName);
 
@@ -349,8 +349,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
                     SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putString(HTConstants.HYPERTRACK_DRIVER_ID, response.body().getHypertrackDriverID());
-                    editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
+                    editor.putString(Constants.HYPERTRACK_DRIVER_ID, response.body().getHypertrackDriverID());
+                    editor.putString(Constants.USER_PROFILE_PIC, response.body().getPhoto());
                     editor.putBoolean("isUserOnboard", true);
                     editor.apply();
 
@@ -381,8 +381,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
 
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId =  settings.getInt(HTConstants.USER_ID, -1);
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        int userId =  settings.getInt(Constants.USER_ID, -1);
 
         RequestBody requestBody =
                 RequestBody.create(MediaType.parse("image/*"), saveBitmapToFile(profileImage));
@@ -402,7 +402,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
                     SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = settings.edit();
-                    editor.putString(HTConstants.USER_PROFILE_PIC, response.body().getPhoto());
+                    editor.putString(Constants.USER_PROFILE_PIC, response.body().getPhoto());
                     editor.apply();
                 } else {
                     Log.d(TAG, "User profile could not be uploaded");

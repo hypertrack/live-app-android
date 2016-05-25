@@ -11,7 +11,7 @@ import com.google.android.gms.iid.InstanceID;
 
 import java.io.IOException;
 
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.Constants;
 
 /**
  * Created by suhas on 04/01/16.
@@ -41,9 +41,9 @@ public class RegistrationIntentService extends IntentService {
 
     private void updateRegistrationToken(String token) {
 
-            SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+            SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedpreferences.edit();
-            editor.putString(HTConstants.GCM_REGISTRATION_TOKEN, token);
+            editor.putString(Constants.GCM_REGISTRATION_TOKEN, token);
             editor.apply();
 
     }

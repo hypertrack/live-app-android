@@ -11,14 +11,14 @@ import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.interactor.callback.OnRegisterCallback;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class RegisterInteractor {
 
     public void registerPhoneNumber(String number, final OnRegisterCallback onRegisterCallback) {
 
-        String url = HTConstants.API_ENDPOINT + "/api/v1/users/";
+        String url = Constants.API_ENDPOINT + "/api/v1/users/";
 
         User user = new User(number);
         Gson gson = new Gson();

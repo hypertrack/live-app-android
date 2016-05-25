@@ -9,7 +9,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.Country;
@@ -30,7 +28,7 @@ import io.hypertrack.meta.model.CountryMaster;
 import io.hypertrack.meta.model.CountrySpinnerAdapter;
 import io.hypertrack.meta.presenter.IRegisterPresenter;
 import io.hypertrack.meta.presenter.RegisterPresenter;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
@@ -67,7 +65,7 @@ public class Login extends AppCompatActivity implements RegisterView {
         registerPresenter.attachView(this);
 
         initCountryFlagSpinner();
-        poulatePhoneNumberIfAvailable();
+//        poulatePhoneNumberIfAvailable();
 
         if(!checkPermission()) {
             requestPermission();
@@ -116,27 +114,27 @@ public class Login extends AppCompatActivity implements RegisterView {
 
     }
 
-    private void poulatePhoneNumberIfAvailable() {
-        TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
-        String number = tm.getLine1Number();
+//    private void poulatePhoneNumberIfAvailable() {
+//        TelephonyManager tm = (TelephonyManager)getSystemService(TELEPHONY_SERVICE);
+//        String number = tm.getLine1Number();
+//
+//        if(!TextUtils.isEmpty(number)) {
+//            phoneNumberView.setText(number);
+//        }
+//    }
 
-        if(!TextUtils.isEmpty(number)) {
-            phoneNumberView.setText(number);
-        }
-    }
-
-    @OnClick(R.id.verify)
-    public void verifyPhoneNumber() {
-
-        String number = phoneNumberView.getText().toString();
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.registration_phone_number));
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
-
-        registerPresenter.attemptRegistration(number, isoCode);
-    }
+//    @OnClick(R.id.verify)
+//    public void verifyPhoneNumber() {
+//
+//        String number = phoneNumberView.getText().toString();
+//
+//        mProgressDialog = new ProgressDialog(this);
+//        mProgressDialog.setMessage(getString(R.string.registration_phone_number));
+//        mProgressDialog.setCancelable(false);
+//        mProgressDialog.show();
+//
+//        registerPresenter.attemptRegistration(number, isoCode);
+//    }
 
     private static final int PERMISSION_REQUEST_CODE = 1;
 
@@ -189,7 +187,7 @@ public class Login extends AppCompatActivity implements RegisterView {
         int userId = sharedPreferenceManager.getUserId();
 
         Intent intent = new Intent(Login.this, Verify.class);
-        intent.putExtra(HTConstants.USER_ID, userId);
+        intent.putExtra(Constants.USER_ID, userId);
         startActivity(intent);
 
     }

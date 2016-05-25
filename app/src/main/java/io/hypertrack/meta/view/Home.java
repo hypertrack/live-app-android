@@ -88,7 +88,6 @@ import java.util.TimeZone;
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.network.HTGson;
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
@@ -110,7 +109,7 @@ import io.hypertrack.meta.model.MetaLocation;
 import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
@@ -306,7 +305,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         MapsInitializer.initialize(getApplicationContext());
 
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
 
         checkIfUseIsOnBoard();
 
@@ -368,7 +367,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         boolean isUserOnboard = sharedPreferenceManager.isUserOnBoard();
         if (!isUserOnboard
                 || sharedPreferenceManager.getHyperTrackDriverID() == null
-                || sharedPreferenceManager.getHyperTrackDriverID().equalsIgnoreCase(HTConstants.DEFAULT_STRING_VALUE)) {
+                || sharedPreferenceManager.getHyperTrackDriverID().equalsIgnoreCase(Constants.DEFAULT_STRING_VALUE)) {
             startActivity(new Intent(this, Login.class));
             finish();
         }
@@ -386,8 +385,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private String getImageToPreferences() {
-        SharedPreferences myPrefrence = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return myPrefrence.getString(HTConstants.USER_PROFILE_PIC_ENCODED, "None");
+        SharedPreferences myPrefrence = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return myPrefrence.getString(Constants.USER_PROFILE_PIC_ENCODED, "None");
     }
 
     public static Bitmap decodeToBase64(String decodeImageString) {
@@ -431,8 +430,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
         profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
 
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String urlProfilePic = settings.getString(HTConstants.USER_PROFILE_PIC, null);
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String urlProfilePic = settings.getString(Constants.USER_PROFILE_PIC, null);
 
         if(!TextUtils.isEmpty(urlProfilePic)) {
             Picasso.with(this)
@@ -472,7 +471,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private int getUserIdFromPreferences() {
         SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-        return settings.getInt(HTConstants.USER_ID, -1);
+        return settings.getInt(Constants.USER_ID, -1);
     }
 
     @Override
@@ -500,13 +499,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void endTrip() {
 
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putBoolean(HTConstants.TRIP_STATUS, false);
-        editor.putString(HTConstants.TRIP_SHARE_URI, "None");
-        editor.putString(HTConstants.TRIP_ETA, "None");
-        editor.putString(HTConstants.TRIP_DESTINATION, "None");
-        editor.putString(HTConstants.TASK_ID, "None");
+        editor.putBoolean(Constants.TRIP_STATUS, false);
+        editor.putString(Constants.TRIP_SHARE_URI, "None");
+        editor.putString(Constants.TRIP_ETA, "None");
+        editor.putString(Constants.TRIP_DESTINATION, "None");
+        editor.putString(Constants.TASK_ID, "None");
         editor.apply();
 
         tripId = null;
@@ -764,18 +763,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void updateDeviceInfo() {
 
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String token = sharedpreferences.getString(HTConstants.GCM_REGISTRATION_TOKEN, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String token = sharedpreferences.getString(Constants.GCM_REGISTRATION_TOKEN, "None");
 
-        SharedPreferences settings = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId =  settings.getInt(HTConstants.USER_ID, -1);
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        int userId =  settings.getInt(Constants.USER_ID, -1);
 
         if (TextUtils.equals("None", token) || userId == -1){
             return;
         }
 
-        String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+ userId +"/add_device/";
-        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userId +"/add_device/";
+        Constants.setPublishableApiKey(getTokenFromSharedPreferences());
 
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
         DeviceInfo deviceInfo = new DeviceInfo();
@@ -818,11 +817,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        String url = HTConstants.API_ENDPOINT + "/api/v1/eta/?origin="
+        String url = Constants.API_ENDPOINT + "/api/v1/eta/?origin="
                 + currentLocation.latitude + "," + currentLocation.longitude
                 + "&destination=" + destinationLocation.latitude + "," + destinationLocation.longitude;
 
-        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+        Constants.setPublishableApiKey(getTokenFromSharedPreferences());
 
         Log.d(TAG, "Url: " + url + "Token: " + getTokenFromSharedPreferences());
 
@@ -854,9 +853,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void saveTripEtaInSharePreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(HTConstants.TRIP_ETA, String.valueOf(etaInMinutes));
+        editor.putString(Constants.TRIP_ETA, String.valueOf(etaInMinutes));
         editor.commit();
     }
 
@@ -926,8 +925,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void createTask() {
-        String createTaskAPI = HTConstants.API_ENDPOINT + "/api/v1/users/" + userId + "/create_task/";
-        HTConstants.setPublishableApiKey(getTokenFromSharedPreferences());
+        String createTaskAPI = Constants.API_ENDPOINT + "/api/v1/users/" + userId + "/create_task/";
+        Constants.setPublishableApiKey(getTokenFromSharedPreferences());
 
         Gson gson = HTGson.gson();
         String jsonBody = gson.toJson(customAddress);
@@ -1017,26 +1016,26 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     public void saveTripInSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(HTConstants.TRIP_ID, tripId);
-        editor.putString(HTConstants.TASK_ID, taskID);
-        editor.putBoolean(HTConstants.TRIP_STATUS, true);
+        editor.putString(Constants.TRIP_ID, tripId);
+        editor.putString(Constants.TASK_ID, taskID);
+        editor.putBoolean(Constants.TRIP_STATUS, true);
         editor.apply();
     }
 
     public void saveTripDestinationSharedPreferences(LatLng destinationLocation) {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
         Gson gson = HTGson.gson();
         String json = gson.toJson(destinationLocation);
-        editor.putString(HTConstants.TRIP_DESTINATION, json);
+        editor.putString(Constants.TRIP_DESTINATION, json);
         editor.apply();
     }
 
     public LatLng getTripDestinationFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String latLngString = sharedpreferences.getString(HTConstants.TRIP_DESTINATION, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String latLngString = sharedpreferences.getString(Constants.TRIP_DESTINATION, "None");
         Gson gson = HTGson.gson();
         if (!TextUtils.isEmpty(latLngString)) {
             return gson.fromJson(latLngString,LatLng.class);
@@ -1046,44 +1045,44 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     public String getTripFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.TRIP_ID, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(Constants.TRIP_ID, "None");
     }
 
     public String getTaskFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.TASK_ID, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(Constants.TASK_ID, "None");
     }
 
     public String getUserProfilePicFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(Constants.USER_PROFILE_PIC, "None");
     }
 
     public String getTripShareUrlInSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.TRIP_SHARE_URI, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(Constants.TRIP_SHARE_URI, "None");
     }
 
     public String getTokenFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(Constants.USER_AUTH_TOKEN, "None");
     }
 
     public String getTripEtaFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(HTConstants.TRIP_ETA, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getString(Constants.TRIP_ETA, "None");
     }
 
     public boolean getTripStatusFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getBoolean(HTConstants.TRIP_STATUS, false);
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedpreferences.getBoolean(Constants.TRIP_STATUS, false);
     }
 
     public void saveTripShareUrlInSharedPreferences(String tripUri) {
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(HTConstants.TRIP_SHARE_URI, tripUri);
+        editor.putString(Constants.TRIP_SHARE_URI, tripUri);
         editor.commit();
     }
 
@@ -1093,7 +1092,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         Gson gson = HTGson.gson();
         String jsonBody = gson.toJson(userTrip);
 
-        String url = HTConstants.API_ENDPOINT + "/api/v1/trips/";
+        String url = Constants.API_ENDPOINT + "/api/v1/trips/";
 
         HTCustomPostRequest<UserTrip> requestObject = new HTCustomPostRequest<UserTrip>(1, url,
                 jsonBody, UserTrip.class,
@@ -1143,7 +1142,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void notifySelectedContact(String number) {
 
-        String url = HTConstants.API_ENDPOINT + "/api/v1/trips/" + metaId + "/send_eta/";
+        String url = Constants.API_ENDPOINT + "/api/v1/trips/" + metaId + "/send_eta/";
         String[] recipientArray = {number};
 
         ETARecipients etaRecipients = new ETARecipients();
