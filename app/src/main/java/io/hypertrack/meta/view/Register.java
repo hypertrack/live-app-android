@@ -11,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.Country;
@@ -32,9 +35,9 @@ import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
-public class Login extends AppCompatActivity implements RegisterView {
+public class Register extends AppCompatActivity implements RegisterView {
 
-    private static final String TAG = Login.class.getSimpleName();
+    private static final String TAG = Register.class.getSimpleName();
 
     @Bind(R.id.phoneNumber)
     public EditText phoneNumberView;
@@ -50,7 +53,6 @@ public class Login extends AppCompatActivity implements RegisterView {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
@@ -59,9 +61,7 @@ public class Login extends AppCompatActivity implements RegisterView {
         toolbar.setTitle("Verify");
 
         ButterKnife.bind(this);
-
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-
         registerPresenter.attachView(this);
 
         initCountryFlagSpinner();
@@ -79,8 +79,6 @@ public class Login extends AppCompatActivity implements RegisterView {
     }
 
     private void initCountryFlagSpinner() {
-
-
         CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
         String countryIsoCode = cm.getDefaultCountryIso();
@@ -123,19 +121,6 @@ public class Login extends AppCompatActivity implements RegisterView {
 //        }
 //    }
 
-//    @OnClick(R.id.verify)
-//    public void verifyPhoneNumber() {
-//
-//        String number = phoneNumberView.getText().toString();
-//
-//        mProgressDialog = new ProgressDialog(this);
-//        mProgressDialog.setMessage(getString(R.string.registration_phone_number));
-//        mProgressDialog.setCancelable(false);
-//        mProgressDialog.show();
-//
-//        registerPresenter.attemptRegistration(number, isoCode);
-//    }
-
     private static final int PERMISSION_REQUEST_CODE = 1;
 
     private boolean checkPermission(){
@@ -174,27 +159,47 @@ public class Login extends AppCompatActivity implements RegisterView {
 
     @Override
     public void registrationFailed() {
-
         mProgressDialog.dismiss();
-        Toast.makeText(Login.this, "Apologies, we could process your request at this moment.", Toast.LENGTH_LONG).show();
+        Toast.makeText(Register.this, "Apologies, we could process your request at this moment.", Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void navigateToVerificationScreen() {
-
         mProgressDialog.dismiss();
 
         int userId = sharedPreferenceManager.getUserId();
 
-        Intent intent = new Intent(Login.this, Verify.class);
+        Intent intent = new Intent(Register.this, Verify.class);
         intent.putExtra(Constants.USER_ID, userId);
         startActivity(intent);
-
     }
 
     @Override
     public void showValidationError() {
         mProgressDialog.dismiss();
         phoneNumberView.setError("Please enter a valid number.");
+    }
+
+    /** Action bar menu methods */
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_register, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onNextButtonClicked(MenuItem menuItem) {
+        this.registerPhoneNumber();
+    }
+
+    private void registerPhoneNumber() {
+        String number = phoneNumberView.getText().toString();
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.registration_phone_number));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        registerPresenter.attemptRegistration(number, isoCode);
     }
 }

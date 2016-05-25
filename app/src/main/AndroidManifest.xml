@@ -44,7 +44,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.Login"
+            android:name=".view.Register"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
@@ -52,13 +52,13 @@
         <activity
             android:name=".view.Verify"
             android:label="@string/title_activity_verify"
-            android:parentActivityName=".view.Login"
+            android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.Login" />
+                android:value=".view.Register" />
         </activity>
 
         <receiver android:name=".util.SMSReceiver">

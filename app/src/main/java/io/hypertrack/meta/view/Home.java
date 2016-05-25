@@ -368,7 +368,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (!isUserOnboard
                 || sharedPreferenceManager.getHyperTrackDriverID() == null
                 || sharedPreferenceManager.getHyperTrackDriverID().equalsIgnoreCase(Constants.DEFAULT_STRING_VALUE)) {
-            startActivity(new Intent(this, Login.class));
+            startActivity(new Intent(this, Register.class));
             finish();
         }
     }

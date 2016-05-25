@@ -37,5 +37,12 @@
     <string name="geofence_transition_invalid_type">
         Geofence transition error: invalid transition type %1$d
     </string>
+
+    <!-- Progress bar strings -->
     <string name="registration_phone_number">Registering phone number...</string>
+    <string name="verifying_phone_number">Verifying phone number...</string>
+
+    <!-- Action bar strings -->
+    <string name="next">Next</string>
+    <string name="verify">Verify</string>
 </resources>
