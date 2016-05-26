@@ -20,7 +20,7 @@
         completions."
     </string>
     <string name="title_activity_login">Register</string>
-    <string name="title_activity_generated_login">Sign in</string>
+    <string name="title_activity_generated_login">Profile</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="title_activity_verify">Verify</string>
     <string name="title_activity_maps">Map</string>

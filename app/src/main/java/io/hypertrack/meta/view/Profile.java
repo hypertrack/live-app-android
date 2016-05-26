@@ -20,6 +20,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -80,9 +82,6 @@ public class Profile extends AppCompatActivity implements ProfileView {
     @Bind(R.id.login_form)
     public View mProfileFormView;
 
-    @Bind(R.id.email_sign_in_button)
-    public Button mEmailSignInButton;
-
     private File profileImage;
 
     private SharedPreferenceManager sharedPreferenceManager;
@@ -111,9 +110,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         super.onDestroy();
     }
 
-    @OnClick(R.id.email_sign_in_button)
-    public void onSignInButtonClicked() {
-
+    private void onSignInButtonClicked() {
         showProgress(true);
 
         String firstName = mFirstNameView.getText().toString();
@@ -121,7 +118,6 @@ public class Profile extends AppCompatActivity implements ProfileView {
         int userId = sharedPreferenceManager.getUserId();
 
         presenter.attemptLogin(firstName, lastName, userId, saveBitmapToFile(profileImage));
-        //attemptLogin();
     }
 
     @OnClick(R.id.profileImageView)
@@ -447,6 +443,18 @@ public class Profile extends AppCompatActivity implements ProfileView {
         showProgress(false);
         mLastNameView.setError(getString(R.string.error_field_required));
         mLastNameView.requestFocus();
+    }
+
+    /** Action bar menu methods */
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_profile, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onNextButtonClicked(MenuItem menuItem) {
+        this.onSignInButtonClicked();
     }
 }
 
