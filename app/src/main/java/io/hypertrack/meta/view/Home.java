@@ -1403,8 +1403,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         Calendar now = Calendar.getInstance();
         now.add(Calendar.MINUTE, etaInMinutes);
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm");
-        return df.format(now.getTime());
+        SimpleDateFormat df = new SimpleDateFormat("h:ma");
+        String format = df.format(now.getTime());
+
+        format = format.replace("AM", "a");
+        format = format.replace("PM", "p");
+
+        return format;
     }
 
     public boolean isNetworkAvailable() {
