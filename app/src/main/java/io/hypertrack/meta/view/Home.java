@@ -1406,8 +1406,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         SimpleDateFormat df = new SimpleDateFormat("h:ma");
         String format = df.format(now.getTime());
 
-        format = format.replace("AM", "a");
-        format = format.replace("PM", "p");
+        format = format.toLowerCase();
+        format = format.replace("am", "a");
+        format = format.replace("pm", "p");
 
         return format;
     }
