@@ -17,6 +17,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
@@ -24,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -36,6 +38,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -46,9 +49,11 @@ import butterknife.OnClick;
 import io.hypertrack.meta.BuildConfig;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.SavedPlacesAdapter;
+import io.hypertrack.meta.model.Place;
 import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.network.retrofit.SendEtaService;
+import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
 import io.hypertrack.meta.util.Constants;
@@ -82,6 +87,9 @@ public class Profile extends AppCompatActivity implements ProfileView {
     @Bind(R.id.login_form)
     public View mProfileFormView;
 
+    @Bind(R.id.recycler_view)
+    public RecyclerView mRecyclerView;
+
     private File profileImage;
 
     private SharedPreferenceManager sharedPreferenceManager;
@@ -92,6 +100,11 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setTitle("Profile");
+
         ButterKnife.bind(this);
 
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
@@ -127,19 +140,19 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     private void populateAutoComplete() {
 
-        String userFirstName =  sharedPreferenceManager.getFirstName();
-        String userLastName =  sharedPreferenceManager.getLastName();
+        String userFirstName = sharedPreferenceManager.getFirstName();
+        String userLastName = sharedPreferenceManager.getLastName();
         String urlProfilePic = sharedPreferenceManager.getUserPhoto();
 
-        if(!TextUtils.equals(userFirstName, Constants.DEFAULT_STRING_VALUE)) {
+        if (!TextUtils.equals(userFirstName, Constants.DEFAULT_STRING_VALUE)) {
             mFirstNameView.setText(userFirstName);
         }
 
-        if(!TextUtils.equals(userLastName, Constants.DEFAULT_STRING_VALUE)) {
+        if (!TextUtils.equals(userLastName, Constants.DEFAULT_STRING_VALUE)) {
             mLastNameView.setText(userLastName);
         }
 
-        if(!TextUtils.equals(urlProfilePic, Constants.DEFAULT_STRING_VALUE)) {
+        if (!TextUtils.equals(urlProfilePic, Constants.DEFAULT_STRING_VALUE)) {
             Picasso.with(this)
                     .load(urlProfilePic)
                     .placeholder(R.drawable.default_profile_pic) // optional
@@ -147,6 +160,20 @@ public class Profile extends AppCompatActivity implements ProfileView {
                     .into(mProfileImageButton);
         }
 
+        // Modify Profile Screen UI for a LoggedIn User
+        if (sharedPreferenceManager.isUserLoggedIn()) {
+
+            // Set Linear Layout Manager for Recycler View
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+            linearLayoutManager.setAutoMeasureEnabled(true);
+            mRecyclerView.setLayoutManager(linearLayoutManager);
+
+            mRecyclerView.setAdapter(new SavedPlacesAdapter(sharedPreferenceManager.getSavedPlaces()));
+
+            // Make User's Saved Locations Recycler View Visible
+            mRecyclerView.setVisibility(View.VISIBLE);
+
+        }
     }
 
 
@@ -207,7 +234,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
                     exif = new ExifInterface(imageFile.getName());
                     String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-                    int orientation = orientString != null ? Integer.parseInt(orientString) :  ExifInterface.ORIENTATION_NORMAL;
+                    int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
 
                     int rotationAngle = 0;
                     if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
@@ -227,16 +254,16 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     private static final int PERMISSION_REQUEST_CODE = 1;
 
-    private boolean checkPermission(){
+    private boolean checkPermission() {
 
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
         return result == PackageManager.PERMISSION_GRANTED;
 
     }
 
-    private void requestPermission(){
+    private void requestPermission() {
 
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
             Toast.makeText(this, "Storage access permission allows read and write image files related to you profile pic. Please allow in App Settings for additional functionality.", Toast.LENGTH_LONG).show();
 
@@ -257,14 +284,14 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
                 } else {
 
-                    Toast.makeText(this,"Permission Denied, You cannot access storage.",Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permission Denied, You cannot access storage.", Toast.LENGTH_LONG).show();
 
                 }
                 break;
         }
     }
 
-    public File saveBitmapToFile(File file){
+    public File saveBitmapToFile(File file) {
         try {
 
             // BitmapFactory options to downsize the image
@@ -279,11 +306,11 @@ public class Profile extends AppCompatActivity implements ProfileView {
             inputStream.close();
 
             // The new size we want to scale to
-            final int REQUIRED_SIZE=75;
+            final int REQUIRED_SIZE = 75;
 
             // Find the correct scale value. It should be the power of 2.
             int scale = 1;
-            while(o.outWidth / scale / 2 >= REQUIRED_SIZE &&
+            while (o.outWidth / scale / 2 >= REQUIRED_SIZE &&
                     o.outHeight / scale / 2 >= REQUIRED_SIZE) {
                 scale *= 2;
             }
@@ -298,7 +325,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
             // here i override the original image file
             file.createNewFile();
             FileOutputStream outputStream = new FileOutputStream(file);
-            selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50 , outputStream);
+            selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
             saveImageToPreferences(encodeToBase64(selectedBitmap));
 
             return file;
@@ -328,7 +355,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
 
         SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId =  settings.getInt(Constants.USER_ID, -1);
+        int userId = settings.getInt(Constants.USER_ID, -1);
 
         User user = new User(firstName, lastName);
 
@@ -378,7 +405,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
 
         SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId =  settings.getInt(Constants.USER_ID, -1);
+        int userId = settings.getInt(Constants.USER_ID, -1);
 
         RequestBody requestBody =
                 RequestBody.create(MediaType.parse("image/*"), saveBitmapToFile(profileImage));
@@ -445,16 +472,28 @@ public class Profile extends AppCompatActivity implements ProfileView {
         mLastNameView.requestFocus();
     }
 
-    /** Action bar menu methods */
+    /**
+     * Action bar menu methods
+     */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
+
+        if (sharedPreferenceManager != null && sharedPreferenceManager.isUserLoggedIn()) {
+            menu.getItem(0).setTitle("Next");
+            invalidateOptionsMenu();
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
     public void onNextButtonClicked(MenuItem menuItem) {
-        this.onSignInButtonClicked();
+        if (sharedPreferenceManager != null && sharedPreferenceManager.isUserLoggedIn()) {
+            // Implement Next Functionality here
+        } else {
+            this.onSignInButtonClicked();
+        }
     }
 }
 

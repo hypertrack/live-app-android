@@ -43,7 +43,7 @@ public class ProfileInteractor {
                     SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
                     sharedPreferenceManager.setHyperTrackDriverID(response.body().getHypertrackDriverID());
                     sharedPreferenceManager.setUserPhoto(response.body().getPhoto());
-                    sharedPreferenceManager.setUserOnBoard(true);
+                    sharedPreferenceManager.setUserLoggedIn(true);
 
                     if (onProfileUpdateCallback != null) {
                         onProfileUpdateCallback.OnSuccess();

@@ -15,50 +15,68 @@
         android:layout_height="match_parent"
         tools:context=".view.Home" />
 
-
-    <AutoCompleteTextView
-        android:id="@+id/autocomplete_places"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:hint="@string/autocomplete_hint"
-        android:singleLine="true"
         android:layout_margin="8dp"
-        android:background="@android:color/white"
-        android:padding="16dp"
-        android:elevation="16dp"/>
+        android:elevation="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <AutoCompleteTextView
+                android:id="@+id/autocomplete_places"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:background="@android:color/white"
+                android:hint="@string/autocomplete_hint"
+                android:padding="16dp"
+                android:singleLine="true" />
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/login_progress"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="@dimen/margin_base"
+            android:indeterminate="true"
+            android:visibility="visible" />
+    </FrameLayout>
 
     <Button
         android:id="@+id/customAddress_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="0dp"
         android:layout_marginBottom="0dp"
-        android:layout_marginRight="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_below="@id/autocomplete_places"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="0dp"
         android:background="@android:color/holo_blue_light"
-        android:textColor="@android:color/white"
+        android:elevation="16dp"
+        android:padding="16dp"
         android:text="Add Custom Address"
-        android:padding="16dp"
-        android:elevation="16dp"
-        android:visibility="visible"/>
-
-
-  <!--  <Button
-        android:id="@+id/endtrip_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="8dp"
-        android:background="@android:color/holo_red_light"
         android:textColor="@android:color/white"
-        android:text="END TRIP"
-        android:padding="16dp"
-        android:elevation="16dp"
-        android:visibility="gone"/>-->
+        android:visibility="gone" />
+
+
+    <!--  <Button
+          android:id="@+id/endtrip_button"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:layout_alignParentBottom="true"
+          android:layout_margin="8dp"
+          android:background="@android:color/holo_red_light"
+          android:textColor="@android:color/white"
+          android:text="END TRIP"
+          android:padding="16dp"
+          android:elevation="16dp"
+          android:visibility="gone"/>-->
 
 
 </RelativeLayout>

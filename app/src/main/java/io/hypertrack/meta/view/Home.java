@@ -24,7 +24,9 @@ import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -223,6 +225,27 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             places.release();
         }
     };
+    private TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            String constraint = s != null ? s.toString() : "";
+
+            if (constraint.length() > 0 ) {
+                mAdapter.getFilter().filter(constraint);
+            }
+        }
+    };
+
     private AdapterView.OnItemClickListener mAutocompleteClickListener
             = new AdapterView.OnItemClickListener() {
         @Override
@@ -324,9 +347,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         mMapFragment.getMapAsync(this);
 
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mBounds,
+                null);
+
         mAutocompleteView = (AutoCompleteTextView)
                 findViewById(R.id.autocomplete_places);
+        mAutocompleteView.setAdapter(mAdapter);
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
+        mAutocompleteView.addTextChangedListener(mTextWatcher);
 
         addAddressButton = (Button) findViewById(R.id.customAddress_button);
         addAddressButton.setOnClickListener(new View.OnClickListener() {
@@ -364,7 +392,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void checkIfUseIsOnBoard() {
 
-        boolean isUserOnboard = sharedPreferenceManager.isUserOnBoard();
+        boolean isUserOnboard = sharedPreferenceManager.isUserLoggedIn();
         if (!isUserOnboard
                 || sharedPreferenceManager.getHyperTrackDriverID() == null
                 || sharedPreferenceManager.getHyperTrackDriverID().equalsIgnoreCase(Constants.DEFAULT_STRING_VALUE)) {
@@ -628,11 +656,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                     currentLocationMarker.remove();
 
                 mBounds = getBounds(location, 100000);
-
-                mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mBounds,
-                        null);
-
-                mAutocompleteView.setAdapter(mAdapter);
 
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 updateCurrentMarkerLocation(location);

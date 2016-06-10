@@ -153,6 +153,8 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
     compile "com.squareup.picasso:picasso:2.4.0"
 
+    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:recyclerview-v7:23.3.0'
 }
 
 task switchToDebug(type: Copy) {

@@ -6,9 +6,8 @@
 
     <item
         android:id="@+id/register_next_item"
-        android:title="@string/next"
         android:onClick="onNextButtonClicked"
-        app:showAsAction="always"
-        />
+        android:title="@string/next"
+        app:showAsAction="always" />
 
 </menu>

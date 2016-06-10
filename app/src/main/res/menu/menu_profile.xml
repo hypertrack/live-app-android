@@ -8,7 +8,5 @@
         android:id="@+id/register_next_item"
         android:title="@string/action_sign_in"
         android:onClick="onNextButtonClicked"
-        app:showAsAction="always"
-        />
-
+        app:showAsAction="always" />
 </menu>

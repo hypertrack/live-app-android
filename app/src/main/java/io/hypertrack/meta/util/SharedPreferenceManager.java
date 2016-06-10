@@ -3,6 +3,10 @@ package io.hypertrack.meta.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.ArrayList;
+
+import io.hypertrack.meta.model.Place;
+
 /**
  * Created by suhas on 25/02/16.
  */
@@ -74,12 +78,12 @@ public class SharedPreferenceManager {
         return sharedpreferences.getString(Constants.HYPERTRACK_DRIVER_ID, Constants.DEFAULT_STRING_VALUE);
     }
 
-    public void setUserOnBoard(boolean flag) {
+    public void setUserLoggedIn(boolean flag) {
         editor.putBoolean(Constants.USER_ONBOARD, flag);
         editor.apply();
     }
 
-    public boolean isUserOnBoard() {
+    public boolean isUserLoggedIn() {
         return sharedpreferences.getBoolean(Constants.USER_ONBOARD, false);
     }
 
@@ -92,4 +96,9 @@ public class SharedPreferenceManager {
         return sharedpreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, Constants.DEFAULT_STRING_VALUE);
     }
 
+    public ArrayList<Place> getSavedPlaces() {
+        ArrayList<Place> places = new ArrayList<>();
+        places.add(0, new Place(1, "Home", "Vasant Vihar", 28.561014, 77.159403));
+        return places;
+    }
 }
