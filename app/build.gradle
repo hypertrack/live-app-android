@@ -130,17 +130,17 @@ dependencies {
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.google.code.gson:gson:2.4'
 
-    debugCompile('io.hypertrack:transmitter:0.4.5:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:0.4.7:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:0.4.5:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.4.7:release@aar') {
         transitive = true;
     }
 
-    debugCompile('io.hypertrack:consumer:0.4.7:debug@aar') {
+    debugCompile('io.hypertrack:consumer:0.4.10:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:consumer:0.4.7:release@aar') {
+    releaseCompile('io.hypertrack:consumer:0.4.10:release@aar') {
         transitive = true;
     }
 
