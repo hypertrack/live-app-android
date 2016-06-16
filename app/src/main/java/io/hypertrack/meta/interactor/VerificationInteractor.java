@@ -59,4 +59,35 @@ public class VerificationInteractor {
 
         MetaApplication.getInstance().addToRequestQueue(request);
     }
+
+    public void resendVerificationCode(int userID, final OnVerificationCallback callback) {
+        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userID + "/resend_verification_code/";
+
+        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
+                1,
+                url,
+                null,
+                null,
+                new Response.Listener<User>() {
+                    @Override
+                    public void onResponse(User response) {
+                        if (callback != null) {
+                            callback.OnSuccess();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Response", "Inside OnError");
+
+                        if (callback != null) {
+                            callback.OnError();
+                        }
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(request);
+    }
 }

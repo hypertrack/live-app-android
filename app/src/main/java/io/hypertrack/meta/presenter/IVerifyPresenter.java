@@ -5,4 +5,5 @@ package io.hypertrack.meta.presenter;
  */
 public interface IVerifyPresenter<V> extends Presenter<V> {
     void attemptVerification(String verificationCode, int userId);
+    void resendVerificationCode(int userID);
 }

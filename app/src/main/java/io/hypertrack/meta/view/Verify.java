@@ -163,4 +163,10 @@ public class Verify extends AppCompatActivity implements VerifyView {
             this.verifyCode();
         }
     }
+
+    @OnClick(R.id.btn_resend)
+    public void resendButtonClicked(Button button) {
+        int userId = sharedPreferenceManager.getUserId();
+        presenter.resendVerificationCode(userId);
+    }
 }

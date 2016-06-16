@@ -115,4 +115,16 @@
         </RelativeLayout>
         
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_resend"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/verfication_code_view"
+        android:layout_marginTop="@dimen/margin_high"
+        android:background="@null"
+        android:textColor="@color/colorAccent"
+        android:text="Resend"
+        />
 </RelativeLayout>

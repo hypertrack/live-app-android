@@ -47,4 +47,21 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
             }
         }
     }
+
+    @Override
+    public void resendVerificationCode(int userID) {
+        verificationInteractor.resendVerificationCode(userID, new OnVerificationCallback() {
+                    @Override
+                    public void OnSuccess() {
+
+                    }
+
+                    @Override
+                    public void OnError() {
+
+                    }
+                }
+
+        );
+    }
 }
