@@ -3,50 +3,62 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
 
-    <!-- Register progress -->
-    <ProgressBar
-        android:id="@+id/login_progress"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <ImageButton
+        android:id="@+id/profileImageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="@dimen/margin_high"
-        android:layout_marginTop="@dimen/margin_high"
-        android:visibility="gone" />
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:padding="0dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/default_profile_pic"
+        android:layout_marginTop="@dimen/margin_xhigh"/>
 
-    <ScrollView
-        android:id="@+id/login_form"
+    <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="@dimen/padding_high">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xhigh"
+        android:background="@drawable/theme"
+        android:layout_marginStart="@dimen/margin_base"
+        android:layout_marginEnd="@dimen/margin_base">
 
-        <LinearLayout
+        <AutoCompleteTextView
+            android:id="@+id/firstName"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="60dp"
+            android:hint="@string/prompt_firstname"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:paddingStart="@dimen/padding_base"
+            android:paddingEnd="@dimen/padding_base"
+            android:paddingTop="@dimen/padding_base"/>
 
-            <include layout="@layout/layout_edit_profile" />
+    </android.support.design.widget.TextInputLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_high"
-                android:fontFamily="sans-serif-medium"
-                android:text="Favourite Places"
-                android:textColor="@color/text_base"
-                android:textSize="@dimen/text_medium" />
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/theme"
+        android:layout_marginStart="@dimen/margin_base"
+        android:layout_marginEnd="@dimen/margin_base"
+        android:layout_marginTop="@dimen/margin_base">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_medium"
-                android:visibility="gone"
-                tools:visibility="visible">
+        <AutoCompleteTextView
+            android:id="@+id/lastName"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="@string/prompt_lastname"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:paddingStart="@dimen/padding_base"
+            android:paddingEnd="@dimen/padding_base"
+            android:paddingTop="@dimen/padding_base"/>
+    </android.support.design.widget.TextInputLayout>
 
-            </android.support.v7.widget.RecyclerView>
-        </LinearLayout>
-    </ScrollView>
 </LinearLayout>

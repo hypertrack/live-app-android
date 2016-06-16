@@ -76,19 +76,10 @@ public class Profile extends AppCompatActivity implements ProfileView {
     public AutoCompleteTextView mFirstNameView;
 
     @Bind(R.id.lastName)
-    public EditText mLastNameView;
+    public AutoCompleteTextView mLastNameView;
 
     @Bind(R.id.profileImageView)
     public ImageButton mProfileImageButton;
-
-    @Bind(R.id.login_progress)
-    public View mProgressView;
-
-    @Bind(R.id.login_form)
-    public View mProfileFormView;
-
-    @Bind(R.id.recycler_view)
-    public RecyclerView mRecyclerView;
 
     private File profileImage;
 
@@ -164,14 +155,14 @@ public class Profile extends AppCompatActivity implements ProfileView {
         if (sharedPreferenceManager.isUserLoggedIn()) {
 
             // Set Linear Layout Manager for Recycler View
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-            linearLayoutManager.setAutoMeasureEnabled(true);
-            mRecyclerView.setLayoutManager(linearLayoutManager);
-
-            mRecyclerView.setAdapter(new SavedPlacesAdapter(sharedPreferenceManager.getSavedPlaces()));
-
-            // Make User's Saved Locations Recycler View Visible
-            mRecyclerView.setVisibility(View.VISIBLE);
+//            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+//            linearLayoutManager.setAutoMeasureEnabled(true);
+//            mRecyclerView.setLayoutManager(linearLayoutManager);
+//
+//            mRecyclerView.setAdapter(new SavedPlacesAdapter(sharedPreferenceManager.getSavedPlaces()));
+//
+//            // Make User's Saved Locations Recycler View Visible
+//            mRecyclerView.setVisibility(View.VISIBLE);
 
         }
     }
@@ -185,32 +176,32 @@ public class Profile extends AppCompatActivity implements ProfileView {
         // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
         // for very easy animations. If available, use these APIs to fade-in
         // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mProfileFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+//            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+//
+//            mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+//            mProfileFormView.animate().setDuration(shortAnimTime).alpha(
+//                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+//                }
+//            });
+//
+//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            mProgressView.animate().setDuration(shortAnimTime).alpha(
+//                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation) {
+//                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//                }
+//            });
+//        } else {
+//            // The ViewPropertyAnimator APIs are not available, so simply show
+//            // and hide the relevant UI components.
+//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+//            mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+//        }
     }
 
     @Override

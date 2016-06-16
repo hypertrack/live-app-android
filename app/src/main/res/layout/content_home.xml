@@ -42,7 +42,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="@dimen/margin_base"
+            android:layout_marginEnd="@dimen/margin_base"
             android:indeterminate="true"
             android:visibility="gone" />
     </FrameLayout>

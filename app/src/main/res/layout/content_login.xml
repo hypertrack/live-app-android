@@ -43,9 +43,10 @@
                 android:id="@+id/phoneNumber"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:hint="Enter Phone Number"
+                android:hint="@string/enter_phone_number"
                 android:imeActionId="@+id/login"
-                android:inputType="phone" />
+                android:inputType="phone"
+                android:textColorHint="@color/colorPrimaryDark"/>
             <requestFocus />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
