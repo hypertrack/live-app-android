@@ -58,7 +58,7 @@ public class Register extends AppCompatActivity implements RegisterView {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle("Verify");
+        toolbar.setTitle(getString(R.string.title_activity_login));
 
         ButterKnife.bind(this);
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
@@ -145,13 +145,9 @@ public class Register extends AppCompatActivity implements RegisterView {
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
-
                 } else {
-
                     Toast.makeText(this,"Permission Denied, You cannot access location data.",Toast.LENGTH_LONG).show();
-
                 }
                 break;
         }

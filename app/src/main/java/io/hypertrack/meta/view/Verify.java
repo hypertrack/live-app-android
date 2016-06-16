@@ -104,11 +104,11 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     /** Action bar menu methods */
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_verify, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        getMenuInflater().inflate(R.menu.menu_verify, menu);
+//        return super.onCreateOptionsMenu(menu);
+//    }
 
     public void onVerifyButtonClicked(MenuItem menuItem) {
         this.verifyCode();

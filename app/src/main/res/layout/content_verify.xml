@@ -10,6 +10,18 @@
     android:background="@color/colorBackground"
     tools:showIn="@layout/activity_verify" tools:context=".view.Verify">
 
+    <TextView
+        android:id="@+id/verify_header_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/verify_phone_number_hearder_note"
+        android:textAlignment="center"
+        android:layout_marginTop="@dimen/margin_high"
+        android:layout_marginStart="@dimen/margin_high"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginRight="@dimen/margin_high"
+        android:layout_marginEnd="@dimen/margin_high"/>
+
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -21,5 +33,7 @@
         android:ems="10"
         android:id="@+id/verificationCode"
         android:hint="Verification Code"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/verify_header_text"
+        />
 </RelativeLayout>

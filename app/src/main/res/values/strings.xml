@@ -19,10 +19,10 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
-    <string name="title_activity_login">Register</string>
+    <string name="title_activity_login">Phone Number</string>
     <string name="title_activity_generated_login">Profile</string>
     <string name="prompt_password">Password (optional)</string>
-    <string name="title_activity_verify">Verify</string>
+    <string name="title_activity_verify">Verify Phone</string>
     <string name="title_activity_maps">Map</string>
 
     <string name="not_connected">GoogleApiClient no yet connected. Try again.</string>
@@ -37,6 +37,8 @@
     <string name="geofence_transition_invalid_type">
         Geofence transition error: invalid transition type %1$d
     </string>
+    <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for SendETA</string>
+    <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to %1$s</string>
 
     <!-- Progress bar strings -->
     <string name="registration_phone_number">Registering phone number...</string>

@@ -118,13 +118,13 @@ import io.hypertrack.meta.util.SharedPreferenceManager;
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     public static final int LOITERING_DELAY_MS = 30000;
-    public static final int EXPIRATION_DURATION = 600000;
     private static final String TAG = AppCompatActivity.class.getSimpleName();
     private static final String GEOFENCE_REQUEST_ID = "geofence";
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
     private static final long INTERVAL_TIME = 5000;
     private static final int CUSTOM_ADDRESS_DATA = 101;
+
     protected GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
     private PlaceAutocompleteAdapter mAdapter;
@@ -1425,7 +1425,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         Calendar now = Calendar.getInstance();
         now.add(Calendar.MINUTE, etaInMinutes);
-        SimpleDateFormat df = new SimpleDateFormat("h:ma");
+        SimpleDateFormat df = new SimpleDateFormat("h:mma");
         String format = df.format(now.getTime());
 
         format = format.toLowerCase();
