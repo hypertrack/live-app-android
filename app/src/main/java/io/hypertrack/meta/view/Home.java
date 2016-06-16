@@ -271,6 +271,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             Log.d(TAG, "Called getPlaceById to get Place details for " + placeId);
         }
     };
+
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -283,6 +284,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             Log.d("receiver", "Got message: " + result);
         }
     };
+
     private Button shareButton;
     private SharedPreferenceManager sharedPreferenceManager;
 
@@ -355,14 +357,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAutocompleteView.setAdapter(mAdapter);
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
         mAutocompleteView.addTextChangedListener(mTextWatcher);
-
-        addAddressButton = (Button) findViewById(R.id.customAddress_button);
-        addAddressButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getCustomAddressFromTheUser();
-            }
-        });
 
         shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
 
@@ -1260,11 +1254,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                         .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,customMarkerView))));
 
 
-    }
-
-    private void getCustomAddressFromTheUser() {
-        Intent intent = new Intent(this, AddAddress.class);
-        startActivityForResult(intent, CUSTOM_ADDRESS_DATA);
     }
 
     @Override

@@ -44,39 +44,7 @@
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="@dimen/margin_base"
             android:indeterminate="true"
-            android:visibility="visible" />
+            android:visibility="gone" />
     </FrameLayout>
-
-    <Button
-        android:id="@+id/customAddress_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="0dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginTop="0dp"
-        android:background="@android:color/holo_blue_light"
-        android:elevation="16dp"
-        android:padding="16dp"
-        android:text="Add Custom Address"
-        android:textColor="@android:color/white"
-        android:visibility="gone" />
-
-
-    <!--  <Button
-          android:id="@+id/endtrip_button"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:layout_gravity="center_horizontal"
-          android:layout_alignParentBottom="true"
-          android:layout_margin="8dp"
-          android:background="@android:color/holo_red_light"
-          android:textColor="@android:color/white"
-          android:text="END TRIP"
-          android:padding="16dp"
-          android:elevation="16dp"
-          android:visibility="gone"/>-->
-
 
 </RelativeLayout>

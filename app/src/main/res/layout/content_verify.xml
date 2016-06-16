@@ -10,21 +10,23 @@
     android:background="@color/colorBackground"
     tools:showIn="@layout/activity_verify" tools:context=".view.Verify">
 
+
     <TextView
         android:id="@+id/verify_header_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/verify_phone_number_hearder_note"
         android:textAlignment="center"
-        android:layout_marginTop="@dimen/margin_high"
+        android:layout_marginTop="40dp"
         android:layout_marginStart="@dimen/margin_high"
         android:layout_marginLeft="@dimen/margin_high"
         android:layout_marginRight="@dimen/margin_high"
-        android:layout_marginEnd="@dimen/margin_high"/>
+        android:layout_marginEnd="@dimen/margin_high"
+        android:layout_marginBottom="20dp"/>
 
     <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="1dp"
+        android:layout_height="1dp"
         android:paddingLeft="@dimen/padding_high"
         android:paddingRight="@dimen/padding_high"
         android:layout_marginTop="@dimen/margin_xxhigh"
@@ -32,8 +34,85 @@
         android:inputType="phone"
         android:ems="10"
         android:id="@+id/verificationCode"
-        android:hint="Verification Code"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/verify_header_text"
-        />
+        android:visibility="visible" />
+    
+    <LinearLayout
+        android:id="@+id/verfication_code_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="100dp"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/first_code"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/theme"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/text_extra_large"
+                android:gravity="center"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/second_code"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/theme"
+                android:layout_centerInParent="true"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/text_extra_large"
+                android:gravity="center"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/third_code"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/theme"
+                android:layout_centerInParent="true"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/text_extra_large"
+                android:gravity="center"/>
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/fourth_code"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:background="@drawable/theme"
+                android:layout_alignParentEnd="true"
+                android:textColor="@color/colorAccent"
+                android:textSize="@dimen/text_extra_large"
+                android:gravity="center"/>
+
+        </RelativeLayout>
+        
+    </LinearLayout>
 </RelativeLayout>

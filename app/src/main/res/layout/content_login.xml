@@ -20,7 +20,7 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:orientation="horizontal"
-        android:background="#FFFFFF">
+        android:background="@drawable/theme">
 
         <Spinner
             android:id="@+id/spinner_countries"
