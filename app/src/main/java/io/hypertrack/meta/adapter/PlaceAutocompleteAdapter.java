@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package io.hypertrack.meta;
+package io.hypertrack.meta.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;

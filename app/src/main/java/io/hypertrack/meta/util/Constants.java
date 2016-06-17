@@ -11,8 +11,8 @@ import io.hypertrack.meta.network.HTMultipartRequest;
 /**
  * Created by suhas on 12/11/15.
  */
-public class HTConstants {
-    public static final String TAG = HTConstants.class.getSimpleName();
+public class Constants {
+    public static final String TAG = Constants.class.getSimpleName();
 
     public static final String SHARED_PREFERENCES_NAME = "io.hypertrack.meta";
     public static final String USER_ID = "user_id";

@@ -3,12 +3,16 @@ package io.hypertrack.meta.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.ArrayList;
+
+import io.hypertrack.meta.model.Place;
+
 /**
  * Created by suhas on 25/02/16.
  */
 public class SharedPreferenceManager {
 
-    public static final String pref_name = HTConstants.SHARED_PREFERENCES_NAME;
+    public static final String pref_name = Constants.SHARED_PREFERENCES_NAME;
     SharedPreferences sharedpreferences;
     SharedPreferences.Editor editor;
     Context ctx;
@@ -21,75 +25,80 @@ public class SharedPreferenceManager {
     }
 
     public void setUserId(int id) {
-        editor.putInt(HTConstants.USER_ID, id);
+        editor.putInt(Constants.USER_ID, id);
         editor.apply();
     }
 
     public int getUserId() {
-        return sharedpreferences.getInt(HTConstants.USER_ID, -1);
+        return sharedpreferences.getInt(Constants.USER_ID, -1);
     }
 
     public void setFirstName(String firstName) {
-        editor.putString(HTConstants.USER_FIRSTNAME, firstName);
+        editor.putString(Constants.USER_FIRSTNAME, firstName);
         editor.apply();
     }
 
     public String getFirstName() {
-        return sharedpreferences.getString(HTConstants.USER_FIRSTNAME, HTConstants.DEFAULT_STRING_VALUE);
+        return sharedpreferences.getString(Constants.USER_FIRSTNAME, Constants.DEFAULT_STRING_VALUE);
     }
 
     public void setLastName(String lastName) {
-        editor.putString(HTConstants.USER_LASTNAME, lastName);
+        editor.putString(Constants.USER_LASTNAME, lastName);
         editor.apply();
     }
 
     public String getLastName() {
-        return sharedpreferences.getString(HTConstants.USER_LASTNAME, HTConstants.DEFAULT_STRING_VALUE);
+        return sharedpreferences.getString(Constants.USER_LASTNAME, Constants.DEFAULT_STRING_VALUE);
     }
 
     public void setUserPhoto(String userPhoto) {
-        editor.putString(HTConstants.USER_PROFILE_PIC, userPhoto);
+        editor.putString(Constants.USER_PROFILE_PIC, userPhoto);
         editor.apply();
     }
 
     public String getUserPhoto() {
-        return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC, HTConstants.DEFAULT_STRING_VALUE);
+        return sharedpreferences.getString(Constants.USER_PROFILE_PIC, Constants.DEFAULT_STRING_VALUE);
     }
 
     public void setUserAuthToken(String userAuthToken) {
-        editor.putString(HTConstants.USER_AUTH_TOKEN, userAuthToken);
+        editor.putString(Constants.USER_AUTH_TOKEN, userAuthToken);
         editor.apply();
     }
 
     public String getUserAuthToken() {
-        return sharedpreferences.getString(HTConstants.USER_AUTH_TOKEN, HTConstants.DEFAULT_STRING_VALUE);
+        return sharedpreferences.getString(Constants.USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
     }
 
     public void setHyperTrackDriverID(String courierId) {
-        editor.putString(HTConstants.HYPERTRACK_DRIVER_ID, courierId);
+        editor.putString(Constants.HYPERTRACK_DRIVER_ID, courierId);
         editor.apply();
     }
 
     public String getHyperTrackDriverID() {
-        return sharedpreferences.getString(HTConstants.HYPERTRACK_DRIVER_ID, HTConstants.DEFAULT_STRING_VALUE);
+        return sharedpreferences.getString(Constants.HYPERTRACK_DRIVER_ID, Constants.DEFAULT_STRING_VALUE);
     }
 
-    public void setUserOnBoard(boolean flag) {
-        editor.putBoolean(HTConstants.USER_ONBOARD, flag);
+    public void setUserLoggedIn(boolean flag) {
+        editor.putBoolean(Constants.USER_ONBOARD, flag);
         editor.apply();
     }
 
-    public boolean isUserOnBoard() {
-        return sharedpreferences.getBoolean(HTConstants.USER_ONBOARD, false);
+    public boolean isUserLoggedIn() {
+        return sharedpreferences.getBoolean(Constants.USER_ONBOARD, false);
     }
 
     public void setProfileImage(String encodedImage) {
-        editor.putString(HTConstants.USER_PROFILE_PIC_ENCODED, encodedImage);
+        editor.putString(Constants.USER_PROFILE_PIC_ENCODED, encodedImage);
         editor.apply();
     }
 
     public String getProfileImage() {
-        return sharedpreferences.getString(HTConstants.USER_PROFILE_PIC_ENCODED, HTConstants.DEFAULT_STRING_VALUE);
+        return sharedpreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, Constants.DEFAULT_STRING_VALUE);
     }
 
+    public ArrayList<Place> getSavedPlaces() {
+        ArrayList<Place> places = new ArrayList<>();
+        places.add(0, new Place(1, "Home", "Vasant Vihar", 28.561014, 77.159403));
+        return places;
+    }
 }

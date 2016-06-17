@@ -7,17 +7,18 @@ import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
 import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.model.Verification;
 import io.hypertrack.meta.network.HTCustomPostRequest;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class VerificationInteractor {
 
-    public void validateVerificationCode(final OnVerificationListener onVerificationListener, String verificationCode, int userId) {
+    public void validateVerificationCode(String verificationCode, int userId, final OnVerificationCallback onVerificationCallback) {
 
-        String url = HTConstants.API_ENDPOINT + "/api/v1/users/"+ userId + "/verify_phone_number/";
+        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userId + "/verify_phone_number/";
 
         Verification verification = new Verification(verificationCode);
         Gson gson = new Gson();
@@ -34,19 +35,55 @@ public class VerificationInteractor {
 
                         Log.d("response", response.toString());
 
-                        HTConstants.setPublishableApiKey(response.getToken());
+                        Constants.setPublishableApiKey(response.getToken());
 
                         SharedPreferenceManager spm = new SharedPreferenceManager(MetaApplication.getInstance());
                         spm.setUserAuthToken(response.getToken());
 
-                        onVerificationListener.OnSuccess();
+                        if (onVerificationCallback != null) {
+                            onVerificationCallback.OnSuccess();
+                        }
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("Response", "Inside OnError");
-                        onVerificationListener.OnError();
+
+                        if (onVerificationCallback != null) {
+                            onVerificationCallback.OnError();
+                        }
+                    }
+                }
+        );
+
+        MetaApplication.getInstance().addToRequestQueue(request);
+    }
+
+    public void resendVerificationCode(int userID, final OnVerificationCallback callback) {
+        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userID + "/resend_verification_code/";
+
+        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
+                1,
+                url,
+                null,
+                null,
+                new Response.Listener<User>() {
+                    @Override
+                    public void onResponse(User response) {
+                        if (callback != null) {
+                            callback.OnSuccess();
+                        }
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d("Response", "Inside OnError");
+
+                        if (callback != null) {
+                            callback.OnError();
+                        }
                     }
                 }
         );

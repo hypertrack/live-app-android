@@ -135,7 +135,7 @@ public class Trip extends AppCompatActivity {
         PolylineOptions options = new PolylineOptions().width(10).color(Color.BLUE);
         options.addAll(list);
 
-        htMapFragment.getmMap().addPolyline(options);
+        htMapFragment.getMap().addPolyline(options);
 
         if (list.size() >= 2) {
 
@@ -149,7 +149,7 @@ public class Trip extends AppCompatActivity {
             LatLngBounds bounds = b.build();
 
             CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 200);
-            htMapFragment.getmMap().moveCamera(cu);//Camera(cu, 1000, null);
+            htMapFragment.getMap().moveCamera(cu);//Camera(cu, 1000, null);
         }
     }
 

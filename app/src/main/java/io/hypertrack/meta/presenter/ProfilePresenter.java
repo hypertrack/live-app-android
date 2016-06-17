@@ -5,14 +5,13 @@ import android.text.TextUtils;
 import java.io.File;
 
 import io.hypertrack.meta.interactor.ProfileInteractor;
-import io.hypertrack.meta.interactor.ProfileUpdateListener;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.interactor.callback.OnProfileUpdateCallback;
 import io.hypertrack.meta.view.ProfileView;
 
 /**
  * Created by suhas on 24/02/16.
  */
-public class ProfilePresenter implements Presenter<ProfileView>, ProfileUpdateListener {
+public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private ProfileView view;
     private ProfileInteractor profileInteractor;
@@ -28,6 +27,7 @@ public class ProfilePresenter implements Presenter<ProfileView>, ProfileUpdateLi
         view = null;
     }
 
+    @Override
     public void attemptLogin(String userFirstName, String userLastName, int userId, File profileImage) {
 
         if (TextUtils.isEmpty(userFirstName)) {
@@ -44,21 +44,20 @@ public class ProfilePresenter implements Presenter<ProfileView>, ProfileUpdateLi
             return;
         }
 
-        profileInteractor.updateUserProfileRetro(this, userFirstName, userLastName, userId, profileImage);
-    }
+        profileInteractor.updateUserProfileRetro(userFirstName, userLastName, userId, profileImage, new OnProfileUpdateCallback() {
+            @Override
+            public void OnSuccess() {
+                if (view != null) {
+                    view.navigateToHomeScreen();
+                }
+            }
 
-    @Override
-    public void OnSuccess() {
-        if (view != null) {
-            view.navigateToHomeScreen();
-        }
+            @Override
+            public void OnError() {
+                if (view != null) {
+                    view.showErrorMessage();
+                }
+            }
+        });
     }
-
-    @Override
-    public void OnError() {
-        if (view != null) {
-            view.showErrorMessage();
-        }
-    }
-
 }

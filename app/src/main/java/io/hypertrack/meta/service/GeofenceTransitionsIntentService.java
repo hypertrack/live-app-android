@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.service;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -6,18 +6,18 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-
-import java.util.List;
 
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
-import io.hypertrack.meta.util.HTConstants;
+import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.util.GeofenceErrorMessages;
+import io.hypertrack.meta.R;
+import io.hypertrack.meta.util.Constants;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -72,9 +72,9 @@ public class GeofenceTransitionsIntentService extends IntentService {
                 Log.v(TAG, "User is dwelling in geo fence.");
                 sendMessage();
 
-                SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+                SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putBoolean(HTConstants.TRIP_STATUS, false);
+                editor.putBoolean(Constants.TRIP_STATUS, false);
                 editor.commit();
 
             } else {
@@ -88,8 +88,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
     private void sendMessage() {
 
-        SharedPreferences sharedpreferences = getSharedPreferences(HTConstants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String tripId = sharedpreferences.getString(HTConstants.TRIP_ID, "None");
+        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String tripId = sharedpreferences.getString(Constants.TRIP_ID, "None");
 
         if (tripId.equalsIgnoreCase("None"))
             return;

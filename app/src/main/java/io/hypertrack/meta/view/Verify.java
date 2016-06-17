@@ -9,16 +9,24 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import org.w3c.dom.Text;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.presenter.IVerifyPresenter;
 import io.hypertrack.meta.presenter.VerifyPresenter;
 import io.hypertrack.meta.util.SMSReceiver;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -28,11 +36,20 @@ public class Verify extends AppCompatActivity implements VerifyView {
     @Bind(R.id.verificationCode)
     public EditText verificationCodeView;
 
-    @Bind(R.id.register)
-    public Button registerButtonView;
+    @Bind(R.id.first_code)
+    public TextView firstCodeTextView;
+
+    @Bind(R.id.second_code)
+    public TextView secondCodeTextView;
+
+    @Bind(R.id.third_code)
+    public TextView thirdCodeTextView;
+
+    @Bind(R.id.fourth_code)
+    public TextView fouthCodeTextView;
 
     private ProgressDialog mProgressDialog;
-    private VerifyPresenter presenter;
+    private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
     private SharedPreferenceManager sharedPreferenceManager;
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -41,7 +58,7 @@ public class Verify extends AppCompatActivity implements VerifyView {
             String code = intent.getStringExtra(SMSReceiver.VERIFICATION_CODE);
             if (!TextUtils.isEmpty(code)) {
                 verificationCodeView.setText(code);
-                registerButtonView.callOnClick();
+                verifyCode();
             }
         }
     };
@@ -50,26 +67,46 @@ public class Verify extends AppCompatActivity implements VerifyView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_verify);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
         ButterKnife.bind(this);
-
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-
-        presenter = new VerifyPresenter();
         presenter.attachView(this);
+
+        this.verificationCodeView.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                textChanged();
+            }
+        });
+
+        this.verificationCodeView.requestFocus();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         presenter.detachView();
+        super.onDestroy();
     }
 
     @Override
     protected void onResume() {
-
         super.onResume();
 
         IntentFilter filter = new IntentFilter(SMSReceiver.SENDETA_SMS_RECIEVED);
@@ -81,20 +118,6 @@ public class Verify extends AppCompatActivity implements VerifyView {
         super.onPause();
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-    }
-
-    @OnClick(R.id.register)
-    public void registerPhoneNumber() {
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("verifying code");
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
-
-        String verificationCode = verificationCodeView.getText().toString();
-        int userId = sharedPreferenceManager.getUserId();
-        presenter.attemptVerification(verificationCode, userId);
-
     }
 
     @Override
@@ -113,5 +136,37 @@ public class Verify extends AppCompatActivity implements VerifyView {
     public void showValidationError() {
         mProgressDialog.dismiss();
         verificationCodeView.setError("Please enter valid verification code");
+    }
+
+    /** Action bar menu methods */
+
+    private void verifyCode() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.verifying_phone_number));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        String verificationCode = verificationCodeView.getText().toString();
+        int userId = sharedPreferenceManager.getUserId();
+        presenter.attemptVerification(verificationCode, userId);
+    }
+
+    private void textChanged() {
+        String code = this.verificationCodeView.getText().toString();
+
+        this.firstCodeTextView.setText(code.length() >= 1 ? code.substring(0, 1) : "");
+        this.secondCodeTextView.setText(code.length() >= 2 ? code.substring(1, 2) : "");
+        this.thirdCodeTextView.setText(code.length() >= 3 ? code.substring(2, 3) : "");
+        this.fouthCodeTextView.setText(code.length() >= 4 ? code.substring(3, 4) : "");
+
+        if (code.length() >= 4) {
+            this.verifyCode();
+        }
+    }
+
+    @OnClick(R.id.btn_resend)
+    public void resendButtonClicked(Button button) {
+        int userId = sharedPreferenceManager.getUserId();
+        presenter.resendVerificationCode(userId);
     }
 }

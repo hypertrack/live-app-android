@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorBackground">
+
+    <ImageButton
+        android:id="@+id/profileImageView"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal"
+        android:adjustViewBounds="true"
+        android:background="@android:color/transparent"
+        android:padding="0dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/default_profile_pic"
+        android:layout_marginTop="@dimen/margin_xhigh"/>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_xhigh"
+        android:background="@drawable/theme"
+        android:layout_marginStart="@dimen/margin_base"
+        android:layout_marginEnd="@dimen/margin_base">
+
+        <AutoCompleteTextView
+            android:id="@+id/firstName"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="@string/prompt_firstname"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:paddingStart="@dimen/padding_base"
+            android:paddingEnd="@dimen/padding_base"
+            android:paddingTop="@dimen/padding_base"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/theme"
+        android:layout_marginStart="@dimen/margin_base"
+        android:layout_marginEnd="@dimen/margin_base"
+        android:layout_marginTop="@dimen/margin_base">
+
+        <AutoCompleteTextView
+            android:id="@+id/lastName"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="@string/prompt_lastname"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:paddingStart="@dimen/padding_base"
+            android:paddingEnd="@dimen/padding_base"
+            android:paddingTop="@dimen/padding_base"/>
+    </android.support.design.widget.TextInputLayout>
+
+</LinearLayout>

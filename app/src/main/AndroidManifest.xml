@@ -19,8 +19,10 @@
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE"
+    <permission
+        android:name="io.hypertrack.meta.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -44,21 +46,21 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.Login"
+            android:name=".view.Register"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
         <activity
             android:name=".view.Verify"
             android:label="@string/title_activity_verify"
-            android:parentActivityName=".view.Login"
+            android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.Login" />
+                android:value=".view.Register" />
         </activity>
 
         <receiver android:name=".util.SMSReceiver">
@@ -123,36 +125,40 @@
             android:screenOrientation="portrait" />
 
         <service
-            android:name=".GeofenceTransitionsIntentService"
+            android:name=".service.GeofenceTransitionsIntentService"
             android:exported="false" />
 
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND" >
+            android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <category android:name="io.hypertrack.meta" />
             </intent-filter>
         </receiver>
+
         <service
-            android:name=".GcmListenerService"
-            android:exported="false" >
+            android:name=".service.GcmListenerService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
         <service
-            android:name=".MyInstanceIDListenerService"
+            android:name=".service.MyInstanceIDListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />
             </intent-filter>
         </service>
         <service
-            android:name=".RegistrationIntentService"
-            android:exported="false">
-        </service>
+            android:name=".service.RegistrationIntentService"
+            android:exported="false"></service>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
 
     </application>
 

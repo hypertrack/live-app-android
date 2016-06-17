@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.service;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import io.hypertrack.meta.R;
 import io.hypertrack.meta.view.Trip;
 
 /**

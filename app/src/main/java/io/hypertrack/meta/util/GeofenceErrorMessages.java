@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.util;
 
 /**
  * Copyright 2014 Google Inc. All Rights Reserved.
@@ -20,6 +20,8 @@ import android.content.Context;
 import android.content.res.Resources;
 
 import com.google.android.gms.location.GeofenceStatusCodes;
+
+import io.hypertrack.meta.R;
 
 /**
  * Geofence error codes mapped to error messages.

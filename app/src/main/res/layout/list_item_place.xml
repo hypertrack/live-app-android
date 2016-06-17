@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/app_primary_light"
+            android:paddingBottom="@dimen/padding_high"
+            android:paddingRight="@dimen/padding_high"
+            android:paddingTop="@dimen/padding_high">
+
+            <ImageView
+                android:id="@+id/item_place.icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:src="@drawable/destination_marker" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_max"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/item_place.title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Title"
+                    android:textColor="@color/text_base"
+                    android:textSize="@dimen/text_medium" />
+
+                <TextView
+                    android:id="@+id/item_place.desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="This is the description"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_medium" />
+            </LinearLayout>
+        </FrameLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>

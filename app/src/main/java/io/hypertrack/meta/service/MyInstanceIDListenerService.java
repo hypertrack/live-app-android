@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.service;
 
 import android.content.Intent;
 
