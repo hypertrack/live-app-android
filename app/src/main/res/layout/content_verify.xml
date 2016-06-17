@@ -21,7 +21,8 @@
         android:layout_marginLeft="@dimen/margin_high"
         android:layout_marginRight="@dimen/margin_high"
         android:layout_marginEnd="@dimen/margin_high"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginBottom="20dp"
+        android:visibility="invisible"/>
 
     <EditText
         android:layout_width="1dp"
@@ -35,7 +36,9 @@
         android:id="@+id/verificationCode"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/verify_header_text"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:focusable="true"
+        android:focusableInTouchMode="true" />
     
     <LinearLayout
         android:id="@+id/verfication_code_view"

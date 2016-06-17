@@ -14,6 +14,8 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -47,6 +49,9 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     @Bind(R.id.fourth_code)
     public TextView fouthCodeTextView;
+
+    @Bind(R.id.verify_header_text)
+    public TextView headerTextView;
 
     private ProgressDialog mProgressDialog;
     private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
@@ -97,6 +102,42 @@ public class Verify extends AppCompatActivity implements VerifyView {
         });
 
         this.verificationCodeView.requestFocus();
+        this.addTouchListeners();
+        this.headerTextView.setText(String.format(getString(R.string.verify_phone_number_hearder_note), "+919323902408"));
+    }
+
+    private void addTouchListeners() {
+        this.firstCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                verificationCodeView.requestFocus();
+                return false;
+            }
+        });
+
+        this.secondCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                verificationCodeView.requestFocus();
+                return false;
+            }
+        });
+
+        this.thirdCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                verificationCodeView.requestFocus();
+                return false;
+            }
+        });
+
+        this.fouthCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                verificationCodeView.requestFocus();
+                return false;
+            }
+        });
     }
 
     @Override

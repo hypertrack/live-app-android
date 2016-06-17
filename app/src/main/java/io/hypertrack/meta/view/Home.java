@@ -143,7 +143,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private InputMethodManager mIMEMgr;
     private CustomAddress customAddress;
     private String taskID;
-    private Button addAddressButton;
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
@@ -431,7 +430,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (getTripStatusFromSharedPreferences()) {
 
             mAutocompleteView.setVisibility(View.GONE);
-            addAddressButton.setVisibility(View.GONE);
             shareEtaButton.setVisibility(View.VISIBLE);
             shareButton.setVisibility(View.VISIBLE);
 
@@ -551,10 +549,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareEtaButton.setVisibility(View.GONE);
         shareButton.setVisibility(View.GONE);
         mAutocompleteView.setVisibility(View.VISIBLE);
-        addAddressButton.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
 
-        if ( destinationLocationMarker != null) {
+        if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
         }
 
@@ -1016,7 +1013,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 initETAUpateTask();
                 mAutocompleteView.setVisibility(View.GONE);
-                addAddressButton.setVisibility(View.GONE);
                 shareButton.setVisibility(View.VISIBLE);
             }
         });
