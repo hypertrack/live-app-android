@@ -1138,23 +1138,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void shareUrl() {
-
         Uri uri1 = Uri.parse("content://contacts");
         Intent intent = new Intent(Intent.ACTION_PICK, uri1);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         startActivityForResult(intent, REQUEST_SHARE_CONTACT_CODE);
-
     }
 
     private void shareUrlViaShare() {
-
-
         String shareBody = "I'm on my way. Will be there by "+ getEstimatedTimeOfArrival() + ". Track me live " + getTripShareUrlInSharedPreferences();
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(sharingIntent);
-
     }
 
     private void notifySelectedContact(String number) {
@@ -1260,62 +1255,69 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         if (resultCode == CUSTOM_ADDRESS_DATA) {
-            CustomAddress ca = (CustomAddress)data.getSerializableExtra("custom_address");
-            if (ca != null) {
-                customAddress = ca;
-                Log.d(TAG, ca.toString());
-
-                MetaLocation location = ca.getLocation();
-                if (location != null) {
-                    addMarkerToSelectedDestination(location.getLatLng());
-                }
-            }
+            this.didSelectCustomAddress(data);
         }
         if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
             if (resultCode == RESULT_OK) {
-                Uri uri = data.getData();
-                String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
-
-                Cursor cursor = getContentResolver().query(uri, projection,
-                        null, null, null);
-                cursor.moveToFirst();
-
-                int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-                String number = cursor.getString(numberColumnIndex);
-
-                int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-                String name = cursor.getString(nameColumnIndex);
-                number = number.replaceAll("\\s","");
-                Log.d(TAG, "Number : " + number + " , name : "+name);
-
-                PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-                try {
-
-                    String locale = PhoneUtils.getCountryRegionFromPhone(this);
-                    Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, locale);
-                    Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
-
-                    boolean isValid = phoneUtil
-                            .isValidNumber(phoneNumber);
-
-                    if (isValid) {
-                        String internationalFormat = phoneUtil.format(
-                                phoneNumber,
-                                PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-
-                       number = internationalFormat;
-
-                    }
-
-                } catch (NumberParseException e) {
-                    System.err.println("NumberParseException was thrown: " + e.toString());
-                }
-
-                notifySelectedContact(number);
-                Log.d(TAG, "International Number Format: " + number + " , name : " + name);
-
+                this.didSelectContact(data);
             }
         }
+    }
+
+    private void didSelectCustomAddress(Intent data) {
+        CustomAddress ca = (CustomAddress)data.getSerializableExtra("custom_address");
+        if (ca != null) {
+            customAddress = ca;
+            Log.d(TAG, ca.toString());
+
+            MetaLocation location = ca.getLocation();
+            if (location != null) {
+                addMarkerToSelectedDestination(location.getLatLng());
+            }
+        }
+    }
+
+    private void didSelectContact(Intent data) {
+        Uri uri = data.getData();
+        String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
+
+        Cursor cursor = getContentResolver().query(uri, projection,
+                null, null, null);
+        cursor.moveToFirst();
+
+        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+        String number = cursor.getString(numberColumnIndex);
+
+        int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+        String name = cursor.getString(nameColumnIndex);
+        number = number.replaceAll("\\s","");
+        Log.d(TAG, "Number : " + number + " , name : "+name);
+
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        try {
+
+            String locale = PhoneUtils.getCountryRegionFromPhone(this);
+            Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, locale);
+            Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
+
+            boolean isValid = phoneUtil
+                    .isValidNumber(phoneNumber);
+
+            if (isValid) {
+                String internationalFormat = phoneUtil.format(
+                        phoneNumber,
+                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+
+                number = internationalFormat;
+
+            }
+
+        } catch (NumberParseException e) {
+            System.err.println("NumberParseException was thrown: " + e.toString());
+        }
+
+        notifySelectedContact(number);
+        Log.d(TAG, "International Number Format: " + number + " , name : " + name);
     }
 
     private LatLngBounds getBounds(Location location, int mDistanceInMeters ){
