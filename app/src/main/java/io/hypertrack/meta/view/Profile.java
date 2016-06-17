@@ -43,7 +43,7 @@ import io.hypertrack.meta.BuildConfig;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.network.retrofit.SendEtaService;
+import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
@@ -334,14 +334,14 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     public void updateUserProfileRetro(String firstName, String lastName) {
 
-        SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, BuildConfig.API_KEY);
 
         SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         int userId = settings.getInt(Constants.USER_ID, -1);
 
         User user = new User(firstName, lastName);
 
-        Call<User> call = sendEtaService.updateUserName(String.valueOf(userId), user);
+        Call<User> call = sendETAService.updateUserName(String.valueOf(userId), user);
 
         call.enqueue(new Callback<User>() {
             @Override
@@ -384,7 +384,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     public void updateUserProfilePic() {
 
-        SendEtaService sendEtaService = ServiceGenerator.createService(SendEtaService.class, BuildConfig.API_KEY);
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, BuildConfig.API_KEY);
 
         SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         int userId = settings.getInt(Constants.USER_ID, -1);
@@ -397,7 +397,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         String fileName = "photo\"; filename=\"" + uuid + ".jpg";
         requestBodyMap.put(fileName, requestBody);
 
-        Call<User> updatePicCall = sendEtaService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
+        Call<User> updatePicCall = sendETAService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
         updatePicCall.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {

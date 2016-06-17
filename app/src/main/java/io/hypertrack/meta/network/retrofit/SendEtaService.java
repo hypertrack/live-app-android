@@ -16,10 +16,10 @@ import retrofit2.http.Path;
 /**
  * Created by suhas on 25/01/16.
  */
-public interface SendEtaService {
+public interface SendETAService {
 
     @PATCH("/api/v1/users/{id}/")
-    Call<User> updateUserName(@Path("id") String id,@Body User user);
+    Call<User> updateUserName(@Path("id") String id, @Body User user);
 
     @Multipart
     @POST("/api/v1/users/{id}/add_photo/")

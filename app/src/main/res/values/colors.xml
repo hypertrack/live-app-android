@@ -17,4 +17,6 @@
     <color name="text_error">#DD2C00</color>
     <color name="text_warning">#D78A00</color>
     <color name="text_highlight">@color/app_primary</color>
+
+    <color name="border_color">#C8C8C8</color>
 </resources>
