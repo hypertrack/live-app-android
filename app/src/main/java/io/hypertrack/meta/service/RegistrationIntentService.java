@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.service;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -11,6 +11,7 @@ import com.google.android.gms.iid.InstanceID;
 
 import java.io.IOException;
 
+import io.hypertrack.meta.R;
 import io.hypertrack.meta.util.Constants;
 
 /**

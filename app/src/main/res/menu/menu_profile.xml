@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/register_next_item"
-        android:title="@string/action_sign_in"
+        android:title="@string/action_done"
         android:onClick="onNextButtonClicked"
         app:showAsAction="always" />
 </menu>

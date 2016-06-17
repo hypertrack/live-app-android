@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.meta.service;
 
 import android.app.IntentService;
 import android.content.Context;
@@ -14,6 +14,9 @@ import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
+import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.util.GeofenceErrorMessages;
+import io.hypertrack.meta.R;
 import io.hypertrack.meta.util.Constants;
 
 /**
