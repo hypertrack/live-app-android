@@ -391,6 +391,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (!isUserOnboard) {
             startActivity(new Intent(this, Register.class));
             finish();
+        } else {
+            UserStore.sharedStore.initializeUser();
         }
     }
 
