@@ -10,6 +10,8 @@ import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
 
 /**
  * Created by suhas on 11/11/15.
@@ -27,6 +29,12 @@ public class MetaApplication extends Application {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         mInstance = this;
+        this.setupRealm();
+    }
+
+    public void setupRealm() {
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
+        Realm.setDefaultConfiguration(realmConfiguration);
     }
 
     public static synchronized MetaApplication getInstance() {

@@ -145,12 +145,12 @@ public class OnboardingManager {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-
+                callback.onSuccess();
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-
+                callback.onError();
             }
         });
     }
@@ -160,6 +160,6 @@ public class OnboardingManager {
     }
 
     private void didOnbardUser(User user) {
-
+        UserStore.sharedStore.addUser(user);
     }
 }

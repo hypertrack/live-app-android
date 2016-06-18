@@ -2,10 +2,12 @@ package io.hypertrack.meta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmObject;
+
 /**
  * Created by suhas on 12/11/15.
  */
-public class User {
+public class User extends RealmObject {
 
     private Integer id;
 
@@ -22,21 +24,6 @@ public class User {
 
     @SerializedName("hypertrack_driver_id")
     private String hypertrackDriverID;
-
-    private String token;
-
-    public User(String number) {
-        phoneNumber = number;
-    }
-
-    public User(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-
-    public User() {
-
-    }
 
     public Integer getId() {
         return id;
@@ -86,14 +73,6 @@ public class User {
         this.hypertrackDriverID = hypertrackDriverID;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
     @Override
     public String toString() {
         return "User{" +
@@ -103,8 +82,6 @@ public class User {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
                 ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
-                ", token='" + token + '\'' +
                 '}';
     }
-
 }

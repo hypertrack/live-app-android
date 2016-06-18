@@ -98,6 +98,7 @@ import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
@@ -111,6 +112,7 @@ import io.hypertrack.meta.model.MetaLocation;
 import io.hypertrack.meta.model.UserTrip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -331,7 +333,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
         SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
 
-        checkIfUseIsOnBoard();
+        checkIfUserIsOnBoard();
 
         setContentView(R.layout.activity_home);
 
@@ -383,12 +385,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     }
 
-    private void checkIfUseIsOnBoard() {
+    private void checkIfUserIsOnBoard() {
 
-        boolean isUserOnboard = sharedPreferenceManager.isUserLoggedIn();
-        if (!isUserOnboard
-                || sharedPreferenceManager.getHyperTrackDriverID() == null
-                || sharedPreferenceManager.getHyperTrackDriverID().equalsIgnoreCase(Constants.DEFAULT_STRING_VALUE)) {
+        boolean isUserOnboard = UserStore.isUserLoggedIn();
+        if (!isUserOnboard) {
             startActivity(new Intent(this, Register.class));
             finish();
         }
@@ -965,7 +965,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void startTrip() {
 
-        String driverID = sharedPreferenceManager.getHyperTrackDriverID();
+        String driverID = UserStore.sharedStore.getUser().getHypertrackDriverID();
 
         if (TextUtils.isEmpty(driverID)) {
             Toast.makeText(this, "Driver id not found", Toast.LENGTH_LONG).show();
