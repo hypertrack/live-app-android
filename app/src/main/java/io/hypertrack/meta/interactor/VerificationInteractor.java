@@ -9,85 +9,39 @@ import com.google.gson.Gson;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.model.Verification;
 import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.store.OnOnboardingCallback;
+import io.hypertrack.meta.store.OnboardingManager;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class VerificationInteractor {
 
-    public void validateVerificationCode(String verificationCode, int userId, final OnVerificationCallback onVerificationCallback) {
+    public void validateVerificationCode(String verificationCode, final OnVerificationCallback onVerificationCallback) {
+        OnboardingManager.sharedManager().verifyCode(verificationCode, new OnOnboardingCallback() {
+            @Override
+            public void onSuccess() {
+                onVerificationCallback.OnSuccess();
+            }
 
-        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userId + "/verify_phone_number/";
-
-        Verification verification = new Verification(verificationCode);
-        Gson gson = new Gson();
-        String jsonObjectBody = gson.toJson(verification);
-
-        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
-                1,
-                url,
-                jsonObjectBody,
-                User.class,
-                new Response.Listener<User>() {
-                    @Override
-                    public void onResponse(User response) {
-
-                        Log.d("response", response.toString());
-
-                        Constants.setPublishableApiKey(response.getToken());
-
-                        SharedPreferenceManager spm = new SharedPreferenceManager(MetaApplication.getInstance());
-                        spm.setUserAuthToken(response.getToken());
-
-                        if (onVerificationCallback != null) {
-                            onVerificationCallback.OnSuccess();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Response", "Inside OnError");
-
-                        if (onVerificationCallback != null) {
-                            onVerificationCallback.OnError();
-                        }
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(request);
+            @Override
+            public void onError() {
+                onVerificationCallback.OnError();
+            }
+        });
     }
 
     public void resendVerificationCode(int userID, final OnVerificationCallback callback) {
-        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userID + "/resend_verification_code/";
+        OnboardingManager.sharedManager().resendVerificationCode(new OnOnboardingCallback() {
+            @Override
+            public void onSuccess() {
+                callback.OnSuccess();
+            }
 
-        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
-                1,
-                url,
-                null,
-                null,
-                new Response.Listener<User>() {
-                    @Override
-                    public void onResponse(User response) {
-                        if (callback != null) {
-                            callback.OnSuccess();
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Response", "Inside OnError");
-
-                        if (callback != null) {
-                            callback.OnError();
-                        }
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(request);
+            @Override
+            public void onError() {
+                callback.OnError();
+            }
+        });
     }
 }

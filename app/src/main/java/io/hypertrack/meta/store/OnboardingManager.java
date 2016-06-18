@@ -5,6 +5,7 @@ import android.util.Log;
 import com.google.i18n.phonenumbers.NumberParseException;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import io.hypertrack.meta.BuildConfig;
 import io.hypertrack.meta.model.OnboardingUser;
@@ -20,7 +21,7 @@ import retrofit2.Response;
 public class OnboardingManager {
 
     private static String TAG = OnboardingManager.class.getSimpleName();
-    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, BuildConfig.API_KEY);
+    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class);
 
     private static OnboardingManager sSharedManager = null;
     private OnboardingUser onboardingUser;
@@ -69,7 +70,21 @@ public class OnboardingManager {
     }
 
     public void verifyCode(String code, final OnOnboardingCallback callback) {
+        HashMap<String, String> verificationCode = new HashMap<>();
+        verificationCode.put("verification_code", code);
 
+        Call<Map<String, Object>> call = sendETAService.verifyUser(this.onboardingUser.getId(), verificationCode);
+        call.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                callback.onSuccess();
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                callback.onError();
+            }
+        });
     }
 
     public void updateInfo(final OnOnboardingCallback callback) {
@@ -77,7 +92,18 @@ public class OnboardingManager {
     }
 
     public void resendVerificationCode(final OnOnboardingCallback callback) {
+        Call<Map<String, Object>> call = sendETAService.resendCode(this.onboardingUser.getId());
+        call.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                callback.onSuccess();
+            }
 
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                callback.onError();
+            }
+        });
     }
 
     public void uploadPhoto(final OnOnboardingCallback callback) {

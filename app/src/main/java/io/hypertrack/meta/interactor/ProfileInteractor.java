@@ -25,46 +25,46 @@ public class ProfileInteractor {
     private static final String TAG = ProfileInteractor.class.getSimpleName();
     private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, BuildConfig.API_KEY);
 
-     public void updateUserProfileRetro(String firstName, String lastName, final int userId, final File profileImage, final OnProfileUpdateCallback onProfileUpdateCallback) {
+     public void updateUserProfile(String firstName, String lastName, final File profileImage, final OnProfileUpdateCallback onProfileUpdateCallback) {
 
-        User user = new User(firstName, lastName);
-
-        Call<User> call = sendETAService.updateUserName(String.valueOf(userId), user);
-        call.enqueue(new Callback<User>() {
-
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.isSuccessful()) {
-
-                    Log.v(TAG, "Response from Retrofit");
-                    Log.d("Response", "User :" + response.body().toString());
-
-                    SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-                    sharedPreferenceManager.setHyperTrackDriverID(response.body().getHypertrackDriverID());
-                    sharedPreferenceManager.setUserPhoto(response.body().getPhoto());
-                    sharedPreferenceManager.setUserLoggedIn(true);
-
-                    if (onProfileUpdateCallback != null) {
-                        onProfileUpdateCallback.OnSuccess();
-                    }
-
-                    //Upload photo
-                    if (profileImage != null)
-                        updateUserProfilePic(userId, profileImage);
-
-                } else {
-                    if (onProfileUpdateCallback != null) {
-                        onProfileUpdateCallback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
-                onProfileUpdateCallback.OnError();
-            }
-        });
+//        User user = new User(firstName, lastName);
+//
+//        Call<User> call = sendETAService.updateUserName(String.valueOf(userId), user);
+//        call.enqueue(new Callback<User>() {
+//
+//            @Override
+//            public void onResponse(Call<User> call, Response<User> response) {
+//                if (response.isSuccessful()) {
+//
+//                    Log.v(TAG, "Response from Retrofit");
+//                    Log.d("Response", "User :" + response.body().toString());
+//
+//                    SharedPreferenceManager sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
+//                    sharedPreferenceManager.setHyperTrackDriverID(response.body().getHypertrackDriverID());
+//                    sharedPreferenceManager.setUserPhoto(response.body().getPhoto());
+//                    sharedPreferenceManager.setUserLoggedIn(true);
+//
+//                    if (onProfileUpdateCallback != null) {
+//                        onProfileUpdateCallback.OnSuccess();
+//                    }
+//
+//                    //Upload photo
+//                    if (profileImage != null)
+//                        updateUserProfilePic(userId, profileImage);
+//
+//                } else {
+//                    if (onProfileUpdateCallback != null) {
+//                        onProfileUpdateCallback.OnError();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<User> call, Throwable t) {
+//                Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
+//                onProfileUpdateCallback.OnError();
+//            }
+//        });
 
     }
 
@@ -101,5 +101,9 @@ public class ProfileInteractor {
                 Log.v(TAG, "Error while updating profile pic. " + t.getMessage());
             }
         });
+    }
+
+    private void didOnboardUser() {
+
     }
 }

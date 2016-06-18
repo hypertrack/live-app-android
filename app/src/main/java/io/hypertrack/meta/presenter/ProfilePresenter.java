@@ -46,7 +46,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             return;
         }
 
-        profileInteractor.updateUserProfileRetro(userFirstName, userLastName, userId, profileImage, new OnProfileUpdateCallback() {
+        profileInteractor.updateUserProfile(userFirstName, userLastName, profileImage, new OnProfileUpdateCallback() {
             @Override
             public void OnSuccess() {
                 if (view != null) {

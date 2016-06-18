@@ -27,8 +27,13 @@ public interface SendETAService {
     @Multipart
     @POST("/api/v1/users/{id}/add_photo/")
     Call<User> updateUserProfilePic(@Path("id") String id, @PartMap Map<String, RequestBody> params);
-    //Call<User> updateUserProfilePic(@Path("id") String id, @Part("photo\"; filename=\"profilePic.jpg\" ")RequestBody file);
 
     @POST("/api/v1/users/")
-    Call<OnboardingUser> getUser(@Body Map<String, String> phoneNumber);
+    Call<OnboardingUser> getUser(@Body Map<String, String> phonfeNumber);
+
+    @POST("/api/v1/users/{id}/verify_phone_number/")
+    Call<Map<String, Object>> verifyUser(@Path("id") int id, @Body Map<String, String> verificationCode);
+
+    @POST("api/v1/users/{id}/resend_verification_code/")
+    Call<Map<String, Object>> resendCode(@Path("id") int id);
 }

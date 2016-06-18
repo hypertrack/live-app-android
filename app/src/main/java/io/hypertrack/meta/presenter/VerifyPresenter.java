@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.interactor.VerificationInteractor;
+import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.view.VerifyView;
 
 public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
@@ -26,7 +27,7 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     @Override
     public void attemptVerification(String verificationCode, int userId) {
         if (!TextUtils.isEmpty(verificationCode) && verificationCode.length() == 4) {
-            verificationInteractor.validateVerificationCode(verificationCode, userId, new OnVerificationCallback() {
+            verificationInteractor.validateVerificationCode(verificationCode, new OnVerificationCallback() {
                 @Override
                 public void OnSuccess() {
                     if (view != null) {
@@ -51,16 +52,16 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     @Override
     public void resendVerificationCode(int userID) {
         verificationInteractor.resendVerificationCode(userID, new OnVerificationCallback() {
-                    @Override
-                    public void OnSuccess() {
+                @Override
+                public void OnSuccess() {
 
-                    }
-
-                    @Override
-                    public void OnError() {
-
-                    }
                 }
+
+                @Override
+                public void OnError() {
+
+                }
+            }
 
         );
     }
