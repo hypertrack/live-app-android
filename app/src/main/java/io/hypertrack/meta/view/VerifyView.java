@@ -5,4 +5,5 @@ public interface VerifyView {
     void navigateToProfileScreen();
     void showValidationError();
     void showResendError();
+    void didResendVerificationCode();
 }

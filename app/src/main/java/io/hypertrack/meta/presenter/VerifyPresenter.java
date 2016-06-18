@@ -54,7 +54,9 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
         verificationInteractor.resendVerificationCode(new OnVerificationCallback() {
                 @Override
                 public void OnSuccess() {
-
+                    if (view != null) {
+                        view.didResendVerificationCode();
+                    }
                 }
 
                 @Override

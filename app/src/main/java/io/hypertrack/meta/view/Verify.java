@@ -185,6 +185,11 @@ public class Verify extends AppCompatActivity implements VerifyView {
         Toast.makeText(Verify.this, "Apologies, there was an error while resending your verification code. Please try again.",Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    public void didResendVerificationCode() {
+        mProgressDialog.dismiss();
+    }
+
     /** Action bar menu methods */
 
     private void verifyCode() {
