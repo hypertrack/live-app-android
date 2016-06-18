@@ -49,7 +49,6 @@ public class Register extends AppCompatActivity implements RegisterView {
     private CountrySpinnerAdapter adapter;
     private String isoCode;
     private IRegisterPresenter<RegisterView> registerPresenter = new RegisterPresenter();
-    private SharedPreferenceManager sharedPreferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +60,6 @@ public class Register extends AppCompatActivity implements RegisterView {
         toolbar.setTitle(getString(R.string.title_activity_login));
 
         ButterKnife.bind(this);
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
         registerPresenter.attachView(this);
 
         initCountryFlagSpinner();
@@ -81,7 +79,6 @@ public class Register extends AppCompatActivity implements RegisterView {
     private void initCountryFlagSpinner() {
         CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
-        String countryIsoCode = cm.getDefaultCountryIso();
         //Country country = cm.getCountryByIso(countryIsoCode);
 
         adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
@@ -129,9 +126,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     }
 
     private void requestPermission(){
-
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
-
             Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
 
         } else {
@@ -163,10 +158,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     public void navigateToVerificationScreen() {
         mProgressDialog.dismiss();
 
-        int userId = sharedPreferenceManager.getUserId();
-
         Intent intent = new Intent(Register.this, Verify.class);
-        intent.putExtra(Constants.USER_ID, userId);
         startActivity(intent);
     }
 

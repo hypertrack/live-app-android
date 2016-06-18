@@ -6,6 +6,7 @@ import java.io.File;
 
 import io.hypertrack.meta.interactor.ProfileInteractor;
 import io.hypertrack.meta.interactor.callback.OnProfileUpdateCallback;
+import io.hypertrack.meta.store.OnboardingManager;
 import io.hypertrack.meta.view.ProfileView;
 
 /**
@@ -15,6 +16,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private ProfileView view;
     private ProfileInteractor profileInteractor;
+    private OnboardingManager onboardingManager = OnboardingManager.sharedManager();
 
     @Override
     public void attachView(ProfileView view) {

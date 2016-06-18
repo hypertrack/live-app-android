@@ -1,7 +1,10 @@
 package io.hypertrack.meta.network.retrofit;
 
 import java.util.Map;
+import java.util.Objects;
 
+import butterknife.Bind;
+import io.hypertrack.meta.model.OnboardingUser;
 import io.hypertrack.meta.model.User;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -25,4 +28,7 @@ public interface SendETAService {
     @POST("/api/v1/users/{id}/add_photo/")
     Call<User> updateUserProfilePic(@Path("id") String id, @PartMap Map<String, RequestBody> params);
     //Call<User> updateUserProfilePic(@Path("id") String id, @Part("photo\"; filename=\"profilePic.jpg\" ")RequestBody file);
+
+    @POST("/api/v1/users/")
+    Call<OnboardingUser> getUser(@Body Map<String, String> phoneNumber);
 }

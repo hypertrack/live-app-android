@@ -2,15 +2,32 @@ package io.hypertrack.meta.model;
 
 import android.media.Image;
 
+import com.google.gson.annotations.SerializedName;
+import com.google.i18n.phonenumbers.NumberParseException;
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber;
+
 /**
  * Created by ulhas on 15/06/16.
  */
 public class OnboardingUser {
     private Integer id;
     private String countryCode;
+    private String contactNumber;
+
+    @SerializedName("first_name")
+    private String firstName;
+
+    @SerializedName("last_name")
+    private String lastName;
+
+    @SerializedName("phone_number")
     private String phoneNumber;
-    private Image photo;
+
+    private Image photoImage;
     private String token;
+
+    @SerializedName("photo")
     private String photoURL;
 
     public Integer getId() {
@@ -29,20 +46,20 @@ public class OnboardingUser {
         this.countryCode = countryCode;
     }
 
-    public String getPhoneNumber() {
-        return phoneNumber;
+    public String getContactNumber() {
+        return contactNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
     }
 
-    public Image getPhoto() {
-        return photo;
+    public Image getPhotoImage() {
+        return photoImage;
     }
 
-    public void setPhoto(Image photo) {
-        this.photo = photo;
+    public void setPhotoImage(Image photo) {
+        this.photoImage = photo;
     }
 
     public String getToken() {
@@ -61,16 +78,48 @@ public class OnboardingUser {
         this.photoURL = photoURL;
     }
 
-    public String combinedPhoneNumber() {
-        String combinedPhoneNumber = "";
-        if (this.countryCode != null) {
-            combinedPhoneNumber = combinedPhoneNumber + this.countryCode;
-        }
+    public String getInternationalNumber() throws NumberParseException {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
-        if (this.phoneNumber != null) {
-            combinedPhoneNumber = combinedPhoneNumber + this.phoneNumber;
-        }
+        Phonenumber.PhoneNumber number = phoneUtil.parse(getContactNumber(), getCountryCode());
+        return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
+    }
 
-        return combinedPhoneNumber;
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "OnboardingUser{" +
+                "id=" + id +
+                ", countryCode='" + countryCode + '\'' +
+                ", contactNumber='" + contactNumber + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", photoImage=" + photoImage +
+                ", token='" + token + '\'' +
+                ", photoURL='" + photoURL + '\'' +
+                '}';
     }
 }
