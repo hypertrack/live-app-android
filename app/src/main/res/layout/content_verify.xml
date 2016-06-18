@@ -21,8 +21,7 @@
         android:layout_marginLeft="@dimen/margin_high"
         android:layout_marginRight="@dimen/margin_high"
         android:layout_marginEnd="@dimen/margin_high"
-        android:layout_marginBottom="20dp"
-        android:visibility="invisible"/>
+        android:layout_marginBottom="20dp" />
 
     <EditText
         android:layout_width="1dp"

@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.interactor.VerificationInteractor;
+import io.hypertrack.meta.store.OnboardingManager;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.view.VerifyView;
 
@@ -17,6 +18,8 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     public void attachView(VerifyView view) {
         this.view = view;
         verificationInteractor = new VerificationInteractor();
+
+        this.view.updateHeaderText(OnboardingManager.sharedManager().getUser().getPhoneNumber());
     }
 
     @Override

@@ -6,4 +6,5 @@ public interface VerifyView {
     void showValidationError();
     void showResendError();
     void didResendVerificationCode();
+    void updateHeaderText(String text);
 }

@@ -103,7 +103,6 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
         this.verificationCodeView.requestFocus();
         this.addTouchListeners();
-        this.headerTextView.setText(String.format(getString(R.string.verify_phone_number_hearder_note), "+919323902408"));
     }
 
     private void addTouchListeners() {
@@ -188,6 +187,11 @@ public class Verify extends AppCompatActivity implements VerifyView {
     @Override
     public void didResendVerificationCode() {
         mProgressDialog.dismiss();
+    }
+
+    @Override
+    public void updateHeaderText(String text) {
+        this.headerTextView.setText(String.format(getString(R.string.verify_phone_number_hearder_note), text));
     }
 
     /** Action bar menu methods */
