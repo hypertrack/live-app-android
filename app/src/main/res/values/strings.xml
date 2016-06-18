@@ -38,6 +38,7 @@
     <string name="registration_phone_number">Registering phone number...</string>
     <string name="verifying_phone_number">Verifying phone number...</string>
     <string name="enter_phone_number">Enter Phone Number</string>
+    <string name="resending_verification_code">Resending verification code</string>
 
     <!-- Action bar strings -->
     <string name="next">Next</string>

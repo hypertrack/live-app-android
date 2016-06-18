@@ -25,7 +25,7 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     }
 
     @Override
-    public void attemptVerification(String verificationCode, int userId) {
+    public void attemptVerification(String verificationCode) {
         if (!TextUtils.isEmpty(verificationCode) && verificationCode.length() == 4) {
             verificationInteractor.validateVerificationCode(verificationCode, new OnVerificationCallback() {
                 @Override
@@ -50,8 +50,8 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     }
 
     @Override
-    public void resendVerificationCode(int userID) {
-        verificationInteractor.resendVerificationCode(userID, new OnVerificationCallback() {
+    public void resendVerificationCode() {
+        verificationInteractor.resendVerificationCode(new OnVerificationCallback() {
                 @Override
                 public void OnSuccess() {
 
@@ -59,7 +59,9 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
 
                 @Override
                 public void OnError() {
-
+                    if (view != null) {
+                        view.showResendError();
+                    }
                 }
             }
 

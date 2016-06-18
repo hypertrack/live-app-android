@@ -31,7 +31,7 @@ public class VerificationInteractor {
         });
     }
 
-    public void resendVerificationCode(int userID, final OnVerificationCallback callback) {
+    public void resendVerificationCode(final OnVerificationCallback callback) {
         OnboardingManager.sharedManager().resendVerificationCode(new OnOnboardingCallback() {
             @Override
             public void onSuccess() {

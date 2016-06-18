@@ -179,6 +179,12 @@ public class Verify extends AppCompatActivity implements VerifyView {
         verificationCodeView.setError("Please enter valid verification code");
     }
 
+    @Override
+    public void showResendError() {
+        mProgressDialog.dismiss();
+        Toast.makeText(Verify.this, "Apologies, there was an error while resending your verification code. Please try again.",Toast.LENGTH_LONG).show();
+    }
+
     /** Action bar menu methods */
 
     private void verifyCode() {
@@ -188,8 +194,7 @@ public class Verify extends AppCompatActivity implements VerifyView {
         mProgressDialog.show();
 
         String verificationCode = verificationCodeView.getText().toString();
-        int userId = sharedPreferenceManager.getUserId();
-        presenter.attemptVerification(verificationCode, userId);
+        presenter.attemptVerification(verificationCode);
     }
 
     private void textChanged() {
@@ -207,7 +212,11 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     @OnClick(R.id.btn_resend)
     public void resendButtonClicked(Button button) {
-        int userId = sharedPreferenceManager.getUserId();
-        presenter.resendVerificationCode(userId);
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.resending_verification_code));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        presenter.resendVerificationCode();
     }
 }
