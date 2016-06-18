@@ -2,6 +2,7 @@ package io.hypertrack.meta.view;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -74,7 +75,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     private File profileImage;
 
-    private SharedPreferenceManager sharedPreferenceManager;
+    private ProgressDialog mProgressDialog;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
 
     @Override
@@ -88,11 +89,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         toolbar.setTitle("Profile");
 
         ButterKnife.bind(this);
-
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
         presenter.attachView(this);
-
-        populateAutoComplete();
 
         if (!checkPermission()) {
             requestPermission();
@@ -110,9 +107,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         String firstName = mFirstNameView.getText().toString();
         String lastName = mLastNameView.getText().toString();
-        int userId = sharedPreferenceManager.getUserId();
 
-        presenter.attemptLogin(firstName, lastName, userId, saveBitmapToFile(profileImage));
+        presenter.attemptLogin(firstName, lastName, saveBitmapToFile(profileImage));
     }
 
     @OnClick(R.id.profileImageView)
@@ -120,79 +116,23 @@ public class Profile extends AppCompatActivity implements ProfileView {
         EasyImage.openChooser(Profile.this, "Please select", true);
     }
 
-    private void populateAutoComplete() {
-
-        String userFirstName = sharedPreferenceManager.getFirstName();
-        String userLastName = sharedPreferenceManager.getLastName();
-        String urlProfilePic = sharedPreferenceManager.getUserPhoto();
-
-        if (!TextUtils.equals(userFirstName, Constants.DEFAULT_STRING_VALUE)) {
-            mFirstNameView.setText(userFirstName);
+    @Override
+    public void updateViews(String firstName, String lastName, String profileURL) {
+        if (firstName != null && !firstName.isEmpty()) {
+            mFirstNameView.setText(firstName);
         }
 
-        if (!TextUtils.equals(userLastName, Constants.DEFAULT_STRING_VALUE)) {
-            mLastNameView.setText(userLastName);
+        if (lastName != null && !lastName.isEmpty()) {
+            mLastNameView.setText(lastName);
         }
 
-        if (!TextUtils.equals(urlProfilePic, Constants.DEFAULT_STRING_VALUE)) {
+        if (profileURL != null && !profileURL.isEmpty()) {
             Picasso.with(this)
-                    .load(urlProfilePic)
+                    .load(profileURL)
                     .placeholder(R.drawable.default_profile_pic) // optional
                     .error(R.drawable.default_profile_pic)         // optional
                     .into(mProfileImageButton);
         }
-
-        // Modify Profile Screen UI for a LoggedIn User
-        if (sharedPreferenceManager.isUserLoggedIn()) {
-
-            // Set Linear Layout Manager for Recycler View
-//            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-//            linearLayoutManager.setAutoMeasureEnabled(true);
-//            mRecyclerView.setLayoutManager(linearLayoutManager);
-//
-//            mRecyclerView.setAdapter(new SavedPlacesAdapter(sharedPreferenceManager.getSavedPlaces()));
-//
-//            // Make User's Saved Locations Recycler View Visible
-//            mRecyclerView.setVisibility(View.VISIBLE);
-
-        }
-    }
-
-
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-//            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-//
-//            mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-//            mProfileFormView.animate().setDuration(shortAnimTime).alpha(
-//                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-//                }
-//            });
-//
-//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//            mProgressView.animate().setDuration(shortAnimTime).alpha(
-//                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation) {
-//                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//                }
-//            });
-//        } else {
-//            // The ViewPropertyAnimator APIs are not available, so simply show
-//            // and hide the relevant UI components.
-//            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-//            mProfileFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-//        }
     }
 
     @Override
@@ -244,13 +184,9 @@ public class Profile extends AppCompatActivity implements ProfileView {
     }
 
     private void requestPermission() {
-
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-
             Toast.makeText(this, "Storage access permission allows read and write image files related to you profile pic. Please allow in App Settings for additional functionality.", Toast.LENGTH_LONG).show();
-
         } else {
-
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
         }
@@ -261,13 +197,9 @@ public class Profile extends AppCompatActivity implements ProfileView {
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
-
                 } else {
-
                     Toast.makeText(this, "Permission Denied, You cannot access storage.", Toast.LENGTH_LONG).show();
-
                 }
                 break;
         }
@@ -308,13 +240,11 @@ public class Profile extends AppCompatActivity implements ProfileView {
             file.createNewFile();
             FileOutputStream outputStream = new FileOutputStream(file);
             selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-            saveImageToPreferences(encodeToBase64(selectedBitmap));
 
             return file;
         } catch (Exception e) {
             return null;
         }
-
     }
 
     public static String encodeToBase64(Bitmap image) {
@@ -328,102 +258,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
         return imageEncoded;
     }
 
-    private void saveImageToPreferences(String encodedImage) {
-        sharedPreferenceManager.setProfileImage(encodedImage);
-    }
-
-    public void updateUserProfileRetro(String firstName, String lastName) {
-
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, BuildConfig.API_KEY);
-
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId = settings.getInt(Constants.USER_ID, -1);
-
-        User user = new User(firstName, lastName);
-
-        Call<User> call = sendETAService.updateUserName(String.valueOf(userId), user);
-
-        call.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-
-                if (response.isSuccessful()) {
-                    Log.v(TAG, "Response from Retrofit");
-
-                    Log.d("Response", "User :" + response.body().toString());
-
-                    SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString(Constants.HYPERTRACK_DRIVER_ID, response.body().getHypertrackDriverID());
-                    editor.putString(Constants.USER_PROFILE_PIC, response.body().getPhoto());
-                    editor.putBoolean("isUserOnboard", true);
-                    editor.apply();
-
-                    showProgress(false);
-
-                    //Upload photo
-                    if (profileImage != null)
-                        updateUserProfilePic();
-
-                    Intent intent = new Intent(Profile.this, Home.class);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(Profile.this, "We had problem connecting with the server. Please try again in sometime.", Toast.LENGTH_LONG).show();
-                }
-
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.v(TAG, "Inside error block of retrofit. " + t.getMessage());
-            }
-        });
-
-    }
-
-    public void updateUserProfilePic() {
-
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, BuildConfig.API_KEY);
-
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId = settings.getInt(Constants.USER_ID, -1);
-
-        RequestBody requestBody =
-                RequestBody.create(MediaType.parse("image/*"), saveBitmapToFile(profileImage));
-
-        Map<String, RequestBody> requestBodyMap = new HashMap<>();
-        String uuid = UUID.randomUUID().toString();
-        String fileName = "photo\"; filename=\"" + uuid + ".jpg";
-        requestBodyMap.put(fileName, requestBody);
-
-        Call<User> updatePicCall = sendETAService.updateUserProfilePic(String.valueOf(userId), requestBodyMap);
-        updatePicCall.enqueue(new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.isSuccessful()) {
-                    Log.v(TAG, "Pic updated successfully");
-                    Log.v(TAG, response.headers().toString());
-
-                    SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = settings.edit();
-                    editor.putString(Constants.USER_PROFILE_PIC, response.body().getPhoto());
-                    editor.apply();
-                } else {
-                    Log.d(TAG, "User profile could not be uploaded");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.v(TAG, "Error while updating profile pic. " + t.getMessage());
-            }
-        });
-    }
-
     @Override
     public void navigateToHomeScreen() {
-
         showProgress(false);
 
         Intent intent = new Intent(Profile.this, Home.class);
@@ -433,14 +269,12 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     @Override
     public void showErrorMessage() {
-
         showProgress(false);
         Toast.makeText(Profile.this, "We had problem connecting with the server. Please try again in sometime.", Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void showFirstNameValidationError() {
-
         showProgress(false);
         mFirstNameView.setError(getString(R.string.error_field_required));
         mFirstNameView.requestFocus();
@@ -448,10 +282,20 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     @Override
     public void showLastNameValidationError() {
-
         showProgress(false);
         mLastNameView.setError(getString(R.string.error_field_required));
         mLastNameView.requestFocus();
+    }
+
+    private void showProgress(boolean show) {
+        if (show) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.registration_phone_number));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        } else {
+            mProgressDialog.dismiss();
+        }
     }
 
     /**
@@ -461,21 +305,11 @@ public class Profile extends AppCompatActivity implements ProfileView {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
-
-        if (sharedPreferenceManager != null && sharedPreferenceManager.isUserLoggedIn()) {
-            menu.getItem(0).setTitle("Next");
-            invalidateOptionsMenu();
-        }
-
         return super.onCreateOptionsMenu(menu);
     }
 
     public void onNextButtonClicked(MenuItem menuItem) {
-        if (sharedPreferenceManager != null && sharedPreferenceManager.isUserLoggedIn()) {
-            // Implement Next Functionality here
-        } else {
-            this.onSignInButtonClicked();
-        }
+        this.onSignInButtonClicked();
     }
 }
 

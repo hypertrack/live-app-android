@@ -8,4 +8,5 @@ public interface ProfileView {
     void showErrorMessage();
     void showFirstNameValidationError();
     void showLastNameValidationError();
+    void updateViews(String firstName, String lastName, String profileURL);
 }

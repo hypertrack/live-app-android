@@ -4,13 +4,18 @@ import android.util.Log;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import io.hypertrack.meta.BuildConfig;
 import io.hypertrack.meta.model.OnboardingUser;
+import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -88,7 +93,23 @@ public class OnboardingManager {
     }
 
     public void updateInfo(final OnOnboardingCallback callback) {
+        HashMap<String, String> user = new HashMap<>();
+        user.put("first_name", this.onboardingUser.getFirstName());
+        user.put("last_name", this.onboardingUser.getLastName());
 
+        Call<User> call = sendETAService.updateUserName(this.onboardingUser.getId(), user);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                didOnbardUser(response.body());
+                callback.onSuccess();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                callback.onError();
+            }
+        });
     }
 
     public void resendVerificationCode(final OnOnboardingCallback callback) {
@@ -107,14 +128,38 @@ public class OnboardingManager {
     }
 
     public void uploadPhoto(final OnOnboardingCallback callback) {
+        File profileImage = this.onboardingUser.getPhotoImage();
+        if (profileImage == null) {
+            callback.onError();
+            return;
+        }
 
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image*//*"), profileImage);
+
+        Map<String, RequestBody> requestBodyMap = new HashMap<>();
+        String uuid = UUID.randomUUID().toString();
+        String fileName = "photo\"; filename=\"" + uuid + ".jpg";
+        requestBodyMap.put(fileName, requestBody);
+
+        Call<Map<String, Object>> call = sendETAService.updateUserProfilePic(this.onboardingUser.getId(), requestBodyMap);
+        call.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+
+            }
+        });
     }
 
     public void getUserImage(final OnOnboardingCallback callback) {
 
     }
 
-    private void didOnbardUser() {
+    private void didOnbardUser(User user) {
 
     }
 }

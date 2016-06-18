@@ -1,11 +1,11 @@
 package io.hypertrack.meta.model;
 
-import android.media.Image;
-
 import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+
+import java.io.File;
 
 /**
  * Created by ulhas on 15/06/16.
@@ -24,7 +24,7 @@ public class OnboardingUser {
     @SerializedName("phone_number")
     private String phoneNumber;
 
-    private Image photoImage;
+    private File photoImage;
     private String token;
 
     @SerializedName("photo")
@@ -54,11 +54,11 @@ public class OnboardingUser {
         this.contactNumber = contactNumber;
     }
 
-    public Image getPhotoImage() {
+    public File getPhotoImage() {
         return photoImage;
     }
 
-    public void setPhotoImage(Image photo) {
+    public void setPhotoImage(File photo) {
         this.photoImage = photo;
     }
 
