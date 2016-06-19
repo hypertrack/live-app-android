@@ -103,6 +103,7 @@ public class TripManager {
     }
 
     public void startTrip(final TripManagerCallback callback) {
+        this.transmitter.clearCurrentTrip(); //TODO: Remove this
         if (this.place == null) {
             callback.OnError();
         }
@@ -223,5 +224,9 @@ public class TripManager {
 
     public void setPlace(MetaPlace place) {
         this.place = place;
+    }
+
+    public Trip getTrip() {
+        return this.trip;
     }
 }

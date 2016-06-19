@@ -30,8 +30,6 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -121,7 +119,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private LatLng currentLocation;
     private Marker currentLocationMarker;
     private Marker destinationLocationMarker;
-    private Button shareEtaButton;
+    private Button sendETAButton;
     private String tripId;
     private ProgressDialog mProgressDialog;
     private Handler handler;
@@ -171,7 +169,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     };
 
-    private String metaId;
     private Bitmap profilePicBitmap;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
@@ -274,7 +271,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             boolean result = intent.getBooleanExtra("end_trip", false);
 
             if (result)
-                endTrip();//endTripClicked();
+//                endTrip();//endTrip();
 
             Log.d("receiver", "Got message: " + result);
         }
@@ -410,7 +407,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void setUpInitView() {
         if (getTripStatusFromSharedPreferences()) {
             mAutocompleteView.setVisibility(View.GONE);
-            shareEtaButton.setVisibility(View.VISIBLE);
+            sendETAButton.setVisibility(View.VISIBLE);
             shareButton.setVisibility(View.VISIBLE);
 
             tripId = getTripFromSharedPreferences();
@@ -439,35 +436,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return bitmap;
     }
 
-    private void endTrip() {
-
-        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putBoolean(Constants.TRIP_STATUS, false);
-        editor.putString(Constants.TRIP_SHARE_URI, "None");
-        editor.putString(Constants.TRIP_ETA, "None");
-        editor.putString(Constants.TRIP_DESTINATION, "None");
-        editor.putString(Constants.TASK_ID, "None");
-        editor.apply();
-
-        tripId = null;
-        taskID = null;
-
-        if(mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            LocationServices.GeofencingApi.removeGeofences(
-                    mGoogleApiClient,
-                    getGeofencePendingIntent()
-            ).setResultCallback(this);
-        }
-        //LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-        resetViewsOnEndTrip();
-    }
-
     private void resetViewsOnEndTrip() {
         if (handler != null)
          handler.removeCallbacks(updateTask);
 
-        shareEtaButton.setVisibility(View.GONE);
+        sendETAButton.setVisibility(View.GONE);
         shareButton.setVisibility(View.GONE);
         mAutocompleteView.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
@@ -655,8 +628,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void showShareButton() {
-        shareEtaButton.setText("Send ETA");
-        shareEtaButton.setVisibility(View.VISIBLE);
+        sendETAButton.setText("Send ETA");
+        sendETAButton.setVisibility(View.VISIBLE);
     }
 
     private void updateETA(Date estimatedTripEndTime) {
@@ -667,36 +640,21 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 //            updateDestinationMarker();
         }
 
-//        shareEtaButton.setText("End Trip (" + etaInMinutes + " mins)");
+//        sendETAButton.setText("End Trip (" + etaInMinutes + " mins)");
     }
 
     private void setUpShareEtaButton() {
-        shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
-
-        shareEtaButton.setOnClickListener(new View.OnClickListener() {
+        sendETAButton = (Button) findViewById(R.id.shareEtaButton);
+        sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!getTripStatusFromSharedPreferences()) {
-                    initShareEtaFlow();
+                if(!tripManager.isTripActive()) {
+                    startTrip();
                 } else {
-                    endTripClicked();
+                    endTrip();
                 }
             }
         });
-    }
-
-    private void initShareEtaFlow() {
-
-        if (getTripStatusFromSharedPreferences()) {
-            String uri = getTripShareUrlInSharedPreferences();
-            if (TextUtils.isEmpty(uri) || uri.equalsIgnoreCase("None")) {
-                return;
-            }
-            //shareUrl();
-            shareUrlViaShare();
-        } else {
-            this.startTrip();
-        }
     }
 
     private void startTrip() {
@@ -709,6 +667,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
+                onTripStart();
             }
 
             @Override
@@ -719,7 +678,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void initETAUpateTask(){
-
         setTimerForEtaUpdate();
     }
 
@@ -795,39 +753,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareBody);
         startActivity(sharingIntent);
-    }
-
-    private void notifySelectedContact(String number) {
-
-        String url = Constants.API_ENDPOINT + "/api/v1/trips/" + metaId + "/send_eta/";
-        String[] recipientArray = {number};
-
-        ETARecipients etaRecipients = new ETARecipients();
-        etaRecipients.setRecipients(recipientArray);
-
-        Gson gson = HTGson.gson();
-        String jsonBody = gson.toJson(etaRecipients);
-
-        HTCustomPostRequest<String> requestObject = new HTCustomPostRequest<String>(1, url,
-                jsonBody, String.class,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                       //Log.v(TAG,"Recipients Response:" + response.toString());
-                        //200 - sending notification
-                        //400, 201 - fall to smses
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        shareUrlViaShare();
-                        Log.d(TAG,"Couldn't send notification to the selected number.");
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
     }
 
     @Override
@@ -942,8 +867,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             System.err.println("NumberParseException was thrown: " + e.toString());
         }
 
-        notifySelectedContact(number);
-        Log.d(TAG, "International Number Format: " + number + " , name : " + name);
     }
 
     private LatLngBounds getBounds(Location location, int mDistanceInMeters ){
@@ -973,7 +896,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         super.onResume();
 
         if (!getTripStatusFromSharedPreferences() && !TextUtils.equals(getTripShareUrlInSharedPreferences(), "None")) {
-            endTrip();
+//            endTrip();
         }
 
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
@@ -988,7 +911,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
-    private void endTripClicked() {
+    private void endTrip() {
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
@@ -999,6 +922,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
+                resetViewsOnEndTrip();
             }
 
             @Override
@@ -1053,5 +977,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
         textView.setText(etaInMinutes + " m");
+    }
+
+    private void onTripStart() {
+        sendETAButton.setText("End Trip");
     }
 }
