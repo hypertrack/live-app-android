@@ -101,6 +101,7 @@ import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
+import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -317,11 +318,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
 
         MapsInitializer.initialize(getApplicationContext());
-
         checkIfUserIsOnBoard();
 
         setContentView(R.layout.activity_home);
@@ -364,7 +363,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         setUpShareEtaButton();
         setUpInitView();
-        updateDeviceInfo();
 
         if (!isConnectedToInternet()) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
@@ -646,51 +644,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 FLAG_UPDATE_CURRENT);
     }
 
-    private void updateDeviceInfo() {
-
-        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String token = sharedpreferences.getString(Constants.GCM_REGISTRATION_TOKEN, "None");
-
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        int userId =  settings.getInt(Constants.USER_ID, -1);
-
-        if (TextUtils.equals("None", token) || userId == -1){
-            return;
-        }
-
-        String url = Constants.API_ENDPOINT + "/api/v1/users/"+ userId +"/add_device/";
-        Constants.setPublishableApiKey(getTokenFromSharedPreferences());
-
-        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        DeviceInfo deviceInfo = new DeviceInfo();
-        deviceInfo.setRegistrationId(token);
-        deviceInfo.setDeviceId(deviceId);
-
-        Gson gson = HTGson.gson();
-        String jsonBody = gson.toJson(deviceInfo);
-
-        Log.d(TAG, "Device Info" + deviceInfo.toString());
-
-        HTCustomPostRequest<String> requestObject = new HTCustomPostRequest<String>(1, url,
-                jsonBody, String.class,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        //200, 201
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //400
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
-
-    }
-
     private void getEtaForDestination(LatLng destinationLocation, final TripETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Getting ETA for the selected destination");
@@ -764,66 +717,27 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             //shareUrl();
             shareUrlViaShare();
         } else {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.setMessage("Fetching URL to share... ");
-            mProgressDialog.show();
+            this.startTrip();
         }
     }
 
     private void startTrip() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setMessage("Fetching URL to share... ");
+        mProgressDialog.show();
 
-        String driverID = UserStore.sharedStore.getUser().getHypertrackDriverID();
+        this.tripManager.startTrip(new TripManagerCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+            }
 
-        if (TextUtils.isEmpty(driverID)) {
-            Toast.makeText(this, "Driver id not found", Toast.LENGTH_LONG).show();
-            mProgressDialog.dismiss();
-            return;
-        }
-
-        if (TextUtils.isEmpty(taskID)) {
-            Toast.makeText(this, "Task id not found", Toast.LENGTH_LONG).show();
-            mProgressDialog.dismiss();
-            return;
-        }
-
-        Log.d(TAG, "driverID: " + driverID);
-
-        if (TextUtils.equals(driverID, "None")) {
-            Toast.makeText(this, "User id not found", Toast.LENGTH_LONG).show();
-            mProgressDialog.dismiss();
-            return;
-        }
-
-//        ArrayList<String> taskIDs = new ArrayList<>();
-//        taskIDs.add(taskID);
-//
-//        HTTripParamsBuilder htTripParamsBuilder = new HTTripParamsBuilder();
-//        HTTripParams htTripParams = htTripParamsBuilder.setDriverID(driverID)
-//                .setTaskIDs(taskIDs)
-//                .setVehicleType(HTDriverVehicleType.CAR)
-//                .createHTTripParams();
-//
-//        transmitterService.startTrip(htTripParams, new HTTripStatusCallback() {
-//            @Override
-//            public void onError(Exception e) {
-//                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
-//                mProgressDialog.dismiss();
-//            }
-//
-//            @Override
-//            public void onSuccess(HTTrip tripDetails) {
-//                //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
-//                tripId = tripDetails.getId();
-//                getShareEtaURL();
-//                saveTripInSharedPreferences();
-//                requestForGeofenceSetup();
-//
-//                initETAUpateTask();
-//                mAutocompleteView.setVisibility(View.GONE);
-//                shareButton.setVisibility(View.VISIBLE);
-//            }
-//        });
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+            }
+        });
     }
 
     private void initETAUpateTask(){
@@ -868,16 +782,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     public String getTripFromSharedPreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         return sharedpreferences.getString(Constants.TRIP_ID, "None");
-    }
-
-    public String getTaskFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(Constants.TASK_ID, "None");
-    }
-
-    public String getUserProfilePicFromSharedPreferences() {
-        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedpreferences.getString(Constants.USER_PROFILE_PIC, "None");
     }
 
     public String getTripShareUrlInSharedPreferences() {
@@ -1113,38 +1017,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setMessage("Stopping trip ... ");
         mProgressDialog.show();
 
-        if (tripId == null)
-            tripId = getTripFromSharedPreferences();
+        this.tripManager.endTrip(new TripManagerCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+            }
 
-        //Toast.makeText(Home.this, "Is internet available: " + isNetworkAvailable(), Toast.LENGTH_SHORT).show();
-
-        if (tripId.equalsIgnoreCase("None"))
-            return;
-
-//        transmitterService.completeTask(this.getTaskFromSharedPreferences(), new HTCompleteTaskStatusCallback() {
-//            @Override
-//            public void onError(Exception e) {
-//                mProgressDialog.dismiss();
-//                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
-//            }
-//
-//            @Override
-//            public void onSuccess(String s) {
-//                transmitterService.endTrip(new HTTripStatusCallback() {
-//                    @Override
-//                    public void onError(Exception e) {
-//                        mProgressDialog.dismiss();
-//                        Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
-//                    }
-//
-//                    @Override
-//                    public void onSuccess(HTTrip tripDetails) {
-//                        mProgressDialog.dismiss();
-//                        endTrip();
-//                    }
-//                });
-//            }
-//        });
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+            }
+        });
     }
 
     @Override
@@ -1168,14 +1051,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         format = format.replace("pm", "p");
 
         return format;
-    }
-
-    public boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager =
-                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = connectivityManager.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
-
     }
 
     @Override
