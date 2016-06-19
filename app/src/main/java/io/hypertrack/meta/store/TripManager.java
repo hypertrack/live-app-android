@@ -16,7 +16,7 @@ import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
-import io.hypertrack.meta.model.Place;
+import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.network.retrofit.SendETAService;
@@ -41,7 +41,8 @@ public class TripManager {
     private TripManagerListener tripEndedListener;
 
     private Trip trip;
-    private Place place;
+    private MetaPlace place;
+
     private HTTrip hyperTrackTrip;
     private HTDriverVehicleType vehicleType;
     private Timer refreshTimer;
@@ -209,5 +210,13 @@ public class TripManager {
 
     private void setupGeofencing() {
 
+    }
+
+    public MetaPlace getPlace() {
+        return place;
+    }
+
+    public void setPlace(MetaPlace place) {
+        this.place = place;
     }
 }

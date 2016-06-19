@@ -86,31 +86,17 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.network.HTGson;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
-import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
-import io.hypertrack.lib.transmitter.model.HTTripParams;
-import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
-import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
-import io.hypertrack.lib.transmitter.model.HTTrip;
-import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.service.RegistrationIntentService;
-import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.DeviceInfo;
-import io.hypertrack.meta.model.ETAInfo;
 import io.hypertrack.meta.model.ETARecipients;
-import io.hypertrack.meta.model.MetaLocation;
-import io.hypertrack.meta.model.Trip;
-import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
@@ -127,7 +113,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
     private static final long INTERVAL_TIME = 5000;
-    private static final int CUSTOM_ADDRESS_DATA = 101;
 
     protected GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
@@ -136,40 +121,37 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private LatLngBounds mBounds;
     private LatLng currentLocation;
     private Marker currentLocationMarker;
-    private LatLng destinationLocation;
     private Marker destinationLocationMarker;
     private Button shareEtaButton;
-    private HTTransmitterService transmitterService;
-    private String userId;
     private String tripId;
     private ProgressDialog mProgressDialog;
     private Handler handler;
     private InputMethodManager mIMEMgr;
-    private CustomAddress customAddress;
     private String taskID;
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
-    private int etaInMinutes;
+
+    private TripManager tripManager = new TripManager();
 
     final Runnable updateTask=new Runnable() {
         @Override
         public void run() {
 
-            transmitterService.refreshTrip(new HTTripStatusCallback() {
-                @Override
-                public void onError(Exception e) {
-                    Log.e(TAG, "Inside refresh trip error");
-                }
-
-                @Override
-                public void onSuccess(HTTrip htTrip) {
-                    Log.v(TAG, htTrip.toString());
-                    updateETA(htTrip.getETA());
-                }
-            });
-
-            handler.postDelayed(this,60000);
+//            transmitterService.refreshTrip(new HTTripStatusCallback() {
+//                @Override
+//                public void onError(Exception e) {
+//                    Log.e(TAG, "Inside refresh trip error");
+//                }
+//
+//                @Override
+//                public void onSuccess(HTTrip htTrip) {
+//                    Log.v(TAG, htTrip.toString());
+//                    updateETA(htTrip.getETA());
+//                }
+//            });
+//
+//            handler.postDelayed(this,60000);
         }
     };
 
@@ -192,9 +174,32 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private String metaId;
     private Bitmap profilePicBitmap;
-    //private static final long GEOFENCE_EXPIRATION_IN_MILLISECONDS = ;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
+
+    private void onSelectPlace(Place place) {
+        final Place selectedPlaces = place.freeze();
+
+        this.getEtaForDestination(selectedPlaces.getLatLng(), new TripETACallback() {
+            @Override
+            public void OnSuccess(TripETAResponse etaResponse) {
+                onETASuccess(etaResponse, selectedPlaces);
+            }
+
+            @Override
+            public void OnError() {
+                destinationLocationMarker.remove();
+            }
+        });
+    }
+
+    private void onETASuccess(TripETAResponse response, Place place) {
+        showShareButton();
+        updateDestinationMarker(place.getLatLng(), (int)response.getDuration()/60);
+        updateMapBounds(place.getLatLng());
+        this.tripManager.setPlace(new MetaPlace(place));
+    }
+
     /**
      * Callback for results from a Places Geo Data API query that shows the first place result in
      * the details view on screen.
@@ -205,7 +210,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         public void onResult(PlaceBuffer places) {
             if (!places.getStatus().isSuccess()) {
                 // Request did not complete successfully
-                Log.d(TAG, "Place query did not complete. Error: " + places.getStatus().toString());
+                Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
                 places.release();
                 return;
             }
@@ -216,18 +221,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 return;
             }
 
-
-            // Get the Place object from the buffer.
+            // Get the MetaPlace object from the buffer.
             final Place place = places.get(0);
 
-            Log.i(TAG, "Place details received: " + place.getName());
-
-            populateCustomAddress(place);
-
-            addMarkerToSelectedDestination(place.getLatLng());
+            Log.i(TAG, "MetaPlace details received: " + place.getName());
+            mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
+            onSelectPlace(place);
             places.release();
         }
     };
+
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -253,25 +256,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            /*
-             Retrieve the place ID of the selected item from the Adapter.
-             The adapter stores each Place suggestion in a AutocompletePrediction from which we
-             read the place ID and title.
-              */
+
             final AutocompletePrediction item = mAdapter.getItem(position);
             final String placeId = item.getPlaceId();
             final CharSequence primaryText = item.getPrimaryText(null);
             Log.d(TAG, "Autocomplete item selected: " + primaryText);
 
-            /*
-             Issue a request to the Places Geo Data API to retrieve a Place object with additional
-             details about the place.
-              */
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
             placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-
-            Log.d(TAG, "Called getPlaceById to get Place details for " + placeId);
         }
     };
 
@@ -292,7 +285,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private SharedPreferenceManager sharedPreferenceManager;
 
     public static int getTheEstimatedTime(Date estimatedTime) {
-
         String currentTime = getCurrentTime();
 
         long seconds = 0;
@@ -317,12 +309,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private static String getCurrentTime() {
-
         SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         String cDateTime=dateFormat.format(new Date());
         return  cDateTime;
-
     }
 
     @Override
@@ -373,7 +363,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
 
         setUpShareEtaButton();
-        setUpHyperTrackSDK();
         setUpInitView();
         updateDeviceInfo();
 
@@ -383,7 +372,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void checkIfUserIsOnBoard() {
-
         boolean isUserOnboard = UserStore.isUserLoggedIn();
         if (!isUserOnboard) {
             startActivity(new Intent(this, Register.class));
@@ -405,8 +393,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private String getImageToPreferences() {
-        SharedPreferences myPrefrence = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return myPrefrence.getString(Constants.USER_PROFILE_PIC_ENCODED, "None");
+        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        return sharedPreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, "None");
     }
 
     public static Bitmap decodeToBase64(String decodeImageString) {
@@ -415,50 +403,28 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void initGoogleClient() {
-
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 0 /* clientId */, this)
                 .addApi(Places.GEO_DATA_API)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
-
     }
 
     private void setUpInitView() {
         if (getTripStatusFromSharedPreferences()) {
-
             mAutocompleteView.setVisibility(View.GONE);
             shareEtaButton.setVisibility(View.VISIBLE);
             shareButton.setVisibility(View.VISIBLE);
 
-            setUpHyperTrackSDK();
             tripId = getTripFromSharedPreferences();
             String etaString = getTripEtaFromSharedPreferences();
             if (!TextUtils.equals(etaString,"None")) {
-                etaInMinutes = Integer.valueOf(etaString);
+//                etaInMinutes = Integer.valueOf(etaString);
             }
-            updateShareETAButton();
+            showShareButton();
             initETAUpateTask();
         }
-
-    }
-
-    private void initCustomMarkerView() {
-
-        customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
-        profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
-
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String urlProfilePic = settings.getString(Constants.USER_PROFILE_PIC, null);
-
-        if(!TextUtils.isEmpty(urlProfilePic)) {
-            Picasso.with(this)
-                    .load(urlProfilePic)
-                    .error(R.drawable.default_profile_pic)
-                    .into(profileViewProfileImage);
-        }
-
     }
 
     private Bitmap createDrawableFromView(Context context, View view) {
@@ -477,22 +443,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return bitmap;
     }
 
-    private void setUpHyperTrackSDK() {
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
-        HyperTrack.setLogLevel(Log.DEBUG);
-        //Setup order details
-
-        transmitterService = HTTransmitterService.getInstance(this);
-        int userIdInt = getUserIdFromPreferences();
-        if (userIdInt != -1)
-            userId = String.valueOf(userIdInt);
-    }
-
-    private int getUserIdFromPreferences() {
-        SharedPreferences settings = getSharedPreferences("io.hypertrack.meta", Context.MODE_PRIVATE);
-        return settings.getInt(Constants.USER_ID, -1);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -502,9 +452,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -541,7 +488,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void resetViewsOnEndTrip() {
-
         if (handler != null)
          handler.removeCallbacks(updateTask);
 
@@ -553,7 +499,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
         }
-
     }
 
     /**
@@ -579,13 +524,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         mMap.setPadding(0,paddingInPxForTop,0,paddingInPxForBottom);
 
-        if (getTripStatusFromSharedPreferences()) {
-            destinationLocation = getTripDestinationFromSharedPreferences();
-            if (destinationLocation != null) {
-                Log.v(TAG, "Destination Latlng: " + destinationLocation);
-                addDestinationMarker(destinationLocation);
-            }
-        }
+//        if (getTripStatusFromSharedPreferences()) {
+//            destinationLocation = getTripDestinationFromSharedPreferences();
+//            if (destinationLocation != null) {
+//                Log.v(TAG, "Destination Latlng: " + destinationLocation);
+//                addDestinationMarker(destinationLocation);
+//            }
+//        }
     }
 
     @Override
@@ -599,32 +544,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 Toast.LENGTH_SHORT).show();
     }
 
-    private void populateCustomAddress(Place place) {
-        customAddress = new CustomAddress();
-
-        if (place.getLatLng() != null) {
-            double[] ll = {place.getLatLng().longitude, place.getLatLng().latitude};
-            MetaLocation metaLocation = new MetaLocation();
-            metaLocation.setType("Point");
-            metaLocation.setCoordinates(ll);
-            customAddress.setLocation(metaLocation);
-        }
-
-        if (!TextUtils.isEmpty(place.getId()))
-        customAddress.setGooglePlacesId(place.getId());
-
-        if (!TextUtils.isEmpty(place.getName()))
-        customAddress.setName(place.getName().toString());
-
-        if (!TextUtils.isEmpty(place.getAddress()))
-        customAddress.setAddress(place.getAddress().toString());
-
-    }
-
     private void addMarkerToCurrentLocation() {
-
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-
             Location location = null;
 
             try{
@@ -634,9 +555,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             }
 
             if (location != null) {
-
-                Log.v(TAG, "Location: " + location);
-
                 if (currentLocationMarker != null)
                     currentLocationMarker.remove();
 
@@ -644,21 +562,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
                 updateCurrentMarkerLocation(location);
-                //currentLocationMarker.showInfoWindow();
-
-                if (currentLocation != null && destinationLocation != null) {
-
-                    LatLngBounds.Builder b = new LatLngBounds.Builder();
-                    b.include(currentLocation);
-                    b.include(destinationLocation);
-                    LatLngBounds bounds = b.build();
-
-                    CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 100);
-                    mMap.animateCamera(cu, 1000, null);
-
-                    return;
-
-                }
 
                 CameraPosition cameraPosition =
                         new CameraPosition.Builder()
@@ -667,87 +570,61 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                                 .build();
 
                 mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
             }
-
         }
-
-        //addMarkerToSelectedDestination(new LatLng(19.158004, 72.991996));
     }
 
-    private void addDestinationMarker(LatLng destinationLocation) {
+//    private void addDestinationMarker(LatLng destinationLocation) {
+//        if (currentLocation != null && destinationLocation != null) {
+//            LatLngBounds.Builder b = new LatLngBounds.Builder();
+//            b.include(currentLocation);
+//            b.include(destinationLocation);
+//            LatLngBounds bounds = b.build();
+//
+//            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
+//                    100);
+//            mMap.moveCamera(cu);
+//        }
+//
+//        saveTripDestinationSharedPreferences(destinationLocation);
+//
+//        if (mGeofenceList == null)
+//            mGeofenceList = new ArrayList<Geofence>();
+//
+//        mGeofenceList.add(new Geofence.Builder()
+//                // Set the request ID of the geofence. This is a string to identify this
+//                // geofence.
+//                .setRequestId(GEOFENCE_REQUEST_ID)
+//                .setCircularRegion(
+//                        destinationLocation.latitude,
+//                        destinationLocation.longitude,
+//                        GEOFENCE_RADIUS_IN_METERS
+//                )
+//                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+//                .setLoiteringDelay(LOITERING_DELAY_MS)
+//                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+//                .build());
+//
+//        mGeofencePendingIntent = getGeofencePendingIntent();
+//    }
 
-        this.destinationLocation = destinationLocation;
-
-        updateDestinationMarker();
-
-        if (currentLocation != null && destinationLocation != null) {
-            LatLngBounds.Builder b = new LatLngBounds.Builder();
-            b.include(currentLocation);
-            b.include(this.destinationLocation);
-            LatLngBounds bounds = b.build();
-
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
-                    100);
-            mMap.moveCamera(cu);
-        }
-
-        saveTripDestinationSharedPreferences(destinationLocation);
-
-        if (mGeofenceList == null)
-            mGeofenceList = new ArrayList<Geofence>();
-
-        mGeofenceList.add(new Geofence.Builder()
-                // Set the request ID of the geofence. This is a string to identify this
-                // geofence.
-                .setRequestId(GEOFENCE_REQUEST_ID)
-                .setCircularRegion(
-                        destinationLocation.latitude,
-                        destinationLocation.longitude,
-                        GEOFENCE_RADIUS_IN_METERS
-                )
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
-                .setLoiteringDelay(LOITERING_DELAY_MS)
-                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                .build());
-
-        mGeofencePendingIntent = getGeofencePendingIntent();
-    }
-
-    private void updateDestinationMarker() {
+    private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
         }
 
-        View markerView = createCustomMarkerView();
+        View markerView = this.getDestinationMarkerView(etaInMinutes);
 
-        destinationLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(this.destinationLocation)
+        this.destinationLocationMarker = mMap.addMarker(new MarkerOptions()
+                .position(destinationLocation)
                 .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,markerView))));
     }
 
-    private View createCustomMarkerView() {
-
+    private View getDestinationMarkerView(int etaInMinutes) {
         View marker = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_destination_marker_layout, null);
-        TextView etaTxt = (TextView) marker.findViewById(R.id.eta_txt);
-
-        int eta = etaInMinutes;
-        if (eta != 0) {
-            etaTxt.setText(eta + "m");
-        }
-
+        TextView etaTextView = (TextView) marker.findViewById(R.id.eta_txt);
+        this.updateTextViewForMinutes(etaTextView, etaInMinutes);
         return marker;
-    }
-
-    private void addMarkerToSelectedDestination(LatLng destinationLocation) {
-
-        if (destinationLocation != null) {
-            // Add a marker in destination and move the camera
-            addDestinationMarker(destinationLocation);
-        }
-
-        mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
-        getEtaForDestination();
     }
 
     private GeofencingRequest getGeofencingRequest() {
@@ -814,7 +691,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     }
 
-    private void getEtaForDestination() {
+    private void getEtaForDestination(LatLng destinationLocation, final TripETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Getting ETA for the selected destination");
         mProgressDialog.setCancelable(false);
@@ -824,18 +701,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        TripManager manager = new TripManager();
-        manager.getETA(currentLocation, destinationLocation, new TripETACallback() {
+        tripManager.getETA(currentLocation, destinationLocation, new TripETACallback() {
             @Override
             public void OnSuccess(TripETAResponse etaResponse) {
                 mProgressDialog.dismiss();
-                showShareEtaButton(etaResponse);
+                callback.OnSuccess(etaResponse);
             }
 
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
-
+                callback.OnError();
             }
         });
     }
@@ -843,37 +719,24 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void saveTripEtaInSharePreferences() {
         SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putString(Constants.TRIP_ETA, String.valueOf(etaInMinutes));
-        editor.commit();
+//        editor.putString(Constants.TRIP_ETA, String.valueOf(etaInMinutes));
+        editor.apply();
     }
 
-    private void showShareEtaButton(TripETAResponse response) {
-        etaInMinutes = (int)response.getDuration() / 60;
-
-        saveTripEtaInSharePreferences();
-
-        if (destinationLocationMarker != null) {
-            updateDestinationMarker();
-        }
-
-        updateShareETAButton();
-    }
-
-    private void updateShareETAButton() {
-        shareEtaButton.setText("Send ETA (" + etaInMinutes + " mins)");
+    private void showShareButton() {
+        shareEtaButton.setText("Send ETA");
         shareEtaButton.setVisibility(View.VISIBLE);
     }
 
     private void updateETA(Date estimatedTripEndTime) {
-
-        etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
+//        etaInMinutes = getTheEstimatedTime(estimatedTripEndTime);
         saveTripEtaInSharePreferences();
 
         if (destinationLocationMarker != null) {
-            updateDestinationMarker();
+//            updateDestinationMarker();
         }
 
-        shareEtaButton.setText("End Trip (" + etaInMinutes + " mins)");
+//        shareEtaButton.setText("End Trip (" + etaInMinutes + " mins)");
     }
 
     private void setUpShareEtaButton() {
@@ -901,38 +764,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             //shareUrl();
             shareUrlViaShare();
         } else {
-
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setCancelable(false);
             mProgressDialog.setMessage("Fetching URL to share... ");
             mProgressDialog.show();
-            createTask();
         }
-    }
-
-    private void createTask() {
-        String createTaskAPI = Constants.API_ENDPOINT + "/api/v1/users/" + userId + "/create_task/";
-        Constants.setPublishableApiKey(getTokenFromSharedPreferences());
-
-        Gson gson = HTGson.gson();
-        String jsonBody = gson.toJson(customAddress);
-
-        HTCustomPostRequest<CustomAddress> request = new HTCustomPostRequest<>(1, createTaskAPI, jsonBody, CustomAddress.class, new Response.Listener<CustomAddress>() {
-            @Override
-            public void onResponse(CustomAddress response) {
-                taskID = response.getId();
-                startTrip();
-            }
-        },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Home.this, error.getMessage(), Toast.LENGTH_LONG).show();
-                        mProgressDialog.dismiss();
-                    }
-                });
-
-        MetaApplication.getInstance().addToRequestQueue(request);
     }
 
     private void startTrip() {
@@ -959,35 +795,35 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        ArrayList<String> taskIDs = new ArrayList<>();
-        taskIDs.add(taskID);
-
-        HTTripParamsBuilder htTripParamsBuilder = new HTTripParamsBuilder();
-        HTTripParams htTripParams = htTripParamsBuilder.setDriverID(driverID)
-                .setTaskIDs(taskIDs)
-                .setVehicleType(HTDriverVehicleType.CAR)
-                .createHTTripParams();
-
-        transmitterService.startTrip(htTripParams, new HTTripStatusCallback() {
-            @Override
-            public void onError(Exception e) {
-                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                mProgressDialog.dismiss();
-            }
-
-            @Override
-            public void onSuccess(HTTrip tripDetails) {
-                //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
-                tripId = tripDetails.getId();
-                getShareEtaURL();
-                saveTripInSharedPreferences();
-                requestForGeofenceSetup();
-
-                initETAUpateTask();
-                mAutocompleteView.setVisibility(View.GONE);
-                shareButton.setVisibility(View.VISIBLE);
-            }
-        });
+//        ArrayList<String> taskIDs = new ArrayList<>();
+//        taskIDs.add(taskID);
+//
+//        HTTripParamsBuilder htTripParamsBuilder = new HTTripParamsBuilder();
+//        HTTripParams htTripParams = htTripParamsBuilder.setDriverID(driverID)
+//                .setTaskIDs(taskIDs)
+//                .setVehicleType(HTDriverVehicleType.CAR)
+//                .createHTTripParams();
+//
+//        transmitterService.startTrip(htTripParams, new HTTripStatusCallback() {
+//            @Override
+//            public void onError(Exception e) {
+//                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
+//                mProgressDialog.dismiss();
+//            }
+//
+//            @Override
+//            public void onSuccess(HTTrip tripDetails) {
+//                //Toast.makeText(Home.this, "Trip id: " + id, Toast.LENGTH_LONG).show();
+//                tripId = tripDetails.getId();
+//                getShareEtaURL();
+//                saveTripInSharedPreferences();
+//                requestForGeofenceSetup();
+//
+//                initETAUpateTask();
+//                mAutocompleteView.setVisibility(View.GONE);
+//                shareButton.setVisibility(View.VISIBLE);
+//            }
+//        });
     }
 
     private void initETAUpateTask(){
@@ -1071,47 +907,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.commit();
     }
 
-    private void getShareEtaURL() {
-
-        Trip trip = new Trip(userId, tripId, taskID);
-        Gson gson = HTGson.gson();
-        String jsonBody = gson.toJson(trip);
-
-        String url = Constants.API_ENDPOINT + "/api/v1/trips/";
-
-        HTCustomPostRequest<Trip> requestObject = new HTCustomPostRequest<Trip>(1, url,
-                jsonBody, Trip.class,
-                new Response.Listener<Trip>() {
-                    @Override
-                    public void onResponse(Trip response) {
-                        //Toast.makeText(Home.this, "URL: " + response.toString(), Toast.LENGTH_LONG).show();
-                        mProgressDialog.dismiss();
-
-                        String uri = response.getShareUrl();
-                        metaId = response.getId();
-                        saveTripShareUrlInSharedPreferences(uri);
-                        //shareUrl();
-                        shareUrlViaShare();
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(Home.this, "Inside Error", Toast.LENGTH_LONG).show();
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(requestObject);
-    }
-
-    private void shareUrl() {
-        Uri uri1 = Uri.parse("content://contacts");
-        Intent intent = new Intent(Intent.ACTION_PICK, uri1);
-        intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-        startActivityForResult(intent, REQUEST_SHARE_CONTACT_CODE);
-    }
-
     private void shareUrlViaShare() {
         String shareBody = "I'm on my way. Will be there by "+ getEstimatedTimeOfArrival() + ". Track me live " + getTripShareUrlInSharedPreferences();
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
@@ -1181,7 +976,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void requestForLocationUpdates() {
-
         LocationRequest locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         locationRequest.setInterval(INTERVAL_TIME);
@@ -1222,25 +1016,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (resultCode == CUSTOM_ADDRESS_DATA) {
-            this.didSelectCustomAddress(data);
-        }
         if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
             if (resultCode == RESULT_OK) {
                 this.didSelectContact(data);
-            }
-        }
-    }
-
-    private void didSelectCustomAddress(Intent data) {
-        CustomAddress ca = (CustomAddress)data.getSerializableExtra("custom_address");
-        if (ca != null) {
-            customAddress = ca;
-            Log.d(TAG, ca.toString());
-
-            MetaLocation location = ca.getLocation();
-            if (location != null) {
-                addMarkerToSelectedDestination(location.getLatLng());
             }
         }
     }
@@ -1345,30 +1123,30 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (tripId.equalsIgnoreCase("None"))
             return;
 
-        transmitterService.completeTask(this.getTaskFromSharedPreferences(), new HTCompleteTaskStatusCallback() {
-            @Override
-            public void onError(Exception e) {
-                mProgressDialog.dismiss();
-                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-
-            @Override
-            public void onSuccess(String s) {
-                transmitterService.endTrip(new HTTripStatusCallback() {
-                    @Override
-                    public void onError(Exception e) {
-                        mProgressDialog.dismiss();
-                        Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-
-                    @Override
-                    public void onSuccess(HTTrip tripDetails) {
-                        mProgressDialog.dismiss();
-                        endTrip();
-                    }
-                });
-            }
-        });
+//        transmitterService.completeTask(this.getTaskFromSharedPreferences(), new HTCompleteTaskStatusCallback() {
+//            @Override
+//            public void onError(Exception e) {
+//                mProgressDialog.dismiss();
+//                Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
+//            }
+//
+//            @Override
+//            public void onSuccess(String s) {
+//                transmitterService.endTrip(new HTTripStatusCallback() {
+//                    @Override
+//                    public void onError(Exception e) {
+//                        mProgressDialog.dismiss();
+//                        Toast.makeText(Home.this, e.getMessage(), Toast.LENGTH_LONG).show();
+//                    }
+//
+//                    @Override
+//                    public void onSuccess(HTTrip tripDetails) {
+//                        mProgressDialog.dismiss();
+//                        endTrip();
+//                    }
+//                });
+//            }
+//        });
     }
 
     @Override
@@ -1383,7 +1161,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private String getEstimatedTimeOfArrival() {
 
         Calendar now = Calendar.getInstance();
-        now.add(Calendar.MINUTE, etaInMinutes);
+//        now.add(Calendar.MINUTE, etaInMinutes);
         SimpleDateFormat df = new SimpleDateFormat("h:mma");
         String format = df.format(now.getTime());
 
@@ -1407,5 +1185,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         super.onStop();
         if (mProgressDialog != null) mProgressDialog.dismiss();
         MetaApplication.getInstance().cancelPendingRequests(TAG);
+    }
+
+    // New Methods
+
+    private void updateMapBounds(LatLng destinationLocation) {
+        if (destinationLocation == null) {
+            return;
+        }
+
+        LatLngBounds bounds = new LatLngBounds.Builder().include(currentLocation).include(destinationLocation).build();
+
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 50);
+        mMap.animateCamera(cameraUpdate);
+    }
+
+    private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
+        textView.setText(etaInMinutes + " m");
     }
 }

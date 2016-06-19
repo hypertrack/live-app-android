@@ -41,7 +41,7 @@
             style="?android:attr/progressBarStyle"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="right|center_vertical"
+            android:layout_gravity="end|center_vertical"
             android:layout_marginEnd="@dimen/margin_base"
             android:indeterminate="true"
             android:visibility="gone" />

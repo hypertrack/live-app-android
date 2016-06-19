@@ -3,10 +3,7 @@ package io.hypertrack.meta.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.ArrayList;
-
 import io.hypertrack.meta.MetaApplication;
-import io.hypertrack.meta.model.Place;
 
 /**
  * Created by suhas on 25/02/16.

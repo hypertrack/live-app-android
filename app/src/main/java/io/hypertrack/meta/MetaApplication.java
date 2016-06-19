@@ -11,6 +11,7 @@ import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
+import io.hypertrack.lib.common.HyperTrack;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -33,6 +34,8 @@ public class MetaApplication extends Application {
         Fabric.with(this, new Crashlytics());
         mInstance = this;
         this.mContext = getApplicationContext();
+
+        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
         this.setupRealm();
     }
 

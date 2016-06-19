@@ -10,16 +10,16 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.model.Place;
+import io.hypertrack.meta.model.MetaPlace;
 
 /**
  * Created by piyush on 10/06/16.
  */
 public class SavedPlacesAdapter extends RecyclerView.Adapter<SavedPlacesAdapter.PlacesViewHolder> {
 
-    private ArrayList<Place> savedPlacesList;
+    private ArrayList<MetaPlace> savedPlacesList;
 
-    public SavedPlacesAdapter(ArrayList<Place> savedPlacesList) {
+    public SavedPlacesAdapter(ArrayList<MetaPlace> savedPlacesList) {
         this.savedPlacesList = savedPlacesList;
     }
 
@@ -32,7 +32,7 @@ public class SavedPlacesAdapter extends RecyclerView.Adapter<SavedPlacesAdapter.
     @Override
     public void onBindViewHolder(PlacesViewHolder holder, int position) {
 
-        final Place place = savedPlacesList.get(position);
+        final MetaPlace place = savedPlacesList.get(position);
 
         holder.title.setText(place.getName());
         holder.description.setText(place.getAddress());
