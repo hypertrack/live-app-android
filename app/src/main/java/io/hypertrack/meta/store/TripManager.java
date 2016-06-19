@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 
+import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
@@ -111,6 +112,8 @@ public class TripManager {
                 transmitter.startTrip(getTripParams(taskID), new HTTripStatusCallback() {
                     @Override
                     public void onSuccess(HTTrip htTrip) {
+                        hyperTrackTrip = htTrip;
+
                         addTrip(new TripManagerCallback() {
                             @Override
                             public void OnSuccess() {

@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hypertrack.meta.model.OnboardingUser;
+import io.hypertrack.meta.model.PlaceDTO;
 import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.model.User;
@@ -44,4 +45,7 @@ public interface SendETAService {
 
     @POST("api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
+
+    @POST("api/v1/users/{id}/create_task/")
+    Call<Map<String, Object>> createTask(@Path("id") int id, @Body PlaceDTO placeDTO);
 }

@@ -1009,8 +1009,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 new MarkerOptions()
                         .position(currentLocation)
                         .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,customMarkerView))));
-
-
     }
 
     @Override

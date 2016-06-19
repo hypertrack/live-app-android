@@ -1,6 +1,12 @@
 package io.hypertrack.meta.model;
 
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.annotations.SerializedName;
+
+import java.util.Map;
+
+import io.hypertrack.lib.common.model.HTLocation;
 
 /**
  * Created by piyush on 10/06/16.
@@ -8,10 +14,17 @@ import com.google.android.gms.location.places.Place;
 public class MetaPlace {
 
     private int id;
+
+    @SerializedName("hypertrack_destination_id")
     private String hyperTrackDestinationID;
+
+    @SerializedName("google_places_id")
     private String googlePlacesID;
+
     private String name;
+
     private String address;
+
     private Double latitude;
     private Double longitude;
 
@@ -85,6 +98,12 @@ public class MetaPlace {
     }
 
     public MetaPlace(Place place) {
+        this.name = place.getName().toString();
+        this.googlePlacesID = place.getId();
+        this.address = place.getAddress().toString();
 
+        LatLng latLng = place.getLatLng();
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
     }
 }
