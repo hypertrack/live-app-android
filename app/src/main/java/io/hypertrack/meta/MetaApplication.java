@@ -1,6 +1,7 @@
 package io.hypertrack.meta;
 
 import android.app.Application;
+import android.content.Context;
 import android.text.TextUtils;
 
 import com.android.volley.DefaultRetryPolicy;
@@ -24,17 +25,24 @@ public class MetaApplication extends Application {
     private static final int TIMEOUT_MILLISECONDS = 60000;
     private static final int MAX_RETRIES = -1;
 
+    private Context mContext;
+
     @Override
     public void onCreate() {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         mInstance = this;
+        this.mContext = getApplicationContext();
         this.setupRealm();
     }
 
     public void setupRealm() {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
         Realm.setDefaultConfiguration(realmConfiguration);
+    }
+
+    public Context getAppContext() {
+        return this.mContext;
     }
 
     public static synchronized MetaApplication getInstance() {

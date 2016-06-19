@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 /**
  * Created by suhas on 26/11/15.
  */
-public class UserTrip {
+public class Trip {
 
     private String user;
 
@@ -28,7 +28,7 @@ public class UserTrip {
         this.shareUrl = shareUrl;
     }
 
-    public UserTrip(String user, String hypertrackTripID, String hypertrackTaskID) {
+    public Trip(String user, String hypertrackTripID, String hypertrackTaskID) {
         this.user = user;
         this.hypertrackTripID = hypertrackTripID;
         this.hypertrackTaskID = hypertrackTaskID;
@@ -68,7 +68,7 @@ public class UserTrip {
 
     @Override
     public String toString() {
-        return "UserTrip{" +
+        return "Trip{" +
                 "user='" + user + '\'' +
                 ", hypertrackTripID='" + hypertrackTripID + '\'' +
                 ", hypertrackTaskID='" + hypertrackTaskID + '\'' +

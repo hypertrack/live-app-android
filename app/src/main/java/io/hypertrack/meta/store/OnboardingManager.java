@@ -1,5 +1,6 @@
 package io.hypertrack.meta.store;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -10,10 +11,12 @@ import java.util.Map;
 import java.util.UUID;
 
 import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.model.OnboardingUser;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
+import io.hypertrack.meta.util.SharedPreferenceManager;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -40,7 +43,7 @@ public class OnboardingManager {
     }
 
     private OnboardingManager() {
-        onboardingUser = new OnboardingUser();
+        this.onboardingUser = new OnboardingUser();
     }
 
     public OnboardingUser getUser() {
@@ -82,6 +85,7 @@ public class OnboardingManager {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                onVerifyCode(response.body());
                 callback.onSuccess();
             }
 
@@ -161,5 +165,11 @@ public class OnboardingManager {
 
     private void didOnbardUser(User user) {
         UserStore.sharedStore.addUser(user);
+    }
+
+    private void onVerifyCode(Map<String, Object> response) {
+        Log.v(TAG, response.toString());
+
+        SharedPreferenceManager.setUserAuthToken((String)response.get("token"));
     }
 }

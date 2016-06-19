@@ -81,7 +81,6 @@ public class Verify extends AppCompatActivity implements VerifyView {
         }
 
         ButterKnife.bind(this);
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
         presenter.attachView(this);
 
         this.verificationCodeView.addTextChangedListener(new TextWatcher() {

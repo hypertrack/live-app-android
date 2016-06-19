@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import java.util.ArrayList;
 
+import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.model.Place;
 
 /**
@@ -12,24 +13,25 @@ import io.hypertrack.meta.model.Place;
  */
 public class SharedPreferenceManager {
 
-    public static final String pref_name = Constants.SHARED_PREFERENCES_NAME;
-    SharedPreferences sharedpreferences;
-    SharedPreferences.Editor editor;
-    Context ctx;
+    private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
 
-    public SharedPreferenceManager(Context ctx) {
-        sharedpreferences = ctx.getSharedPreferences(pref_name,
-                Context.MODE_PRIVATE);
-        editor = sharedpreferences.edit();
-        this.ctx = ctx;
+    private static SharedPreferences getSharedPreferences() {
+        Context context = MetaApplication.getInstance().getApplicationContext();
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public void setUserAuthToken(String userAuthToken) {
+    private static SharedPreferences.Editor getEditor() {
+        return getSharedPreferences().edit();
+    }
+
+    public static void setUserAuthToken(String userAuthToken) {
+        SharedPreferences.Editor editor = getEditor();
+
         editor.putString(Constants.USER_AUTH_TOKEN, userAuthToken);
         editor.apply();
     }
 
-    public String getUserAuthToken() {
-        return sharedpreferences.getString(Constants.USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
+    public static String getUserAuthToken() {
+        return getSharedPreferences().getString(Constants.USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
     }
 }

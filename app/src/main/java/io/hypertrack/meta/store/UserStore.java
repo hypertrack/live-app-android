@@ -1,6 +1,8 @@
 package io.hypertrack.meta.store;
 
+import io.hypertrack.meta.model.Place;
 import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.store.callback.UserStoreGetTaskCallback;
 import io.realm.Realm;
 
 /**
@@ -38,5 +40,9 @@ public class UserStore {
     public static boolean isUserLoggedIn() {
         Realm realm = Realm.getDefaultInstance();
         return realm.where(User.class).findAll().size() > 0;
+    }
+
+    public void getTask(Place place, final UserStoreGetTaskCallback callback) {
+
     }
 }

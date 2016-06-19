@@ -98,7 +98,7 @@ import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.BuildConfig;
-import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
@@ -109,10 +109,12 @@ import io.hypertrack.meta.model.DeviceInfo;
 import io.hypertrack.meta.model.ETAInfo;
 import io.hypertrack.meta.model.ETARecipients;
 import io.hypertrack.meta.model.MetaLocation;
-import io.hypertrack.meta.model.UserTrip;
+import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.network.HTCustomGetRequest;
 import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
+import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -330,9 +332,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         MapsInitializer.initialize(getApplicationContext());
 
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-
         checkIfUserIsOnBoard();
 
         setContentView(R.layout.activity_home);
@@ -358,8 +357,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAutocompleteView.setAdapter(mAdapter);
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
         mAutocompleteView.addTextChangedListener(mTextWatcher);
-
-        shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
 
         shareButton = (Button) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
@@ -600,14 +597,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         Toast.makeText(this,
                 "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
                 Toast.LENGTH_SHORT).show();
-
-
     }
 
     private void populateCustomAddress(Place place) {
-
-        //name and location are compulsary
-
         customAddress = new CustomAddress();
 
         if (place.getLatLng() != null) {
@@ -823,7 +815,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void getEtaForDestination() {
-
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Getting ETA for the selected destination");
         mProgressDialog.setCancelable(false);
@@ -833,39 +824,20 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        String url = Constants.API_ENDPOINT + "/api/v1/eta/?origin="
-                + currentLocation.latitude + "," + currentLocation.longitude
-                + "&destination=" + destinationLocation.latitude + "," + destinationLocation.longitude;
+        TripManager manager = new TripManager();
+        manager.getETA(currentLocation, destinationLocation, new TripETACallback() {
+            @Override
+            public void OnSuccess(TripETAResponse etaResponse) {
+                mProgressDialog.dismiss();
+                showShareEtaButton(etaResponse);
+            }
 
-        Constants.setPublishableApiKey(getTokenFromSharedPreferences());
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
 
-        Log.d(TAG, "Url: " + url + "Token: " + getTokenFromSharedPreferences());
-
-        HTCustomGetRequest<ETAInfo[]> requestObject =
-                new HTCustomGetRequest<ETAInfo[]>(url, ETAInfo[].class, new Response.Listener<ETAInfo[]>() {
-                    @Override
-                    public void onResponse(ETAInfo[] response) {
-                        Log.d("Response", "Inside onResponse");
-                        showShareEtaButton(response);
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        mProgressDialog.dismiss();
-                        Log.d("Response", "Inside onError");
-                        Toast.makeText(Home.this, "There was an error fetching ETA. Please try again.", Toast.LENGTH_LONG).show();
-
-                        if (destinationLocationMarker != null)
-                            destinationLocationMarker.remove();
-
-                        shareEtaButton.setVisibility(View.INVISIBLE);
-                        mAutocompleteView.setText("");
-                        mIMEMgr.showSoftInputFromInputMethod(mAutocompleteView.getWindowToken(), 0);
-                    }
-                });
-
-        MetaApplication.getInstance().addToRequestQueue(requestObject, TAG);
-
+            }
+        });
     }
 
     private void saveTripEtaInSharePreferences() {
@@ -875,10 +847,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.commit();
     }
 
-    private void showShareEtaButton(ETAInfo[] etaInfoList) {
-
-        int eta = etaInfoList[0].getDuration();
-        etaInMinutes = eta / 60;
+    private void showShareEtaButton(TripETAResponse response) {
+        etaInMinutes = (int)response.getDuration() / 60;
 
         saveTripEtaInSharePreferences();
 
@@ -887,8 +857,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
 
         updateShareETAButton();
-
-        mProgressDialog.dismiss();
     }
 
     private void updateShareETAButton() {
@@ -909,6 +877,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setUpShareEtaButton() {
+        shareEtaButton = (Button) findViewById(R.id.shareEtaButton);
+
         shareEtaButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1103,17 +1073,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void getShareEtaURL() {
 
-        UserTrip userTrip = new UserTrip(userId, tripId, taskID);
+        Trip trip = new Trip(userId, tripId, taskID);
         Gson gson = HTGson.gson();
-        String jsonBody = gson.toJson(userTrip);
+        String jsonBody = gson.toJson(trip);
 
         String url = Constants.API_ENDPOINT + "/api/v1/trips/";
 
-        HTCustomPostRequest<UserTrip> requestObject = new HTCustomPostRequest<UserTrip>(1, url,
-                jsonBody, UserTrip.class,
-                new Response.Listener<UserTrip>() {
+        HTCustomPostRequest<Trip> requestObject = new HTCustomPostRequest<Trip>(1, url,
+                jsonBody, Trip.class,
+                new Response.Listener<Trip>() {
                     @Override
-                    public void onResponse(UserTrip response) {
+                    public void onResponse(Trip response) {
                         //Toast.makeText(Home.this, "URL: " + response.toString(), Toast.LENGTH_LONG).show();
                         mProgressDialog.dismiss();
 
