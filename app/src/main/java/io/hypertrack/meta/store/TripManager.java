@@ -17,6 +17,7 @@ import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
+import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
@@ -35,7 +36,7 @@ import retrofit2.Response;
  * Created by ulhas on 18/06/16.
  */
 public class TripManager {
-    private HTTransmitterService transmitter;
+    private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
     private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
     private TripManagerListener tripRefreshedListener;
@@ -45,7 +46,7 @@ public class TripManager {
     private MetaPlace place;
 
     private HTTrip hyperTrackTrip;
-    private HTDriverVehicleType vehicleType;
+    private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
     private Timer refreshTimer;
     private PendingIntent mGeofencePendingIntent;
 
@@ -109,7 +110,8 @@ public class TripManager {
         UserStore.sharedStore.getTask(this.place, new UserStoreGetTaskCallback() {
             @Override
             public void OnSuccess(String taskID) {
-                transmitter.startTrip(getTripParams(taskID), new HTTripStatusCallback() {
+                HTTripParams tripParams = getTripParams(taskID);
+                transmitter.startTrip(tripParams, new HTTripStatusCallback() {
                     @Override
                     public void onSuccess(HTTrip htTrip) {
                         hyperTrackTrip = htTrip;
