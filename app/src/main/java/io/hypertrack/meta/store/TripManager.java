@@ -73,7 +73,9 @@ public class TripManager {
     };
 
     private void onTripRefresh() {
-        this.tripRefreshedListener.OnCallback();
+        if (this.tripRefreshedListener != null) {
+            this.tripRefreshedListener.OnCallback();
+        }
     }
 
     public boolean isTripActive() {
