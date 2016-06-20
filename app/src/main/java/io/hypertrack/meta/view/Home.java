@@ -113,8 +113,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
 
-    private TripManager tripManager = new TripManager();
-
     Target target = new Target() {
         @Override
         public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -152,7 +150,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         showSendETAButton();
         updateDestinationMarker(place.getLatLng(), (int)response.getDuration()/60);
         updateMapBounds(place.getLatLng());
-        this.tripManager.setPlace(new MetaPlace(place));
+        TripManager.getSharedManager().setPlace(new MetaPlace(place));
     }
 
     /**
@@ -438,7 +436,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        tripManager.getETA(currentLocation, destinationLocation, new TripETACallback() {
+        TripManager.getSharedManager().getETA(currentLocation, destinationLocation, new TripETACallback() {
             @Override
             public void OnSuccess(TripETAResponse etaResponse) {
                 mProgressDialog.dismiss();
@@ -463,7 +461,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!tripManager.isTripActive()) {
+                if(!TripManager.getSharedManager().isTripActive()) {
                     startTrip();
                 } else {
                     endTrip();
@@ -478,7 +476,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setMessage("Fetching URL to share... ");
         mProgressDialog.show();
 
-        this.tripManager.startTrip(new TripManagerCallback() {
+        TripManager.getSharedManager().startTrip(new TripManagerCallback() {
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
@@ -615,7 +613,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setMessage("Stopping trip ... ");
         mProgressDialog.show();
 
-        this.tripManager.endTrip(new TripManagerCallback() {
+        TripManager.getSharedManager().endTrip(new TripManagerCallback() {
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
@@ -663,7 +661,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void updateETAForOnGoingTrip() {
-        HTTrip trip = this.tripManager.getHyperTrackTrip();
+        HTTrip trip = TripManager.getSharedManager().getHyperTrackTrip();
 
         Date ETA = trip.getETA();
         Date now = new Date();
@@ -680,14 +678,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sendETAButton.setText("End Trip");
         shareButton.setVisibility(View.VISIBLE);
 
-        this.tripManager.setTripRefreshedListener(new TripManagerListener() {
+        TripManager tripManager = TripManager.getSharedManager();
+
+        tripManager.setTripRefreshedListener(new TripManagerListener() {
             @Override
             public void OnCallback() {
                 updateETAForOnGoingTrip();
             }
         });
 
-        this.tripManager.setTripEndedListener(new TripManagerListener() {
+        tripManager.setTripEndedListener(new TripManagerListener() {
             @Override
             public void OnCallback() {
                 OnTripEnd();

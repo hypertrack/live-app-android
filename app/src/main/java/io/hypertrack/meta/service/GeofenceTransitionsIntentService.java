@@ -15,6 +15,9 @@ import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.meta.BuildConfig;
+import io.hypertrack.meta.model.Trip;
+import io.hypertrack.meta.store.TripManager;
+import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.util.GeofenceErrorMessages;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.util.Constants;
@@ -70,12 +73,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
                 Log.v(TAG, "User is dwelling in geo fence.");
-                sendMessage();
-
-                SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putBoolean(Constants.TRIP_STATUS, false);
-                editor.commit();
+                TripManager.getSharedManager().OnGeoFenceSuccess();
 
             } else {
                 // Log the error.
@@ -84,37 +82,6 @@ public class GeofenceTransitionsIntentService extends IntentService {
             }
 
         }
-    }
-
-    private void sendMessage() {
-
-        SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String tripId = sharedpreferences.getString(Constants.TRIP_ID, "None");
-
-        if (tripId.equalsIgnoreCase("None"))
-            return;
-
-        if (transmitterService == null) {
-            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, this);
-            HyperTrack.setLogLevel(Log.VERBOSE);
-            transmitterService = HTTransmitterService.getInstance(this);
-        }
-
-        transmitterService.endTrip(new HTTripStatusCallback() {
-            @Override
-            public void onError(Exception e) {
-                Log.v(TAG, "Error while Ending trip" + e.getMessage());
-            }
-
-            @Override
-            public void onSuccess(HTTrip tripDetails) {
-                Log.v(TAG, "Trip Ended. Broadcasting intent.");
-
-                Intent intent = new Intent("trip_ended");
-                intent.putExtra("end_trip", true);
-                LocalBroadcastManager.getInstance(GeofenceTransitionsIntentService.this).sendBroadcast(intent);
-            }
-        });
     }
 
 }

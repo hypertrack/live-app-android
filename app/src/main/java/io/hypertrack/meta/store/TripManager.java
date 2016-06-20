@@ -1,8 +1,20 @@
 package io.hypertrack.meta.store;
 
 import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -22,11 +34,13 @@ import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
+import io.hypertrack.meta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.meta.util.SharedPreferenceManager;
+import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,8 +48,13 @@ import retrofit2.Response;
 /**
  * Created by ulhas on 18/06/16.
  */
-public class TripManager {
+public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
+    public static final int LOITERING_DELAY_MS = 30000;
+    private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
+    private static final float GEOFENCE_RADIUS_IN_METERS = 100;
+
+    private static final String TAG = TripManager.class.getSimpleName();
     private static final long REFRESH_DELAY = 60000;
 
     private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
@@ -43,15 +62,41 @@ public class TripManager {
 
     private TripManagerListener tripRefreshedListener;
     private TripManagerListener tripEndedListener;
+    private Realm realm = Realm.getDefaultInstance();
 
     private Trip trip;
     private MetaPlace place;
 
     private HTTrip hyperTrackTrip;
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
+
     private PendingIntent mGeofencePendingIntent;
+    private GoogleApiClient mGoogleAPIClient;
 
     private Handler handler;
+
+    private static TripManager sSharedManager;
+
+    public static TripManager getSharedManager() {
+        if (sSharedManager == null) {
+            sSharedManager = new TripManager();
+        }
+
+        return sSharedManager;
+    }
+
+    private TripManager() {
+        this.setupGoogleAPIClient();
+    }
+
+    private void setupGoogleAPIClient() {
+        this.mGoogleAPIClient = new GoogleApiClient.Builder(MetaApplication.getInstance().getApplicationContext())
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .build();
+
+        this.mGoogleAPIClient.connect();
+    }
 
     final Runnable refreshTask = new Runnable() {
         @Override
@@ -94,15 +139,21 @@ public class TripManager {
                 List<TripETAResponse> etaResponses = response.body();
 
                 if (etaResponses.size() > 0) {
-                    callback.OnSuccess(etaResponses.get(0));
+                    if (callback != null) {
+                        callback.OnSuccess(etaResponses.get(0));
+                    }
                 } else {
-                    callback.OnError();
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<List<TripETAResponse>> call, Throwable t) {
-                callback.OnError();
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }
@@ -117,12 +168,16 @@ public class TripManager {
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
                 trip = response.body();
-                callback.OnSuccess();
+                if (callback != null) {
+                    callback.OnSuccess();
+                }
             }
 
             @Override
             public void onFailure(Call<Trip> call, Throwable t) {
-                callback.OnError();
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }
@@ -134,7 +189,9 @@ public class TripManager {
     public void startTrip(final TripManagerCallback callback) {
         this.transmitter.clearCurrentTrip(); //TODO: Remove this
         if (this.place == null) {
-            callback.OnError();
+            if (callback != null) {
+                callback.OnError();
+            }
         }
 
         UserStore.sharedStore.getTask(this.place, new UserStoreGetTaskCallback() {
@@ -150,28 +207,36 @@ public class TripManager {
                             @Override
                             public void OnSuccess() {
                                 onTripStart();
-                                callback.OnSuccess();
+                                if (callback != null) {
+                                    callback.OnSuccess();
+                                }
                             }
 
                             @Override
                             public void OnError() {
                                 clearState();
                                 transmitter.clearCurrentTrip();
-                                callback.OnError();
+                                if (callback != null) {
+                                    callback.OnError();
+                                }
                             }
                         });
                     }
 
                     @Override
                     public void onError(Exception e) {
-                        callback.OnError();
+                        if (callback != null) {
+                            callback.OnError();
+                        }
                     }
                 });
             }
 
             @Override
             public void OnError() {
-                callback.OnError();
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }
@@ -191,14 +256,18 @@ public class TripManager {
 
                     @Override
                     public void onError(Exception e) {
-                        callback.OnError();
+                        if (callback != null) {
+                            callback.OnError();
+                        }
                     }
                 });
             }
 
             @Override
             public void onError(Exception e) {
-                callback.OnError();
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }
@@ -209,6 +278,7 @@ public class TripManager {
         this.hyperTrackTrip = null;
         this.vehicleType = null;
         this.stopRefreshingTrip();
+        this.stopGeofencing();
         this.clearListeners();
     }
 
@@ -245,8 +315,71 @@ public class TripManager {
                 .createHTTripParams();
     }
 
-    private void setupGeofencing() {
+    private void stopGeofencing() {
+        if (this.mGeofencePendingIntent != null) {
+            LocationServices.GeofencingApi.removeGeofences(mGoogleAPIClient, mGeofencePendingIntent);
+            mGeofencePendingIntent = null;
+        }
+    }
 
+    private void setupGeofencing() {
+        GeofencingRequest request = this.getGeofencingRequest();
+
+        Context context = MetaApplication.getInstance().getAppContext();
+        Intent geofencingIntent = new Intent(context, GeofenceTransitionsIntentService.class);
+        mGeofencePendingIntent = PendingIntent.getService(context, 0, geofencingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        try {
+            LocationServices.GeofencingApi.addGeofences(mGoogleAPIClient, request, mGeofencePendingIntent).setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onResult(@NonNull Status status) {
+                    if (status.isSuccess()) {
+                        Log.v(TAG, "Geofencing added successfully");
+                    } else {
+                        Log.v(TAG, "Geofencing not added. There was an error");
+                    }
+                }
+            });
+        } catch (SecurityException exception) {
+            Log.v(TAG, "Exeption for geo fence");
+        }
+    }
+
+    public void OnGeoFenceSuccess() {
+        this.endTrip(new TripManagerCallback() {
+            @Override
+            public void OnSuccess() {
+                if (tripEndedListener != null) {
+                    tripEndedListener.OnCallback();
+                }
+            }
+
+            @Override
+            public void OnError() {
+
+            }
+        });
+    }
+
+    private GeofencingRequest getGeofencingRequest() {
+
+        List<Geofence> geoFenceList = new ArrayList<Geofence>();
+        geoFenceList.add(new Geofence.Builder()
+                .setRequestId(GEOFENCE_REQUEST_ID)
+                .setCircularRegion(
+                        this.place.getLatitude(),
+                        this.place.getLongitude(),
+                        GEOFENCE_RADIUS_IN_METERS
+                )
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setLoiteringDelay(LOITERING_DELAY_MS)
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .build());
+
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.addGeofences(geoFenceList);
+        return builder.build();
     }
 
     public MetaPlace getPlace() {
@@ -271,5 +404,15 @@ public class TripManager {
 
     public HTTrip getHyperTrackTrip() {
         return this.hyperTrackTrip;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
     }
 }
