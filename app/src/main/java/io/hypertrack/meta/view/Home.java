@@ -661,15 +661,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void updateETAForOnGoingTrip() {
-        HTTrip trip = TripManager.getSharedManager().getHyperTrackTrip();
+        TripManager tripManager = TripManager.getSharedManager();
+
+        HTTrip trip = tripManager.getHyperTrackTrip();
+
+        MetaPlace place = tripManager.getPlace();
+        LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
         Date ETA = trip.getETA();
         Date now = new Date();
-
         long etaInSecond = ETA.getTime() - now.getTime();
-        int etaInMinutes = (int) etaInSecond / 60;
-
-        LatLng destinationLocation = new LatLng(trip.getEndLocation().getCoordinates()[1], trip.getEndLocation().getCoordinates()[0]);
+        int etaInMinutes = (int) etaInSecond / (60 * 1000);
 
         this.updateDestinationMarker(destinationLocation, etaInMinutes);
     }

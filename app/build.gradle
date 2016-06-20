@@ -115,7 +115,8 @@ android {
             debuggable true
             applicationIdSuffix ".debug"
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
-            buildConfigField "String", "BASE_URL",'"http://10.0.2.2:8000"'
+            buildConfigField "String", "BASE_URL",'"http://meta-api-staging.herokuapp.com/"'
+//            buildConfigField "String", "BASE_URL",'"http://10.0.2.2:8000"'
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
