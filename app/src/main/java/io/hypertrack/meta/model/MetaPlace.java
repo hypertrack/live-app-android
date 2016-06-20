@@ -7,11 +7,12 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Map;
 
 import io.hypertrack.lib.common.model.HTLocation;
+import io.realm.RealmObject;
 
 /**
  * Created by piyush on 10/06/16.
  */
-public class MetaPlace {
+public class MetaPlace extends RealmObject {
 
     private int id;
 
@@ -95,6 +96,10 @@ public class MetaPlace {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 '}';
+    }
+
+    public MetaPlace() {
+
     }
 
     public MetaPlace(Place place) {

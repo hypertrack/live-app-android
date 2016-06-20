@@ -7,8 +7,6 @@ import com.google.gson.annotations.SerializedName;
  */
 public class Trip {
 
-    private String user;
-
     @SerializedName("hypertrack_trip_id")
     private String hypertrackTripID;
 
@@ -26,20 +24,6 @@ public class Trip {
 
     public void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
-    }
-
-    public Trip(String user, String hypertrackTripID, String hypertrackTaskID) {
-        this.user = user;
-        this.hypertrackTripID = hypertrackTripID;
-        this.hypertrackTaskID = hypertrackTaskID;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
     }
 
     public String getHypertrackTripID() {
@@ -69,7 +53,6 @@ public class Trip {
     @Override
     public String toString() {
         return "Trip{" +
-                "user='" + user + '\'' +
                 ", hypertrackTripID='" + hypertrackTripID + '\'' +
                 ", hypertrackTaskID='" + hypertrackTaskID + '\'' +
                 ", id='" + id + '\'' +
