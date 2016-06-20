@@ -1,15 +1,14 @@
 package io.hypertrack.meta.store;
 
 import android.app.PendingIntent;
+import android.os.Handler;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
 
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
@@ -36,6 +35,9 @@ import retrofit2.Response;
  * Created by ulhas on 18/06/16.
  */
 public class TripManager {
+
+    private static final long REFRESH_DELAY = 60000;
+
     private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
     private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
@@ -47,8 +49,32 @@ public class TripManager {
 
     private HTTrip hyperTrackTrip;
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
-    private Timer refreshTimer;
     private PendingIntent mGeofencePendingIntent;
+
+    private Handler handler;
+
+    final Runnable refreshTask = new Runnable() {
+        @Override
+        public void run() {
+            transmitter.refreshTrip(new HTTripStatusCallback() {
+                @Override
+                public void onSuccess(HTTrip htTrip) {
+                    onTripRefresh();
+                }
+
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
+
+            handler.postDelayed(this, REFRESH_DELAY);
+        }
+    };
+
+    private void onTripRefresh() {
+        this.tripRefreshedListener.OnCallback();
+    }
 
     public boolean isTripActive() {
         return (this.hyperTrackTrip != null);
@@ -127,6 +153,7 @@ public class TripManager {
                             @Override
                             public void OnError() {
                                 clearState();
+                                transmitter.clearCurrentTrip();
                                 callback.OnError();
                             }
                         });
@@ -193,13 +220,14 @@ public class TripManager {
     }
 
     private void startRefreshingTrip() {
-
+        handler = new Handler();
+        handler.postDelayed(refreshTask, REFRESH_DELAY);
     }
 
     private void stopRefreshingTrip() {
-        if (this.refreshTimer != null) {
-            this.refreshTimer.cancel();
-            this.refreshTimer = null;
+        if (this.handler != null) {
+            this.handler.removeCallbacks(refreshTask);
+            this.handler = null;
         }
     }
 
@@ -228,5 +256,17 @@ public class TripManager {
 
     public Trip getTrip() {
         return this.trip;
+    }
+
+    public void setTripRefreshedListener(TripManagerListener listener) {
+        this.tripRefreshedListener = listener;
+    }
+
+    public void setTripEndedListener(TripManagerListener listener) {
+        this.tripEndedListener = listener;
+    }
+
+    public HTTrip getHyperTrackTrip() {
+        return this.hyperTrackTrip;
     }
 }

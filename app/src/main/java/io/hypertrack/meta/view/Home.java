@@ -39,8 +39,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -85,6 +83,7 @@ import java.util.TimeZone;
 
 import io.hypertrack.lib.common.network.HTGson;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
+import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.service.GeofenceTransitionsIntentService;
@@ -92,12 +91,11 @@ import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.service.RegistrationIntentService;
-import io.hypertrack.meta.model.ETARecipients;
-import io.hypertrack.meta.network.HTCustomPostRequest;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
+import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
 import io.hypertrack.meta.util.SharedPreferenceManager;
@@ -128,6 +126,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
     private SupportMapFragment mMapFragment;
+    private Button shareButton;
 
     private TripManager tripManager = new TripManager();
 
@@ -190,7 +189,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void onETASuccess(TripETAResponse response, Place place) {
-        showShareButton();
+        showSendETAButton();
         updateDestinationMarker(place.getLatLng(), (int)response.getDuration()/60);
         updateMapBounds(place.getLatLng());
         this.tripManager.setPlace(new MetaPlace(place));
@@ -276,8 +275,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             Log.d("receiver", "Got message: " + result);
         }
     };
-
-    private Button shareButton;
     private SharedPreferenceManager sharedPreferenceManager;
 
     public static int getTheEstimatedTime(Date estimatedTime) {
@@ -415,7 +412,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             if (!TextUtils.equals(etaString,"None")) {
 //                etaInMinutes = Integer.valueOf(etaString);
             }
-            showShareButton();
+            showSendETAButton();
             initETAUpateTask();
         }
     }
@@ -434,20 +431,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         view.draw(canvas);
 
         return bitmap;
-    }
-
-    private void resetViewsOnEndTrip() {
-        if (handler != null)
-         handler.removeCallbacks(updateTask);
-
-        sendETAButton.setVisibility(View.GONE);
-        shareButton.setVisibility(View.GONE);
-        mAutocompleteView.setVisibility(View.VISIBLE);
-        mAutocompleteView.setText("");
-
-        if (destinationLocationMarker != null) {
-            destinationLocationMarker.remove();
-        }
     }
 
     /**
@@ -627,7 +610,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         editor.apply();
     }
 
-    private void showShareButton() {
+    private void showSendETAButton() {
         sendETAButton.setText("Send ETA");
         sendETAButton.setVisibility(View.VISIBLE);
     }
@@ -922,7 +905,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
-                resetViewsOnEndTrip();
+                OnTripEnd();
             }
 
             @Override
@@ -979,7 +962,48 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         textView.setText(etaInMinutes + " m");
     }
 
+    private void updateETAForOnGoingTrip() {
+        HTTrip trip = this.tripManager.getHyperTrackTrip();
+
+        Date ETA = trip.getETA();
+        Date now = new Date();
+
+        long etaInSecond = ETA.getTime() - now.getTime();
+        int etaInMinutes = (int) etaInSecond / 60;
+
+        LatLng destinationLocation = new LatLng(trip.getEndLocation().getCoordinates()[1], trip.getEndLocation().getCoordinates()[0]);
+
+        this.updateDestinationMarker(destinationLocation, etaInMinutes);
+    }
+
     private void onTripStart() {
         sendETAButton.setText("End Trip");
+        shareButton.setVisibility(View.VISIBLE);
+
+        this.tripManager.setTripRefreshedListener(new TripManagerListener() {
+            @Override
+            public void OnCallback() {
+                updateETAForOnGoingTrip();
+            }
+        });
+
+        this.tripManager.setTripEndedListener(new TripManagerListener() {
+            @Override
+            public void OnCallback() {
+                OnTripEnd();
+            }
+        });
+    }
+
+    private void OnTripEnd() {
+        sendETAButton.setVisibility(View.GONE);
+        shareButton.setVisibility(View.GONE);
+
+        mAutocompleteView.setVisibility(View.VISIBLE);
+        mAutocompleteView.setText("");
+
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.remove();
+        }
     }
 }
