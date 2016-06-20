@@ -59,6 +59,7 @@ public class TripManager {
             transmitter.refreshTrip(new HTTripStatusCallback() {
                 @Override
                 public void onSuccess(HTTrip htTrip) {
+                    hyperTrackTrip = htTrip;
                     onTripRefresh();
                 }
 
