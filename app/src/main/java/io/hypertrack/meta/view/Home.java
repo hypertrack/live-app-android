@@ -366,14 +366,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         int paddingInPxForBottom = (int) (paddingInDpForBottom * scale + 0.5f);
 
         mMap.setPadding(0,paddingInPxForTop,0,paddingInPxForBottom);
-
-//        if (getTripStatusFromSharedPreferences()) {
-//            destinationLocation = getTripDestinationFromSharedPreferences();
-//            if (destinationLocation != null) {
-//                Log.v(TAG, "Destination Latlng: " + destinationLocation);
-//                addDestinationMarker(destinationLocation);
-//            }
-//        }
     }
 
     @Override
@@ -416,40 +408,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             }
         }
     }
-
-//    private void addDestinationMarker(LatLng destinationLocation) {
-//        if (currentLocation != null && destinationLocation != null) {
-//            LatLngBounds.Builder b = new LatLngBounds.Builder();
-//            b.include(currentLocation);
-//            b.include(destinationLocation);
-//            LatLngBounds bounds = b.build();
-//
-//            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds,
-//                    100);
-//            mMap.moveCamera(cu);
-//        }
-//
-//        saveTripDestinationSharedPreferences(destinationLocation);
-//
-//        if (mGeofenceList == null)
-//            mGeofenceList = new ArrayList<Geofence>();
-//
-//        mGeofenceList.add(new Geofence.Builder()
-//                // Set the request ID of the geofence. This is a string to identify this
-//                // geofence.
-//                .setRequestId(GEOFENCE_REQUEST_ID)
-//                .setCircularRegion(
-//                        destinationLocation.latitude,
-//                        destinationLocation.longitude,
-//                        GEOFENCE_RADIUS_IN_METERS
-//                )
-//                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
-//                .setLoiteringDelay(LOITERING_DELAY_MS)
-//                .setExpirationDuration(Geofence.NEVER_EXPIRE)
-//                .build());
-//
-//        mGeofencePendingIntent = getGeofencePendingIntent();
-//    }
 
     private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
         if (destinationLocationMarker != null) {
@@ -566,10 +524,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void updateCurrentMarkerLocation(Location location) {
-
         if (currentLocationMarker != null)
             currentLocationMarker.remove();
-
 
         customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
         profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
@@ -584,7 +540,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
             if (resultCode == RESULT_OK) {
                 this.didSelectContact(data);
@@ -630,11 +585,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         } catch (NumberParseException e) {
             System.err.println("NumberParseException was thrown: " + e.toString());
         }
-
     }
 
     private LatLngBounds getBounds(Location location, int mDistanceInMeters ){
-
         double latRadian = Math.toRadians(location.getLatitude());
 
         double degLatKm = 110.574235;
@@ -653,22 +606,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LatLngBounds bounds = b.build();
 
         return bounds;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
-                new IntentFilter("trip_ended"));
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        // Unregister since the activity is not visible
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
     }
 
     private void endTrip() {
@@ -699,20 +636,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         } else {
             Log.v(TAG, "Geofencing not added. There was an error");
         }
-    }
-
-    private String getEstimatedTimeOfArrival() {
-
-        Calendar now = Calendar.getInstance();
-//        now.add(Calendar.MINUTE, etaInMinutes);
-        SimpleDateFormat df = new SimpleDateFormat("h:mma");
-        String format = df.format(now.getTime());
-
-        format = format.toLowerCase();
-        format = format.replace("am", "a");
-        format = format.replace("pm", "p");
-
-        return format;
     }
 
     @Override
