@@ -102,6 +102,16 @@ public class MetaPlace extends RealmObject {
 
     }
 
+    public MetaPlace(MetaPlace place) {
+        this.name = place.getName();
+        this.googlePlacesID = place.getGooglePlacesID();
+        this.address = place.getAddress();
+        this.id = place.getId();
+        this.longitude = place.getLongitude();
+        this.latitude = place.getLatitude();
+        this.hyperTrackDestinationID = place.getHyperTrackDestinationID();
+    }
+
     public MetaPlace(Place place) {
         this.name = place.getName().toString();
         this.googlePlacesID = place.getId();

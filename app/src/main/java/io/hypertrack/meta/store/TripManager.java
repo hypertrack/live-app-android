@@ -39,6 +39,7 @@ import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.store.callback.UserStoreGetTaskCallback;
+import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.realm.Realm;
 import retrofit2.Call;
@@ -87,6 +88,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManager() {
         this.setupGoogleAPIClient();
+        this.restoreState();
     }
 
     private void setupGoogleAPIClient() {
@@ -96,6 +98,32 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 .build();
 
         this.mGoogleAPIClient.connect();
+    }
+
+    private void restoreState() {
+        this.trip = realm.where(Trip.class).findFirst();
+
+        int placeID = SharedPreferenceManager.getPlaceID();
+        if (placeID != Constants.DEFAULT_INT_VALUE) {
+            MetaPlace place = realm.where(MetaPlace.class).equalTo("id", placeID).findFirst();
+            if (place != null) {
+                this.place = place;
+            }
+        }
+
+        if (this.trip != null && this.place != null) {
+            transmitter.refreshTrip(new HTTripStatusCallback() {
+                @Override
+                public void onSuccess(HTTrip htTrip) {
+                    onTripStart();
+                }
+
+                @Override
+                public void onError(Exception e) {
+
+                }
+            });
+        }
     }
 
     final Runnable refreshTask = new Runnable() {
@@ -167,7 +195,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         call.enqueue(new Callback<Trip>() {
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
-                trip = response.body();
+                setTrip(response.body());
                 if (callback != null) {
                     callback.OnSuccess();
                 }
@@ -274,12 +302,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void clearState() {
         this.trip = null;
-        this.place = null;
         this.hyperTrackTrip = null;
         this.vehicleType = null;
         this.stopRefreshingTrip();
         this.stopGeofencing();
         this.clearListeners();
+        this.clearPlace();
+        this.clearTrip();
     }
 
     private void clearListeners() {
@@ -388,6 +417,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void setPlace(MetaPlace place) {
         this.place = place;
+        this.savePlaceID();
+    }
+
+    private void clearPlace() {
+        this.deletePlaceID();
+        this.place = null;
     }
 
     public Trip getTrip() {
@@ -414,5 +449,34 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     @Override
     public void onConnectionSuspended(int i) {
 
+    }
+
+    private void savePlaceID() {
+        SharedPreferenceManager.setPlaceID(this.place.getId());
+    }
+
+    private void deletePlaceID() {
+        SharedPreferenceManager.setPlaceID(Constants.DEFAULT_INT_VALUE);
+    }
+
+    private void clearTrip() {
+        final Trip tripToDelete = realm.where(Trip.class).findFirst();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                tripToDelete.deleteFromRealm();
+            }
+        });
+
+        this.trip = null;
+    }
+
+    private void setTrip(final Trip tripToSave) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                trip = realm.copyToRealm(tripToSave);
+            }
+        });
     }
 }

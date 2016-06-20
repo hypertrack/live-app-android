@@ -11,6 +11,9 @@ import io.hypertrack.meta.MetaApplication;
 public class SharedPreferenceManager {
 
     private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
+    private static final String USER_AUTH_TOKEN = "user_auth_token";
+    private static final String PLACE_ID = "io.hypertrack.meta:PlaceID";
+    private static final String TRIP_ID = "io.hypertrack.meta:TripID";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -24,11 +27,22 @@ public class SharedPreferenceManager {
     public static void setUserAuthToken(String userAuthToken) {
         SharedPreferences.Editor editor = getEditor();
 
-        editor.putString(Constants.USER_AUTH_TOKEN, userAuthToken);
+        editor.putString(USER_AUTH_TOKEN, userAuthToken);
         editor.apply();
     }
 
     public static String getUserAuthToken() {
-        return getSharedPreferences().getString(Constants.USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
+        return getSharedPreferences().getString(USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
+    }
+
+    public static int getPlaceID() {
+        return getSharedPreferences().getInt(PLACE_ID, Constants.DEFAULT_INT_VALUE);
+    }
+
+    public static void setPlaceID(int placeID) {
+        SharedPreferences.Editor editor = getEditor();
+
+        editor.putInt(PLACE_ID, placeID);
+        editor.apply();
     }
 }

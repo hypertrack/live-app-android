@@ -2,10 +2,12 @@ package io.hypertrack.meta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmObject;
+
 /**
  * Created by suhas on 26/11/15.
  */
-public class Trip {
+public class Trip extends RealmObject {
 
     @SerializedName("hypertrack_trip_id")
     private String hypertrackTripID;

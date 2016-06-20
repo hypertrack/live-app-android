@@ -1,7 +1,6 @@
 package io.hypertrack.meta.store;
 
 import java.util.Map;
-import java.util.Objects;
 
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.PlaceDTO;
