@@ -90,7 +90,16 @@ public class OnboardingManager {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                onVerifyCode(response.body());
+                Map body = response.body();
+                if (body == null) {
+                    if (callback != null) {
+                        callback.onError();
+                    }
+
+                    return;
+                }
+
+                onVerifyCode(body);
                 if (callback != null) {
                     callback.onSuccess();
                 }

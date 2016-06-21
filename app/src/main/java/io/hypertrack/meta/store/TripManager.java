@@ -63,7 +63,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManagerListener tripRefreshedListener;
     private TripManagerListener tripEndedListener;
-    private TripManagerListener tripOnRestoreStateListener;
 
     private Realm realm = Realm.getDefaultInstance();
 
@@ -75,6 +74,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private PendingIntent mGeofencePendingIntent;
     private GoogleApiClient mGoogleAPIClient;
+    private boolean shouldWaitForGoogleAPIClient;
 
     private Handler handler;
 
@@ -90,7 +90,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManager() {
         this.setupGoogleAPIClient();
-        this.restoreState();
     }
 
     private void setupGoogleAPIClient() {
@@ -102,7 +101,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.mGoogleAPIClient.connect();
     }
 
-    private void restoreState() {
+    public void restoreState(final TripManagerCallback callback) {
         this.trip = realm.where(Trip.class).findFirst();
         this.place = SharedPreferenceManager.getPlace();
 
@@ -124,8 +123,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 }
             });
 
-            if (tripOnRestoreStateListener != null) {
-                tripOnRestoreStateListener.OnCallback();
+            if (callback != null) {
+                callback.OnSuccess();
             }
         } else {
             this.clearState();
@@ -359,6 +358,11 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void setupGeofencing() {
+        if (!this.mGoogleAPIClient.isConnected()) {
+            this.shouldWaitForGoogleAPIClient = true;
+            return;
+        }
+
         GeofencingRequest request = this.getGeofencingRequest();
 
         Context context = MetaApplication.getInstance().getAppContext();
@@ -450,12 +454,15 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        if (this.shouldWaitForGoogleAPIClient) {
+            this.setupGoogleAPIClient();
+            this.shouldWaitForGoogleAPIClient = false;
+        }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        this.shouldWaitForGoogleAPIClient = false;
     }
 
     private void savePlace() {

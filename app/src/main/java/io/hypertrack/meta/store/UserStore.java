@@ -230,16 +230,10 @@ public class UserStore {
             return;
         }
 
-        final MetaPlace placeToEdit = realm.where(MetaPlace.class).equalTo("id", place.getId()).findFirst();
-
-        if (placeToEdit == null) {
-            this.addPlace(place);
-        }
-
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                placeToEdit.update(place);
+                realm.copyToRealmOrUpdate(place);
             }
         });
     }

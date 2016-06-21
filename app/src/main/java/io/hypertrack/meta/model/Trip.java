@@ -3,6 +3,7 @@ package io.hypertrack.meta.model;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by suhas on 26/11/15.
@@ -15,6 +16,7 @@ public class Trip extends RealmObject {
     @SerializedName("hypertrack_task_id")
     private String hypertrackTaskID;
 
+    @PrimaryKey
     private String id;
 
     @SerializedName("share_url")

@@ -7,12 +7,14 @@ import java.util.List;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by suhas on 12/11/15.
  */
 public class User extends RealmObject {
 
+    @PrimaryKey
     private Integer id;
 
     @SerializedName("first_name")

@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -18,7 +17,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -67,8 +65,6 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
@@ -78,7 +74,6 @@ import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.service.RegistrationIntentService;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
@@ -238,24 +233,31 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        MapsInitializer.initialize(getApplicationContext());
         checkIfUserIsOnBoard();
 
+        MapsInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_home);
 
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mMapFragment.getMapAsync(this);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        initGoogleClient();
-
-        Intent intent = new Intent(this, RegistrationIntentService.class);
-        startService(intent);
-
         mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        mMapFragment.getMapAsync(this);
+        this.initGoogleClient();
+        this.setupAutoCompleteView();
+        this.setupShareButton();
+        this.setupSendETAButton();
+        this.setupProfilePicBitmap();
 
+        if (!isConnectedToInternet()) {
+            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void setupAutoCompleteView() {
         mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mBounds,
                 null);
 
@@ -264,7 +266,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAutocompleteView.setAdapter(mAdapter);
         mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
         mAutocompleteView.addTextChangedListener(mTextWatcher);
+    }
 
+    private void setupShareButton() {
         shareButton = (Button) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -272,18 +276,52 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 //                shareUrlViaShare();
             }
         });
+    }
 
+    private void setupProfilePicBitmap() {
         if (!TextUtils.equals("None", getImageToPreferences())) {
             profilePicBitmap = decodeToBase64(getImageToPreferences());
         } else {
             profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
         }
+    }
 
-        setUpShareEtaButton();
+    private void restoreTripStateIfNeeded() {
+        final TripManager tripManager = TripManager.getSharedManager();
+        tripManager.restoreState(new TripManagerCallback() {
+            @Override
+            public void OnSuccess() {
+                Log.v(TAG, "Trip is active");
+                showSendETAButton();
 
-        if (!isConnectedToInternet()) {
-            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
-        }
+                MetaPlace place = tripManager.getPlace();
+
+                updateDestinationMarker(place.getLatLng(), 0);
+                mAutocompleteView.setText(place.getAddress());
+                updateMapBounds(place.getLatLng());
+
+                onTripStart();
+            }
+
+            @Override
+            public void OnError() {
+                Log.v(TAG, "Trip is not active");
+            }
+        });
+    }
+
+    private void setupSendETAButton() {
+        sendETAButton = (Button) findViewById(R.id.shareEtaButton);
+        sendETAButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!TripManager.getSharedManager().isTripActive()) {
+                    startTrip();
+                } else {
+                    endTrip();
+                }
+            }
+        });
     }
 
     private void checkIfUserIsOnBoard() {
@@ -364,6 +402,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         int paddingInPxForBottom = (int) (paddingInDpForBottom * scale + 0.5f);
 
         mMap.setPadding(0,paddingInPxForTop,0,paddingInPxForBottom);
+
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                restoreTripStateIfNeeded();
+            }
+        });
     }
 
     @Override
@@ -454,20 +499,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void showSendETAButton() {
         sendETAButton.setText("Send ETA");
         sendETAButton.setVisibility(View.VISIBLE);
-    }
-
-    private void setUpShareEtaButton() {
-        sendETAButton = (Button) findViewById(R.id.shareEtaButton);
-        sendETAButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!TripManager.getSharedManager().isTripActive()) {
-                    startTrip();
-                } else {
-                    endTrip();
-                }
-            }
-        });
     }
 
     private void startTrip() {
@@ -657,7 +688,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
-        textView.setText(etaInMinutes + " m");
+        if (etaInMinutes == 0) {
+            textView.setText("--");
+        } else {
+            textView.setText(etaInMinutes + " m");
+        }
     }
 
     private void updateETAForOnGoingTrip() {

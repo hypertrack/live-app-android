@@ -5,6 +5,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
 import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by piyush on 10/06/16.
@@ -14,6 +15,7 @@ public class MetaPlace extends RealmObject {
     public final static String HOME = "Home";
     public final static String WORK = "Work";
 
+    @PrimaryKey
     private int id;
 
     @SerializedName("hypertrack_destination_id")
@@ -154,5 +156,9 @@ public class MetaPlace extends RealmObject {
 
     public MetaPlace(String name) {
         this.name = name;
+    }
+
+    public LatLng getLatLng() {
+        return new LatLng(this.latitude, this.longitude);
     }
 }
