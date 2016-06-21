@@ -2,6 +2,9 @@ package io.hypertrack.meta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
+import io.realm.RealmList;
 import io.realm.RealmObject;
 
 /**
@@ -24,6 +27,8 @@ public class User extends RealmObject {
 
     @SerializedName("hypertrack_driver_id")
     private String hypertrackDriverID;
+
+    private RealmList<MetaPlace> places;
 
     public Integer getId() {
         return id;
@@ -71,6 +76,14 @@ public class User extends RealmObject {
 
     public void setHypertrackDriverID(String hypertrackDriverID) {
         this.hypertrackDriverID = hypertrackDriverID;
+    }
+
+    public RealmList<MetaPlace> getPlaces() {
+        return places;
+    }
+
+    public void setPlaces(RealmList<MetaPlace> places) {
+        this.places = places;
     }
 
     @Override

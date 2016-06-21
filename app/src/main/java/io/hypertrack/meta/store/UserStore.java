@@ -9,6 +9,7 @@ import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.meta.util.SharedPreferenceManager;
+import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -68,5 +69,9 @@ public class UserStore {
                 callback.OnError();
             }
         });
+    }
+
+    public void addPlace(MetaPlace place, final SuccessErrorCallback callback) {
+
     }
 }

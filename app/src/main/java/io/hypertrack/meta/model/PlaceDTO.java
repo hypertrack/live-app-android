@@ -23,6 +23,54 @@ public class PlaceDTO {
 
     private HTLocation location;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getHyperTrackDestinationID() {
+        return hyperTrackDestinationID;
+    }
+
+    public void setHyperTrackDestinationID(String hyperTrackDestinationID) {
+        this.hyperTrackDestinationID = hyperTrackDestinationID;
+    }
+
+    public String getGooglePlacesID() {
+        return googlePlacesID;
+    }
+
+    public void setGooglePlacesID(String googlePlacesID) {
+        this.googlePlacesID = googlePlacesID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public HTLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(HTLocation location) {
+        this.location = location;
+    }
+
     public PlaceDTO(MetaPlace place) {
         this.id = place.getId();
         this.address = place.getAddress();

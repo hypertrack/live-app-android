@@ -63,6 +63,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManagerListener tripRefreshedListener;
     private TripManagerListener tripEndedListener;
+    private TripManagerListener tripOnRestoreStateListener;
+
     private Realm realm = Realm.getDefaultInstance();
 
     private Trip trip;
@@ -113,13 +115,18 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 public void onSuccess(HTTrip htTrip) {
                     hyperTrackTrip = htTrip;
                     onTripStart();
+                    onTripRefresh();
                 }
 
                 @Override
                 public void onError(Exception e) {
-
+                    clearState();
                 }
             });
+
+            if (tripOnRestoreStateListener != null) {
+                tripOnRestoreStateListener.OnCallback();
+            }
         } else {
             this.clearState();
         }
