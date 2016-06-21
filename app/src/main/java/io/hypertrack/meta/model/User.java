@@ -2,6 +2,7 @@ package io.hypertrack.meta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.RealmList;
@@ -96,5 +97,103 @@ public class User extends RealmObject {
                 ", photo='" + photo + '\'' +
                 ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
                 '}';
+    }
+
+    public MetaPlace getHome() {
+        if (this.places.size() == 0) {
+            return null;
+        }
+
+        MetaPlace place = null;
+        for (MetaPlace candidate: this.places) {
+            if (candidate.isHome()) {
+                place = candidate;
+                break;
+            }
+        }
+
+        return place;
+    }
+
+    public MetaPlace getWork() {
+        if (this.places.size() == 0) {
+            return null;
+        }
+
+        MetaPlace place = null;
+        for (MetaPlace candidate: this.places) {
+            if (candidate.isWork()) {
+                place = candidate;
+                break;
+            }
+        }
+
+        return place;
+    }
+
+    public boolean hasHome() {
+        return this.getHome() != null;
+    }
+
+    public boolean hasWork() {
+        return this.getWork() != null;
+    }
+
+    public List<MetaPlace> getOtherPlaces() {
+        List<MetaPlace> otherPlaces = new ArrayList<>();
+
+        for (MetaPlace candidate : this.places) {
+            if (candidate.isWork() || candidate.isHome()) {
+                continue;
+            }
+
+            otherPlaces.add(candidate);
+        }
+
+        return otherPlaces;
+    }
+
+    public boolean hasPlace(MetaPlace place) {
+        if (this.places.size() == 0) {
+            return false;
+        }
+
+        for (MetaPlace candidate : this.places) {
+            if (candidate.getName().equalsIgnoreCase(place.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isSynced(MetaPlace place) {
+        if (this.places.size() == 0) {
+            return false;
+        }
+
+        for (MetaPlace candidate : this.places) {
+            if (candidate.getId() == place.getId()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isFavorite(MetaPlace place) {
+        if (this.places.size() == 0) {
+            return false;
+        }
+
+        for (MetaPlace candidate : this.places) {
+            if (candidate.getId() == place.getId()
+                    || candidate.getGooglePlacesID().equalsIgnoreCase(place.getGooglePlacesID())
+                    || candidate.getHyperTrackDestinationID().equalsIgnoreCase(place.getHyperTrackDestinationID())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

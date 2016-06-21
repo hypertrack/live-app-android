@@ -124,4 +124,28 @@ public class MetaPlace extends RealmObject {
         this.latitude = latLng.latitude;
         this.longitude = latLng.longitude;
     }
+
+    public boolean isHome() {
+        return this.name.equalsIgnoreCase(HOME);
+    }
+
+    public boolean isWork() {
+        return this.name.equalsIgnoreCase(WORK);
+    }
+
+    public boolean hasDestination() {
+        return (this.hyperTrackDestinationID != null && !this.hyperTrackDestinationID.isEmpty());
+    }
+
+    public boolean isEqualPlace(MetaPlace place) {
+        if (this.id == 0 && place.id == 0) {
+            return false;
+        }
+
+        return (this.id == place.getId());
+    }
+
+    public MetaPlace(String name) {
+        this.name = name;
+    }
 }
