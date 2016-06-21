@@ -1,5 +1,7 @@
 package io.hypertrack.meta.store;
 
+import android.util.Log;
+
 import java.util.List;
 import java.util.Map;
 
@@ -162,6 +164,10 @@ public class UserStore {
         }
 
         final RealmList<MetaPlace> places = this.user.getPlaces();
+        if (places == null) {
+            return;
+        }
+
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {

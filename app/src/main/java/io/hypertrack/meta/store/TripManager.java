@@ -468,6 +468,10 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private void clearTrip() {
         final Trip tripToDelete = realm.where(Trip.class).findFirst();
+        if (tripToDelete == null) {
+            return;
+        }
+
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
