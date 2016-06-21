@@ -37,6 +37,10 @@ public class UserStore {
     }
 
     public void initializeUser() {
+        if (this.user != null) {
+            return;
+        }
+
         this.user = realm.where(User.class).findFirst();
     }
 
@@ -164,7 +168,7 @@ public class UserStore {
         }
 
         final RealmList<MetaPlace> places = this.user.getPlaces();
-        if (places == null) {
+        if (places == null || places.isEmpty()) {
             return;
         }
 
@@ -172,6 +176,8 @@ public class UserStore {
             @Override
             public void execute(Realm realm) {
                 places.deleteAllFromRealm();
+                user.getPlaces().removeAll(places);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
@@ -181,12 +187,17 @@ public class UserStore {
             return;
         }
 
+        if (places.isEmpty()) {
+            return;
+        }
+
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 List<MetaPlace> placesToAdd = realm.copyToRealm(places);
                 RealmList<MetaPlace> placesList = new RealmList<>(placesToAdd.toArray(new MetaPlace[placesToAdd.size()]));
                 user.setPlaces(placesList);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
@@ -201,6 +212,7 @@ public class UserStore {
             public void execute(Realm realm) {
                 MetaPlace managedPlace = realm.copyToRealm(place);
                 user.getPlaces().add(managedPlace);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
@@ -234,6 +246,7 @@ public class UserStore {
             @Override
             public void execute(Realm realm) {
                 realm.copyToRealmOrUpdate(place);
+                // update list ?
             }
         });
     }
@@ -268,6 +281,7 @@ public class UserStore {
             public void execute(Realm realm) {
                 place.deleteFromRealm();
                 user.getPlaces().remove(place);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
