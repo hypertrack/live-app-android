@@ -102,19 +102,16 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private void restoreState() {
         this.trip = realm.where(Trip.class).findFirst();
+        this.place = SharedPreferenceManager.getPlace();
 
-        int placeID = SharedPreferenceManager.getPlaceID();
-        if (placeID != Constants.DEFAULT_INT_VALUE) {
-            MetaPlace place = realm.where(MetaPlace.class).equalTo("id", placeID).findFirst();
-            if (place != null) {
-                this.place = place;
-            }
-        }
-
-        if (this.trip != null && this.place != null) {
+        if (this.trip != null
+                && this.place != null
+                && transmitter.isTripActive()
+                && transmitter.getActiveTripID().equalsIgnoreCase(this.trip.getHypertrackTripID())) {
             transmitter.refreshTrip(new HTTripStatusCallback() {
                 @Override
                 public void onSuccess(HTTrip htTrip) {
+                    hyperTrackTrip = htTrip;
                     onTripStart();
                 }
 
@@ -123,6 +120,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
                 }
             });
+        } else {
+            this.clearState();
         }
     }
 
@@ -309,6 +308,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.clearListeners();
         this.clearPlace();
         this.clearTrip();
+        transmitter.clearCurrentTrip();
     }
 
     private void clearListeners() {
@@ -417,11 +417,11 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void setPlace(MetaPlace place) {
         this.place = place;
-        this.savePlaceID();
+        this.savePlace();
     }
 
     private void clearPlace() {
-        this.deletePlaceID();
+        this.deletePlace();
         this.place = null;
     }
 
@@ -451,12 +451,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     }
 
-    private void savePlaceID() {
-        SharedPreferenceManager.setPlaceID(this.place.getId());
+    private void savePlace() {
+        SharedPreferenceManager.setPlace(this.place);
     }
 
-    private void deletePlaceID() {
-        SharedPreferenceManager.setPlaceID(Constants.DEFAULT_INT_VALUE);
+    private void deletePlace() {
+        SharedPreferenceManager.deletePlace();
     }
 
     private void clearTrip() {
