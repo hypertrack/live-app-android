@@ -142,10 +142,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void onETASuccess(TripETAResponse response, Place place) {
-        showSendETAButton();
-        updateDestinationMarker(place.getLatLng(), (int)response.getDuration()/60);
-        updateMapBounds(place.getLatLng());
+        this.updateViewForETASuccess((int)response.getDuration()/60, place.getLatLng());
         TripManager.getSharedManager().setPlace(new MetaPlace(place));
+    }
+
+    private void updateViewForETASuccess(int etaInMinutes, LatLng latLng) {
+        showSendETAButton();
+        updateDestinationMarker(latLng, etaInMinutes);
+        updateMapBounds(latLng);
     }
 
     /**
@@ -292,13 +296,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnSuccess() {
                 Log.v(TAG, "Trip is active");
-                showSendETAButton();
 
                 MetaPlace place = tripManager.getPlace();
-
-                updateDestinationMarker(place.getLatLng(), 0);
+                updateViewForETASuccess(0, place.getLatLng());
                 mAutocompleteView.setText(place.getAddress());
-                updateMapBounds(place.getLatLng());
 
                 onTripStart();
             }
