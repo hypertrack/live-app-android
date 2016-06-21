@@ -54,7 +54,6 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -84,10 +83,7 @@ import io.hypertrack.meta.util.PhoneUtils;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
-    public static final int LOITERING_DELAY_MS = 30000;
     private static final String TAG = AppCompatActivity.class.getSimpleName();
-    private static final String GEOFENCE_REQUEST_ID = "geofence";
-    private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
     private static final long INTERVAL_TIME = 5000;
 
@@ -95,8 +91,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private GoogleMap mMap;
     private PlaceAutocompleteAdapter mAdapter;
     private AutoCompleteTextView mAutocompleteView;
-    private LatLngBounds mBounds;
-    private LatLng currentLocation;
     private Marker currentLocationMarker;
     private Marker destinationLocationMarker;
     private Button sendETAButton;
@@ -136,7 +130,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             @Override
             public void OnError() {
-                destinationLocationMarker.remove();
+                if (destinationLocationMarker != null) {
+                    destinationLocationMarker.remove();
+                }
             }
         });
     }
@@ -149,7 +145,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void updateViewForETASuccess(int etaInMinutes, LatLng latLng) {
         showSendETAButton();
         updateDestinationMarker(latLng, etaInMinutes);
-        updateMapBounds(latLng);
+        updateMapView();
     }
 
     /**
@@ -255,6 +251,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupShareButton();
         this.setupSendETAButton();
         this.setupProfilePicBitmap();
+        this.initCustomMarkerView();
 
         if (!isConnectedToInternet()) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
@@ -262,9 +259,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupAutoCompleteView() {
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mBounds,
-                null);
-
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient);
         mAutocompleteView = (AutoCompleteTextView)
                 findViewById(R.id.autocomplete_places);
         mAutocompleteView.setAdapter(mAdapter);
@@ -365,22 +360,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 .build();
     }
 
-    private Bitmap createDrawableFromView(Context context, View view) {
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
-        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
-
-        return bitmap;
-    }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -393,6 +372,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
@@ -423,34 +403,42 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 Toast.LENGTH_SHORT).show();
     }
 
-    private void addMarkerToCurrentLocation() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            Location location = null;
+    private void addMarkerToCurrentLocation(LatLng latLng) {
+        currentLocationMarker = mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, customMarkerView))));
+    }
 
-            try{
-                location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            } catch (SecurityException exception) {
-                Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_LONG).show();
-            }
+    private Bitmap getBitMapForView(Context context, View view) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 
-            if (location != null) {
-                if (currentLocationMarker != null)
-                    currentLocationMarker.remove();
+        Canvas canvas = new Canvas(bitmap);
+        view.draw(canvas);
 
-                mBounds = getBounds(location, 100000);
+        return bitmap;
+    }
 
-                currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                updateCurrentMarkerLocation(location);
+    private void initCustomMarkerView() {
 
-                CameraPosition cameraPosition =
-                        new CameraPosition.Builder()
-                                .target(currentLocation)
-                                .zoom(mMap.getCameraPosition().zoom >= 16 ? mMap.getCameraPosition().zoom : 16)
-                                .build();
+        customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
+        profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
 
-                mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            }
+        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        String urlProfilePic = settings.getString(Constants.USER_PROFILE_PIC, null);
+
+        if(!TextUtils.isEmpty(urlProfilePic)) {
+            Picasso.with(this)
+                    .load(urlProfilePic)
+                    .error(R.drawable.default_profile_pic)
+                    .into(profileViewProfileImage);
         }
+
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
@@ -462,7 +450,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         this.destinationLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(destinationLocation)
-                .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,markerView))));
+                .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this,markerView))));
     }
 
     private View getDestinationMarkerView(int etaInMinutes) {
@@ -478,11 +466,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        if (currentLocation == null || destinationLocation == null) {
+        if (currentLocationMarker.getPosition() == null || destinationLocation == null) {
             return;
         }
 
-        TripManager.getSharedManager().getETA(currentLocation, destinationLocation, new TripETACallback() {
+        TripManager.getSharedManager().getETA(currentLocationMarker.getPosition(), destinationLocation, new TripETACallback() {
             @Override
             public void OnSuccess(TripETAResponse etaResponse) {
                 mProgressDialog.dismiss();
@@ -525,7 +513,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-        addMarkerToCurrentLocation();
         requestForLocationUpdates();
     }
 
@@ -550,22 +537,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     public void onLocationChanged(Location location) {
-        updateCurrentMarkerLocation(location);
-    }
+        if (location == null) {
+            return;
+        }
 
-    private void updateCurrentMarkerLocation(Location location) {
-        if (currentLocationMarker != null)
-            currentLocationMarker.remove();
+        if (currentLocationMarker == null) {
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            addMarkerToCurrentLocation(latLng);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
+        } else {
+            currentLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
 
-        customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
-        profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
-        profileViewProfileImage.setImageBitmap(profilePicBitmap);
+        updateMapView();
 
-        currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-        currentLocationMarker = mMap.addMarker(
-                new MarkerOptions()
-                        .position(currentLocation)
-                        .icon(BitmapDescriptorFactory.fromBitmap(createDrawableFromView(this,customMarkerView))));
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        mAdapter.setBounds(getBounds(latLng, 10000));
     }
 
     @Override
@@ -617,18 +604,18 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     }
 
-    private LatLngBounds getBounds(Location location, int mDistanceInMeters ){
-        double latRadian = Math.toRadians(location.getLatitude());
+    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters ){
+        double latRadian = Math.toRadians(latLng.latitude);
 
         double degLatKm = 110.574235;
         double degLongKm = 110.572833 * Math.cos(latRadian);
         double deltaLat = mDistanceInMeters / 1000.0 / degLatKm;
         double deltaLong = mDistanceInMeters / 1000.0 / degLongKm;
 
-        double minLat = location.getLatitude() - deltaLat;
-        double minLong = location.getLongitude() - deltaLong;
-        double maxLat = location.getLatitude() + deltaLat;
-        double maxLong = location.getLongitude() + deltaLong;
+        double minLat = latLng.latitude - deltaLat;
+        double minLong = latLng.longitude - deltaLong;
+        double maxLat = latLng.latitude + deltaLat;
+        double maxLong = latLng.longitude + deltaLong;
 
         LatLngBounds.Builder b = new LatLngBounds.Builder();
         b.include(new LatLng(minLat, minLong));
@@ -677,15 +664,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     // New Methods
 
-    private void updateMapBounds(LatLng destinationLocation) {
-        if (destinationLocation == null) {
+    private void updateMapView() {
+        LatLng current = currentLocationMarker.getPosition();
+
+        if (destinationLocationMarker != null) {
+            LatLngBounds bounds = new LatLngBounds.Builder()
+                    .include(current)
+                    .include(destinationLocationMarker.getPosition())
+                    .build();
+
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 50);
+            mMap.animateCamera(cameraUpdate);
+
             return;
         }
 
-        LatLngBounds bounds = new LatLngBounds.Builder().include(currentLocation).include(destinationLocation).build();
-
-        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 50);
-        mMap.animateCamera(cameraUpdate);
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(current));
     }
 
     private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
@@ -717,14 +711,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareButton.setVisibility(View.VISIBLE);
 
         TripManager tripManager = TripManager.getSharedManager();
-
         tripManager.setTripRefreshedListener(new TripManagerListener() {
             @Override
             public void OnCallback() {
                 updateETAForOnGoingTrip();
             }
         });
-
         tripManager.setTripEndedListener(new TripManagerListener() {
             @Override
             public void OnCallback() {
