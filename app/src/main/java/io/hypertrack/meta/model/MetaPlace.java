@@ -14,6 +14,9 @@ import io.realm.RealmObject;
  */
 public class MetaPlace extends RealmObject {
 
+    public final static String HOME = "Home";
+    public final static String WORK = "Work";
+
     private int id;
 
     @SerializedName("hypertrack_destination_id")

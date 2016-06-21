@@ -1,5 +1,6 @@
 package io.hypertrack.meta.store;
 
+import java.util.List;
 import java.util.Map;
 
 import io.hypertrack.meta.model.MetaPlace;
@@ -7,10 +8,12 @@ import io.hypertrack.meta.model.PlaceDTO;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
+import io.hypertrack.meta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.meta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.realm.Realm;
+import io.realm.RealmList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,17 +64,63 @@ public class UserStore {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 Map<String, Object> responseDTO = response.body();
-                callback.OnSuccess((String)responseDTO.get("id"));
+                if (callback != null) {
+                    callback.OnSuccess((String)responseDTO.get("id"));
+                }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                callback.OnError();
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }
 
     public void addPlace(MetaPlace place, final SuccessErrorCallback callback) {
 
+    }
+
+    public void updatePlaces(final SuccessErrorCallback callback) {
+        PlaceManager placeManager = new PlaceManager();
+        placeManager.getPlaces(new PlaceManagerGetPlacesCallback() {
+            @Override
+            public void OnSuccess(List<MetaPlace> places) {
+                clearPlaces();
+                addPlaces(places);
+                if (callback != null) {
+                    callback.OnSuccess();
+                }
+            }
+
+            @Override
+            public void OnError() {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    private void clearPlaces() {
+        final RealmList<MetaPlace> places = this.user.getPlaces();
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                places.deleteAllFromRealm();
+            }
+        });
+    }
+
+    private void addPlaces(final List<MetaPlace> places) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                List<MetaPlace> placesToAdd = realm.copyToRealm(places);
+                RealmList<MetaPlace> placesList = new RealmList<>(placesToAdd.toArray(new MetaPlace[placesToAdd.size()]));
+                user.setPlaces(placesList);
+            }
+        });
     }
 }

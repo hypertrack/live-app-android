@@ -17,6 +17,7 @@ import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.util.SharedPreferenceManager;
+import io.hypertrack.meta.util.SuccessErrorCallback;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
 import retrofit2.Call;
@@ -104,9 +105,23 @@ public class OnboardingManager {
         Call<User> call = sendETAService.updateUserName(this.onboardingUser.getId(), user);
         call.enqueue(new Callback<User>() {
             @Override
-            public void onResponse(Call<User> call, Response<User> response) {
+            public void onResponse(final Call<User> call, Response<User> response) {
                 didOnbardUser(response.body());
-                callback.onSuccess();
+                UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
+                    @Override
+                    public void OnSuccess() {
+                        if (callback != null) {
+                            callback.onSuccess();
+                        }
+                    }
+
+                    @Override
+                    public void OnError() {
+                        if (callback != null) {
+                            callback.onSuccess();
+                        }
+                    }
+                });
             }
 
             @Override
