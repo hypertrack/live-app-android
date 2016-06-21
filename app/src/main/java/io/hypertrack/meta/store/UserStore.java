@@ -246,7 +246,7 @@ public class UserStore {
             @Override
             public void execute(Realm realm) {
                 realm.copyToRealmOrUpdate(place);
-                // update list ?
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
