@@ -56,7 +56,9 @@ public class OnboardingManager {
         try {
             phoneNumber = this.onboardingUser.getInternationalNumber();
         }  catch (NumberParseException e) {
-            callback.onError();
+            if (callback != null) {
+                callback.onError();
+            }
             return;
         }
 
@@ -68,7 +70,9 @@ public class OnboardingManager {
             @Override
             public void onResponse(Call<OnboardingUser> call, Response<OnboardingUser> response) {
                 onboardingUser = response.body();
-                callback.onSuccess();
+                if (callback != null) {
+                    callback.onSuccess();
+                }
             }
 
             @Override
@@ -87,12 +91,16 @@ public class OnboardingManager {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 onVerifyCode(response.body());
-                callback.onSuccess();
+                if (callback != null) {
+                    callback.onSuccess();
+                }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                callback.onError();
+                if (callback != null) {
+                    callback.onError();
+                }
             }
         });
     }
@@ -118,7 +126,7 @@ public class OnboardingManager {
                     @Override
                     public void OnError() {
                         if (callback != null) {
-                            callback.onSuccess();
+                            callback.onError();
                         }
                     }
                 });
@@ -136,12 +144,16 @@ public class OnboardingManager {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                callback.onSuccess();
+                if (callback != null) {
+                    callback.onSuccess();
+                }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                callback.onError();
+                if (callback != null) {
+                    callback.onError();
+                }
             }
         });
     }
@@ -164,12 +176,16 @@ public class OnboardingManager {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                callback.onSuccess();
+                if (callback != null) {
+                    callback.onSuccess();
+                }
             }
 
             @Override
             public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                callback.onError();
+                if (callback != null) {
+                    callback.onError();
+                }
             }
         });
     }
