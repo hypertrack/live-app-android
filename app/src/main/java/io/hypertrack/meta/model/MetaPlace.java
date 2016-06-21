@@ -4,9 +4,6 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Map;
-
-import io.hypertrack.lib.common.model.HTLocation;
 import io.realm.RealmObject;
 
 /**
@@ -106,6 +103,16 @@ public class MetaPlace extends RealmObject {
     }
 
     public MetaPlace(MetaPlace place) {
+        this.name = place.getName();
+        this.googlePlacesID = place.getGooglePlacesID();
+        this.address = place.getAddress();
+        this.id = place.getId();
+        this.longitude = place.getLongitude();
+        this.latitude = place.getLatitude();
+        this.hyperTrackDestinationID = place.getHyperTrackDestinationID();
+    }
+
+    public void update(MetaPlace place) {
         this.name = place.getName();
         this.googlePlacesID = place.getGooglePlacesID();
         this.address = place.getAddress();

@@ -62,4 +62,7 @@ public interface SendETAService {
 
     @GET("/api/v1/places/")
     Call<List<MetaPlace>> getPlaces();
+
+    @GET("/api/v1/users/{id}/task/")
+    Call<Map <String, Object>> createTask(@Path("id") int id, @Query("destination_id") String destinationID);
 }
