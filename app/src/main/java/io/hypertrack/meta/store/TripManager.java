@@ -1,12 +1,15 @@
 package io.hypertrack.meta.store;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -25,6 +28,7 @@ import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
+import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
@@ -39,7 +43,6 @@ import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.store.callback.UserStoreGetTaskCallback;
-import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.realm.Realm;
 import retrofit2.Call;
@@ -75,6 +78,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private PendingIntent mGeofencePendingIntent;
     private GoogleApiClient mGoogleAPIClient;
     private boolean shouldWaitForGoogleAPIClient;
+    private BroadcastReceiver mTripEndedReceiver;
 
     private Handler handler;
 
@@ -314,7 +318,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.clearListeners();
         this.clearPlace();
         this.clearTrip();
-        transmitter.clearCurrentTrip();
+        this.transmitter.clearCurrentTrip();
+        this.unregisterForTripEndedBroadcast();
     }
 
     private void clearListeners() {
@@ -325,6 +330,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private void onTripStart() {
         this.setupGeofencing();
         this.startRefreshingTrip();
+        this.registerForTripEndedBroadcast();
     }
 
     private void startRefreshingTrip() {
@@ -392,6 +398,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 if (tripEndedListener != null) {
                     tripEndedListener.OnCallback();
                 }
+                clearState();
             }
 
             @Override
@@ -496,5 +503,29 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 trip = realm.copyToRealm(tripToSave);
             }
         });
+    }
+
+    private void registerForTripEndedBroadcast() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(TransmitterConstants.HT_ON_TRIP_ENDED_INTENT);
+
+        mTripEndedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (tripEndedListener != null) {
+                    tripEndedListener.OnCallback();
+                }
+                clearState();
+            }
+        };
+
+        LocalBroadcastManager.getInstance(MetaApplication.getInstance().getApplicationContext()).registerReceiver(mTripEndedReceiver, filter);
+    }
+
+    private void unregisterForTripEndedBroadcast() {
+        if (this.mTripEndedReceiver != null) {
+            LocalBroadcastManager.getInstance(MetaApplication.getInstance().getApplicationContext()).unregisterReceiver(mTripEndedReceiver);
+            this.mTripEndedReceiver = null;
+        }
     }
 }
