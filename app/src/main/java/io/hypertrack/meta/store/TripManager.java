@@ -20,6 +20,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,19 +120,25 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                     hyperTrackTrip = htTrip;
                     onTripStart();
                     onTripRefresh();
+
+                    if (callback != null) {
+                        callback.OnSuccess();
+                    }
                 }
 
                 @Override
                 public void onError(Exception e) {
                     clearState();
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             });
-
-            if (callback != null) {
-                callback.OnSuccess();
-            }
         } else {
             this.clearState();
+            if (callback != null) {
+                callback.OnError();
+            }
         }
     }
 
@@ -527,5 +534,39 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             LocalBroadcastManager.getInstance(MetaApplication.getInstance().getApplicationContext()).unregisterReceiver(mTripEndedReceiver);
             this.mTripEndedReceiver = null;
         }
+    }
+
+    private String getFormattedETA() {
+        if (this.hyperTrackTrip == null || this.hyperTrackTrip.getETA() == null) {
+            return null;
+        }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("h:mma");
+        String formattedDate = dateFormat.format(this.hyperTrackTrip.getETA());
+
+        formattedDate = formattedDate.toLowerCase();
+        formattedDate = formattedDate.replace("am", "a");
+        formattedDate = formattedDate.replace("pm", "p");
+
+        return formattedDate;
+    }
+
+    public String getShareMessage() {
+
+        if (this.trip == null) {
+            return null;
+        }
+
+        String formattedETA = this.getFormattedETA();
+        if (formattedETA == null) {
+            return null;
+        }
+
+        String shareURL = this.trip.getShareUrl();
+        if (shareURL == null) {
+            return null;
+        }
+
+        return "I'm on my way. Will be there by " + formattedETA + ". Track me live " + shareURL;
     }
 }

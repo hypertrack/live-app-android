@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -27,13 +28,13 @@ import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -71,18 +72,20 @@ import com.squareup.picasso.Target;
 import java.util.ArrayList;
 import java.util.Date;
 
+import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
+import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.R;
+import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
-import io.hypertrack.meta.MetaApplication;
-import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
-import io.hypertrack.meta.R;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
+import io.hypertrack.meta.util.AnimationUtils;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.PhoneUtils;
@@ -115,6 +118,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
     private ProgressDialog mProgressDialog;
+
+    private ArrayList<AutocompletePrediction> mResultList;
+    private boolean enterDestinationLayoutClicked = false;
 
     Target target = new Target() {
         @Override
@@ -189,6 +195,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             Log.i(TAG, "MetaPlace details received: " + place.getName());
             KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
+
+            // Set the Selected Place Name in the Enter Destination Layout
+            //mAutocompleteView.setText(place.getAddress());
+
             onSelectPlace(place);
             places.release();
         }
@@ -215,27 +225,32 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     };
 
-    private AdapterView.OnClickListener mAutocompleteBackClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            toolbar.setVisibility(View.VISIBLE);
-
-            mAutocompleteView.setGravity(Gravity.CENTER);
-
-            mAutocompleteIcon.setImageResource(R.drawable.ic_destination);
-            mAutocompleteIcon.setOnClickListener(null);
-        }
-    };
-
     private AdapterView.OnClickListener mAutocompleteClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            toolbar.setVisibility(View.GONE);
+            enterDestinationLayoutClicked = true;
 
-            mAutocompleteView.setGravity(Gravity.LEFT);
+            AnimationUtils.collapse(toolbar, 100);
 
             mAutocompleteIcon.setImageResource(R.drawable.ic_navigation_arrow_back);
             mAutocompleteIcon.setOnClickListener(mAutocompleteBackClickListener);
+        }
+    };
+
+    private AdapterView.OnClickListener mAutocompleteBackClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            enterDestinationLayoutClicked = false;
+
+            AnimationUtils.expand(toolbar, 100);
+
+            mAutocompleteView.setText("");
+            mAutocompleteResults.setVisibility(View.GONE);
+
+            mAutocompleteIcon.setImageResource(R.drawable.ic_destination);
+            mAutocompleteIcon.setOnClickListener(null);
+
+            KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
         }
     };
 
@@ -243,7 +258,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            final AutocompletePrediction item = mAdapter.getItem();
+            //Restore Default State for Enter Destination Layout
+            mAutocompleteBackClickListener.onClick(null);
+
+            final AutocompletePrediction item = mAdapter.getItem(position);
             final String placeId = item.getPlaceId();
             final CharSequence primaryText = item.getPrimaryText(null);
             Log.d(TAG, "Autocomplete item selected: " + primaryText);
@@ -301,26 +319,24 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                shareUrlViaShare();
+                navigate();
             }
         });
     }
 
     private void setupAutoCompleteView() {
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener);
         mAutocompleteView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
-
-//        mAutocompleteView.setAdapter(mAdapter);
+        mAutocompleteIcon = (ImageView) findViewById(R.id.autocomplete_places_icon);
+        mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
+        mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
 
         mAutocompleteView.setOnClickListener(mAutocompleteClickListener);
-        mAutocompleteView.setOnItemClickListener(mAutocompleteItemClickListener);
         mAutocompleteView.addTextChangedListener(mTextWatcher);
 
-        mAutocompleteIcon = (ImageView) findViewById(R.id.autocomplete_places_icon);
-
-        mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
-        mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
-
+        LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
+        layoutManager.setAutoMeasureEnabled(true);
+        mAutocompleteResults.setLayoutManager(layoutManager);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener);
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
@@ -329,12 +345,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (results != null && results.size() > 0) {
 
             mAutocompleteResults.smoothScrollToPosition(0);
+            mAutocompleteResults.setVisibility(View.VISIBLE);
             mAutocompleteResultsLayout.setVisibility(View.VISIBLE);
 
         } else {
 
+            mAutocompleteResults.setVisibility(View.GONE);
             mAutocompleteResultsLayout.setVisibility(View.GONE);
         }
+        // TODO: 22/06/16 Add Loader while fetching Places Autocomplete data 
 //        ((Home) context).customLoader.setVisibility(View.GONE);
     }
 
@@ -343,7 +362,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                shareUrlViaShare();
+                share();
             }
         });
     }
@@ -538,7 +557,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        if (currentLocationMarker.getPosition() == null || destinationLocation == null) {
+        if (currentLocationMarker == null || currentLocationMarker.getPosition() == null || destinationLocation == null) {
             return;
         }
 
@@ -810,5 +829,76 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             destinationLocationMarker.remove();
             destinationLocationMarker = null;
         }
+    }
+
+    private void share() {
+        String shareMessage = TripManager.getSharedManager().getShareMessage();
+        if (shareMessage == null) {
+            return;
+        }
+
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+        startActivity(sharingIntent);
+    }
+
+    private void navigate() {
+        TripManager tripManager = TripManager.getSharedManager();
+
+        MetaPlace place = tripManager.getPlace();
+        if (place == null) {
+            return;
+        }
+
+        Double latitude = place.getLatitude();
+        Double longitude = place.getLongitude();
+        if (latitude == null || longitude == null) {
+            return;
+        }
+
+        String mode = "d";
+        HTTrip trip = tripManager.getHyperTrackTrip();
+        if (trip != null && trip.getVehicleType() != null) {
+            HTDriverVehicleType type = trip.getVehicleType();
+            switch (type) {
+                case BICYCLE:
+                    mode = "b";
+                    break;
+                case WALK:
+                    mode = "w";
+                    break;
+                default:
+                    mode = "d";
+                    break;
+            }
+        }
+
+        String navigationString = latitude.toString() + "," + longitude.toString() + "&mode=" + mode;
+        Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+
+        startActivity(mapIntent);
+    }
+
+    public void onProfileButtonClicked(MenuItem menuItem) {
+        Intent profileIntent = new Intent(this, UserProfile.class);
+        startActivity(profileIntent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (enterDestinationLayoutClicked) {
+            mAutocompleteBackClickListener.onClick(null);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }

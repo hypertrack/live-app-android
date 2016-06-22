@@ -14,9 +14,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS"></uses-permission>
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <permission
@@ -25,7 +24,6 @@
 
     <uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-
 
     <application
         android:name=".MetaApplication"
@@ -70,25 +68,6 @@
         </receiver>
 
         <activity
-            android:name=".view.Trip"
-            android:screenOrientation="portrait">
-            <intent-filter android:label="mETA app">
-                <action android:name="android.intent.action.VIEW" />
-
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with " http://eta.fyi/r4eN” -->
-                <!--
-                <data
-                   android:host="eta.fyi"
-                   android:pathPrefix="/"
-                   android:scheme="http" />
-                -->
-
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".view.AddAddress"
             android:label="Custom Address"
             android:launchMode="singleTop"
@@ -112,7 +91,7 @@
         <activity
             android:name=".view.Profile"
             android:label="@string/title_activity_generated_login"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
@@ -134,6 +113,7 @@
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="io.hypertrack.meta" />
             </intent-filter>
         </receiver>
@@ -154,12 +134,13 @@
         </service>
         <service
             android:name=".service.RegistrationIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
 
+        <activity android:name=".view.UserProfile"></activity>
     </application>
 
 </manifest>

@@ -131,6 +131,14 @@ public class PlaceAutocompleteAdapter
         return mResultList != null ? mResultList.size() : 0;
     }
 
+    public AutocompletePrediction getItem(int position) {
+        if (mResultList != null && mResultList.size() > 0) {
+            return mResultList.get(position);
+        }
+
+        return null;
+    }
+
     /**
      * Returns the filter for the current set of autocomplete results.
      */
@@ -158,16 +166,18 @@ public class PlaceAutocompleteAdapter
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
-                    notifyDataSetChanged();
-
                     Log.d(TAG, "Received results");
                     mResultList = (ArrayList<AutocompletePrediction>) results.values;
 
+                    notifyDataSetChanged();
+
                 } else {
                     // The API did not return any results, invalidate the data set.
+                    Log.d(TAG, "no results found");
+                    mResultList = null;
+
                     notifyItemRangeRemoved(0, 0);
 
-                    Log.d(TAG, "no results found");
                 }
 
                 ((Home) context).processPublishedResults(mResultList);
@@ -245,7 +255,7 @@ public class PlaceAutocompleteAdapter
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    itemClickListener.onItemClick((AdapterView) view.getRootView(), view, getAdapterPosition(), getItemId());
+                    itemClickListener.onItemClick(null, view, getAdapterPosition(), getItemId());
                 }
             });
         }
