@@ -120,10 +120,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                     hyperTrackTrip = htTrip;
                     onTripStart();
                     onTripRefresh();
-
-                    if (callback != null) {
-                        callback.OnSuccess();
-                    }
                 }
 
                 @Override
@@ -134,6 +130,10 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                     }
                 }
             });
+
+            if (callback != null) {
+                callback.OnSuccess();
+            }
         } else {
             this.clearState();
             if (callback != null) {
@@ -231,7 +231,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void startTrip(final TripManagerCallback callback) {
-        this.transmitter.clearCurrentTrip(); //TODO: Remove this
         if (this.place == null) {
             if (callback != null) {
                 callback.OnError();
