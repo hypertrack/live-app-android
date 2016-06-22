@@ -7,7 +7,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="@android:color/white"
         android:paddingBottom="@dimen/padding_high"
         android:paddingRight="@dimen/padding_high"
         android:paddingTop="@dimen/padding_high">

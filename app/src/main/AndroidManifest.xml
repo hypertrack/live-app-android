@@ -32,6 +32,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- Register Activities here -->
         <activity
             android:name=".view.Home"
             android:label="@string/app_name"
@@ -43,12 +45,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".view.Register"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
+
         <activity
             android:name=".view.Verify"
             android:label="@string/title_activity_verify"
@@ -60,12 +64,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".view.Register" />
         </activity>
-
-        <receiver android:name=".util.SMSReceiver">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
 
         <activity
             android:name=".view.AddAddress"
@@ -93,19 +91,51 @@
             android:label="@string/title_activity_generated_login"
             android:windowSoftInputMode="adjustResize" />
 
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
-
         <activity
             android:name=".view.SelectDestination"
             android:label="Select Destination"
             android:parentActivityName=".view.AddAddress"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".view.UserProfile" />
+
+        <activity android:name=".view.EditProfile" />
+
+        <activity android:name=".view.AddFavoritePlace" />
+
+        <!-- Register Services here -->
         <service
             android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
+            android:exported="false">
+        </service>
+
+        <service
+            android:name=".service.GcmListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.MyInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.RegistrationIntentService"
+            android:exported="false">
+        </service>
+
+        <!-- Register Receivers here -->
+        <receiver android:name=".util.SMSReceiver">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
 
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
@@ -118,31 +148,13 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name=".service.GcmListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".service.MyInstanceIDListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".service.RegistrationIntentService"
-            android:exported="false" />
-
+        <!-- Register meta-data here -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
 
-        <activity android:name=".view.UserProfile" />
-        <activity android:name=".view.EditProfile" />
-        <activity android:name=".view.Place"></activity>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
     </application>
-
 </manifest>
