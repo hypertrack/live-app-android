@@ -22,6 +22,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-
+    <include layout="@layout/list_item_place" />
 
 </RelativeLayout>
