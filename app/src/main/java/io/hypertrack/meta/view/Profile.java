@@ -1,23 +1,18 @@
 package io.hypertrack.meta.view;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -33,30 +28,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.hypertrack.meta.BuildConfig;
-import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.model.User;
-import io.hypertrack.meta.network.retrofit.SendETAService;
-import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
-import io.hypertrack.meta.util.Constants;
-import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class Profile extends AppCompatActivity implements ProfileView {
 
