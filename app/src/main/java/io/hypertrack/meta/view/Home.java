@@ -69,6 +69,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
@@ -77,6 +78,7 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
+import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
@@ -328,7 +330,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
         layoutManager.setAutoMeasureEnabled(true);
         mAutocompleteResults.setLayoutManager(layoutManager);
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener);
+    }
+
+    private void updatePlacesAutocompleteAdapter() {
+        List<MetaPlace> places = null;
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            places = user.getPlaces();
+        }
+
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener, places);
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
@@ -401,6 +412,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             finish();
         } else {
             UserStore.sharedStore.initializeUser();
+            this.updatePlacesAutocompleteAdapter();
         }
     }
 

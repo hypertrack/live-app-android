@@ -43,9 +43,11 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.view.Home;
 
 /**
@@ -81,6 +83,11 @@ public class PlaceAutocompleteAdapter
     private LatLngBounds mBounds;
 
     /**
+     * Saved places
+     */
+    private List<MetaPlace> favorites;
+
+    /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
     private AutocompleteFilter mPlaceFilter;
@@ -95,11 +102,16 @@ public class PlaceAutocompleteAdapter
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, AdapterView.OnItemClickListener itemClickListener) {
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, AdapterView.OnItemClickListener itemClickListener, List<MetaPlace> favorites) {
         super();
         this.context = context;
         this.mGoogleApiClient = mGoogleApiClient;
         this.itemClickListener = itemClickListener;
+        this.favorites = favorites;
+    }
+
+    private PlaceAutocompleteAdapter() {
+
     }
 
     /**
@@ -127,7 +139,16 @@ public class PlaceAutocompleteAdapter
 
     @Override
     public int getItemCount() {
-        return mResultList != null ? mResultList.size() : 0;
+        int count = 0;
+        if (this.favorites != null && !this.favorites.isEmpty()) {
+            count = count + this.favorites.size();
+        }
+
+        if (mResultList != null && !mResultList.isEmpty()) {
+            count = count + mResultList.size();
+        }
+
+        return count;
     }
 
     public AutocompletePrediction getItem(int position) {
@@ -169,14 +190,12 @@ public class PlaceAutocompleteAdapter
                     mResultList = (ArrayList<AutocompletePrediction>) results.values;
 
                     notifyDataSetChanged();
-
                 } else {
                     // The API did not return any results, invalidate the data set.
                     Log.d(TAG, "no results found");
                     mResultList = null;
 
                     notifyItemRangeRemoved(0, 0);
-
                 }
 
                 ((Home) context).processPublishedResults(mResultList);
@@ -257,36 +276,6 @@ public class PlaceAutocompleteAdapter
                     itemClickListener.onItemClick(null, view, getAdapterPosition(), getItemId());
                 }
             });
-        }
-    }
-
-    public class PlaceAutocomplete {
-        public CharSequence placeId;
-        public String description;
-        public String title;
-
-        PlaceAutocomplete(CharSequence placeId, CharSequence description) {
-            this.placeId = placeId;
-            try {
-
-                String[] str = description.toString().split(", ", 2);
-
-                if (str.length > 1) {
-                    this.title = str[0];
-                    this.description = str[1];
-                } else {
-                    this.title = description.toString();
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                this.title = description.toString();
-            }
-        }
-
-        @Override
-        public String toString() {
-            return this.description;
         }
     }
 }
