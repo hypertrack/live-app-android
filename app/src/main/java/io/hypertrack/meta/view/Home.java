@@ -34,7 +34,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -102,8 +102,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private Toolbar toolbar;
 
+    private TextView enterDestinationText;
     private TextView mAutocompleteView;
-    private ImageView mAutocompleteIcon;
+    private FrameLayout enterDestinationLayout;
+    private FrameLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Marker currentLocationMarker;
@@ -208,41 +210,42 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     };
 
-    private AdapterView.OnClickListener mAutocompleteClickListener = new View.OnClickListener() {
+    private AdapterView.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             enterDestinationLayoutClicked = true;
 
+            // Hide the toolbar
             AnimationUtils.collapse(toolbar, 100);
 
-            mAutocompleteIcon.setImageResource(R.drawable.ic_navigation_arrow_back);
-            mAutocompleteIcon.setOnClickListener(mAutocompleteBackClickListener);
+            // Hide the sendETA CTA while user is searching for a place
+//            sendETAButton.setVisibility(View.GONE);
+
+            enterDestinationLayout.setVisibility(View.GONE);
+            mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
         }
     };
 
-    private AdapterView.OnClickListener mAutocompleteBackClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            enterDestinationLayoutClicked = false;
+    public void onEnterDestinationBackClick(View view) {
+        enterDestinationLayoutClicked = false;
 
-            AnimationUtils.expand(toolbar, 100);
+        AnimationUtils.expand(toolbar, 100);
 
-            mAutocompleteView.setText("");
-            mAutocompleteResults.setVisibility(View.GONE);
+        enterDestinationText.setText("");
+        mAutocompleteResults.setVisibility(View.GONE);
 
-            mAutocompleteIcon.setImageResource(R.drawable.ic_destination);
-            mAutocompleteIcon.setOnClickListener(null);
+        enterDestinationLayout.setVisibility(View.VISIBLE);
+        mAutocompletePlacesLayout.setVisibility(View.GONE);
 
-            KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
-        }
-    };
+        KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
+    }
 
     private AdapterView.OnItemClickListener mAutocompleteItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
             //Restore Default State for Enter Destination Layout
-            mAutocompleteBackClickListener.onClick(null);
+            onEnterDestinationBackClick(null);
 
             final AutocompletePrediction item = mAdapter.getItem(position);
             final String placeId = item.getPlaceId();
@@ -284,6 +287,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         setSupportActionBar(toolbar);
 
         this.initGoogleClient();
+        this.setupEnterDestinationView();
         this.setupAutoCompleteView();
         this.setupShareButton();
         this.setupSendETAButton();
@@ -306,13 +310,19 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
     }
 
+    private void setupEnterDestinationView() {
+        enterDestinationText = (TextView) findViewById(R.id.enter_destination_text);
+        enterDestinationLayout = (FrameLayout) findViewById(R.id.enter_destination_layout);
+
+        enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
+    }
+
     private void setupAutoCompleteView() {
-        mAutocompleteView = (TextView) findViewById(R.id.autocomplete_places);
-        mAutocompleteIcon = (ImageView) findViewById(R.id.autocomplete_places_icon);
+        mAutocompleteView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
+        mAutocompletePlacesLayout = (FrameLayout) findViewById(R.id.autocomplete_places_layout);
         mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
 
-        mAutocompleteView.setOnClickListener(mAutocompleteClickListener);
         mAutocompleteView.addTextChangedListener(mTextWatcher);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
@@ -863,7 +873,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onBackPressed() {
         if (enterDestinationLayoutClicked) {
-            mAutocompleteBackClickListener.onClick(null);
+           onEnterDestinationBackClick(null);
         } else {
             super.onBackPressed();
         }
