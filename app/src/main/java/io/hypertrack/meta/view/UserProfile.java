@@ -37,7 +37,16 @@ public class UserProfile extends AppCompatActivity {
         layoutManager.setAutoMeasureEnabled(true);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        favoritePlacesAdapter = new FavoritePlacesAdapter();
+        this.setupFavoritePlacesAdapter();
+    }
+
+    private void setupFavoritePlacesAdapter() {
+        User user = UserStore.sharedStore.getUser();
+        if (user == null) {
+            return;
+        }
+
+        favoritePlacesAdapter = new FavoritePlacesAdapter(user.getHome(), user.getWork(), user.getOtherPlaces());
         mRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 

@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
+
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.User;
@@ -18,6 +20,20 @@ import io.hypertrack.meta.store.UserStore;
  */
 public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAdapter.PlacesViewHolder> {
 
+    private MetaPlace home;
+    private MetaPlace work;
+    private List<MetaPlace> otherPlaces;
+
+    public FavoritePlacesAdapter(MetaPlace home, MetaPlace work, List<MetaPlace> otherPlaces) {
+        this.home = home;
+        this.work = work;
+        this.otherPlaces = otherPlaces;
+    }
+
+    private FavoritePlacesAdapter() {
+        
+    }
+
     @Override
     public PlacesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_place, parent, false);
@@ -26,26 +42,20 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
 
     @Override
     public void onBindViewHolder(PlacesViewHolder holder, int position) {
-        User user = UserStore.sharedStore.getUser();
-        if (user == null) {
-            return;
-        }
-
-
         if (this.isHomeRow(position)) {
-            if (user.hasHome()) {
-                holder.title.setText(user.getHome().getName());
+            if (this.home != null) {
+                holder.title.setText(home.getName());
                 holder.description.setVisibility(View.VISIBLE);
-                holder.description.setText(user.getHome().getAddress());
+                holder.description.setText(home.getAddress());
             } else {
                 holder.title.setText("Add Home");
                 holder.description.setVisibility(View.GONE);
             }
         } else if (this.isWorkRow(position)) {
-            if (user.hasWork()) {
-                holder.title.setText(user.getWork().getName());
+            if (this.work != null) {
+                holder.title.setText(work.getName());
                 holder.description.setVisibility(View.VISIBLE);
-                holder.description.setText(user.getWork().getAddress());
+                holder.description.setText(work.getAddress());
             } else {
                 holder.title.setText("Add Work");
                 holder.description.setVisibility(View.GONE);
@@ -54,7 +64,7 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
             holder.title.setText("Add new place");
             holder.description.setVisibility(View.GONE);
         } else {
-            MetaPlace place = user.getOtherPlaces().get(position - 2);
+            MetaPlace place = this.otherPlaces.get(position - 2);
             holder.title.setText(place.getName());
             holder.description.setVisibility(View.VISIBLE);
             holder.description.setText(place.getAddress());
@@ -86,7 +96,7 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         }
 
         int defaultRow = 3;
-        return defaultRow + user.getOtherPlaces().size();
+        return defaultRow + this.otherPlaces.size();
     }
 
     private boolean isHomeRow(int position) {
