@@ -204,10 +204,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
-
-            if (constraint.length() > 0 ) {
-                mAdapter.getFilter().filter(constraint);
-            }
+            mAdapter.setFilterString(constraint);
         }
     };
 
@@ -227,9 +224,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             mAutocompletePlacesView.setText("");
             mAutocompletePlacesView.requestFocus();
             KeyboardUtils.showKeyboard(Home.this, mAutocompletePlacesView);
-
-            // Hide the sendETA CTA while user is searching for a place
-//            sendETAButton.setVisibility(View.GONE);
 
             enterDestinationLayout.setVisibility(View.GONE);
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
