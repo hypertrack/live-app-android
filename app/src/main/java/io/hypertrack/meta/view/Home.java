@@ -16,6 +16,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -103,9 +104,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private PlaceAutocompleteAdapter mAdapter;
 
     private Toolbar toolbar;
+    private AppBarLayout appBarLayout;
 
     private TextView enterDestinationText;
-    private TextView mAutocompleteView;
+    private TextView mAutocompletePlacesView;
     private FrameLayout enterDestinationLayout;
     private FrameLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
@@ -181,10 +183,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             final Place place = places.get(0);
 
             Log.i(TAG, "MetaPlace details received: " + place.getName());
-            KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
-
-            // Set the Selected Place Name in the Enter Destination Layout
-            //mAutocompleteView.setText(place.getAddress());
+            KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
 
             onSelectPlace(place);
             places.release();
@@ -217,8 +216,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         public void onClick(View v) {
             enterDestinationLayoutClicked = true;
 
-            // Hide the toolbar
-            AnimationUtils.collapse(toolbar, 100);
+            // Hide the AppBar
+            AnimationUtils.collapse(appBarLayout, 200);
+
+            // Reset the Autocomplete TextView
+            mAutocompletePlacesView.setText("");
+            mAutocompletePlacesView.requestFocus();
+            KeyboardUtils.showKeyboard(Home.this, mAutocompletePlacesView);
 
             // Hide the sendETA CTA while user is searching for a place
 //            sendETAButton.setVisibility(View.GONE);
@@ -231,28 +235,31 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     public void onEnterDestinationBackClick(View view) {
         enterDestinationLayoutClicked = false;
 
-        AnimationUtils.expand(toolbar, 100);
+        // Show the AppBar
+        AnimationUtils.expand(appBarLayout, 200);
 
-        enterDestinationText.setText("");
         mAutocompleteResults.setVisibility(View.GONE);
 
         enterDestinationLayout.setVisibility(View.VISIBLE);
         mAutocompletePlacesLayout.setVisibility(View.GONE);
 
-        KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
+        KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
     }
 
     private AdapterView.OnItemClickListener mAutocompleteItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            //Restore Default State for Enter Destination Layout
-            onEnterDestinationBackClick(null);
-
             final AutocompletePrediction item = mAdapter.getItem(position);
             final String placeId = item.getPlaceId();
             final CharSequence primaryText = item.getPrimaryText(null);
             Log.d(TAG, "Autocomplete item selected: " + primaryText);
+
+            //Restore Default State for Enter Destination Layout
+            onEnterDestinationBackClick(null);
+
+            // Set the Selected Place Name in the Enter Destination Layout
+            enterDestinationText.setText(item.getPrimaryText(null));
 
             PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
                     .getPlaceById(mGoogleApiClient, placeId);
@@ -286,6 +293,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMapFragment.getMapAsync(this);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         setSupportActionBar(toolbar);
 
         this.initGoogleClient();
@@ -320,12 +328,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupAutoCompleteView() {
-        mAutocompleteView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
+        mAutocompletePlacesView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
         mAutocompletePlacesLayout = (FrameLayout) findViewById(R.id.autocomplete_places_layout);
         mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
 
-        mAutocompleteView.addTextChangedListener(mTextWatcher);
+        mAutocompletePlacesView.addTextChangedListener(mTextWatcher);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
         layoutManager.setAutoMeasureEnabled(true);
@@ -379,7 +387,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 MetaPlace place = tripManager.getPlace();
                 updateViewForETASuccess(0, place.getLatLng());
-                mAutocompleteView.setText(place.getAddress());
+                mAutocompletePlacesView.setText(place.getAddress());
 
                 onTripStart();
             }
@@ -817,8 +825,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareButton.setVisibility(View.GONE);
         navigateButton.setVisibility(View.GONE);
 
-        mAutocompleteView.setVisibility(View.VISIBLE);
-        mAutocompleteView.setText("");
+        mAutocompletePlacesView.setVisibility(View.VISIBLE);
+        mAutocompletePlacesView.setText("");
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
