@@ -33,4 +33,10 @@
 
     <!-- Button dimensions -->
     <dimen name="button_size">50dp</dimen>
+
+    <!-- Standard Elevation Dimensions-->
+    <dimen name="elevation_base">2dp</dimen>
+    <dimen name="elevation_medium">4dp</dimen>
+    <dimen name="elevation_high">8dp</dimen>
+
 </resources>

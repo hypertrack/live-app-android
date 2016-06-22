@@ -18,14 +18,19 @@ package io.hypertrack.meta.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v7.widget.RecyclerView;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -41,6 +46,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
+import io.hypertrack.meta.R;
+import io.hypertrack.meta.view.Home;
+
 /**
  * Adapter that handles Autocomplete requests from the Places Geo Data API.
  * {@link AutocompletePrediction} results from the API are frozen and stored directly in this
@@ -51,10 +59,13 @@ import java.util.concurrent.TimeUnit;
  * connection states. The API client must be connected with the {@link Places#GEO_DATA_API} API.
  */
 public class PlaceAutocompleteAdapter
-        extends ArrayAdapter<AutocompletePrediction> implements Filterable {
+        extends RecyclerView.Adapter<PlaceAutocompleteAdapter.AutocompleteViewHolder> implements Filterable {
 
     private static final String TAG = "PlaceAutocompAdapter";
     private static final CharacterStyle STYLE_BOLD = new StyleSpan(Typeface.BOLD);
+    private static final CharacterStyle STYLE_NORMAL = new StyleSpan(Typeface.NORMAL);
+
+    private Context context;
     /**
      * Current results returned by this adapter.
      */
@@ -76,13 +87,20 @@ public class PlaceAutocompleteAdapter
     private AutocompleteFilter mPlaceFilter;
 
     /**
+     * The onItemClickListener used to listen to a list item selection
+     */
+    private AdapterView.OnItemClickListener itemClickListener;
+
+    /**
      * Initializes with a resource for text rows and autocomplete query bounds.
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient googleApiClient) {
-        super(context, android.R.layout.simple_expandable_list_item_2, android.R.id.text1);
-        mGoogleApiClient = googleApiClient;
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, AdapterView.OnItemClickListener itemClickListener) {
+        super();
+        this.context = context;
+        this.mGoogleApiClient = mGoogleApiClient;
+        this.itemClickListener = itemClickListener;
     }
 
     /**
@@ -92,53 +110,25 @@ public class PlaceAutocompleteAdapter
         mBounds = bounds;
     }
 
-    /**
-     * Returns the number of results received in the last autocomplete query.
-     */
     @Override
-    public int getCount() {
-        if (mResultList == null) {
-            return 0;
-        }
-
-        return mResultList.size();
-    }
-
-    /**
-     * Returns an item from the last autocomplete query.
-     */
-    @Override
-    public AutocompletePrediction getItem(int position) {
-        if (mResultList == null) {
-            return null;
-        }
-
-        if (position >= mResultList.size()) {
-            return null;
-        }
-
-        return mResultList.get(position);
+    public AutocompleteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.list_item_place, parent, false);
+        return new AutocompleteViewHolder(view);
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View row = super.getView(position, convertView, parent);
+    public void onBindViewHolder(AutocompleteViewHolder holder, int position) {
+        final AutocompletePrediction item = mResultList.get(position);
 
-        // Sets the primary and secondary text for a row.
-        // Note that getPrimaryText() and getSecondaryText() return a CharSequence that may contain
-        // styling based on the given CharacterStyle.
+        holder.header.setText(item.getPrimaryText(STYLE_BOLD));
+        holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
 
-        if (getCount() == 0) {
-            return row;
-        }
-        AutocompletePrediction item = getItem(position);
+        // TODO: 22/06/16 Get Composite List of Saved Places & Fetched AutoComplete Results
+    }
 
-        TextView textView1 = (TextView) row.findViewById(android.R.id.text1);
-        TextView textView2 = (TextView) row.findViewById(android.R.id.text2);
-        textView1.setText(item.getPrimaryText(STYLE_BOLD));
-        textView2.setText(item.getSecondaryText(STYLE_BOLD));
-
-        return row;
+    @Override
+    public int getItemCount() {
+        return mResultList != null ? mResultList.size() : 0;
     }
 
     /**
@@ -150,14 +140,15 @@ public class PlaceAutocompleteAdapter
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
+                ArrayList<AutocompletePrediction> googleList;
                 // Skip the autocomplete query if no constraints are given.
                 if (constraint != null) {
                     // Query the autocomplete API for the (constraint) search string.
-                    mResultList = getAutocomplete(constraint);
-                    if (mResultList != null) {
+                    googleList = getAutocomplete(constraint);
+                    if (googleList != null) {
                         // The API successfully returned results.
-                        results.values = mResultList;
-                        results.count = mResultList.size();
+                        results.values = googleList;
+                        results.count = googleList.size();
                     }
                 }
                 return results;
@@ -168,10 +159,18 @@ public class PlaceAutocompleteAdapter
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
                     notifyDataSetChanged();
+
+                    Log.d(TAG, "Received results");
+                    mResultList = (ArrayList<AutocompletePrediction>) results.values;
+
                 } else {
                     // The API did not return any results, invalidate the data set.
-                    notifyDataSetInvalidated();
+                    notifyItemRangeRemoved(0, 0);
+
+                    Log.d(TAG, "no results found");
                 }
+
+                ((Home) context).processPublishedResults(mResultList);
             }
 
             @Override
@@ -223,15 +222,62 @@ public class PlaceAutocompleteAdapter
                 return null;
             }
 
-            Log.d(TAG, "Query completed. Received " + autocompletePredictions.getCount()
-                    + " predictions.");
+            Log.d(TAG, "Query complete: Received " + autocompletePredictions.getCount() + " predictions");
 
             // Freeze the results immutable representation that can be stored safely.
             return DataBufferUtils.freezeAndClose(autocompletePredictions);
         }
-        Log.e(TAG, "Google API client is not connected for autocomplete query.");
+        Log.e(TAG, "Google API client not connected for autocomplete query.");
         return null;
     }
 
+    public class AutocompleteViewHolder extends RecyclerView.ViewHolder{
+        public TextView header;
+        public TextView description;
+        public ImageView icon;
 
+        public AutocompleteViewHolder(final View view) {
+            super(view);
+            header = (TextView) view.findViewById(R.id.item_place_title);
+            description = (TextView) view.findViewById(R.id.item_place_desc);
+            icon = (ImageView) view.findViewById(R.id.item_place_icon);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemClickListener.onItemClick((AdapterView) view.getRootView(), view, getAdapterPosition(), getItemId());
+                }
+            });
+        }
+    }
+
+    public class PlaceAutocomplete {
+        public CharSequence placeId;
+        public String description;
+        public String title;
+
+        PlaceAutocomplete(CharSequence placeId, CharSequence description) {
+            this.placeId = placeId;
+            try {
+
+                String[] str = description.toString().split(", ", 2);
+
+                if (str.length > 1) {
+                    this.title = str[0];
+                    this.description = str[1];
+                } else {
+                    this.title = description.toString();
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                this.title = description.toString();
+            }
+        }
+
+        @Override
+        public String toString() {
+            return this.description;
+        }
+    }
 }

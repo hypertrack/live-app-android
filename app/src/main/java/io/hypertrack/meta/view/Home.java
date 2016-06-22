@@ -18,6 +18,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -25,12 +27,14 @@ import android.text.TextWatcher;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,6 +68,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
@@ -79,29 +84,37 @@ import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.Constants;
+import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.PhoneUtils;
 
-public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener,
+        OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = AppCompatActivity.class.getSimpleName();
     private static final int REQUEST_SHARE_CONTACT_CODE = 1;
     private static final long INTERVAL_TIME = 5000;
 
-    protected GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
+    protected GoogleApiClient mGoogleApiClient;
+    private SupportMapFragment mMapFragment;
+
     private PlaceAutocompleteAdapter mAdapter;
+
+    private Toolbar toolbar;
+
     private AutoCompleteTextView mAutocompleteView;
+    private ImageView mAutocompleteIcon;
+    public CardView mAutocompleteResultsLayout;
+    public RecyclerView mAutocompleteResults;
     private Marker currentLocationMarker;
     private Marker destinationLocationMarker;
     private Button sendETAButton;
-    private ProgressDialog mProgressDialog;
-    private InputMethodManager mIMEMgr;
-    private SupportMapFragment mMapFragment;
     private Button shareButton;
+    private Button navigateButton;
     private Bitmap profilePicBitmap;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
-    private Button navigateButton;
+    private ProgressDialog mProgressDialog;
 
     Target target = new Target() {
         @Override
@@ -175,7 +188,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             final Place place = places.get(0);
 
             Log.i(TAG, "MetaPlace details received: " + place.getName());
-            mIMEMgr.hideSoftInputFromWindow(mAutocompleteView.getWindowToken(), 0);
+            KeyboardUtils.hideKeyboard(Home.this, mAutocompleteView);
             onSelectPlace(place);
             places.release();
         }
@@ -202,12 +215,35 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     };
 
-    private AdapterView.OnItemClickListener mAutocompleteClickListener
-            = new AdapterView.OnItemClickListener() {
+    private AdapterView.OnClickListener mAutocompleteBackClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            toolbar.setVisibility(View.VISIBLE);
+
+            mAutocompleteView.setGravity(Gravity.CENTER);
+
+            mAutocompleteIcon.setImageResource(R.drawable.ic_destination);
+            mAutocompleteIcon.setOnClickListener(null);
+        }
+    };
+
+    private AdapterView.OnClickListener mAutocompleteClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            toolbar.setVisibility(View.GONE);
+
+            mAutocompleteView.setGravity(Gravity.LEFT);
+
+            mAutocompleteIcon.setImageResource(R.drawable.ic_navigation_arrow_back);
+            mAutocompleteIcon.setOnClickListener(mAutocompleteBackClickListener);
+        }
+    };
+
+    private AdapterView.OnItemClickListener mAutocompleteItemClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            final AutocompletePrediction item = mAdapter.getItem(position);
+            final AutocompletePrediction item = mAdapter.getItem();
             final String placeId = item.getPlaceId();
             final CharSequence primaryText = item.getPrimaryText(null);
             Log.d(TAG, "Autocomplete item selected: " + primaryText);
@@ -243,10 +279,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mIMEMgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 
         this.initGoogleClient();
         this.setupAutoCompleteView();
@@ -257,7 +291,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupNavigateButton();
 
         if (!isConnectedToInternet()) {
-            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
+                    Toast.LENGTH_LONG).show();
         }
     }
 
@@ -272,12 +307,35 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupAutoCompleteView() {
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient);
-        mAutocompleteView = (AutoCompleteTextView)
-                findViewById(R.id.autocomplete_places);
-        mAutocompleteView.setAdapter(mAdapter);
-        mAutocompleteView.setOnItemClickListener(mAutocompleteClickListener);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener);
+        mAutocompleteView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
+
+//        mAutocompleteView.setAdapter(mAdapter);
+
+        mAutocompleteView.setOnClickListener(mAutocompleteClickListener);
+        mAutocompleteView.setOnItemClickListener(mAutocompleteItemClickListener);
         mAutocompleteView.addTextChangedListener(mTextWatcher);
+
+        mAutocompleteIcon = (ImageView) findViewById(R.id.autocomplete_places_icon);
+
+        mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
+        mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
+
+        mAutocompleteResults.setAdapter(mAdapter);
+    }
+
+    public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
+
+        if (results != null && results.size() > 0) {
+
+            mAutocompleteResults.smoothScrollToPosition(0);
+            mAutocompleteResultsLayout.setVisibility(View.VISIBLE);
+
+        } else {
+
+            mAutocompleteResultsLayout.setVisibility(View.GONE);
+        }
+//        ((Home) context).customLoader.setVisibility(View.GONE);
     }
 
     private void setupShareButton() {
