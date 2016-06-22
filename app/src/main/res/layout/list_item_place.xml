@@ -33,7 +33,8 @@
                 android:fontFamily="sans-serif-medium"
                 android:text="Title"
                 android:textColor="@color/text_base"
-                android:textSize="@dimen/text_base" />
+                android:textSize="@dimen/text_base"
+                android:layout_gravity="center_vertical"/>
 
             <TextView
                 android:id="@+id/item_place.desc"
@@ -41,7 +42,8 @@
                 android:layout_height="wrap_content"
                 android:text="This is the description"
                 android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_base" />
+                android:textSize="@dimen/text_base"
+                android:layout_gravity="center_vertical"/>
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

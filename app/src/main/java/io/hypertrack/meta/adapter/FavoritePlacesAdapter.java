@@ -1,6 +1,7 @@
 package io.hypertrack.meta.adapter;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,25 +35,28 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         if (this.isHomeRow(position)) {
             if (user.hasHome()) {
                 holder.title.setText(user.getHome().getName());
+                holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(user.getHome().getAddress());
             } else {
                 holder.title.setText("Add Home");
-                holder.description.setText("");
+                holder.description.setVisibility(View.GONE);
             }
         } else if (this.isWorkRow(position)) {
             if (user.hasWork()) {
                 holder.title.setText(user.getWork().getName());
+                holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(user.getWork().getAddress());
             } else {
                 holder.title.setText("Add Work");
-                holder.description.setText("");
+                holder.description.setVisibility(View.GONE);
             }
         } else if (this.isAddNewRow(position)) {
             holder.title.setText("Add new place");
-            holder.description.setText("");
+            holder.description.setVisibility(View.GONE);
         } else {
             MetaPlace place = user.getOtherPlaces().get(position - 2);
             holder.title.setText(place.getName());
+            holder.description.setVisibility(View.VISIBLE);
             holder.description.setText(place.getAddress());
         }
     }
