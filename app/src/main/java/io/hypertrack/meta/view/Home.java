@@ -70,6 +70,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
@@ -78,6 +79,7 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
+import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
@@ -203,16 +205,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
-
-            if (constraint.length() > 0 ) {
-                mAdapter.getFilter().filter(constraint);
-            }
+            mAdapter.setFilterString(constraint);
         }
     };
 
     private AdapterView.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            TripManager.getSharedManager().clearState();
+            OnTripEnd();
+
+            enterDestinationText.setText(getString(R.string.autocomplete_hint));
             enterDestinationLayoutClicked = true;
 
             // Hide the AppBar
@@ -222,9 +225,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             mAutocompletePlacesView.setText("");
             mAutocompletePlacesView.requestFocus();
             KeyboardUtils.showKeyboard(Home.this, mAutocompletePlacesView);
-
-            // Hide the sendETA CTA while user is searching for a place
-//            sendETAButton.setVisibility(View.GONE);
 
             enterDestinationLayout.setVisibility(View.GONE);
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
@@ -283,8 +283,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        checkIfUserIsOnBoard();
-
         MapsInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_home);
 
@@ -302,6 +300,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupSendETAButton();
         this.initCustomMarkerView();
         this.setupNavigateButton();
+
+        checkIfUserIsOnBoard();
 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
@@ -337,7 +337,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
         layoutManager.setAutoMeasureEnabled(true);
         mAutocompleteResults.setLayoutManager(layoutManager);
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener);
+    }
+
+    private void updatePlacesAutocompleteAdapter() {
+        List<MetaPlace> places = null;
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            places = user.getPlaces();
+        }
+
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener, places);
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
@@ -410,6 +419,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             finish();
         } else {
             UserStore.sharedStore.initializeUser();
+            this.updatePlacesAutocompleteAdapter();
         }
     }
 
@@ -782,6 +792,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sendETAButton.setText("End Trip");
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
+        enterDestinationLayout.setOnClickListener(null);
 
         TripManager tripManager = TripManager.getSharedManager();
         tripManager.setTripRefreshedListener(new TripManagerListener() {
@@ -810,6 +821,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             destinationLocationMarker.remove();
             destinationLocationMarker = null;
         }
+
+        enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
     }
 
     private void share() {

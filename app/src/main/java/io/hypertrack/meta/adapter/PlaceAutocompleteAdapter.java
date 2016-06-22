@@ -43,9 +43,12 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.view.Home;
 
 /**
@@ -81,9 +84,47 @@ public class PlaceAutocompleteAdapter
     private LatLngBounds mBounds;
 
     /**
+     * Saved places
+     */
+    private List<MetaPlace> favorites;
+
+    private List<MetaPlace> filteredFavorites;
+
+    /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
     private AutocompleteFilter mPlaceFilter;
+
+    private boolean isSearching;
+
+    private String filterString;
+
+    public void setFilterString(String filterString) {
+        this.filterString = filterString.toLowerCase();
+
+        if (!filterString.isEmpty()) {
+            this.getFilter().filter(filterString);
+            this.filterFavorites();
+            this.isSearching = true;
+        } else {
+            this.isSearching = false;
+            this.filteredFavorites = null;
+            this.mResultList = null;
+        }
+
+        notifyDataSetChanged();
+    }
+
+    private void filterFavorites() {
+        this.filteredFavorites = new ArrayList<>();
+
+        Iterator<MetaPlace> it = this.favorites.iterator();
+        while (it.hasNext()) {
+            if (it.next().getName().toLowerCase().contains(this.filterString)) {
+                this.filteredFavorites.add(it.next());
+            }
+        }
+    }
 
     /**
      * The onItemClickListener used to listen to a list item selection
@@ -95,11 +136,16 @@ public class PlaceAutocompleteAdapter
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, AdapterView.OnItemClickListener itemClickListener) {
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, AdapterView.OnItemClickListener itemClickListener, List<MetaPlace> favorites) {
         super();
         this.context = context;
         this.mGoogleApiClient = mGoogleApiClient;
         this.itemClickListener = itemClickListener;
+        this.favorites = favorites;
+    }
+
+    private PlaceAutocompleteAdapter() {
+
     }
 
     /**
@@ -117,17 +163,56 @@ public class PlaceAutocompleteAdapter
 
     @Override
     public void onBindViewHolder(AutocompleteViewHolder holder, int position) {
-        final AutocompletePrediction item = mResultList.get(position);
+        if (!this.isSearching) {
+            MetaPlace place = this.favorites.get(position);
 
-        holder.header.setText(item.getPrimaryText(STYLE_BOLD));
-        holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
+            holder.header.setText(place.getName());
+            holder.description.setText(place.getAddress());
+        } else {
+            if (this.isFilteredPlace(position)) {
+                MetaPlace place = this.filteredFavorites.get(position);
 
-        // TODO: 22/06/16 Get Composite List of Saved Places & Fetched AutoComplete Results
+                holder.header.setText(place.getName());
+                holder.description.setText(place.getAddress());
+            } else {
+                final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
+
+                holder.header.setText(item.getPrimaryText(STYLE_BOLD));
+                holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
+            }
+        }
+    }
+
+    private int filteredPlacesCount() {
+        if (this.filteredFavorites == null) {
+            return 0;
+        }
+
+        return this.filteredFavorites.size();
     }
 
     @Override
     public int getItemCount() {
-        return mResultList != null ? mResultList.size() : 0;
+        if (!this.isSearching) {
+            return this.favorites != null ? this.favorites.size() : 0;
+        }
+
+        return this.combinedResultsCount();
+    }
+
+    private int combinedResultsCount() {
+        int count = this.filteredPlacesCount();
+
+        if (mResultList != null) {
+            count = count + mResultList.size();
+        }
+
+        return count;
+    }
+
+    private boolean isFilteredPlace(int position) {
+        int count = this.filteredPlacesCount();
+        return count > 0 && position < count;
     }
 
     public AutocompletePrediction getItem(int position) {
@@ -169,14 +254,12 @@ public class PlaceAutocompleteAdapter
                     mResultList = (ArrayList<AutocompletePrediction>) results.values;
 
                     notifyDataSetChanged();
-
                 } else {
                     // The API did not return any results, invalidate the data set.
                     Log.d(TAG, "no results found");
                     mResultList = null;
 
                     notifyItemRangeRemoved(0, 0);
-
                 }
 
                 ((Home) context).processPublishedResults(mResultList);
@@ -257,36 +340,6 @@ public class PlaceAutocompleteAdapter
                     itemClickListener.onItemClick(null, view, getAdapterPosition(), getItemId());
                 }
             });
-        }
-    }
-
-    public class PlaceAutocomplete {
-        public CharSequence placeId;
-        public String description;
-        public String title;
-
-        PlaceAutocomplete(CharSequence placeId, CharSequence description) {
-            this.placeId = placeId;
-            try {
-
-                String[] str = description.toString().split(", ", 2);
-
-                if (str.length > 1) {
-                    this.title = str[0];
-                    this.description = str[1];
-                } else {
-                    this.title = description.toString();
-                }
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                this.title = description.toString();
-            }
-        }
-
-        @Override
-        public String toString() {
-            return this.description;
         }
     }
 }
