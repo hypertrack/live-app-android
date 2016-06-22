@@ -10,7 +10,6 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -67,7 +66,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -75,7 +73,6 @@ import java.util.Date;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
-import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.meta.model.MetaPlace;
@@ -105,7 +102,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private Toolbar toolbar;
 
-    private AutoCompleteTextView mAutocompleteView;
+    private TextView mAutocompleteView;
     private ImageView mAutocompleteIcon;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
@@ -310,7 +307,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupAutoCompleteView() {
-        mAutocompleteView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
+        mAutocompleteView = (TextView) findViewById(R.id.autocomplete_places);
         mAutocompleteIcon = (ImageView) findViewById(R.id.autocomplete_places_icon);
         mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);

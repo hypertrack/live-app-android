@@ -35,14 +35,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <AutoCompleteTextView
+                <TextView
                     android:id="@+id/autocomplete_places"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
+                    android:ellipsize="end"
                     android:gravity="center"
+                    android:text="This is a demo text to know what happens when the text is very long"
                     android:hint="@string/autocomplete_hint"
                     android:padding="16dp"
+                    android:layout_marginLeft="@dimen/margin_xhigh"
+                    android:layout_marginRight="@dimen/margin_high"
                     android:singleLine="true" />
 
                 <ImageView
@@ -64,8 +68,10 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="@dimen/margin_base"
+            android:layout_marginTop="@dimen/margin_low"
+            android:layout_marginRight="@dimen/margin_high"
             android:indeterminate="true"
+            tools:visibility="visible"
             android:visibility="gone" />
     </FrameLayout>
 
