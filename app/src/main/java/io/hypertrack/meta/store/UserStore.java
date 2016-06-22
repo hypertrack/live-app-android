@@ -44,12 +44,11 @@ public class UserStore {
         this.user = realm.where(User.class).findFirst();
     }
 
-    public void addUser(final User user) {
-        this.user = user;
+    public void addUser(final User userToAdd) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                realm.copyToRealm(user);
+                user = realm.copyToRealm(userToAdd);
             }
         });
     }
