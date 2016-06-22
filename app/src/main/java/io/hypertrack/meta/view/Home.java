@@ -285,7 +285,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                shareUrlViaShare();
+                share();
             }
         });
     }
@@ -752,5 +752,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             destinationLocationMarker.remove();
             destinationLocationMarker = null;
         }
+    }
+
+    private void share() {
+        String shareMessage = TripManager.getSharedManager().getShareMessage();
+        if (shareMessage == null) {
+            return;
+        }
+
+        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+        sharingIntent.setType("text/plain");
+        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+        startActivity(sharingIntent);
     }
 }
