@@ -214,6 +214,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private AdapterView.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            TripManager.getSharedManager().clearState();
+            OnTripEnd();
             enterDestinationLayoutClicked = true;
 
             // Hide the AppBar
@@ -284,8 +286,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        checkIfUserIsOnBoard();
-
         MapsInitializer.initialize(getApplicationContext());
         setContentView(R.layout.activity_home);
 
@@ -303,6 +303,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupSendETAButton();
         this.initCustomMarkerView();
         this.setupNavigateButton();
+
+        checkIfUserIsOnBoard();
 
         if (!isConnectedToInternet()) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",

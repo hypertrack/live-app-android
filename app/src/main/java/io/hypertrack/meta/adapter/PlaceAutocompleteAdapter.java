@@ -107,7 +107,7 @@ public class PlaceAutocompleteAdapter
         this.context = context;
         this.mGoogleApiClient = mGoogleApiClient;
         this.itemClickListener = itemClickListener;
-        this.favorites = favorites;
+//        this.favorites = favorites;
     }
 
     private PlaceAutocompleteAdapter() {
@@ -140,9 +140,9 @@ public class PlaceAutocompleteAdapter
     @Override
     public int getItemCount() {
         int count = 0;
-        if (this.favorites != null && !this.favorites.isEmpty()) {
-            count = count + this.favorites.size();
-        }
+//        if (this.favorites != null && !this.favorites.isEmpty()) {
+//            count = count + this.favorites.size();
+//        }
 
         if (mResultList != null && !mResultList.isEmpty()) {
             count = count + mResultList.size();
