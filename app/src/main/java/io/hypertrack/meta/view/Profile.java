@@ -88,7 +88,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         String firstName = mFirstNameView.getText().toString();
         String lastName = mLastNameView.getText().toString();
 
-        presenter.attemptLogin(firstName, lastName, saveBitmapToFile(profileImage));
+        presenter.attemptLogin(firstName, lastName, getBitmap(profileImage));
     }
 
     @OnClick(R.id.profileImageView)
@@ -185,7 +185,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         }
     }
 
-    public File saveBitmapToFile(File file) {
+    public File getBitmap(File file) {
         try {
 
             // BitmapFactory options to downsize the image
@@ -225,17 +225,6 @@ public class Profile extends AppCompatActivity implements ProfileView {
         } catch (Exception e) {
             return null;
         }
-    }
-
-    public static String encodeToBase64(Bitmap image) {
-        Bitmap immage = image;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        immage.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
-
-        Log.d("Image Log:", imageEncoded);
-        return imageEncoded;
     }
 
     @Override

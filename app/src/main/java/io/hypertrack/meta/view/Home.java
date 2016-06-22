@@ -122,25 +122,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private ArrayList<AutocompletePrediction> mResultList;
     private boolean enterDestinationLayoutClicked = false;
 
-    Target target = new Target() {
-        @Override
-        public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
-            profilePicBitmap = bitmap;
-        }
-
-        @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
-        }
-    };
-
     private void onSelectPlace(Place place) {
         final Place selectedPlaces = place.freeze();
+        if (selectedPlaces == null) {
+            return;
+        }
 
         this.getEtaForDestination(selectedPlaces.getLatLng(), new TripETACallback() {
             @Override
@@ -304,7 +290,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupAutoCompleteView();
         this.setupShareButton();
         this.setupSendETAButton();
-        this.setupProfilePicBitmap();
         this.initCustomMarkerView();
         this.setupNavigateButton();
 
@@ -365,14 +350,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 share();
             }
         });
-    }
-
-    private void setupProfilePicBitmap() {
-        if (!TextUtils.equals("None", getImageToPreferences())) {
-            profilePicBitmap = decodeToBase64(getImageToPreferences());
-        } else {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
-        }
     }
 
     private void restoreTripStateIfNeeded() {
@@ -750,7 +727,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onStop() {
         super.onStop();
         if (mProgressDialog != null) mProgressDialog.dismiss();
-        MetaApplication.getInstance().cancelPendingRequests(TAG);
     }
 
     // New Methods
