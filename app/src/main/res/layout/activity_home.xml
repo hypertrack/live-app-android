@@ -29,29 +29,42 @@
         android:layout_gravity="bottom">
 
         <Button
+            android:id="@+id/navigateButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#ffffff"
+            android:layout_alignParentEnd="true"
+            android:background="@android:color/holo_green_light"
+            android:text="NV"
+            android:padding="16dp"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:layout_alignTop="@+id/shareButton"/>
+
+        <Button
             android:id="@+id/shareButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#ffffff"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:background="@android:color/holo_green_light"
             android:text="SHARE"
             android:padding="16dp"
-            android:layout_marginRight="8dp"
-            android:visibility="gone" />
+            android:layout_marginEnd="8dp"
+            android:visibility="gone"
+            android:layout_alignTop="@+id/sendETAButton"/>
 
         <Button
-            android:id="@+id/shareEtaButton"
+            android:id="@+id/sendETAButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/shareButton"
+            android:layout_height="50dp"
             android:gravity="center"
             android:textColor="#ffffff"
             android:background="@android:color/holo_blue_light"
             android:padding="16dp"
             android:layout_margin="8dp"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 

@@ -101,6 +101,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private Bitmap profilePicBitmap;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
+    private Button navigateButton;
 
     Target target = new Target() {
         @Override
@@ -132,6 +133,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             public void OnError() {
                 if (destinationLocationMarker != null) {
                     destinationLocationMarker.remove();
+                    destinationLocationMarker = null;
                 }
             }
         });
@@ -252,10 +254,21 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupSendETAButton();
         this.setupProfilePicBitmap();
         this.initCustomMarkerView();
+        this.setupNavigateButton();
 
         if (!isConnectedToInternet()) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private void setupNavigateButton() {
+        navigateButton = (Button) findViewById(R.id.navigateButton);
+        navigateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                shareUrlViaShare();
+            }
+        });
     }
 
     private void setupAutoCompleteView() {
@@ -307,7 +320,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupSendETAButton() {
-        sendETAButton = (Button) findViewById(R.id.shareEtaButton);
+        sendETAButton = (Button) findViewById(R.id.sendETAButton);
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -444,6 +457,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
+            destinationLocationMarker = null;
         }
 
         View markerView = this.getDestinationMarkerView(etaInMinutes);
@@ -709,6 +723,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void onTripStart() {
         sendETAButton.setText("End Trip");
         shareButton.setVisibility(View.VISIBLE);
+        navigateButton.setVisibility(View.VISIBLE);
 
         TripManager tripManager = TripManager.getSharedManager();
         tripManager.setTripRefreshedListener(new TripManagerListener() {
@@ -728,12 +743,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void OnTripEnd() {
         sendETAButton.setVisibility(View.GONE);
         shareButton.setVisibility(View.GONE);
+        navigateButton.setVisibility(View.GONE);
 
         mAutocompleteView.setVisibility(View.VISIBLE);
         mAutocompleteView.setText("");
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
+            destinationLocationMarker = null;
         }
     }
 }
