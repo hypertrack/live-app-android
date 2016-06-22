@@ -66,6 +66,7 @@ import com.squareup.picasso.Target;
 
 import java.util.Date;
 
+import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.model.MetaPlace;
@@ -769,7 +770,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void navigate() {
-        MetaPlace place = TripManager.getSharedManager().getPlace();
+        TripManager tripManager = TripManager.getSharedManager();
+
+        MetaPlace place = tripManager.getPlace();
         if (place == null) {
             return;
         }
@@ -780,7 +783,24 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
-        String navigationString = latitude.toString() + "," + longitude.toString();
+        String mode = "d";
+        HTTrip trip = tripManager.getHyperTrackTrip();
+        if (trip != null && trip.getVehicleType() != null) {
+            HTDriverVehicleType type = trip.getVehicleType();
+            switch (type) {
+                case BICYCLE:
+                    mode = "b";
+                    break;
+                case WALK:
+                    mode = "w";
+                    break;
+                default:
+                    mode = "d";
+                    break;
+            }
+        }
+
+        String navigationString = latitude.toString() + "," + longitude.toString() + "&mode=" + mode;
         Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
