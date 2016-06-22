@@ -120,19 +120,25 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                     hyperTrackTrip = htTrip;
                     onTripStart();
                     onTripRefresh();
+
+                    if (callback != null) {
+                        callback.OnSuccess();
+                    }
                 }
 
                 @Override
                 public void onError(Exception e) {
                     clearState();
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             });
-
-            if (callback != null) {
-                callback.OnSuccess();
-            }
         } else {
             this.clearState();
+            if (callback != null) {
+                callback.OnError();
+            }
         }
     }
 
