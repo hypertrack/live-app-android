@@ -30,4 +30,7 @@
     <dimen name="text_medium">16sp</dimen>
     <dimen name="text_large">20sp</dimen>
     <dimen name="text_extra_large">32sp</dimen>
+
+    <!-- Button dimensions -->
+    <dimen name="button_size">50dp</dimen>
 </resources>
