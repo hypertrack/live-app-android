@@ -69,6 +69,7 @@ import java.util.Date;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.model.MetaPlace;
+import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
@@ -80,6 +81,7 @@ import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
+import io.realm.annotations.PrimaryKey;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -266,7 +268,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                shareUrlViaShare();
+                navigate();
             }
         });
     }
@@ -764,5 +766,26 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
         startActivity(sharingIntent);
+    }
+
+    private void navigate() {
+
+        MetaPlace place = TripManager.getSharedManager().getPlace();
+        if (place == null) {
+            return;
+        }
+
+        Double latitude = place.getLatitude();
+        Double longitude = place.getLongitude();
+        if (latitude == null || longitude == null) {
+            return;
+        }
+
+        String navigationString = latitude.toString() + "," + longitude.toString();
+        Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        mapIntent.setPackage("com.google.android.apps.maps");
+        
+        startActivity(mapIntent);
     }
 }
