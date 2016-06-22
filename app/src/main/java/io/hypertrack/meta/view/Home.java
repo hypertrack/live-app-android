@@ -769,7 +769,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void navigate() {
-
         MetaPlace place = TripManager.getSharedManager().getPlace();
         if (place == null) {
             return;
@@ -785,7 +784,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
-        
+
         startActivity(mapIntent);
     }
 }
