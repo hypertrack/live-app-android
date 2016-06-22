@@ -216,6 +216,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         public void onClick(View v) {
             TripManager.getSharedManager().clearState();
             OnTripEnd();
+
+            enterDestinationText.setText(getString(R.string.autocomplete_hint));
             enterDestinationLayoutClicked = true;
 
             // Hide the AppBar
