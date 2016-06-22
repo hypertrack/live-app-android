@@ -125,6 +125,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void onSelectPlace(Place place) {
         final Place selectedPlaces = place.freeze();
+        if (selectedPlaces == null) {
+            return;
+        }
 
         this.getEtaForDestination(selectedPlaces.getLatLng(), new TripETACallback() {
             @Override
