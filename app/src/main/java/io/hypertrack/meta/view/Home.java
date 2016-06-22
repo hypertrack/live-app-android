@@ -204,6 +204,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
+
+            if (constraint.length() > 0 ) {
+                mAdapter.getFilter().filter(constraint);
+            }
+
+
             mAdapter.setFilterString(constraint);
         }
     };

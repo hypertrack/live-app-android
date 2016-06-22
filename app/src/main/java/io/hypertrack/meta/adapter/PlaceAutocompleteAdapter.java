@@ -103,7 +103,6 @@ public class PlaceAutocompleteAdapter
         this.filterString = filterString.toLowerCase();
 
         if (!filterString.isEmpty()) {
-            this.getFilter().filter(filterString);
             this.filterFavorites();
             this.isSearching = true;
         } else {
@@ -120,8 +119,9 @@ public class PlaceAutocompleteAdapter
 
         Iterator<MetaPlace> it = this.favorites.iterator();
         while (it.hasNext()) {
-            if (it.next().getName().toLowerCase().contains(this.filterString)) {
-                this.filteredFavorites.add(it.next());
+            MetaPlace place = it.next();
+            if (place.getName().toLowerCase().contains(this.filterString)) {
+                this.filteredFavorites.add(place);
             }
         }
     }
