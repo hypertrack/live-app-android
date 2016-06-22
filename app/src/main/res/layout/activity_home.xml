@@ -39,7 +39,7 @@
             android:padding="16dp"
             android:layout_marginEnd="8dp"
             android:visibility="gone"
-            android:layout_alignTop="@+id/shareButton"/>
+            android:layout_above="@+id/shareButton"/>
 
         <Button
             android:id="@+id/shareButton"
@@ -50,9 +50,9 @@
             android:background="@android:color/holo_green_light"
             android:text="SHARE"
             android:padding="16dp"
-            android:layout_marginEnd="8dp"
+            android:layout_margin="8dp"
             android:visibility="gone"
-            android:layout_alignTop="@+id/sendETAButton"/>
+            android:layout_above="@+id/sendETAButton"/>
 
         <Button
             android:id="@+id/sendETAButton"
