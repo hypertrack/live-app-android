@@ -27,7 +27,6 @@ import io.hypertrack.meta.presenter.IVerifyPresenter;
 import io.hypertrack.meta.presenter.VerifyPresenter;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.SMSReceiver;
-import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class Verify extends AppCompatActivity implements VerifyView {
 
@@ -51,7 +50,6 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     private ProgressDialog mProgressDialog;
     private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
-    private SharedPreferenceManager sharedPreferenceManager;
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
