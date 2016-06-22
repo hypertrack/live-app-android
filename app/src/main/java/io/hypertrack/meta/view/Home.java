@@ -808,6 +808,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sendETAButton.setText("End Trip");
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
+        enterDestinationLayout.setOnClickListener(null);
 
         TripManager tripManager = TripManager.getSharedManager();
         tripManager.setTripRefreshedListener(new TripManagerListener() {
@@ -836,6 +837,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             destinationLocationMarker.remove();
             destinationLocationMarker = null;
         }
+
+        enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
     }
 
     private void share() {
