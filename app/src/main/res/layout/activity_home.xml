@@ -60,9 +60,8 @@
             android:layout_height="50dp"
             android:gravity="center"
             android:textColor="#ffffff"
-            android:background="@android:color/holo_blue_light"
+            android:background="@color/colorAccent"
             android:padding="16dp"
-            android:layout_margin="8dp"
             android:visibility="gone"
             android:layout_alignParentBottom="true" />
 

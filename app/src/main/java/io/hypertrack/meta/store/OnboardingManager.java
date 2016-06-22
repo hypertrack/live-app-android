@@ -69,7 +69,16 @@ public class OnboardingManager {
         call.enqueue(new Callback<OnboardingUser>() {
             @Override
             public void onResponse(Call<OnboardingUser> call, Response<OnboardingUser> response) {
-                onboardingUser = response.body();
+                OnboardingUser candidate = response.body();
+                if (candidate == null) {
+                    if (callback != null) {
+                        callback.onError();
+                    }
+
+                    return;
+                }
+
+                onboardingUser = candidate;
                 if (callback != null) {
                     callback.onSuccess();
                 }
