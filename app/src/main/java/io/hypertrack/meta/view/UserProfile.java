@@ -10,11 +10,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.ArrayList;
-
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.adapter.SavedPlacesAdapter;
-import io.hypertrack.meta.model.MetaPlace;
+import io.hypertrack.meta.adapter.FavoritePlacesAdapter;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.store.UserStore;
 
@@ -23,9 +20,7 @@ public class UserProfile extends AppCompatActivity {
     private final String TAG = "UserProfile";
 
     private RecyclerView mRecyclerView;
-    private SavedPlacesAdapter savedPlacesAdapter;
-
-    private ArrayList<MetaPlace> savedPlaces;
+    private FavoritePlacesAdapter favoritePlacesAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,17 +31,14 @@ public class UserProfile extends AppCompatActivity {
         setSupportActionBar(toolbar);
         this.updateTitle();
 
-        // Fetch User's Saved Places
-        savedPlaces = new ArrayList<>();
-
         mRecyclerView = (RecyclerView) findViewById(R.id.user_profile_saved_places);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setAutoMeasureEnabled(true);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        savedPlacesAdapter = new SavedPlacesAdapter(savedPlaces);
-        mRecyclerView.setAdapter(savedPlacesAdapter);
+        favoritePlacesAdapter = new FavoritePlacesAdapter();
+        mRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
