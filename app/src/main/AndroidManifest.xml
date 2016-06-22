@@ -140,7 +140,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
 
-        <activity android:name=".view.UserProfile"></activity>
+        <activity android:name=".view.UserProfile" />
+        <activity android:name=".view.EditProfile"></activity>
     </application>
 
 </manifest>
