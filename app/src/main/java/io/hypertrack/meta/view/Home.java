@@ -101,27 +101,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private InputMethodManager mIMEMgr;
     private SupportMapFragment mMapFragment;
     private Button shareButton;
-    private Bitmap profilePicBitmap;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
     private Button navigateButton;
-
-    Target target = new Target() {
-        @Override
-        public void onBitmapLoaded(final Bitmap bitmap, Picasso.LoadedFrom from) {
-            profilePicBitmap = bitmap;
-        }
-
-        @Override
-        public void onBitmapFailed(Drawable errorDrawable) {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
-        }
-
-        @Override
-        public void onPrepareLoad(Drawable placeHolderDrawable) {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
-        }
-    };
 
     private void onSelectPlace(Place place) {
         final Place selectedPlaces = place.freeze();
@@ -258,7 +240,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupAutoCompleteView();
         this.setupShareButton();
         this.setupSendETAButton();
-        this.setupProfilePicBitmap();
         this.initCustomMarkerView();
         this.setupNavigateButton();
 
@@ -294,14 +275,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 share();
             }
         });
-    }
-
-    private void setupProfilePicBitmap() {
-        if (!TextUtils.equals("None", getImageToPreferences())) {
-            profilePicBitmap = decodeToBase64(getImageToPreferences());
-        } else {
-            profilePicBitmap = BitmapFactory.decodeResource(getResources(),R.drawable.default_profile_pic);
-        }
     }
 
     private void restoreTripStateIfNeeded() {
