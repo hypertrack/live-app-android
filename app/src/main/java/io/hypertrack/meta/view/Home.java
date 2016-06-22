@@ -676,7 +676,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     protected void onStop() {
         super.onStop();
         if (mProgressDialog != null) mProgressDialog.dismiss();
-        MetaApplication.getInstance().cancelPendingRequests(TAG);
     }
 
     // New Methods

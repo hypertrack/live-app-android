@@ -20,12 +20,7 @@ import io.realm.RealmConfiguration;
  */
 public class MetaApplication extends Application {
 
-    private static final String TAG = MetaApplication.class.getSimpleName();
-    private RequestQueue mRequestQueue;
     private static MetaApplication mInstance;
-    private static final int TIMEOUT_MILLISECONDS = 60000;
-    private static final int MAX_RETRIES = -1;
-
     private Context mContext;
 
     @Override
@@ -50,37 +45,6 @@ public class MetaApplication extends Application {
 
     public static synchronized MetaApplication getInstance() {
         return mInstance;
-    }
-
-    public RequestQueue getRequestQueue() {
-
-        if (mRequestQueue == null) {
-            mRequestQueue = Volley.newRequestQueue(this);
-        }
-        return mRequestQueue;
-    }
-
-    public <T> void addToRequestQueue(Request<T> req, String tag) {
-        // set the default tag if tag is empty
-        req.setTag(TextUtils.isEmpty(tag) ? TAG : tag);
-        req.setRetryPolicy(new DefaultRetryPolicy(TIMEOUT_MILLISECONDS, MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        req.setShouldCache(false);
-        getRequestQueue().add(req);
-    }
-
-    public <T> void addToRequestQueue(Request<T> req) {
-        req.setTag(TAG);
-        req.setRetryPolicy(new DefaultRetryPolicy(TIMEOUT_MILLISECONDS, MAX_RETRIES,
-                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        req.setShouldCache(false);
-        getRequestQueue().add(req);
-    }
-
-    public void cancelPendingRequests(Object tag) {
-        if (mRequestQueue != null) {
-            mRequestQueue.cancelAll(tag);
-        }
     }
 
 }
