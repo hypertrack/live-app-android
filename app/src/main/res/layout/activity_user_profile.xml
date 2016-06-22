@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="io.hypertrack.meta.view.UserProfile">
+    tools:context="io.hypertrack.meta.view.UserProfile"
+    android:background="@color/colorBackground">
 
 
     <android.support.design.widget.AppBarLayout
