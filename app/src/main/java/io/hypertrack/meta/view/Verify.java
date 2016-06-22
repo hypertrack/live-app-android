@@ -12,8 +12,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -21,17 +19,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.presenter.IVerifyPresenter;
 import io.hypertrack.meta.presenter.VerifyPresenter;
 import io.hypertrack.meta.util.SMSReceiver;
-import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class Verify extends AppCompatActivity implements VerifyView {
 
@@ -55,7 +49,6 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     private ProgressDialog mProgressDialog;
     private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
-    private SharedPreferenceManager sharedPreferenceManager;
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
