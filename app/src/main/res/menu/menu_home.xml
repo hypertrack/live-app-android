@@ -1,6 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".view.Home">
-    <item android:id="@+id/action_settings" android:title="@string/action_endtrip"
-        android:orderInCategory="100" app:showAsAction="collapseActionView" />
+
+    <item
+        android:id="@+id/register_next_item"
+        android:title="@string/user_profile"
+        android:onClick="onProfileButtonClicked"
+        app:showAsAction="always" />
 </menu>

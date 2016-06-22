@@ -26,6 +26,8 @@ import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -70,7 +72,6 @@ import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.model.MetaPlace;
-import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
@@ -82,7 +83,6 @@ import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
-import io.realm.annotations.PrimaryKey;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener, OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
@@ -806,5 +806,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mapIntent.setPackage("com.google.android.apps.maps");
 
         startActivity(mapIntent);
+    }
+
+    public void onProfileButtonClicked(MenuItem menuItem) {
+        Intent profileIntent = new Intent(this, UserProfile.class);
+        startActivity(profileIntent);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 }
