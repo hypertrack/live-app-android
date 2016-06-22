@@ -68,24 +68,6 @@
         </receiver>
 
         <activity
-            android:name=".view.Trip"
-            android:screenOrientation="portrait">
-            <intent-filter android:label="mETA app">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with " http://eta.fyi/r4eN” -->
-                <!--
-                <data
-                   android:host="eta.fyi"
-                   android:pathPrefix="/"
-                   android:scheme="http" />
-                -->
-
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".view.AddAddress"
             android:label="Custom Address"
             android:launchMode="singleTop"

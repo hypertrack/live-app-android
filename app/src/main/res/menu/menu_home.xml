@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools" tools:context=".view.Home">
 
     <item
-        android:id="@+id/register_next_item"
+        android:id="@+id/user_profile"
         android:title="@string/user_profile"
         android:onClick="onProfileButtonClicked"
         app:showAsAction="always" />

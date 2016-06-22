@@ -198,4 +198,21 @@ public class User extends RealmObject {
 
         return false;
     }
+
+    public String getFullName() {
+        String fullName = "";
+        if (this.firstName != null && !this.firstName.isEmpty()) {
+            fullName = fullName + this.firstName;
+        }
+
+        if (this.lastName != null && !this.lastName.isEmpty()) {
+            if (fullName.length() > 0) {
+                fullName = fullName + " ";
+            }
+
+            fullName = fullName + this.lastName;
+        }
+
+        return fullName;
+    }
 }
