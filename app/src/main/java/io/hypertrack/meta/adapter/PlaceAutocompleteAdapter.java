@@ -138,16 +138,25 @@ public class PlaceAutocompleteAdapter
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener, List<MetaPlace> favorites) {
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener) {
         super();
         this.context = context;
         this.mGoogleApiClient = mGoogleApiClient;
-        this.favorites = favorites;
+        this.favorites = new ArrayList<>();
         this.listener = listener;
     }
 
     private PlaceAutocompleteAdapter() {
 
+    }
+
+    public void refreshFavorites(List<MetaPlace> favorites) {
+        if (this.favorites == null) {
+            this.favorites = favorites;
+        }
+
+        this.favorites.clear();
+        this.favorites.addAll(favorites);
     }
 
     /**

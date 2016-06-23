@@ -219,8 +219,27 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             enterDestinationLayout.setVisibility(View.GONE);
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
+
+            updateAutoCompleteResults();
         }
     };
+
+    private void updateAutoCompleteResults() {
+        List<MetaPlace> places = null;
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            places = user.getPlaces();
+        }
+
+        if (places == null || places.isEmpty()) {
+            return;
+        }
+
+        mAutocompleteResults.setVisibility(View.VISIBLE);
+
+        mAdapter.refreshFavorites(places);
+        mAdapter.notifyDataSetChanged();
+    }
 
     public void onEnterDestinationBackClick(View view) {
         enterDestinationLayoutClicked = false;
@@ -294,16 +313,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
         layoutManager.setAutoMeasureEnabled(true);
         mAutocompleteResults.setLayoutManager(layoutManager);
-    }
 
-    private void updatePlacesAutocompleteAdapter() {
-        List<MetaPlace> places = null;
-        User user = UserStore.sharedStore.getUser();
-        if (user != null) {
-            places = user.getPlaces();
-        }
-
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mPlaceAutoCompleteListener, places);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mPlaceAutoCompleteListener);
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
@@ -376,7 +387,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             finish();
         } else {
             UserStore.sharedStore.initializeUser();
-            this.updatePlacesAutocompleteAdapter();
         }
     }
 
