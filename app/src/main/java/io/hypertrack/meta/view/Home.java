@@ -214,7 +214,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             enterDestinationLayout.setVisibility(View.GONE);
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
-            mAutocompleteResults.setVisibility(View.VISIBLE);
+
+            showAutocompleteResults(true);
 
             updateAutoCompleteResults();
         }
@@ -241,7 +242,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         // Show the AppBar
         AnimationUtils.expand(appBarLayout, 200);
 
-        mAutocompleteResults.setVisibility(View.GONE);
+        showAutocompleteResults(false);
 
         enterDestinationLayout.setVisibility(View.VISIBLE);
         mAutocompletePlacesLayout.setVisibility(View.GONE);
@@ -315,18 +316,23 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
 
         if (results != null && results.size() > 0) {
-
-            mAutocompleteResults.smoothScrollToPosition(0);
-            mAutocompleteResults.setVisibility(View.VISIBLE);
-            mAutocompleteResultsLayout.setVisibility(View.VISIBLE);
-
+            showAutocompleteResults(true);
         } else {
-
-            mAutocompleteResults.setVisibility(View.GONE);
-            mAutocompleteResultsLayout.setVisibility(View.GONE);
+            showAutocompleteResults(false);
         }
         // TODO: 22/06/16 Add Loader while fetching Places Autocomplete data 
 //        ((Home) context).customLoader.setVisibility(View.GONE);
+    }
+
+    private void showAutocompleteResults(boolean show) {
+        if (show) {
+            mAutocompleteResults.smoothScrollToPosition(0);
+            mAutocompleteResults.setVisibility(View.VISIBLE);
+            mAutocompleteResultsLayout.setVisibility(View.VISIBLE);
+        } else {
+            mAutocompleteResults.setVisibility(View.GONE);
+            mAutocompleteResultsLayout.setVisibility(View.GONE);
+        }
     }
 
     private void setupShareButton() {
