@@ -96,7 +96,20 @@ public class EditProfile extends AppCompatActivity {
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
+        if (this.mFirstNameView.getText().length() == 0) {
+            this.mFirstNameView.setError("First Name cannot be blank");
+            return;
+        }
 
+        if (this.mLastNameView.getText().length() == 0) {
+            this.mLastNameView.setError("Last Name cannot be blank");
+            return;
+        }
+
+        this.updateUserInfo();
+    }
+
+    private void updateUserInfo() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Updating profile");
         mProgressDialog.setCancelable(false);
