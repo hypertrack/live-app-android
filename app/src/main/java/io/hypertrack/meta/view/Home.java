@@ -507,6 +507,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mProgressDialog.show();
 
         if (currentLocationMarker == null || currentLocationMarker.getPosition() == null || destinationLocation == null) {
+            callback.OnError();
             return;
         }
 
