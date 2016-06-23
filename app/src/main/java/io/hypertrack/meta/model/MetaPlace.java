@@ -4,13 +4,15 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
 /**
  * Created by piyush on 10/06/16.
  */
-public class MetaPlace extends RealmObject {
+public class MetaPlace extends RealmObject implements Serializable{
 
     public final static String HOME = "Home";
     public final static String WORK = "Work";

@@ -40,6 +40,8 @@
                 android:id="@+id/item_place.desc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:singleLine="true"
                 android:text="This is the description"
                 android:textColor="@color/text_secondary"
                 android:textSize="@dimen/text_base"

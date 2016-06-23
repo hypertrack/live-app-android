@@ -63,6 +63,11 @@ public class UserProfile extends AppCompatActivity {
         startActivity(editProfileIntent);
     }
 
+    public void onDoneButtonClicked(MenuItem v) {
+        // TODO: 23/06/16 Add Done Btn functionality
+        finish();
+    }
+
     private void refreshFavorites() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Refresh favorite places");
@@ -108,7 +113,6 @@ public class UserProfile extends AppCompatActivity {
         if (user == null) {
             return;
         }
-
 
         favoritePlacesAdapter.setHome(user.getHome());
         favoritePlacesAdapter.setWork(user.getWork());

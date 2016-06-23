@@ -13,6 +13,7 @@
     <string name="prompt_lastname">Last Name</string>
     <string name="prompt_phonenumber">Phone Number</string>
     <string name="action_done">Done</string>
+    <string name="action_save">Save</string>
     <string name="action_refresh">Refresh</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
