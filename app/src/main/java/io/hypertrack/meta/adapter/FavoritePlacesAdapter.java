@@ -24,6 +24,18 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
     private MetaPlace work;
     private List<MetaPlace> otherPlaces;
 
+    public void setHome(MetaPlace home) {
+        this.home = home;
+    }
+
+    public void setWork(MetaPlace work) {
+        this.work = work;
+    }
+
+    public void setOtherPlaces(List<MetaPlace> otherPlaces) {
+        this.otherPlaces = otherPlaces;
+    }
+
     public FavoritePlacesAdapter(MetaPlace home, MetaPlace work, List<MetaPlace> otherPlaces) {
         this.home = home;
         this.work = work;

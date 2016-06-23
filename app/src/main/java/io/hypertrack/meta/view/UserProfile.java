@@ -1,5 +1,7 @@
 package io.hypertrack.meta.view;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.FavoritePlacesAdapter;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.store.UserStore;
+import io.hypertrack.meta.util.SuccessErrorCallback;
 
 public class UserProfile extends AppCompatActivity {
 
@@ -21,6 +24,7 @@ public class UserProfile extends AppCompatActivity {
 
     private RecyclerView mRecyclerView;
     private FavoritePlacesAdapter favoritePlacesAdapter;
+    private ProgressDialog mProgressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,12 +54,33 @@ public class UserProfile extends AppCompatActivity {
         mRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 
-    public void doneButtonClicked(MenuItem menuItem) {
-        finish();
+    public void refreshButtonClicked(MenuItem menuItem) {
+        this.refreshFavorites();
     }
 
     public void onEditAccountClick(View view) {
-        // Action to be performed on EditAccount
+        Intent editProfileIntent = new Intent(this, EditProfile.class);
+        startActivity(editProfileIntent);
+    }
+
+    private void refreshFavorites() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Refresh favorite places");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+                updateFavoritesAdapter();
+            }
+
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+            }
+        });
     }
 
     @Override
@@ -76,5 +101,19 @@ public class UserProfile extends AppCompatActivity {
         }
 
         actionBar.setTitle(user.getFullName());
+    }
+
+    private void updateFavoritesAdapter(){
+        User user = UserStore.sharedStore.getUser();
+        if (user == null) {
+            return;
+        }
+
+
+        favoritePlacesAdapter.setHome(user.getHome());
+        favoritePlacesAdapter.setWork(user.getWork());
+        favoritePlacesAdapter.setOtherPlaces(user.getOtherPlaces());
+
+        favoritePlacesAdapter.notifyDataSetChanged();
     }
 }

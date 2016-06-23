@@ -86,7 +86,7 @@ public class EditProfile extends AppCompatActivity {
             return;
         }
 
-        this.mFirstNameView.setText(lastName);
+        this.mLastNameView.setText(lastName);
     }
 
     private void updateImage() {
