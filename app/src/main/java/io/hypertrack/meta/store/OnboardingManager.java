@@ -176,29 +176,17 @@ public class OnboardingManager {
 
     public void uploadPhoto(final OnOnboardingCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
-        if (profileImage == null) {
-            callback.onError();
-            return;
-        }
 
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image*//*"), profileImage);
-
-        Map<String, RequestBody> requestBodyMap = new HashMap<>();
-        String uuid = UUID.randomUUID().toString();
-        String fileName = "photo\"; filename=\"" + uuid + ".jpg";
-        requestBodyMap.put(fileName, requestBody);
-
-        Call<Map<String, Object>> call = sendETAService.updateUserProfilePic(this.onboardingUser.getId(), requestBodyMap);
-        call.enqueue(new Callback<Map<String, Object>>() {
+        UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
             @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+            public void OnSuccess() {
                 if (callback != null) {
                     callback.onSuccess();
                 }
             }
 
             @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+            public void OnError() {
                 if (callback != null) {
                     callback.onError();
                 }
@@ -210,13 +198,8 @@ public class OnboardingManager {
 
     }
 
-    private void didOnbardUser(User user) {
-        UserStore.sharedStore.addUser(user);
-    }
-
     private void onVerifyCode(Map<String, Object> response) {
         Log.v(TAG, response.toString());
-
         SharedPreferenceManager.setUserAuthToken((String)response.get("token"));
     }
 }

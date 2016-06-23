@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.PlaceDTO;
@@ -19,6 +20,8 @@ import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.realm.Realm;
 import io.realm.RealmList;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -325,6 +328,34 @@ public class UserStore {
     }
 
     public void updatePhoto(File updatePhoto, final SuccessErrorCallback callback) {
+        if (updatePhoto == null) {
+            callback.OnError();
+            return;
+        }
 
+        RequestBody requestBody = RequestBody.create(MediaType.parse("image*//*"), updatePhoto);
+
+        Map<String, RequestBody> requestBodyMap = new HashMap<>();
+        String uuid = UUID.randomUUID().toString();
+        String fileName = "photo\"; filename=\"" + uuid + ".jpg";
+        requestBodyMap.put(fileName, requestBody);
+
+        Call<Map<String, Object>> call = sendETAService.updateUserProfilePic(this.user.getId(), requestBodyMap);
+        call.enqueue(new Callback<Map<String, Object>>() {
+            @Override
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+//                user.setPhoto(); TODO: save photo to user
+                if (callback != null) {
+                    callback.OnSuccess();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
     }
 }

@@ -48,4 +48,5 @@
     <string name="next">Next</string>
     <string name="verify">Verify</string>
     <string name="user_profile">Profile</string>
+    <string name="edit_profile_error">There was an error updating your profile. Please try again.</string>
 </resources>

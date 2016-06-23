@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +24,7 @@ import butterknife.OnClick;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.store.UserStore;
+import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
 import io.realm.annotations.PrimaryKey;
@@ -94,7 +96,25 @@ public class EditProfile extends AppCompatActivity {
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
-        finish();
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Updating profile");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        UserStore.sharedStore.updateInfo(this.mFirstNameView.getText().toString(), this.mLastNameView.getText().toString(), new SuccessErrorCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+                finish();
+            }
+
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+                Toast.makeText(getApplicationContext(), R.string.edit_profile_error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override
