@@ -191,11 +191,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         @Override
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
-
-            if (constraint.length() > 0 ) {
-                mAdapter.getFilter().filter(constraint);
-            }
-
             mAdapter.setFilterString(constraint);
         }
     };
@@ -219,6 +214,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
             enterDestinationLayout.setVisibility(View.GONE);
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
+            mAutocompleteResults.setVisibility(View.VISIBLE);
 
             updateAutoCompleteResults();
         }
@@ -234,8 +230,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (places == null || places.isEmpty()) {
             return;
         }
-
-        mAutocompleteResults.setVisibility(View.VISIBLE);
 
         mAdapter.refreshFavorites(places);
         mAdapter.notifyDataSetChanged();

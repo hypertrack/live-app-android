@@ -110,6 +110,7 @@ public class PlaceAutocompleteAdapter
         this.filterString = filterString.toLowerCase();
 
         if (!filterString.isEmpty()) {
+            getFilter().filter(filterString);
             this.filterFavorites();
             this.isSearching = true;
         } else {
