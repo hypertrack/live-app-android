@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".view.Home" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_high"
+            android:background="@android:color/white"
+            android:elevation="@dimen/elevation_high"
+            app:cardCornerRadius="2dp">
+
+            <FrameLayout
+                android:id="@+id/add_fav_place.name_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/add_fav_place.name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/margin_xhigh"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:hint="@string/favorite_place_name_hint"
+                    android:padding="16dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_base"
+                    android:textSize="@dimen/text_base" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical|right"
+                    android:paddingLeft="@dimen/padding_base"
+                    android:paddingRight="@dimen/padding_base"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_navigation_cancel"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </FrameLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_high"
+            android:background="@android:color/white"
+            android:elevation="@dimen/elevation_high"
+            app:cardCornerRadius="2dp">
+
+            <FrameLayout
+                android:id="@+id/add_fav_place.address_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/add_fav_place.address"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/margin_xhigh"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:hint="@string/favorite_place_address_hint"
+                    android:padding="16dp"
+                    android:singleLine="true"
+                    android:textColor="@color/text_base"
+                    android:textSize="@dimen/text_base" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center_vertical|right"
+                    android:paddingLeft="@dimen/padding_base"
+                    android:paddingRight="@dimen/padding_base"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_navigation_cancel"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+            </FrameLayout>
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+</FrameLayout>

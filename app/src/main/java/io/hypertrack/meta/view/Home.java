@@ -89,6 +89,7 @@ import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.AnimationUtils;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.KeyboardUtils;
+import io.hypertrack.meta.util.NetworkUtils;
 import io.hypertrack.meta.util.PhoneUtils;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener,
@@ -259,7 +260,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         checkIfUserIsOnBoard();
 
-        if (!isConnectedToInternet()) {
+        if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
                     Toast.LENGTH_LONG).show();
         }
@@ -377,17 +378,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             UserStore.sharedStore.initializeUser();
             this.updatePlacesAutocompleteAdapter();
         }
-    }
-
-    private boolean isConnectedToInternet() {
-        ConnectivityManager cm =
-                (ConnectivityManager)this.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork != null &&
-                activeNetwork.isConnectedOrConnecting();
-
-        return isConnected;
     }
 
     private String getImageToPreferences() {

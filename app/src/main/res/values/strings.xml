@@ -4,6 +4,9 @@
     <string name="action_endtrip">End Trip</string>
     <string name="title_activity_on_boarding">Sign in</string>
     <string name="autocomplete_hint">Enter your destination</string>
+    <string name="favorite_place_name_hint">Name your Favorite (eg. Dave\'s Home)</string>
+    <string name="favorite_place_address_hint">Address</string>
+
 
     <!-- Strings related to login -->
     <string name="prompt_firstname">First Name</string>
