@@ -20,7 +20,7 @@ import io.hypertrack.meta.util.SuccessErrorCallback;
 
 public class UserProfile extends AppCompatActivity {
 
-    private final String TAG = "UserProfile";
+    private final String TAG = UserProfile.class.getSimpleName();
 
     private RecyclerView mRecyclerView;
     private FavoritePlacesAdapter favoritePlacesAdapter;
@@ -85,7 +85,7 @@ public class UserProfile extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user_profile, menu);
+        getMenuInflater().inflate(R.menu.menu_edit_profile, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
