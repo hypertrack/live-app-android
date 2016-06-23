@@ -350,16 +350,16 @@ public class PlaceAutocompleteAdapter
         if (!this.isSearching) {
             MetaPlace place = this.favorites.get(position);
             if (this.listener != null) {
-                this.listener.OnSuccess(place);
+                this.listener.OnSuccess(new MetaPlace(place));
             }
         } else {
             if (this.isFilteredPlace(position)) {
                 MetaPlace place = this.filteredFavorites.get(position);
                 if (this.listener != null) {
-                    this.listener.OnSuccess(place);
+                    this.listener.OnSuccess(new MetaPlace(place));
                 }
             } else {
-                final AutocompletePrediction item = getItem(position);
+                final AutocompletePrediction item = getItem(position - this.filteredPlacesCount());
                 final String placeId = item.getPlaceId();
 
                 PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
