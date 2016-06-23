@@ -348,7 +348,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 MetaPlace place = tripManager.getPlace();
                 updateViewForETASuccess(0, place.getLatLng());
-                mAutocompletePlacesView.setText(place.getAddress());
+                enterDestinationText.setText(place.getAddress());
 
                 onTripStart();
             }
