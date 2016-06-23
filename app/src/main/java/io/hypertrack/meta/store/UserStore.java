@@ -2,6 +2,8 @@ package io.hypertrack.meta.store;
 
 import android.util.Log;
 
+import java.io.File;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +50,7 @@ public class UserStore {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                user = realm.copyToRealm(userToAdd);
+                user = realm.copyToRealmOrUpdate(userToAdd);
             }
         });
     }
@@ -283,5 +285,46 @@ public class UserStore {
                 user = realm.copyToRealmOrUpdate(user);
             }
         });
+    }
+
+    public void updateInfo(String firstName, String lastName, final SuccessErrorCallback callback) {
+        if (this.user == null) {
+            if (callback != null) {
+                callback.OnError();
+            }
+            return;
+        }
+
+        HashMap<String, String> user = new HashMap<>();
+        user.put("first_name", firstName);
+        user.put("last_name", lastName);
+
+        Call<User> call = sendETAService.updateUserName(this.user.getId(), user);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(final Call<User> call, Response<User> response) {
+                User user = response.body();
+                if (user == null) {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                    return;
+                }
+
+                addUser(user);
+                if (callback != null) {
+                    callback.OnSuccess();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                callback.OnError();
+            }
+        });
+    }
+
+    public void updatePhoto(File updatePhoto, final SuccessErrorCallback callback) {
+
     }
 }

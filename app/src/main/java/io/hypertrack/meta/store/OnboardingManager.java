@@ -128,11 +128,9 @@ public class OnboardingManager {
         user.put("first_name", this.onboardingUser.getFirstName());
         user.put("last_name", this.onboardingUser.getLastName());
 
-        Call<User> call = sendETAService.updateUserName(this.onboardingUser.getId(), user);
-        call.enqueue(new Callback<User>() {
+        UserStore.sharedStore.updateInfo(this.onboardingUser.getFirstName(), this.onboardingUser.getLastName(), new SuccessErrorCallback() {
             @Override
-            public void onResponse(final Call<User> call, Response<User> response) {
-                didOnbardUser(response.body());
+            public void OnSuccess() {
                 UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
                     @Override
                     public void OnSuccess() {
@@ -151,7 +149,7 @@ public class OnboardingManager {
             }
 
             @Override
-            public void onFailure(Call<User> call, Throwable t) {
+            public void OnError() {
                 callback.onError();
             }
         });
