@@ -586,17 +586,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
         if (currentLocationMarker == null) {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             addMarkerToCurrentLocation(latLng);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
         } else {
-            currentLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+            currentLocationMarker.setPosition(latLng);
         }
 
         updateMapView();
 
-        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         mAdapter.setBounds(getBounds(latLng, 10000));
     }
 
@@ -777,7 +777,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         navigateButton.setVisibility(View.GONE);
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
-        mAutocompletePlacesView.setText("");
+        // Reset Enter Destination Layout Text
+        enterDestinationText.setText("");
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();

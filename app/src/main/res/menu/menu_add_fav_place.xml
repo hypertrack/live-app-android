@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/done"
-        android:title="@string/action_done"
-        android:onClick="onDoneButtonClicked"
+        android:id="@+id/save"
+        android:title="@string/action_save"
+        android:onClick="onSaveButtonClicked"
         app:showAsAction="always" />
 
 </menu>
