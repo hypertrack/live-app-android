@@ -77,6 +77,7 @@ import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.PlaceAutocompleteAdapter;
+import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.model.User;
@@ -125,16 +126,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private ArrayList<AutocompletePrediction> mResultList;
     private boolean enterDestinationLayoutClicked = false;
 
-    private void onSelectPlace(Place place) {
-        final Place selectedPlaces = place.freeze();
-        if (selectedPlaces == null) {
+    private void onSelectPlace(final MetaPlace place) {
+        if (place == null) {
             return;
         }
 
-        this.getEtaForDestination(selectedPlaces.getLatLng(), new TripETACallback() {
+        this.getEtaForDestination(place.getLatLng(), new TripETACallback() {
             @Override
             public void OnSuccess(TripETAResponse etaResponse) {
-                onETASuccess(etaResponse, selectedPlaces);
+                onETASuccess(etaResponse, place);
             }
 
             @Override
@@ -147,9 +147,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
     }
 
-    private void onETASuccess(TripETAResponse response, Place place) {
+    private void onETASuccess(TripETAResponse response, MetaPlace place) {
         this.updateViewForETASuccess((int)response.getDuration()/60, place.getLatLng());
-        TripManager.getSharedManager().setPlace(new MetaPlace(place));
+        TripManager.getSharedManager().setPlace(place);
     }
 
     private void updateViewForETASuccess(int etaInMinutes, LatLng latLng) {
@@ -158,35 +158,21 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         updateMapView();
     }
 
-    /**
-     * Callback for results from a Places Geo Data API query that shows the first place result in
-     * the details view on screen.
-     */
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
-            = new ResultCallback<PlaceBuffer>() {
+    private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
-        public void onResult(PlaceBuffer places) {
-            if (!places.getStatus().isSuccess()) {
-                // Request did not complete successfully
-                Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
-                places.release();
-                return;
-            }
+        public void OnSuccess(MetaPlace place) {
+            //Restore Default State for Enter Destination Layout
+            onEnterDestinationBackClick(null);
 
-            if (places.getCount() == 0) {
-                Log.d(TAG, "Places is empty");
-                places.release();
-                return;
-            }
-
-            // Get the MetaPlace object from the buffer.
-            final Place place = places.get(0);
-
-            Log.i(TAG, "MetaPlace details received: " + place.getName());
+            // Set the Selected Place Name in the Enter Destination Layout
+            enterDestinationText.setText(place.getName());
             KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
-
             onSelectPlace(place);
-            places.release();
+        }
+
+        @Override
+        public void OnError() {
+
         }
     };
 
@@ -208,7 +194,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             if (constraint.length() > 0 ) {
                 mAdapter.getFilter().filter(constraint);
             }
-
 
             mAdapter.setFilterString(constraint);
         }
@@ -249,40 +234,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
     }
-
-    private AdapterView.OnItemClickListener mAutocompleteItemClickListener = new AdapterView.OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            final AutocompletePrediction item = mAdapter.getItem(position);
-            final String placeId = item.getPlaceId();
-            final CharSequence primaryText = item.getPrimaryText(null);
-            Log.d(TAG, "Autocomplete item selected: " + primaryText);
-
-            //Restore Default State for Enter Destination Layout
-            onEnterDestinationBackClick(null);
-
-            // Set the Selected Place Name in the Enter Destination Layout
-            enterDestinationText.setText(item.getPrimaryText(null));
-
-            PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
-                    .getPlaceById(mGoogleApiClient, placeId);
-            placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-        }
-    };
-
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // Extract data included in the Intent
-            boolean result = intent.getBooleanExtra("end_trip", false);
-
-            if (result)
-//                endTrip();//endTrip();
-
-            Log.d("receiver", "Got message: " + result);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -351,7 +302,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             places = user.getPlaces();
         }
 
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mAutocompleteItemClickListener, places);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mPlaceAutoCompleteListener, places);
         mAutocompleteResults.setAdapter(mAdapter);
     }
 

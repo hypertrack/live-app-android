@@ -34,11 +34,14 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -48,7 +51,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
+import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.view.Home;
 
 /**
@@ -99,6 +104,8 @@ public class PlaceAutocompleteAdapter
 
     private String filterString;
 
+    private PlaceAutoCompleteOnClickListener listener;
+
     public void setFilterString(String filterString) {
         this.filterString = filterString.toLowerCase();
 
@@ -127,21 +134,16 @@ public class PlaceAutocompleteAdapter
     }
 
     /**
-     * The onItemClickListener used to listen to a list item selection
-     */
-    private AdapterView.OnItemClickListener itemClickListener;
-
-    /**
      * Initializes with a resource for text rows and autocomplete query bounds.
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, AdapterView.OnItemClickListener itemClickListener, List<MetaPlace> favorites) {
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener, List<MetaPlace> favorites) {
         super();
         this.context = context;
         this.mGoogleApiClient = mGoogleApiClient;
-        this.itemClickListener = itemClickListener;
         this.favorites = favorites;
+        this.listener = listener;
     }
 
     private PlaceAutocompleteAdapter() {
@@ -337,9 +339,70 @@ public class PlaceAutocompleteAdapter
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    itemClickListener.onItemClick(null, view, getAdapterPosition(), getItemId());
+                    itemClickedAtPosition(getAdapterPosition());
                 }
             });
         }
     }
+
+    private void itemClickedAtPosition(int position) {
+
+        if (!this.isSearching) {
+            MetaPlace place = this.favorites.get(position);
+            if (this.listener != null) {
+                this.listener.OnSuccess(place);
+            }
+        } else {
+            if (this.isFilteredPlace(position)) {
+                MetaPlace place = this.filteredFavorites.get(position);
+                if (this.listener != null) {
+                    this.listener.OnSuccess(place);
+                }
+            } else {
+                final AutocompletePrediction item = getItem(position);
+                final String placeId = item.getPlaceId();
+
+                PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                        .getPlaceById(mGoogleApiClient, placeId);
+                placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            }
+        }
+    }
+
+    /**
+     * Callback for results from a Places Geo Data API query that shows the first place result in
+     * the details view on screen.
+     */
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                // Request did not complete successfully
+                Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
+                places.release();
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
+
+            if (places.getCount() == 0) {
+                Log.d(TAG, "Places is empty");
+                places.release();
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
+
+            // Get the MetaPlace object from the buffer.
+            final Place place = places.get(0);
+
+            Log.i(TAG, "MetaPlace details received: " + place.getName());
+
+            if (listener != null) {
+                listener.OnSuccess(new MetaPlace(place));
+            }
+            places.release();
+        }
+    };
 }
