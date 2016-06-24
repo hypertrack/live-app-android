@@ -63,10 +63,10 @@ public class UserProfile extends AppCompatActivity {
         startActivity(editProfileIntent);
     }
 
-    public void onDoneButtonClicked(MenuItem v) {
-        // TODO: 23/06/16 Add Done Btn functionality
-        finish();
-    }
+//    public void onDoneButtonClicked(MenuItem v) {
+//        // TODO: 23/06/16 Add Done Btn functionality
+//        finish();
+//    }
 
     private void refreshFavorites() {
         mProgressDialog = new ProgressDialog(this);
@@ -90,7 +90,7 @@ public class UserProfile extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_edit_profile, menu);
+        getMenuInflater().inflate(R.menu.menu_user_profile, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

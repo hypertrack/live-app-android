@@ -5,7 +5,7 @@
     <item
         android:id="@+id/done"
         android:title="@string/action_done"
-        android:onClick="onDoneButtonClicked"
+        android:onClick="doneButtonClicked"
         app:showAsAction="always" />
 
 </menu>
