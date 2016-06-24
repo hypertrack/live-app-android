@@ -124,7 +124,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private View customMarkerView;
     private ProgressDialog mProgressDialog;
 
-    private ArrayList<AutocompletePrediction> mResultList;
     private boolean enterDestinationLayoutClicked = false;
 
     private void onSelectPlace(final MetaPlace place) {
@@ -744,8 +743,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         TripManager tripManager = TripManager.getSharedManager();
 
         HTTrip trip = tripManager.getHyperTrackTrip();
+        if (trip == null) {
+            return;
+        }
 
         MetaPlace place = tripManager.getPlace();
+        if (place == null) {
+            return;
+        }
+
         LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
         Date ETA = trip.getETA();

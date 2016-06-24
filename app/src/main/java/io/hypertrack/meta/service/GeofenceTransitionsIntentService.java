@@ -73,6 +73,11 @@ public class GeofenceTransitionsIntentService extends IntentService {
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
                 Log.v(TAG, "User is dwelling in geo fence.");
+                
+                if (HyperTrack.getPublishableKey(this) == null) {
+                    HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, this);
+                }
+
                 TripManager.getSharedManager().OnGeoFenceSuccess();
 
             } else {
