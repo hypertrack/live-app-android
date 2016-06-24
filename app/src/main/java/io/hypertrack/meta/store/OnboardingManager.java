@@ -8,18 +8,13 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
-import io.hypertrack.meta.BuildConfig;
-import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.model.OnboardingUser;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.util.SuccessErrorCallback;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -128,9 +123,11 @@ public class OnboardingManager {
         user.put("first_name", this.onboardingUser.getFirstName());
         user.put("last_name", this.onboardingUser.getLastName());
 
-        UserStore.sharedStore.updateInfo(this.onboardingUser.getFirstName(), this.onboardingUser.getLastName(), new SuccessErrorCallback() {
+        Call<User> call = sendETAService.updateUserName(this.onboardingUser.getId(), user);
+        call.enqueue(new Callback<User>() {
             @Override
-            public void OnSuccess() {
+            public void onResponse(final Call<User> call, Response<User> response) {
+                didOnbardUser(response.body());
                 UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
                     @Override
                     public void OnSuccess() {
@@ -149,7 +146,7 @@ public class OnboardingManager {
             }
 
             @Override
-            public void OnError() {
+            public void onFailure(Call<User> call, Throwable t) {
                 callback.onError();
             }
         });
@@ -198,8 +195,13 @@ public class OnboardingManager {
 
     }
 
+    private void didOnbardUser(User user) {
+        UserStore.sharedStore.addUser(user);
+    }
+
     private void onVerifyCode(Map<String, Object> response) {
         Log.v(TAG, response.toString());
+
         SharedPreferenceManager.setUserAuthToken((String)response.get("token"));
     }
 }
