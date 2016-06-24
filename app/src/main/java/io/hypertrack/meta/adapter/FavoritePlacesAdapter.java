@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import io.hypertrack.meta.R;
+import io.hypertrack.meta.adapter.callback.FavoritePlaceOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.store.UserStore;
@@ -23,6 +24,7 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
     private MetaPlace home;
     private MetaPlace work;
     private List<MetaPlace> otherPlaces;
+    private FavoritePlaceOnClickListener listener;
 
     public void setHome(MetaPlace home) {
         this.home = home;
@@ -36,10 +38,11 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         this.otherPlaces = otherPlaces;
     }
 
-    public FavoritePlacesAdapter(MetaPlace home, MetaPlace work, List<MetaPlace> otherPlaces) {
+    public FavoritePlacesAdapter(MetaPlace home, MetaPlace work, List<MetaPlace> otherPlaces, FavoritePlaceOnClickListener listener) {
         this.home = home;
         this.work = work;
         this.otherPlaces = otherPlaces;
+        this.listener = listener;
     }
 
     private FavoritePlacesAdapter() {
@@ -98,6 +101,13 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
             this.icon = (ImageView) view.findViewById(R.id.item_place_icon);
             this.title = (TextView) view.findViewById(R.id.item_place_title);
             this.description = (TextView) view.findViewById(R.id.item_place_desc);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemClickedAtPosition(getAdapterPosition());
+                }
+            });
         }
     }
 
@@ -121,5 +131,57 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
 
     private boolean isAddNewRow(int position) {
         return (position == this.rowCount() - 1);
+    }
+
+    private void itemClickedAtPosition(int position) {
+        if (this.isHomeRow(position)) {
+            if (this.home == null) {
+                if (this.listener != null) {
+                    this.listener.OnAddHomeClick();
+                }
+            } else {
+                if (this.listener != null) {
+                    this.listener.OnEditHomeClick(home);
+                }
+            }
+        } else if (this.isWorkRow(position)) {
+            if (this.work == null) {
+                if (this.listener != null) {
+                    this.listener.OnAddWorkClick();
+                }
+            } else {
+                if (this.listener != null) {
+                    this.listener.OnEditWorkClick(work);
+                }
+            }
+        } else if (this.isAddNewRow(position)) {
+            if (this.listener != null) {
+                this.listener.OnAddPlaceClick();
+            }
+        } else {
+            if (this.listener != null) {
+                this.listener.OnEditPlaceClick(this.otherPlaces.get(position - 2));
+            }
+        }
+    }
+
+    private void itemToBeDeleteAtPosition(int position) {
+        if (this.isHomeRow(position)) {
+            if (this.home != null) {
+                if (this.listener != null) {
+                    this.listener.OnDeletePlace(home);
+                }
+            }
+        } else if (this.isWorkRow(position)) {
+            if (this.work != null) {
+                if (this.listener != null) {
+                    this.listener.OnDeletePlace(work);
+                }
+            }
+        } else if (!this.isAddNewRow(position)) {
+            if (this.listener != null) {
+                this.listener.OnDeletePlace(this.otherPlaces.get(position - 2));
+            }
+        }
     }
 }

@@ -339,12 +339,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.registerForTripEndedBroadcast();
     }
 
-    private void startRefreshingTrip() {
+    public void startRefreshingTrip() {
         handler = new Handler();
         handler.postDelayed(refreshTask, REFRESH_DELAY);
     }
 
-    private void stopRefreshingTrip() {
+    public void stopRefreshingTrip() {
         if (this.handler != null) {
             this.handler.removeCallbacks(refreshTask);
             this.handler = null;

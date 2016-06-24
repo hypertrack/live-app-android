@@ -294,10 +294,12 @@ public class UserStore {
             return;
         }
 
+        final MetaPlace managedPlaceToDelete = realm.where(MetaPlace.class).equalTo("id", place.getId()).findFirst();
+
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                place.deleteFromRealm();
+                managedPlaceToDelete.deleteFromRealm();
                 user.getPlaces().remove(place);
                 user = realm.copyToRealmOrUpdate(user);
             }

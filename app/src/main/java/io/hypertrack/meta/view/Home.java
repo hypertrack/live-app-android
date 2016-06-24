@@ -2,7 +2,6 @@ package io.hypertrack.meta.view;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,8 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -42,15 +39,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompletePrediction;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -81,6 +75,7 @@ import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.store.LocationStore;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.store.callback.TripETACallback;
@@ -592,6 +587,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             return;
         }
 
+        LocationStore.sharedStore().setCurrentLocation(location);
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 
         if (currentLocationMarker == null) {

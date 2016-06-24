@@ -31,6 +31,8 @@ import io.realm.annotations.PrimaryKey;
 
 public class EditProfile extends AppCompatActivity {
 
+    public static final int EDIT_PROFILE_RESULT_CODE = 101;
+
     @Bind(R.id.firstName)
     public AutoCompleteTextView mFirstNameView;
 
@@ -119,6 +121,7 @@ public class EditProfile extends AppCompatActivity {
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
+                broadcastResultIntent();
                 finish();
             }
 
@@ -128,6 +131,10 @@ public class EditProfile extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), R.string.edit_profile_error, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void broadcastResultIntent() {
+
     }
 
     @Override

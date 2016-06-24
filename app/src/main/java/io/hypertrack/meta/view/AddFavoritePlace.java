@@ -1,5 +1,6 @@
 package io.hypertrack.meta.view;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,11 +9,11 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -24,12 +25,8 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
@@ -37,24 +34,27 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.AddPlaceAutocompleteAdapter;
 import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
+import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.NetworkUtils;
+import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.hypertrack.meta.util.images.LocationUtils;
 
 /**
  * Created by piyush on 22/06/16.
  */
 public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, TouchableWrapper.TouchActionDown, TouchableWrapper.TouchActionUp {
+
+    public static final int FAVORITE_PLACE_REQUEST_CODE = 100;
 
     private final String TAG = "AddFavoritePlace";
-    private static final long INTERVAL_TIME = 5000;
+    private static final int DISTANCE_IN_METERS = 10000;
 
     private GoogleApiClient mGoogleApiClient;
     private GoogleMap mMap;
-    private Marker locationMarker;
 
-    private Toolbar toolbar;
     private EditText addPlaceNameView;
     private EditText addPlaceAddressView;
 
@@ -62,9 +62,9 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     private CardView mAutocompleteResultsLayout;
     private AddPlaceAutocompleteAdapter mAdapter;
 
-    private MetaPlace metaPlace;
+    private ProgressDialog mProgressDialog;
 
-    private boolean placeSelected = false;
+    private MetaPlace metaPlace;
 
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
@@ -77,24 +77,16 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
         @Override
         public void afterTextChanged(Editable s) {
-
-            if (!placeSelected) {
-                String constraint = s != null ? s.toString() : "";
-                mAdapter.getFilter().filter(constraint);
-            } else {
-                // If TextChanged because selectedPlace Address was set
-                placeSelected = false;
-            }
+            String constraint = s != null ? s.toString() : "";
+            mAdapter.getFilter().filter(constraint);
         }
     };
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
-
-            placeSelected = true;
-
-            updatePlaceData(place);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
+            mAdapter.setBounds(getBounds(place.getLatLng(), DISTANCE_IN_METERS));
 
             KeyboardUtils.hideKeyboard(AddFavoritePlace.this, addPlaceAddressView);
 
@@ -112,21 +104,16 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_favorite_place);
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         // Fetch Meta Place object passed with intent
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra("meta_place")) {
-//                metaPlace = (MetaPlace) intent.getSerializableExtra("meta_place");
+                metaPlace = (MetaPlace) intent.getSerializableExtra("meta_place");
             }
         }
-
-        // For Testing purpose
-        metaPlace = new MetaPlace();
-        metaPlace.setLatitude(28.411877);
-        metaPlace.setLongitude(77.041965);
 
         // Initialize GoogleApiClient & UI Views
         this.initGoogleClient();
@@ -140,51 +127,45 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
-    private void updatePlaceData(MetaPlace metaPlace) {
-
-        try {
-            if (!TextUtils.isEmpty(metaPlace.getAddress())) {
-                addPlaceAddressView.setText(metaPlace.getAddress());
-
-                // TODO: 23/06/16 Set Place Name from MetaPlace name variable
-//                if (!TextUtils.isEmpty(metaPlace.getName())) {
-//                    addPlaceNameView.setText(metaPlace.getName());
-//                }
-
-            } else if (metaPlace.getLatitude() != null && metaPlace.getLongitude() != null) {
-
-                String address = LocationUtils.getNameFromLatLng(this, metaPlace.getLatitude(), metaPlace.getLongitude());
-                if (!TextUtils.isEmpty(address)) {
-                    addPlaceAddressView.setText(address);
-                }
-            }
-
-            updateLocationMarker(new LatLng(metaPlace.getLatitude(), metaPlace.getLongitude()));
-
-            LatLng latLng = new LatLng(metaPlace.getLatitude(), metaPlace.getLongitude());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     private void initGoogleClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 0 /* clientId */, this)
                 .addApi(Places.GEO_DATA_API)
                 .addConnectionCallbacks(this)
                 .build();
+
+        mGoogleApiClient.connect();
     }
 
     private void getMap() {
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        TouchableSupportMapFragment mapFragment = (TouchableSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
     private void initNameAddressView() {
         addPlaceNameView = (EditText) findViewById(R.id.add_fav_place_name);
         addPlaceAddressView = (EditText) findViewById(R.id.add_fav_place_address);
-        addPlaceAddressView.addTextChangedListener(mTextWatcher);
+
+        if (metaPlace.getName() != null && !metaPlace.getName().isEmpty()) {
+            addPlaceNameView.setText(metaPlace.getName());
+        }
+
+        if (metaPlace.getAddress() != null && !metaPlace.getAddress().isEmpty()) {
+            addPlaceAddressView.setText(metaPlace.getAddress());
+        } else {
+            reverseGeocode(metaPlace.getLatLng());
+        }
+
+        addPlaceAddressView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    addPlaceAddressView.addTextChangedListener(mTextWatcher);
+                } else {
+                    addPlaceAddressView.addTextChangedListener(null);
+                }
+            }
+        });
     }
 
     private void initAutocompleteResultsView() {
@@ -197,6 +178,8 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         layoutManager.setAutoMeasureEnabled(true);
         mAutocompleteResults.setLayoutManager(layoutManager);
         mAutocompleteResults.setAdapter(mAdapter);
+
+        mAdapter.setBounds(getBounds(metaPlace.getLatLng(), DISTANCE_IN_METERS));
     }
 
     @Override
@@ -206,40 +189,18 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
-        updatePlaceData(metaPlace);
-
-        // TODO: 23/06/16 Detect Changed Lat,Lng on user interaction on Map & Update Place accordingly
-
-        mAdapter.setBounds(getBounds(new LatLng(metaPlace.getLatitude(), metaPlace.getLongitude()), 10000));
-    }
-
-    private void updateLocationMarker(LatLng latLng) {
-        if (mMap != null) {
-            if (locationMarker == null) {
-                locationMarker = mMap.addMarker(new MarkerOptions()
-                        .position(latLng)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car_marker)));
-            } else {
-                locationMarker.setPosition(latLng);
-            }
-        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(metaPlace.getLatLng(), 18.0f));
     }
 
     public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
-
         if (results != null && results.size() > 0) {
-
             mAutocompleteResults.smoothScrollToPosition(0);
             mAutocompleteResults.setVisibility(View.VISIBLE);
             mAutocompleteResultsLayout.setVisibility(View.VISIBLE);
-
         } else {
-
             mAutocompleteResults.setVisibility(View.GONE);
             mAutocompleteResultsLayout.setVisibility(View.GONE);
         }
-        // TODO: 22/06/16 Add Loader while fetching Places Autocomplete data
-//        ((Home) context).customLoader.setVisibility(View.GONE);
     }
 
     private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters) {
@@ -264,8 +225,95 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     }
 
     public void onSaveButtonClicked(MenuItem v) {
-        // TODO: 23/06/16 Add Save Btn functionality
-        finish();
+        User user = UserStore.sharedStore.getUser();
+        if (user == null) {
+            return;
+        }
+
+        metaPlace.setName(addPlaceNameView.getText().toString());
+
+        if (metaPlace.getName() == null || metaPlace.getName().isEmpty()) {
+            Toast.makeText(this, R.string.place_name_error, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (metaPlace.isHome()) {
+            if (user.hasHome() && user.getHome().isEqualPlace(metaPlace)) {
+                Toast.makeText(this, R.string.home_exists_error, Toast.LENGTH_LONG).show();
+                return;
+            }
+        } else if (metaPlace.isWork()) {
+            if (user.hasWork() && user.getWork().isEqualPlace(metaPlace)) {
+                Toast.makeText(this, R.string.work_exists_error, Toast.LENGTH_LONG).show();
+                return;
+            }
+        }
+
+        metaPlace.setAddress(addPlaceAddressView.getText().toString());
+        metaPlace.setLatLng(mMap.getCameraPosition().target);
+
+        if (user.isSynced(metaPlace)) {
+            this.editPlace();
+        } else {
+            this.addPlace();
+        }
+    }
+
+    private void addPlace() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Adding place");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        UserStore.sharedStore.addPlace(metaPlace, new SuccessErrorCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+                broadcastResultIntent();
+                finish();
+            }
+
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+                showAddPlaceError();
+            }
+        });
+    }
+
+    private void editPlace() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Editing place");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        UserStore.sharedStore.editPlace(metaPlace, new SuccessErrorCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+                broadcastResultIntent();
+                finish();
+            }
+
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+                showEditPlaceError();
+            }
+        });
+    }
+
+    private void broadcastResultIntent() {
+        Intent intent=new Intent();
+        setResult(FAVORITE_PLACE_REQUEST_CODE, intent);
+    }
+
+    private void showAddPlaceError() {
+        Toast.makeText(this, R.string.add_place_error, Toast.LENGTH_LONG).show();
+    }
+
+    private void showEditPlaceError() {
+        Toast.makeText(this, R.string.edit_place_error, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -293,5 +341,20 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         Toast.makeText(this,
                 "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
                 Toast.LENGTH_SHORT).show();
+    }
+
+    private void reverseGeocode(LatLng latLng) {
+        addPlaceAddressView.setText(LocationUtils.getNameFromLatLng(this, latLng.latitude, latLng.longitude));
+    }
+
+    @Override
+    public void onTouchDown(MotionEvent event) {
+
+    }
+
+    @Override
+    public void onTouchUp(MotionEvent event) {
+        mAdapter.setBounds(getBounds(mMap.getCameraPosition().target, DISTANCE_IN_METERS));
+        reverseGeocode(mMap.getCameraPosition().target);
     }
 }

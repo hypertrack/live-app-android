@@ -50,4 +50,9 @@
     <string name="verify">Verify</string>
     <string name="user_profile">Profile</string>
     <string name="edit_profile_error">There was an error updating your profile. Please try again.</string>
+    <string name="add_place_error">There was an error adding place. Please try again.</string>
+    <string name="home_exists_error">You have already added a home. Please select a different name.</string>
+    <string name="work_exists_error">You have already added a work. Please select a different name.</string>
+    <string name="place_name_error">Place name is mandatory. Please enter a name and try again.</string>
+    <string name="edit_place_error">There was an error editing place. Please try again.</string>
 </resources>

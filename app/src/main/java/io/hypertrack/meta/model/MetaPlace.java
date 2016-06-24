@@ -106,6 +106,28 @@ public class MetaPlace extends RealmObject implements Serializable{
 
     }
 
+    public MetaPlace(Double latitude, Double longitude) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public MetaPlace(LatLng latLng) {
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
+    }
+
+    public MetaPlace(String name, LatLng latLng) {
+        this.name = name;
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
+    }
+
+    public MetaPlace(String name, Double latitude, Double longitude) {
+        this.name = name;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
     public MetaPlace(MetaPlace place) {
         this.name = place.getName();
         this.googlePlacesID = place.getGooglePlacesID();
@@ -162,5 +184,10 @@ public class MetaPlace extends RealmObject implements Serializable{
 
     public LatLng getLatLng() {
         return new LatLng(this.latitude, this.longitude);
+    }
+
+    public void setLatLng(LatLng latLng) {
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
     }
 }

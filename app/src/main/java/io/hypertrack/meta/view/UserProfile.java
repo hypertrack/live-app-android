@@ -14,11 +14,14 @@ import android.view.View;
 
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.FavoritePlacesAdapter;
+import io.hypertrack.meta.adapter.callback.FavoritePlaceOnClickListener;
+import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.store.LocationStore;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 
-public class UserProfile extends AppCompatActivity {
+public class UserProfile extends AppCompatActivity implements FavoritePlaceOnClickListener {
 
     private final String TAG = UserProfile.class.getSimpleName();
 
@@ -50,7 +53,7 @@ public class UserProfile extends AppCompatActivity {
             return;
         }
 
-        favoritePlacesAdapter = new FavoritePlacesAdapter(user.getHome(), user.getWork(), user.getOtherPlaces());
+        favoritePlacesAdapter = new FavoritePlacesAdapter(user.getHome(), user.getWork(), user.getOtherPlaces(), this);
         mRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 
@@ -60,7 +63,7 @@ public class UserProfile extends AppCompatActivity {
 
     public void onEditAccountClick(View view) {
         Intent editProfileIntent = new Intent(this, EditProfile.class);
-        startActivity(editProfileIntent);
+        startActivityForResult(editProfileIntent, EditProfile.EDIT_PROFILE_RESULT_CODE, null);
     }
 
 //    public void onDoneButtonClicked(MenuItem v) {
@@ -119,5 +122,77 @@ public class UserProfile extends AppCompatActivity {
         favoritePlacesAdapter.setOtherPlaces(user.getOtherPlaces());
 
         favoritePlacesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void OnAddHomeClick() {
+        MetaPlace newHome = new MetaPlace(MetaPlace.HOME, LocationStore.sharedStore().getCurrentLatLng());
+        this.showAddPlace(newHome);
+    }
+
+    @Override
+    public void OnEditHomeClick(MetaPlace place) {
+        this.showAddPlace(new MetaPlace(place));
+    }
+
+    @Override
+    public void OnAddWorkClick() {
+        MetaPlace newWork = new MetaPlace(MetaPlace.WORK, LocationStore.sharedStore().getCurrentLatLng());
+        this.showAddPlace(newWork);
+    }
+
+    @Override
+    public void OnEditWorkClick(MetaPlace place) {
+        this.showAddPlace(new MetaPlace(place));
+    }
+
+    @Override
+    public void OnAddPlaceClick() {
+        MetaPlace newPlace = new MetaPlace(LocationStore.sharedStore().getCurrentLatLng());
+        this.showAddPlace(newPlace);
+    }
+
+    @Override
+    public void OnEditPlaceClick(MetaPlace place) {
+        this.showAddPlace(new MetaPlace(place));
+    }
+
+    @Override
+    public void OnDeletePlace(MetaPlace place) {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage("Deleting place");
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        UserStore.sharedStore.deletePlace(new MetaPlace(place), new SuccessErrorCallback() {
+            @Override
+            public void OnSuccess() {
+                mProgressDialog.dismiss();
+                updateFavoritesAdapter();
+            }
+
+            @Override
+            public void OnError() {
+                mProgressDialog.dismiss();
+            }
+        });
+    }
+
+    private void showAddPlace(MetaPlace place) {
+        // For Testing purpose
+        Intent addPlace = new Intent(this, AddFavoritePlace.class);
+        addPlace.putExtra("meta_place", place);
+        startActivityForResult(addPlace, AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE, null);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
+            this.updateFavoritesAdapter();
+        } else if (requestCode == EditProfile.EDIT_PROFILE_RESULT_CODE) {
+            this.updateTitle();
+        }
     }
 }
