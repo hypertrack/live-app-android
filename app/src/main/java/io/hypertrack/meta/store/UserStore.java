@@ -53,6 +53,9 @@ public class UserStore {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
+                if (user != null) {
+                    userToAdd.setPlaces(user.getPlaces());
+                }
                 user = realm.copyToRealmOrUpdate(userToAdd);
             }
         });
