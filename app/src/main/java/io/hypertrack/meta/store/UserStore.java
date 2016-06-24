@@ -61,6 +61,17 @@ public class UserStore {
         });
     }
 
+    private void updateInfo(final String firstName, final String lastName) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
     public User getUser() {
         return this.user;
     }
@@ -317,7 +328,7 @@ public class UserStore {
                     return;
                 }
 
-                addUser(user);
+                updateInfo(user.getFirstName(), user.getLastName());
                 if (callback != null) {
                     callback.OnSuccess();
                 }
