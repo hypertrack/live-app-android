@@ -182,7 +182,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             public void onResponse(Call<List<TripETAResponse>> call, Response<List<TripETAResponse>> response) {
                 List<TripETAResponse> etaResponses = response.body();
 
-                if (etaResponses.size() > 0) {
+                if (etaResponses!= null && etaResponses.size() > 0) {
                     if (callback != null) {
                         callback.OnSuccess(etaResponses.get(0));
                     }
