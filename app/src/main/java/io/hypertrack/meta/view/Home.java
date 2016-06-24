@@ -749,6 +749,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
         Date ETA = trip.getETA();
+        if (ETA == null) {
+            return;
+        }
+
         Date now = new Date();
         long etaInSecond = ETA.getTime() - now.getTime();
         int etaInMinutes = (int) etaInSecond / (60 * 1000);
