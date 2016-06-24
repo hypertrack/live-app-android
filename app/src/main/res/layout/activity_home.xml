@@ -168,7 +168,7 @@
             <Button
                 android:id="@+id/sendETAButton"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/button_size"
+                android:layout_height="@dimen/cta_button_size"
                 android:gravity="center"
                 android:textColor="#ffffff"
                 android:background="@color/colorAccent"
@@ -178,8 +178,8 @@
 
             <Button
                 android:id="@+id/navigateButton"
-                android:layout_width="@dimen/button_size"
-                android:layout_height="@dimen/button_size"
+                android:layout_width="@dimen/cta_button_size"
+                android:layout_height="@dimen/cta_button_size"
                 android:textColor="#ffffff"
                 android:layout_alignParentEnd="true"
                 android:background="@android:color/holo_green_light"
@@ -191,8 +191,8 @@
 
             <Button
                 android:id="@+id/shareButton"
-                android:layout_width="@dimen/button_size"
-                android:layout_height="@dimen/button_size"
+                android:layout_width="@dimen/cta_button_size"
+                android:layout_height="@dimen/cta_button_size"
                 android:textColor="#ffffff"
                 android:layout_alignParentEnd="true"
                 android:background="@android:color/holo_green_light"
@@ -200,7 +200,7 @@
                 android:padding="@dimen/padding_high"
                 android:layout_marginTop="@dimen/margin_base"
                 android:layout_marginEnd="@dimen/margin_high"
-                android:layout_marginBottom="-25dp"
+                android:layout_marginBottom="@dimen/margin_base"
                 android:visibility="gone"
                 android:layout_above="@+id/sendETAButton"/>
         </RelativeLayout>

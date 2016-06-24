@@ -32,7 +32,7 @@
     <dimen name="text_extra_large">32sp</dimen>
 
     <!-- Button dimensions -->
-    <dimen name="button_size">50dp</dimen>
+    <dimen name="cta_button_size">50dp</dimen>
 
     <!-- Standard Elevation Dimensions-->
     <dimen name="elevation_base">2dp</dimen>

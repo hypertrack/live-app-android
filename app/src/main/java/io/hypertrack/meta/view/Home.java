@@ -550,6 +550,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
+                share();
                 onTripStart();
             }
 
