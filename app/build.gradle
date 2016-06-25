@@ -20,13 +20,6 @@ repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
-/*
-slack {
-    url 'https://hooks.slack.com/services/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'
-    dependsOnTasks 'crashlyticsUploadDistributionDebug'
-    title 'New version of Send ETA available on Beta'
-}
-*/
 
 def getDate() {
     def date = new Date()
@@ -67,8 +60,8 @@ android {
             value = 1;
         }
 
-        def versionMajor = 0
-        def versionMinor = 1
+        def versionMajor = 1
+        def versionMinor = 0
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
@@ -80,7 +73,7 @@ android {
         versionProps.store(versionPropsFile.newWriter(), null)
 
         defaultConfig {
-            applicationId "io.hypertrack.meta"
+            applicationId "io.hypertrack.sendeta"
             versionCode versionNumber
             versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionBuild})"
             minSdkVersion 19
@@ -158,24 +151,3 @@ dependencies {
     compile 'com.android.support:cardview-v7:23.3.0'
     compile 'com.android.support:recyclerview-v7:23.3.0'
 }
-
-task switchToDebug(type: Copy) {
-    description = 'Switches to DEBUG google-services.json'
-    from "src/debug"
-    include "google-services.json"
-    into "."
-}
-
-task switchToRelease(type: Copy) {
-    description = 'Switches to RELEASE google-services.json'
-    from "src/release"
-    include "google-services.json"
-    into "."
-}
-
-afterEvaluate {
-    processDebugGoogleServices.dependsOn switchToDebug
-    processReleaseGoogleServices.dependsOn switchToRelease
-}
-
-apply plugin: 'com.google.gms.google-services'

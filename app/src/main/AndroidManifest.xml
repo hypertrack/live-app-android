@@ -99,7 +99,7 @@
         <!-- Register Services here -->
         <service
             android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
         <service
             android:name=".service.GcmListenerService"
             android:exported="false">
@@ -116,7 +116,7 @@
         </service>
         <service
             android:name=".service.RegistrationIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
 
         <!-- Register Receivers here -->
         <receiver android:name=".util.SMSReceiver">
@@ -145,7 +145,7 @@
 
         <service
             android:name=".service.FetchAddressIntentService"
-            android:exported="false"></service>
+            android:exported="false" />
     </application>
 
 </manifest>
