@@ -29,15 +29,6 @@ def getDate() {
 
 android {
 
-    signingConfigs {
-        releaseConfig {
-            keyAlias 'meta-release'
-            keyPassword 'Hyp3rTr@ck123#'
-            storeFile file('/Users/ulhas/Workspace/HyperTrack/keystores/android.jks')
-            storePassword 'iygn67u9'
-        }
-    }
-
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
 
@@ -100,7 +91,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL",'"http://api.sendeta.com"'
-            signingConfig signingConfigs.releaseConfig
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
