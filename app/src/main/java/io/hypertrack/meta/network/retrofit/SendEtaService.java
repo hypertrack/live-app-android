@@ -26,7 +26,7 @@ import retrofit2.http.Query;
  */
 public interface SendETAService {
 
-    @PATCH("/api/v1/users/{id}/")
+    @POST("/api/v1/users/{id}/edit/")
     Call<User> updateUserName(@Path("id") int id, @Body Map<String, String> user);
 
     @Multipart
@@ -54,7 +54,7 @@ public interface SendETAService {
     @POST("/api/v1/places/")
     Call<MetaPlace> addPlace(@Body PlaceDTO place);
 
-    @PATCH("/api/v1/places/{id}/")
+    @POST("/api/v1/places/{id}/edit/")
     Call<MetaPlace> editPlace(@Path("id") int id, @Body PlaceDTO place);
 
     @DELETE("/api/v1/places/{id}/")
