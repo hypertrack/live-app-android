@@ -113,8 +113,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private Marker currentLocationMarker;
     private Marker destinationLocationMarker;
     private Button sendETAButton;
-    private Button shareButton;
-    private Button navigateButton;
+    private ImageButton shareButton;
+    private ImageButton navigateButton;
     private Bitmap profilePicBitmap;
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
@@ -278,7 +278,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupNavigateButton() {
-        navigateButton = (Button) findViewById(R.id.navigateButton);
+        navigateButton = (ImageButton) findViewById(R.id.navigateButton);
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -333,7 +333,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupShareButton() {
-        shareButton = (Button) findViewById(R.id.shareButton);
+        shareButton = (ImageButton) findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

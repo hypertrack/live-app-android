@@ -33,6 +33,7 @@
 
     <!-- Button dimensions -->
     <dimen name="cta_button_size">50dp</dimen>
+    <dimen name="cta_button_radius">25dp</dimen>
 
     <!-- Standard Elevation Dimensions-->
     <dimen name="elevation_base">2dp</dimen>

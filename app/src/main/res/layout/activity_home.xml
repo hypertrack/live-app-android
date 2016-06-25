@@ -187,33 +187,31 @@
                 android:visibility="gone"
                 android:layout_alignParentBottom="true" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/navigateButton"
                 android:layout_width="@dimen/cta_button_size"
                 android:layout_height="@dimen/cta_button_size"
-                android:textColor="#ffffff"
                 android:layout_alignParentEnd="true"
-                android:background="@android:color/holo_green_light"
-                android:text="NV"
+                android:background="@drawable/circle_accent_color"
                 android:padding="@dimen/padding_high"
                 android:layout_marginEnd="@dimen/margin_high"
                 android:visibility="gone"
-                android:layout_above="@+id/shareButton"/>
+                android:layout_above="@+id/shareButton"
+                android:src="@drawable/ic_navigate"/>
 
-            <Button
+            <ImageButton
                 android:id="@+id/shareButton"
                 android:layout_width="@dimen/cta_button_size"
                 android:layout_height="@dimen/cta_button_size"
-                android:textColor="#ffffff"
                 android:layout_alignParentEnd="true"
-                android:background="@android:color/holo_green_light"
-                android:text="SHARE"
+                android:background="@drawable/circle_primary_background"
                 android:padding="@dimen/padding_high"
                 android:layout_marginTop="@dimen/margin_base"
                 android:layout_marginEnd="@dimen/margin_high"
                 android:layout_marginBottom="@dimen/margin_base"
                 android:visibility="gone"
-                android:layout_above="@+id/sendETAButton"/>
+                android:src="@drawable/ic_share_nocircle"
+                android:layout_above="@+id/sendETAButton" />
         </RelativeLayout>
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>
