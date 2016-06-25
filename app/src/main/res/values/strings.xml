@@ -55,4 +55,9 @@
     <string name="work_exists_error">You have already added a work. Please select a different name.</string>
     <string name="place_name_error">Place name is mandatory. Please enter a name and try again.</string>
     <string name="edit_place_error">There was an error editing place. Please try again.</string>
+
+    <!-- Geocoding Intent Service string -->
+    <string name="service_not_available">There was an error geocoding address. Location service is not available.</string>
+    <string name="invalid_lat_long_used">There was an error fetching address. Location is invalid.</string>
+    <string name="no_address_found">There was an error fetching address. Please try again.</string>
 </resources>

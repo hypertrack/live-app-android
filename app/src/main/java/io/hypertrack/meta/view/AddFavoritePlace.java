@@ -1,8 +1,12 @@
 package io.hypertrack.meta.view;
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -35,11 +39,11 @@ import io.hypertrack.meta.adapter.AddPlaceAutocompleteAdapter;
 import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.service.FetchAddressIntentService;
 import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.NetworkUtils;
 import io.hypertrack.meta.util.SuccessErrorCallback;
-import io.hypertrack.meta.util.images.LocationUtils;
 
 /**
  * Created by piyush on 22/06/16.
@@ -86,6 +90,11 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         @Override
         public void OnSuccess(MetaPlace place) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
+
+            metaPlace.setGooglePlacesID(place.getGooglePlacesID());
+
+            addPlaceAddressView.setText(place.getAddress());
+            addPlaceAddressView.removeTextChangedListener(mTextWatcher);
             mAdapter.setBounds(getBounds(place.getLatLng(), DISTANCE_IN_METERS));
 
             KeyboardUtils.hideKeyboard(AddFavoritePlace.this, addPlaceAddressView);
@@ -162,7 +171,7 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
                 if (hasFocus) {
                     addPlaceAddressView.addTextChangedListener(mTextWatcher);
                 } else {
-                    addPlaceAddressView.addTextChangedListener(null);
+                    addPlaceAddressView.removeTextChangedListener(mTextWatcher);
                 }
             }
         });
@@ -344,7 +353,18 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void reverseGeocode(LatLng latLng) {
-        addPlaceAddressView.setText(LocationUtils.getNameFromLatLng(this, latLng.latitude, latLng.longitude));
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver(new Handler()));
+        intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, latLng);
+        startService(intent);
+    }
+
+    private void setAddress(String address) {
+        addPlaceAddressView.setText(address);
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -354,7 +374,27 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onTouchUp(MotionEvent event) {
+        metaPlace.setGooglePlacesID(null);
         mAdapter.setBounds(getBounds(mMap.getCameraPosition().target, DISTANCE_IN_METERS));
         reverseGeocode(mMap.getCameraPosition().target);
+        // set spinner for address text view
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            //remove spinner from address text view
+
+            if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
+                setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+            } else {
+                showToast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+            }
+        }
     }
 }
