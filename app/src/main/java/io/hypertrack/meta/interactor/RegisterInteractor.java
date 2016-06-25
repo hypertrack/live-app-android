@@ -1,7 +1,7 @@
 package io.hypertrack.meta.interactor;
 
 import io.hypertrack.meta.interactor.callback.OnRegisterCallback;
-import io.hypertrack.meta.store.OnOnboardingCallback;
+import io.hypertrack.meta.store.callback.OnOnboardingCallback;
 import io.hypertrack.meta.store.OnboardingManager;
 
 public class RegisterInteractor {

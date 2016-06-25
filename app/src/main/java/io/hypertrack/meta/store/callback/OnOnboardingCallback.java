@@ -1,4 +1,4 @@
-package io.hypertrack.meta.store;
+package io.hypertrack.meta.store.callback;
 
 /**
  * Created by ulhas on 18/06/16.

@@ -36,7 +36,6 @@ public class UserStore {
 
     private User user;
     private Realm realm = Realm.getDefaultInstance();
-    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
     private UserStore() {
     }
@@ -98,6 +97,8 @@ public class UserStore {
     }
 
     private void getTaskForDestination(String destinationID, final  UserStoreGetTaskCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
         Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), destinationID);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -119,6 +120,8 @@ public class UserStore {
 
     private void getTaskForPlace(MetaPlace place, final UserStoreGetTaskCallback callback) {
         PlaceDTO placeDTO = new PlaceDTO(place);
+
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
         Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), placeDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
@@ -318,6 +321,8 @@ public class UserStore {
         user.put("first_name", firstName);
         user.put("last_name", lastName);
 
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
         Call<User> call = sendETAService.updateUserName(this.user.getId(), user);
         call.enqueue(new Callback<User>() {
             @Override
@@ -355,6 +360,8 @@ public class UserStore {
         String uuid = UUID.randomUUID().toString();
         String fileName = "photo\"; filename=\"" + uuid + ".jpg";
         requestBodyMap.put(fileName, requestBody);
+
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
         Call<Map<String, Object>> call = sendETAService.updateUserProfilePic(this.user.getId(), requestBodyMap);
         call.enqueue(new Callback<Map<String, Object>>() {

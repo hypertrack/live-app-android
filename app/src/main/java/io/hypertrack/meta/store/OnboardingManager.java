@@ -1,6 +1,5 @@
 package io.hypertrack.meta.store;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -13,6 +12,7 @@ import io.hypertrack.meta.model.OnboardingUser;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.retrofit.SendETAService;
 import io.hypertrack.meta.network.retrofit.ServiceGenerator;
+import io.hypertrack.meta.store.callback.OnOnboardingCallback;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 import retrofit2.Call;
@@ -25,10 +25,10 @@ import retrofit2.Response;
 public class OnboardingManager {
 
     private static String TAG = OnboardingManager.class.getSimpleName();
-    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class);
 
     private static OnboardingManager sSharedManager = null;
     private OnboardingUser onboardingUser;
+    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class);
 
     public static OnboardingManager sharedManager() {
         if (sSharedManager == null) {
@@ -47,7 +47,7 @@ public class OnboardingManager {
     }
 
     public void onboardUser(final OnOnboardingCallback callback) {
-        String phoneNumber;
+        final String phoneNumber;
         try {
             phoneNumber = this.onboardingUser.getInternationalNumber();
         }  catch (NumberParseException e) {
@@ -60,57 +60,54 @@ public class OnboardingManager {
         HashMap<String, String> phoneNumberMap = new HashMap<>();
         phoneNumberMap.put("phone_number", phoneNumber);
 
-        Call<OnboardingUser> call = sendETAService.getUser(phoneNumberMap);
-        call.enqueue(new Callback<OnboardingUser>() {
+        Call<Map<String, Object>> call = sendETAService.getUser(phoneNumberMap);
+        call.enqueue(new Callback<Map<String, Object>>() {
             @Override
-            public void onResponse(Call<OnboardingUser> call, Response<OnboardingUser> response) {
-                OnboardingUser candidate = response.body();
-                if (candidate == null) {
+            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+                if (response.isSuccessful()) {
+                    onboardingUser.setPhoneNumber(phoneNumber);
                     if (callback != null) {
-                        callback.onError();
+                        callback.onSuccess();
                     }
-
                     return;
                 }
 
-                onboardingUser = candidate;
                 if (callback != null) {
-                    callback.onSuccess();
+                    callback.onError();
                 }
             }
 
             @Override
-            public void onFailure(Call<OnboardingUser> call, Throwable t) {
+            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
                 callback.onError();
             }
         });
     }
 
     public void verifyCode(String code, final OnOnboardingCallback callback) {
-        HashMap<String, String> verificationCode = new HashMap<>();
-        verificationCode.put("verification_code", code);
+        HashMap<String, String> verificationParams = new HashMap<>();
+        verificationParams.put("verification_code", code);
+        verificationParams.put("phone_number", onboardingUser.getPhoneNumber());
 
-        Call<Map<String, Object>> call = sendETAService.verifyUser(this.onboardingUser.getId(), verificationCode);
-        call.enqueue(new Callback<Map<String, Object>>() {
+        Call<VerifyResponse> call = sendETAService.verifyUser(verificationParams);
+        call.enqueue(new Callback<VerifyResponse>() {
             @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                Map body = response.body();
-                if (body == null) {
+            public void onResponse(Call<VerifyResponse> call, Response<VerifyResponse> response) {
+                if (response.isSuccessful()) {
+                    onVerifyCode(response.body());
                     if (callback != null) {
-                        callback.onError();
+                        callback.onSuccess();
                     }
-
                     return;
                 }
 
-                onVerifyCode(body);
                 if (callback != null) {
-                    callback.onSuccess();
+                    callback.onError();
                 }
             }
 
             @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
+            public void onFailure(Call<VerifyResponse> call, Throwable t) {
                 if (callback != null) {
                     callback.onError();
                 }
@@ -123,26 +120,35 @@ public class OnboardingManager {
         user.put("first_name", this.onboardingUser.getFirstName());
         user.put("last_name", this.onboardingUser.getLastName());
 
-        Call<User> call = sendETAService.updateUserName(this.onboardingUser.getId(), user);
+        SendETAService userService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
+        Call<User> call = userService.updateUserName(this.onboardingUser.getId(), user);
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(final Call<User> call, Response<User> response) {
-                didOnbardUser(response.body());
-                UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (callback != null) {
-                            callback.onSuccess();
+                if (response.isSuccessful()) {
+                    didOnbardUser(response.body());
+                    UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
+                        @Override
+                        public void OnSuccess() {
+                            if (callback != null) {
+                                callback.onSuccess();
+                            }
                         }
-                    }
 
-                    @Override
-                    public void OnError() {
-                        if (callback != null) {
-                            callback.onError();
+                        @Override
+                        public void OnError() {
+                            if (callback != null) {
+                                callback.onError();
+                            }
                         }
-                    }
-                });
+                    });
+                    return;
+                }
+
+                if (callback != null) {
+                    callback.onError();
+                }
             }
 
             @Override
@@ -153,12 +159,21 @@ public class OnboardingManager {
     }
 
     public void resendVerificationCode(final OnOnboardingCallback callback) {
-        Call<Map<String, Object>> call = sendETAService.resendCode(this.onboardingUser.getId());
+        HashMap<String, String> phoneNumber = new HashMap<>();
+        phoneNumber.put("phone_number", this.onboardingUser.getPhoneNumber());
+
+        Call<Map<String, Object>> call = sendETAService.resendCode(phoneNumber);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (callback != null) {
-                    callback.onSuccess();
+                if (response.isSuccessful()) {
+                    if (callback != null) {
+                        callback.onSuccess();
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.onError();
+                    }
                 }
             }
 
@@ -199,9 +214,10 @@ public class OnboardingManager {
         UserStore.sharedStore.addUser(user);
     }
 
-    private void onVerifyCode(Map<String, Object> response) {
+    private void onVerifyCode(VerifyResponse response) {
         Log.v(TAG, response.toString());
 
-        SharedPreferenceManager.setUserAuthToken((String)response.get("token"));
+        SharedPreferenceManager.setUserAuthToken(response.getToken());
+        this.onboardingUser = response.getUser();
     }
 }

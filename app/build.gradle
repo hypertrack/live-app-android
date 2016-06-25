@@ -118,8 +118,8 @@ dependencies {
 
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
-    compile 'com.squareup.retrofit2:retrofit:2.0.2'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile "com.squareup.picasso:picasso:2.4.0"
 
     debugCompile('io.hypertrack:transmitter:0.4.12:debug@aar') {

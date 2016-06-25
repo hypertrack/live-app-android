@@ -63,7 +63,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private static final long REFRESH_DELAY = 60000;
 
     private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
-    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
     private TripManagerListener tripRefreshedListener;
     private TripManagerListener tripEndedListener;
@@ -180,6 +179,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         String originQueryParam = origin.latitude + "," + origin.longitude;
         String destinationQueryParam = destination.latitude + "," + destination.longitude;
 
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
         Call<List<TripETAResponse>> call = sendETAService.getETA(originQueryParam, destinationQueryParam);
         call.enqueue(new Callback<List<TripETAResponse>>() {
             @Override
@@ -210,6 +211,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         HashMap<String, String> tripDetails = new HashMap<>();
         tripDetails.put("hypertrack_trip_id", this.hyperTrackTrip.getId());
         tripDetails.put("hypertrack_task_id", this.hyperTrackTrip.getTaskIDs().get(0));
+
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
         Call<Trip> call = sendETAService.addTrip(tripDetails);
         call.enqueue(new Callback<Trip>() {
