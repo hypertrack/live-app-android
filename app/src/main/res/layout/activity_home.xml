@@ -192,12 +192,12 @@
                 android:layout_width="@dimen/cta_button_size"
                 android:layout_height="@dimen/cta_button_size"
                 android:layout_alignParentEnd="true"
-                android:background="@drawable/circle_accent_color"
+                android:background="@drawable/circle_primary_background"
                 android:padding="@dimen/padding_high"
                 android:layout_marginEnd="@dimen/margin_high"
                 android:visibility="gone"
                 android:layout_above="@+id/shareButton"
-                android:src="@drawable/ic_navigate"/>
+                android:src="@drawable/ic_navigate_nocircle"/>
 
             <ImageButton
                 android:id="@+id/shareButton"

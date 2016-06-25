@@ -12,6 +12,13 @@
         android:layout_height="match_parent"
         tools:context=".view.Home" />
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_marker"
+        android:layout_gravity="center"
+        android:paddingBottom="25dp"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
