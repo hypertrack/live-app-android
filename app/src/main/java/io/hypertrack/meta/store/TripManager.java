@@ -158,6 +158,10 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 }
             });
 
+            if (handler == null) {
+                return;
+            }
+            
             handler.postDelayed(this, REFRESH_DELAY);
         }
     };
