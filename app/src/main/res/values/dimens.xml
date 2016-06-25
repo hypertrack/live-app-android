@@ -3,4 +3,41 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <!-- Standard Margin Dimensions -->
+    <dimen name="margin_low">4dp</dimen>
+    <dimen name="margin_base">8dp</dimen>
+    <dimen name="margin_medium">12dp</dimen>
+    <dimen name="margin_high">16dp</dimen>
+    <dimen name="margin_xhigh">24dp</dimen>
+    <dimen name="margin_xxhigh">28dp</dimen>
+    <dimen name="margin_huge">56dp</dimen>
+    <dimen name="margin_max">72dp</dimen>
+
+    <!-- Standard Padding Dimensions -->
+    <dimen name="padding_low">4dp</dimen>
+    <dimen name="padding_base">8dp</dimen>
+    <dimen name="padding_medium">12dp</dimen>
+    <dimen name="padding_high">16dp</dimen>
+    <dimen name="padding_xhigh">24dp</dimen>
+    <dimen name="padding_xxhigh">28dp</dimen>
+    <dimen name="padding_huge">56dp</dimen>
+    <dimen name="padding_max">72dp</dimen>
+
+    <!-- Standard Text Dimensions -->
+    <dimen name="text_base">14sp</dimen>
+    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_medium">16sp</dimen>
+    <dimen name="text_large">20sp</dimen>
+    <dimen name="text_extra_large">32sp</dimen>
+
+    <!-- Button dimensions -->
+    <dimen name="cta_button_size">50dp</dimen>
+    <dimen name="cta_button_radius">25dp</dimen>
+
+    <!-- Standard Elevation Dimensions-->
+    <dimen name="elevation_base">2dp</dimen>
+    <dimen name="elevation_medium">4dp</dimen>
+    <dimen name="elevation_high">8dp</dimen>
+
 </resources>

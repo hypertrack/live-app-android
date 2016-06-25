@@ -14,18 +14,12 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'com.mindera.gradle.slack'
+apply plugin: 'realm-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
-/*
-slack {
-    url 'https://hooks.slack.com/services/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'
-    dependsOnTasks 'crashlyticsUploadDistributionDebug'
-    title 'New version of Send ETA available on Beta'
-}
-*/
 
 def getDate() {
     def date = new Date()
@@ -34,15 +28,6 @@ def getDate() {
 }
 
 android {
-
-    signingConfigs {
-        releaseConfig {
-            keyAlias 'meta-release'
-            keyPassword 'Hyp3rTr@ck123#'
-            storeFile file('/Users/suhas/Hypertrack/keystores/android.jks')
-            storePassword 'iygn67u9'
-        }
-    }
 
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
@@ -66,8 +51,8 @@ android {
             value = 1;
         }
 
-        def versionMajor = 0
-        def versionMinor = 1
+        def versionMajor = 1
+        def versionMinor = 0
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
@@ -79,13 +64,11 @@ android {
         versionProps.store(versionPropsFile.newWriter(), null)
 
         defaultConfig {
-            applicationId "io.hypertrack.meta"
+            applicationId "io.hypertrack.sendeta"
             versionCode versionNumber
             versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionBuild})"
             minSdkVersion 19
             targetSdkVersion 23
-
-            multiDexEnabled true
         }
 
     } else {
@@ -103,20 +86,22 @@ android {
     */
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_KEY", '"pk_8df4a9c1a6c258ed9c09e6a445b068455ad6e88b"'
+            buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL",'"http://api.sendeta.com"'
-            signingConfig signingConfigs.releaseConfig
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
         debug {
-            buildConfigField "String", "API_KEY", '"pk_65801d4211efccf3128d74101254e7637e655356"'
-            buildConfigField "String", "BASE_URL",'"https://meta-api-staging.herokuapp.com"'
+            debuggable true
+            applicationIdSuffix ".debug"
+            buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
+            buildConfigField "String", "BASE_URL",'"http://meta-api-staging.herokuapp.com/"'
+//            buildConfigField "String", "BASE_URL",'"http://10.0.2.2:8000"'
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails="suhas@hypertrack.io"
+            ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
     }
 }
@@ -124,34 +109,35 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
     compile 'com.jakewharton:butterknife:7.0.1'
-    compile 'com.mcxiaoke.volley:library:1.0.19'
+    compile 'com.android.volley:volley:1.0.0'
     compile 'com.google.code.gson:gson:2.4'
 
-    debugCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:0.4.11:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:hypertrack-driver-sdk:0.1.15:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.4.11:release@aar') {
         transitive = true;
     }
 
-    debugCompile('io.hypertrack:hypertrack-sdk:0.1.3:debug@aar') {
+    debugCompile('io.hypertrack:consumer:0.4.10:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:hypertrack-sdk:0.1.3:release@aar') {
+    releaseCompile('io.hypertrack:consumer:0.4.10:release@aar') {
         transitive = true;
     }
 
     compile 'com.google.maps.android:android-maps-utils:0.4+'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.3@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
-    compile 'com.squareup.retrofit2:retrofit:2.0.0-beta3'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta3'
+    compile 'com.squareup.retrofit2:retrofit:2.0.2'
+    compile 'com.squareup.retrofit2:converter-gson:2.0.2'
     compile "com.squareup.picasso:picasso:2.4.0"
-}
 
-apply plugin: 'com.google.gms.google-services'
+    compile 'com.android.support:cardview-v7:23.3.0'
+    compile 'com.android.support:recyclerview-v7:23.3.0'
+}
