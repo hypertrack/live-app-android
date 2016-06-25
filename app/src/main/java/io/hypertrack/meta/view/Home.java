@@ -33,6 +33,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -105,7 +106,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private TextView enterDestinationText;
     private TextView mAutocompletePlacesView;
-    private FrameLayout enterDestinationLayout;
+    private RelativeLayout enterDestinationLayout;
     private FrameLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
@@ -118,6 +119,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private HTCircleImageView profileViewProfileImage;
     private View customMarkerView;
     private ProgressDialog mProgressDialog;
+    private ImageButton favoriteButton;
 
     private boolean enterDestinationLayoutClicked = false;
 
@@ -265,6 +267,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.setupSendETAButton();
         this.initCustomMarkerView();
         this.setupNavigateButton();
+        this.setupFavoriteButton();
 
         checkIfUserIsOnBoard();
 
@@ -286,7 +289,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void setupEnterDestinationView() {
         enterDestinationText = (TextView) findViewById(R.id.enter_destination_text);
-        enterDestinationLayout = (FrameLayout) findViewById(R.id.enter_destination_layout);
+        enterDestinationLayout = (RelativeLayout) findViewById(R.id.enter_destination_layout);
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
     }
@@ -608,6 +611,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             if (resultCode == RESULT_OK) {
                 this.didSelectContact(data);
             }
+        } else if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
+            this.updateFavoritesButton();
         }
     }
 
@@ -768,6 +773,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
         enterDestinationLayout.setOnClickListener(null);
+        favoriteButton.setVisibility(View.VISIBLE);
+        this.updateFavoritesButton();
 
         TripManager tripManager = TripManager.getSharedManager();
         tripManager.setTripRefreshedListener(new TripManagerListener() {
@@ -790,6 +797,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         navigateButton.setVisibility(View.GONE);
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
+        favoriteButton.setVisibility(View.GONE);
         // Reset Enter Destination Layout Text
         enterDestinationText.setText("");
 
@@ -870,5 +878,67 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public void OnFavoriteClick(View view) {
+        TripManager tripManager = TripManager.getSharedManager();
+        MetaPlace place = tripManager.getPlace();
+
+        if (place == null) {
+            return;
+        }
+
+        showAddPlace(place);
+    }
+
+    private void showAddPlace(MetaPlace place) {
+        // For Testing purpose
+        Intent addPlace = new Intent(this, AddFavoritePlace.class);
+        addPlace.putExtra("meta_place", place);
+        startActivityForResult(addPlace, AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE, null);
+    }
+
+    private void updateFavoritesButton() {
+        TripManager tripManager = TripManager.getSharedManager();
+        if (tripManager.isTripActive()) {
+            MetaPlace place = tripManager.getPlace();
+            if (place == null) {
+                return;
+            }
+
+            User user = UserStore.sharedStore.getUser();
+            if (user == null) {
+                return;
+            }
+
+            if (user.isFavorite(place)) {
+                this.markAsFavorite();
+            } else {
+                this.markAsNotFavorite();
+            }
+        }
+    }
+
+    private void markAsFavorite() {
+        favoriteButton.setSelected(true);
+        favoriteButton.setClickable(false);
+        favoriteButton.setImageDrawable(getDrawable(R.drawable.ic_star));
+    }
+
+    private void markAsNotFavorite() {
+        favoriteButton.setSelected(false);
+        favoriteButton.setImageDrawable(getDrawable(R.drawable.ic_star_faded));
+        favoriteButton.setClickable(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.updateFavoritesButton();
+    }
+
+    private void setupFavoriteButton() {
+        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
+        favoriteButton.setVisibility(View.GONE);
     }
 }

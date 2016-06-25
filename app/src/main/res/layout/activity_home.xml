@@ -61,9 +61,9 @@
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content">
+                            android:layout_height="50dp">
 
-                            <FrameLayout
+                            <RelativeLayout
                                 android:id="@+id/enter_destination_layout"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent">
@@ -91,7 +91,18 @@
                                     android:paddingRight="@dimen/padding_medium"
                                     android:scaleType="centerInside"
                                     android:src="@drawable/ic_destination" />
-                            </FrameLayout>
+
+                                <ImageButton
+                                    android:id="@+id/favorite_button"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginEnd="@dimen/margin_high"
+                                    android:onClick="OnFavoriteClick"
+                                    android:layout_alignParentEnd="true"
+                                    android:background="@null"/>
+
+                            </RelativeLayout>
 
                             <FrameLayout
                                 android:id="@+id/autocomplete_places_layout"
