@@ -247,12 +247,12 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         }
 
         if (metaPlace.isHome()) {
-            if (user.hasHome() && user.getHome().isEqualPlace(metaPlace)) {
+            if (user.hasHome() && !user.getHome().isEqualPlace(metaPlace)) {
                 Toast.makeText(this, R.string.home_exists_error, Toast.LENGTH_LONG).show();
                 return;
             }
         } else if (metaPlace.isWork()) {
-            if (user.hasWork() && user.getWork().isEqualPlace(metaPlace)) {
+            if (user.hasWork() && !user.getWork().isEqualPlace(metaPlace)) {
                 Toast.makeText(this, R.string.work_exists_error, Toast.LENGTH_LONG).show();
                 return;
             }
