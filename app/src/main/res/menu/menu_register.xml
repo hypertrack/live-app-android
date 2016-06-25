@@ -7,6 +7,7 @@
     <item
         android:id="@+id/register_next_item"
         android:onClick="onNextButtonClicked"
+        android:icon="@drawable/ic_action_forward"
         android:title="@string/next"
         app:showAsAction="always" />
 

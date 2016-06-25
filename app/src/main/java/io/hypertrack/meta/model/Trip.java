@@ -2,12 +2,13 @@ package io.hypertrack.meta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by suhas on 26/11/15.
  */
-public class UserTrip {
-
-    private String user;
+public class Trip extends RealmObject {
 
     @SerializedName("hypertrack_trip_id")
     private String hypertrackTripID;
@@ -15,6 +16,7 @@ public class UserTrip {
     @SerializedName("hypertrack_task_id")
     private String hypertrackTaskID;
 
+    @PrimaryKey
     private String id;
 
     @SerializedName("share_url")
@@ -26,20 +28,6 @@ public class UserTrip {
 
     public void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
-    }
-
-    public UserTrip(String user, String hypertrackTripID, String hypertrackTaskID) {
-        this.user = user;
-        this.hypertrackTripID = hypertrackTripID;
-        this.hypertrackTaskID = hypertrackTaskID;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
     }
 
     public String getHypertrackTripID() {
@@ -68,8 +56,7 @@ public class UserTrip {
 
     @Override
     public String toString() {
-        return "UserTrip{" +
-                "user='" + user + '\'' +
+        return "Trip{" +
                 ", hypertrackTripID='" + hypertrackTripID + '\'' +
                 ", hypertrackTaskID='" + hypertrackTaskID + '\'' +
                 ", id='" + id + '\'' +

@@ -14,9 +14,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS"></uses-permission>
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
-
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <permission
@@ -26,7 +25,6 @@
     <uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
-
     <application
         android:name=".MetaApplication"
         android:allowBackup="true"
@@ -34,6 +32,8 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- Register Activities here -->
         <activity
             android:name=".view.Home"
             android:label="@string/app_name"
@@ -62,32 +62,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".view.Register" />
         </activity>
-
-        <receiver android:name=".util.SMSReceiver">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-
-        <activity
-            android:name=".view.Trip"
-            android:screenOrientation="portrait">
-            <intent-filter android:label="mETA app">
-                <action android:name="android.intent.action.VIEW" />
-
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with " http://eta.fyi/r4eN” -->
-                <!--
-                <data
-                   android:host="eta.fyi"
-                   android:pathPrefix="/"
-                   android:scheme="http" />
-                -->
-
-            </intent-filter>
-        </activity>
         <activity
             android:name=".view.AddAddress"
             android:label="Custom Address"
@@ -112,32 +86,20 @@
         <activity
             android:name=".view.Profile"
             android:label="@string/title_activity_generated_login"
-            android:windowSoftInputMode="adjustResize"/>
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
-
+            android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".view.SelectDestination"
             android:label="Select Destination"
             android:parentActivityName=".view.AddAddress"
             android:screenOrientation="portrait" />
+        <activity android:name=".view.UserProfile" />
+        <activity android:name=".view.EditProfile" />
+        <activity android:name=".view.AddFavoritePlace" />
 
+        <!-- Register Services here -->
         <service
             android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
-
-        <receiver
-            android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="io.hypertrack.meta" />
-            </intent-filter>
-        </receiver>
-
+            android:exported="false"></service>
         <service
             android:name=".service.GcmListenerService"
             android:exported="false">
@@ -156,10 +118,34 @@
             android:name=".service.RegistrationIntentService"
             android:exported="false"></service>
 
+        <!-- Register Receivers here -->
+        <receiver android:name=".util.SMSReceiver">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
+                <category android:name="io.hypertrack.meta" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Register meta-data here -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
+        <service
+            android:name=".service.FetchAddressIntentService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

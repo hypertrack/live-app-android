@@ -18,28 +18,43 @@ package io.hypertrack.meta.adapter;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.support.v7.widget.RecyclerView;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.data.DataBufferUtils;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.PlaceBuffer;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import io.hypertrack.meta.R;
+import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
+import io.hypertrack.meta.model.MetaPlace;
+import io.hypertrack.meta.util.KeyboardUtils;
+import io.hypertrack.meta.view.Home;
 
 /**
  * Adapter that handles Autocomplete requests from the Places Geo Data API.
@@ -51,10 +66,13 @@ import java.util.concurrent.TimeUnit;
  * connection states. The API client must be connected with the {@link Places#GEO_DATA_API} API.
  */
 public class PlaceAutocompleteAdapter
-        extends ArrayAdapter<AutocompletePrediction> implements Filterable {
+        extends RecyclerView.Adapter<PlaceAutocompleteAdapter.AutocompleteViewHolder> implements Filterable {
 
     private static final String TAG = "PlaceAutocompAdapter";
     private static final CharacterStyle STYLE_BOLD = new StyleSpan(Typeface.BOLD);
+    private static final CharacterStyle STYLE_NORMAL = new StyleSpan(Typeface.NORMAL);
+
+    private Context context;
     /**
      * Current results returned by this adapter.
      */
@@ -71,21 +89,75 @@ public class PlaceAutocompleteAdapter
     private LatLngBounds mBounds;
 
     /**
+     * Saved places
+     */
+    private List<MetaPlace> favorites;
+
+    private List<MetaPlace> filteredFavorites;
+
+    /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
      */
     private AutocompleteFilter mPlaceFilter;
+
+    private boolean isSearching;
+
+    private String filterString;
+
+    private PlaceAutoCompleteOnClickListener listener;
+
+    public void setFilterString(String filterString) {
+        this.filterString = filterString.toLowerCase();
+
+        if (!filterString.isEmpty()) {
+            getFilter().filter(filterString);
+            this.filterFavorites();
+            this.isSearching = true;
+        } else {
+            this.isSearching = false;
+            this.filteredFavorites = null;
+            this.mResultList = null;
+        }
+
+        notifyDataSetChanged();
+    }
+
+    private void filterFavorites() {
+        this.filteredFavorites = new ArrayList<>();
+
+        Iterator<MetaPlace> it = this.favorites.iterator();
+        while (it.hasNext()) {
+            MetaPlace place = it.next();
+            if (place.getName().toLowerCase().contains(this.filterString)) {
+                this.filteredFavorites.add(place);
+            }
+        }
+    }
 
     /**
      * Initializes with a resource for text rows and autocomplete query bounds.
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient googleApiClient,
-                                    LatLngBounds bounds, AutocompleteFilter filter) {
-        super(context, android.R.layout.simple_expandable_list_item_2, android.R.id.text1);
-        mGoogleApiClient = googleApiClient;
-        mBounds = bounds;
-        mPlaceFilter = filter;
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener) {
+        super();
+        this.context = context;
+        this.mGoogleApiClient = mGoogleApiClient;
+        this.favorites = new ArrayList<>();
+        this.listener = listener;
+    }
+
+    private PlaceAutocompleteAdapter() {
+
+    }
+
+    public void refreshFavorites(List<MetaPlace> favorites) {
+        if (this.favorites == null) {
+            this.favorites = favorites;
+        }
+
+        this.favorites.clear();
+        this.favorites.addAll(favorites);
     }
 
     /**
@@ -95,53 +167,72 @@ public class PlaceAutocompleteAdapter
         mBounds = bounds;
     }
 
-    /**
-     * Returns the number of results received in the last autocomplete query.
-     */
     @Override
-    public int getCount() {
-        if (mResultList == null) {
+    public AutocompleteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.list_item_place, parent, false);
+        return new AutocompleteViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(AutocompleteViewHolder holder, int position) {
+        if (!this.isSearching) {
+            MetaPlace place = this.favorites.get(position);
+
+            holder.header.setText(place.getName());
+            holder.description.setText(place.getAddress());
+        } else {
+            if (this.isFilteredPlace(position)) {
+                MetaPlace place = this.filteredFavorites.get(position);
+
+                holder.header.setText(place.getName());
+                holder.description.setText(place.getAddress());
+            } else {
+                final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
+
+                holder.header.setText(item.getPrimaryText(STYLE_BOLD));
+                holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
+            }
+        }
+    }
+
+    private int filteredPlacesCount() {
+        if (this.filteredFavorites == null) {
             return 0;
         }
 
-        return mResultList.size();
+        return this.filteredFavorites.size();
     }
 
-    /**
-     * Returns an item from the last autocomplete query.
-     */
     @Override
+    public int getItemCount() {
+        if (!this.isSearching) {
+            return this.favorites != null ? this.favorites.size() : 0;
+        }
+
+        return this.combinedResultsCount();
+    }
+
+    private int combinedResultsCount() {
+        int count = this.filteredPlacesCount();
+
+        if (mResultList != null) {
+            count = count + mResultList.size();
+        }
+
+        return count;
+    }
+
+    private boolean isFilteredPlace(int position) {
+        int count = this.filteredPlacesCount();
+        return count > 0 && position < count;
+    }
+
     public AutocompletePrediction getItem(int position) {
-        if (mResultList == null) {
-            return null;
+        if (mResultList != null && mResultList.size() > 0) {
+            return mResultList.get(position);
         }
 
-        if (position >= mResultList.size()) {
-            return null;
-        }
-
-        return mResultList.get(position);
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View row = super.getView(position, convertView, parent);
-
-        // Sets the primary and secondary text for a row.
-        // Note that getPrimaryText() and getSecondaryText() return a CharSequence that may contain
-        // styling based on the given CharacterStyle.
-
-        if (getCount() == 0) {
-            return row;
-        }
-        AutocompletePrediction item = getItem(position);
-
-        TextView textView1 = (TextView) row.findViewById(android.R.id.text1);
-        TextView textView2 = (TextView) row.findViewById(android.R.id.text2);
-        textView1.setText(item.getPrimaryText(STYLE_BOLD));
-        textView2.setText(item.getSecondaryText(STYLE_BOLD));
-
-        return row;
+        return null;
     }
 
     /**
@@ -153,14 +244,15 @@ public class PlaceAutocompleteAdapter
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
                 FilterResults results = new FilterResults();
+                ArrayList<AutocompletePrediction> googleList;
                 // Skip the autocomplete query if no constraints are given.
-                if (constraint != null) {
+                if (constraint != null && constraint.length() > 0) {
                     // Query the autocomplete API for the (constraint) search string.
-                    mResultList = getAutocomplete(constraint);
-                    if (mResultList != null) {
+                    googleList = getAutocomplete(constraint);
+                    if (googleList != null) {
                         // The API successfully returned results.
-                        results.values = mResultList;
-                        results.count = mResultList.size();
+                        results.values = googleList;
+                        results.count = googleList.size();
                     }
                 }
                 return results;
@@ -170,11 +262,19 @@ public class PlaceAutocompleteAdapter
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
+                    Log.d(TAG, "Received results");
+                    mResultList = (ArrayList<AutocompletePrediction>) results.values;
+
                     notifyDataSetChanged();
                 } else {
                     // The API did not return any results, invalidate the data set.
-                    notifyDataSetInvalidated();
+                    Log.d(TAG, "no results found");
+                    mResultList = null;
+
+                    notifyItemRangeRemoved(0, 0);
                 }
+
+                ((Home) context).processPublishedResults(mResultList);
             }
 
             @Override
@@ -193,7 +293,7 @@ public class PlaceAutocompleteAdapter
     /**
      * Submits an autocomplete query to the Places Geo Data Autocomplete API.
      * Results are returned as frozen AutocompletePrediction objects, ready to be cached.
-     * objects to store the Place ID and description that the API returns.
+     * objects to store the MetaPlace ID and description that the API returns.
      * Returns an empty list if no results were found.
      * Returns null if the API client is not available or the query did not complete
      * successfully.
@@ -226,15 +326,93 @@ public class PlaceAutocompleteAdapter
                 return null;
             }
 
-            Log.d(TAG, "Query completed. Received " + autocompletePredictions.getCount()
-                    + " predictions.");
+            Log.d(TAG, "Query complete: Received " + autocompletePredictions.getCount() + " predictions");
 
             // Freeze the results immutable representation that can be stored safely.
             return DataBufferUtils.freezeAndClose(autocompletePredictions);
         }
-        Log.e(TAG, "Google API client is not connected for autocomplete query.");
+        Log.e(TAG, "Google API client not connected for autocomplete query.");
         return null;
     }
 
+    public class AutocompleteViewHolder extends RecyclerView.ViewHolder{
+        public TextView header;
+        public TextView description;
+        public ImageView icon;
 
+        public AutocompleteViewHolder(final View view) {
+            super(view);
+            header = (TextView) view.findViewById(R.id.item_place_title);
+            description = (TextView) view.findViewById(R.id.item_place_desc);
+            icon = (ImageView) view.findViewById(R.id.item_place_icon);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemClickedAtPosition(getAdapterPosition());
+                }
+            });
+        }
+    }
+
+    private void itemClickedAtPosition(int position) {
+
+        if (!this.isSearching) {
+            MetaPlace place = this.favorites.get(position);
+            if (this.listener != null) {
+                this.listener.OnSuccess(new MetaPlace(place));
+            }
+        } else {
+            if (this.isFilteredPlace(position)) {
+                MetaPlace place = this.filteredFavorites.get(position);
+                if (this.listener != null) {
+                    this.listener.OnSuccess(new MetaPlace(place));
+                }
+            } else {
+                final AutocompletePrediction item = getItem(position - this.filteredPlacesCount());
+                final String placeId = item.getPlaceId();
+
+                PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                        .getPlaceById(mGoogleApiClient, placeId);
+                placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+            }
+        }
+    }
+
+    /**
+     * Callback for results from a Places Geo Data API query that shows the first place result in
+     * the details view on screen.
+     */
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                // Request did not complete successfully
+                Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
+                places.release();
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
+
+            if (places.getCount() == 0) {
+                Log.d(TAG, "Places is empty");
+                places.release();
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
+
+            // Get the MetaPlace object from the buffer.
+            final Place place = places.get(0);
+
+            Log.i(TAG, "MetaPlace details received: " + place.getName());
+
+            if (listener != null) {
+                listener.OnSuccess(new MetaPlace(place));
+            }
+            places.release();
+        }
+    };
 }

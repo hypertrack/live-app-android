@@ -3,102 +3,69 @@ package io.hypertrack.meta.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.ArrayList;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import io.hypertrack.meta.model.Place;
+import java.lang.reflect.Type;
+
+import io.hypertrack.meta.MetaApplication;
+import io.hypertrack.meta.model.MetaPlace;
 
 /**
  * Created by suhas on 25/02/16.
  */
 public class SharedPreferenceManager {
 
-    public static final String pref_name = Constants.SHARED_PREFERENCES_NAME;
-    SharedPreferences sharedpreferences;
-    SharedPreferences.Editor editor;
-    Context ctx;
+    private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
+    private static final String USER_AUTH_TOKEN = "user_auth_token";
+    private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
+    private static final String TRIP_ID = "io.hypertrack.meta:TripID";
 
-    public SharedPreferenceManager(Context ctx) {
-        sharedpreferences = ctx.getSharedPreferences(pref_name,
-                Context.MODE_PRIVATE);
-        editor = sharedpreferences.edit();
-        this.ctx = ctx;
+    private static SharedPreferences getSharedPreferences() {
+        Context context = MetaApplication.getInstance().getApplicationContext();
+        return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    public void setUserId(int id) {
-        editor.putInt(Constants.USER_ID, id);
+    private static SharedPreferences.Editor getEditor() {
+        return getSharedPreferences().edit();
+    }
+
+    public static void setUserAuthToken(String userAuthToken) {
+        SharedPreferences.Editor editor = getEditor();
+
+        editor.putString(USER_AUTH_TOKEN, userAuthToken);
         editor.apply();
     }
 
-    public int getUserId() {
-        return sharedpreferences.getInt(Constants.USER_ID, -1);
+    public static String getUserAuthToken() {
+        return getSharedPreferences().getString(USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
     }
 
-    public void setFirstName(String firstName) {
-        editor.putString(Constants.USER_FIRSTNAME, firstName);
+    public static MetaPlace getPlace() {
+        String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
+        if (placeJson == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<MetaPlace>(){}.getType();
+
+        return gson.fromJson(placeJson, type);
+    }
+
+    public static void deletePlace() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_PLACE);
         editor.apply();
     }
 
-    public String getFirstName() {
-        return sharedpreferences.getString(Constants.USER_FIRSTNAME, Constants.DEFAULT_STRING_VALUE);
-    }
+    public static void setPlace(MetaPlace place) {
+        SharedPreferences.Editor editor = getEditor();
 
-    public void setLastName(String lastName) {
-        editor.putString(Constants.USER_LASTNAME, lastName);
+        Gson gson = new Gson();
+        String placeJson = gson.toJson(place);
+
+        editor.putString(CURRENT_PLACE, placeJson);
         editor.apply();
-    }
-
-    public String getLastName() {
-        return sharedpreferences.getString(Constants.USER_LASTNAME, Constants.DEFAULT_STRING_VALUE);
-    }
-
-    public void setUserPhoto(String userPhoto) {
-        editor.putString(Constants.USER_PROFILE_PIC, userPhoto);
-        editor.apply();
-    }
-
-    public String getUserPhoto() {
-        return sharedpreferences.getString(Constants.USER_PROFILE_PIC, Constants.DEFAULT_STRING_VALUE);
-    }
-
-    public void setUserAuthToken(String userAuthToken) {
-        editor.putString(Constants.USER_AUTH_TOKEN, userAuthToken);
-        editor.apply();
-    }
-
-    public String getUserAuthToken() {
-        return sharedpreferences.getString(Constants.USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
-    }
-
-    public void setHyperTrackDriverID(String courierId) {
-        editor.putString(Constants.HYPERTRACK_DRIVER_ID, courierId);
-        editor.apply();
-    }
-
-    public String getHyperTrackDriverID() {
-        return sharedpreferences.getString(Constants.HYPERTRACK_DRIVER_ID, Constants.DEFAULT_STRING_VALUE);
-    }
-
-    public void setUserLoggedIn(boolean flag) {
-        editor.putBoolean(Constants.USER_ONBOARD, flag);
-        editor.apply();
-    }
-
-    public boolean isUserLoggedIn() {
-        return sharedpreferences.getBoolean(Constants.USER_ONBOARD, false);
-    }
-
-    public void setProfileImage(String encodedImage) {
-        editor.putString(Constants.USER_PROFILE_PIC_ENCODED, encodedImage);
-        editor.apply();
-    }
-
-    public String getProfileImage() {
-        return sharedpreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, Constants.DEFAULT_STRING_VALUE);
-    }
-
-    public ArrayList<Place> getSavedPlaces() {
-        ArrayList<Place> places = new ArrayList<>();
-        places.add(0, new Place(1, "Home", "Vasant Vihar", 28.561014, 77.159403));
-        return places;
     }
 }

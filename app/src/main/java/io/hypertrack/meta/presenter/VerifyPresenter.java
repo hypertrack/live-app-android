@@ -4,6 +4,8 @@ import android.text.TextUtils;
 
 import io.hypertrack.meta.interactor.callback.OnVerificationCallback;
 import io.hypertrack.meta.interactor.VerificationInteractor;
+import io.hypertrack.meta.store.OnboardingManager;
+import io.hypertrack.meta.util.SharedPreferenceManager;
 import io.hypertrack.meta.view.VerifyView;
 
 public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
@@ -16,6 +18,8 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     public void attachView(VerifyView view) {
         this.view = view;
         verificationInteractor = new VerificationInteractor();
+
+        this.view.updateHeaderText(OnboardingManager.sharedManager().getUser().getPhoneNumber());
     }
 
     @Override
@@ -24,9 +28,9 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     }
 
     @Override
-    public void attemptVerification(String verificationCode, int userId) {
+    public void attemptVerification(String verificationCode) {
         if (!TextUtils.isEmpty(verificationCode) && verificationCode.length() == 4) {
-            verificationInteractor.validateVerificationCode(verificationCode, userId, new OnVerificationCallback() {
+            verificationInteractor.validateVerificationCode(verificationCode, new OnVerificationCallback() {
                 @Override
                 public void OnSuccess() {
                     if (view != null) {
@@ -49,18 +53,22 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     }
 
     @Override
-    public void resendVerificationCode(int userID) {
-        verificationInteractor.resendVerificationCode(userID, new OnVerificationCallback() {
-                    @Override
-                    public void OnSuccess() {
-
-                    }
-
-                    @Override
-                    public void OnError() {
-
+    public void resendVerificationCode() {
+        verificationInteractor.resendVerificationCode(new OnVerificationCallback() {
+                @Override
+                public void OnSuccess() {
+                    if (view != null) {
+                        view.didResendVerificationCode();
                     }
                 }
+
+                @Override
+                public void OnError() {
+                    if (view != null) {
+                        view.showResendError();
+                    }
+                }
+            }
 
         );
     }

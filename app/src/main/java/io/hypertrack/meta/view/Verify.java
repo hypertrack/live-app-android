@@ -12,24 +12,21 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.presenter.IVerifyPresenter;
 import io.hypertrack.meta.presenter.VerifyPresenter;
+import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.SMSReceiver;
-import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class Verify extends AppCompatActivity implements VerifyView {
 
@@ -48,9 +45,11 @@ public class Verify extends AppCompatActivity implements VerifyView {
     @Bind(R.id.fourth_code)
     public TextView fouthCodeTextView;
 
+    @Bind(R.id.verify_header_text)
+    public TextView headerTextView;
+
     private ProgressDialog mProgressDialog;
     private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
-    private SharedPreferenceManager sharedPreferenceManager;
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -76,7 +75,6 @@ public class Verify extends AppCompatActivity implements VerifyView {
         }
 
         ButterKnife.bind(this);
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
         presenter.attachView(this);
 
         this.verificationCodeView.addTextChangedListener(new TextWatcher() {
@@ -97,6 +95,41 @@ public class Verify extends AppCompatActivity implements VerifyView {
         });
 
         this.verificationCodeView.requestFocus();
+        this.addTouchListeners();
+    }
+
+    private void addTouchListeners() {
+        this.firstCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                return false;
+            }
+        });
+
+        this.secondCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                return false;
+            }
+        });
+
+        this.thirdCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                return false;
+            }
+        });
+
+        this.fouthCodeTextView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                return false;
+            }
+        });
     }
 
     @Override
@@ -138,6 +171,22 @@ public class Verify extends AppCompatActivity implements VerifyView {
         verificationCodeView.setError("Please enter valid verification code");
     }
 
+    @Override
+    public void showResendError() {
+        mProgressDialog.dismiss();
+        Toast.makeText(Verify.this, "Apologies, there was an error while resending your verification code. Please try again.",Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void didResendVerificationCode() {
+        mProgressDialog.dismiss();
+    }
+
+    @Override
+    public void updateHeaderText(String text) {
+        this.headerTextView.setText(String.format(getString(R.string.verify_phone_number_hearder_note), text));
+    }
+
     /** Action bar menu methods */
 
     private void verifyCode() {
@@ -147,8 +196,7 @@ public class Verify extends AppCompatActivity implements VerifyView {
         mProgressDialog.show();
 
         String verificationCode = verificationCodeView.getText().toString();
-        int userId = sharedPreferenceManager.getUserId();
-        presenter.attemptVerification(verificationCode, userId);
+        presenter.attemptVerification(verificationCode);
     }
 
     private void textChanged() {
@@ -166,7 +214,11 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     @OnClick(R.id.btn_resend)
     public void resendButtonClicked(Button button) {
-        int userId = sharedPreferenceManager.getUserId();
-        presenter.resendVerificationCode(userId);
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.resending_verification_code));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        presenter.resendVerificationCode();
     }
 }

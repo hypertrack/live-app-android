@@ -28,7 +28,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.hypertrack.meta.R;
-import io.hypertrack.meta.model.CustomAddress;
 import io.hypertrack.meta.model.MetaLocation;
 
 public class AddAddress extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
@@ -86,41 +85,41 @@ public class AddAddress extends AppCompatActivity implements OnMapReadyCallback,
 
         if (validated()) {
 
-            Intent intent=new Intent();
-
-            CustomAddress customAddress = new CustomAddress();
-
-            if (!TextUtils.isEmpty(locationNameEditText.getText().toString()))
-                customAddress.setName(locationNameEditText.getText().toString());
-
-            if (!TextUtils.isEmpty(addressEditText.getText().toString()))
-                customAddress.setAddress(addressEditText.getText().toString());
-
-            if (!TextUtils.isEmpty(cityEditText.getText().toString()))
-                customAddress.setCity(cityEditText.getText().toString());
-
-            if (!TextUtils.isEmpty(stateEditText.getText().toString()))
-                customAddress.setState(stateEditText.getText().toString());
-
-            if (!TextUtils.isEmpty(postalCodeEditText.getText().toString()))
-                customAddress.setPostalCode(postalCodeEditText.getText().toString());
-
-            if (!TextUtils.isEmpty(countryEditText.getText().toString()))
-                customAddress.setCountry(countryEditText.getText().toString());
-
-            if (metaLocation == null && currentLocation != null) {
-                double[] ll = {currentLocation.longitude, currentLocation.latitude};
-                metaLocation = new MetaLocation();
-                metaLocation.setType("Point");
-                metaLocation.setCoordinates(ll);
-            }
-
-            customAddress.setLocation(metaLocation);
-
-            intent.putExtra("custom_address", customAddress);
-            setResult(101, intent);
-
-            finish();
+//            Intent intent=new Intent();
+//
+//            CustomAddress customAddress = new CustomAddress();
+//
+//            if (!TextUtils.isEmpty(locationNameEditText.getText().toString()))
+//                customAddress.setName(locationNameEditText.getText().toString());
+//
+//            if (!TextUtils.isEmpty(addressEditText.getText().toString()))
+//                customAddress.setAddress(addressEditText.getText().toString());
+//
+//            if (!TextUtils.isEmpty(cityEditText.getText().toString()))
+//                customAddress.setCity(cityEditText.getText().toString());
+//
+//            if (!TextUtils.isEmpty(stateEditText.getText().toString()))
+//                customAddress.setState(stateEditText.getText().toString());
+//
+//            if (!TextUtils.isEmpty(postalCodeEditText.getText().toString()))
+//                customAddress.setPostalCode(postalCodeEditText.getText().toString());
+//
+//            if (!TextUtils.isEmpty(countryEditText.getText().toString()))
+//                customAddress.setCountry(countryEditText.getText().toString());
+//
+//            if (metaLocation == null && currentLocation != null) {
+//                double[] ll = {currentLocation.longitude, currentLocation.latitude};
+//                metaLocation = new MetaLocation();
+//                metaLocation.setType("Point");
+//                metaLocation.setCoordinates(ll);
+//            }
+//
+//            customAddress.setLocation(metaLocation);
+//
+//            intent.putExtra("custom_address", customAddress);
+//            setResult(101, intent);
+//
+//            finish();
         }
 
     }

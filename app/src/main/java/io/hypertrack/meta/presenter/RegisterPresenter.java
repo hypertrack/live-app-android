@@ -1,14 +1,10 @@
 package io.hypertrack.meta.presenter;
 
 import android.text.TextUtils;
-import android.util.Log;
-
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
 
 import io.hypertrack.meta.interactor.callback.OnRegisterCallback;
 import io.hypertrack.meta.interactor.RegisterInteractor;
+import io.hypertrack.meta.store.OnboardingManager;
 import io.hypertrack.meta.view.RegisterView;
 
 public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
@@ -16,6 +12,7 @@ public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
     private static final String TAG = RegisterPresenter.class.getSimpleName();
     private RegisterView view;
     private RegisterInteractor registerInteractor;
+    private OnboardingManager onboardingManager = OnboardingManager.sharedManager();
 
     @Override
     public void attachView(RegisterView view) {
@@ -32,39 +29,24 @@ public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
     public void attemptRegistration(String number, String isoCode) {
 
         if(!TextUtils.isEmpty(number) && number.length() < 20) {
+            onboardingManager.getUser().setContactNumber(number);
+            onboardingManager.getUser().setCountryCode(isoCode);
 
-            PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-            Phonenumber.PhoneNumber phoneNumber;
-            try {
-                phoneNumber = phoneUtil.parse(number, isoCode);
-                String internationalFormat = phoneUtil.format(
-                        phoneNumber,
-                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-
-                registerInteractor.registerPhoneNumber(internationalFormat, new OnRegisterCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (view != null) {
-                            view.navigateToVerificationScreen();
-                        }
+            registerInteractor.registerPhoneNumber(new OnRegisterCallback() {
+                @Override
+                public void OnSuccess() {
+                    if (view != null) {
+                        view.navigateToVerificationScreen();
                     }
-
-                    @Override
-                    public void OnError() {
-                        if (view != null) {
-                            view.registrationFailed();
-                        }
-                    }
-                });
-                Log.v(TAG, "International Format: " + internationalFormat);
-
-            } catch (NumberParseException e) {
-                if (view != null) {
-                    view.showValidationError();
                 }
-                Log.wtf(TAG, e);
-            }
 
+                @Override
+                public void OnError() {
+                    if (view != null) {
+                        view.registrationFailed();
+                    }
+                }
+            });
         } else {
             if (view != null) {
                 view.showValidationError();

@@ -14,6 +14,7 @@ buildscript {
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'com.mindera.gradle.slack'
+apply plugin: 'realm-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -114,7 +115,8 @@ android {
             debuggable true
             applicationIdSuffix ".debug"
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
-            buildConfigField "String", "BASE_URL",'"https://meta-api-staging.herokuapp.com"'
+            buildConfigField "String", "BASE_URL",'"http://meta-api-staging.herokuapp.com/"'
+//            buildConfigField "String", "BASE_URL",'"http://10.0.2.2:8000"'
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails="ulhas@hypertrack.io"
         }
@@ -124,16 +126,16 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.1.1'
-    compile 'com.android.support:design:23.1.1'
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile 'com.android.support:design:23.3.0'
     compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.android.volley:volley:1.0.0'
     compile 'com.google.code.gson:gson:2.4'
 
-    debugCompile('io.hypertrack:transmitter:0.4.7:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:0.4.11:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:0.4.7:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.4.11:release@aar') {
         transitive = true;
     }
 

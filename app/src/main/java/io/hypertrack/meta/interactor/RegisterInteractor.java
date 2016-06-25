@@ -9,74 +9,27 @@ import com.google.gson.Gson;
 
 import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.interactor.callback.OnRegisterCallback;
+import io.hypertrack.meta.model.OnboardingUser;
 import io.hypertrack.meta.model.User;
 import io.hypertrack.meta.network.HTCustomPostRequest;
+import io.hypertrack.meta.store.OnOnboardingCallback;
+import io.hypertrack.meta.store.OnboardingManager;
 import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class RegisterInteractor {
 
-    public void registerPhoneNumber(String number, final OnRegisterCallback onRegisterCallback) {
+    public void registerPhoneNumber(final OnRegisterCallback onRegisterCallback) {
+        OnboardingManager.sharedManager().onboardUser(new OnOnboardingCallback() {
+            @Override
+            public void onSuccess() {
+                onRegisterCallback.OnSuccess();
+            }
 
-        String url = Constants.API_ENDPOINT + "/api/v1/users/";
-
-        User user = new User(number);
-        Gson gson = new Gson();
-        String jsonObjectBody = gson.toJson(user);
-
-        Log.d("Response", "Request Body - " + jsonObjectBody);
-
-        HTCustomPostRequest<User> request = new HTCustomPostRequest<User>(
-                1,
-                url,
-                jsonObjectBody,
-                User.class,
-                new Response.Listener<User>() {
-                    @Override
-                    public void onResponse(User response) {
-
-                        Log.d("Response", "ID :" + response.getId()
-                            + " First Name :" + response.getFirstName()
-                            + " Last name :" + response.getLastName());
-
-                        SharedPreferenceManager spm = new SharedPreferenceManager(MetaApplication.getInstance());
-
-                        if (response.getId() != null) {
-                            spm.setUserId(response.getId());
-                        }
-
-
-                        if (!TextUtils.isEmpty(response.getFirstName())) {
-                            spm.setFirstName(response.getFirstName());
-                        }
-
-                        if (!TextUtils.isEmpty(response.getLastName())) {
-                            spm.setLastName(response.getLastName());
-                        }
-
-                        if (!TextUtils.isEmpty(response.getPhoto())) {
-                            spm.setUserPhoto(response.getPhoto());
-                        }
-
-                        if (onRegisterCallback != null) {
-                            onRegisterCallback.OnSuccess();
-                        }
-
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Response", "Inside OnError");
-
-                        if (onRegisterCallback != null) {
-                            onRegisterCallback.OnError();
-                        }
-                    }
-                }
-        );
-
-        MetaApplication.getInstance().addToRequestQueue(request);
-
+            @Override
+            public void onError() {
+                onRegisterCallback.OnError();
+            }
+        });
     }
 }

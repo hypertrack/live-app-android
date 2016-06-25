@@ -7,60 +7,211 @@
     android:fitsSystemWindows="true"
     tools:context=".view.Home">
 
-    <android.support.design.widget.AppBarLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
+            android:layout_height="match_parent"
+            tools:context=".view.Home" />
 
-    </android.support.design.widget.AppBarLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
-    <include layout="@layout/content_home" />
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/app_bar_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:theme="@style/AppTheme.AppBarOverlay">
 
-    <!-- <android.support.design.widget.FloatingActionButton
-          android:id="@+id/fab"
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:layout_gravity="bottom|end"
-          android:layout_margin="@dimen/fab_margin"
-          android:src="@android:drawable/ic_input_add" />-->
+                <android.support.v7.widget.Toolbar
+                    android:id="@+id/toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="?attr/colorPrimary"
+                    app:popupTheme="@style/AppTheme.PopupOverlay" />
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
+            </android.support.design.widget.AppBarLayout>
 
-        <Button
-            android:id="@+id/shareButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#ffffff"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:background="@android:color/holo_green_light"
-            android:text="SHARE"
-            android:padding="16dp"
-            android:layout_marginRight="8dp"
-            android:visibility="gone" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/app_bar_layout"
+                android:orientation="vertical">
 
-        <Button
-            android:id="@+id/shareEtaButton"
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <android.support.v7.widget.CardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="@dimen/margin_base"
+                        android:layout_marginLeft="@dimen/margin_high"
+                        android:layout_marginRight="@dimen/margin_high"
+                        android:layout_marginTop="@dimen/margin_high"
+                        android:background="@android:color/white"
+                        android:elevation="@dimen/elevation_high"
+                        app:cardCornerRadius="2dp">
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp">
+
+                            <RelativeLayout
+                                android:id="@+id/enter_destination_layout"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent">
+
+                                <TextView
+                                    android:id="@+id/enter_destination_text"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="@dimen/margin_xhigh"
+                                    android:layout_marginRight="@dimen/margin_high"
+                                    android:background="@null"
+                                    android:ellipsize="end"
+                                    android:gravity="center"
+                                    android:hint="@string/autocomplete_hint"
+                                    android:padding="16dp"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_base"
+                                    android:textSize="@dimen/text_base" />
+
+                                <ImageView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_vertical"
+                                    android:paddingLeft="@dimen/padding_medium"
+                                    android:paddingRight="@dimen/padding_medium"
+                                    android:scaleType="centerInside"
+                                    android:src="@drawable/ic_destination" />
+
+                                <ImageButton
+                                    android:id="@+id/favorite_button"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginEnd="@dimen/margin_high"
+                                    android:onClick="OnFavoriteClick"
+                                    android:layout_alignParentEnd="true"
+                                    android:background="@null"/>
+
+                            </RelativeLayout>
+
+                            <FrameLayout
+                                android:id="@+id/autocomplete_places_layout"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:visibility="gone">
+
+                                <AutoCompleteTextView
+                                    android:id="@+id/autocomplete_places"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginLeft="@dimen/margin_xhigh"
+                                    android:layout_marginRight="@dimen/margin_high"
+                                    android:background="@null"
+                                    android:ellipsize="end"
+                                    android:gravity="center"
+                                    android:hint="@string/autocomplete_hint"
+                                    android:padding="16dp"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_base"
+                                    android:textSize="@dimen/text_base" />
+
+                                <ImageView
+                                    android:id="@+id/autocomplete_places_back_icon"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center_vertical"
+                                    android:onClick="onEnterDestinationBackClick"
+                                    android:paddingLeft="@dimen/padding_medium"
+                                    android:paddingRight="@dimen/padding_medium"
+                                    android:scaleType="centerInside"
+                                    android:src="@drawable/ic_navigation_arrow_back" />
+                            </FrameLayout>
+                        </FrameLayout>
+
+                    </android.support.v7.widget.CardView>
+
+                    <ProgressBar
+                        android:id="@+id/login_progress"
+                        style="?android:attr/progressBarStyle"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginRight="@dimen/margin_high"
+                        android:layout_marginTop="@dimen/margin_low"
+                        android:indeterminate="true"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+                </FrameLayout>
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/autocomplete_places_results_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_high"
+                    android:layout_marginLeft="@dimen/margin_high"
+                    android:layout_marginRight="@dimen/margin_high"
+                    android:layout_marginTop="@dimen/margin_base"
+                    android:visibility="gone">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/autocomplete_places_results"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </android.support.v7.widget.CardView>
+            </LinearLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/shareButton"
-            android:gravity="center"
-            android:textColor="#ffffff"
-            android:background="@android:color/holo_blue_light"
-            android:padding="16dp"
-            android:layout_margin="8dp"
-            android:visibility="gone" />
+            android:layout_gravity="bottom">
 
-    </RelativeLayout>
+            <Button
+                android:id="@+id/sendETAButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/cta_button_size"
+                android:gravity="center"
+                android:textColor="#ffffff"
+                android:background="@color/colorAccent"
+                android:padding="@dimen/padding_high"
+                android:visibility="gone"
+                android:layout_alignParentBottom="true" />
 
+            <ImageButton
+                android:id="@+id/navigateButton"
+                android:layout_width="@dimen/cta_button_size"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/circle_primary_background"
+                android:padding="@dimen/padding_high"
+                android:layout_marginEnd="@dimen/margin_high"
+                android:visibility="gone"
+                android:layout_above="@+id/shareButton"
+                android:src="@drawable/ic_navigate_nocircle"/>
+
+            <ImageButton
+                android:id="@+id/shareButton"
+                android:layout_width="@dimen/cta_button_size"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/circle_primary_background"
+                android:padding="@dimen/padding_high"
+                android:layout_marginTop="@dimen/margin_base"
+                android:layout_marginEnd="@dimen/margin_high"
+                android:layout_marginBottom="@dimen/margin_base"
+                android:visibility="gone"
+                android:src="@drawable/ic_share_nocircle"
+                android:layout_above="@+id/sendETAButton" />
+        </RelativeLayout>
+    </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>

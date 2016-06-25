@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -49,7 +50,6 @@ public class Register extends AppCompatActivity implements RegisterView {
     private CountrySpinnerAdapter adapter;
     private String isoCode;
     private IRegisterPresenter<RegisterView> registerPresenter = new RegisterPresenter();
-    private SharedPreferenceManager sharedPreferenceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +61,6 @@ public class Register extends AppCompatActivity implements RegisterView {
         toolbar.setTitle(getString(R.string.title_activity_login));
 
         ButterKnife.bind(this);
-        sharedPreferenceManager = new SharedPreferenceManager(MetaApplication.getInstance());
         registerPresenter.attachView(this);
 
         initCountryFlagSpinner();
@@ -73,6 +72,26 @@ public class Register extends AppCompatActivity implements RegisterView {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+    }
+
+    @Override
     protected void onDestroy() {
         registerPresenter.detachView();
         super.onDestroy();
@@ -81,7 +100,6 @@ public class Register extends AppCompatActivity implements RegisterView {
     private void initCountryFlagSpinner() {
         CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
-        String countryIsoCode = cm.getDefaultCountryIso();
         //Country country = cm.getCountryByIso(countryIsoCode);
 
         adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
@@ -129,9 +147,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     }
 
     private void requestPermission(){
-
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
-
             Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
 
         } else {
@@ -163,10 +179,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     public void navigateToVerificationScreen() {
         mProgressDialog.dismiss();
 
-        int userId = sharedPreferenceManager.getUserId();
-
         Intent intent = new Intent(Register.this, Verify.class);
-        intent.putExtra(Constants.USER_ID, userId);
         startActivity(intent);
     }
 

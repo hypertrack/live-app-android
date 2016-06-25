@@ -3,13 +3,18 @@
     <string name="action_settings">Settings</string>
     <string name="action_endtrip">End Trip</string>
     <string name="title_activity_on_boarding">Sign in</string>
-    <string name="autocomplete_hint">Enter place name or address</string>
+    <string name="autocomplete_hint">Enter your destination</string>
+    <string name="favorite_place_name_hint">Name your Favorite (eg. Dave\'s Home)</string>
+    <string name="favorite_place_address_hint">Address</string>
+
 
     <!-- Strings related to login -->
     <string name="prompt_firstname">First Name</string>
     <string name="prompt_lastname">Last Name</string>
     <string name="prompt_phonenumber">Phone Number</string>
     <string name="action_done">Done</string>
+    <string name="action_save">Save</string>
+    <string name="action_refresh">Refresh</string>
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
@@ -38,8 +43,21 @@
     <string name="registration_phone_number">Registering phone number...</string>
     <string name="verifying_phone_number">Verifying phone number...</string>
     <string name="enter_phone_number">Enter Phone Number</string>
+    <string name="resending_verification_code">Resending verification code</string>
 
     <!-- Action bar strings -->
     <string name="next">Next</string>
     <string name="verify">Verify</string>
+    <string name="user_profile">Profile</string>
+    <string name="edit_profile_error">There was an error updating your profile. Please try again.</string>
+    <string name="add_place_error">There was an error adding place. Please try again.</string>
+    <string name="home_exists_error">You have already added a home. Please select a different name.</string>
+    <string name="work_exists_error">You have already added a work. Please select a different name.</string>
+    <string name="place_name_error">Place name is mandatory. Please enter a name and try again.</string>
+    <string name="edit_place_error">There was an error editing place. Please try again.</string>
+
+    <!-- Geocoding Intent Service string -->
+    <string name="service_not_available">There was an error geocoding address. Location service is not available.</string>
+    <string name="invalid_lat_long_used">There was an error fetching address. Location is invalid.</string>
+    <string name="no_address_found">There was an error fetching address. Please try again.</string>
 </resources>

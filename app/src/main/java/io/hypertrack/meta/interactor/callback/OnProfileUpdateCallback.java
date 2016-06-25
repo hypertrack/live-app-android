@@ -1,6 +1,6 @@
 package io.hypertrack.meta.interactor.callback;
 
-public abstract class OnProfileUpdateCallback {
-    public abstract void OnSuccess();
-    public abstract void OnError();
+import io.hypertrack.meta.util.SuccessErrorCallback;
+
+public abstract class OnProfileUpdateCallback extends SuccessErrorCallback {
 }
