@@ -30,8 +30,8 @@ public class MetaPlace extends RealmObject implements Serializable{
 
     private String address;
 
-    private Double latitude;
-    private Double longitude;
+    private Double latitude = 0.0;
+    private Double longitude = 0.0;
 
     public int getId() {
         return id;
@@ -107,23 +107,38 @@ public class MetaPlace extends RealmObject implements Serializable{
     }
 
     public MetaPlace(Double latitude, Double longitude) {
+        if (latitude == null || longitude == null)
+            return;
+
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
     public MetaPlace(LatLng latLng) {
+        if (latLng == null)
+            return;
+
         this.latitude = latLng.latitude;
         this.longitude = latLng.longitude;
     }
 
     public MetaPlace(String name, LatLng latLng) {
         this.name = name;
+
+        if (latLng == null) {
+            return;
+        }
+
         this.latitude = latLng.latitude;
         this.longitude = latLng.longitude;
     }
 
     public MetaPlace(String name, Double latitude, Double longitude) {
         this.name = name;
+
+        if (latitude == null || longitude == null)
+            return;
+
         this.latitude = latitude;
         this.longitude = longitude;
     }
