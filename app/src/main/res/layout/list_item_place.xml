@@ -18,7 +18,7 @@
             android:layout_height="40dp"
             android:padding="@dimen/padding_low"
             android:layout_marginLeft="@dimen/margin_high"
-            android:src="@drawable/destination_marker" />
+            android:src="@drawable/ic_favorite" />
 
         <LinearLayout
             android:layout_width="match_parent"

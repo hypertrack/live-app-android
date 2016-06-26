@@ -96,9 +96,9 @@
                                     android:id="@+id/favorite_button"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
                                     android:layout_marginEnd="@dimen/margin_high"
                                     android:onClick="OnFavoriteClick"
+                                    android:layout_centerInParent="true"
                                     android:layout_alignParentEnd="true"
                                     android:background="@null"/>
 
