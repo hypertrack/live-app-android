@@ -325,7 +325,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     public void clearState() {
         this.trip = null;
         this.hyperTrackTrip = null;
-        this.vehicleType = null;
+        this.vehicleType = HTDriverVehicleType.CAR;
         this.stopRefreshingTrip();
         this.stopGeofencing();
         this.clearListeners();
