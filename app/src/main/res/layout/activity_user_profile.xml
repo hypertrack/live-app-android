@@ -22,76 +22,62 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <ImageButton
-        android:id="@+id/user_profile.image"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/margin_xhigh"
-        android:adjustViewBounds="true"
-        android:background="@android:color/transparent"
-        android:padding="0dp"
-        android:scaleType="centerInside"
-        android:src="@drawable/default_profile_pic" />
-
-    <TextView
-        android:id="@+id/user_profile.edit_account"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:onClick="onEditAccountClick"
-        android:padding="@dimen/margin_high"
-        android:text="Edit Account"
-        android:textAllCaps="true"
-        android:textColor="@color/text_highlight"
-        android:textSize="@dimen/text_base" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_high"
-        android:layout_marginTop="@dimen/margin_xxhigh"
-        android:fontFamily="sans-serif-medium"
-        android:text="Favorite Addresses"
-        android:textColor="@color/text_base"
-        android:textSize="@dimen/text_medium" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/user_profile.saved_places"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_high" />
+        android:layout_height="match_parent">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@android:color/white"
-        android:paddingBottom="@dimen/padding_high"
-        android:paddingRight="@dimen/padding_high"
-        android:paddingTop="@dimen/padding_high">
-
-        <ImageView
-            android:id="@+id/user_profile.add_place_icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="@dimen/margin_high"
-            android:src="@drawable/destination_marker" />
-
-        <LinearLayout
+        <ScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginLeft="@dimen/margin_max"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/user_profile.add_place_text"
+            <LinearLayout
+                android:id="@+id/user_profile.parent_layout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Add a new place"
-                android:textColor="@color/text_base"
-                android:textSize="@dimen/text_base" />
-        </LinearLayout>
-    </FrameLayout>
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
+                <ImageButton
+                    android:id="@+id/user_profile.image"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="@dimen/margin_xhigh"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:padding="0dp"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/default_profile_pic" />
+
+                <TextView
+                    android:id="@+id/user_profile.edit_account"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:onClick="onEditAccountClick"
+                    android:padding="@dimen/margin_high"
+                    android:text="Edit Account"
+                    android:textAllCaps="true"
+                    android:textColor="@color/text_highlight"
+                    android:textSize="@dimen/text_base" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_high"
+                    android:layout_marginTop="@dimen/margin_xxhigh"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Favorite Addresses"
+                    android:textColor="@color/text_base"
+                    android:textSize="@dimen/text_medium" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/user_profile.saved_places"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/margin_high" />
+            </LinearLayout>
+        </ScrollView>
+    </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>
