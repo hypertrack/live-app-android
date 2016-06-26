@@ -172,7 +172,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public boolean isTripActive() {
-        return (this.hyperTrackTrip != null);
+        return (this.trip != null);
     }
 
     public void getETA(LatLng origin, LatLng destination, final TripETACallback callback) {
