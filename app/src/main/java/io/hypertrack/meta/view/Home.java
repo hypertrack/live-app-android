@@ -422,13 +422,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
-        int paddingInDpForTop = 175;
-        int paddingInDpForBottom = 50;
-        final float scale = getResources().getDisplayMetrics().density;
-        int paddingInPxForTop = (int) (paddingInDpForTop * scale + 0.5f);
-        int paddingInPxForBottom = (int) (paddingInDpForBottom * scale + 0.5f);
-
-        mMap.setPadding(0,paddingInPxForTop,0,paddingInPxForBottom);
+        updateMapPadding(false);
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -436,6 +430,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 restoreTripStateIfNeeded();
             }
         });
+    }
+
+    private void updateMapPadding(boolean activeTrip) {
+        int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+        int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+        int right = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_side_padding) : getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+        int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+
+        mMap.setPadding(left, top, right, bottom);
     }
 
     @Override
@@ -631,6 +634,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         String name = cursor.getString(nameColumnIndex);
         number = number.replaceAll("\\s","");
         Log.d(TAG, "Number : " + number + " , name : "+name);
+        cursor.close();
 
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         try {
@@ -716,21 +720,33 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     // New Methods
 
     private void updateMapView() {
-        LatLng current = currentLocationMarker.getPosition();
-
-        if (destinationLocationMarker != null) {
-            LatLngBounds bounds = new LatLngBounds.Builder()
-                    .include(current)
-                    .include(destinationLocationMarker.getPosition())
-                    .build();
-
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 50);
-            mMap.animateCamera(cameraUpdate);
-
+        if (currentLocationMarker == null && destinationLocationMarker == null) {
             return;
         }
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(current));
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        if (currentLocationMarker != null) {
+            LatLng current = currentLocationMarker.getPosition();
+            builder.include(current);
+        }
+
+        if (destinationLocationMarker != null) {
+            LatLng destination = destinationLocationMarker.getPosition();
+            builder.include(destination);
+        }
+
+        LatLngBounds bounds = builder.build();
+
+        CameraUpdate cameraUpdate;
+        if (destinationLocationMarker != null && currentLocationMarker != null) {
+            cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+        } else {
+            LatLng latLng = currentLocationMarker != null ? currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
+            cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
+        }
+
+        mMap.animateCamera(cameraUpdate);
     }
 
     private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
@@ -789,6 +805,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 OnTripEnd();
             }
         });
+
+        this.updateMapPadding(true);
     }
 
     private void OnTripEnd() {
@@ -807,6 +825,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
+        this.updateMapPadding(false);
     }
 
     private void share() {
@@ -922,12 +941,12 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void markAsFavorite() {
         favoriteButton.setSelected(true);
         favoriteButton.setClickable(false);
-        favoriteButton.setImageDrawable(getDrawable(R.drawable.ic_star));
+        favoriteButton.setImageResource(R.drawable.ic_favorite);
     }
 
     private void markAsNotFavorite() {
         favoriteButton.setSelected(false);
-        favoriteButton.setImageDrawable(getDrawable(R.drawable.ic_star_faded));
+        favoriteButton.setImageResource(R.drawable.ic_favorite_hollow);
         favoriteButton.setClickable(true);
     }
 
