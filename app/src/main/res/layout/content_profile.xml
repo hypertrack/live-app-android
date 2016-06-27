@@ -1,67 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/appBackground"
-    android:gravity="center_horizontal"
-    android:orientation="vertical">
+    android:background="@color/appBackground">
 
-    <io.hypertrack.meta.util.images.RoundedImageView
-        android:id="@+id/profileImageView"
-        android:layout_width="@dimen/image_view_size"
-        android:layout_height="@dimen/image_view_size"
-        android:layout_marginTop="@dimen/margin_xhigh"
-        android:background="@drawable/circle_image_button"
-        android:padding="0dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/default_profile_pic" />
-
-    <android.support.v7.widget.CardView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_high"
-        android:layout_marginRight="@dimen/margin_high"
-        android:layout_marginTop="@dimen/margin_high"
-        app:cardCornerRadius="2dp"
-        app:cardElevation="0dp">
+        android:layout_height="match_parent"
+        android:background="@color/appBackground"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-        <AutoCompleteTextView
-            android:id="@+id/firstName"
+        <io.hypertrack.meta.util.images.RoundedImageView
+            android:id="@+id/profileImageView"
+            android:layout_width="@dimen/image_view_size"
+            android:layout_height="@dimen/image_view_size"
+            android:layout_marginTop="@dimen/margin_xhigh"
+            android:background="@drawable/circle_image_button"
+            android:padding="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/default_profile_pic" />
+
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:gravity="center_horizontal"
-            android:hint="@string/prompt_firstname"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/text_base"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:padding="@dimen/padding_high"
-            android:singleLine="true" />
-    </android.support.v7.widget.CardView>
+            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_high"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="0dp">
 
-    <android.support.v7.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_high"
-        android:layout_marginRight="@dimen/margin_high"
-        android:layout_marginTop="@dimen/margin_high"
-        app:cardCornerRadius="2dp"
-        app:cardElevation="0dp">
+            <AutoCompleteTextView
+                android:id="@+id/firstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="center_horizontal"
+                android:hint="@string/prompt_firstname"
+                android:inputType="textPersonName"
+                android:maxLines="1"
+                android:padding="@dimen/padding_high"
+                android:singleLine="true"
+                android:textColor="@color/text_base"
+                android:textColorHint="@color/text_secondary" />
+        </android.support.v7.widget.CardView>
 
-        <AutoCompleteTextView
-            android:id="@+id/lastName"
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:gravity="center_horizontal"
-            android:hint="@string/prompt_lastname"
-            android:textColorHint="@color/text_secondary"
-            android:textColor="@color/text_base"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:padding="@dimen/padding_high"
-            android:singleLine="true" />
-    </android.support.v7.widget.CardView>
-</LinearLayout>
+            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_high"
+            app:cardCornerRadius="2dp"
+            app:cardElevation="0dp">
+
+            <AutoCompleteTextView
+                android:id="@+id/lastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:gravity="center_horizontal"
+                android:hint="@string/prompt_lastname"
+                android:inputType="textPersonName"
+                android:maxLines="1"
+                android:padding="@dimen/padding_high"
+                android:singleLine="true"
+                android:textColor="@color/text_base"
+                android:textColorHint="@color/text_secondary" />
+        </android.support.v7.widget.CardView>
+    </LinearLayout>
+</ScrollView>
