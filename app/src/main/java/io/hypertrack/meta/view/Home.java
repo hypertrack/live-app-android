@@ -280,14 +280,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         setSupportActionBar(toolbar);
 
         this.checkIfUserIsOnBoard();
-
-        // Check if Location Permission has been granted
-        if (checkPermission()) {
-            requestForLocationUpdates();
-        } else {
-            requestPermission();
-        }
-
         this.initGoogleClient();
         this.setupEnterDestinationView();
         this.setupAutoCompleteView();
@@ -584,12 +576,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
+
+        // Check if Location Permission has been granted
+        if (checkPermission()) {
+            requestForLocationUpdates();
+        } else {
+            requestPermission();
+        }
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {}
 
     private void requestForLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create();

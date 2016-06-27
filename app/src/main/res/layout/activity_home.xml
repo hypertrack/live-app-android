@@ -75,18 +75,16 @@
                                     android:layout_width="wrap_content"
                                     android:layout_height="match_parent"
                                     android:layout_gravity="center_vertical"
-                                    android:paddingBottom="@dimen/padding_high"
-                                    android:paddingLeft="@dimen/padding_base"
-                                    android:paddingRight="@dimen/padding_base"
-                                    android:paddingTop="@dimen/padding_high"
+                                    android:paddingLeft="@dimen/padding_medium"
+                                    android:paddingRight="@dimen/padding_medium"
                                     android:scaleType="fitCenter"
                                     android:src="@drawable/icon_end_map" />
 
                                 <LinearLayout
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:paddingTop="@dimen/padding_high"
-                                    android:paddingBottom="@dimen/padding_high"
+                                    android:paddingTop="@dimen/padding_medium"
+                                    android:paddingBottom="@dimen/padding_medium"
                                     android:paddingRight="@dimen/padding_high"
                                     android:layout_weight="1"
                                     android:orientation="vertical">
@@ -110,7 +108,7 @@
                                         android:singleLine="true"
                                         android:ellipsize="end"
                                         android:textColor="@color/text_secondary"
-                                        android:textSize="@dimen/text_small"
+                                        android:textSize="@dimen/text_base"
                                         android:visibility="gone" />
                                 </LinearLayout>
 
@@ -157,7 +155,6 @@
                                     android:singleLine="true"
                                     android:textColor="@color/text_base"
                                     android:textSize="@dimen/text_base" />
-
 
                                 <ProgressBar
                                     android:id="@+id/autocomplete_progress"
