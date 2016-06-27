@@ -148,8 +148,17 @@ public class Profile extends AppCompatActivity implements ProfileView {
                     return;
                 }
 
-                profileImage = getScaledFile(imageFile);
-                mProfileImageView.setImageBitmap(getRotatedBitMap(imageFile));
+                profileImage = getScaledFile(getScaledFile(imageFile));
+
+                Bitmap bitmap = getRotatedBitMap(imageFile);
+                if (bitmap == null) {
+                    bitmap = BitmapFactory.decodeFile(imageFile.getPath());
+                }
+
+                if (bitmap != null) {
+                    mProfileImageView.setImageBitmap(bitmap);
+                }
+
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         });

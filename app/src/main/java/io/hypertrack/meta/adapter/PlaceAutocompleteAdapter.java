@@ -205,7 +205,7 @@ public class PlaceAutocompleteAdapter
             } else {
                 final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
 
-                holder.icon.setImageResource(R.drawable.ic_favorite_hollow);
+                holder.icon.setImageResource(R.drawable.ic_marker_gray);
                 holder.header.setText(item.getPrimaryText(STYLE_BOLD));
                 holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(item.getSecondaryText(STYLE_NORMAL));

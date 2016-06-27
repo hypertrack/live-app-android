@@ -15,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.Toast;
 
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.FavoritePlacesAdapter;
@@ -184,8 +185,13 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
+                showDeletePlaceError();
             }
         });
+    }
+
+    private void showDeletePlaceError() {
+        Toast.makeText(this, "There was error deleting place. Please try again.", Toast.LENGTH_LONG).show();
     }
 
     private void showAddPlace(MetaPlace place) {
