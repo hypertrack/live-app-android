@@ -111,6 +111,9 @@ public class AddPlaceAutocompleteAdapter extends
 
         final AutocompletePrediction item = mResultList.get(position);
 
+        // Add Icon for Autocomplete Places
+        holder.icon.setImageResource(R.drawable.ic_marker_gray);
+
         holder.header.setText(item.getPrimaryText(STYLE_BOLD));
         holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
         holder.description.setVisibility(View.VISIBLE);
