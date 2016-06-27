@@ -8,7 +8,7 @@
     <color name="app_primary_light">#F4F4F4</color>
     <color name="app_primary_dark">#606060</color>
 
-    <color name="colorBackground">#F4F4F4</color>
+    <color name="appBackground">#F4F4F4</color>
 
     <color name="text_base">#6a6a6a</color>
     <color name="text_secondary">#888888</color>
@@ -19,4 +19,8 @@
     <color name="text_highlight">@color/colorAccent</color>
 
     <color name="border_color">#C8C8C8</color>
+
+    <color name="divider">#28000000</color>
+    <color name="divider_light">#16000000</color>
+    <color name="divider_dark">#777777</color>
 </resources>

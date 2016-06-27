@@ -14,6 +14,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -62,12 +63,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".view.Register" />
         </activity>
-        <activity
-            android:name=".view.AddAddress"
-            android:label="Custom Address"
-            android:launchMode="singleTop"
-            android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -86,36 +81,17 @@
         <activity
             android:name=".view.Profile"
             android:label="@string/title_activity_generated_login"
-            android:windowSoftInputMode="adjustResize" />
-        <activity
-            android:name=".view.SelectDestination"
-            android:label="Select Destination"
-            android:parentActivityName=".view.AddAddress"
-            android:screenOrientation="portrait" />
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
         <activity android:name=".view.UserProfile" />
+
         <activity android:name=".view.EditProfile" />
+
         <activity android:name=".view.AddFavoritePlace" />
 
         <!-- Register Services here -->
         <service
             android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
-        <service
-            android:name=".service.GcmListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".service.MyInstanceIDListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID" />
-            </intent-filter>
-        </service>
-        <service
-            android:name=".service.RegistrationIntentService"
             android:exported="false" />
 
         <!-- Register Receivers here -->

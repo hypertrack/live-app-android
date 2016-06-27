@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -115,6 +114,9 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Favorite");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         // Fetch Meta Place object passed with intent
         Intent intent = getIntent();
@@ -326,12 +328,6 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add_fav_place, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
     }
@@ -396,5 +392,21 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
                 showToast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add_fav_place, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back button inside toolbar
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else
+            return false;
     }
 }

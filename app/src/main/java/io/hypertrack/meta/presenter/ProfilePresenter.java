@@ -61,12 +61,12 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         profileInteractor.updateUserProfile(new OnProfileUpdateCallback() {
             @Override
             public void OnSuccess() {
-                if (view != null) {
-                    view.navigateToHomeScreen();
-                }
-
                 if (profileImage != null) {
                     profileInteractor.updateUserProfilePic(profileImage);
+                }
+
+                if (view != null) {
+                    view.navigateToHomeScreen();
                 }
             }
 

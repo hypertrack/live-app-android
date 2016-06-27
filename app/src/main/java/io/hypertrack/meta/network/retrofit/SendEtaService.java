@@ -9,6 +9,7 @@ import io.hypertrack.meta.model.PlaceDTO;
 import io.hypertrack.meta.model.Trip;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.store.VerifyResponse;
 import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -26,21 +27,21 @@ import retrofit2.http.Query;
  */
 public interface SendETAService {
 
-    @PATCH("/api/v1/users/{id}/")
+    @POST("/api/v1/users/{id}/edit/")
     Call<User> updateUserName(@Path("id") int id, @Body Map<String, String> user);
 
     @Multipart
     @POST("/api/v1/users/{id}/add_photo/")
     Call<Map<String, Object>> updateUserProfilePic(@Path("id") int id, @PartMap Map<String, RequestBody> params);
 
-    @POST("/api/v1/users/")
-    Call<OnboardingUser> getUser(@Body Map<String, String> phoneNumber);
+    @POST("/api/v1/login/")
+    Call<Map<String, Object>> getUser(@Body Map<String, String> phoneNumber);
 
-    @POST("/api/v1/users/{id}/verify_phone_number/")
-    Call<Map<String, Object>> verifyUser(@Path("id") int id, @Body Map<String, String> verificationCode);
+    @POST("/api/v1/verify_code/")
+    Call<VerifyResponse> verifyUser(@Body Map<String, String> verificationParams);
 
-    @POST("/api/v1/users/{id}/resend_verification_code/")
-    Call<Map<String, Object>> resendCode(@Path("id") int id);
+    @POST("/api/v1/resend_code/")
+    Call<Map<String, Object>> resendCode(@Body Map<String, String> phoneNumber);
 
     @GET("/api/v1/eta/")
     Call<List<TripETAResponse>> getETA(@Query("origin") String origin, @Query("destination") String destination);
@@ -54,7 +55,7 @@ public interface SendETAService {
     @POST("/api/v1/places/")
     Call<MetaPlace> addPlace(@Body PlaceDTO place);
 
-    @PATCH("/api/v1/places/{id}/")
+    @POST("/api/v1/places/{id}/edit/")
     Call<MetaPlace> editPlace(@Path("id") int id, @Body PlaceDTO place);
 
     @DELETE("/api/v1/places/{id}/")

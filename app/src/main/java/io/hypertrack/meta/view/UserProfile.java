@@ -2,15 +2,19 @@ package io.hypertrack.meta.view;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.ScrollView;
 
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.FavoritePlacesAdapter;
@@ -25,9 +29,12 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
 
     private final String TAG = UserProfile.class.getSimpleName();
 
+    private ScrollView mScrollView;
     private RecyclerView mRecyclerView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
     private FavoritePlacesAdapter favoritePlacesAdapter;
     private ProgressDialog mProgressDialog;
+    private ImageView profileImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +43,30 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
         this.updateTitle();
 
+        mScrollView = (ScrollView) findViewById(R.id.scrollView);
+        mScrollView.smoothScrollTo(0, 0);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.user_profile_saved_places);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
+        mSwipeRefreshLayout.setColorSchemeColors(Color.GRAY);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                UserProfile.this.refreshFavorites();
+            }
+        });
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setAutoMeasureEnabled(true);
         mRecyclerView.setLayoutManager(layoutManager);
+        profileImageView = (ImageView)findViewById(R.id.user_profile_image);
 
         this.setupFavoritePlacesAdapter();
+        this.updateProfileImage();
     }
 
     private void setupFavoritePlacesAdapter() {
@@ -57,21 +79,15 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
         mRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 
-    public void refreshButtonClicked(MenuItem menuItem) {
-        this.refreshFavorites();
-    }
-
     public void onEditAccountClick(View view) {
         Intent editProfileIntent = new Intent(this, EditProfile.class);
         startActivityForResult(editProfileIntent, EditProfile.EDIT_PROFILE_RESULT_CODE, null);
     }
 
-//    public void onDoneButtonClicked(MenuItem v) {
-//        // TODO: 23/06/16 Add Done Btn functionality
-//        finish();
-//    }
-
     private void refreshFavorites() {
+        // Hide the Swipe Refresh Loader
+        mSwipeRefreshLayout.setRefreshing(false);
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Refresh favorite places");
         mProgressDialog.setCancelable(false);
@@ -89,12 +105,6 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
                 mProgressDialog.dismiss();
             }
         });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_user_profile, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     private void updateTitle() {
@@ -193,6 +203,28 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
             this.updateFavoritesAdapter();
         } else if (requestCode == EditProfile.EDIT_PROFILE_RESULT_CODE) {
             this.updateTitle();
+            this.updateProfileImage();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back button inside toolbar
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else
+            return false;
+    }
+
+    private void updateProfileImage() {
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap bitmap = user.getImageBitmap();
+            if (bitmap != null) {
+                profileImageView.setImageBitmap(bitmap);
+                profileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            }
         }
     }
 }

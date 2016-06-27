@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
@@ -53,7 +52,6 @@ import java.util.concurrent.TimeUnit;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
-import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.view.Home;
 
 /**
@@ -178,18 +176,38 @@ public class PlaceAutocompleteAdapter
         if (!this.isSearching) {
             MetaPlace place = this.favorites.get(position);
 
+            if (place.isHome()) {
+                holder.icon.setImageResource(R.drawable.ic_home);
+            } else if (place.isWork()) {
+                holder.icon.setImageResource(R.drawable.ic_work);
+            } else {
+                holder.icon.setImageResource(R.drawable.ic_favorite);
+            }
+
             holder.header.setText(place.getName());
+            holder.description.setVisibility(View.VISIBLE);
             holder.description.setText(place.getAddress());
         } else {
             if (this.isFilteredPlace(position)) {
                 MetaPlace place = this.filteredFavorites.get(position);
 
+                if (place.isHome()) {
+                    holder.icon.setImageResource(R.drawable.ic_home);
+                } else if (place.isWork()) {
+                    holder.icon.setImageResource(R.drawable.ic_work);
+                } else {
+                    holder.icon.setImageResource(R.drawable.ic_favorite);
+                }
+
                 holder.header.setText(place.getName());
+                holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(place.getAddress());
             } else {
                 final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
 
+                holder.icon.setImageResource(R.drawable.ic_favorite_hollow);
                 holder.header.setText(item.getPrimaryText(STYLE_BOLD));
+                holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
             }
         }

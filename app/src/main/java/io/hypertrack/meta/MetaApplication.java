@@ -35,7 +35,7 @@ public class MetaApplication extends Application {
     }
 
     public void setupRealm() {
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).build();
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build();
         Realm.setDefaultConfiguration(realmConfiguration);
     }
 
