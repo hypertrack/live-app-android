@@ -1,6 +1,8 @@
 package io.hypertrack.meta.view;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -168,24 +170,42 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
     }
 
     @Override
-    public void OnDeletePlace(MetaPlace place) {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Deleting place");
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
+    public void OnDeletePlace(final MetaPlace place) {
 
-        UserStore.sharedStore.deletePlace(new MetaPlace(place), new SuccessErrorCallback() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage("Do you want to delete this favorite address?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
-            public void OnSuccess() {
-                mProgressDialog.dismiss();
-                updateFavoritesAdapter();
-            }
+            public void onClick(DialogInterface dialogInterface, int i) {
 
-            @Override
-            public void OnError() {
-                mProgressDialog.dismiss();
+                // Proceed with Deleting Favorite Place
+                mProgressDialog = new ProgressDialog(UserProfile.this);
+                mProgressDialog.setMessage("Deleting place");
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
+
+                UserStore.sharedStore.deletePlace(new MetaPlace(place), new SuccessErrorCallback() {
+                    @Override
+                    public void OnSuccess() {
+                        mProgressDialog.dismiss();
+                        updateFavoritesAdapter();
+                    }
+
+                    @Override
+                    public void OnError() {
+                        mProgressDialog.dismiss();
+                    }
+                });
             }
         });
+        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     private void showAddPlace(MetaPlace place) {
