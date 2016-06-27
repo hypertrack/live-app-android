@@ -15,9 +15,9 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_marker"
         android:layout_gravity="center"
-        android:paddingBottom="25dp"/>
+        android:paddingBottom="25dp"
+        android:src="@drawable/ic_marker" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -34,7 +34,7 @@
             android:elevation="@dimen/elevation_high"
             app:cardCornerRadius="2dp">
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/add_fav_place.name_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -48,13 +48,17 @@
                     android:ellipsize="end"
                     android:gravity="center"
                     android:hint="@string/favorite_place_name_hint"
-                    android:padding="16dp"
+                    android:paddingBottom="@dimen/padding_high"
+                    android:paddingLeft="@dimen/padding_high"
+                    android:paddingRight="@dimen/padding_huge"
+                    android:paddingTop="@dimen/padding_high"
                     android:singleLine="true"
                     android:textColor="@color/text_base"
                     android:textColorHint="@color/text_disabled"
                     android:textSize="@dimen/text_base" />
 
                 <ImageView
+                    android:id="@+id/add_fav_place.name_clear"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical|right"
@@ -62,8 +66,9 @@
                     android:paddingRight="@dimen/padding_base"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_cancel"
-                    android:visibility="gone"/>
-            </LinearLayout>
+                    android:onClick="onPlaceNameClearClick"
+                    android:visibility="gone" />
+            </FrameLayout>
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
@@ -77,7 +82,7 @@
             android:elevation="@dimen/elevation_high"
             app:cardCornerRadius="2dp">
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/add_fav_place.address_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -89,17 +94,21 @@
                     android:layout_height="wrap_content"
                     android:background="@null"
                     android:ellipsize="end"
-                    android:maxLines="1"
-                    android:scrollHorizontally="true"
                     android:gravity="center"
                     android:hint="@string/favorite_place_address_hint"
-                    android:padding="16dp"
+                    android:maxLines="1"
+                    android:paddingBottom="@dimen/padding_high"
+                    android:paddingLeft="@dimen/padding_high"
+                    android:paddingRight="@dimen/padding_huge"
+                    android:paddingTop="@dimen/padding_high"
+                    android:scrollHorizontally="true"
                     android:singleLine="true"
                     android:textColor="@color/text_base"
                     android:textColorHint="@color/text_disabled"
                     android:textSize="@dimen/text_base" />
 
                 <ImageView
+                    android:id="@+id/add_fav_place.address_clear"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_gravity="center_vertical|right"
@@ -107,8 +116,9 @@
                     android:paddingRight="@dimen/padding_base"
                     android:scaleType="centerInside"
                     android:src="@drawable/ic_cancel"
-                    android:visibility="gone"/>
-            </LinearLayout>
+                    android:onClick="onPlaceAddressClearClick"
+                    android:visibility="gone" />
+            </FrameLayout>
         </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
