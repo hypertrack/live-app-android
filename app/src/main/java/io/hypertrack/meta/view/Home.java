@@ -325,14 +325,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
-    public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
-
-        if (results != null && results.size() > 0) {
-            showAutocompleteResults(true);
-        } else {
-            showAutocompleteResults(false);
-        }
-
+    public void processPublishedResults(boolean publish) {
+        showAutocompleteResults(publish);
         mAutocompleteLoader.setVisibility(View.GONE);
     }
 

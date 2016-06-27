@@ -279,6 +279,7 @@ public class PlaceAutocompleteAdapter
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (!isSearching) {
+                    ((Home) context).processPublishedResults(favorites != null && favorites.size() > 0);
                     return;
                 }
 
@@ -296,7 +297,7 @@ public class PlaceAutocompleteAdapter
                     notifyItemRangeRemoved(0, 0);
                 }
 
-                ((Home) context).processPublishedResults(mResultList);
+                ((Home) context).processPublishedResults(mResultList != null && mResultList.size() > 0);
             }
 
             @Override
