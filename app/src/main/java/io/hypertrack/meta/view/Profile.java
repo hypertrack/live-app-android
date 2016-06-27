@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,9 +40,6 @@ import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
 
 public class Profile extends AppCompatActivity implements ProfileView {
-
-    private static final String TAG = Profile.class.getSimpleName();
-    private static final int MAX_IMAGE_DIMENSION = 400;
 
     // UI references.
     @Bind(R.id.firstName)
@@ -111,7 +109,23 @@ public class Profile extends AppCompatActivity implements ProfileView {
                     .load(profileURL)
                     .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
-                    .into(mProfileImageButton);
+                    .into(new Target() {
+                        @Override
+                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                            profileImage = getFileFromBitmap(bitmap);
+                            mProfileImageButton.setImageBitmap(bitmap);
+                        }
+
+                        @Override
+                        public void onBitmapFailed(Drawable errorDrawable) {
+
+                        }
+
+                        @Override
+                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+
+                        }
+                    });
         }
     }
 
@@ -290,6 +304,28 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     public void onNextButtonClicked(MenuItem menuItem) {
         this.onSignInButtonClicked();
+    }
+
+    private File getFileFromBitmap(Bitmap bitmap) {
+        try {
+            File file = new File(this.getCacheDir(), "temp");
+            if (!file.createNewFile()) {
+                return null;
+            }
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 0, stream);
+            byte[] bitmapData = stream.toByteArray();
+
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(bitmapData);
+            fileOutputStream.flush();
+            fileOutputStream.close();
+
+            return file;
+        }  catch (Exception e) {
+            return null;
+        }
     }
 }
 
