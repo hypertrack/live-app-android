@@ -31,7 +31,7 @@ public class PhoneUtils {
             if (service != null) {
                 code = service.getNetworkCountryIso();
             }
-            if (code == null) {
+            if (TextUtils.isEmpty(code)) {
                 code = paramContext.getResources().getConfiguration().locale.getCountry();
             }
         }

@@ -12,15 +12,28 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <io.hypertrack.meta.util.images.RoundedImageView
-            android:id="@+id/profileImageView"
+        <FrameLayout
             android:layout_width="@dimen/image_view_size"
             android:layout_height="@dimen/image_view_size"
-            android:layout_marginTop="@dimen/margin_xhigh"
-            android:background="@drawable/circle_image_button"
-            android:padding="0dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/default_profile_pic" />
+            android:layout_marginTop="@dimen/margin_xhigh">
+
+            <io.hypertrack.meta.util.images.RoundedImageView
+                android:id="@+id/profile.image_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/circle_image_button"
+                android:padding="0dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/default_profile_pic" />
+
+            <ProgressBar
+                android:id="@+id/profile.image_loader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone"/>
+        </FrameLayout>
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
@@ -32,7 +45,7 @@
             app:cardElevation="0dp">
 
             <AutoCompleteTextView
-                android:id="@+id/firstName"
+                android:id="@+id/profile.first_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/theme"
@@ -56,7 +69,7 @@
             app:cardElevation="0dp">
 
             <AutoCompleteTextView
-                android:id="@+id/lastName"
+                android:id="@+id/profile.last_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/theme"

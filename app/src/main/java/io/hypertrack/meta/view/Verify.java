@@ -12,10 +12,12 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -89,6 +91,18 @@ public class Verify extends AppCompatActivity implements VerifyView {
             @Override
             public void afterTextChanged(Editable s) {
                 Verify.this.onTextChanged();
+            }
+        });
+
+        verificationCodeView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    Verify.this.verifyCode();
+                    return true;
+                }
+
+                return false;
             }
         });
 

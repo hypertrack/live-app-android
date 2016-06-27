@@ -12,29 +12,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
-import io.hypertrack.meta.MetaApplication;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.model.Country;
 import io.hypertrack.meta.model.CountryMaster;
 import io.hypertrack.meta.model.CountrySpinnerAdapter;
 import io.hypertrack.meta.presenter.IRegisterPresenter;
 import io.hypertrack.meta.presenter.RegisterPresenter;
-import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.PhoneUtils;
-import io.hypertrack.meta.util.SharedPreferenceManager;
 
 public class Register extends AppCompatActivity implements RegisterView {
 
@@ -51,6 +50,8 @@ public class Register extends AppCompatActivity implements RegisterView {
     private String isoCode;
     private IRegisterPresenter<RegisterView> registerPresenter = new RegisterPresenter();
 
+    private final int PERMISSION_REQUEST_CODE = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,8 +64,48 @@ public class Register extends AppCompatActivity implements RegisterView {
         ButterKnife.bind(this);
         registerPresenter.attachView(this);
 
-        initCountryFlagSpinner();
-//        poulatePhoneNumberIfAvailable();
+        phoneNumberView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    Register.this.registerPhoneNumber();
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        if (checkPermission()) {
+            initCountryFlagSpinner();
+        } else {
+            requestTelelphonyManagerPermission();
+        }
+    }
+
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        return result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestTelelphonyManagerPermission(){
+//        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+//            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
+//
+//        } else {
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+//        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                // Get Devices's Country Code for both Positive & Negative cases
+                initCountryFlagSpinner();
+                break;
+        }
     }
 
     @Override

@@ -47,6 +47,7 @@
                     android:background="@null"
                     android:ellipsize="end"
                     android:gravity="center"
+                    android:inputType="textCapWords"
                     android:hint="@string/favorite_place_name_hint"
                     android:paddingBottom="@dimen/padding_high"
                     android:paddingLeft="@dimen/padding_high"
@@ -55,7 +56,7 @@
                     android:singleLine="true"
                     android:textColor="@color/text_base"
                     android:textColorHint="@color/text_disabled"
-                    android:textSize="@dimen/text_base" />
+                    android:textSize="@dimen/text_medium" />
 
                 <ImageView
                     android:id="@+id/add_fav_place.name_clear"
@@ -97,6 +98,7 @@
                     android:gravity="center"
                     android:hint="@string/favorite_place_address_hint"
                     android:maxLines="1"
+                    android:inputType="textCapWords"
                     android:paddingBottom="@dimen/padding_high"
                     android:paddingLeft="@dimen/padding_high"
                     android:paddingRight="@dimen/padding_huge"
@@ -105,7 +107,7 @@
                     android:singleLine="true"
                     android:textColor="@color/text_base"
                     android:textColorHint="@color/text_disabled"
-                    android:textSize="@dimen/text_base" />
+                    android:textSize="@dimen/text_medium" />
 
                 <ImageView
                     android:id="@+id/add_fav_place.address_clear"

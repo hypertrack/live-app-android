@@ -59,6 +59,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -581,7 +582,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         if (checkPermission()) {
             requestForLocationUpdates();
         } else {
-            requestPermission();
+            requestLocationPermission();
         }
     }
 
@@ -628,7 +629,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestPermission(){
+    private void requestLocationPermission(){
 //        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
 //            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
 //
