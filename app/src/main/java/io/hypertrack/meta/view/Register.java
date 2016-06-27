@@ -65,10 +65,6 @@ public class Register extends AppCompatActivity implements RegisterView {
 
         initCountryFlagSpinner();
 //        poulatePhoneNumberIfAvailable();
-
-        if(!checkPermission()) {
-            requestPermission();
-        }
     }
 
     @Override
@@ -138,36 +134,6 @@ public class Register extends AppCompatActivity implements RegisterView {
 //            phoneNumberView.setText(number);
 //        }
 //    }
-
-    private static final int PERMISSION_REQUEST_CODE = 1;
-
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        return result == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void requestPermission(){
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)){
-            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
-
-        } else {
-            ActivityCompat.requestPermissions(this,new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_CODE);
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_CODE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
-                } else {
-                    Toast.makeText(this,"Permission Denied, You cannot access location data.",Toast.LENGTH_LONG).show();
-                }
-                break;
-        }
-    }
 
     @Override
     public void registrationFailed() {
