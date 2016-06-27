@@ -35,7 +35,6 @@ import io.hypertrack.meta.R;
 import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.view.AddFavoritePlace;
-import io.hypertrack.meta.view.Home;
 
 /**
  * Created by piyush on 23/06/16.
@@ -114,6 +113,7 @@ public class AddPlaceAutocompleteAdapter extends
 
         holder.header.setText(item.getPrimaryText(STYLE_BOLD));
         holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
+        holder.description.setVisibility(View.VISIBLE);
     }
 
     @Override

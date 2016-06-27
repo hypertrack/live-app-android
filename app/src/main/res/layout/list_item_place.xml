@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:paddingBottom="@dimen/padding_medium"
         android:paddingRight="@dimen/padding_high"
-        android:paddingTop="@dimen/padding_medium">
+        android:paddingTop="@dimen/padding_medium"
+        android:paddingBottom="@dimen/padding_medium">
 
         <ImageView
             android:id="@+id/item_place.icon"
@@ -24,7 +24,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -38,7 +38,6 @@
                     android:id="@+id/item_place.title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
                     android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
                     android:singleLine="true"
@@ -53,7 +52,6 @@
                     android:layout_gravity="center_vertical"
                     android:ellipsize="end"
                     android:singleLine="true"
-                    android:text="This is the description"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_base"
                     android:visibility="gone" />
@@ -64,8 +62,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_action_delete"
-                android:visibility="gone"
-                tools:visibility="visible" />
+                android:visibility="gone" />
         </LinearLayout>
     </FrameLayout>
 

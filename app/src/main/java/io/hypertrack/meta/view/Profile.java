@@ -14,10 +14,16 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
@@ -42,19 +48,46 @@ import io.hypertrack.meta.util.images.RoundedImageView;
 public class Profile extends AppCompatActivity implements ProfileView {
 
     // UI references.
-    @Bind(R.id.firstName)
+    @Bind(R.id.profile_first_name)
     public AutoCompleteTextView mFirstNameView;
 
-    @Bind(R.id.lastName)
+    @Bind(R.id.profile_last_name)
     public AutoCompleteTextView mLastNameView;
 
-    @Bind(R.id.profileImageView)
+    @Bind(R.id.profile_image_view)
     public RoundedImageView mProfileImageView;
+
+    @Bind(R.id.profile_image_loader)
+    public ProgressBar mProfileImageLoader;
 
     private File profileImage;
 
     private ProgressDialog mProgressDialog;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
+
+    private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                mLastNameView.requestFocus();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private TextView.OnEditorActionListener mLastNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                Profile.this.onSignInButtonClicked();
+                return true;
+            }
+
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +103,9 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         ButterKnife.bind(this);
         presenter.attachView(this);
+
+        mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
+        mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
 
         if (!checkPermission()) {
             requestPermission();
@@ -91,7 +127,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
         presenter.attemptLogin(firstName, lastName, profileImage);
     }
 
-    @OnClick(R.id.profileImageView)
+    @OnClick(R.id.profile_image_view)
     public void onImageButtonClicked() {
         EasyImage.openChooser(Profile.this, "Please select", true);
     }
@@ -107,27 +143,33 @@ public class Profile extends AppCompatActivity implements ProfileView {
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
+            Target target = new Target() {
+                @Override
+                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                    Log.d("Profile", "onBitmapLoaded called!");
+                    profileImage = getFileFromBitmap(bitmap);
+                    mProfileImageView.setImageBitmap(bitmap);
+                    mProfileImageLoader.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onBitmapFailed(Drawable errorDrawable) {
+                    Log.d("Profile", "onBitmapFailed called!");
+                    mProfileImageLoader.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onPrepareLoad(Drawable placeHolderDrawable) {
+                    Log.d("Profile", "onPrepareLoad called!");
+                }
+            };
+
+            mProfileImageLoader.setVisibility(View.VISIBLE);
             Picasso.with(this)
                     .load(profileURL)
                     .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
-                    .into(new Target() {
-                        @Override
-                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                            profileImage = getFileFromBitmap(bitmap);
-                            mProfileImageView.setImageBitmap(bitmap);
-                        }
-
-                        @Override
-                        public void onBitmapFailed(Drawable errorDrawable) {
-
-                        }
-
-                        @Override
-                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-
-                        }
-                    });
+                    .into(target);
             mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
     }

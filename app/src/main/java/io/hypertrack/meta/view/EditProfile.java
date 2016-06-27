@@ -9,10 +9,13 @@ import android.media.ExifInterface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -35,18 +38,42 @@ public class EditProfile extends AppCompatActivity {
 
     public static final int EDIT_PROFILE_RESULT_CODE = 101;
 
-    @Bind(R.id.firstName)
+    @Bind(R.id.profile_first_name)
     public AutoCompleteTextView mFirstNameView;
 
-    @Bind(R.id.lastName)
+    @Bind(R.id.profile_last_name)
     public AutoCompleteTextView mLastNameView;
 
-    @Bind(R.id.profileImageView)
+    @Bind(R.id.profile_image_view)
     public RoundedImageView mProfileImageView;
 
     private File profileImage;
 
     private ProgressDialog mProgressDialog;
+
+    private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                mLastNameView.requestFocus();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private TextView.OnEditorActionListener mLastNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                EditProfile.this.doneButtonClicked(null);
+                return true;
+            }
+
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +87,9 @@ public class EditProfile extends AppCompatActivity {
         getSupportActionBar().setHomeButtonEnabled(true);
 
         ButterKnife.bind(this);
+
+        mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
+        mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
 
         this.setupViews();
     }
@@ -177,7 +207,7 @@ public class EditProfile extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @OnClick(R.id.profileImageView)
+    @OnClick(R.id.profile_image_view)
     public void onImageButtonClicked() {
         EasyImage.openChooser(EditProfile.this, "Please select", true);
     }

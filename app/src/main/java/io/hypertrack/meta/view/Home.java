@@ -1,9 +1,11 @@
 package io.hypertrack.meta.view;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,6 +13,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -55,6 +59,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -83,6 +88,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private static final String TAG = AppCompatActivity.class.getSimpleName();
     private static final long INTERVAL_TIME = 5000;
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
 
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
@@ -274,7 +281,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         setSupportActionBar(toolbar);
 
         this.checkIfUserIsOnBoard();
-
         this.initGoogleClient();
         this.setupEnterDestinationView();
         this.setupAutoCompleteView();
@@ -444,17 +450,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap.setPadding(left, top, right, bottom);
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
-                + connectionResult.getErrorCode());
-
-        // TODO(Developer): Check error code and notify the user of error state and resolution.
-        Toast.makeText(this,
-                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
-                Toast.LENGTH_SHORT).show();
-    }
-
     private void addMarkerToCurrentLocation(LatLng latLng) {
         currentLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
@@ -576,13 +571,17 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-        requestForLocationUpdates();
+
+        // Check if Location Permission has been granted
+        if (checkPermission()) {
+            requestForLocationUpdates();
+        } else {
+            requestLocationPermission();
+        }
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {}
 
     private void requestForLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create();
@@ -619,6 +618,34 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAdapter.setBounds(getBounds(latLng, 10000));
     }
 
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        return result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestLocationPermission(){
+//        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+//            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
+//
+//        } else {
+        ActivityCompat.requestPermissions(this,new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_CODE);
+//        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requestForLocationUpdates();
+                } else {
+                    Toast.makeText(this,"Permission Denied, You cannot access location data.",Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
@@ -626,7 +653,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     }
 
-    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters ){
+    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters) {
         double latRadian = Math.toRadians(latLng.latitude);
 
         double degLatKm = 110.574235;
@@ -671,21 +698,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void showEndTripError() {
         Toast.makeText(this, getString(R.string.end_trip_error), Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void onResult(Status status) {
-        if (status.isSuccess()) {
-            Log.v(TAG, "Geofencing added successfully");
-        } else {
-            Log.v(TAG, "Geofencing not added. There was an error");
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mProgressDialog != null) mProgressDialog.dismiss();
     }
 
     // New Methods
@@ -861,21 +873,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         startActivity(profileIntent);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (enterDestinationLayoutClicked) {
-           onEnterDestinationBackClick(null);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
     public void OnFavoriteClick(View view) {
         TripManager tripManager = TripManager.getSharedManager();
         MetaPlace place = tripManager.getPlace();
@@ -941,6 +938,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.addMarkerToCurrentLocation(position);
     }
 
+    private void setupFavoriteButton() {
+        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
+        favoriteButton.setVisibility(View.GONE);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -948,8 +950,44 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         this.updateCurrentLocationMarker();
     }
 
-    private void setupFavoriteButton() {
-        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
-        favoriteButton.setVisibility(View.GONE);
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+                + connectionResult.getErrorCode());
+
+        // TODO(Developer): Check error code and notify the user of error state and resolution.
+        Toast.makeText(this,
+                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (enterDestinationLayoutClicked) {
+            onEnterDestinationBackClick(null);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onResult(Status status) {
+        if (status.isSuccess()) {
+            Log.v(TAG, "Geofencing added successfully");
+        } else {
+            Log.v(TAG, "Geofencing not added. There was an error");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mProgressDialog != null) mProgressDialog.dismiss();
     }
 }
