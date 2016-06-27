@@ -1,7 +1,16 @@
 package io.hypertrack.meta.model;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.google.gson.annotations.SerializedName;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +36,8 @@ public class User extends RealmObject {
     private String phoneNumber;
 
     private String photo;
+
+    private byte[] photoData;
 
     @SerializedName("hypertrack_driver_id")
     private String hypertrackDriverID;
@@ -214,5 +225,35 @@ public class User extends RealmObject {
         }
 
         return fullName;
+    }
+
+    public void saveImageBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        this.photoData = byteArrayOutputStream .toByteArray();
+    }
+
+    public Bitmap getImageBitmap() {
+        if (this.photoData == null) {
+            return null;
+        }
+
+        return BitmapFactory.decodeByteArray(this.photoData, 0, this.photoData.length);
+    }
+
+    public void saveFileAsBitmap(File file) {
+        int size = (int) file.length();
+        byte[] bytes = new byte[size];
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            buf.read(bytes, 0, bytes.length);
+            buf.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        this.photoData = bytes;
     }
 }

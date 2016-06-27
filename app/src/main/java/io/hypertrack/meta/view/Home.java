@@ -1,30 +1,30 @@
 package io.hypertrack.meta.view;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,8 +32,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -58,10 +59,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,17 +80,16 @@ import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.AnimationUtils;
-import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.NetworkUtils;
-import io.hypertrack.meta.util.PhoneUtils;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = AppCompatActivity.class.getSimpleName();
-    private static final int REQUEST_SHARE_CONTACT_CODE = 1;
     private static final long INTERVAL_TIME = 5000;
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
 
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
@@ -104,10 +100,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private Toolbar toolbar;
     private AppBarLayout appBarLayout;
 
-    private TextView enterDestinationText;
+    private TextView destinationText;
+    private TextView destinationDescription;
     private TextView mAutocompletePlacesView;
-    private RelativeLayout enterDestinationLayout;
-    private FrameLayout mAutocompletePlacesLayout;
+    private LinearLayout enterDestinationLayout;
+    private LinearLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Marker currentLocationMarker;
@@ -120,6 +117,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private View customMarkerView;
     private ProgressDialog mProgressDialog;
     private ImageButton favoriteButton;
+    private ProgressBar mAutocompleteLoader;
 
     private boolean enterDestinationLayoutClicked = false;
 
@@ -140,8 +138,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                     destinationLocationMarker.remove();
                     destinationLocationMarker = null;
                 }
+
+                showETAError();
             }
         });
+    }
+
+    private void showETAError() {
+        Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_LONG).show();
     }
 
     private void onETASuccess(TripETAResponse response, MetaPlace place) {
@@ -161,15 +165,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             //Restore Default State for Enter Destination Layout
             onEnterDestinationBackClick(null);
 
+            destinationText.setGravity(Gravity.LEFT);
             // Set the Selected Place Name in the Enter Destination Layout
-            enterDestinationText.setText(place.getName());
+            destinationText.setText(place.getName());
+
+            // Set the selected Place Description as Place Address
+            destinationDescription.setText(place.getAddress());
+            destinationDescription.setVisibility(View.VISIBLE);
+
             KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
             onSelectPlace(place);
         }
 
         @Override
         public void OnError() {
-
+            destinationDescription.setVisibility(View.GONE);
+            destinationDescription.setText("");
         }
     };
 
@@ -188,6 +199,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
             mAdapter.setFilterString(constraint);
+
+            if (constraint.length() > 0)
+                mAutocompleteLoader.setVisibility(View.VISIBLE);
         }
     };
 
@@ -197,7 +211,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             TripManager.getSharedManager().clearState();
             OnTripEnd();
 
-            enterDestinationText.setText(getString(R.string.autocomplete_hint));
+            // Reset the Destination Text View
+            destinationText.setGravity(Gravity.CENTER);
+            destinationText.setText("");
+
+            // Reset the Destionation Description View
+            destinationDescription.setVisibility(View.GONE);
+            destinationDescription.setText("");
+
             enterDestinationLayoutClicked = true;
 
             // Hide the AppBar
@@ -212,7 +233,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
 
             showAutocompleteResults(true);
-
             updateAutoCompleteResults();
         }
     };
@@ -260,16 +280,15 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         setSupportActionBar(toolbar);
 
+        this.checkIfUserIsOnBoard();
         this.initGoogleClient();
         this.setupEnterDestinationView();
         this.setupAutoCompleteView();
         this.setupShareButton();
         this.setupSendETAButton();
-        this.initCustomMarkerView();
         this.setupNavigateButton();
         this.setupFavoriteButton();
-
-        checkIfUserIsOnBoard();
+        this.initCustomMarkerView();
 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
@@ -288,18 +307,20 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupEnterDestinationView() {
-        enterDestinationText = (TextView) findViewById(R.id.enter_destination_text);
-        enterDestinationLayout = (RelativeLayout) findViewById(R.id.enter_destination_layout);
+        destinationText = (TextView) findViewById(R.id.destination_text);
+        destinationDescription = (TextView) findViewById(R.id.destination_desc);
+
+        enterDestinationLayout = (LinearLayout) findViewById(R.id.enter_destination_layout);
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
     }
 
     private void setupAutoCompleteView() {
         mAutocompletePlacesView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
-        mAutocompletePlacesLayout = (FrameLayout) findViewById(R.id.autocomplete_places_layout);
+        mAutocompletePlacesLayout = (LinearLayout) findViewById(R.id.autocomplete_places_layout);
         mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
-
+        mAutocompleteLoader = (ProgressBar) findViewById(R.id.autocomplete_progress);
         mAutocompletePlacesView.addTextChangedListener(mTextWatcher);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
@@ -310,15 +331,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
-    public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
-
-        if (results != null && results.size() > 0) {
-            showAutocompleteResults(true);
-        } else {
-            showAutocompleteResults(false);
-        }
-        // TODO: 22/06/16 Add Loader while fetching Places Autocomplete data 
-//        ((Home) context).customLoader.setVisibility(View.GONE);
+    public void processPublishedResults(boolean publish) {
+        showAutocompleteResults(publish);
+        mAutocompleteLoader.setVisibility(View.GONE);
     }
 
     private void showAutocompleteResults(boolean show) {
@@ -351,7 +366,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 MetaPlace place = tripManager.getPlace();
                 updateViewForETASuccess(0, place.getLatLng());
-                enterDestinationText.setText(place.getAddress());
+                destinationText.setGravity(Gravity.LEFT);
+                destinationText.setText(place.getName());
+
+                destinationDescription.setText(place.getAddress());
+                destinationDescription.setVisibility(View.VISIBLE);
 
                 onTripStart();
             }
@@ -368,7 +387,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!TripManager.getSharedManager().isTripActive()) {
+                if (!TripManager.getSharedManager().isTripActive()) {
                     startTrip();
                 } else {
                     endTrip();
@@ -385,16 +404,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         } else {
             UserStore.sharedStore.initializeUser();
         }
-    }
-
-    private String getImageToPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, "None");
-    }
-
-    public static Bitmap decodeToBase64(String decodeImageString) {
-        byte[] decodedByte = Base64.decode(decodeImageString, 0);
-        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
     }
 
     private void initGoogleClient() {
@@ -422,13 +431,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
-        int paddingInDpForTop = 175;
-        int paddingInDpForBottom = 50;
-        final float scale = getResources().getDisplayMetrics().density;
-        int paddingInPxForTop = (int) (paddingInDpForTop * scale + 0.5f);
-        int paddingInPxForBottom = (int) (paddingInDpForBottom * scale + 0.5f);
-
-        mMap.setPadding(0,paddingInPxForTop,0,paddingInPxForBottom);
+        updateMapPadding(false);
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -438,15 +441,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         });
     }
 
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
-                + connectionResult.getErrorCode());
+    private void updateMapPadding(boolean activeTrip) {
+        int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+        int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+        int right = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_side_padding) : getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+        int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
 
-        // TODO(Developer): Check error code and notify the user of error state and resolution.
-        Toast.makeText(this,
-                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
-                Toast.LENGTH_SHORT).show();
+        mMap.setPadding(left, top, right, bottom);
     }
 
     private void addMarkerToCurrentLocation(LatLng latLng) {
@@ -457,6 +458,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private Bitmap getBitMapForView(Context context, View view) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
+
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
         view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
@@ -471,20 +473,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void initCustomMarkerView() {
-
         customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
         profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
+        this.updateProfileImage();
+    }
 
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String urlProfilePic = settings.getString(Constants.USER_PROFILE_PIC, null);
-
-        if(!TextUtils.isEmpty(urlProfilePic)) {
-            Picasso.with(this)
-                    .load(urlProfilePic)
-                    .error(R.drawable.default_profile_pic)
-                    .into(profileViewProfileImage);
+    private void updateProfileImage() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap userImageBitmap = user.getImageBitmap();
+            if (userImageBitmap != null) {
+                bitmap = userImageBitmap;
+            }
         }
 
+        profileViewProfileImage.setImageBitmap(bitmap);
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
@@ -509,7 +513,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void getEtaForDestination(LatLng destinationLocation, final TripETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Getting ETA for the selected destination");
+        mProgressDialog.setMessage("Getting your destination");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -541,7 +545,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void startTrip() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage("Fetching URL to share... ");
+        mProgressDialog.setMessage("Preparing your trip");
         mProgressDialog.show();
 
         TripManager.getSharedManager().startTrip(new TripManagerCallback() {
@@ -555,20 +559,29 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
+                showStartTripError();
             }
         });
+    }
+
+    private void showStartTripError() {
+        Toast.makeText(this, getString(R.string.trip_start_error), Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-        requestForLocationUpdates();
+
+        // Check if Location Permission has been granted
+        if (checkPermission()) {
+            requestForLocationUpdates();
+        } else {
+            requestLocationPermission();
+        }
     }
 
     @Override
-    public void onConnectionSuspended(int i) {
-
-    }
+    public void onConnectionSuspended(int i) {}
 
     private void requestForLocationUpdates() {
         LocationRequest locationRequest = LocationRequest.create();
@@ -605,58 +618,42 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAdapter.setBounds(getBounds(latLng, 10000));
     }
 
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        return result == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestLocationPermission(){
+//        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+//            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
+//
+//        } else {
+        ActivityCompat.requestPermissions(this,new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_CODE);
+//        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    requestForLocationUpdates();
+                } else {
+                    Toast.makeText(this,"Permission Denied, You cannot access location data.",Toast.LENGTH_LONG).show();
+                }
+                break;
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
-            if (resultCode == RESULT_OK) {
-                this.didSelectContact(data);
-            }
-        } else if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
+        if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
             this.updateFavoritesButton();
         }
     }
 
-    private void didSelectContact(Intent data) {
-        Uri uri = data.getData();
-        String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
-
-        Cursor cursor = getContentResolver().query(uri, projection,
-                null, null, null);
-        cursor.moveToFirst();
-
-        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        String number = cursor.getString(numberColumnIndex);
-
-        int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-        String name = cursor.getString(nameColumnIndex);
-        number = number.replaceAll("\\s","");
-        Log.d(TAG, "Number : " + number + " , name : "+name);
-
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        try {
-
-            String locale = PhoneUtils.getCountryRegionFromPhone(this);
-            Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, locale);
-            Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
-
-            boolean isValid = phoneUtil
-                    .isValidNumber(phoneNumber);
-
-            if (isValid) {
-                String internationalFormat = phoneUtil.format(
-                        phoneNumber,
-                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-
-                number = internationalFormat;
-
-            }
-
-        } catch (NumberParseException e) {
-            System.err.println("NumberParseException was thrown: " + e.toString());
-        }
-    }
-
-    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters ){
+    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters) {
         double latRadian = Math.toRadians(latLng.latitude);
 
         double degLatKm = 110.574235;
@@ -694,43 +691,45 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
+                showEndTripError();
             }
         });
     }
 
-    @Override
-    public void onResult(Status status) {
-        if (status.isSuccess()) {
-            Log.v(TAG, "Geofencing added successfully");
-        } else {
-            Log.v(TAG, "Geofencing not added. There was an error");
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (mProgressDialog != null) mProgressDialog.dismiss();
+    private void showEndTripError() {
+        Toast.makeText(this, getString(R.string.end_trip_error), Toast.LENGTH_LONG).show();
     }
 
     // New Methods
 
     private void updateMapView() {
-        LatLng current = currentLocationMarker.getPosition();
-
-        if (destinationLocationMarker != null) {
-            LatLngBounds bounds = new LatLngBounds.Builder()
-                    .include(current)
-                    .include(destinationLocationMarker.getPosition())
-                    .build();
-
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 50);
-            mMap.animateCamera(cameraUpdate);
-
+        if (currentLocationMarker == null && destinationLocationMarker == null) {
             return;
         }
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(current));
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        if (currentLocationMarker != null) {
+            LatLng current = currentLocationMarker.getPosition();
+            builder.include(current);
+        }
+
+        if (destinationLocationMarker != null) {
+            LatLng destination = destinationLocationMarker.getPosition();
+            builder.include(destination);
+        }
+
+        LatLngBounds bounds = builder.build();
+
+        CameraUpdate cameraUpdate;
+        if (destinationLocationMarker != null && currentLocationMarker != null) {
+            cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+        } else {
+            LatLng latLng = currentLocationMarker != null ? currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
+            cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
+        }
+
+        mMap.animateCamera(cameraUpdate);
     }
 
     private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
@@ -789,6 +788,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                 OnTripEnd();
             }
         });
+
+        this.updateMapPadding(true);
     }
 
     private void OnTripEnd() {
@@ -798,8 +799,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
         favoriteButton.setVisibility(View.GONE);
-        // Reset Enter Destination Layout Text
-        enterDestinationText.setText("");
+
+        // Reset the Destination Text View
+        destinationText.setGravity(Gravity.CENTER);
+        destinationText.setText("");
+
+        // Reset the Destionation Description View
+        destinationDescription.setVisibility(View.GONE);
+        destinationDescription.setText("");
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
@@ -807,6 +814,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
+        this.updateMapPadding(false);
     }
 
     private void share() {
@@ -865,21 +873,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         startActivity(profileIntent);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (enterDestinationLayoutClicked) {
-           onEnterDestinationBackClick(null);
-        } else {
-            super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
     public void OnFavoriteClick(View view) {
         TripManager tripManager = TripManager.getSharedManager();
         MetaPlace place = tripManager.getPlace();
@@ -892,9 +885,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void showAddPlace(MetaPlace place) {
-        // For Testing purpose
+        MetaPlace newPlace = new MetaPlace(place);
+        newPlace.setName(null);
+
         Intent addPlace = new Intent(this, AddFavoritePlace.class);
-        addPlace.putExtra("meta_place", place);
+        addPlace.putExtra("meta_place", newPlace);
         startActivityForResult(addPlace, AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE, null);
     }
 
@@ -922,23 +917,77 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void markAsFavorite() {
         favoriteButton.setSelected(true);
         favoriteButton.setClickable(false);
-        favoriteButton.setImageDrawable(getDrawable(R.drawable.ic_star));
+        favoriteButton.setImageResource(R.drawable.ic_favorite);
     }
 
     private void markAsNotFavorite() {
         favoriteButton.setSelected(false);
-        favoriteButton.setImageDrawable(getDrawable(R.drawable.ic_star_faded));
+        favoriteButton.setImageResource(R.drawable.ic_favorite_hollow);
         favoriteButton.setClickable(true);
+    }
+
+    private void updateCurrentLocationMarker() {
+        if (this.currentLocationMarker == null) {
+            return;
+        }
+
+        LatLng position = this.currentLocationMarker.getPosition();
+        this.currentLocationMarker.remove();
+        this.initCustomMarkerView();
+
+        this.addMarkerToCurrentLocation(position);
+    }
+
+    private void setupFavoriteButton() {
+        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
+        favoriteButton.setVisibility(View.GONE);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         this.updateFavoritesButton();
+        this.updateCurrentLocationMarker();
     }
 
-    private void setupFavoriteButton() {
-        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
-        favoriteButton.setVisibility(View.GONE);
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+                + connectionResult.getErrorCode());
+
+        // TODO(Developer): Check error code and notify the user of error state and resolution.
+        Toast.makeText(this,
+                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+                Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (enterDestinationLayoutClicked) {
+            onEnterDestinationBackClick(null);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_home, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public void onResult(Status status) {
+        if (status.isSuccess()) {
+            Log.v(TAG, "Geofencing added successfully");
+        } else {
+            Log.v(TAG, "Geofencing not added. There was an error");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mProgressDialog != null) mProgressDialog.dismiss();
     }
 }

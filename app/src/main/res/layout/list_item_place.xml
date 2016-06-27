@@ -1,51 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:background="?android:attr/selectableItemBackground"
+    android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/white"
-        android:paddingBottom="@dimen/padding_high"
         android:paddingRight="@dimen/padding_high"
-        android:paddingTop="@dimen/padding_high">
+        android:paddingTop="@dimen/padding_medium"
+        android:paddingBottom="@dimen/padding_medium">
 
         <ImageView
             android:id="@+id/item_place.icon"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:padding="@dimen/padding_low"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_high"
-            android:src="@drawable/destination_marker" />
+            android:src="@drawable/ic_favorite_hollow" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_max"
-            android:orientation="vertical">
+            android:layout_gravity="center_vertical"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/item_place.title"
-                android:layout_width="match_parent"
+            <LinearLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:text="Title"
-                android:textColor="@color/text_base"
-                android:textSize="@dimen/text_base"
-                android:layout_gravity="center_vertical"/>
+                android:layout_marginLeft="@dimen/margin_max"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/item_place.desc"
-                android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/item_place.title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:fontFamily="sans-serif-medium"
+                    android:singleLine="true"
+                    android:text="Title"
+                    android:textColor="@color/text_base"
+                    android:textSize="@dimen/text_medium" />
+
+                <TextView
+                    android:id="@+id/item_place.desc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:ellipsize="end"
+                    android:singleLine="true"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="@dimen/text_base"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/item_place.delete"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:text="This is the description"
-                android:textColor="@color/text_secondary"
-                android:textSize="@dimen/text_base"
-                android:layout_gravity="center_vertical"/>
+                android:src="@drawable/ic_action_delete"
+                android:visibility="gone" />
         </LinearLayout>
     </FrameLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@drawable/divider_light_border_bottom" />
 </LinearLayout>

@@ -1,7 +1,6 @@
 package io.hypertrack.meta.adapter;
 
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,9 +44,7 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         this.listener = listener;
     }
 
-    private FavoritePlacesAdapter() {
-        
-    }
+    private FavoritePlacesAdapter() {}
 
     @Override
     public PlacesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -58,31 +55,41 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
     @Override
     public void onBindViewHolder(PlacesViewHolder holder, int position) {
         if (this.isHomeRow(position)) {
+            holder.icon.setImageResource(R.drawable.ic_home);
             if (this.home != null) {
                 holder.title.setText(home.getName());
                 holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(home.getAddress());
+                holder.deleteIcon.setVisibility(View.VISIBLE);
             } else {
                 holder.title.setText("Add Home");
                 holder.description.setVisibility(View.GONE);
+                holder.deleteIcon.setVisibility(View.GONE);
             }
         } else if (this.isWorkRow(position)) {
+            holder.icon.setImageResource(R.drawable.ic_work);
             if (this.work != null) {
                 holder.title.setText(work.getName());
                 holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(work.getAddress());
+                holder.deleteIcon.setVisibility(View.VISIBLE);
             } else {
                 holder.title.setText("Add Work");
                 holder.description.setVisibility(View.GONE);
+                holder.deleteIcon.setVisibility(View.GONE);
             }
         } else if (this.isAddNewRow(position)) {
+            holder.icon.setImageResource(R.drawable.ic_favorite_hollow);
             holder.title.setText("Add new place");
             holder.description.setVisibility(View.GONE);
+            holder.deleteIcon.setVisibility(View.GONE);
         } else {
             MetaPlace place = this.otherPlaces.get(position - 2);
+            holder.icon.setImageResource(R.drawable.ic_favorite);
             holder.title.setText(place.getName());
             holder.description.setVisibility(View.VISIBLE);
             holder.description.setText(place.getAddress());
+            holder.deleteIcon.setVisibility(View.VISIBLE);
         }
     }
 
@@ -95,12 +102,21 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         protected ImageView icon;
         protected TextView title;
         protected TextView description;
+        protected ImageView deleteIcon;
 
         public PlacesViewHolder(View view) {
             super(view);
             this.icon = (ImageView) view.findViewById(R.id.item_place_icon);
             this.title = (TextView) view.findViewById(R.id.item_place_title);
             this.description = (TextView) view.findViewById(R.id.item_place_desc);
+            this.deleteIcon = (ImageView) view.findViewById(R.id.item_place_delete);
+
+            deleteIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemToBeDeletedAtPosition(getAdapterPosition());
+                }
+            });
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -165,7 +181,8 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         }
     }
 
-    private void itemToBeDeleteAtPosition(int position) {
+    private void itemToBeDeletedAtPosition(int position) {
+
         if (this.isHomeRow(position)) {
             if (this.home != null) {
                 if (this.listener != null) {

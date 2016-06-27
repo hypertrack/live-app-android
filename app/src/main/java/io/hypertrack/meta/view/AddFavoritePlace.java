@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -20,6 +19,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -62,6 +62,9 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     private EditText addPlaceNameView;
     private EditText addPlaceAddressView;
 
+    private ImageView placeNameClearIcon;
+    private ImageView placeAddressClearIcon;
+
     private RecyclerView mAutocompleteResults;
     private CardView mAutocompleteResultsLayout;
     private AddPlaceAutocompleteAdapter mAdapter;
@@ -70,7 +73,26 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
     private MetaPlace metaPlace;
 
-    private TextWatcher mTextWatcher = new TextWatcher() {
+    private TextWatcher mPlaceNameTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+            // Show/Hide Clear Icon on Place Name View
+            if (s != null && s.length() > 0) {
+                placeNameClearIcon.setVisibility(View.VISIBLE);
+            } else {
+                placeNameClearIcon.setVisibility(View.GONE);
+            }
+        }
+    };
+
+    private TextWatcher mPlaceAddressTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
@@ -83,6 +105,13 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
             mAdapter.getFilter().filter(constraint);
+
+            // Show/Hide Clear Icon on Place Address View
+            if (constraint.length() > 0 ) {
+                placeAddressClearIcon.setVisibility(View.VISIBLE);
+            } else {
+                placeAddressClearIcon.setVisibility(View.GONE);
+            }
         }
     };
 
@@ -93,8 +122,10 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
             metaPlace.setGooglePlacesID(place.getGooglePlacesID());
 
+            // Remove Text Changed Listener to prevent Autocomplete updates on setText
+            addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
+
             addPlaceAddressView.setText(place.getAddress());
-            addPlaceAddressView.removeTextChangedListener(mTextWatcher);
             mAdapter.setBounds(getBounds(place.getLatLng(), DISTANCE_IN_METERS));
 
             KeyboardUtils.hideKeyboard(AddFavoritePlace.this, addPlaceAddressView);
@@ -115,6 +146,9 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Favorite");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         // Fetch Meta Place object passed with intent
         Intent intent = getIntent();
@@ -153,25 +187,40 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
     private void initNameAddressView() {
         addPlaceNameView = (EditText) findViewById(R.id.add_fav_place_name);
+        placeNameClearIcon = (ImageView) findViewById(R.id.add_fav_place_name_clear);
         addPlaceAddressView = (EditText) findViewById(R.id.add_fav_place_address);
+        placeAddressClearIcon = (ImageView) findViewById(R.id.add_fav_place_address_clear);
 
         if (metaPlace.getName() != null && !metaPlace.getName().isEmpty()) {
             addPlaceNameView.setText(metaPlace.getName());
+            placeNameClearIcon.setVisibility(View.VISIBLE);
         }
 
         if (metaPlace.getAddress() != null && !metaPlace.getAddress().isEmpty()) {
             addPlaceAddressView.setText(metaPlace.getAddress());
+            placeAddressClearIcon.setVisibility(View.VISIBLE);
         } else {
             reverseGeocode(metaPlace.getLatLng());
         }
+
+        addPlaceNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    addPlaceNameView.addTextChangedListener(mPlaceNameTextWatcher);
+                } else {
+                    addPlaceNameView.removeTextChangedListener(mPlaceNameTextWatcher);
+                }
+            }
+        });
 
         addPlaceAddressView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    addPlaceAddressView.addTextChangedListener(mTextWatcher);
+                    addPlaceAddressView.addTextChangedListener(mPlaceAddressTextWatcher);
                 } else {
-                    addPlaceAddressView.removeTextChangedListener(mTextWatcher);
+                    addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
                 }
             }
         });
@@ -268,6 +317,24 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         }
     }
 
+    public void onPlaceNameClearClick(View view) {
+        placeNameClearIcon.setVisibility(View.GONE);
+        addPlaceNameView.setText("");
+
+        // Remove & Add the Text Watcher Again
+        addPlaceNameView.removeTextChangedListener(mPlaceNameTextWatcher);
+        addPlaceNameView.addTextChangedListener(mPlaceNameTextWatcher);
+    }
+
+    public void onPlaceAddressClearClick(View view) {
+        placeAddressClearIcon.setVisibility(View.GONE);
+        addPlaceAddressView.setText("");
+
+        // Remove & Add the Text Watcher Again
+        addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
+        addPlaceAddressView.addTextChangedListener(mPlaceAddressTextWatcher);
+    }
+
     private void addPlace() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Adding place");
@@ -325,33 +392,6 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
         Toast.makeText(this, R.string.edit_place_error, Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_add_fav_place, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.v(TAG, "mGoogleApiClient is connected");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
-                + connectionResult.getErrorCode());
-
-        // TODO(Developer): Check error code and notify the user of error state and resolution.
-        Toast.makeText(this,
-                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
-                Toast.LENGTH_SHORT).show();
-    }
-
     private void reverseGeocode(LatLng latLng) {
         Intent intent = new Intent(this, FetchAddressIntentService.class);
         intent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver(new Handler()));
@@ -361,6 +401,7 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
     private void setAddress(String address) {
         addPlaceAddressView.setText(address);
+        placeAddressClearIcon.setVisibility(View.VISIBLE);
     }
 
     private void showToast(String message) {
@@ -368,9 +409,7 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     }
 
     @Override
-    public void onTouchDown(MotionEvent event) {
-
-    }
+    public void onTouchDown(MotionEvent event) {}
 
     @Override
     public void onTouchUp(MotionEvent event) {
@@ -396,5 +435,40 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
                 showToast(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_add_fav_place, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back button inside toolbar
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else
+            return false;
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.v(TAG, "mGoogleApiClient is connected");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {}
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
+                + connectionResult.getErrorCode());
+
+        // TODO(Developer): Check error code and notify the user of error state and resolution.
+        Toast.makeText(this,
+                "Could not connect to Google API Client: Error " + connectionResult.getErrorCode(),
+                Toast.LENGTH_SHORT).show();
     }
 }

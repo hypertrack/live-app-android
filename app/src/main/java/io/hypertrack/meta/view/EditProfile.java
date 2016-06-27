@@ -6,16 +6,21 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import butterknife.Bind;
@@ -27,24 +32,48 @@ import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
-import io.realm.annotations.PrimaryKey;
+import io.hypertrack.meta.util.images.RoundedImageView;
 
 public class EditProfile extends AppCompatActivity {
 
     public static final int EDIT_PROFILE_RESULT_CODE = 101;
 
-    @Bind(R.id.firstName)
+    @Bind(R.id.profile_first_name)
     public AutoCompleteTextView mFirstNameView;
 
-    @Bind(R.id.lastName)
+    @Bind(R.id.profile_last_name)
     public AutoCompleteTextView mLastNameView;
 
-    @Bind(R.id.profileImageView)
-    public ImageButton mProfileImageButton;
+    @Bind(R.id.profile_image_view)
+    public RoundedImageView mProfileImageView;
 
     private File profileImage;
 
     private ProgressDialog mProgressDialog;
+
+    private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                mLastNameView.requestFocus();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private TextView.OnEditorActionListener mLastNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                EditProfile.this.doneButtonClicked(null);
+                return true;
+            }
+
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +82,14 @@ public class EditProfile extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Profile");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         ButterKnife.bind(this);
+
+        mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
+        mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
 
         this.setupViews();
     }
@@ -94,7 +129,14 @@ public class EditProfile extends AppCompatActivity {
     }
 
     private void updateImage() {
-//        this.mProfileImageButton.setImageDrawable(R.drawable.default_profile_pic);
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap bitmap = user.getImageBitmap();
+            if (bitmap != null) {
+                mProfileImageView.setImageBitmap(bitmap);
+                mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            }
+        }
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
@@ -120,21 +162,43 @@ public class EditProfile extends AppCompatActivity {
         UserStore.sharedStore.updateInfo(this.mFirstNameView.getText().toString(), this.mLastNameView.getText().toString(), new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
-                mProgressDialog.dismiss();
-                broadcastResultIntent();
-                finish();
+                if (profileImage != null) {
+                    UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
+                        @Override
+                        public void OnSuccess() {
+                            mProgressDialog.dismiss();
+                            broadcastResultIntent();
+                            finish();
+                        }
+
+                        @Override
+                        public void OnError() {
+                            mProgressDialog.dismiss();
+                            showUpdateError();
+                        }
+                    });
+                } else {
+                    mProgressDialog.dismiss();
+                    broadcastResultIntent();
+                    finish();
+                }
             }
 
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
-                Toast.makeText(getApplicationContext(), R.string.edit_profile_error, Toast.LENGTH_LONG).show();
+                showUpdateError();
             }
         });
     }
 
-    private void broadcastResultIntent() {
+    private void showUpdateError() {
+        Toast.makeText(this, R.string.edit_profile_error, Toast.LENGTH_LONG).show();
+    }
 
+    private void broadcastResultIntent() {
+        Intent intent = new Intent();
+        setResult(EDIT_PROFILE_RESULT_CODE, intent);
     }
 
     @Override
@@ -143,11 +207,10 @@ public class EditProfile extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    @OnClick(R.id.profileImageView)
+    @OnClick(R.id.profile_image_view)
     public void onImageButtonClicked() {
         EasyImage.openChooser(EditProfile.this, "Please select", true);
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -161,30 +224,103 @@ public class EditProfile extends AppCompatActivity {
 
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source) {
-                //Handle the image
-                profileImage = imageFile;
-                Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-
-                ExifInterface exif = null;
-                try {
-
-                    exif = new ExifInterface(imageFile.getName());
-                    String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-                    int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
-
-                    int rotationAngle = 0;
-                    if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
-                    if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
-                    if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
-
-                    Matrix matrix = new Matrix();
-                    matrix.setRotate(rotationAngle, (float) srcBitmap.getWidth() / 2, (float) srcBitmap.getHeight() / 2);
-                    Bitmap rotatedBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
-                    mProfileImageButton.setImageBitmap(rotatedBitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (imageFile == null) {
+                    return;
                 }
+
+                profileImage = getScaledFile(getScaledFile(imageFile));
+
+                Bitmap bitmap = getRotatedBitMap(imageFile);
+                if (bitmap == null) {
+                    bitmap = BitmapFactory.decodeFile(imageFile.getPath());
+                }
+
+                if (bitmap != null) {
+                    mProfileImageView.setImageBitmap(bitmap);
+                }
+                mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         });
+    }
+
+    private Bitmap getRotatedBitMap(File imageFile) {
+        if (imageFile == null) {
+            return null;
+        }
+
+        Bitmap rotatedBitmap = null;
+        Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
+
+        try {
+            ExifInterface exif = new ExifInterface(imageFile.getName());
+            String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+
+            int rotationAngle = 0;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
+
+            Matrix matrix = new Matrix();
+            matrix.setRotate(rotationAngle, (float) srcBitmap.getWidth() / 2, (float) srcBitmap.getHeight() / 2);
+            rotatedBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return rotatedBitmap;
+    }
+
+    private File getScaledFile(File file) {
+        try {
+            // BitmapFactory options to downsize the image
+            BitmapFactory.Options o = new BitmapFactory.Options();
+            o.inJustDecodeBounds = true;
+            o.inSampleSize = 6;
+            // factor of downsizing the image
+
+            FileInputStream inputStream = new FileInputStream(file);
+            //Bitmap selectedBitmap = null;
+            BitmapFactory.decodeStream(inputStream, null, o);
+            inputStream.close();
+
+            // The new size we want to scale to
+            final int REQUIRED_SIZE = 75;
+
+            // Find the correct scale value. It should be the power of 2.
+            int scale = 1;
+            while (o.outWidth / scale / 2 >= REQUIRED_SIZE &&
+                    o.outHeight / scale / 2 >= REQUIRED_SIZE) {
+                scale *= 2;
+            }
+
+            BitmapFactory.Options o2 = new BitmapFactory.Options();
+            o2.inSampleSize = scale;
+            inputStream = new FileInputStream(file);
+
+            Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStream, null, o2);
+            inputStream.close();
+
+            // here i override the original image file
+            file.createNewFile();
+            FileOutputStream outputStream = new FileOutputStream(file);
+            selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
+
+            return file;
+        } catch (Exception e) {
+            return null;
+        }
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back button inside toolbar
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else
+            return false;
     }
 }

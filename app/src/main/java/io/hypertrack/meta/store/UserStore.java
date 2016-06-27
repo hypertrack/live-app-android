@@ -1,5 +1,6 @@
 package io.hypertrack.meta.store;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.io.File;
@@ -36,7 +37,6 @@ public class UserStore {
 
     private User user;
     private Realm realm = Realm.getDefaultInstance();
-    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
     private UserStore() {
     }
@@ -98,6 +98,8 @@ public class UserStore {
     }
 
     private void getTaskForDestination(String destinationID, final  UserStoreGetTaskCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
         Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), destinationID);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -119,6 +121,8 @@ public class UserStore {
 
     private void getTaskForPlace(MetaPlace place, final UserStoreGetTaskCallback callback) {
         PlaceDTO placeDTO = new PlaceDTO(place);
+
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
         Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), placeDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
@@ -195,6 +199,26 @@ public class UserStore {
             public void execute(Realm realm) {
                 places.deleteAllFromRealm();
                 user.getPlaces().removeAll(places);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    public void addImage(final File file) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.saveFileAsBitmap(file);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    public void addBitmap(final Bitmap bitmap) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.saveImageBitmap(bitmap);
                 user = realm.copyToRealmOrUpdate(user);
             }
         });
@@ -318,6 +342,8 @@ public class UserStore {
         user.put("first_name", firstName);
         user.put("last_name", lastName);
 
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
         Call<User> call = sendETAService.updateUserName(this.user.getId(), user);
         call.enqueue(new Callback<User>() {
             @Override
@@ -343,7 +369,7 @@ public class UserStore {
         });
     }
 
-    public void updatePhoto(File updatePhoto, final SuccessErrorCallback callback) {
+    public void updatePhoto(final File updatePhoto, final SuccessErrorCallback callback) {
         if (updatePhoto == null) {
             callback.OnError();
             return;
@@ -356,11 +382,13 @@ public class UserStore {
         String fileName = "photo\"; filename=\"" + uuid + ".jpg";
         requestBodyMap.put(fileName, requestBody);
 
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
         Call<Map<String, Object>> call = sendETAService.updateUserProfilePic(this.user.getId(), requestBodyMap);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-//                user.setPhoto(); TODO: save photo to user
+                addImage(updatePhoto);
                 if (callback != null) {
                     callback.OnSuccess();
                 }

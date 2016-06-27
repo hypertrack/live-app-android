@@ -61,27 +61,15 @@
 
                         <FrameLayout
                             android:layout_width="match_parent"
-                            android:layout_height="50dp">
+                            android:layout_height="wrap_content">
 
-                            <RelativeLayout
+                            <LinearLayout
                                 android:id="@+id/enter_destination_layout"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent">
-
-                                <TextView
-                                    android:id="@+id/enter_destination_text"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="@dimen/margin_xhigh"
-                                    android:layout_marginRight="@dimen/margin_high"
-                                    android:background="@null"
-                                    android:ellipsize="end"
-                                    android:gravity="center"
-                                    android:hint="@string/autocomplete_hint"
-                                    android:padding="16dp"
-                                    android:singleLine="true"
-                                    android:textColor="@color/text_base"
-                                    android:textSize="@dimen/text_base" />
+                                android:layout_height="wrap_content"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
+                                android:visibility="visible">
 
                                 <ImageView
                                     android:layout_width="wrap_content"
@@ -89,41 +77,59 @@
                                     android:layout_gravity="center_vertical"
                                     android:paddingLeft="@dimen/padding_medium"
                                     android:paddingRight="@dimen/padding_medium"
-                                    android:scaleType="centerInside"
-                                    android:src="@drawable/ic_destination" />
+                                    android:scaleType="fitCenter"
+                                    android:src="@drawable/icon_end_map" />
+
+                                <LinearLayout
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:paddingTop="@dimen/padding_medium"
+                                    android:paddingBottom="@dimen/padding_medium"
+                                    android:paddingRight="@dimen/padding_high"
+                                    android:layout_weight="1"
+                                    android:orientation="vertical">
+
+                                    <TextView
+                                        android:id="@+id/destination_text"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:background="@null"
+                                        android:ellipsize="end"
+                                        android:gravity="center"
+                                        android:hint="@string/autocomplete_hint"
+                                        android:singleLine="true"
+                                        android:textColor="@color/text_base"
+                                        android:textSize="@dimen/text_base" />
+
+                                    <TextView
+                                        android:id="@+id/destination_desc"
+                                        android:layout_width="match_parent"
+                                        android:layout_height="wrap_content"
+                                        android:singleLine="true"
+                                        android:ellipsize="end"
+                                        android:textColor="@color/text_secondary"
+                                        android:textSize="@dimen/text_base"
+                                        android:visibility="gone" />
+                                </LinearLayout>
 
                                 <ImageButton
                                     android:id="@+id/favorite_button"
                                     android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_gravity="center_vertical"
-                                    android:layout_marginEnd="@dimen/margin_high"
+                                    android:layout_height="match_parent"
+                                    android:background="@null"
                                     android:onClick="OnFavoriteClick"
-                                    android:layout_alignParentEnd="true"
-                                    android:background="@null"/>
+                                    android:padding="@dimen/padding_low"
+                                    android:src="@drawable/ic_favorite"
+                                    android:visibility="gone"/>
+                            </LinearLayout>
 
-                            </RelativeLayout>
-
-                            <FrameLayout
+                            <LinearLayout
                                 android:id="@+id/autocomplete_places_layout"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal"
                                 android:visibility="gone">
-
-                                <AutoCompleteTextView
-                                    android:id="@+id/autocomplete_places"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="@dimen/margin_xhigh"
-                                    android:layout_marginRight="@dimen/margin_high"
-                                    android:background="@null"
-                                    android:ellipsize="end"
-                                    android:gravity="center"
-                                    android:hint="@string/autocomplete_hint"
-                                    android:padding="16dp"
-                                    android:singleLine="true"
-                                    android:textColor="@color/text_base"
-                                    android:textSize="@dimen/text_base" />
 
                                 <ImageView
                                     android:id="@+id/autocomplete_places_back_icon"
@@ -135,22 +141,34 @@
                                     android:paddingRight="@dimen/padding_medium"
                                     android:scaleType="centerInside"
                                     android:src="@drawable/ic_navigation_arrow_back" />
-                            </FrameLayout>
+
+                                <AutoCompleteTextView
+                                    android:id="@+id/autocomplete_places"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginRight="@dimen/margin_base"
+                                    android:layout_weight="1"
+                                    android:background="@null"
+                                    android:ellipsize="end"
+                                    android:hint="@string/autocomplete_hint"
+                                    android:padding="@dimen/padding_high"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_base"
+                                    android:textSize="@dimen/text_base" />
+
+                                <ProgressBar
+                                    android:id="@+id/autocomplete_progress"
+                                    style="?android:attr/progressBarStyle"
+                                    android:layout_width="24dp"
+                                    android:layout_height="24dp"
+                                    android:layout_gravity="center_vertical"
+                                    android:layout_marginRight="@dimen/margin_base"
+                                    android:indeterminate="true"
+                                    android:visibility="gone"
+                                    tools:visibility="visible" />
+                            </LinearLayout>
                         </FrameLayout>
-
                     </android.support.v7.widget.CardView>
-
-                    <ProgressBar
-                        android:id="@+id/login_progress"
-                        style="?android:attr/progressBarStyle"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="end|center_vertical"
-                        android:layout_marginRight="@dimen/margin_high"
-                        android:layout_marginTop="@dimen/margin_low"
-                        android:indeterminate="true"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
                 </FrameLayout>
 
                 <android.support.v7.widget.CardView
@@ -180,38 +198,38 @@
                 android:id="@+id/sendETAButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/cta_button_size"
-                android:gravity="center"
-                android:textColor="#ffffff"
+                android:layout_alignParentBottom="true"
                 android:background="@color/colorAccent"
+                android:gravity="center"
                 android:padding="@dimen/padding_high"
-                android:visibility="gone"
-                android:layout_alignParentBottom="true" />
+                android:textColor="#ffffff"
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/navigateButton"
                 android:layout_width="@dimen/cta_button_size"
                 android:layout_height="@dimen/cta_button_size"
+                android:layout_above="@+id/shareButton"
                 android:layout_alignParentEnd="true"
+                android:layout_marginEnd="@dimen/margin_high"
                 android:background="@drawable/circle_primary_background"
                 android:padding="@dimen/padding_high"
-                android:layout_marginEnd="@dimen/margin_high"
-                android:visibility="gone"
-                android:layout_above="@+id/shareButton"
-                android:src="@drawable/ic_navigate_nocircle"/>
+                android:src="@drawable/ic_navigate_nocircle"
+                android:visibility="gone" />
 
             <ImageButton
                 android:id="@+id/shareButton"
                 android:layout_width="@dimen/cta_button_size"
                 android:layout_height="@dimen/cta_button_size"
+                android:layout_above="@+id/sendETAButton"
                 android:layout_alignParentEnd="true"
+                android:layout_marginBottom="@dimen/margin_base"
+                android:layout_marginEnd="@dimen/margin_high"
+                android:layout_marginTop="@dimen/margin_base"
                 android:background="@drawable/circle_primary_background"
                 android:padding="@dimen/padding_high"
-                android:layout_marginTop="@dimen/margin_base"
-                android:layout_marginEnd="@dimen/margin_high"
-                android:layout_marginBottom="@dimen/margin_base"
-                android:visibility="gone"
                 android:src="@drawable/ic_share_nocircle"
-                android:layout_above="@+id/sendETAButton" />
+                android:visibility="gone" />
         </RelativeLayout>
     </FrameLayout>
 </android.support.design.widget.CoordinatorLayout>
