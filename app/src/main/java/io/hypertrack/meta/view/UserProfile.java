@@ -2,6 +2,7 @@ package io.hypertrack.meta.view;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
@@ -12,6 +13,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 
 import io.hypertrack.meta.R;
@@ -32,6 +34,7 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private FavoritePlacesAdapter favoritePlacesAdapter;
     private ProgressDialog mProgressDialog;
+    private ImageView profileImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +63,10 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setAutoMeasureEnabled(true);
         mRecyclerView.setLayoutManager(layoutManager);
+        profileImageView = (ImageView)findViewById(R.id.user_profile_image);
 
         this.setupFavoritePlacesAdapter();
+        this.updateProfileImage();
     }
 
     private void setupFavoritePlacesAdapter() {
@@ -204,6 +209,7 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
             this.updateFavoritesAdapter();
         } else if (requestCode == EditProfile.EDIT_PROFILE_RESULT_CODE) {
             this.updateTitle();
+            this.updateProfileImage();
         }
     }
 
@@ -215,5 +221,15 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
             return true;
         } else
             return false;
+    }
+
+    private void updateProfileImage() {
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap bitmap = user.getImageBitmap();
+            if (bitmap != null) {
+                profileImageView.setImageBitmap(bitmap);
+            }
+        }
     }
 }

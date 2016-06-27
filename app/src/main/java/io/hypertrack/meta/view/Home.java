@@ -260,16 +260,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         setSupportActionBar(toolbar);
 
+        this.checkIfUserIsOnBoard();
+
         this.initGoogleClient();
         this.setupEnterDestinationView();
         this.setupAutoCompleteView();
         this.setupShareButton();
         this.setupSendETAButton();
-        this.initCustomMarkerView();
         this.setupNavigateButton();
         this.setupFavoriteButton();
-
-        checkIfUserIsOnBoard();
+        this.initCustomMarkerView();
 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
@@ -387,16 +387,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     }
 
-    private String getImageToPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, "None");
-    }
-
-    public static Bitmap decodeToBase64(String decodeImageString) {
-        byte[] decodedByte = Base64.decode(decodeImageString, 0);
-        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-    }
-
     private void initGoogleClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 0 /* clientId */, this)
@@ -460,6 +450,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private Bitmap getBitMapForView(Context context, View view) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
+
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
         view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
@@ -474,20 +465,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void initCustomMarkerView() {
-
         customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
         profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
+        this.updateProfileImage();
+    }
 
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String urlProfilePic = settings.getString(Constants.USER_PROFILE_PIC, null);
-
-        if(!TextUtils.isEmpty(urlProfilePic)) {
-            Picasso.with(this)
-                    .load(urlProfilePic)
-                    .error(R.drawable.default_profile_pic)
-                    .into(profileViewProfileImage);
+    private void updateProfileImage() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap userImageBitmap = user.getImageBitmap();
+            if (userImageBitmap != null) {
+                bitmap = userImageBitmap;
+            }
         }
 
+        profileViewProfileImage.setImageBitmap(bitmap);
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
@@ -950,10 +943,23 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         favoriteButton.setClickable(true);
     }
 
+    private void updateCurrentLocationMarker() {
+        if (this.currentLocationMarker == null) {
+            return;
+        }
+
+        LatLng position = this.currentLocationMarker.getPosition();
+        this.currentLocationMarker.remove();
+        this.initCustomMarkerView();
+
+        this.addMarkerToCurrentLocation(position);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         this.updateFavoritesButton();
+        this.updateCurrentLocationMarker();
     }
 
     private void setupFavoriteButton() {

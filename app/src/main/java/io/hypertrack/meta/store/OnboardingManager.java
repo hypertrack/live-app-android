@@ -189,6 +189,8 @@ public class OnboardingManager {
     public void uploadPhoto(final OnOnboardingCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
 
+        UserStore.sharedStore.addImage(profileImage);
+
         UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {

@@ -29,7 +29,6 @@ import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
-import io.realm.annotations.PrimaryKey;
 
 public class EditProfile extends AppCompatActivity {
 
@@ -96,7 +95,13 @@ public class EditProfile extends AppCompatActivity {
     }
 
     private void updateImage() {
-//        this.mProfileImageButton.setImageDrawable(R.drawable.default_profile_pic);
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap bitmap = user.getImageBitmap();
+            if (bitmap != null) {
+                mProfileImageButton.setImageBitmap(bitmap);
+            }
+        }
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
@@ -122,21 +127,43 @@ public class EditProfile extends AppCompatActivity {
         UserStore.sharedStore.updateInfo(this.mFirstNameView.getText().toString(), this.mLastNameView.getText().toString(), new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
-                mProgressDialog.dismiss();
-                broadcastResultIntent();
-                finish();
+                if (profileImage != null) {
+                    UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
+                        @Override
+                        public void OnSuccess() {
+                            mProgressDialog.dismiss();
+                            broadcastResultIntent();
+                            finish();
+                        }
+
+                        @Override
+                        public void OnError() {
+                            mProgressDialog.dismiss();
+                            showUpdateError();
+                        }
+                    });
+                } else {
+                    mProgressDialog.dismiss();
+                    broadcastResultIntent();
+                    finish();
+                }
             }
 
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
-                Toast.makeText(getApplicationContext(), R.string.edit_profile_error, Toast.LENGTH_LONG).show();
+                showUpdateError();
             }
         });
     }
 
-    private void broadcastResultIntent() {
+    private void showUpdateError() {
+        Toast.makeText(this, R.string.edit_profile_error, Toast.LENGTH_LONG).show();
+    }
 
+    private void broadcastResultIntent() {
+        Intent intent=new Intent();
+        setResult(EDIT_PROFILE_RESULT_CODE, intent);
     }
 
     @Override
