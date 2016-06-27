@@ -4,15 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.design.widget.AppBarLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
@@ -20,9 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -60,11 +55,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber;
-import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -85,16 +75,13 @@ import io.hypertrack.meta.store.callback.TripETACallback;
 import io.hypertrack.meta.store.callback.TripManagerCallback;
 import io.hypertrack.meta.store.callback.TripManagerListener;
 import io.hypertrack.meta.util.AnimationUtils;
-import io.hypertrack.meta.util.Constants;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.NetworkUtils;
-import io.hypertrack.meta.util.PhoneUtils;
 
 public class Home extends AppCompatActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = AppCompatActivity.class.getSimpleName();
-    private static final int REQUEST_SHARE_CONTACT_CODE = 1;
     private static final long INTERVAL_TIME = 5000;
 
     private GoogleMap mMap;
@@ -144,8 +131,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
                     destinationLocationMarker.remove();
                     destinationLocationMarker = null;
                 }
+
+                showETAError();
             }
         });
+    }
+
+    private void showETAError() {
+        Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_LONG).show();
     }
 
     private void onETASuccess(TripETAResponse response, MetaPlace place) {
@@ -280,16 +273,16 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         setSupportActionBar(toolbar);
 
+        this.checkIfUserIsOnBoard();
+
         this.initGoogleClient();
         this.setupEnterDestinationView();
         this.setupAutoCompleteView();
         this.setupShareButton();
         this.setupSendETAButton();
-        this.initCustomMarkerView();
         this.setupNavigateButton();
         this.setupFavoriteButton();
-
-        checkIfUserIsOnBoard();
+        this.initCustomMarkerView();
 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
@@ -409,16 +402,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         }
     }
 
-    private String getImageToPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        return sharedPreferences.getString(Constants.USER_PROFILE_PIC_ENCODED, "None");
-    }
-
-    public static Bitmap decodeToBase64(String decodeImageString) {
-        byte[] decodedByte = Base64.decode(decodeImageString, 0);
-        return BitmapFactory.decodeByteArray(decodedByte, 0, decodedByte.length);
-    }
-
     private void initGoogleClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 0 /* clientId */, this)
@@ -482,6 +465,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private Bitmap getBitMapForView(Context context, View view) {
         DisplayMetrics displayMetrics = new DisplayMetrics();
+
         ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
         view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
@@ -496,20 +480,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void initCustomMarkerView() {
-
         customMarkerView = ((LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
         profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
+        this.updateProfileImage();
+    }
 
-        SharedPreferences settings = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-        String urlProfilePic = settings.getString(Constants.USER_PROFILE_PIC, null);
-
-        if(!TextUtils.isEmpty(urlProfilePic)) {
-            Picasso.with(this)
-                    .load(urlProfilePic)
-                    .error(R.drawable.default_profile_pic)
-                    .into(profileViewProfileImage);
+    private void updateProfileImage() {
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            Bitmap userImageBitmap = user.getImageBitmap();
+            if (userImageBitmap != null) {
+                bitmap = userImageBitmap;
+            }
         }
 
+        profileViewProfileImage.setImageBitmap(bitmap);
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
@@ -580,8 +566,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
+                showStartTripError();
             }
         });
+    }
+
+    private void showStartTripError() {
+        Toast.makeText(this, getString(R.string.trip_start_error), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -632,53 +623,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_SHARE_CONTACT_CODE) {
-            if (resultCode == RESULT_OK) {
-                this.didSelectContact(data);
-            }
-        } else if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
+        if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
             this.updateFavoritesButton();
-        }
-    }
-
-    private void didSelectContact(Intent data) {
-        Uri uri = data.getData();
-        String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
-
-        Cursor cursor = getContentResolver().query(uri, projection,
-                null, null, null);
-        cursor.moveToFirst();
-
-        int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-        String number = cursor.getString(numberColumnIndex);
-
-        int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-        String name = cursor.getString(nameColumnIndex);
-        number = number.replaceAll("\\s","");
-        Log.d(TAG, "Number : " + number + " , name : "+name);
-        cursor.close();
-
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        try {
-
-            String locale = PhoneUtils.getCountryRegionFromPhone(this);
-            Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(number, locale);
-            Log.v(TAG, String.valueOf(phoneNumber.hasCountryCode()));
-
-            boolean isValid = phoneUtil
-                    .isValidNumber(phoneNumber);
-
-            if (isValid) {
-                String internationalFormat = phoneUtil.format(
-                        phoneNumber,
-                        PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-
-                number = internationalFormat;
-
-            }
-
-        } catch (NumberParseException e) {
-            System.err.println("NumberParseException was thrown: " + e.toString());
         }
     }
 
@@ -720,8 +666,13 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
+                showEndTripError();
             }
         });
+    }
+
+    private void showEndTripError() {
+        Toast.makeText(this, getString(R.string.end_trip_error), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -978,10 +929,23 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         favoriteButton.setClickable(true);
     }
 
+    private void updateCurrentLocationMarker() {
+        if (this.currentLocationMarker == null) {
+            return;
+        }
+
+        LatLng position = this.currentLocationMarker.getPosition();
+        this.currentLocationMarker.remove();
+        this.initCustomMarkerView();
+
+        this.addMarkerToCurrentLocation(position);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
         this.updateFavoritesButton();
+        this.updateCurrentLocationMarker();
     }
 
     private void setupFavoriteButton() {

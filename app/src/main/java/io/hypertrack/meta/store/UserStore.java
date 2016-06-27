@@ -1,5 +1,6 @@
 package io.hypertrack.meta.store;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import java.io.File;
@@ -203,6 +204,26 @@ public class UserStore {
         });
     }
 
+    public void addImage(final File file) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.saveFileAsBitmap(file);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    public void addBitmap(final Bitmap bitmap) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.saveImageBitmap(bitmap);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
     private void addPlaces(final List<MetaPlace> places) {
         if (this.user == null) {
             return;
@@ -348,7 +369,7 @@ public class UserStore {
         });
     }
 
-    public void updatePhoto(File updatePhoto, final SuccessErrorCallback callback) {
+    public void updatePhoto(final File updatePhoto, final SuccessErrorCallback callback) {
         if (updatePhoto == null) {
             callback.OnError();
             return;
@@ -367,7 +388,7 @@ public class UserStore {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-//                user.setPhoto(); TODO: save photo to user
+                addImage(updatePhoto);
                 if (callback != null) {
                     callback.OnSuccess();
                 }

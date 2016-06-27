@@ -8,11 +8,11 @@
 
     <ImageButton
         android:id="@+id/profileImageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/image_view_size"
+        android:layout_height="@dimen/image_view_size"
         android:layout_gravity="center_horizontal"
         android:adjustViewBounds="true"
-        android:background="@android:color/transparent"
+        android:background="@drawable/circle_image_button"
         android:padding="0dp"
         android:scaleType="centerInside"
         android:src="@drawable/default_profile_pic"
