@@ -894,9 +894,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void showAddPlace(MetaPlace place) {
-        // For Testing purpose
+        MetaPlace newPlace = new MetaPlace(place);
+        newPlace.setName(null);
+
         Intent addPlace = new Intent(this, AddFavoritePlace.class);
-        addPlace.putExtra("meta_place", place);
+        addPlace.putExtra("meta_place", newPlace);
         startActivityForResult(addPlace, AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE, null);
     }
 
