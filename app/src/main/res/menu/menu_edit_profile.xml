@@ -6,6 +6,7 @@
         android:id="@+id/done"
         android:title="@string/action_done"
         android:onClick="doneButtonClicked"
+        android:icon="@drawable/ic_action_done"
         app:showAsAction="always" />
 
 </menu>
