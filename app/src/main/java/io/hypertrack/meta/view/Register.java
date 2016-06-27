@@ -172,7 +172,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     @Override
     public void registrationFailed() {
         mProgressDialog.dismiss();
-        Toast.makeText(Register.this, "Apologies, we could process your request at this moment.", Toast.LENGTH_LONG).show();
+        Toast.makeText(Register.this, "Wwe could not process your request at this moment. Please try again.", Toast.LENGTH_LONG).show();
     }
 
     @Override
