@@ -122,11 +122,11 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile "com.squareup.picasso:picasso:2.4.0"
 
-    debugCompile('io.hypertrack:transmitter:0.4.12:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:0.4.13:debug@aar') {
         transitive = true;
     }
 
-    releaseCompile('io.hypertrack:transmitter:0.4.12:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.4.13:release@aar') {
         transitive = true;
     }
 
