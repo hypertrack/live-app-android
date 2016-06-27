@@ -12,7 +12,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -29,6 +29,7 @@ import io.hypertrack.meta.store.UserStore;
 import io.hypertrack.meta.util.SuccessErrorCallback;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
+import io.hypertrack.meta.util.images.RoundedImageView;
 
 public class EditProfile extends AppCompatActivity {
 
@@ -41,7 +42,7 @@ public class EditProfile extends AppCompatActivity {
     public AutoCompleteTextView mLastNameView;
 
     @Bind(R.id.profileImageView)
-    public ImageButton mProfileImageButton;
+    public RoundedImageView mProfileImageView;
 
     private File profileImage;
 
@@ -102,7 +103,8 @@ public class EditProfile extends AppCompatActivity {
         if (user != null) {
             Bitmap bitmap = user.getImageBitmap();
             if (bitmap != null) {
-                mProfileImageButton.setImageBitmap(bitmap);
+                mProfileImageView.setImageBitmap(bitmap);
+                mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         }
     }
@@ -180,7 +182,6 @@ public class EditProfile extends AppCompatActivity {
         EasyImage.openChooser(EditProfile.this, "Please select", true);
     }
 
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -198,7 +199,8 @@ public class EditProfile extends AppCompatActivity {
                 }
 
                 profileImage = getScaledFile(imageFile);
-                mProfileImageButton.setImageBitmap(getRotatedBitMap(imageFile));
+                mProfileImageView.setImageBitmap(getRotatedBitMap(imageFile));
+                mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         });
     }

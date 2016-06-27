@@ -223,6 +223,7 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
             Bitmap bitmap = user.getImageBitmap();
             if (bitmap != null) {
                 profileImageView.setImageBitmap(bitmap);
+                profileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         }
     }

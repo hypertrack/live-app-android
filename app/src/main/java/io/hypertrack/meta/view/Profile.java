@@ -7,8 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -18,11 +16,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +34,7 @@ import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
+import io.hypertrack.meta.util.images.RoundedImageView;
 
 public class Profile extends AppCompatActivity implements ProfileView {
 
@@ -51,7 +49,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
     public AutoCompleteTextView mLastNameView;
 
     @Bind(R.id.profileImageView)
-    public ImageButton mProfileImageButton;
+    public RoundedImageView mProfileImageView;
 
     private File profileImage;
 
@@ -113,7 +111,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
                     .load(profileURL)
                     .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
-                    .into(mProfileImageButton);
+                    .into(mProfileImageView);
+            mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
     }
 
@@ -134,7 +133,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
                 }
 
                 profileImage = getScaledFile(imageFile);
-                mProfileImageButton.setImageBitmap(getRotatedBitMap(imageFile));
+                mProfileImageView.setImageBitmap(getRotatedBitMap(imageFile));
+                mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         });
     }

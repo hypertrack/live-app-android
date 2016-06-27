@@ -8,7 +8,7 @@
     <color name="app_primary_light">#F4F4F4</color>
     <color name="app_primary_dark">#606060</color>
 
-    <color name="colorBackground">#F4F4F4</color>
+    <color name="appBackground">#F4F4F4</color>
 
     <color name="text_base">#6a6a6a</color>
     <color name="text_secondary">#888888</color>
