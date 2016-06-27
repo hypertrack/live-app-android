@@ -1,7 +1,11 @@
 package io.hypertrack.meta.model;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.google.gson.annotations.SerializedName;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +31,8 @@ public class User extends RealmObject {
     private String phoneNumber;
 
     private String photo;
+
+    private byte[] photoData;
 
     @SerializedName("hypertrack_driver_id")
     private String hypertrackDriverID;
@@ -214,5 +220,19 @@ public class User extends RealmObject {
         }
 
         return fullName;
+    }
+
+    public void saveImageBitmap(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        this.photoData = byteArrayOutputStream .toByteArray();
+    }
+
+    public Bitmap getImageBitmap() {
+        if (this.photoData == null) {
+            return null;
+        }
+
+        return BitmapFactory.decodeByteArray(this.photoData, 0, this.photoData.length);
     }
 }
