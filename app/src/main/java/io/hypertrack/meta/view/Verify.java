@@ -12,6 +12,8 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -79,18 +81,14 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
         this.verificationCodeView.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
-                textChanged();
+                Verify.this.onTextChanged();
             }
         });
 
@@ -156,7 +154,7 @@ public class Verify extends AppCompatActivity implements VerifyView {
     @Override
     public void verificationFailed() {
         mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, "Apologies, there was an error while verifying your number. Please try again.",Toast.LENGTH_LONG).show();
+        Toast.makeText(Verify.this, "Apologies, there was an error while verifying your number. Please try again.", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -199,7 +197,7 @@ public class Verify extends AppCompatActivity implements VerifyView {
         presenter.attemptVerification(verificationCode);
     }
 
-    private void textChanged() {
+    private void onTextChanged() {
         String code = this.verificationCodeView.getText().toString();
 
         this.firstCodeTextView.setText(code.length() >= 1 ? code.substring(0, 1) : "");
@@ -220,5 +218,15 @@ public class Verify extends AppCompatActivity implements VerifyView {
         mProgressDialog.show();
 
         presenter.resendVerificationCode();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_verify, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void onVerifyButtonClicked(MenuItem menuItem) {
+        verifyCode();
     }
 }
