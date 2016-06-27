@@ -43,7 +43,7 @@
 
     <!-- Map Padding -->
     <dimen name="map_side_padding">24dp</dimen>
-    <dimen name="map_top_padding">200dp</dimen>
+    <dimen name="map_top_padding">225dp</dimen>
     <dimen name="map_bottom_padding">50dp</dimen>
     <dimen name="map_active_trip_side_padding">70dp</dimen>
 
