@@ -331,14 +331,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
-    public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
-
-        if (results != null && results.size() > 0) {
-            showAutocompleteResults(true);
-        } else {
-            showAutocompleteResults(false);
-        }
-
+    public void processPublishedResults(boolean publish) {
+        showAutocompleteResults(publish);
         mAutocompleteLoader.setVisibility(View.GONE);
     }
 
@@ -519,7 +513,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
     private void getEtaForDestination(LatLng destinationLocation, final TripETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Getting ETA for the selected destination");
+        mProgressDialog.setMessage("Getting your destination");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -551,7 +545,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private void startTrip() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage("Fetching URL to share... ");
+        mProgressDialog.setMessage("Preparing your trip");
         mProgressDialog.show();
 
         TripManager.getSharedManager().startTrip(new TripManagerCallback() {

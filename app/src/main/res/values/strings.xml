@@ -40,7 +40,7 @@
     <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to %1$s</string>
 
     <!-- Progress bar strings -->
-    <string name="registration_phone_number">Registering phone number...</string>
+    <string name="registration_phone_number">Setting up your account</string>
     <string name="verifying_phone_number">Verifying phone number...</string>
     <string name="enter_phone_number">Enter Phone Number</string>
     <string name="resending_verification_code">Resending verification code</string>

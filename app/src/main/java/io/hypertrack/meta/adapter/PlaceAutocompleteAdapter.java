@@ -278,6 +278,11 @@ public class PlaceAutocompleteAdapter
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
+                if (!isSearching) {
+                    ((Home) context).processPublishedResults(favorites != null && favorites.size() > 0);
+                    return;
+                }
+
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
                     Log.d(TAG, "Received results");
@@ -292,7 +297,7 @@ public class PlaceAutocompleteAdapter
                     notifyItemRangeRemoved(0, 0);
                 }
 
-                ((Home) context).processPublishedResults(mResultList);
+                ((Home) context).processPublishedResults(mResultList != null && mResultList.size() > 0);
             }
 
             @Override
