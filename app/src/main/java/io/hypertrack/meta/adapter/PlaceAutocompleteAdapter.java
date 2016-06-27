@@ -278,6 +278,10 @@ public class PlaceAutocompleteAdapter
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
+                if (!isSearching) {
+                    return;
+                }
+
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
                     Log.d(TAG, "Received results");
