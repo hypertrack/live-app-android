@@ -28,17 +28,17 @@
             android:layout_marginLeft="@dimen/margin_high"
             android:layout_marginRight="@dimen/margin_high"
             android:layout_marginTop="@dimen/margin_high"
-            app:cardCornerRadius="2dp"
+            app:cardCornerRadius="5dp"
             app:cardElevation="0dp">
 
             <AutoCompleteTextView
                 android:id="@+id/firstName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
+                android:background="@drawable/theme"
                 android:gravity="center_horizontal"
                 android:hint="@string/prompt_firstname"
-                android:inputType="textPersonName"
+                android:inputType="textPersonName|textCapWords"
                 android:maxLines="1"
                 android:padding="@dimen/padding_high"
                 android:singleLine="true"
@@ -52,17 +52,17 @@
             android:layout_marginLeft="@dimen/margin_high"
             android:layout_marginRight="@dimen/margin_high"
             android:layout_marginTop="@dimen/margin_high"
-            app:cardCornerRadius="2dp"
+            app:cardCornerRadius="5dp"
             app:cardElevation="0dp">
 
             <AutoCompleteTextView
                 android:id="@+id/lastName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
+                android:background="@drawable/theme"
                 android:gravity="center_horizontal"
                 android:hint="@string/prompt_lastname"
-                android:inputType="textPersonName"
+                android:inputType="textPersonName|textCapWords"
                 android:maxLines="1"
                 android:padding="@dimen/padding_high"
                 android:singleLine="true"

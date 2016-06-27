@@ -44,9 +44,7 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         this.listener = listener;
     }
 
-    private FavoritePlacesAdapter() {
-        
-    }
+    private FavoritePlacesAdapter() {}
 
     @Override
     public PlacesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
