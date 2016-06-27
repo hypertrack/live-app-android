@@ -6,8 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,6 +54,9 @@ public class EditProfile extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setTitle("Profile");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         ButterKnife.bind(this);
 
@@ -162,7 +165,7 @@ public class EditProfile extends AppCompatActivity {
     }
 
     private void broadcastResultIntent() {
-        Intent intent=new Intent();
+        Intent intent = new Intent();
         setResult(EDIT_PROFILE_RESULT_CODE, intent);
     }
 
@@ -268,5 +271,16 @@ public class EditProfile extends AppCompatActivity {
         } catch (Exception e) {
             return null;
         }
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back button inside toolbar
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else
+            return false;
     }
 }

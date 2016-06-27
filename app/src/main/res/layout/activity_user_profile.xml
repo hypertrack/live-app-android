@@ -66,7 +66,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="@dimen/margin_high"
-                    android:layout_marginTop="@dimen/margin_xxhigh"
+                    android:layout_marginTop="@dimen/margin_medium"
                     android:fontFamily="sans-serif-medium"
                     android:text="Favorite Addresses"
                     android:textColor="@color/text_base"

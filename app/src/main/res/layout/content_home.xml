@@ -45,7 +45,7 @@
                         android:layout_height="match_parent">
 
                         <TextView
-                            android:id="@+id/enter_destination_text"
+                            android:id="@+id/destination_text"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="@dimen/margin_xhigh"

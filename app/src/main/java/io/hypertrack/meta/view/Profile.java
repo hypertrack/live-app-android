@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.ExifInterface;
 import android.os.Bundle;
@@ -64,7 +63,9 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setTitle("Profile");
+        getSupportActionBar().setTitle("Profile");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
         ButterKnife.bind(this);
         presenter.attachView(this);
@@ -323,9 +324,19 @@ public class Profile extends AppCompatActivity implements ProfileView {
             fileOutputStream.close();
 
             return file;
-        }  catch (Exception e) {
+        } catch (Exception e) {
             return null;
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        //back button inside toolbar
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
+        } else
+            return false;
     }
 }
 

@@ -20,6 +20,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,8 +28,9 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,10 +93,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private Toolbar toolbar;
     private AppBarLayout appBarLayout;
 
-    private TextView enterDestinationText;
+    private TextView destinationText;
+    private TextView destinationDescription;
     private TextView mAutocompletePlacesView;
-    private RelativeLayout enterDestinationLayout;
-    private FrameLayout mAutocompletePlacesLayout;
+    private LinearLayout enterDestinationLayout;
+    private LinearLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Marker currentLocationMarker;
@@ -107,6 +110,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private View customMarkerView;
     private ProgressDialog mProgressDialog;
     private ImageButton favoriteButton;
+    private ProgressBar mAutocompleteLoader;
 
     private boolean enterDestinationLayoutClicked = false;
 
@@ -154,15 +158,22 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             //Restore Default State for Enter Destination Layout
             onEnterDestinationBackClick(null);
 
+            destinationText.setGravity(Gravity.LEFT);
             // Set the Selected Place Name in the Enter Destination Layout
-            enterDestinationText.setText(place.getName());
+            destinationText.setText(place.getName());
+
+            // Set the selected Place Description as Place Address
+            destinationDescription.setText(place.getAddress());
+            destinationDescription.setVisibility(View.VISIBLE);
+
             KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
             onSelectPlace(place);
         }
 
         @Override
         public void OnError() {
-
+            destinationDescription.setVisibility(View.GONE);
+            destinationDescription.setText("");
         }
     };
 
@@ -181,6 +192,9 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
             mAdapter.setFilterString(constraint);
+
+            if (constraint.length() > 0)
+                mAutocompleteLoader.setVisibility(View.VISIBLE);
         }
     };
 
@@ -190,7 +204,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             TripManager.getSharedManager().clearState();
             OnTripEnd();
 
-            enterDestinationText.setText(getString(R.string.autocomplete_hint));
+            // Reset the Destination Text View
+            destinationText.setGravity(Gravity.CENTER);
+            destinationText.setText("");
+
+            // Reset the Destionation Description View
+            destinationDescription.setVisibility(View.GONE);
+            destinationDescription.setText("");
+
             enterDestinationLayoutClicked = true;
 
             // Hide the AppBar
@@ -205,7 +226,6 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
             mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
 
             showAutocompleteResults(true);
-
             updateAutoCompleteResults();
         }
     };
@@ -281,18 +301,20 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void setupEnterDestinationView() {
-        enterDestinationText = (TextView) findViewById(R.id.enter_destination_text);
-        enterDestinationLayout = (RelativeLayout) findViewById(R.id.enter_destination_layout);
+        destinationText = (TextView) findViewById(R.id.destination_text);
+        destinationDescription = (TextView) findViewById(R.id.destination_desc);
+
+        enterDestinationLayout = (LinearLayout) findViewById(R.id.enter_destination_layout);
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
     }
 
     private void setupAutoCompleteView() {
         mAutocompletePlacesView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
-        mAutocompletePlacesLayout = (FrameLayout) findViewById(R.id.autocomplete_places_layout);
+        mAutocompletePlacesLayout = (LinearLayout) findViewById(R.id.autocomplete_places_layout);
         mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
-
+        mAutocompleteLoader = (ProgressBar) findViewById(R.id.autocomplete_progress);
         mAutocompletePlacesView.addTextChangedListener(mTextWatcher);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
@@ -310,8 +332,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         } else {
             showAutocompleteResults(false);
         }
-        // TODO: 22/06/16 Add Loader while fetching Places Autocomplete data 
-//        ((Home) context).customLoader.setVisibility(View.GONE);
+
+        mAutocompleteLoader.setVisibility(View.GONE);
     }
 
     private void showAutocompleteResults(boolean show) {
@@ -344,7 +366,11 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
                 MetaPlace place = tripManager.getPlace();
                 updateViewForETASuccess(0, place.getLatLng());
-                enterDestinationText.setText(place.getAddress());
+                destinationText.setGravity(Gravity.LEFT);
+                destinationText.setText(place.getName());
+
+                destinationDescription.setText(place.getAddress());
+                destinationDescription.setVisibility(View.VISIBLE);
 
                 onTripStart();
             }
@@ -361,7 +387,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(!TripManager.getSharedManager().isTripActive()) {
+                if (!TripManager.getSharedManager().isTripActive()) {
                     startTrip();
                 } else {
                     endTrip();
@@ -767,8 +793,14 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
         favoriteButton.setVisibility(View.GONE);
-        // Reset Enter Destination Layout Text
-        enterDestinationText.setText("");
+
+        // Reset the Destination Text View
+        destinationText.setGravity(Gravity.CENTER);
+        destinationText.setText("");
+
+        // Reset the Destionation Description View
+        destinationDescription.setVisibility(View.GONE);
+        destinationDescription.setText("");
 
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
