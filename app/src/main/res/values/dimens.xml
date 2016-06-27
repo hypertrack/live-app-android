@@ -21,6 +21,7 @@
     <dimen name="padding_high">16dp</dimen>
     <dimen name="padding_xhigh">24dp</dimen>
     <dimen name="padding_xxhigh">28dp</dimen>
+    <dimen name="padding_xxxhigh">32dp</dimen>
     <dimen name="padding_huge">56dp</dimen>
     <dimen name="padding_max">72dp</dimen>
 

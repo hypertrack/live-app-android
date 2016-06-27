@@ -19,4 +19,8 @@
     <color name="text_highlight">@color/colorAccent</color>
 
     <color name="border_color">#C8C8C8</color>
+
+    <color name="divider">#28000000</color>
+    <color name="divider_light">#16000000</color>
+    <color name="divider_dark">#777777</color>
 </resources>

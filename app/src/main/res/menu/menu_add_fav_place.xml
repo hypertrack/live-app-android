@@ -6,7 +6,7 @@
         android:id="@+id/save"
         android:title="@string/action_save"
         android:onClick="onSaveButtonClicked"
-        android:icon="@drawable/ic_action_forward"
+        android:icon="@drawable/ic_action_done"
         app:showAsAction="always" />
 
 </menu>

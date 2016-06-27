@@ -3,10 +3,10 @@ package io.hypertrack.meta.view;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -79,12 +79,9 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
         startActivityForResult(editProfileIntent, EditProfile.EDIT_PROFILE_RESULT_CODE, null);
     }
 
-//    public void onDoneButtonClicked(MenuItem v) {
-//        // TODO: 23/06/16 Add Done Btn functionality
-//        finish();
-//    }
-
     private void refreshFavorites() {
+        // Hide the Swipe Refresh Loader
+        mSwipeRefreshLayout.setRefreshing(false);
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Refresh favorite places");
@@ -96,9 +93,6 @@ public class UserProfile extends AppCompatActivity implements FavoritePlaceOnCli
             public void OnSuccess() {
                 mProgressDialog.dismiss();
                 updateFavoritesAdapter();
-
-                // Hide the Swipe Refresh Loader
-                mSwipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
