@@ -104,9 +104,15 @@ public class UserStore {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                Map<String, Object> responseDTO = response.body();
-                if (callback != null) {
-                    callback.OnSuccess((String)responseDTO.get("id"));
+                if (response.isSuccessful()) {
+                    Map<String, Object> responseDTO = response.body();
+                    if (callback != null) {
+                        callback.OnSuccess((String)responseDTO.get("id"));
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
@@ -128,9 +134,15 @@ public class UserStore {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                Map<String, Object> responseDTO = response.body();
-                if (callback != null) {
-                    callback.OnSuccess((String)responseDTO.get("id"));
+                if (response.isSuccessful()) {
+                    Map<String, Object> responseDTO = response.body();
+                    if (callback != null) {
+                        callback.OnSuccess((String)responseDTO.get("id"));
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
@@ -388,9 +400,15 @@ public class UserStore {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                addImage(updatePhoto);
-                if (callback != null) {
-                    callback.OnSuccess();
+                if (response.isSuccessful()) {
+                    addImage(updatePhoto);
+                    if (callback != null) {
+                        callback.OnSuccess();
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 

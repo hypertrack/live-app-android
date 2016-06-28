@@ -25,8 +25,14 @@ public class PlaceManager {
         call.enqueue(new Callback<List<MetaPlace>>() {
             @Override
             public void onResponse(Call<List<MetaPlace>> call, Response<List<MetaPlace>> response) {
-                if (callback != null) {
-                    callback.OnSuccess(response.body());
+                if (response.isSuccessful()) {
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
@@ -47,8 +53,14 @@ public class PlaceManager {
         call.enqueue(new Callback<MetaPlace>() {
             @Override
             public void onResponse(Call<MetaPlace> call, Response<MetaPlace> response) {
-                if (callback != null) {
-                    callback.OnSuccess(place);
+                if (response.isSuccessful()) {
+                    if (callback != null) {
+                        callback.OnSuccess(place);
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
@@ -69,8 +81,14 @@ public class PlaceManager {
         call.enqueue(new Callback<MetaPlace>() {
             @Override
             public void onResponse(Call<MetaPlace> call, Response<MetaPlace> response) {
-                if (callback != null) {
-                    callback.OnSuccess(response.body());
+                if (response.isSuccessful()) {
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
@@ -91,8 +109,14 @@ public class PlaceManager {
         call.enqueue(new Callback<MetaPlace>() {
             @Override
             public void onResponse(Call<MetaPlace> call, Response<MetaPlace> response) {
-                if (callback != null) {
-                    callback.OnSuccess(response.body());
+                if (response.isSuccessful()) {
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 

@@ -218,9 +218,15 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         call.enqueue(new Callback<Trip>() {
             @Override
             public void onResponse(Call<Trip> call, Response<Trip> response) {
-                setTrip(response.body());
-                if (callback != null) {
-                    callback.OnSuccess();
+                if (response.isSuccessful()) {
+                    setTrip(response.body());
+                    if (callback != null) {
+                        callback.OnSuccess();
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
                 }
             }
 
