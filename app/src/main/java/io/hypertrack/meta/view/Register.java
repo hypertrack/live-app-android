@@ -76,25 +76,25 @@ public class Register extends AppCompatActivity implements RegisterView {
             }
         });
 
-        if (checkPermission()) {
+        if (checkReadPhoneStatePermission()) {
             initCountryFlagSpinner();
         } else {
-            requestTelelphonyManagerPermission();
+            requestReadPhoneStatePermission();
         }
     }
 
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+    private boolean checkReadPhoneStatePermission(){
+        int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE);
         return result == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void requestTelelphonyManagerPermission(){
+    private void requestReadPhoneStatePermission(){
 //        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)){
 //            Toast.makeText(this,"GPS permission allows us to access location data. Please allow in App Settings for additional functionality.",Toast.LENGTH_LONG).show();
 //
 //        } else {
         ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSION_REQUEST_CODE);
+                Manifest.permission.READ_PHONE_STATE}, PERMISSION_REQUEST_CODE);
 //        }
     }
 

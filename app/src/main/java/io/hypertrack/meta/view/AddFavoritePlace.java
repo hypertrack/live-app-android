@@ -122,8 +122,10 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
 
             metaPlace.setGooglePlacesID(place.getGooglePlacesID());
 
-            addPlaceAddressView.setText(place.getAddress());
+            // Remove Text Changed Listener to prevent Autocomplete updates on setText
             addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
+
+            addPlaceAddressView.setText(place.getAddress());
             mAdapter.setBounds(getBounds(place.getLatLng(), DISTANCE_IN_METERS));
 
             KeyboardUtils.hideKeyboard(AddFavoritePlace.this, addPlaceAddressView);
@@ -318,11 +320,19 @@ public class AddFavoritePlace extends AppCompatActivity implements OnMapReadyCal
     public void onPlaceNameClearClick(View view) {
         placeNameClearIcon.setVisibility(View.GONE);
         addPlaceNameView.setText("");
+
+        // Remove & Add the Text Watcher Again
+        addPlaceNameView.removeTextChangedListener(mPlaceNameTextWatcher);
+        addPlaceNameView.addTextChangedListener(mPlaceNameTextWatcher);
     }
 
     public void onPlaceAddressClearClick(View view) {
         placeAddressClearIcon.setVisibility(View.GONE);
         addPlaceAddressView.setText("");
+
+        // Remove & Add the Text Watcher Again
+        addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
+        addPlaceAddressView.addTextChangedListener(mPlaceAddressTextWatcher);
     }
 
     private void addPlace() {
