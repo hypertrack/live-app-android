@@ -39,6 +39,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -73,6 +74,7 @@ import io.hypertrack.meta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.meta.model.MetaPlace;
 import io.hypertrack.meta.model.TripETAResponse;
 import io.hypertrack.meta.model.User;
+import io.hypertrack.meta.store.AnalyticsStore;
 import io.hypertrack.meta.store.LocationStore;
 import io.hypertrack.meta.store.TripManager;
 import io.hypertrack.meta.store.UserStore;
@@ -162,6 +164,10 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
+
+            AnalyticsStore.getLogger().selectedAddress(mAutocompletePlacesView.getText().length(),
+                    place.isFavorite());
+
             //Restore Default State for Enter Destination Layout
             onEnterDestinationBackClick(null);
 
@@ -948,6 +954,8 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
         super.onResume();
         this.updateFavoritesButton();
         this.updateCurrentLocationMarker();
+
+        AppEventsLogger.activateApp(getApplication(), getApplicationContext().getPackageName());
     }
 
     @Override

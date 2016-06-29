@@ -29,6 +29,7 @@ import butterknife.OnClick;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.presenter.IVerifyPresenter;
 import io.hypertrack.meta.presenter.VerifyPresenter;
+import io.hypertrack.meta.util.ErrorMessages;
 import io.hypertrack.meta.util.KeyboardUtils;
 import io.hypertrack.meta.util.SMSReceiver;
 
@@ -54,6 +55,8 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     private ProgressDialog mProgressDialog;
     private IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
+
+    private int retryCount = -1, resendCount = 0;
 
     BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -145,53 +148,35 @@ public class Verify extends AppCompatActivity implements VerifyView {
     }
 
     @Override
-    protected void onDestroy() {
-        presenter.detachView();
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        IntentFilter filter = new IntentFilter(SMSReceiver.SENDETA_SMS_RECIEVED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, filter);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-    }
-
-    @Override
-    public void verificationFailed() {
-        mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, "Apologies, there was an error while verifying your number. Please try again.", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
     public void navigateToProfileScreen() {
         mProgressDialog.dismiss();
         startActivity(new Intent(Verify.this, Profile.class));
     }
 
     @Override
+    public void verificationFailed() {
+        mProgressDialog.dismiss();
+        Toast.makeText(Verify.this, ErrorMessages.PHONE_NO_VERIFICATION_FAILED, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
     public void showValidationError() {
         mProgressDialog.dismiss();
-        verificationCodeView.setError("Please enter valid verification code");
+        verificationCodeView.setError(ErrorMessages.INVALID_VERIFICATION_CODE);
+    }
+
+    @Override
+    public void didResendVerificationCode() {
+        // Reset Retry Count on successful Resend OTP call
+        retryCount = -1;
+
+        mProgressDialog.dismiss();
     }
 
     @Override
     public void showResendError() {
         mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, "There was an error while resending your verification code. Please try again.",Toast.LENGTH_LONG).show();
-    }
-
-    @Override
-    public void didResendVerificationCode() {
-        mProgressDialog.dismiss();
+        Toast.makeText(Verify.this, ErrorMessages.RESEND_OTP_FAILED, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -202,13 +187,15 @@ public class Verify extends AppCompatActivity implements VerifyView {
     /** Action bar menu methods */
 
     private void verifyCode() {
+        retryCount++;
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.verifying_phone_number));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
         String verificationCode = verificationCodeView.getText().toString();
-        presenter.attemptVerification(verificationCode);
+        presenter.attemptVerification(verificationCode, retryCount);
     }
 
     private void onTextChanged() {
@@ -226,21 +213,45 @@ public class Verify extends AppCompatActivity implements VerifyView {
 
     @OnClick(R.id.btn_resend)
     public void resendButtonClicked(Button button) {
+        resendCount++;
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.resending_verification_code));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        presenter.resendVerificationCode();
+        presenter.resendVerificationCode(resendCount);
+    }
+
+
+    public void onVerifyButtonClicked(MenuItem menuItem) {
+        verifyCode();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(SMSReceiver.SENDETA_SMS_RECIEVED);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, filter);
+    }
+
+    @Override
+    protected void onDestroy() {
+        presenter.detachView();
+        super.onDestroy();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_verify, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    public void onVerifyButtonClicked(MenuItem menuItem) {
-        verifyCode();
     }
 }

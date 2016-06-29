@@ -89,11 +89,6 @@
 
         <activity android:name=".view.AddFavoritePlace" />
 
-        <!-- Register Services here -->
-        <service
-            android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
-
         <!-- Register Receivers here -->
         <receiver android:name=".util.SMSReceiver">
             <intent-filter>
@@ -118,6 +113,13 @@
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
+
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+
+        <!-- Register Services here -->
+        <service
+            android:name=".service.GeofenceTransitionsIntentService"
+            android:exported="false" />
 
         <service
             android:name=".service.FetchAddressIntentService"

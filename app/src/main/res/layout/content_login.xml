@@ -43,6 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/enter_phone_number"
+                android:maxLength="10"
                 android:imeActionId="@+id/login"
                 android:inputType="phone"
                 android:textColorHint="@color/colorPrimaryDark"/>

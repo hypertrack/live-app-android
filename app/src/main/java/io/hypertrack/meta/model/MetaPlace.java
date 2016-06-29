@@ -181,6 +181,14 @@ public class MetaPlace extends RealmObject implements Serializable{
         return this.name.equalsIgnoreCase(WORK);
     }
 
+    public boolean isFavorite() {
+        // TODO: 30/06/16 Add check for Other Favorites too!
+        if (isHome() || isWork())
+            return true;
+
+        return false;
+    }
+
     public boolean hasDestination() {
         return (this.hyperTrackDestinationID != null && !this.hyperTrackDestinationID.isEmpty());
     }

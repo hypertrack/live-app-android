@@ -33,6 +33,7 @@ import io.hypertrack.meta.model.CountryMaster;
 import io.hypertrack.meta.model.CountrySpinnerAdapter;
 import io.hypertrack.meta.presenter.IRegisterPresenter;
 import io.hypertrack.meta.presenter.RegisterPresenter;
+import io.hypertrack.meta.util.ErrorMessages;
 import io.hypertrack.meta.util.PhoneUtils;
 
 public class Register extends AppCompatActivity implements RegisterView {
@@ -179,7 +180,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     @Override
     public void registrationFailed() {
         mProgressDialog.dismiss();
-        Toast.makeText(Register.this, "Wwe could not process your request at this moment. Please try again.", Toast.LENGTH_LONG).show();
+        Toast.makeText(Register.this, ErrorMessages.PHONE_NO_REGISTRATION_FAILED, Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -193,7 +194,7 @@ public class Register extends AppCompatActivity implements RegisterView {
     @Override
     public void showValidationError() {
         mProgressDialog.dismiss();
-        phoneNumberView.setError("Please enter a valid number.");
+        phoneNumberView.setError(ErrorMessages.INVALID_PHONE_NUMBER);
     }
 
     /** Action bar menu methods */

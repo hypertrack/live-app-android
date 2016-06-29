@@ -5,9 +5,12 @@ import android.text.TextUtils;
 import java.io.File;
 
 import io.hypertrack.meta.interactor.ProfileInteractor;
+import io.hypertrack.meta.interactor.callback.OnProfilePicUploadCallback;
 import io.hypertrack.meta.interactor.callback.OnProfileUpdateCallback;
 import io.hypertrack.meta.model.OnboardingUser;
+import io.hypertrack.meta.store.AnalyticsStore;
 import io.hypertrack.meta.store.OnboardingManager;
+import io.hypertrack.meta.util.ErrorMessages;
 import io.hypertrack.meta.view.ProfileView;
 
 /**
@@ -61,13 +64,32 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         profileInteractor.updateUserProfile(new OnProfileUpdateCallback() {
             @Override
             public void OnSuccess() {
-                if (profileImage != null) {
-                    profileInteractor.updateUserProfilePic(profileImage);
-                }
+                AnalyticsStore.getLogger().enteredName(true, null);
 
-                if (view != null) {
-                    view.navigateToHomeScreen();
-                }
+                profileInteractor.updateUserProfilePic(new OnProfilePicUploadCallback() {
+
+                    @Override
+                    public void OnSuccess() {
+
+                        if (view != null) {
+                            view.navigateToHomeScreen();
+                        }
+
+                        AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+                    }
+
+                    @Override
+                    public void OnError() {
+
+                        if (view != null) {
+                            view.showProfilePicUploadError();
+                        }
+
+                        AnalyticsStore.getLogger().uploadedProfilePhoto(false,
+                                ErrorMessages.PROFILE_PIC_UPLOAD_FAILED);
+                    }
+
+                });
             }
 
             @Override
@@ -75,6 +97,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 if (view != null) {
                     view.showErrorMessage();
                 }
+
+                AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
             }
         });
     }

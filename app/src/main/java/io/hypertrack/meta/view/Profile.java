@@ -41,6 +41,8 @@ import butterknife.OnClick;
 import io.hypertrack.meta.R;
 import io.hypertrack.meta.presenter.IProfilePresenter;
 import io.hypertrack.meta.presenter.ProfilePresenter;
+import io.hypertrack.meta.store.AnalyticsStore;
+import io.hypertrack.meta.util.ErrorMessages;
 import io.hypertrack.meta.util.images.DefaultCallback;
 import io.hypertrack.meta.util.images.EasyImage;
 import io.hypertrack.meta.util.images.RoundedImageView;
@@ -57,6 +59,11 @@ public class Profile extends AppCompatActivity implements ProfileView {
     @Bind(R.id.profile_image_view)
     public RoundedImageView mProfileImageView;
 
+    @OnClick(R.id.profile_image_view)
+    public void onImageButtonClicked() {
+        EasyImage.openChooser(Profile.this, "Please select", true);
+    }
+
     @Bind(R.id.profile_image_loader)
     public ProgressBar mProfileImageLoader;
 
@@ -64,6 +71,8 @@ public class Profile extends AppCompatActivity implements ProfileView {
 
     private ProgressDialog mProgressDialog;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
+
+    private static final int PERMISSION_REQUEST_CODE = 1;
 
     private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
@@ -125,11 +134,6 @@ public class Profile extends AppCompatActivity implements ProfileView {
         String lastName = mLastNameView.getText().toString();
 
         presenter.attemptLogin(firstName, lastName, profileImage);
-    }
-
-    @OnClick(R.id.profile_image_view)
-    public void onImageButtonClicked() {
-        EasyImage.openChooser(Profile.this, "Please select", true);
     }
 
     @Override
@@ -235,8 +239,6 @@ public class Profile extends AppCompatActivity implements ProfileView {
         return rotatedBitmap;
     }
 
-    private static final int PERMISSION_REQUEST_CODE = 1;
-
     private boolean checkPermission() {
 
         int result = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -308,8 +310,18 @@ public class Profile extends AppCompatActivity implements ProfileView {
     }
 
     @Override
+    public void showProfilePicUploadError() {
+        showProgress(false);
+        Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     public void navigateToHomeScreen() {
         showProgress(false);
+        Toast.makeText(Profile.this, "Profile Pic uploaded successfully", Toast.LENGTH_SHORT).show();
+
+        // TODO: 30/06/16 Move this event to proper place
+        AnalyticsStore.getLogger().completedProfileSetUp(false);
 
         Intent intent = new Intent(Profile.this, Home.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -319,7 +331,7 @@ public class Profile extends AppCompatActivity implements ProfileView {
     @Override
     public void showErrorMessage() {
         showProgress(false);
-        Toast.makeText(Profile.this, "We had problem connecting with the server. Please try again in sometime.", Toast.LENGTH_LONG).show();
+        Toast.makeText(Profile.this, ErrorMessages.PROFILE_UPDATE_FAILED, Toast.LENGTH_LONG).show();
     }
 
     @Override

@@ -2,16 +2,11 @@ package io.hypertrack.meta;
 
 import android.app.Application;
 import android.content.Context;
-import android.text.TextUtils;
-
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.Volley;
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.meta.store.AnalyticsStore;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -32,6 +27,8 @@ public class MetaApplication extends Application {
 
         HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
         this.setupRealm();
+
+        AnalyticsStore.init(this);
     }
 
     public void setupRealm() {

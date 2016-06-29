@@ -1,10 +1,9 @@
 package io.hypertrack.meta.interactor;
 
-import java.io.File;
-
+import io.hypertrack.meta.interactor.callback.OnProfilePicUploadCallback;
 import io.hypertrack.meta.interactor.callback.OnProfileUpdateCallback;
-import io.hypertrack.meta.store.callback.OnOnboardingCallback;
 import io.hypertrack.meta.store.OnboardingManager;
+import io.hypertrack.meta.store.callback.OnOnboardingCallback;
 
 public class ProfileInteractor {
 
@@ -25,17 +24,22 @@ public class ProfileInteractor {
          });
     }
 
-    public void updateUserProfilePic(File profileImage) {
+    public void updateUserProfilePic(final OnProfilePicUploadCallback callback) {
 
         OnboardingManager.sharedManager().uploadPhoto(new OnOnboardingCallback() {
             @Override
             public void onSuccess() {
 
+                if (callback != null) {
+                    callback.OnSuccess();
+                }
             }
 
             @Override
             public void onError() {
-
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }
