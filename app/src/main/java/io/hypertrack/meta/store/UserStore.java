@@ -82,7 +82,7 @@ public class UserStore {
     }
 
     public void getTask(MetaPlace place, final UserStoreGetTaskCallback callback) {
-        if (this.user == null) {
+        if (this.user == null || place == null) {
             if (callback != null) {
                 callback.OnError();
             }
