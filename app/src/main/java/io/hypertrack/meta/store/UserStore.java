@@ -141,8 +141,11 @@ public class UserStore {
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful()) {
                     Map<String, Object> responseDTO = response.body();
-                    if (callback != null) {
-                        callback.OnSuccess((String)responseDTO.get("id"));
+
+                    if (responseDTO != null) {
+                        callback.OnSuccess((String) responseDTO.get("id"));
+                    } else {
+                        callback.OnError();
                     }
                 } else {
                     if (callback != null) {
