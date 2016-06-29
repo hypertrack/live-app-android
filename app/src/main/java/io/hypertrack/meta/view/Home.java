@@ -768,6 +768,7 @@ public class Home extends AppCompatActivity implements ResultCallback<Status>, L
     }
 
     private void onTripStart() {
+        // TODO: 29/06/16 Add sendETAButton visibility to VISIBLE?
         sendETAButton.setText("End Trip");
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
