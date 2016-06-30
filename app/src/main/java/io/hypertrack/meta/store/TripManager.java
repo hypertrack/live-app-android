@@ -298,7 +298,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void endTrip(final TripManagerCallback callback) {
-        String taskID = this.hyperTrackTrip.getTaskIDs().get(0);
+        String taskID = this.trip.getHypertrackTaskID();
 
         transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
             @Override
