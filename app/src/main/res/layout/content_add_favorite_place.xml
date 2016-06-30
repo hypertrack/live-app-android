@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/map"
-        android:name="io.hypertrack.meta.view.TouchableSupportMapFragment"
+        android:name="io.hypertrack.sendeta.view.TouchableSupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".view.Home" />

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.hypertrack.meta">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="io.hypertrack.sendeta">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <!--
@@ -20,7 +21,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <permission
-        android:name="io.hypertrack.meta.permission.C2D_MESSAGE"
+        android:name="io.hypertrack.sendeta.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
     <uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />
@@ -30,14 +31,15 @@
         android:name=".MetaApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="${applicationLabel}"
+        tools:replace="android:label"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
         <!-- Register Activities here -->
         <activity
             android:name=".view.Home"
-            android:label="@string/app_name"
+            android:label="${applicationLabel}"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -48,13 +50,11 @@
         </activity>
         <activity
             android:name=".view.Register"
-            android:label="@string/title_activity_login"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
         <activity
             android:name=".view.Verify"
-            android:label="@string/title_activity_verify"
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
@@ -80,7 +80,6 @@
 
         <activity
             android:name=".view.Profile"
-            android:label="@string/title_activity_generated_login"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <activity android:name=".view.UserProfile" />

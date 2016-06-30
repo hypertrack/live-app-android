@@ -17,13 +17,14 @@
             android:layout_height="@dimen/image_view_size"
             android:layout_marginTop="@dimen/margin_xhigh">
 
-            <io.hypertrack.meta.util.images.RoundedImageView
+            <io.hypertrack.sendeta.util.images.RoundedImageView
                 android:id="@+id/profile.image_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@drawable/circle_image_button"
                 android:padding="0dp"
                 android:scaleType="fitCenter"
+                android:onClick="onProfileImageViewClicked"
                 android:src="@drawable/default_profile_pic" />
 
             <ProgressBar

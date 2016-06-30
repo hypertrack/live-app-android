@@ -69,13 +69,13 @@ android {
             versionName "${versionMajor}.${versionMinor}.${versionPatch}(${versionBuild})"
             minSdkVersion 19
             targetSdkVersion 23
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
         }
 
     } else {
         throw new GradleException("Could not read version.properties!")
     }
 
-    /*
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             output.outputFile = new File(
@@ -83,7 +83,7 @@ android {
                     output.outputFile.name.replace("app-debug.apk", "SendETA-${variant.versionName}.apk"))
         }
     }
-    */
+
     buildTypes {
         release {
             debuggable false
@@ -97,7 +97,9 @@ android {
         }
         debug {
             debuggable true
+            versionNameSuffix '-debug'
             applicationIdSuffix ".debug"
+            manifestPlaceholders = [applicationLabel: "SendETA Debug"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL",'"http://meta-api-staging.herokuapp.com/"'
             resValue "string", "facebook_app_id", "1548496698792614"

@@ -23,7 +23,7 @@
         android:background="@drawable/theme">
 
         <Spinner
-            android:id="@+id/spinner_countries"
+            android:id="@+id/register.country_codes_spinner"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="center"
@@ -39,7 +39,7 @@
             android:layout_marginEnd="@dimen/margin_low">
 
             <EditText
-                android:id="@+id/phoneNumber"
+                android:id="@+id/register.phone_number"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/enter_phone_number"

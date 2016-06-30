@@ -15,9 +15,7 @@
     <string name="action_save">Save</string>
     <string name="action_refresh">Refresh</string>
     <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+    <string name="permission_rationale">Contacts permissions are needed for providing email completions.</string>
     <string name="title_activity_login">Phone Number</string>
     <string name="title_activity_generated_login">Profile</string>
     <string name="title_activity_verify">Verify Phone</string>
@@ -26,15 +24,9 @@
     <string name="not_connected">GoogleApiClient no yet connected. Try again.</string>
     <string name="geofence_not_available">Geofence service is not available now</string>
     <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
-    <string name="geofence_too_many_pending_intents">
-        You have provided too many PendingIntents to the addGeofences() call
-    </string>
-    <string name="unknown_geofence_error">
-        Unknown error: the Geofence service is not available now
-    </string>
-    <string name="geofence_transition_invalid_type">
-        Geofence transition error: invalid transition type %1$d
-    </string>
+    <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call</string>
+    <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
+    <string name="geofence_transition_invalid_type">Geofence transition error: invalid transition type %1$d</string>
     <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for SendETA</string>
     <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to %1$s</string>
 
@@ -50,10 +42,10 @@
     <string name="user_profile">Profile</string>
     <string name="edit_profile_error">There was an error updating your profile. Please try again.</string>
     <string name="add_place_error">There was an error adding place. Please try again.</string>
+    <string name="edit_place_error">There was an error editing place. Please try again.</string>
+    <string name="place_name_error">Place name is mandatory. Please enter a name and try again.</string>
     <string name="home_exists_error">You have already added a home. Please select a different name.</string>
     <string name="work_exists_error">You have already added a work. Please select a different name.</string>
-    <string name="place_name_error">Place name is mandatory. Please enter a name and try again.</string>
-    <string name="edit_place_error">There was an error editing place. Please try again.</string>
 
     <!-- Geocoding Intent Service string -->
     <string name="service_not_available">There was an error fetching address. Please try again.</string>
@@ -64,4 +56,9 @@
     <string name="trip_start_error">There was an error starting the trip. Please try again.</string>
     <string name="end_trip_error">There was an error ending the trip. Please try again.</string>
     <string name="eta_fetching_error">There was an error in getting the ETA. Please try again.</string>
+
+    <!-- Permission Error Strings -->
+    <string name="permission_denied_location">Can\'t get your location. Permission was denied.</string>
+    <string name="permission_denied_contacts">Can\'t get your contacts. Permission was denied.</string>
+    <string name="permission_declined">Permission was denied.</string>
 </resources>
