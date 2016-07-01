@@ -21,7 +21,7 @@ public class AnalyticsConstants {
         public static final String STARTED_A_TRIP = "Started a trip";
 
         // Tapped on Share Via Events
-        public static final String TAPPED_SHARE_VIA_ANOTHER_APP = "Tapped on ‘share via another app’";
+        public static final String TAPPED_SHARE_VIA_ANOTHER_APP = "Tapped on share via another app";
         public static final String TAPPED_ON_3RD_PARTY_APP = "Tapped on a 3P app";
 
         // Trip Shared Via Events
@@ -29,14 +29,14 @@ public class AnalyticsConstants {
 
         //
         public static final String SELECTED_CONTACTS = "Selected contacts";
-        public static final String TAPPED_SEND_TO_GROUP = "Tapped on ‘Send to group’";
+        public static final String TAPPED_SEND_TO_GROUP = "Tapped on Send to group";
         public static final String TEXT_MESSAGE_SENT = "Text message sent";
 
         // Tapped on Icons during a Live Trip
-        public static final String TAPPED_SHARE_ICON = "Tapped on ‘share’ icon on live trip";
-        public static final String TAPPED_NAVIGATE_ICON = "Tapped on ‘navigate’ icon on live trip";
-        public static final String TAPPED_FAVORITE_ICON = "Tapped on ‘favorite’ icon on live trip";
-        public static final String TAPPED_END_TRIP = "Tapped on ‘end trip’ CTA on live trip";
+        public static final String TAPPED_SHARE_ICON = "Tapped on share icon on live trip";
+        public static final String TAPPED_NAVIGATE_ICON = "Tapped on navigate icon on live trip";
+        public static final String TAPPED_FAVORITE_ICON = "Tapped on favorite icon on live trip";
+        public static final String TAPPED_END_TRIP = "Tapped on end trip CTA on live trip";
         public static final String AUTO_END_TRIP = "Trip ended automatically";
 
         // Profile Events

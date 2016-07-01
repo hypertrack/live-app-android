@@ -20,7 +20,6 @@ public interface AnalyticsInterface {
     // Trip Events
     void startedTrip(boolean status, String errorMessage);
 
-    void tappedShareIcon(boolean tripShared);
 //    void tappedOnShareViaAnotherApp();
     void tappedOn3rdPartyApp(String appName);
     void tripSharedVia3rdPartyApp(String appName);
@@ -28,6 +27,7 @@ public interface AnalyticsInterface {
 //    void tappedSendToGroup(int contactsCount, int sendETAContactsCount);
 //    void textMessageSent(int contactsSentCount);
 
+    void tappedShareIcon(boolean tripShared);
     void tappedNavigate();
     void tappedFavorite();
 
@@ -40,8 +40,8 @@ public interface AnalyticsInterface {
     void tappedEditProfile();
     void editedFirstName(boolean status, String errorMessage);
     void editedLastName(boolean status, String errorMessage);
-    void uploadedPhotoViaPhotoEditor();
-    void replacedPhotoViaPhotoEditor();
+    void uploadedPhotoViaPhotoEditor(boolean status, String errorMessage);
+    void replacedPhotoViaPhotoEditor(boolean status, String errorMessage);
 
     // Home Favorite Events
     void addedHome(boolean status, String errorMessage);

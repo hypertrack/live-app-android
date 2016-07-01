@@ -3,6 +3,7 @@ package io.hypertrack.sendeta;
 import android.app.Application;
 import android.content.Context;
 import com.crashlytics.android.Crashlytics;
+import com.facebook.stetho.Stetho;
 
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.lib.common.HyperTrack;
@@ -29,6 +30,15 @@ public class MetaApplication extends Application {
         this.setupRealm();
 
         AnalyticsStore.init(this);
+
+        if (BuildConfig.DEBUG) {
+            Stetho.initialize(
+                    Stetho.newInitializerBuilder(this)
+                            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
+                            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
+                            .build());
+
+        }
     }
 
     public void setupRealm() {

@@ -84,8 +84,8 @@ public class BaseActivity extends AppCompatActivity {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("");
-        toolbar.setTitleTextColor(Color.WHITE);
-        toolbar.setSubtitleTextColor(Color.WHITE);
+//        toolbar.setTitleTextColor(getResources().getColor(R.color.colorAccent));
+//        toolbar.setSubtitleTextColor(Color.WHITE);
 
 //        retryContainer = (LinearLayout) findViewById(R.id.retry_container);
 
@@ -98,8 +98,8 @@ public class BaseActivity extends AppCompatActivity {
         }
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(homeButtonEnabled);
+        getSupportActionBar().setHomeButtonEnabled(homeButtonEnabled);
 //        toolbar.findViewById(R.id.toolbar_logo).setVisibility(View.GONE);
     }
 

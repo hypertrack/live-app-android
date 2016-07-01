@@ -78,14 +78,14 @@ public class Profile extends BaseActivity implements ProfileView {
         // Initialize Toolbar
         initToolbar("Profile");
 
-        // Attach View Presenter to View
-        presenter.attachView(this);
-
-        // Initialize UI Views
+        // Initialize UI Views before Attaching View Presenter
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.profile_first_name);
         mLastNameView = (AutoCompleteTextView) findViewById(R.id.profile_last_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
+
+        // Attach View Presenter to View
+        presenter.attachView(this);
 
         // Initialize UI Action Listeners
         mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);

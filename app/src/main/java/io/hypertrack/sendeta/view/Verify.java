@@ -85,16 +85,16 @@ public class Verify extends BaseActivity implements VerifyView {
         // Initialize Toolbar
         initToolbar("Verify");
 
-        // Attach View Presenter to View
-        presenter.attachView(this);
-
-        // Initialize UI Views
+        // Initialize UI Views before Attaching View Presenter
         verificationCodeView = (EditText) findViewById(R.id.verify_verification_code);
         firstCodeTextView = (TextView) findViewById(R.id.verify_first_code);
         secondCodeTextView = (TextView) findViewById(R.id.verify_second_code);
         thirdCodeTextView = (TextView) findViewById(R.id.verify_third_code);
         fouthCodeTextView = (TextView) findViewById(R.id.verify_fourth_code);
         headerTextView = (TextView) findViewById(R.id.verify_header_text);
+
+        // Attach View Presenter to View
+        presenter.attachView(this);
 
         // Initialize UI Action Listeners
         verificationCodeView.addTextChangedListener(mTextWatcher);

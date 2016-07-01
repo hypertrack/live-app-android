@@ -290,8 +290,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Initialize Toolbar
-        initToolbar();
+        // Initialize Toolbar without Home Button
+        initToolbar(getResources().getString(R.string.app_name), false);
 
         // Initialize Maps
         MapsInitializer.initialize(getApplicationContext());

@@ -63,12 +63,12 @@ public class Register extends BaseActivity implements RegisterView {
         // Initialize Toolbar without Home Button
         initToolbar(getResources().getString(R.string.title_activity_login), false);
 
-        // Attach View Presenter to View
-        registerPresenter.attachView(this);
-
-        // Initialize UI Views
+        // Initialize UI Views before Attaching View Presenter
         phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
         countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
+
+        // Attach View Presenter to View
+        registerPresenter.attachView(this);
 
         // Initialize UI Action Listeners
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);

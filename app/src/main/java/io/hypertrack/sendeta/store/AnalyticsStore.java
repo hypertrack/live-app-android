@@ -3,14 +3,17 @@ package io.hypertrack.sendeta.store;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.facebook.FacebookSdk;
+import com.facebook.LoggingBehavior;
 import com.facebook.appevents.AppEventsConstants;
 import com.facebook.appevents.AppEventsLogger;
 
 import java.math.BigDecimal;
 import java.util.Currency;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.util.AnalyticsConstants.Event;
 import io.hypertrack.sendeta.util.AnalyticsConstants.EventParam;
 
@@ -19,6 +22,7 @@ import io.hypertrack.sendeta.util.AnalyticsConstants.EventParam;
  */
 public class AnalyticsStore implements AnalyticsInterface {
 
+    private static final String TAG = "AnalyticsStore";
     private static AnalyticsStore analyticsStore;
     private AppEventsLogger fbAnalyticsLogger;
 
@@ -26,7 +30,7 @@ public class AnalyticsStore implements AnalyticsInterface {
 
     private AnalyticsStore(Application mApplication) {
         Context context = mApplication.getApplicationContext();
-        this.fbAnalyticsLogger = AppEventsLogger.newLogger(context, context.getPackageName());
+        this.fbAnalyticsLogger = AppEventsLogger.newLogger(context);
     }
 
     public static AnalyticsStore getLogger() {
@@ -39,6 +43,11 @@ public class AnalyticsStore implements AnalyticsInterface {
         FacebookSdk.sdkInitialize(application.getApplicationContext());
         AppEventsLogger.activateApp(application);
 
+        if (BuildConfig.DEBUG) {
+            FacebookSdk.setIsDebugEnabled(true);
+            FacebookSdk.addLoggingBehavior(LoggingBehavior.APP_EVENTS);
+        }
+
         if (analyticsStore == null) {
             analyticsStore = new AnalyticsStore(application);
         }
@@ -47,14 +56,16 @@ public class AnalyticsStore implements AnalyticsInterface {
     private void logEvent(String eventName) {
         try {
             fbAnalyticsLogger.logEvent(eventName);
+            fbAnalyticsLogger.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void logEvent(String eventName, Bundle eventParams) {
+    private void logEvent(String eventName, Bundle params) {
         try {
-            fbAnalyticsLogger.logEvent(eventName, eventParams);
+            fbAnalyticsLogger.logEvent(eventName, params);
+            fbAnalyticsLogger.flush();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -71,47 +82,47 @@ public class AnalyticsStore implements AnalyticsInterface {
     // Signup Events
     @Override
     public void enteredPhoneNumber(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.ENTERED_NAME, eventParams);
+        logEvent(Event.ENTERED_NAME, params);
     }
 
     @Override
     public void enteredCorrectOTP(boolean status, String errorMessage, int retries) {
-        Bundle eventParams = getBundle(status, errorMessage);
-        eventParams.putString(EventParam.NO_OF_ATTEMPT, String.valueOf(retries));
+        Bundle params = getBundle(status, errorMessage);
+        params.putString(EventParam.NO_OF_ATTEMPT, String.valueOf(retries));
 
-        logEvent(Event.ENTERED_CORRECT_OTP, eventParams);
+        logEvent(Event.ENTERED_CORRECT_OTP, params);
     }
 
     @Override
     public void resendOTP(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.RESEND_OTP, eventParams);
+        logEvent(Event.RESEND_OTP, params);
     }
 
     @Override
     public void enteredName(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.ENTERED_NAME, eventParams);
+        logEvent(Event.ENTERED_NAME, params);
     }
 
     @Override
     public void uploadedProfilePhoto(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.UPLOADED_PROFILE_PHOTO, eventParams);
+        logEvent(Event.UPLOADED_PROFILE_PHOTO, params);
     }
 
     @Override
     public void completedProfileSetUp(boolean isExistingUser) {
-        Bundle eventParams = getBundle();
-        eventParams.putString(EventParam.IS_EXISTING_USER, String.valueOf(isExistingUser));
+        Bundle params = getBundle();
+        params.putString(EventParam.IS_EXISTING_USER, String.valueOf(isExistingUser));
 
         // Using FB Event for Completed Profile Set-Up
-        logEvent(AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION, eventParams);
+        logEvent(AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION, params);
     }
 
     // Add Destination Address Events
@@ -122,27 +133,27 @@ public class AnalyticsStore implements AnalyticsInterface {
 
     @Override
     public void selectedAddress(int charactersTyped, boolean isFavorite) {
-        Bundle eventParams = getBundle();
-        eventParams.putString(EventParam.IS_ADDRESS_FAVORITE, String.valueOf(isFavorite));
+        Bundle params = getBundle();
+        params.putString(EventParam.IS_ADDRESS_FAVORITE, String.valueOf(isFavorite));
 
-        logEvent(Event.SELECTED_AN_ADDRESS, eventParams);
+        logEvent(Event.SELECTED_AN_ADDRESS, params);
     }
 
     // Trip Events
     @Override
     public void startedTrip(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.STARTED_A_TRIP, eventParams);
+        logEvent(Event.STARTED_A_TRIP, params);
         logPurchaseEvent();
     }
 
     @Override
     public void tappedShareIcon(boolean tripShared) {
-        Bundle eventParams = getBundle();
-        eventParams.putString(EventParam.SHARED_CURRENT_TRIP_BEFORE, String.valueOf(tripShared));
+        Bundle params = getBundle();
+        params.putString(EventParam.SHARED_CURRENT_TRIP_BEFORE, String.valueOf(tripShared));
 
-        logEvent(Event.TAPPED_SHARE_ICON, eventParams);
+        logEvent(Event.TAPPED_SHARE_ICON, params);
     }
 
 //    @Override
@@ -152,44 +163,44 @@ public class AnalyticsStore implements AnalyticsInterface {
 
     @Override
     public void tappedOn3rdPartyApp(String appName) {
-        Bundle eventParams = getBundle();
-        eventParams.putString(EventParam.SHARING_APP, appName);
+        Bundle params = getBundle();
+        params.putString(EventParam.SHARING_APP, appName);
 
-        logEvent(Event.TAPPED_ON_3RD_PARTY_APP, eventParams);
+        logEvent(Event.TAPPED_ON_3RD_PARTY_APP, params);
     }
 
     @Override
     public void tripSharedVia3rdPartyApp(String appName) {
-        Bundle eventParams = getBundle();
-        eventParams.putString(EventParam.SHARING_APP, appName);
+        Bundle params = getBundle();
+        params.putString(EventParam.SHARING_APP, appName);
 
-        logEvent(Event.TRIP_SHARED_VIA_3RD_PARTY_APP, eventParams);
+        logEvent(Event.TRIP_SHARED_VIA_3RD_PARTY_APP, params);
     }
 
 //    @Override
 //    public void selectedContacts(int contactsCount, int sendETAContactsCount) {
-//        Bundle eventParams = getBundle();
-//        eventParams.putString(EventParam.NO_OF_CONTACTS_SELECTED, String.valueOf(contactsCount));
-//        eventParams.putString(EventParam.NO_OF_SEND_ETA_CONTACTS_SELECTED, String.valueOf(sendETAContactsCount));
+//        Bundle params = getBundle();
+//        params.putString(EventParam.NO_OF_CONTACTS_SELECTED, String.valueOf(contactsCount));
+//        params.putString(EventParam.NO_OF_SEND_ETA_CONTACTS_SELECTED, String.valueOf(sendETAContactsCount));
 //
-//        logEvent(Event.SELECTED_CONTACTS, eventParams);
+//        logEvent(Event.SELECTED_CONTACTS, params);
 //    }
 
 //    @Override
 //    public void tappedSendToGroup(int contactsCount, int sendETAContactsCount) {
-//        Bundle eventParams = getBundle();
-//        eventParams.putString(EventParam.NO_OF_CONTACTS_SELECTED, String.valueOf(contactsCount));
-//        eventParams.putString(EventParam.NO_OF_SEND_ETA_CONTACTS_SELECTED, String.valueOf(sendETAContactsCount));
+//        Bundle params = getBundle();
+//        params.putString(EventParam.NO_OF_CONTACTS_SELECTED, String.valueOf(contactsCount));
+//        params.putString(EventParam.NO_OF_SEND_ETA_CONTACTS_SELECTED, String.valueOf(sendETAContactsCount));
 //
-//        logEvent(Event.TAPPED_SEND_TO_GROUP, eventParams);
+//        logEvent(Event.TAPPED_SEND_TO_GROUP, params);
 //    }
 
 //    @Override
 //    public void textMessageSent(int contactsSentCount) {
-//        Bundle eventParams = getBundle();
-//        eventParams.putString(EventParam.NO_OF_CONTACTS_SENT, String.valueOf(contactsSentCount));
+//        Bundle params = getBundle();
+//        params.putString(EventParam.NO_OF_CONTACTS_SENT, String.valueOf(contactsSentCount));
 //
-//        logEvent(Event.TEXT_MESSAGE_SENT, eventParams);
+//        logEvent(Event.TEXT_MESSAGE_SENT, params);
 //    }
 
     @Override
@@ -204,16 +215,16 @@ public class AnalyticsStore implements AnalyticsInterface {
 
     @Override
     public void tappedEndTrip(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.TAPPED_END_TRIP, eventParams);
+        logEvent(Event.TAPPED_END_TRIP, params);
     }
 
     @Override
     public void autoTripEnded(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.AUTO_END_TRIP, eventParams);
+        logEvent(Event.AUTO_END_TRIP, params);
     }
 
     // Profile Events
@@ -229,97 +240,97 @@ public class AnalyticsStore implements AnalyticsInterface {
 
     @Override
     public void editedFirstName(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.EDITED_FIRST_NAME, eventParams);
+        logEvent(Event.EDITED_FIRST_NAME, params);
     }
 
     @Override
     public void editedLastName(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.EDITED_LAST_NAME, eventParams);
+        logEvent(Event.EDITED_LAST_NAME, params);
     }
 
     @Override
-    public void uploadedPhotoViaPhotoEditor() {
+    public void uploadedPhotoViaPhotoEditor(boolean status, String errorMessage) {
         logEvent(Event.UPLOADED_PHOTO_VIA_GALLERY);
     }
 
     @Override
-    public void replacedPhotoViaPhotoEditor() {
+    public void replacedPhotoViaPhotoEditor(boolean status, String errorMessage) {
         logEvent(Event.REPLACED_PHOTO_VIA_GALLERY);
     }
 
     // Home Favorite Events
     @Override
     public void addedHome(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.ADDED_HOME, eventParams);
+        logEvent(Event.ADDED_HOME, params);
     }
 
     @Override
     public void editedHome(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.EDITED_HOME, eventParams);
+        logEvent(Event.EDITED_HOME, params);
     }
 
     @Override
     public void deletedHome(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.DELETED_HOME, eventParams);
+        logEvent(Event.DELETED_HOME, params);
     }
 
     // Work Favorite Events
     @Override
     public void addedWork(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.ADDED_WORK, eventParams);
+        logEvent(Event.ADDED_WORK, params);
     }
 
     @Override
     public void editedWork(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.EDITED_WORK, eventParams);
+        logEvent(Event.EDITED_WORK, params);
     }
 
     @Override
     public void deletedWork(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.DELETED_WORK, eventParams);
+        logEvent(Event.DELETED_WORK, params);
     }
 
     // Other Favorite Events
     @Override
     public void addedOtherFavorite(boolean status, String errorMessage, int favoritesCount) {
-        Bundle eventParams = getBundle(status, errorMessage);
-        eventParams.putString(EventParam.NO_OF_FAVORITES_ADDED, String.valueOf(favoritesCount));
+        Bundle params = getBundle(status, errorMessage);
+        params.putString(EventParam.NO_OF_FAVORITES_ADDED, String.valueOf(favoritesCount));
 
-        logEvent(Event.ADDED_OTHER_FAVORITE, eventParams);
+        logEvent(Event.ADDED_OTHER_FAVORITE, params);
     }
 
     @Override
     public void editedOtherFavorite(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.EDITED_OTHER_FAVORITE, eventParams);
+        logEvent(Event.EDITED_OTHER_FAVORITE, params);
     }
 
     @Override
     public void deletedOtherFavorite(boolean status, String errorMessage) {
-        Bundle eventParams = getBundle(status, errorMessage);
+        Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.DELETED_OTHER_FAVORITE, eventParams);
+        logEvent(Event.DELETED_OTHER_FAVORITE, params);
     }
 
     /**
-     * Method to get eventParams Bundle object
+     * Method to get params Bundle object
      *
      * @return
      */
@@ -328,17 +339,17 @@ public class AnalyticsStore implements AnalyticsInterface {
     }
 
     /**
-     * Method to get eventParams Bundle object
+     * Method to get params Bundle object
      *
      * @param status        Flag to denote the Success/Failure Event
      * @param errorMessage  Message displayed to User in case of failure
      * @return
      */
     private Bundle getBundle(boolean status, String errorMessage) {
-        Bundle eventParams = new Bundle();
-        eventParams.putString(EventParam.STATUS, String.valueOf(status));
-        eventParams.putString(EventParam.ERROR_MESSAGE, errorMessage != null ? errorMessage : "");
+        Bundle params = new Bundle();
+        params.putString(EventParam.STATUS, String.valueOf(status));
+        params.putString(EventParam.ERROR_MESSAGE, errorMessage != null ? errorMessage : "");
 
-        return eventParams;
+        return params;
     }
 }
