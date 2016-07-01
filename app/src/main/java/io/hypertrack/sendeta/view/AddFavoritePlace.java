@@ -76,6 +76,8 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private MetaPlace metaPlace;
     private boolean metaPlaceAdded = false;
 
+    private LatLng latlng;
+
     private TextWatcher mPlaceNameTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -122,7 +124,12 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
+            if (mMap != null) {
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
+            }
+
+            // Update LatLng variable with the currently selected Google Place
+            latlng = place.getLatLng();
 
             metaPlace.setGooglePlacesID(place.getGooglePlacesID());
 
@@ -156,6 +163,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         if (intent != null) {
             if (intent.hasExtra("meta_place")) {
                 metaPlace = (MetaPlace) intent.getSerializableExtra("meta_place");
+                latlng = metaPlace.getLatLng();
             }
         }
 
@@ -312,7 +320,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         }
 
         metaPlace.setAddress(addPlaceAddressView.getText().toString());
-        metaPlace.setLatLng(mMap.getCameraPosition().target);
+        metaPlace.setLatLng(latlng);
 
         if (metaPlaceAdded) {
             editPlace();
@@ -465,10 +473,14 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     @Override
     public void onTouchUp(MotionEvent event) {
-        metaPlace.setGooglePlacesID(null);
-        mAdapter.setBounds(getBounds(mMap.getCameraPosition().target, DISTANCE_IN_METERS));
-        reverseGeocode(mMap.getCameraPosition().target);
-        // set spinner for address text view
+        if (mMap != null) {
+            metaPlace.setGooglePlacesID(null);
+            mAdapter.setBounds(getBounds(mMap.getCameraPosition().target, DISTANCE_IN_METERS));
+            reverseGeocode(mMap.getCameraPosition().target);
+
+            latlng = mMap.getCameraPosition().target;
+            // set spinner for address text view
+        }
     }
 
     @SuppressLint("ParcelCreator")

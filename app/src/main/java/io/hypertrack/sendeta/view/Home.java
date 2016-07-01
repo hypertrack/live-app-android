@@ -608,6 +608,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
      * Method to update State Variables & UI to reflect Trip Started
      */
     private void onTripStart() {
+        // TODO: 29/06/16 Add sendETAButton visibility to VISIBLE?
         sendETAButton.setText("End Trip");
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);

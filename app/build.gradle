@@ -72,6 +72,7 @@ android {
     } else {
         throw new GradleException("Could not read version.properties!")
     }
+
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             output.outputFile = new File(
@@ -79,6 +80,7 @@ android {
                     output.outputFile.name.replace("app-debug.apk", "SendETA-${variant.versionName}.apk"))
         }
     }
+
     buildTypes {
         release {
             debuggable false

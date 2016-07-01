@@ -81,7 +81,7 @@ public class UserStore {
     }
 
     public void getTask(MetaPlace place, final UserStoreGetTaskCallback callback) {
-        if (this.user == null) {
+        if (this.user == null || place == null) {
             if (callback != null) {
                 callback.OnError();
             }
@@ -103,10 +103,16 @@ public class UserStore {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+
                 if (response.isSuccessful()) {
                     Map<String, Object> responseDTO = response.body();
+
                     if (callback != null) {
-                        callback.OnSuccess((String) responseDTO.get("id"));
+                        if (responseDTO != null) {
+                            callback.OnSuccess((String) responseDTO.get("id"));
+                        } else {
+                            callback.OnError();
+                        }
                     }
                 } else {
                     if (callback != null) {
@@ -133,10 +139,16 @@ public class UserStore {
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
+
                 if (response.isSuccessful()) {
                     Map<String, Object> responseDTO = response.body();
+
                     if (callback != null) {
-                        callback.OnSuccess((String) responseDTO.get("id"));
+                        if (responseDTO != null) {
+                            callback.OnSuccess((String) responseDTO.get("id"));
+                        } else {
+                            callback.OnError();
+                        }
                     }
                 } else {
                     if (callback != null) {

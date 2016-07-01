@@ -410,32 +410,40 @@ public class PlaceAutocompleteAdapter
             = new ResultCallback<PlaceBuffer>() {
         @Override
         public void onResult(PlaceBuffer places) {
-            if (!places.getStatus().isSuccess()) {
-                // Request did not complete successfully
-                Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
+
+            try {
+                if (!places.getStatus().isSuccess()) {
+                    // Request did not complete successfully
+                    Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
+                    places.release();
+                    if (listener != null) {
+                        listener.OnError();
+                    }
+                }
+
+                if (places.getCount() == 0) {
+                    Log.d(TAG, "Places is empty");
+                    places.release();
+                    if (listener != null) {
+                        listener.OnError();
+                    }
+                }
+
+                // Get the MetaPlace object from the buffer.
+                final Place place = places.get(0);
+
+                Log.i(TAG, "MetaPlace details received: " + place.getName());
+
+                if (listener != null) {
+                    listener.OnSuccess(new MetaPlace(place));
+                }
                 places.release();
+
+            } catch (Exception e) {
                 if (listener != null) {
                     listener.OnError();
                 }
             }
-
-            if (places.getCount() == 0) {
-                Log.d(TAG, "Places is empty");
-                places.release();
-                if (listener != null) {
-                    listener.OnError();
-                }
-            }
-
-            // Get the MetaPlace object from the buffer.
-            final Place place = places.get(0);
-
-            Log.i(TAG, "MetaPlace details received: " + place.getName());
-
-            if (listener != null) {
-                listener.OnSuccess(new MetaPlace(place));
-            }
-            places.release();
         }
     };
 }
