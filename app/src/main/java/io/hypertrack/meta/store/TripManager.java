@@ -207,7 +207,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    public void addTrip(final TripManagerCallback callback) {
+    private void addTrip(final TripManagerCallback callback) {
         HashMap<String, String> tripDetails = new HashMap<>();
         tripDetails.put("hypertrack_trip_id", this.hyperTrackTrip.getId());
         tripDetails.put("hypertrack_task_id", this.hyperTrackTrip.getTaskIDs().get(0));
@@ -262,6 +262,10 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                         addTrip(new TripManagerCallback() {
                             @Override
                             public void OnSuccess() {
+                                if (place == null) {
+                                    place = SharedPreferenceManager.getPlace();
+                                }
+
                                 onTripStart();
                                 if (callback != null) {
                                     callback.OnSuccess();
@@ -270,8 +274,9 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
                             @Override
                             public void OnError() {
-                                clearState();
                                 transmitter.clearCurrentTrip();
+                                hyperTrackTrip = null;
+
                                 if (callback != null) {
                                     callback.OnError();
                                 }

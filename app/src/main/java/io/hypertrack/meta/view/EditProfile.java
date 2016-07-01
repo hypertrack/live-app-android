@@ -228,7 +228,7 @@ public class EditProfile extends AppCompatActivity {
                     return;
                 }
 
-                profileImage = getScaledFile(getScaledFile(imageFile));
+                profileImage = getScaledFile(imageFile);
 
                 Bitmap bitmap = getRotatedBitMap(imageFile);
                 if (bitmap == null) {
