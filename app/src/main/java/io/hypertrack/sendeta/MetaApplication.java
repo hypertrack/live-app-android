@@ -26,11 +26,16 @@ public class MetaApplication extends Application {
         mInstance = this;
         this.mContext = getApplicationContext();
 
+        // Initialize Hypertrack Transmitter SDK
         HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
+
+        // Initialize Realm to maintain app databases
         this.setupRealm();
 
+        // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
 
+        // Check if current Build Variant is DEBUG & Initialize Stetho to debug Databases
         if (BuildConfig.DEBUG) {
             Stetho.initialize(
                     Stetho.newInitializerBuilder(this)
@@ -41,7 +46,7 @@ public class MetaApplication extends Application {
         }
     }
 
-    public void setupRealm() {
+    private void setupRealm() {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build();
         Realm.setDefaultConfiguration(realmConfiguration);
     }
