@@ -127,7 +127,9 @@ public class OnboardingManager {
             @Override
             public void onResponse(final Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
+
                     didOnbardUser(response.body());
+
                     UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
                         @Override
                         public void OnSuccess() {
@@ -189,7 +191,7 @@ public class OnboardingManager {
     public void uploadPhoto(final OnOnboardingCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
 
-        if (profileImage.length() > 0) {
+        if (profileImage != null && profileImage.length() > 0) {
             UserStore.sharedStore.addImage(profileImage);
 
             UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {

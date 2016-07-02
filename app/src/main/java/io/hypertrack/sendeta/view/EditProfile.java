@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +20,9 @@ import java.io.File;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
@@ -35,7 +38,9 @@ public class EditProfile extends BaseActivity {
     private RoundedImageView mProfileImageView;
     private AutoCompleteTextView mFirstNameView, mLastNameView;
 
-    private File profileImage;
+    private Bitmap oldProfileImage = null, updatedProfileImage = null;
+    private EasyImage.ImageSource imageUploadSource;
+    private File updatedProfileImageFile;
 
     private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
@@ -77,6 +82,11 @@ public class EditProfile extends BaseActivity {
         // Initialize UI Action Listeners
         mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
         mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
+
+        User user = UserStore.sharedStore.getUser();
+        if (user != null) {
+            oldProfileImage = user.getImageBitmap();
+        }
 
         // Setup UI Views with User Data
         updateFirstName();
@@ -147,47 +157,104 @@ public class EditProfile extends BaseActivity {
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        UserStore.sharedStore.updateInfo(mFirstNameView.getText().toString(), mLastNameView.getText().toString(), new SuccessErrorCallback() {
+        String firstName = mFirstNameView.getText().toString();
+        if (!TextUtils.isEmpty(firstName)) {
+            firstName = firstName.trim();
+        }
+
+        String lastName = mLastNameView.getText().toString();
+        if (!TextUtils.isEmpty(lastName)) {
+            lastName = lastName.trim();
+        }
+
+        UserStore.sharedStore.updateInfo(firstName, lastName, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
 
-                if (profileImage != null && profileImage.length() > 0) {
-                    UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
+                // Check if the profile image has changed from the existing one
+                if (updatedProfileImageFile != null && updatedProfileImageFile.length() > 0 && !updatedProfileImage.sameAs(oldProfileImage)) {
+
+                    UserStore.sharedStore.updatePhoto(updatedProfileImageFile, new SuccessErrorCallback() {
+
                         @Override
                         public void OnSuccess() {
+                            // Process Image Upload Success for Analytics
+                            processImageDataForAnalytics(true, null, oldProfileImage, imageUploadSource);
+
                             mProgressDialog.dismiss();
+                            Toast.makeText(EditProfile.this, "Profile Pic uploaded successfully",
+                                    Toast.LENGTH_SHORT).show();
+
                             broadcastResultIntent();
                             finish();
                         }
 
                         @Override
                         public void OnError() {
+                            // Process Image Upload Failure for Analytics
+                            processImageDataForAnalytics(false, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED,
+                                    oldProfileImage, imageUploadSource);
+
                             mProgressDialog.dismiss();
-                            showUpdateError();
+                            Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED,
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
+
                 } else {
+
+                    Toast.makeText(EditProfile.this, "The image you are trying to save is same as the existing one.",
+                            Toast.LENGTH_SHORT).show();
                     mProgressDialog.dismiss();
-                    broadcastResultIntent();
-                    finish();
+//                    broadcastResultIntent();
+//                    finish();
                 }
             }
 
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
-                showUpdateError();
+                Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_UPDATE_FAILED, Toast.LENGTH_SHORT).show();
             }
         });
-    }
-
-    private void showUpdateError() {
-        Toast.makeText(this, R.string.edit_profile_error, Toast.LENGTH_LONG).show();
     }
 
     private void broadcastResultIntent() {
         Intent intent = new Intent();
         setResult(EDIT_PROFILE_RESULT_CODE, intent);
+    }
+
+    /**
+     * Method to process uploaded User Profile Image to log Analytics Event
+     *
+     * @param status            Flag to indicate status of FavoritePlace Deletion event
+     * @param errorMessage      ErrorMessage in case of Failure
+     * @param oldProfileImage   User's Existing Profile Image
+     */
+    private void processImageDataForAnalytics(boolean status, String errorMessage, Bitmap oldProfileImage, EasyImage.ImageSource imageSource) {
+
+        String source;
+
+        switch (imageSource) {
+            case GALLERY:
+                source = "gallery";
+                break;
+            case DOCUMENTS:
+                source = "documents";
+                break;
+            case CAMERA:
+                source = "camera";
+                break;
+            default:
+                source = "";
+                break;
+        }
+
+        if (oldProfileImage != null && oldProfileImage.getByteCount() > 0) {
+            AnalyticsStore.getLogger().replacedPhotoViaPhotoEditor(status, errorMessage, source);
+        } else {
+            AnalyticsStore.getLogger().uploadedPhotoViaPhotoEditor(status, errorMessage, source);
+        }
     }
 
     @Override
@@ -198,6 +265,7 @@ public class EditProfile extends BaseActivity {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
                 //Some error handling
+                Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_PIC_CHOOSE_FAILED, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -206,15 +274,16 @@ public class EditProfile extends BaseActivity {
                     return;
                 }
 
-                profileImage = ImageUtils.getScaledFile(ImageUtils.getScaledFile(imageFile));
+                updatedProfileImageFile = ImageUtils.getScaledFile(imageFile);
+                imageUploadSource = source;
 
-                Bitmap bitmap = ImageUtils.getRotatedBitMap(imageFile);
-                if (bitmap == null) {
-                    bitmap = BitmapFactory.decodeFile(imageFile.getPath());
+                updatedProfileImage = ImageUtils.getRotatedBitMap(imageFile);
+                if (updatedProfileImage == null) {
+                    updatedProfileImage = BitmapFactory.decodeFile(imageFile.getPath());
                 }
 
-                if (bitmap != null) {
-                    mProfileImageView.setImageBitmap(bitmap);
+                if (updatedProfileImage != null) {
+                    mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }

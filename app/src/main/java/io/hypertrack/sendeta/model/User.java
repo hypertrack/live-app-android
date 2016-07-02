@@ -202,7 +202,8 @@ public class User extends RealmObject {
         for (MetaPlace candidate : this.places) {
             if (candidate.getId() == place.getId()
                     || candidate.getGooglePlacesID().equalsIgnoreCase(place.getGooglePlacesID())
-                    || candidate.getHyperTrackDestinationID().equalsIgnoreCase(place.getHyperTrackDestinationID())) {
+                    || candidate.getHyperTrackDestinationID().equalsIgnoreCase(place.getHyperTrackDestinationID())
+                    || (candidate.getLatitude().equals(place.getLatitude()) && candidate.getLongitude().equals(place.getLongitude()))) {
                 return true;
             }
         }

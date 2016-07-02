@@ -40,8 +40,8 @@ public class Profile extends BaseActivity implements ProfileView {
     public AutoCompleteTextView mFirstNameView, mLastNameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
-
     private ProgressDialog mProgressDialog;
+
     private File profileImage;
 
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
@@ -199,7 +199,7 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void showErrorMessage() {
         showProgress(false);
-        Toast.makeText(Profile.this, ErrorMessages.PROFILE_UPDATE_FAILED, Toast.LENGTH_LONG).show();
+        Toast.makeText(Profile.this, ErrorMessages.PROFILE_UPDATE_FAILED, Toast.LENGTH_SHORT).show();
     }
 
     private void showProgress(boolean show) {
@@ -220,7 +220,7 @@ public class Profile extends BaseActivity implements ProfileView {
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
-                //Some error handling
+                Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_CHOOSE_FAILED, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -229,8 +229,7 @@ public class Profile extends BaseActivity implements ProfileView {
                     return;
                 }
 
-                // TODO: 30/06/16 Why getScaledFile used twice on imageFile?
-                profileImage = ImageUtils.getScaledFile(ImageUtils.getScaledFile(imageFile));
+                profileImage = ImageUtils.getScaledFile(imageFile);
 
                 Bitmap bitmap = ImageUtils.getRotatedBitMap(imageFile);
                 if (bitmap == null) {
@@ -240,13 +239,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 if (bitmap != null) {
                     mProfileImageView.setImageBitmap(bitmap);
                 }
-
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            }
-
-            @Override
-            public void onCanceled(EasyImage.ImageSource source) {
-                super.onCanceled(source);
             }
         });
     }
@@ -256,9 +249,9 @@ public class Profile extends BaseActivity implements ProfileView {
         switch (requestCode) {
             case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "Permission Denied, You cannot access storage.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permission Denied, You cannot access storage.", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

@@ -135,7 +135,7 @@ public class Register extends BaseActivity implements RegisterView {
     @Override
     public void registrationFailed() {
         mProgressDialog.dismiss();
-        Toast.makeText(Register.this, ErrorMessages.PHONE_NO_REGISTRATION_FAILED, Toast.LENGTH_LONG).show();
+        Toast.makeText(Register.this, ErrorMessages.PHONE_NO_REGISTRATION_FAILED, Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -23,6 +23,7 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
@@ -182,7 +183,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
         // Start an intent to AddFavoritePlace with MetaPlace object as parameter
         Intent addFavPlaceIntent = new Intent(this, AddFavoritePlace.class);
         addFavPlaceIntent.putExtra("meta_place", place);
-        startActivityForResult(addFavPlaceIntent, AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE, null);
+        startActivityForResult(addFavPlaceIntent, Constants.FAVORITE_PLACE_REQUEST_CODE, null);
     }
 
     @Override
@@ -218,7 +219,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
 //                                place);
                         mProgressDialog.dismiss();
                         Toast.makeText(UserProfile.this, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
-                                Toast.LENGTH_LONG).show();
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -238,7 +239,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
+        if (requestCode == Constants.FAVORITE_PLACE_REQUEST_CODE) {
             updateFavoritesAdapter();
 
         } else if (requestCode == EditProfile.EDIT_PROFILE_RESULT_CODE) {

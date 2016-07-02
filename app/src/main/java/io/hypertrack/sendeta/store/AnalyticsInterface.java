@@ -14,7 +14,6 @@ public interface AnalyticsInterface {
     void completedProfileSetUp(boolean isNewUser);
 
     // Add Destination Address Events
-//    void typedAddress();
     void selectedAddress(int charactersTyped, boolean isFavorite);
 
     // Trip Events
@@ -40,8 +39,8 @@ public interface AnalyticsInterface {
     void tappedEditProfile();
     void editedFirstName(boolean status, String errorMessage);
     void editedLastName(boolean status, String errorMessage);
-    void uploadedPhotoViaPhotoEditor(boolean status, String errorMessage);
-    void replacedPhotoViaPhotoEditor(boolean status, String errorMessage);
+    void uploadedPhotoViaPhotoEditor(boolean status, String errorMessage, String source);
+    void replacedPhotoViaPhotoEditor(boolean status, String errorMessage, String source);
 
     // Home Favorite Events
     void addedHome(boolean status, String errorMessage);

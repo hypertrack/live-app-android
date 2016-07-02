@@ -43,7 +43,6 @@ public class EasyImage implements EasyImageConfig {
     private static final String KEY_PHOTO_URI = "pl.aprilapps.easyphotopicker.photo_uri";
     private static final String KEY_LAST_CAMERA_PHOTO = "pl.aprilapps.easyphotopicker.last_photo";
 
-
     private static Intent createDocumentsIntent() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");

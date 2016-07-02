@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -38,11 +39,16 @@ import android.widget.Toast;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -76,6 +82,7 @@ import io.hypertrack.sendeta.store.callback.TripETACallback;
 import io.hypertrack.sendeta.store.callback.TripManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripManagerListener;
 import io.hypertrack.sendeta.util.AnimationUtils;
+import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
@@ -86,10 +93,11 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private static final String TAG = "Home";
     private static final long INTERVAL_TIME = 5000;
-    private static final int SHARE_REQUEST_CODE = 2;
+
 
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
+    protected LocationRequest locationRequest;
     private SupportMapFragment mMapFragment;
 
     private AppBarLayout appBarLayout;
@@ -176,6 +184,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         mProgressDialog.show();
 
         if (currentLocationMarker == null || currentLocationMarker.getPosition() == null || destinationLocation == null) {
+            mProgressDialog.dismiss();
             callback.OnError();
             return;
         }
@@ -196,7 +205,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void showETAError() {
-        Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
     }
 
     private void onETASuccess(TripETAResponse response, MetaPlace place) {
@@ -239,34 +248,42 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         @Override
         public void onClick(View v) {
 
-            enterDestinationLayoutClicked = true;
+            if (currentLocationMarker == null ||
+                    new LatLng(0.0, 0.0).equals(currentLocationMarker.getPosition())) {
 
-            // Reset Current State when user chooses to edit destination
-            TripManager.getSharedManager().clearState();
-            OnTripEnd();
+                Toast.makeText(Home.this, "Please enable Location first", Toast.LENGTH_SHORT).show();
+                checkIfLocationIsEnabled();
 
-            // Reset the Destination Text View
-            destinationText.setGravity(Gravity.CENTER);
-            destinationText.setText("");
+            } else {
+                enterDestinationLayoutClicked = true;
 
-            // Reset the Destionation Description View
-            destinationDescription.setVisibility(View.GONE);
-            destinationDescription.setText("");
+                // Reset Current State when user chooses to edit destination
+                TripManager.getSharedManager().clearState();
+                OnTripEnd();
 
-            // Hide the AppBar
-            AnimationUtils.collapse(appBarLayout, 200);
+                // Reset the Destination Text View
+                destinationText.setGravity(Gravity.CENTER);
+                destinationText.setText("");
 
-            // Reset the Autocomplete TextView
-            mAutocompletePlacesView.setText("");
-            mAutocompletePlacesView.requestFocus();
-            KeyboardUtils.showKeyboard(Home.this, mAutocompletePlacesView);
+                // Reset the Destionation Description View
+                destinationDescription.setVisibility(View.GONE);
+                destinationDescription.setText("");
 
-            // Show the Autocomplete Places Layout
-            enterDestinationLayout.setVisibility(View.GONE);
-            mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
+                // Hide the AppBar
+                AnimationUtils.collapse(appBarLayout, 200);
 
-            showAutocompleteResults(true);
-            updateAutoCompleteResults();
+                // Reset the Autocomplete TextView
+                mAutocompletePlacesView.setText("");
+                mAutocompletePlacesView.requestFocus();
+                KeyboardUtils.showKeyboard(Home.this, mAutocompletePlacesView);
+
+                // Show the Autocomplete Places Layout
+                enterDestinationLayout.setVisibility(View.GONE);
+                mAutocompletePlacesLayout.setVisibility(View.VISIBLE);
+
+                showAutocompleteResults(true);
+                updateAutoCompleteResults();
+            }
         }
     };
 
@@ -306,6 +323,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         checkIfUserIsOnBoard();
 
         initGoogleClient();
+        createLocationRequest();
         setupEnterDestinationView();
         setupAutoCompleteView();
         setupShareButton();
@@ -317,7 +335,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         // Check & Prompt User if Internet is Not Connected
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
-                    Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -338,6 +356,13 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
+    }
+
+    private void createLocationRequest() {
+        locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(INTERVAL_TIME);
+        locationRequest.setFastestInterval(INTERVAL_TIME);
     }
 
     private void setupEnterDestinationView() {
@@ -460,7 +485,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     /**
      * Method to publish update received from Adapter on the Autocomplete Results List
      *
-     * @param publish   Flag to indicate whether to update/remove the results
+     * @param publish Flag to indicate whether to update/remove the results
      */
     public void processPublishedResults(boolean publish) {
         showAutocompleteResults(publish);
@@ -568,7 +593,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void showStartTripError() {
-        Toast.makeText(this, ErrorMessages.START_TRIP_FAILED, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, ErrorMessages.START_TRIP_FAILED, Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -601,7 +626,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void showEndTripError() {
-        Toast.makeText(this, getString(R.string.end_trip_error), Toast.LENGTH_LONG).show();
+        Toast.makeText(this, getString(R.string.end_trip_error), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -719,25 +744,66 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-
         // Check & Request for LOCATION permission, if not available
         if (PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-            requestForLocationUpdates();
+            checkIfLocationIsEnabled();
         }
     }
 
     private void requestForLocationUpdates() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(INTERVAL_TIME);
-        locationRequest.setFastestInterval(INTERVAL_TIME);
-
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, locationRequest, this);
         } catch (SecurityException exception) {
-            Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_LONG).show();
+            Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    /**
+     * Method to check if the Location Services are enabled and in case not, request user to
+     * enable them.
+     */
+    private void checkIfLocationIsEnabled() {
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest).setAlwaysShow(true);
+        PendingResult<LocationSettingsResult> pendingResult =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+        pendingResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult locationSettingsResult) {
+                final Status status = locationSettingsResult.getStatus();
+                final LocationSettingsStates states = locationSettingsResult.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can
+                        // initialize location requests here.
+                        //Start Location Service here if not already active
+                        Log.d(TAG, "Fetching Location started!");
+                        requestForLocationUpdates();
+
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied, but this can be fixed
+                        // by showing the user a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(Home.this, Constants.REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                            e.printStackTrace();
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way
+                        // to fix the settings so we won't show the dialog.
+                        // This happens when phone is in Airplane/Flight Mode
+                        break;
+                }
+
+            }
+        });
     }
 
     @Override
@@ -751,7 +817,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         if (currentLocationMarker == null) {
             addMarkerToCurrentLocation(latLng);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
         } else {
             currentLocationMarker.setPosition(latLng);
         }
@@ -855,7 +921,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
-        startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), SHARE_REQUEST_CODE);
+        startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), Constants.SHARE_REQUEST_CODE);
     }
 
     /**
@@ -937,7 +1003,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         Intent addPlace = new Intent(this, AddFavoritePlace.class);
         addPlace.putExtra("meta_place", newPlace);
-        startActivityForResult(addPlace, AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE, null);
+        startActivityForResult(addPlace, Constants.FAVORITE_PLACE_REQUEST_CODE, null);
     }
 
     /**
@@ -994,9 +1060,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         switch (requestCode) {
             case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    requestForLocationUpdates();
+                    checkIfLocationIsEnabled();
                 } else {
-                    Toast.makeText(this, "Permission Denied, You cannot access location data.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Permission Denied, You cannot access location data.", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
@@ -1004,9 +1070,32 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == AddFavoritePlace.FAVORITE_PLACE_REQUEST_CODE) {
+
+        if (requestCode == Constants.REQUEST_CHECK_SETTINGS) {
+
+            switch (resultCode) {
+                case Activity.RESULT_OK:
+
+                    Log.i(TAG, "User agreed to make required location settings changes.");
+                    Log.d(TAG, "Fetching Location started!");
+                    requestForLocationUpdates();
+                    break;
+
+                case Activity.RESULT_CANCELED:
+
+                    Log.i(TAG, "User chose not to make required location settings changes.");
+
+                    // Location Service Enable Request denied, boo! Fire LocationDenied event
+
+                    break;
+            }
+
+        } else if (requestCode == Constants.FAVORITE_PLACE_REQUEST_CODE) {
+
             updateFavoritesButton();
-        } else if (requestCode == SHARE_REQUEST_CODE) {
+
+        } else if (requestCode == Constants.SHARE_REQUEST_CODE) {
+
             Log.d(TAG, resultCode + "");
         }
     }

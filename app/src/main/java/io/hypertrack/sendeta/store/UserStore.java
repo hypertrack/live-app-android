@@ -192,8 +192,10 @@ public class UserStore {
         placeManager.getPlaces(new PlaceManagerGetPlacesCallback() {
             @Override
             public void OnSuccess(List<MetaPlace> places) {
+
                 clearPlaces();
                 addPlaces(places);
+
                 if (callback != null) {
                     callback.OnSuccess();
                 }
@@ -260,7 +262,7 @@ public class UserStore {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                List<MetaPlace> placesToAdd = realm.copyToRealm(places);
+                List<MetaPlace> placesToAdd = realm.copyToRealmOrUpdate(places);
                 RealmList<MetaPlace> placesList = new RealmList<>(placesToAdd.toArray(new MetaPlace[placesToAdd.size()]));
                 user.setPlaces(placesList);
                 user = realm.copyToRealmOrUpdate(user);
@@ -419,11 +421,11 @@ public class UserStore {
                 }
 
                 // Check if First Name was edited & Log Analytics Event
-                if (firstName.equals(updatedUserDetails.get("first_name")))
+                if (!firstName.equals(updatedUserDetails.get("first_name")))
                     AnalyticsStore.getLogger().editedFirstName(true, null);
 
                 // Check if Last Name was edited & Log Analytics Event
-                if (lastName.equals(updatedUserDetails.get("last_name")))
+                if (!lastName.equals(updatedUserDetails.get("last_name")))
                     AnalyticsStore.getLogger().editedLastName(true, null);
 
                 updateInfo(user.getFirstName(), user.getLastName());

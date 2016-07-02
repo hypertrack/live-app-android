@@ -176,7 +176,7 @@ public class Verify extends BaseActivity implements VerifyView {
     @Override
     public void verificationFailed() {
         mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, ErrorMessages.PHONE_NO_VERIFICATION_FAILED, Toast.LENGTH_LONG).show();
+        Toast.makeText(Verify.this, ErrorMessages.PHONE_NO_VERIFICATION_FAILED, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -190,7 +190,7 @@ public class Verify extends BaseActivity implements VerifyView {
     @Override
     public void showResendError() {
         mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, ErrorMessages.RESEND_OTP_FAILED, Toast.LENGTH_LONG).show();
+        Toast.makeText(Verify.this, ErrorMessages.RESEND_OTP_FAILED, Toast.LENGTH_SHORT).show();
     }
 
     private void onVerificationCodeChanged() {

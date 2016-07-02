@@ -3,7 +3,6 @@ package io.hypertrack.sendeta.store;
 import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.facebook.FacebookSdk;
 import com.facebook.LoggingBehavior;
@@ -84,7 +83,7 @@ public class AnalyticsStore implements AnalyticsInterface {
     public void enteredPhoneNumber(boolean status, String errorMessage) {
         Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.ENTERED_NAME, params);
+        logEvent(Event.ENTERED_PHONE_NO, params);
     }
 
     @Override
@@ -126,11 +125,6 @@ public class AnalyticsStore implements AnalyticsInterface {
     }
 
     // Add Destination Address Events
-//    @Override
-//    public void typedAddress() {
-//        logEvent(Event.TYPED_AN_ADDRESS);
-//    }
-
     @Override
     public void selectedAddress(int charactersTyped, boolean isFavorite) {
         Bundle params = getBundle();
@@ -253,13 +247,19 @@ public class AnalyticsStore implements AnalyticsInterface {
     }
 
     @Override
-    public void uploadedPhotoViaPhotoEditor(boolean status, String errorMessage) {
-        logEvent(Event.UPLOADED_PHOTO_VIA_GALLERY);
+    public void uploadedPhotoViaPhotoEditor(boolean status, String errorMessage, String source) {
+        Bundle params = getBundle(status, errorMessage);
+        params.putString(EventParam.SOURCE, source);
+
+        logEvent(Event.UPLOADED_PHOTO_VIA_GALLERY, params);
     }
 
     @Override
-    public void replacedPhotoViaPhotoEditor(boolean status, String errorMessage) {
-        logEvent(Event.REPLACED_PHOTO_VIA_GALLERY);
+    public void replacedPhotoViaPhotoEditor(boolean status, String errorMessage, String source) {
+        Bundle params = getBundle(status, errorMessage);
+        params.putString(EventParam.SOURCE, source);
+
+        logEvent(Event.REPLACED_PHOTO_VIA_GALLERY, params);
     }
 
     // Home Favorite Events

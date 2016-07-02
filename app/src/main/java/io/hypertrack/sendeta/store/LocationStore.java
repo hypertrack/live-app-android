@@ -21,7 +21,6 @@ public class LocationStore {
     }
 
     private LocationStore() {
-
     }
 
     public LatLng getCurrentLatLng() {

@@ -75,5 +75,6 @@ public class AnalyticsConstants {
         public static final String NO_OF_CONTACTS_SENT = "number_of_contacts_sent";
         public static final String SHARED_CURRENT_TRIP_BEFORE = "had_shared_this_trip_before";
         public static final String NO_OF_FAVORITES_ADDED = "number_of_fav_locations_added";
+        public static final String SOURCE = "source";
     }
 }

@@ -40,6 +40,7 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
@@ -54,7 +55,6 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     private final String TAG = "AddFavoritePlace";
 
-    public static final int FAVORITE_PLACE_REQUEST_CODE = 100;
     public static final String KEY_UPDATED_PLACE = "updated_place";
     public static final String KEY_ADDED_OR_EDITED = "added_or_edited";
 
@@ -175,7 +175,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
-                    Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -274,10 +274,21 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        mMap.getUiSettings().setZoomGesturesEnabled(true);
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.getUiSettings().setCompassEnabled(false);
+        mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
+        mMap.getUiSettings().setScrollGesturesEnabled(true);
+        mMap.getUiSettings().setTiltGesturesEnabled(false);
+        mMap.getUiSettings().setRotateGesturesEnabled(false);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(metaPlace.getLatLng(), 18.0f));
+        if (metaPlace.getLatitude() != 0.0 && metaPlace.getLongitude() != 0.0) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(metaPlace.getLatLng(), 18.0f));
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0.0, 0.0), 0.0f));
+        }
     }
 
     public void processPublishedResults(ArrayList<AutocompletePrediction> results) {
@@ -297,24 +308,28 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
             return;
         }
 
-        metaPlaceAdded = user.isSynced(metaPlace);
+        metaPlaceAdded = !user.isFavorite(metaPlace);
         metaPlace.setName(addPlaceNameView.getText().toString());
 
         if (metaPlace.getName() == null || metaPlace.getName().isEmpty()) {
-            Toast.makeText(this, R.string.place_name_error, Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.place_name_error, Toast.LENGTH_SHORT).show();
+
+            processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_NAME_REQUIRED_ERROR);
             return;
         }
 
         if (metaPlace.isHome()) {
             if (user.hasHome() && !user.getHome().isEqualPlace(metaPlace)) {
-                Toast.makeText(this, R.string.home_exists_error, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.home_exists_error, Toast.LENGTH_SHORT).show();
 
-                processUpdatedMetaPlaceForAnalytics(false, null);
+                processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.HOME_ALREADY_EXISTS_ERROR);
                 return;
             }
         } else if (metaPlace.isWork()) {
             if (user.hasWork() && !user.getWork().isEqualPlace(metaPlace)) {
-                Toast.makeText(this, R.string.work_exists_error, Toast.LENGTH_LONG).show();
+                Toast.makeText(this, R.string.work_exists_error, Toast.LENGTH_SHORT).show();
+
+                processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.WORK_ALREADY_EXISTS_ERROR);
                 return;
             }
         }
@@ -323,9 +338,11 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         metaPlace.setLatLng(latlng);
 
         if (metaPlaceAdded) {
-            editPlace();
-        } else {
+            Log.d(TAG, "Add Place called with id: " + metaPlace.getId());
             addPlace();
+        } else {
+            Log.d(TAG, "Edit Place called with id: " + metaPlace.getId());
+            editPlace();
         }
     }
 
@@ -374,6 +391,14 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     }
 
     private void editPlace() {
+
+        if (metaPlace.getId() == 0) {
+            Toast.makeText(AddFavoritePlace.this, ErrorMessages.EDITING_ALREADY_SAVED_PLACE_ERROR,
+                    Toast.LENGTH_SHORT).show();
+            processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.EDITING_ALREADY_SAVED_PLACE_ERROR);
+            return;
+        }
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage("Editing place");
         mProgressDialog.setCancelable(false);
@@ -397,13 +422,14 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 showEditPlaceError();
             }
         });
+
     }
 
     private void broadcastResultIntent() {
         Intent intent = new Intent();
         intent.putExtra(KEY_ADDED_OR_EDITED, metaPlaceAdded);
         intent.putExtra(KEY_UPDATED_PLACE, metaPlace);
-        setResult(FAVORITE_PLACE_REQUEST_CODE, intent);
+        setResult(Constants.FAVORITE_PLACE_REQUEST_CODE, intent);
     }
 
     /**
@@ -448,11 +474,11 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     }
 
     private void showAddPlaceError() {
-        Toast.makeText(this, R.string.add_place_error, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.add_place_error, Toast.LENGTH_SHORT).show();
     }
 
     private void showEditPlaceError() {
-        Toast.makeText(this, R.string.edit_place_error, Toast.LENGTH_LONG).show();
+        Toast.makeText(this, R.string.edit_place_error, Toast.LENGTH_SHORT).show();
     }
 
     private void reverseGeocode(LatLng latLng) {
@@ -497,7 +523,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
             } else {
                 Toast.makeText(AddFavoritePlace.this, resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY),
-                        Toast.LENGTH_LONG).show();
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }
