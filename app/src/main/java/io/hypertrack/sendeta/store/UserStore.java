@@ -16,6 +16,7 @@ import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
+import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
@@ -321,6 +322,9 @@ public class UserStore {
         placeManager.deletePlace(place, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
+
+                processDeletedMetaPlaceForAnalytics(true, null, place);
+
                 deletePlace(place);
                 if (callback != null) {
                     callback.OnSuccess();
@@ -329,11 +333,42 @@ public class UserStore {
 
             @Override
             public void OnError() {
+
+                processDeletedMetaPlaceForAnalytics(false, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
+                        place);
+
                 if (callback != null) {
                     callback.OnError();
                 }
             }
         });
+    }
+
+    /**
+     * Method to process deleted User Favorite Data to log Analytics Event
+     *
+     * @param status        Flag to indicate status of FavoritePlace Deletion event
+     * @param errorMessage  ErrorMessage in case of Failure
+     * @param metaPlace     The Place object which is being deleted
+     */
+    private void processDeletedMetaPlaceForAnalytics(boolean status, String errorMessage, MetaPlace metaPlace) {
+
+        try {
+            // Check if MetaPlace to be deleted is User's Home
+            if (metaPlace.isHome()) {
+                AnalyticsStore.getLogger().deletedHome(status, errorMessage);
+
+                // Check if MetaPlace to be deleted is User's Work
+            } else if (metaPlace.isWork()) {
+                AnalyticsStore.getLogger().deletedWork(status, errorMessage);
+
+                // Check if MetaPlace to be deleted is User's Other Favorite
+            } else {
+                AnalyticsStore.getLogger().deletedOtherFavorite(status, errorMessage);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void deletePlace(final MetaPlace place) {

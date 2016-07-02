@@ -57,7 +57,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         user.setFirstName(userFirstName);
         user.setLastName(userLastName);
 
-        if (profileImage != null) {
+        if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
         }
 

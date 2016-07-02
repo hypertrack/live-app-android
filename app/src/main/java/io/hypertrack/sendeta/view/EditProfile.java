@@ -151,7 +151,7 @@ public class EditProfile extends BaseActivity {
             @Override
             public void OnSuccess() {
 
-                if (profileImage != null) {
+                if (profileImage != null && profileImage.length() > 0) {
                     UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
                         @Override
                         public void OnSuccess() {

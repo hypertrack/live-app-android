@@ -189,23 +189,29 @@ public class OnboardingManager {
     public void uploadPhoto(final OnOnboardingCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
 
-        UserStore.sharedStore.addImage(profileImage);
+        if (profileImage.length() > 0) {
+            UserStore.sharedStore.addImage(profileImage);
 
-        UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
-            @Override
-            public void OnSuccess() {
-                if (callback != null) {
-                    callback.onSuccess();
+            UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
+                @Override
+                public void OnSuccess() {
+                    if (callback != null) {
+                        callback.onSuccess();
+                    }
                 }
-            }
 
-            @Override
-            public void OnError() {
-                if (callback != null) {
-                    callback.onError();
+                @Override
+                public void OnError() {
+                    if (callback != null) {
+                        callback.onError();
+                    }
                 }
+            });
+        } else {
+            if (callback != null) {
+                callback.onError();
             }
-        });
+        }
     }
 
     public void getUserImage(final OnOnboardingCallback callback) {

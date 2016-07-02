@@ -206,8 +206,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
                     @Override
                     public void OnSuccess() {
 
-                        processDeletedMetaPlaceForAnalytics(true, null, place);
-
+//                        processDeletedMetaPlaceForAnalytics(true, null, place);
                         mProgressDialog.dismiss();
                         updateFavoritesAdapter();
                     }
@@ -215,9 +214,8 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
                     @Override
                     public void OnError() {
 
-                        processDeletedMetaPlaceForAnalytics(false, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
-                                place);
-
+//                        processDeletedMetaPlaceForAnalytics(false, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
+//                                place);
                         mProgressDialog.dismiss();
                         Toast.makeText(UserProfile.this, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
                                 Toast.LENGTH_LONG).show();
@@ -234,29 +232,6 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
         });
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
-
-    /**
-     * Method to process deleted User Favorite Data to log Analytics Event
-     *
-     * @param status        Flag to indicate status of FavoritePlace Deletion event
-     * @param errorMessage  ErrorMessage in case of Failure
-     * @param metaPlace     The Place object which is being deleted
-     */
-    private void processDeletedMetaPlaceForAnalytics(boolean status, String errorMessage, MetaPlace metaPlace) {
-
-        // Check if MetaPlace to be deleted is User's Home
-        if (metaPlace.isHome()) {
-            AnalyticsStore.getLogger().deletedHome(status, errorMessage);
-
-        // Check if MetaPlace to be deleted is User's Work
-        } else if (metaPlace.isWork()) {
-            AnalyticsStore.getLogger().deletedWork(status, errorMessage);
-
-        // Check if MetaPlace to be deleted is User's Other Favorite
-        } else {
-            AnalyticsStore.getLogger().deletedOtherFavorite(status, errorMessage);
-        }
     }
 
     @Override

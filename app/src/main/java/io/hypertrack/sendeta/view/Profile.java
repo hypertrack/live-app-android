@@ -243,6 +243,11 @@ public class Profile extends BaseActivity implements ProfileView {
 
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
+
+            @Override
+            public void onCanceled(EasyImage.ImageSource source) {
+                super.onCanceled(source);
+            }
         });
     }
 
