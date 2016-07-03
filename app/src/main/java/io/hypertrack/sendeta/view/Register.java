@@ -3,8 +3,11 @@ package io.hypertrack.sendeta.view;
 import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -73,9 +76,18 @@ public class Register extends BaseActivity implements RegisterView {
         // Initialize UI Action Listeners
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);
 
-        // Check & Request for READ_PHONE_STATE permission, if not available
-        if (PermissionUtils.requestPermission(this, Manifest.permission.READ_PHONE_STATE)) {
+        // Check If READ_PHONE_STATE Permission is available & Initialize CountryFlagSpinner
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
             initCountryFlagSpinner();
+
+        } else {
+            // Show Rationale & Request for READ_PHONE_STATE permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.READ_PHONE_STATE,
+                        getString(R.string.read_phone_state_permission_title), getString(R.string.read_phone_state_msg));
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.READ_PHONE_STATE);
+            }
         }
     }
 
@@ -125,9 +137,27 @@ public class Register extends BaseActivity implements RegisterView {
     }
 
     @Override
-    public void navigateToVerificationScreen() {
+    public void registrationSuccessful() {
         mProgressDialog.dismiss();
 
+        // Check If RECEIVE_SMS Permission is available & Navigate to Verification Screen
+        if (ContextCompat.checkSelfPermission(Register.this, Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_GRANTED) {
+            navigateToVerificationScreen();
+
+        } else {
+            // Show Rationale & Request for RECEIVE_SMS permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(Register.this, Manifest.permission.RECEIVE_SMS)) {
+                PermissionUtils.showRationaleMessageAsDialog(Register.this, Manifest.permission.RECEIVE_SMS,
+                        getString(R.string.sms_receive_permission_title), getString(R.string.sms_receive_permission_msg));
+                return;
+            } else {
+                PermissionUtils.requestPermission(Register.this, Manifest.permission.RECEIVE_SMS);
+                return;
+            }
+        }
+    }
+
+    private void navigateToVerificationScreen() {
         Intent intent = new Intent(Register.this, Verify.class);
         startActivity(intent);
     }
@@ -150,6 +180,10 @@ public class Register extends BaseActivity implements RegisterView {
             case PermissionUtils.REQUEST_CODE_PERMISSION_READ_PHONE_STATE:
                 // Get Devices's Country Code for both Positive & Negative cases
                 initCountryFlagSpinner();
+                break;
+            case PermissionUtils.REQUEST_CODE_PERMISSION_SMS_RECEIVER:
+                // Navigate to Verification Screen for both Positive & Negative cases
+                navigateToVerificationScreen();
                 break;
         }
     }

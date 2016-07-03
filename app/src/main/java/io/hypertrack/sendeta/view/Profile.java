@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -93,12 +95,36 @@ public class Profile extends BaseActivity implements ProfileView {
         mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
         mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
 
-        // Check & Request for READ_EXTERNAL_STORAGE permission, if not available
-        PermissionUtils.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        // Check If READ_EXTERNAL_STORAGE Permission is available or not
+        if (!(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
+            // Show Rationale & Request for READ_EXTERNAL_STORAGE permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        getString(R.string.sms_receive_permission_title), getString(R.string.sms_receive_permission_msg));
+                return;
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+                return;
+            }
+        }
     }
 
     public void onProfileImageViewClicked(View view) {
-        EasyImage.openChooser(Profile.this, "Please select", true);
+
+        // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            EasyImage.openChooser(Profile.this, "Please select", true);
+
+        } else {
+            // Show Rationale & Request for READ_EXTERNAL_STORAGE permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        getString(R.string.read_external_storage_permission_title),
+                        getString(R.string.read_external_storage_permission_msg));
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+        }
     }
 
     private void onSignInButtonClicked() {
@@ -258,7 +284,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(this, "Permission Denied, You cannot access storage.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.permission_denied_read_external_storage, Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

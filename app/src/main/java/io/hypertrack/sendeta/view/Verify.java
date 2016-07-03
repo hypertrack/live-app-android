@@ -71,8 +71,11 @@ public class Verify extends BaseActivity implements VerifyView {
         public void onReceive(Context context, Intent intent) {
             String code = intent.getStringExtra(SMSReceiver.VERIFICATION_CODE);
             if (!TextUtils.isEmpty(code)) {
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
+
                 verificationCodeView.setText(code);
-                verifyCode();
             }
         }
     };

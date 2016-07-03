@@ -5,5 +5,6 @@ package io.hypertrack.sendeta.store.callback;
  */
 public abstract class OnOnboardingCallback {
     public abstract void onSuccess();
+
     public abstract void onError();
 }

@@ -14,6 +14,8 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -334,9 +336,14 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         // Check & Prompt User if Internet is Not Connected
         if (!NetworkUtils.isConnectedToInternet(this)) {
-            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
+            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues",
                     Toast.LENGTH_SHORT).show();
         }
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setMessage("Please wait while we check if there is any existing trip.");
+        mProgressDialog.show();
     }
 
     private void checkIfUserIsOnBoard() {
@@ -545,6 +552,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             public void OnSuccess() {
                 Log.v(TAG, "Trip is active");
 
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
+
                 MetaPlace place = tripManager.getPlace();
                 updateViewForETASuccess(0, place.getLatLng());
                 destinationText.setGravity(Gravity.LEFT);
@@ -559,6 +569,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             @Override
             public void OnError() {
                 Log.v(TAG, "Trip is not active");
+
+                if (mProgressDialog != null)
+                    mProgressDialog.dismiss();
             }
         });
     }
@@ -744,9 +757,19 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-        // Check & Request for LOCATION permission, if not available
-        if (PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+        // Check If LOCATION Permission is available & then if Location is enabled
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             checkIfLocationIsEnabled();
+
+        } else {
+            // Show Rationale & Request for LOCATION permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                        getString(R.string.read_phone_state_permission_title), getString(R.string.read_phone_state_msg));
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+            }
         }
     }
 
@@ -1061,8 +1084,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkIfLocationIsEnabled();
-                } else {
-                    Toast.makeText(this, "Permission Denied, You cannot access location data.", Toast.LENGTH_SHORT).show();
+                } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    PermissionUtils.showPermissionDeclineMessage(this, Manifest.permission.ACCESS_FINE_LOCATION);
                 }
                 break;
         }

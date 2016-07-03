@@ -1,5 +1,6 @@
 package io.hypertrack.sendeta.store;
 
+import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.google.i18n.phonenumbers.NumberParseException;
@@ -13,6 +14,7 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.OnOnboardingCallback;
+import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import retrofit2.Call;
@@ -50,7 +52,7 @@ public class OnboardingManager {
         final String phoneNumber;
         try {
             phoneNumber = this.onboardingUser.getInternationalNumber();
-        }  catch (NumberParseException e) {
+        } catch (NumberParseException e) {
             if (callback != null) {
                 callback.onError();
             }
@@ -196,27 +198,38 @@ public class OnboardingManager {
         });
     }
 
-    public void uploadPhoto(final OnOnboardingCallback callback) {
+    public void uploadPhoto(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
+                            final OnOnboardingImageUploadCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
 
         if (profileImage != null && profileImage.length() > 0) {
             UserStore.sharedStore.addImage(profileImage);
 
-            UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
-                @Override
-                public void OnSuccess() {
-                    if (callback != null) {
-                        callback.onSuccess();
-                    }
-                }
+            // Check if the profile image has changed from the existing one
+            if (updatedProfileImage != null && updatedProfileImage.getByteCount() > 0
+                    && !updatedProfileImage.sameAs(oldProfileImage)) {
 
-                @Override
-                public void OnError() {
-                    if (callback != null) {
-                        callback.onError();
+                UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
+                    @Override
+                    public void OnSuccess() {
+                        if (callback != null) {
+                            callback.onSuccess();
+                        }
                     }
+
+                    @Override
+                    public void OnError() {
+                        if (callback != null) {
+                            callback.onError();
+                        }
+                    }
+                });
+            } else {
+                // No need to upload Profile Image since there was no change in it
+                if (callback != null) {
+                    callback.onImageUploadNotNeeded();
                 }
-            });
+            }
         } else {
             if (callback != null) {
                 callback.onError();

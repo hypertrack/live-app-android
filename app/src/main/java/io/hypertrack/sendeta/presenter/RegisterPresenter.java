@@ -38,7 +38,7 @@ public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
                 @Override
                 public void OnSuccess() {
                     if (view != null) {
-                        view.navigateToVerificationScreen();
+                        view.registrationSuccessful();
                     }
 
                     AnalyticsStore.getLogger().enteredPhoneNumber(true, null);

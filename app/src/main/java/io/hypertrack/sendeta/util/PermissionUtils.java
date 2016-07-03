@@ -84,7 +84,6 @@ public class PermissionUtils {
         }
     }
 
-
     public static void requestCallPermissions(Activity activity) {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);

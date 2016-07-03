@@ -1,9 +1,12 @@
 package io.hypertrack.sendeta.interactor;
 
+import android.graphics.Bitmap;
+
 import io.hypertrack.sendeta.interactor.callback.OnProfilePicUploadCallback;
 import io.hypertrack.sendeta.interactor.callback.OnProfileUpdateCallback;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.callback.OnOnboardingCallback;
+import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 
 public class ProfileInteractor {
 
@@ -24,9 +27,11 @@ public class ProfileInteractor {
          });
     }
 
-    public void updateUserProfilePic(final OnProfilePicUploadCallback callback) {
+     public void updateUserProfilePic(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
+                                     final OnProfilePicUploadCallback callback) {
 
-        OnboardingManager.sharedManager().uploadPhoto(new OnOnboardingCallback() {
+        OnboardingManager.sharedManager().uploadPhoto(oldProfileImage, updatedProfileImage,
+                new OnOnboardingImageUploadCallback() {
             @Override
             public void onSuccess() {
 
@@ -39,6 +44,13 @@ public class ProfileInteractor {
             public void onError() {
                 if (callback != null) {
                     callback.OnError();
+                }
+            }
+
+            @Override
+            public void onImageUploadNotNeeded() {
+                if (callback != null) {
+                    callback.onImageUploadNotNeeded();
                 }
             }
         });
