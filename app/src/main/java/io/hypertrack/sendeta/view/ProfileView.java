@@ -6,6 +6,7 @@ package io.hypertrack.sendeta.view;
 public interface ProfileView {
     void showProfilePicUploadError();
     void showProfilePicUploadSuccess();
+    void navigateToHomeScreen();
     void showErrorMessage();
     void showFirstNameValidationError();
     void showLastNameValidationError();

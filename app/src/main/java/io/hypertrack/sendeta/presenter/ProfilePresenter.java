@@ -1,5 +1,6 @@
 package io.hypertrack.sendeta.presenter;
 
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 import java.io.File;
@@ -37,7 +38,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void attemptLogin(String userFirstName, String userLastName, final File profileImage) {
+    public void attemptLogin(String userFirstName, String userLastName, final File profileImage,
+                             final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
 
         if (TextUtils.isEmpty(userFirstName)) {
             if (view != null) {
@@ -61,36 +63,46 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             user.setPhotoImage(profileImage);
         }
 
+
         profileInteractor.updateUserProfile(new OnProfileUpdateCallback() {
             @Override
             public void OnSuccess() {
                 AnalyticsStore.getLogger().enteredName(true, null);
                 AnalyticsStore.getLogger().completedProfileSetUp(user.isExistingUser());
 
-                profileInteractor.updateUserProfilePic(new OnProfilePicUploadCallback() {
+                // Check if the profile image has changed from the existing one
+                if (updatedProfileImage != null && updatedProfileImage.getByteCount() > 0 && !updatedProfileImage.sameAs(oldProfileImage)) {
 
-                    @Override
-                    public void OnSuccess() {
+                    profileInteractor.updateUserProfilePic(new OnProfilePicUploadCallback() {
 
-                        if (view != null) {
-                            view.showProfilePicUploadSuccess();
+                        @Override
+                        public void OnSuccess() {
+
+                            if (view != null) {
+                                view.showProfilePicUploadSuccess();
+                            }
+
+                            AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
                         }
 
-                        AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
-                    }
+                        @Override
+                        public void OnError() {
 
-                    @Override
-                    public void OnError() {
+                            if (view != null) {
+                                view.showProfilePicUploadError();
+                            }
 
-                        if (view != null) {
-                            view.showProfilePicUploadError();
+                            AnalyticsStore.getLogger().uploadedProfilePhoto(false,
+                                    ErrorMessages.PROFILE_PIC_UPLOAD_FAILED);
                         }
 
-                        AnalyticsStore.getLogger().uploadedProfilePhoto(false,
-                                ErrorMessages.PROFILE_PIC_UPLOAD_FAILED);
+                    });
+                } else {
+                    // Signup Completed as Profile Image need not be uploaded
+                    if (view != null) {
+                        view.navigateToHomeScreen();
                     }
-
-                });
+                }
             }
 
             @Override

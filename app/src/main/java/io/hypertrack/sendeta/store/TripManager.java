@@ -106,9 +106,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.mGoogleAPIClient.connect();
     }
 
-    public void restoreState(final TripManagerCallback callback) {
+    private void restoreState() {
         this.trip = realm.where(Trip.class).findFirst();
         this.place = SharedPreferenceManager.getPlace();
+    }
+
+    public void restoreState(final TripManagerCallback callback) {
+        this.restoreState();
 
         if (this.trip != null
                 && this.place != null
@@ -305,6 +309,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void endTrip(final TripManagerCallback callback) {
         String taskID = this.trip.getHypertrackTaskID();
+        if (taskID == null) {
+            if (callback != null) {
+                callback.OnSuccess();
+            }
+
+            clearState();
+        }
 
         transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
             @Override
@@ -417,6 +428,16 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void OnGeoFenceSuccess() {
+        if (this.trip == null) {
+            this.restoreState();
+            if (this.trip == null) {
+                if (tripEndedListener != null) {
+                    tripEndedListener.OnCallback();
+                }
+                clearState();
+            }
+        }
+
         this.endTrip(new TripManagerCallback() {
             @Override
             public void OnSuccess() {

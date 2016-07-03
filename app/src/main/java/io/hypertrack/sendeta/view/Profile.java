@@ -42,7 +42,9 @@ public class Profile extends BaseActivity implements ProfileView {
     public ProgressBar mProfileImageLoader;
     private ProgressDialog mProgressDialog;
 
+    private Target profileImageDownloadTarget;
     private File profileImage;
+    public Bitmap oldProfileImage = null, updatedProfileImage = null;
 
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
 
@@ -105,7 +107,7 @@ public class Profile extends BaseActivity implements ProfileView {
         String firstName = mFirstNameView.getText().toString();
         String lastName = mLastNameView.getText().toString();
 
-        presenter.attemptLogin(firstName, lastName, profileImage);
+        presenter.attemptLogin(firstName, lastName, profileImage, oldProfileImage, updatedProfileImage);
     }
 
     public void onNextButtonClicked(MenuItem menuItem) {
@@ -123,10 +125,12 @@ public class Profile extends BaseActivity implements ProfileView {
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
-            Target target = new Target() {
+            profileImageDownloadTarget = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                     Log.d("Profile", "onBitmapLoaded called!");
+
+                    oldProfileImage = bitmap;
 
                     profileImage = ImageUtils.getFileFromBitmap(Profile.this, bitmap);
                     mProfileImageView.setImageBitmap(bitmap);
@@ -151,14 +155,13 @@ public class Profile extends BaseActivity implements ProfileView {
                     .load(profileURL)
                     .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
-                    .into(target);
+                    .into(profileImageDownloadTarget);
             mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
     }
 
     @Override
     public void showProfilePicUploadSuccess() {
-        showProgress(false);
         Toast.makeText(Profile.this, "Profile Pic uploaded successfully", Toast.LENGTH_SHORT).show();
 
         // Complete User Signup on Profile Pic Upload Success
@@ -167,16 +170,16 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void showProfilePicUploadError() {
-        showProgress(false);
-        Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
-
         // TODO: 30/06/16 Add Background Upload of Image
+        Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
 
         // Complete User Signup on Profile Pic Upload Failure
         navigateToHomeScreen();
     }
 
+    @Override
     public void navigateToHomeScreen() {
+        showProgress(false);
         Intent intent = new Intent(Profile.this, Home.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
@@ -229,15 +232,19 @@ public class Profile extends BaseActivity implements ProfileView {
                     return;
                 }
 
+                // Cancel Profile Pic Download Request from Server & Hide Image Download Loader
+                Picasso.with(Profile.this).cancelRequest(profileImageDownloadTarget);
+                mProfileImageLoader.setVisibility(View.GONE);
+
                 profileImage = ImageUtils.getScaledFile(imageFile);
 
-                Bitmap bitmap = ImageUtils.getRotatedBitMap(imageFile);
-                if (bitmap == null) {
-                    bitmap = BitmapFactory.decodeFile(imageFile.getPath());
+                updatedProfileImage = ImageUtils.getRotatedBitMap(imageFile);
+                if (updatedProfileImage == null) {
+                    updatedProfileImage = BitmapFactory.decodeFile(imageFile.getPath());
                 }
 
-                if (bitmap != null) {
-                    mProfileImageView.setImageBitmap(bitmap);
+                if (updatedProfileImage != null) {
+                    mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }

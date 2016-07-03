@@ -111,13 +111,11 @@ public class OnboardingUser {
     }
 
     public boolean isExistingUser() {
-        Log.d(TAG, "isExistingUser: " + isExistingUser);
         return isExistingUser;
     }
 
     public void setExistingUser(boolean existingUser) {
         isExistingUser = existingUser;
-        Log.d(TAG, "setExistingUser: " + isExistingUser);
     }
 
     public String getInternationalNumber() throws NumberParseException {

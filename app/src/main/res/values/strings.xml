@@ -46,6 +46,7 @@
     <string name="place_name_error">Place name is mandatory. Please enter a name and try again.</string>
     <string name="home_exists_error">You have already added a home. Please select a different name.</string>
     <string name="work_exists_error">You have already added a work. Please select a different name.</string>
+    <string name="place_exists_error">You have already added this place as a favorite.</string>
 
     <!-- Geocoding Intent Service string -->
     <string name="service_not_available">There was an error fetching address. Please try again.</string>
