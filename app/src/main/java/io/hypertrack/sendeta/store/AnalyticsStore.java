@@ -116,9 +116,9 @@ public class AnalyticsStore implements AnalyticsInterface {
     }
 
     @Override
-    public void completedProfileSetUp(boolean isExistingUser) {
+    public void completedProfileSetUp(boolean isExistingUSer) {
         Bundle params = getBundle();
-        params.putString(EventParam.IS_EXISTING_USER, String.valueOf(isExistingUser));
+        params.putString(EventParam.IS_EXISTING_USER, String.valueOf(isExistingUSer));
 
         // Using FB Event for Completed Profile Set-Up
         logEvent(AppEventsConstants.EVENT_NAME_COMPLETED_REGISTRATION, params);

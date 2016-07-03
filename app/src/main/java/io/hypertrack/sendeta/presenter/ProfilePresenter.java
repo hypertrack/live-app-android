@@ -53,7 +53,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             return;
         }
 
-        OnboardingUser user = this.onboardingManager.getUser();
+        final OnboardingUser user = this.onboardingManager.getUser();
         user.setFirstName(userFirstName);
         user.setLastName(userLastName);
 
@@ -65,7 +65,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             @Override
             public void OnSuccess() {
                 AnalyticsStore.getLogger().enteredName(true, null);
-                AnalyticsStore.getLogger().completedProfileSetUp(false);
+                AnalyticsStore.getLogger().completedProfileSetUp(user.isExistingUser());
 
                 profileInteractor.updateUserProfilePic(new OnProfilePicUploadCallback() {
 

@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.model;
 
+import android.util.Log;
+
 import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -7,10 +9,14 @@ import com.google.i18n.phonenumbers.Phonenumber;
 
 import java.io.File;
 
+import io.hypertrack.sendeta.store.OnboardingManager;
+
 /**
  * Created by ulhas on 15/06/16.
  */
 public class OnboardingUser {
+    private static String TAG = OnboardingManager.class.getSimpleName();
+
     private Integer id;
     private String countryCode;
     private String contactNumber;
@@ -29,6 +35,32 @@ public class OnboardingUser {
 
     @SerializedName("photo")
     private String photoURL;
+
+    private boolean isExistingUser;
+
+    /**
+     * Method to update OnboardingUser Data
+     *
+     * @param user  User Object containing the updated OnboardingUser Data
+     */
+    public void update(OnboardingUser user) {
+        this.setId(user.getId());
+        this.setCountryCode(user.getCountryCode());
+        this.setContactNumber(user.getContactNumber());
+
+        this.setFirstName(user.getFirstName());
+        this.setLastName(user.getLastName());
+
+        this.setPhoneNumber(user.getPhoneNumber());
+
+        this.setPhotoImage(user.getPhotoImage());
+        this.setToken(user.getToken());
+        this.setPhotoURL(user.getPhotoURL());
+
+        // IMPORTANT: Do not update isExistingUser Flag while updating OnboardingUser
+        // isExistingUser Flag is received while User registers his number (Login)
+        // this.isExistingUser = this.isExistingUser;
+    }
 
     public Integer getId() {
         return id;
@@ -76,6 +108,16 @@ public class OnboardingUser {
 
     public void setPhotoURL(String photoURL) {
         this.photoURL = photoURL;
+    }
+
+    public boolean isExistingUser() {
+        Log.d(TAG, "isExistingUser: " + isExistingUser);
+        return isExistingUser;
+    }
+
+    public void setExistingUser(boolean existingUser) {
+        isExistingUser = existingUser;
+        Log.d(TAG, "setExistingUser: " + isExistingUser);
     }
 
     public String getInternationalNumber() throws NumberParseException {

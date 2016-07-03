@@ -66,6 +66,14 @@ public class OnboardingManager {
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
                 if (response.isSuccessful()) {
                     onboardingUser.setPhoneNumber(phoneNumber);
+
+                    // Check if Current Phone Number is an Existing SendETA User or not
+                    if (response.raw().code() == 200) {
+                        onboardingUser.setExistingUser(true);
+                    } else {
+                        onboardingUser.setExistingUser(false);
+                    }
+
                     if (callback != null) {
                         callback.onSuccess();
                     }
@@ -228,6 +236,7 @@ public class OnboardingManager {
         Log.v(TAG, response.toString());
 
         SharedPreferenceManager.setUserAuthToken(response.getToken());
-        this.onboardingUser = response.getUser();
+        // Update OnBoardingUser Data with the data fetched after code verification
+        this.onboardingUser.update(response.getUser());
     }
 }

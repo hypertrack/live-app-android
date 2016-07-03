@@ -2,12 +2,13 @@ package io.hypertrack.sendeta;
 
 import android.app.Application;
 import android.content.Context;
+
 import com.crashlytics.android.Crashlytics;
-import com.facebook.stetho.Stetho;
 
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.sendeta.store.AnalyticsStore;
+import io.hypertrack.sendeta.util.DevDebugUtils;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
@@ -35,15 +36,9 @@ public class MetaApplication extends Application {
         // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
 
-        // Check if current Build Variant is DEBUG & Initialize Stetho to debug Databases
-        if (BuildConfig.DEBUG) {
-            Stetho.initialize(
-                    Stetho.newInitializerBuilder(this)
-                            .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-                            .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-                            .build());
-
-        }
+        // Initialize Stetho to debug Databases
+        // (NOTE: IFF current Build Variant is DEBUG)
+        DevDebugUtils.installStetho(this);
     }
 
     private void setupRealm() {

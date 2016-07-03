@@ -11,7 +11,7 @@ public interface AnalyticsInterface {
     void resendOTP(boolean status, String errorMessage);
     void enteredName(boolean status, String errorMessage);
     void uploadedProfilePhoto(boolean status, String errorMessage);
-    void completedProfileSetUp(boolean isNewUser);
+    void completedProfileSetUp(boolean isExistingUSer);
 
     // Add Destination Address Events
     void selectedAddress(int charactersTyped, boolean isFavorite);
