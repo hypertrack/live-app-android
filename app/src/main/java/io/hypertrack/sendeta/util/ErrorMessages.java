@@ -32,6 +32,7 @@ public class ErrorMessages {
     public static final String PLACE_NAME_REQUIRED_ERROR = "Place name is mandatory. Please enter a name and try again";
     public static final String HOME_ALREADY_EXISTS_ERROR = "You have already added a home. Please select a different name";
     public static final String WORK_ALREADY_EXISTS_ERROR = "You have already added a work. Please select a different name";
+    public static final String PLACE_EXISTS_ERROR = "You have already added this place as a favorite.";
     public static final String ADDING_FAVORITE_PLACE_FAILED = "There was an error adding place. Please try again";
     public static final String EDITING_FAVORITE_PLACE_FAILED = "There was an error editing place. Please try again";
     public static final String EDITING_ALREADY_SAVED_PLACE_ERROR = "The place you are trying to add already exists in your favorites";

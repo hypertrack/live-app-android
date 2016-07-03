@@ -332,6 +332,10 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.WORK_ALREADY_EXISTS_ERROR);
                 return;
             }
+        } else if (metaPlace.getId() == 0 && metaPlaceAdded) {
+            Toast.makeText(this, R.string.place_exists_error, Toast.LENGTH_SHORT).show();
+            processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_EXISTS_ERROR);
+            return;
         }
 
         metaPlace.setAddress(addPlaceAddressView.getText().toString());
