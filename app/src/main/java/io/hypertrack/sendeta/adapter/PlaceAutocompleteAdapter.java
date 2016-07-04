@@ -246,7 +246,7 @@ public class PlaceAutocompleteAdapter
     }
 
     public AutocompletePrediction getItem(int position) {
-        if (mResultList != null && mResultList.size() > 0) {
+        if (mResultList != null && mResultList.size() > 0 && position < mResultList.size()) {
             return mResultList.get(position);
         }
 
