@@ -15,7 +15,7 @@
         android:gravity="center"
         android:text=""
         android:textColor="#ffffff"
-        android:textSize="@dimen/text_small"
+        android:textSize="@dimen/text_medium"
         android:textStyle="bold"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />

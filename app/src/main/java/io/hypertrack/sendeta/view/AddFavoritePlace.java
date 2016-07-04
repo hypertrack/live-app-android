@@ -368,7 +368,8 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.WORK_ALREADY_EXISTS_ERROR);
                 return;
             }
-        } else if (metaPlace.getId() == 0 && metaPlaceAdded) {
+            // Check if PlaceID = 0 while Editing a place (this is not a valid case)
+        } else if (metaPlace.getId() == 0 && !metaPlaceAdded) {
             Toast.makeText(this, R.string.place_already_exists_error, Toast.LENGTH_SHORT).show();
 
             processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_ALREADY_EXISTS_ERROR);

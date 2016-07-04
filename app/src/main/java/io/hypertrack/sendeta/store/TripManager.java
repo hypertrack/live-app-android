@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
+import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
@@ -445,6 +446,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             }
         }
 
+        HTLog.i(TAG, "OnGeoFence success: Trip end initiated.");
+
         this.endTrip(new TripManagerCallback() {
             @Override
             public void OnSuccess() {
@@ -454,11 +457,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 clearState();
 
                 AnalyticsStore.getLogger().autoTripEnded(true, null);
+                HTLog.i(TAG, "OnGeoFence success: Trip ended (Auto) successfully.");
             }
 
             @Override
             public void OnError() {
                 AnalyticsStore.getLogger().autoTripEnded(false, ErrorMessages.AUTO_END_TRIP_FAILED);
+                HTLog.e(TAG, "OnGeoFence success: Trip end (Auto) failed.");
             }
         });
     }

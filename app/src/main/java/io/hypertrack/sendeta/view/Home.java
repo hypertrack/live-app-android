@@ -69,6 +69,7 @@ import java.util.Date;
 import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
+import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.sendeta.R;
@@ -117,7 +118,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private ProgressDialog mProgressDialog;
     private ProgressBar mAutocompleteLoader;
 
-    private Bitmap profilePicBitmap;
     private Marker currentLocationMarker, destinationLocationMarker;
 
     private PlaceAutocompleteAdapter mAdapter;
@@ -566,6 +566,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             @Override
             public void OnSuccess() {
                 Log.v(TAG, "Trip is active");
+                HTLog.i(TAG, "Trip restored successfully.");
 
                 if (mProgressDialog != null)
                     mProgressDialog.dismiss();
@@ -584,6 +585,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             @Override
             public void OnError() {
                 Log.v(TAG, "Trip is not active");
+                HTLog.e(TAG, "Trip restore failed.");
 
                 if (mProgressDialog != null)
                     mProgressDialog.dismiss();
@@ -608,12 +610,14 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 onTripStart();
 
                 AnalyticsStore.getLogger().startedTrip(true, null);
+                HTLog.i(TAG, "Trip started successfully.");
             }
 
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
                 showStartTripError();
+                HTLog.e(TAG, "Trip start failed.");
 
                 AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
             }
@@ -641,6 +645,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 OnTripEnd();
 
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
+                HTLog.i(TAG, "Trip end (CTA) happened successfully.");
             }
 
             @Override
@@ -649,6 +654,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 showEndTripError();
 
                 AnalyticsStore.getLogger().tappedEndTrip(false, ErrorMessages.END_TRIP_FAILED);
+                HTLog.e(TAG, "Trip end (CTA) failed.");
             }
         });
     }
@@ -684,6 +690,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         });
 
         updateMapPadding(true);
+        updateMapView();
     }
 
     private void updateETAForOnGoingTrip() {

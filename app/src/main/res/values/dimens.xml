@@ -46,8 +46,8 @@
     <!-- Map Padding -->
     <dimen name="map_side_padding">48dp</dimen>
     <dimen name="map_top_padding">240dp</dimen>
-    <dimen name="map_bottom_padding">50dp</dimen>
-    <dimen name="map_active_trip_side_padding">70dp</dimen>
+    <dimen name="map_bottom_padding">56dp</dimen>
+    <dimen name="map_active_trip_side_padding">100dp</dimen>
 
     <dimen name="image_view_size">100dp</dimen>
     <dimen name="image_view_size_half">50dp</dimen>
