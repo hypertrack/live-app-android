@@ -390,6 +390,10 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         placeNameClearIcon.setVisibility(View.GONE);
         addPlaceNameView.setText("");
 
+        // Reset Right Padding for addPlaceNameView
+        right = getResources().getDimensionPixelSize(R.dimen.padding_high);
+        addPlaceNameView.setPadding(left, top, right, bottom);
+
         // Remove & Add the Text Watcher Again
         addPlaceNameView.removeTextChangedListener(mPlaceNameTextWatcher);
         addPlaceNameView.addTextChangedListener(mPlaceNameTextWatcher);
@@ -398,6 +402,10 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     public void onPlaceAddressClearClick(View view) {
         placeAddressClearIcon.setVisibility(View.GONE);
         addPlaceAddressView.setText("");
+
+        // Reset Right Padding for addPlaceAddressView
+        right = getResources().getDimensionPixelSize(R.dimen.padding_high);
+        addPlaceAddressView.setPadding(left, top, right, bottom);
 
         // Remove & Add the Text Watcher Again
         addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
