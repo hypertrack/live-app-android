@@ -61,7 +61,7 @@ public class Register extends BaseActivity implements RegisterView {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
 
         // Initialize Toolbar without Home Button
         initToolbar(getResources().getString(R.string.title_activity_login), false);

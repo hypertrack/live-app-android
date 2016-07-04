@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -94,19 +95,6 @@ public class Profile extends BaseActivity implements ProfileView {
         // Initialize UI Action Listeners
         mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
         mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
-
-        // Check If READ_EXTERNAL_STORAGE Permission is available or not
-        if (!(ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)) {
-            // Show Rationale & Request for READ_EXTERNAL_STORAGE permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
-                        getString(R.string.sms_receive_permission_title), getString(R.string.sms_receive_permission_msg));
-                return;
-            } else {
-                PermissionUtils.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-                return;
-            }
-        }
     }
 
     public void onProfileImageViewClicked(View view) {
@@ -142,12 +130,15 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void updateViews(String firstName, String lastName, String profileURL) {
-        if (firstName != null && !firstName.isEmpty()) {
+        if (!TextUtils.isEmpty(firstName)) {
             mFirstNameView.setText(firstName);
+            mFirstNameView.setCursorVisible(false);
+            mLastNameView.setCursorVisible(true);
         }
 
-        if (lastName != null && !lastName.isEmpty()) {
+        if (!TextUtils.isEmpty(lastName)) {
             mLastNameView.setText(lastName);
+            mLastNameView.setCursorVisible(false);
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {

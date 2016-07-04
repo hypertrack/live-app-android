@@ -250,6 +250,20 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         @Override
         public void onClick(View v) {
 
+            // Check If LOCATION Permission is available
+            if (!(ContextCompat.checkSelfPermission(Home.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
+                // Show Rationale & Request for LOCATION permission
+                if (ActivityCompat.shouldShowRequestPermissionRationale(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    PermissionUtils.showRationaleMessageAsDialog(Home.this, Manifest.permission.ACCESS_FINE_LOCATION,
+                            getString(R.string.read_phone_state_permission_title), getString(R.string.read_phone_state_msg));
+                } else {
+                    PermissionUtils.requestPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION);
+                }
+
+                return;
+            }
+
+            // Check if Location was enabled & if valid location was received
             if (currentLocationMarker == null ||
                     new LatLng(0.0, 0.0).equals(currentLocationMarker.getPosition())) {
 

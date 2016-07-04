@@ -7,7 +7,7 @@
     <item
         android:id="@+id/register_next_item"
         android:title="@string/action_done"
-        android:icon="@drawable/ic_action_forward"
+        android:icon="@drawable/ic_action_done"
         android:onClick="onNextButtonClicked"
         app:showAsAction="always" />
 </menu>

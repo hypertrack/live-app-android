@@ -37,6 +37,8 @@
 
     <!-- Action bar strings -->
     <string name="next">Next</string>
+    <string name="done">Done</string>
+    <string name="register">Register</string>
     <string name="verify">Verify</string>
     <string name="user_profile">Profile</string>
 
