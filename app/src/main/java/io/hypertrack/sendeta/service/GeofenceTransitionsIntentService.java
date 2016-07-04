@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
+import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.store.TripManager;
 import io.hypertrack.sendeta.util.GeofenceErrorMessages;
@@ -54,20 +55,20 @@ public class GeofenceTransitionsIntentService extends IntentService {
             // Test that the reported transition was of interest.
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                Log.v(TAG, "User entered Geo Fence");
+                HTLog.i(TAG, "User entered Geo Fence");
             }
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-                Log.v(TAG, "User exited Geo fence");
+                HTLog.i(TAG, "User exited Geo fence");
             }
 
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
-                Log.v(TAG, "User is dwelling in geo fence.");
+                HTLog.i(TAG, "User is dwelling in geo fence.");
                 TripManager.getSharedManager().OnGeoFenceSuccess();
 
             } else {
                 // Log the error.
-                Log.e(TAG, getString(R.string.geofence_transition_invalid_type,
+                HTLog.e(TAG, getString(R.string.geofence_transition_invalid_type,
                         geofenceTransition));
             }
 

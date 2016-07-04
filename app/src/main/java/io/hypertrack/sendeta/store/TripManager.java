@@ -118,9 +118,22 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             transmitter.refreshTrip(new HTTripStatusCallback() {
                 @Override
                 public void onSuccess(HTTrip htTrip) {
+                    if (htTrip == null || htTrip.getLive() == null || !htTrip.getLive()) {
+                        clearState();
+                        if (callback != null) {
+                            callback.OnError();
+                        }
+
+                        return;
+                    }
+
                     hyperTrackTrip = htTrip;
                     onTripStart();
                     onTripRefresh();
+
+                    if (callback != null) {
+                        callback.OnSuccess();
+                    }
                 }
 
                 @Override
@@ -131,10 +144,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                     }
                 }
             });
-
-            if (callback != null) {
-                callback.OnSuccess();
-            }
         } else {
             this.clearState();
             if (callback != null) {
