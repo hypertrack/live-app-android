@@ -695,6 +695,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         long etaInSecond = ETA.getTime() - now.getTime();
         int etaInMinutes = (int) etaInSecond / (60 * 1000);
 
+        etaInMinutes = Math.max(etaInMinutes, 1);
+
         updateDestinationMarker(destinationLocation, etaInMinutes);
     }
 
