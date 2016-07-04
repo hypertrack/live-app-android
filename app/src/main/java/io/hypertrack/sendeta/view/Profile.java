@@ -80,7 +80,7 @@ public class Profile extends BaseActivity implements ProfileView {
         setContentView(R.layout.activity_profile);
 
         // Initialize Toolbar
-        initToolbar("Profile");
+        initToolbar(getString(R.string.title_activity_signup_profile));
 
         // Initialize UI Views before Attaching View Presenter
         mFirstNameView = (AutoCompleteTextView) findViewById(R.id.profile_first_name);
@@ -228,7 +228,7 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void showErrorMessage() {
         showProgress(false);
-        Toast.makeText(Profile.this, ErrorMessages.PROFILE_UPDATE_FAILED, Toast.LENGTH_SHORT).show();
+        Toast.makeText(Profile.this, R.string.profile_update_failed, Toast.LENGTH_SHORT).show();
     }
 
     private void showProgress(boolean show) {
@@ -249,7 +249,7 @@ public class Profile extends BaseActivity implements ProfileView {
         EasyImage.handleActivityResult(requestCode, resultCode, data, this, new DefaultCallback() {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
-                Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_CHOOSE_FAILED, Toast.LENGTH_SHORT).show();
+                Toast.makeText(Profile.this, R.string.profile_pic_choose_failed, Toast.LENGTH_SHORT).show();
             }
 
             @Override

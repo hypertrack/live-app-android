@@ -171,7 +171,7 @@ public class Register extends BaseActivity implements RegisterView {
     @Override
     public void showValidationError() {
         mProgressDialog.dismiss();
-        phoneNumberView.setError(ErrorMessages.INVALID_PHONE_NUMBER);
+        phoneNumberView.setError(getResources().getString(R.string.invalid_phone_number));
     }
 
     @Override

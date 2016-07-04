@@ -16,8 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingBottom="38dp"
-        android:src="@drawable/ic_marker" />
+        android:paddingBottom="56dp"
+        android:src="@drawable/ic_hero_marker" />
 
     <LinearLayout
         android:layout_width="match_parent"

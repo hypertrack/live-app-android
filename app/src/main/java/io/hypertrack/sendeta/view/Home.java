@@ -222,7 +222,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void showSendETAButton() {
-        sendETAButton.setText("Send ETA");
+        sendETAButton.setText(getString(R.string.action_send_eta));
         sendETAButton.setVisibility(View.VISIBLE);
     }
 
@@ -455,7 +455,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private void initCustomMarkerView() {
         // Initialize Custom Marker (Hero Marker) UI View
-        customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_car_marker, null);
+        customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_hero_marker, null);
         profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
         updateProfileImage();
     }
@@ -639,7 +639,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void showEndTripError() {
-        Toast.makeText(this, getString(R.string.end_trip_error), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, getString(R.string.end_trip_failed), Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -647,7 +647,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
      */
     private void onTripStart() {
         // TODO: 29/06/16 Add sendETAButton visibility to VISIBLE?
-        sendETAButton.setText("End Trip");
+        sendETAButton.setText(getString(R.string.action_end_trip));
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
         enterDestinationLayout.setOnClickListener(null);

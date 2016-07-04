@@ -66,7 +66,7 @@ public class FetchAddressIntentService extends IntentService {
             Log.e(TAG, errorMessage, ioException);
         } catch (IllegalArgumentException illegalArgumentException) {
             // Catch invalid latitude or longitude values.
-            errorMessage = getString(R.string.invalid_lat_long_used);
+            errorMessage = getString(R.string.invalid_lat_lng_used);
             Log.e(TAG, errorMessage, illegalArgumentException);
         }
 

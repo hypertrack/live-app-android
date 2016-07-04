@@ -86,7 +86,7 @@ public class Verify extends BaseActivity implements VerifyView {
         setContentView(R.layout.activity_verify);
 
         // Initialize Toolbar
-        initToolbar("Verify");
+        initToolbar(getString(R.string.title_activity_verify));
 
         // Initialize UI Views before Attaching View Presenter
         verificationCodeView = (EditText) findViewById(R.id.verify_verification_code);
@@ -167,7 +167,7 @@ public class Verify extends BaseActivity implements VerifyView {
     @Override
     public void showValidationError() {
         mProgressDialog.dismiss();
-        verificationCodeView.setError(ErrorMessages.INVALID_VERIFICATION_CODE);
+        verificationCodeView.setError(getResources().getString(R.string.invalid_verification_code));
     }
 
     @Override
@@ -179,7 +179,7 @@ public class Verify extends BaseActivity implements VerifyView {
     @Override
     public void verificationFailed() {
         mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, ErrorMessages.PHONE_NO_VERIFICATION_FAILED, Toast.LENGTH_SHORT).show();
+        Toast.makeText(Verify.this, R.string.phone_no_verification_failed, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -193,7 +193,7 @@ public class Verify extends BaseActivity implements VerifyView {
     @Override
     public void showResendError() {
         mProgressDialog.dismiss();
-        Toast.makeText(Verify.this, ErrorMessages.RESEND_OTP_FAILED, Toast.LENGTH_SHORT).show();
+        Toast.makeText(Verify.this, R.string.resend_otp_failed, Toast.LENGTH_SHORT).show();
     }
 
     private void onVerificationCodeChanged() {

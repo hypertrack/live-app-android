@@ -206,19 +206,14 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
                 UserStore.sharedStore.deletePlace(new MetaPlace(place), new SuccessErrorCallback() {
                     @Override
                     public void OnSuccess() {
-
-//                        processDeletedMetaPlaceForAnalytics(true, null, place);
                         mProgressDialog.dismiss();
                         updateFavoritesAdapter();
                     }
 
                     @Override
                     public void OnError() {
-
-//                        processDeletedMetaPlaceForAnalytics(false, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
-//                                place);
                         mProgressDialog.dismiss();
-                        Toast.makeText(UserProfile.this, ErrorMessages.DELETING_FAVORITE_PLACE_FAILED,
+                        Toast.makeText(UserProfile.this, R.string.deleting_favorite_place_failed,
                                 Toast.LENGTH_SHORT).show();
                     }
                 });

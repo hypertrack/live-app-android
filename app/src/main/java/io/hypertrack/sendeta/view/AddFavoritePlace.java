@@ -312,7 +312,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         metaPlace.setName(addPlaceNameView.getText().toString());
 
         if (metaPlace.getName() == null || metaPlace.getName().isEmpty()) {
-            Toast.makeText(this, R.string.place_name_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.place_name_required_error, Toast.LENGTH_SHORT).show();
 
             processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_NAME_REQUIRED_ERROR);
             return;
@@ -320,22 +320,22 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
         if (metaPlace.isHome()) {
             if (user.hasHome() && !user.getHome().isEqualPlace(metaPlace)) {
-                Toast.makeText(this, R.string.home_exists_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.home_already_exists_error, Toast.LENGTH_SHORT).show();
 
                 processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.HOME_ALREADY_EXISTS_ERROR);
                 return;
             }
         } else if (metaPlace.isWork()) {
             if (user.hasWork() && !user.getWork().isEqualPlace(metaPlace)) {
-                Toast.makeText(this, R.string.work_exists_error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.work_already_exists_error, Toast.LENGTH_SHORT).show();
 
                 processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.WORK_ALREADY_EXISTS_ERROR);
                 return;
             }
         } else if (metaPlace.getId() == 0 && metaPlaceAdded) {
-            Toast.makeText(this, R.string.place_exists_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.place_already_exists_error, Toast.LENGTH_SHORT).show();
 
-            processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_EXISTS_ERROR);
+            processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_ALREADY_EXISTS_ERROR);
             return;
         }
 
@@ -477,11 +477,11 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     }
 
     private void showAddPlaceError() {
-        Toast.makeText(this, R.string.add_place_error, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.adding_favorite_place_failed, Toast.LENGTH_SHORT).show();
     }
 
     private void showEditPlaceError() {
-        Toast.makeText(this, R.string.edit_place_error, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.editing_already_saved_place_error, Toast.LENGTH_SHORT).show();
     }
 
     private void reverseGeocode(LatLng latLng) {

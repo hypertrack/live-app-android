@@ -214,7 +214,7 @@ public class EditProfile extends BaseActivity {
             @Override
             public void OnError() {
                 mProgressDialog.dismiss();
-                Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_UPDATE_FAILED, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditProfile.this, R.string.profile_update_failed, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -265,7 +265,7 @@ public class EditProfile extends BaseActivity {
             @Override
             public void onImagePickerError(Exception e, EasyImage.ImageSource source) {
                 //Some error handling
-                Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_PIC_CHOOSE_FAILED, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EditProfile.this, R.string.profile_pic_choose_failed, Toast.LENGTH_SHORT).show();
             }
 
             @Override

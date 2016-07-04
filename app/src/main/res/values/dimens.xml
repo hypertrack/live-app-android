@@ -5,6 +5,7 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <!-- Standard Margin Dimensions -->
+    <dimen name="margin_very_low">2dp</dimen>
     <dimen name="margin_low">4dp</dimen>
     <dimen name="margin_base">8dp</dimen>
     <dimen name="margin_medium">12dp</dimen>
