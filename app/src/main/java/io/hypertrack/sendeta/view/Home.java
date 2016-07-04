@@ -31,6 +31,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -104,7 +105,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private AppBarLayout appBarLayout;
     private TextView destinationText, destinationDescription, mAutocompletePlacesView;
-    private LinearLayout enterDestinationLayout, mAutocompletePlacesLayout;
+    private LinearLayout enterDestinationLayout;
+    private FrameLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Button sendETAButton;
@@ -181,7 +183,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private void getEtaForDestination(LatLng destinationLocation, final TripETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Getting your destination");
+        mProgressDialog.setMessage(getString(R.string.getting_eta_message));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -255,7 +257,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 // Show Rationale & Request for LOCATION permission
                 if (ActivityCompat.shouldShowRequestPermissionRationale(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     PermissionUtils.showRationaleMessageAsDialog(Home.this, Manifest.permission.ACCESS_FINE_LOCATION,
-                            getString(R.string.read_phone_state_permission_title), getString(R.string.read_phone_state_msg));
+                            getString(R.string.location_permission_rationale_title), getString(R.string.location_permission_rationale_msg));
                 } else {
                     PermissionUtils.requestPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION);
                 }
@@ -267,7 +269,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             if (currentLocationMarker == null ||
                     new LatLng(0.0, 0.0).equals(currentLocationMarker.getPosition())) {
 
-                Toast.makeText(Home.this, "Please enable Location first", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
                 checkIfLocationIsEnabled();
 
             } else {
@@ -350,13 +352,12 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         // Check & Prompt User if Internet is Not Connected
         if (!NetworkUtils.isConnectedToInternet(this)) {
-            Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues",
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage("Please wait while we check if there is any existing trip.");
+        mProgressDialog.setMessage(getString(R.string.fetching_existing_trip));
         mProgressDialog.show();
     }
 
@@ -399,7 +400,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private void setupAutoCompleteView() {
         // Initialize Autocomplete UI Views
         mAutocompletePlacesView = (AutoCompleteTextView) findViewById(R.id.autocomplete_places);
-        mAutocompletePlacesLayout = (LinearLayout) findViewById(R.id.autocomplete_places_layout);
+        mAutocompletePlacesLayout = (FrameLayout) findViewById(R.id.autocomplete_places_layout);
         mAutocompleteResults = (RecyclerView) findViewById(R.id.autocomplete_places_results);
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
         mAutocompleteLoader = (ProgressBar) findViewById(R.id.autocomplete_progress);
@@ -596,7 +597,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private void startTrip() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage("Preparing your trip");
+        mProgressDialog.setMessage(getString(R.string.starting_trip_message));
         mProgressDialog.show();
 
         TripManager.getSharedManager().startTrip(new TripManagerCallback() {
@@ -630,7 +631,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage("Stopping trip ... ");
+        mProgressDialog.setMessage(getString(R.string.ending_trip_message));
         mProgressDialog.show();
 
         TripManager.getSharedManager().endTrip(new TripManagerCallback() {
@@ -792,7 +793,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, locationRequest, this);
         } catch (SecurityException exception) {
-            Toast.makeText(Home.this, "Unable to request for location. Please check permissions in app settings.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(Home.this, R.string.fused_location_exception_error, Toast.LENGTH_SHORT).show();
         }
     }
 

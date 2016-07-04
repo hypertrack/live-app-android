@@ -179,7 +179,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void showProfilePicUploadSuccess() {
-        Toast.makeText(Profile.this, "Profile Pic uploaded successfully", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Profile.this, R.string.profile_upload_success, Toast.LENGTH_SHORT).show();
 
         // Complete User Signup on Profile Pic Upload Success
         navigateToHomeScreen();

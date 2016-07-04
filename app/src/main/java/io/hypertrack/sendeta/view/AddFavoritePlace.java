@@ -78,6 +78,19 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     private LatLng latlng;
 
+    int top, bottom, left, right;
+
+    private View.OnFocusChangeListener mPlaceNameFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (hasFocus) {
+                addPlaceNameView.setCursorVisible(true);
+            } else {
+                addPlaceNameView.setCursorVisible(false);
+            }
+        }
+    };
+
     private TextWatcher mPlaceNameTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -89,11 +102,16 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
         @Override
         public void afterTextChanged(Editable s) {
+
             // Show/Hide Clear Icon on Place Name View
             if (s != null && s.length() > 0) {
                 placeNameClearIcon.setVisibility(View.VISIBLE);
+                right = getResources().getDimensionPixelSize(R.dimen.padding_huge);
+                addPlaceNameView.setPadding(left, top, right, bottom);
             } else {
                 placeNameClearIcon.setVisibility(View.GONE);
+                right = getResources().getDimensionPixelSize(R.dimen.padding_high);
+                addPlaceNameView.setPadding(left, top, right, bottom);
             }
         }
     };
@@ -110,13 +128,17 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         @Override
         public void afterTextChanged(Editable s) {
             String constraint = s != null ? s.toString() : "";
-            mAdapter.getFilter().filter(constraint);
+            mAdapter.setFilterString(constraint);
 
             // Show/Hide Clear Icon on Place Address View
             if (constraint.length() > 0) {
                 placeAddressClearIcon.setVisibility(View.VISIBLE);
+                right = getResources().getDimensionPixelSize(R.dimen.padding_huge);
+                addPlaceAddressView.setPadding(left, top, right, bottom);
             } else {
                 placeAddressClearIcon.setVisibility(View.GONE);
+                right = getResources().getDimensionPixelSize(R.dimen.padding_high);
+                addPlaceAddressView.setPadding(left, top, right, bottom);
             }
         }
     };
@@ -156,7 +178,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_favorite_place);
 
-        initToolbar("Favorite");
+        initToolbar(getString(R.string.title_activity_add_fav_place));
 
         // Fetch Meta Place object passed with intent
         Intent intent = getIntent();
@@ -172,6 +194,11 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         getMap();
         initNameAddressView();
         initAutocompleteResultsView();
+
+        top = getResources().getDimensionPixelSize(R.dimen.padding_high);
+        bottom = getResources().getDimensionPixelSize(R.dimen.padding_high);
+        left = getResources().getDimensionPixelSize(R.dimen.padding_high);
+        right = getResources().getDimensionPixelSize(R.dimen.padding_huge);
 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, "We could not detect internet on your mobile or there seems to be connectivity issues.",
@@ -200,6 +227,9 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         addPlaceAddressView = (EditText) findViewById(R.id.add_fav_place_address);
         placeAddressClearIcon = (ImageView) findViewById(R.id.add_fav_place_address_clear);
 
+        // Clear Focus & Cursor from AddPlaceName View
+        addPlaceNameView.clearFocus();
+
         if (metaPlace.getName() != null && !metaPlace.getName().isEmpty()) {
             addPlaceNameView.setText(metaPlace.getName());
             placeNameClearIcon.setVisibility(View.VISIBLE);
@@ -211,6 +241,8 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         } else {
             reverseGeocode(metaPlace.getLatLng());
         }
+
+        addPlaceNameView.setOnFocusChangeListener(mPlaceNameFocusChangeListener);
 
         addPlaceNameView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override

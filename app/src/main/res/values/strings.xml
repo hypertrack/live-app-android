@@ -4,8 +4,8 @@
     <string name="action_end_trip">End Trip</string>
     <string name="action_send_eta">Send ETA</string>
     <string name="autocomplete_hint">Enter your destination</string>
-    <string name="favorite_place_name_hint">Name your Favorite (eg. Dave\'s Home)</string>
-    <string name="favorite_place_address_hint">Address</string>
+    <string name="favorite_place_name_hint">Name your favorite (eg. Dave\'s Home)</string>
+    <string name="favorite_place_address_hint">Search for an address</string>
 
     <!-- Strings related to login -->
     <string name="prompt_firstname">First Name</string>
@@ -17,6 +17,7 @@
     <string name="title_activity_login">Phone Number</string>
     <string name="title_activity_signup_profile">Profile</string>
     <string name="title_activity_verify">Verify Phone</string>
+    <string name="title_activity_add_fav_place">Add Favorite</string>
 
     <string name="error_field_required">This field is required</string>
 
@@ -29,12 +30,6 @@
     <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for SendETA</string>
     <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to %1$s</string>
 
-    <!-- Progress bar strings -->
-    <string name="registration_phone_number">Setting up your account</string>
-    <string name="verifying_phone_number">Verifying phone number...</string>
-    <string name="enter_phone_number">Enter Phone Number</string>
-    <string name="resending_verification_code">Resending verification code</string>
-
     <!-- Action bar strings -->
     <string name="next">Next</string>
     <string name="done">Done</string>
@@ -43,11 +38,30 @@
     <string name="user_profile">Profile</string>
 
     <!-- Geocoding Intent Service string -->
-    <string name="service_not_available">There was an error fetching address. Please try again.</string>
-    <string name="invalid_lat_lng_used">There was an error fetching address. Please try again.</string>
-    <string name="no_address_found">There was an error fetching address. Please try again.</string>
+    <string name="service_not_available">There was an error fetching address. Please try again</string>
+    <string name="invalid_lat_lng_used">There was an error fetching address. Please try again</string>
+    <string name="no_address_found">There was an error fetching address. Please try again</string>
 
-    <!-- Error string -->
+    <!-- Progress bar strings -->
+    <string name="registration_phone_number">Setting up your account</string>
+    <string name="verifying_phone_number">Verifying phone number</string>
+    <string name="enter_phone_number">Enter Phone Number</string>
+    <string name="resending_verification_code">Resending verification code</string>
+
+    <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
+    <string name="getting_eta_message">Getting your destination</string>
+    <string name="starting_trip_message">Preparing your trip</string>
+    <string name="ending_trip_message">Ending trip</string>
+
+    <!-- Success Strings -->
+    <string name="profile_upload_success">Profile Pic uploaded successfully</string>
+
+    <!-- Error Strings -->
+    <string name="network_issue">We could not detect internet on your mobile or there seems to be connectivity issues</string>
+    <string name="invalid_current_location">Please enable Location first</string>
+
+    <string name="fused_location_exception_error">Unable to request for location. Please check permissions in app settings</string>
+
     <string name="invalid_phone_number">Please enter a valid number</string>
     <string name="phone_no_registration_failed">We could not process your request at this moment. Please try again</string>
 
@@ -60,35 +74,36 @@
     <string name="profile_pic_choose_failed">There was an error choosing profile image. Please try again</string>
 
     <string name="start_trip_failed">There was an error starting the trip. Please try again</string>
-    <string name="end_trip_failed">There was an error ending the trip. Please try again.</string>
-    <string name="eta_fetching_error">There was an error in getting the ETA. Please try again.</string>
+    <string name="end_trip_failed">There was an error ending the trip. Please try again</string>
+    <string name="eta_fetching_error">There was an error in getting the ETA. Please try again</string>
 
-    <string name="place_name_required_error">Place name is mandatory. Please enter a name and try again.</string>
-    <string name="home_already_exists_error">You have already added a home. Please select a different name.</string>
-    <string name="work_already_exists_error">You have already added a work. Please select a different name.</string>
-    <string name="place_already_exists_error">You have already added this place as a favorite.</string>
-    <string name="adding_favorite_place_failed">There was an error adding place. Please try again.</string>
-    <string name="editing_favorite_place_failed">There was an error editing place. Please try again.</string>
+    <string name="place_name_required_error">Place name is mandatory. Please enter a name and try again</string>
+    <string name="home_already_exists_error">You have already added a home. Please select a different name</string>
+    <string name="work_already_exists_error">You have already added a work. Please select a different name</string>
+    <string name="place_already_exists_error">You have already added this place as a favorite</string>
+    <string name="adding_favorite_place_failed">There was an error adding place. Please try again</string>
+    <string name="editing_favorite_place_failed">There was an error editing place. Please try again</string>
     <string name="editing_already_saved_place_error">The place you are trying to add already exists in your favorites</string>
 
     <string name="deleting_favorite_place_failed">There was error deleting place. Please try again</string>
 
     <!-- Permission Error Strings -->
-    <string name="permission_declined">Permission was denied.</string>
-    <string name="permission_denied_location">Can\'t get your location. Permission was denied.</string>
-    <string name="permission_denied_read_external_storage">Can\'t read device\'s storage. Permission was denied.</string>
-    <string name="permission_denied_contacts">Can\'t get your contacts. Permission was denied.</string>
+    <string name="permission_declined_default_msg">Permission was denied</string>
 
-    <string name="read_phone_state_permission_title">Read Phone State permission required.</string>
+    <string name="permission_denied_location">To enable permission, go to Settings → Apps → SendETA → Permissions, and turn on location permission</string>
+    <string name="permission_denied_read_external_storage">Can\'t read device\'s storage. Permission was denied</string>
+    <string name="permission_denied_contacts">Can\'t get your contacts. Permission was denied</string>
+
+    <string name="read_phone_state_permission_title">Read Phone State permission required</string>
     <string name="read_phone_state_msg">We need access to information about your phone\'s data to provide you with a suggestion for Country Code</string>
 
-    <string name="location_permission_title">Location permission required to access current location.</string>
-    <string name="location_permission_msg">Help us provide you a better recommendation of pick-up points by automatically detecting your location.</string>
-    <string name="location_permission_grant_after_never_allow">Location permission is required for better experience.</string>
+    <string name="location_permission_rationale_title">Location permission required</string>
+    <string name="location_permission_rationale_msg">Location permission denied. We need to know your current location to calculate ETAs</string>
+    <string name="location_permission_grant_after_never_allow">Location permission is required for better experience</string>
 
     <string name="sms_receive_permission_title">Sms Permission Required</string>
-    <string name="sms_receive_permission_msg">We need permission to read your SMS in order to automatically detect the OTP sent to your phone.</string>
+    <string name="sms_receive_permission_msg">We need permission to read your SMS in order to automatically detect the OTP sent to your phone</string>
 
     <string name="read_external_storage_permission_title">Read External Storage Permission Required</string>
-    <string name="read_external_storage_permission_msg">We need permission to read your storage in order for you to choose your Profile Picture.</string>
+    <string name="read_external_storage_permission_msg">We need permission to read your storage in order for you to choose your Profile Picture</string>
 </resources>

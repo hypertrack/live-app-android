@@ -59,7 +59,7 @@ public class PermissionUtils {
             case Manifest.permission.GET_ACCOUNTS:
                 return R.string.permission_denied_contacts;
             default:
-                return R.string.permission_declined;
+                return R.string.permission_declined_default_msg;
         }
     }
 

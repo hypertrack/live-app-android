@@ -432,6 +432,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                     tripEndedListener.OnCallback();
                 }
                 clearState();
+                return;
             }
         }
 

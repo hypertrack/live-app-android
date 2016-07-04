@@ -77,7 +77,21 @@ public class AddPlaceAutocompleteAdapter extends
      */
     private AutocompleteFilter mPlaceFilter;
 
+    private boolean isSearching;
+
     private PlaceAutoCompleteOnClickListener listener;
+
+    public void setFilterString(String filterString) {
+        if (!filterString.isEmpty()) {
+            getFilter().filter(filterString);
+            this.isSearching = true;
+        } else {
+            this.isSearching = false;
+            this.mResultList = null;
+        }
+
+        notifyDataSetChanged();
+    }
 
     /**
      * Initializes with a resource for text rows and autocomplete query bounds.
@@ -157,6 +171,10 @@ public class AddPlaceAutocompleteAdapter extends
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
+                if (!isSearching) {
+                    return;
+                }
+
                 if (results != null && results.count > 0) {
                     // The API returned at least one result, update the data.
                     Log.d(TAG, "Received results");

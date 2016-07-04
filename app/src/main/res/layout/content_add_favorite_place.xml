@@ -13,6 +13,7 @@
         tools:context=".view.Home" />
 
     <ImageView
+        android:id="@+id/add_fav_place.marker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
@@ -51,7 +52,6 @@
                     android:hint="@string/favorite_place_name_hint"
                     android:paddingBottom="@dimen/padding_high"
                     android:paddingLeft="@dimen/padding_high"
-                    android:paddingRight="@dimen/padding_huge"
                     android:paddingTop="@dimen/padding_high"
                     android:singleLine="true"
                     android:textColor="@color/text_base"
