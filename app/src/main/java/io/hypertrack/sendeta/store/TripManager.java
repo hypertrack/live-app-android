@@ -119,6 +119,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 @Override
                 public void onSuccess(HTTrip htTrip) {
                     if (htTrip == null || htTrip.getLive() == null || !htTrip.getLive()) {
+                        clearState();
                         if (callback != null) {
                             callback.OnError();
                         }
