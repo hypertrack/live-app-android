@@ -35,6 +35,7 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
         ImageView countryFlag = (ImageView)layout.findViewById(R.id.iv_flag);
 
         countryName.setText(countries.get(position).mCountryName);
+        countryName.setVisibility(View.VISIBLE);
         countryFlag.setImageResource(countries.get(position).mImageId);
 
         return layout;
@@ -61,7 +62,7 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
         TextView countryName = (TextView)layout.findViewById(R.id.tv_country_name);
         ImageView countryFlag = (ImageView)layout.findViewById(R.id.iv_flag);
 
-        countryName.setText("+ " + countries.get(position).mDialPrefix);
+        countryName.setVisibility(View.GONE);
         countryFlag.setImageResource(countries.get(position).mImageId);
 
         return layout;

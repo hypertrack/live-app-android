@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,9 +38,11 @@ public class Register extends BaseActivity implements RegisterView {
 
     private static final String TAG = "Register";
 
-    public EditText phoneNumberView;
-    public Spinner countryCodeSpinner;
+    private EditText phoneNumberView;
+    private TextView countryCodeTextView;
+    private Spinner countryCodeSpinner;
     private ProgressDialog mProgressDialog;
+    private LinearLayout countryCodeLayout;
 
     private String isoCode;
 
@@ -68,7 +71,15 @@ public class Register extends BaseActivity implements RegisterView {
 
         // Initialize UI Views before Attaching View Presenter
         phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
+        countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
         countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
+        countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
+        countryCodeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                countryCodeSpinner.performClick();
+            }
+        });
 
         // Attach View Presenter to View
         registerPresenter.attachView(this);
@@ -113,6 +124,8 @@ public class Register extends BaseActivity implements RegisterView {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 isoCode = countries.get(position).mCountryIso;
+                countryCodeTextView.setText("+ " + countries.get(position).mDialPrefix);
+                countryCodeTextView.setVisibility(View.VISIBLE);
             }
 
             @Override
