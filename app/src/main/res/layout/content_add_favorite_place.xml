@@ -14,10 +14,10 @@
 
     <ImageView
         android:id="@+id/add_fav_place.marker"
-        android:layout_width="wrap_content"
+        android:layout_width="56dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingBottom="56dp"
+        android:paddingBottom="40dp"
         android:src="@drawable/ic_hero_marker" />
 
     <LinearLayout

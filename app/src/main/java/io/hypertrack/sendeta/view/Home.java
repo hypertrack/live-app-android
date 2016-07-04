@@ -795,7 +795,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             LocationServices.FusedLocationApi.requestLocationUpdates(
                     mGoogleApiClient, locationRequest, this);
         } catch (SecurityException exception) {
-            Toast.makeText(Home.this, R.string.fused_location_exception_error, Toast.LENGTH_SHORT).show();
+            Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
         }
     }
 

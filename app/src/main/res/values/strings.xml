@@ -58,9 +58,7 @@
 
     <!-- Error Strings -->
     <string name="network_issue">We could not detect internet on your mobile or there seems to be connectivity issues</string>
-    <string name="invalid_current_location">Please enable Location first</string>
-
-    <string name="fused_location_exception_error">Unable to request for location. Please check permissions in app settings</string>
+    <string name="invalid_current_location">Unable to get location. Please check permissions in app settings</string>
 
     <string name="invalid_phone_number">Please enter a valid number</string>
     <string name="phone_no_registration_failed">We could not process your request at this moment. Please try again</string>

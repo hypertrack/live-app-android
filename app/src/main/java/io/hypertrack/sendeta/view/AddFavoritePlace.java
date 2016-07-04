@@ -18,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -70,6 +71,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private RecyclerView mAutocompleteResults;
     private CardView mAutocompleteResultsLayout;
     private AddPlaceAutocompleteAdapter mAdapter;
+    private LinearLayout addFavPlaceParentLayout;
 
     private ProgressDialog mProgressDialog;
 
@@ -162,6 +164,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
             mAdapter.setBounds(getBounds(place.getLatLng(), DISTANCE_IN_METERS));
 
             KeyboardUtils.hideKeyboard(AddFavoritePlace.this, addPlaceAddressView);
+            addFavPlaceParentLayout.requestFocus();
 
             //Hide the Results List on Selection
             mAutocompleteResults.setVisibility(View.GONE);
@@ -222,6 +225,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     }
 
     private void initNameAddressView() {
+        addFavPlaceParentLayout = (LinearLayout) findViewById(R.id.add_fav_place_parent);
         addPlaceNameView = (EditText) findViewById(R.id.add_fav_place_name);
         placeNameClearIcon = (ImageView) findViewById(R.id.add_fav_place_name_clear);
         addPlaceAddressView = (EditText) findViewById(R.id.add_fav_place_address);
