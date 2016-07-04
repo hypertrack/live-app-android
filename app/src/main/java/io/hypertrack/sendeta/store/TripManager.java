@@ -122,6 +122,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                         if (callback != null) {
                             callback.OnError();
                         }
+
+                        return;
                     }
 
                     hyperTrackTrip = htTrip;
