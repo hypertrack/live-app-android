@@ -406,7 +406,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     private void addPlace() {
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Adding place");
+        mProgressDialog.setMessage(getString(R.string.saving_favorite_addresses_message));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -440,7 +440,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         }
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Editing place");
+        mProgressDialog.setMessage(getString(R.string.editing_favorite_addresses_message));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -518,7 +518,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     }
 
     private void showEditPlaceError() {
-        Toast.makeText(this, R.string.editing_already_saved_place_error, Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, R.string.editing_favorite_place_failed, Toast.LENGTH_SHORT).show();
     }
 
     private void reverseGeocode(LatLng latLng) {

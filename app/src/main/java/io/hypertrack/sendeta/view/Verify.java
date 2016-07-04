@@ -24,7 +24,6 @@ import android.widget.Toast;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.IVerifyPresenter;
 import io.hypertrack.sendeta.presenter.VerifyPresenter;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.SMSReceiver;
 
@@ -215,7 +214,7 @@ public class Verify extends BaseActivity implements VerifyView {
         retryCount++;
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.verifying_phone_number));
+        mProgressDialog.setMessage(getString(R.string.verifying_your_code));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 

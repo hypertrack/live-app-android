@@ -44,15 +44,17 @@
 
     <!-- Progress bar strings -->
     <string name="registration_phone_number">Setting up your account</string>
-    <string name="verifying_phone_number">Verifying phone number</string>
+    <string name="verifying_your_code">Verifying your code</string>
     <string name="enter_phone_number">Enter Phone Number</string>
     <string name="resending_verification_code">Resending verification code</string>
 
     <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
     <string name="getting_eta_message">Getting your destination</string>
     <string name="starting_trip_message">Preparing your trip</string>
-    <string name="ending_trip_message">Ending trip</string>
+    <string name="ending_trip_message">Ending your trip</string>
 
+    <string name="saving_favorite_addresses_message">Saving your favorite address</string>
+    <string name="editing_favorite_addresses_message">Saving your edits</string>
     <!-- Success Strings -->
     <string name="profile_upload_success">Profile Pic uploaded successfully</string>
 
@@ -60,27 +62,27 @@
     <string name="network_issue">We could not detect internet on your mobile or there seems to be connectivity issues</string>
     <string name="invalid_current_location">Unable to get location. Please check permissions in app settings</string>
 
-    <string name="invalid_phone_number">Please enter a valid number</string>
+    <string name="invalid_phone_number">Not a valid phone number</string>
     <string name="phone_no_registration_failed">We could not process your request at this moment. Please try again</string>
 
     <string name="invalid_verification_code">Please enter valid verification code</string>
-    <string name="phone_no_verification_failed">Apologies, there was an error while verifying your number. Please try again</string>
+    <string name="phone_no_verification_failed">Incorrect verification code. Please check and try again</string>
 
-    <string name="resend_otp_failed">There was an error while resending your verification code. Please try again</string>
+    <string name="resend_otp_failed">Error sending verification code. Please try again</string>
 
     <string name="profile_update_failed">We had problem connecting with the server. Please try again in sometime</string>
     <string name="profile_pic_choose_failed">There was an error choosing profile image. Please try again</string>
 
-    <string name="start_trip_failed">There was an error starting the trip. Please try again</string>
-    <string name="end_trip_failed">There was an error ending the trip. Please try again</string>
-    <string name="eta_fetching_error">There was an error in getting the ETA. Please try again</string>
+    <string name="start_trip_failed">Error starting your trip. Please try again</string>
+    <string name="end_trip_failed">Error ending your trip. Please try again</string>
+    <string name="eta_fetching_error">Sorry, we could not calculate an ETA. Please try again later</string>
 
     <string name="place_name_required_error">Place name is mandatory. Please enter a name and try again</string>
     <string name="home_already_exists_error">You have already added a home. Please select a different name</string>
     <string name="work_already_exists_error">You have already added a work. Please select a different name</string>
     <string name="place_already_exists_error">You have already added this place as a favorite</string>
-    <string name="adding_favorite_place_failed">There was an error adding place. Please try again</string>
-    <string name="editing_favorite_place_failed">There was an error editing place. Please try again</string>
+    <string name="adding_favorite_place_failed">Error saving your favorite. Please try again</string>
+    <string name="editing_favorite_place_failed">Error saving your edits. Please try again</string>
     <string name="editing_already_saved_place_error">The place you are trying to add already exists in your favorites</string>
 
     <string name="deleting_favorite_place_failed">There was error deleting place. Please try again</string>

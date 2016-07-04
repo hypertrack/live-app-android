@@ -62,7 +62,7 @@ public class Register extends BaseActivity implements RegisterView {
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+        protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
