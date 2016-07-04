@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.Trip;
 
 /**
  * Created by suhas on 25/02/16.
@@ -19,7 +20,7 @@ public class SharedPreferenceManager {
     private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
     private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
-    private static final String TRIP_ID = "io.hypertrack.meta:TripID";
+    private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -66,6 +67,34 @@ public class SharedPreferenceManager {
         String placeJson = gson.toJson(place);
 
         editor.putString(CURRENT_PLACE, placeJson);
+        editor.apply();
+    }
+
+    public static Trip getTrip() {
+        String tripJson = getSharedPreferences().getString(CURRENT_TRIP, null);
+        if (tripJson == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Trip>(){}.getType();
+
+        return gson.fromJson(tripJson, type);
+    }
+
+    public static void deleteTrip() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_TRIP);
+        editor.apply();
+    }
+
+    public static void setTrip(Trip trip) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String tripJSON = gson.toJson(trip);
+
+        editor.putString(CURRENT_TRIP, tripJSON);
         editor.apply();
     }
 }

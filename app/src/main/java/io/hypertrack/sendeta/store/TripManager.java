@@ -46,7 +46,6 @@ import io.hypertrack.sendeta.store.callback.TripManagerListener;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import io.realm.Realm;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -67,8 +66,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManagerListener tripRefreshedListener;
     private TripManagerListener tripEndedListener;
-
-    private Realm realm = Realm.getDefaultInstance();
 
     private Trip trip;
     private MetaPlace place;
@@ -107,7 +104,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void restoreState() {
-        this.trip = realm.where(Trip.class).findFirst();
+        this.trip = SharedPreferenceManager.getTrip();
         this.place = SharedPreferenceManager.getPlace();
     }
 
@@ -529,28 +526,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void clearTrip() {
-        final Trip tripToDelete = realm.where(Trip.class).findFirst();
-        if (tripToDelete == null) {
-            return;
-        }
-
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                tripToDelete.deleteFromRealm();
-            }
-        });
-
+        SharedPreferenceManager.deleteTrip();
         this.trip = null;
     }
 
     private void setTrip(final Trip tripToSave) {
-        realm.executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                trip = realm.copyToRealm(tripToSave);
-            }
-        });
+        SharedPreferenceManager.setTrip(tripToSave);
+        this.trip = tripToSave;
     }
 
     private void registerForTripEndedBroadcast() {
