@@ -32,4 +32,9 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"></style>
 
+    <style name="TextViewSpinnerItem" parent="@android:style/Widget.TextView.SpinnerItem">
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+    </style>
+
 </resources>

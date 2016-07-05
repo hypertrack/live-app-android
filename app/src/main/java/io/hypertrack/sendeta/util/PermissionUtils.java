@@ -50,7 +50,6 @@ public class PermissionUtils {
 
     /**
      * @param permission Permission for which Snackbar has to be shown
-     *
      */
     private static int getPermissionDeclinedMessage(final String permission) {
         switch (permission) {
@@ -112,6 +111,38 @@ public class PermissionUtils {
         Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
         intent.setData(uri);
         activity.startActivity(intent);
+    }
+
+    /**
+     * @param activity   Context where the Snackbar will be shown
+     * @param permission Permission for which Snackbar has to be shown,
+     *                   helps in deciding the message string for Snackbar
+     * @return snackbar snackbar instance which can be useful to set callbacks,if needed
+     */
+    public static AlertDialog.Builder showPermissionDeclineDialog(@NonNull final Activity activity,
+                                                       @NonNull final String permission,
+                                                       @NonNull final String title,
+                                                       @NonNull final String message) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(activity.getString(R.string.action_settings), new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                openSettings(activity);
+            }
+        });
+        builder.setNegativeButton(activity.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+
+        return builder;
     }
 
     /**

@@ -28,8 +28,9 @@
     <dimen name="padding_max">72dp</dimen>
 
     <!-- Standard Text Dimensions -->
-    <dimen name="text_base">14sp</dimen>
+    <dimen name="text_very_small">10sp</dimen>
     <dimen name="text_small">12sp</dimen>
+    <dimen name="text_base">14sp</dimen>
     <dimen name="text_medium">16sp</dimen>
     <dimen name="text_large">20sp</dimen>
     <dimen name="text_extra_large">32sp</dimen>
@@ -45,9 +46,10 @@
 
     <!-- Map Padding -->
     <dimen name="map_side_padding">48dp</dimen>
+    <dimen name="map_active_trip_side_padding">100dp</dimen>
     <dimen name="map_top_padding">240dp</dimen>
     <dimen name="map_bottom_padding">56dp</dimen>
-    <dimen name="map_active_trip_side_padding">100dp</dimen>
+    <dimen name="map_active_trip_bottom_padding">56dp</dimen>
 
     <dimen name="image_view_size">100dp</dimen>
     <dimen name="image_view_size_half">50dp</dimen>

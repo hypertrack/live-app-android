@@ -128,6 +128,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         @Override
         public void OnSuccess(MetaPlace place) {
 
+            // On Click Disable handling/showing any more results
+            mAdapter.setSearching(false);
+
             // Check if selected place is a User Favorite to log Analytics Event
             boolean isFavorite = false;
             User user = UserStore.sharedStore.getUser();
@@ -268,8 +271,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             // Check if Location was enabled & if valid location was received
             if (currentLocationMarker == null ||
                     new LatLng(0.0, 0.0).equals(currentLocationMarker.getPosition())) {
-
-                Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
                 checkIfLocationIsEnabled();
 
             } else {
@@ -547,50 +548,64 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             @Override
             public void onMapLoaded() {
                 restoreTripStateIfNeeded();
+                checkForLocationPermission();
             }
         });
+    }
+
+    private void checkForLocationPermission() {
+        // Check If LOCATION Permission is available & then if Location is enabled
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            checkIfLocationIsEnabled();
+        } else {
+            // Show Rationale & Request for LOCATION permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                        getString(R.string.location_permission_rationale_title),
+                        getString(R.string.location_permission_rationale_msg));
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+        }
     }
 
     private void updateMapPadding(boolean activeTrip) {
         int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
         int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
         int right = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_side_padding) : getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-        int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+        int bottom = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_bottom_padding) : getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
 
         mMap.setPadding(left, top, right, bottom);
     }
 
     private void restoreTripStateIfNeeded() {
         final TripManager tripManager = TripManager.getSharedManager();
-        tripManager.restoreState(new TripManagerCallback() {
-            @Override
-            public void OnSuccess() {
-                Log.v(TAG, "Trip is active");
-                HTLog.i(TAG, "Trip restored successfully.");
 
-                if (mProgressDialog != null)
-                    mProgressDialog.dismiss();
+        //Check if there is any existing trip to be restored
+        if (tripManager.shouldRestoreState()) {
+            Log.v(TAG, "Trip is active");
+            HTLog.i(TAG, "Trip restored successfully.");
 
-                MetaPlace place = tripManager.getPlace();
-                updateViewForETASuccess(0, place.getLatLng());
-                destinationText.setGravity(Gravity.LEFT);
-                destinationText.setText(place.getName());
+            if (mProgressDialog != null)
+                mProgressDialog.dismiss();
 
-                destinationDescription.setText(place.getAddress());
-                destinationDescription.setVisibility(View.VISIBLE);
+            MetaPlace place = tripManager.getPlace();
+            updateViewForETASuccess(0, place.getLatLng());
+            destinationText.setGravity(Gravity.LEFT);
+            destinationText.setText(place.getName());
 
-                onTripStart();
-            }
+            destinationDescription.setText(place.getAddress());
+            destinationDescription.setVisibility(View.VISIBLE);
 
-            @Override
-            public void OnError() {
-                Log.v(TAG, "Trip is not active");
-                HTLog.e(TAG, "Trip restore failed.");
+            onTripStart();
 
-                if (mProgressDialog != null)
-                    mProgressDialog.dismiss();
-            }
-        });
+        } else {
+            Log.v(TAG, "Trip is not active");
+            HTLog.e(TAG, "Trip restore failed.");
+
+            if (mProgressDialog != null)
+                mProgressDialog.dismiss();
+        }
     }
 
     /**
@@ -765,36 +780,33 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private View getDestinationMarkerView(int etaInMinutes) {
         View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_destination_marker_layout, null);
-        TextView etaTextView = (TextView) marker.findViewById(R.id.eta_txt);
-        updateTextViewForMinutes(etaTextView, etaInMinutes);
+        TextView etaTimeTextView = (TextView) marker.findViewById(R.id.eta_time);
+        TextView etaTimeTypeTextView = (TextView) marker.findViewById(R.id.eta_time_type_text);
+        updateTextViewForMinutes(etaTimeTextView, etaTimeTypeTextView, etaInMinutes);
         return marker;
     }
 
-    private void updateTextViewForMinutes(TextView textView, int etaInMinutes) {
+    private void updateTextViewForMinutes(TextView etaTimeTextView, TextView etaTimeTypeTextView, int etaInMinutes) {
         if (etaInMinutes == 0) {
-            textView.setText("--");
+            etaTimeTextView.setText("--");
         } else {
-            textView.setText(etaInMinutes + " m");
+            if (etaInMinutes <= Constants.MINUTES_ON_ETA_MARKER_LIMIT) {
+                etaTimeTextView.setText(String.valueOf(etaInMinutes));
+                etaTimeTypeTextView.setText("mins");
+            } else {
+                if (etaInMinutes % Constants.MINUTES_IN_AN_HOUR < Constants.MINUTES_TO_ROUND_OFF_TO_HOUR) {
+                    etaTimeTextView.setText(String.valueOf(etaInMinutes / Constants.MINUTES_IN_AN_HOUR));
+                } else {
+                    etaTimeTextView.setText(String.valueOf(etaInMinutes / Constants.MINUTES_IN_AN_HOUR + 1));
+                }
+                etaTimeTypeTextView.setText("hrs");
+            }
         }
     }
 
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
-
-        // Check If LOCATION Permission is available & then if Location is enabled
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            checkIfLocationIsEnabled();
-
-        } else {
-            // Show Rationale & Request for LOCATION permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
-                        getString(R.string.read_phone_state_permission_title), getString(R.string.read_phone_state_msg));
-            } else {
-                PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-            }
-        }
     }
 
     private void requestForLocationUpdates() {
@@ -1109,7 +1121,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkIfLocationIsEnabled();
                 } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    PermissionUtils.showPermissionDeclineMessage(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                    PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                            getString(R.string.location_permission_rationale_title),
+                            getString(R.string.permission_denied_location));
                 }
                 break;
         }

@@ -61,7 +61,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
 
     private static final String TAG = TripManager.class.getSimpleName();
-    private static final long REFRESH_DELAY = 60000;
+    private static final long REFRESH_DELAY = 30000;
 
     private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
 
@@ -104,52 +104,28 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.mGoogleAPIClient.connect();
     }
 
-    private void restoreState() {
+    private void getCachedTripData() {
         this.trip = SharedPreferenceManager.getTrip();
         this.place = SharedPreferenceManager.getPlace();
     }
 
-    public void restoreState(final TripManagerCallback callback) {
-        this.restoreState();
+    public boolean shouldRestoreState() {
+        this.getCachedTripData();
 
+        // Check if current Trip exists in Shared Preference or not
         if (this.trip != null
                 && this.place != null
                 && transmitter.isTripActive()
                 && transmitter.getActiveTripID().equalsIgnoreCase(this.trip.getHypertrackTripID())) {
-            transmitter.refreshTrip(new HTTripStatusCallback() {
-                @Override
-                public void onSuccess(HTTrip htTrip) {
-                    if (htTrip == null || htTrip.getLive() == null || !htTrip.getLive()) {
-                        clearState();
-                        if (callback != null) {
-                            callback.OnError();
-                        }
 
-                        return;
-                    }
+            // Restore the current trip with locally cached data
+            // Start Refreshing the trip without any delay
+            onTripStart(0);
+            return true;
 
-                    hyperTrackTrip = htTrip;
-                    onTripStart();
-                    onTripRefresh();
-
-                    if (callback != null) {
-                        callback.OnSuccess();
-                    }
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    clearState();
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            });
         } else {
             this.clearState();
-            if (callback != null) {
-                callback.OnError();
-            }
+            return false;
         }
     }
 
@@ -159,6 +135,15 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             transmitter.refreshTrip(new HTTripStatusCallback() {
                 @Override
                 public void onSuccess(HTTrip htTrip) {
+                    if (htTrip != null && htTrip.getLive() != null && !htTrip.getLive()) {
+                        if (tripEndedListener != null) {
+                            tripEndedListener.OnCallback();
+                        }
+
+                        clearState();
+                        return;
+                    }
+
                     hyperTrackTrip = htTrip;
                     onTripRefresh();
                 }
@@ -370,15 +355,25 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.tripRefreshedListener = null;
     }
 
+    // Start Trip with a default delay of REFRESH_DELAY
     private void onTripStart() {
+        onTripStart(REFRESH_DELAY);
+    }
+
+    private void onTripStart (final long delay) {
         this.setupGeofencing();
-        this.startRefreshingTrip();
+        this.startRefreshingTrip(delay);
         this.registerForTripEndedBroadcast();
     }
 
+    // Refresh Trip with a default delay of REFRESH_DELAY
     public void startRefreshingTrip() {
+        startRefreshingTrip(REFRESH_DELAY);
+    }
+
+    public void startRefreshingTrip(final long delay) {
         handler = new Handler();
-        handler.postDelayed(refreshTask, REFRESH_DELAY);
+        handler.postDelayed(refreshTask, delay);
     }
 
     public void stopRefreshingTrip() {
@@ -436,7 +431,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void OnGeoFenceSuccess() {
         if (this.trip == null) {
-            this.restoreState();
+            this.getCachedTripData();
             if (this.trip == null) {
                 if (tripEndedListener != null) {
                     tripEndedListener.OnCallback();

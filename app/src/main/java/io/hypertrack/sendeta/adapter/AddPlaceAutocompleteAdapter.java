@@ -81,6 +81,10 @@ public class AddPlaceAutocompleteAdapter extends
 
     private PlaceAutoCompleteOnClickListener listener;
 
+    public void setSearching (boolean isSearching) {
+        this.isSearching = isSearching;
+    }
+
     public void setFilterString(String filterString) {
         if (!filterString.isEmpty()) {
             getFilter().filter(filterString);

@@ -104,6 +104,10 @@ public class PlaceAutocompleteAdapter
 
     private PlaceAutoCompleteOnClickListener listener;
 
+    public void setSearching(boolean isSearching) {
+        this.isSearching = isSearching;
+    }
+
     public void setFilterString(String filterString) {
         this.filterString = filterString.toLowerCase();
 

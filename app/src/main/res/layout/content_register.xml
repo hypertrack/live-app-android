@@ -33,6 +33,9 @@
                 android:id="@+id/register.country_codes_spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
+                android:padding="0dp"
+                android:gravity="center"
+                style="@style/TextViewSpinnerItem"
                 android:spinnerMode="dialog"
                 android:visibility="visible" />
 

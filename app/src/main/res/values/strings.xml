@@ -56,10 +56,10 @@
     <string name="saving_favorite_addresses_message">Saving your favorite address</string>
     <string name="editing_favorite_addresses_message">Saving your edits</string>
     <!-- Success Strings -->
-    <string name="profile_upload_success">Profile Pic uploaded successfully</string>
+    <string name="profile_upload_success">Profile pic uploaded successfully</string>
 
     <!-- Error Strings -->
-    <string name="network_issue">We could not detect internet on your mobile or there seems to be connectivity issues</string>
+    <string name="network_issue">Bad connection. Try again later</string>
     <string name="invalid_current_location">Unable to get location. Please check permissions in app settings</string>
 
     <string name="invalid_phone_number">Not a valid phone number</string>
@@ -77,20 +77,20 @@
     <string name="end_trip_failed">Error ending your trip. Please try again</string>
     <string name="eta_fetching_error">Sorry, we could not calculate an ETA. Please try again later</string>
 
-    <string name="place_name_required_error">Place name is mandatory. Please enter a name and try again</string>
+    <string name="place_name_required_error">This field is required</string>
     <string name="home_already_exists_error">You have already added a home. Please select a different name</string>
     <string name="work_already_exists_error">You have already added a work. Please select a different name</string>
-    <string name="place_already_exists_error">You have already added this place as a favorite</string>
+    <string name="place_already_exists_error">You have already added this address as a favorite</string>
     <string name="adding_favorite_place_failed">Error saving your favorite. Please try again</string>
     <string name="editing_favorite_place_failed">Error saving your edits. Please try again</string>
-    <string name="editing_already_saved_place_error">The place you are trying to add already exists in your favorites</string>
+    <string name="editing_already_saved_place_error">The address you are trying to add already exists in your favorites</string>
 
-    <string name="deleting_favorite_place_failed">There was error deleting place. Please try again</string>
+    <string name="deleting_favorite_place_failed">Error deleting this favorite. Please try again</string>
 
     <!-- Permission Error Strings -->
     <string name="permission_declined_default_msg">Permission was denied</string>
 
-    <string name="permission_denied_location">To enable permission, go to Settings → Apps → SendETA → Permissions, and turn on location permission</string>
+    <string name="permission_denied_location">To use this app, you need to enable location permission. Go to settings and change the permission</string>
     <string name="permission_denied_read_external_storage">Can\'t read device\'s storage. Permission was denied</string>
     <string name="permission_denied_contacts">Can\'t get your contacts. Permission was denied</string>
 
@@ -104,6 +104,6 @@
     <string name="sms_receive_permission_title">Sms Permission Required</string>
     <string name="sms_receive_permission_msg">We need permission to read your SMS in order to automatically detect the OTP sent to your phone</string>
 
-    <string name="read_external_storage_permission_title">Read External Storage Permission Required</string>
+    <string name="read_external_storage_permission_title">Permission required to read external storage</string>
     <string name="read_external_storage_permission_msg">We need permission to read your storage in order for you to choose your Profile Picture</string>
 </resources>

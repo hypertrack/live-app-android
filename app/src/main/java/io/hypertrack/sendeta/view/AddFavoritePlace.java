@@ -76,7 +76,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private ProgressDialog mProgressDialog;
 
     private MetaPlace metaPlace;
-    private boolean metaPlaceAdded = false;
+    private boolean addNewMetaPlace = false;
 
     private LatLng latlng;
 
@@ -148,6 +148,10 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
+
+            // On Click Disable handling/showing any more results
+            mAdapter.setSearching(false);
+
             if (mMap != null) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
             }
@@ -344,7 +348,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
             return;
         }
 
-        metaPlaceAdded = !user.isFavorite(metaPlace);
+        addNewMetaPlace = !user.isFavorite(metaPlace);
         metaPlace.setName(addPlaceNameView.getText().toString());
 
         if (metaPlace.getName() == null || metaPlace.getName().isEmpty()) {
@@ -369,7 +373,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 return;
             }
             // Check if PlaceID = 0 while Editing a place (this is not a valid case)
-        } else if (metaPlace.getId() == 0 && !metaPlaceAdded) {
+        } else if (metaPlace.getId() == 0 && !addNewMetaPlace) {
             Toast.makeText(this, R.string.place_already_exists_error, Toast.LENGTH_SHORT).show();
 
             processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_ALREADY_EXISTS_ERROR);
@@ -379,7 +383,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         metaPlace.setAddress(addPlaceAddressView.getText().toString());
         metaPlace.setLatLng(latlng);
 
-        if (metaPlaceAdded) {
+        if (addNewMetaPlace) {
             addPlace();
         } else {
             editPlace();
@@ -475,7 +479,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     private void broadcastResultIntent() {
         Intent intent = new Intent();
-        intent.putExtra(KEY_ADDED_OR_EDITED, metaPlaceAdded);
+        intent.putExtra(KEY_ADDED_OR_EDITED, addNewMetaPlace);
         intent.putExtra(KEY_UPDATED_PLACE, metaPlace);
         setResult(Constants.FAVORITE_PLACE_REQUEST_CODE, intent);
     }
@@ -489,20 +493,20 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private void processUpdatedMetaPlaceForAnalytics(boolean status, String errorMessage) {
 
         if (metaPlace.isHome()) {
-            if (metaPlaceAdded) {
+            if (addNewMetaPlace) {
                 AnalyticsStore.getLogger().addedHome(status, errorMessage);
             } else {
                 AnalyticsStore.getLogger().editedHome(status, errorMessage);
             }
         } else if (metaPlace.isWork()) {
-            if (metaPlaceAdded) {
+            if (addNewMetaPlace) {
                 AnalyticsStore.getLogger().addedWork(status, errorMessage);
             } else {
                 AnalyticsStore.getLogger().editedWork(status, errorMessage);
             }
         } else {
 
-            if (metaPlaceAdded) {
+            if (addNewMetaPlace) {
                 User user = UserStore.sharedStore.getUser();
 
                 // Initialize favoritesCount based on current MetaPlace update status
