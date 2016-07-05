@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".view.Home"
     tools:showIn="@layout/activity_home">
@@ -15,123 +15,219 @@
         android:layout_height="match_parent"
         tools:context=".view.Home" />
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <android.support.v7.widget.CardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_base"
-                android:layout_marginLeft="@dimen/margin_high"
-                android:layout_marginRight="@dimen/margin_high"
-                android:layout_marginTop="@dimen/margin_high"
-                android:background="@android:color/white"
-                android:elevation="@dimen/elevation_high"
-                app:cardCornerRadius="2dp">
-
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-
-                    <FrameLayout
-                        android:id="@+id/enter_destination_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent">
-
-                        <TextView
-                            android:id="@+id/destination_text"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/margin_xhigh"
-                            android:layout_marginRight="@dimen/margin_high"
-                            android:background="@null"
-                            android:ellipsize="end"
-                            android:gravity="center"
-                            android:hint="@string/autocomplete_hint"
-                            android:padding="16dp"
-                            android:singleLine="true"
-                            android:textColor="@color/text_base"
-                            android:textSize="@dimen/text_base" />
-
-                        <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical"
-                            android:paddingLeft="@dimen/padding_medium"
-                            android:paddingRight="@dimen/padding_medium"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/ic_destination" />
-                    </FrameLayout>
-
-                    <FrameLayout
-                        android:id="@+id/autocomplete_places_layout"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:visibility="gone">
-
-                        <AutoCompleteTextView
-                            android:id="@+id/autocomplete_places"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginLeft="@dimen/margin_xhigh"
-                            android:layout_marginRight="@dimen/margin_high"
-                            android:background="@null"
-                            android:ellipsize="end"
-                            android:gravity="center"
-                            android:hint="@string/autocomplete_hint"
-                            android:padding="16dp"
-                            android:singleLine="true"
-                            android:textColor="@color/text_base"
-                            android:textSize="@dimen/text_base" />
-
-                        <ImageView
-                            android:id="@+id/autocomplete_places_back_icon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center_vertical"
-                            android:onClick="onEnterDestinationBackClick"
-                            android:paddingLeft="@dimen/padding_medium"
-                            android:paddingRight="@dimen/padding_medium"
-                            android:scaleType="centerInside"
-                            android:src="@drawable/ic_navigation_arrow_back" />
-                    </FrameLayout>
-                </FrameLayout>
-
-            </android.support.v7.widget.CardView>
-
-            <ProgressBar
-                android:id="@+id/login_progress"
-                style="?android:attr/progressBarStyle"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_gravity="end|center_vertical"
-                android:layout_marginRight="@dimen/margin_high"
-                android:layout_marginTop="@dimen/margin_low"
-                android:indeterminate="true"
-                android:visibility="gone"
-                tools:visibility="visible" />
-        </FrameLayout>
-
-        <android.support.v7.widget.CardView
-            android:id="@+id/autocomplete_places_results_layout"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/margin_high"
-            android:layout_marginLeft="@dimen/margin_high"
-            android:layout_marginRight="@dimen/margin_high"
-            android:layout_marginTop="@dimen/margin_base"
-            android:visibility="gone">
+            android:layout_gravity="top"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/autocomplete_places_results"
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-        </android.support.v7.widget.CardView>
-    </LinearLayout>
-</RelativeLayout>
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+        </android.support.design.widget.AppBarLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/app_bar_layout"
+            android:orientation="vertical">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <android.support.v7.widget.CardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_base"
+                    android:layout_marginLeft="@dimen/margin_high"
+                    android:layout_marginRight="@dimen/margin_high"
+                    android:layout_marginTop="@dimen/margin_high"
+                    android:background="@android:color/white"
+                    android:elevation="@dimen/elevation_high"
+                    app:cardCornerRadius="2dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:id="@+id/enter_destination_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:visibility="visible">
+
+                            <ImageView
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center_vertical"
+                                android:paddingLeft="@dimen/padding_medium"
+                                android:paddingRight="@dimen/padding_medium"
+                                android:scaleType="fitCenter"
+                                android:src="@drawable/icon_end_map" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:paddingBottom="@dimen/padding_medium"
+                                android:paddingRight="@dimen/padding_high"
+                                android:paddingTop="@dimen/padding_medium">
+
+                                <TextView
+                                    android:id="@+id/destination_text"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:background="@null"
+                                    android:ellipsize="end"
+                                    android:gravity="center"
+                                    android:hint="@string/autocomplete_hint"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_base"
+                                    android:textSize="@dimen/text_medium" />
+
+                                <TextView
+                                    android:id="@+id/destination_desc"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:ellipsize="end"
+                                    android:singleLine="true"
+                                    android:textColor="@color/text_disabled"
+                                    android:textSize="@dimen/text_base"
+                                    android:visibility="gone" />
+                            </LinearLayout>
+
+                            <ImageButton
+                                android:id="@+id/favorite_button"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:background="@null"
+                                android:onClick="OnFavoriteClick"
+                                android:padding="@dimen/padding_low"
+                                android:src="@drawable/ic_favorite"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <FrameLayout
+                            android:id="@+id/autocomplete_places_layout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:visibility="gone">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/autocomplete_places"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:layout_marginLeft="@dimen/margin_max"
+                                android:layout_marginRight="@dimen/margin_xxxhigh"
+                                android:paddingTop="@dimen/padding_high"
+                                android:paddingBottom="@dimen/padding_high"
+                                android:background="@null"
+                                android:ellipsize="end"
+                                android:hint="@string/autocomplete_hint"
+                                android:singleLine="true"
+                                android:textColor="@color/text_base"
+                                android:textSize="@dimen/text_medium" />
+
+                            <ImageView
+                                android:id="@+id/autocomplete_places_back_icon"
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center_vertical"
+                                android:paddingLeft="@dimen/padding_xhigh"
+                                android:paddingRight="@dimen/padding_xhigh"
+                                android:onClick="onEnterDestinationBackClick"
+                                android:scaleType="centerInside"
+                                android:src="@drawable/ic_navigation_arrow_back" />
+
+                            <ProgressBar
+                                android:id="@+id/autocomplete_progress"
+                                style="?android:attr/progressBarStyle"
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center_vertical|end"
+                                android:layout_marginRight="@dimen/margin_base"
+                                android:indeterminate="true"
+                                android:visibility="gone"
+                                tools:visibility="visible" />
+                        </FrameLayout>
+                    </FrameLayout>
+                </android.support.v7.widget.CardView>
+            </FrameLayout>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/autocomplete_places_results_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_high"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:layout_marginRight="@dimen/margin_high"
+                android:layout_marginTop="@dimen/margin_base"
+                android:visibility="gone">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/autocomplete_places_results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/sendETAButton"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cta_button_size"
+            android:layout_alignParentBottom="true"
+            android:background="@color/colorAccent"
+            android:gravity="center"
+            android:padding="@dimen/padding_high"
+            android:textColor="#ffffff"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/navigateButton"
+            android:layout_width="@dimen/cta_button_size"
+            android:layout_height="@dimen/cta_button_size"
+            android:layout_above="@+id/shareButton"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="@dimen/margin_high"
+            android:background="@drawable/circle_primary_background"
+            android:padding="@dimen/padding_high"
+            android:src="@drawable/ic_navigate_nocircle"
+            android:visibility="gone" />
+
+        <ImageButton
+            android:id="@+id/shareButton"
+            android:layout_width="@dimen/cta_button_size"
+            android:layout_height="@dimen/cta_button_size"
+            android:layout_above="@+id/sendETAButton"
+            android:layout_alignParentEnd="true"
+            android:layout_marginBottom="@dimen/margin_base"
+            android:layout_marginEnd="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_base"
+            android:background="@drawable/circle_primary_background"
+            android:padding="@dimen/padding_high"
+            android:src="@drawable/ic_share_nocircle"
+            android:visibility="gone" />
+    </RelativeLayout>
+</FrameLayout>
