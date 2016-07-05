@@ -1,23 +1,29 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" >
+    android:layout_height="wrap_content">
 
     <ImageView
-        android:layout_width="75dp"
-        android:layout_height="85dp"
-        android:src="@drawable/icon_desitination" />
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:src="@drawable/icon_eta" />
 
     <TextView
-        android:id="@+id/eta_txt"
-        android:layout_width="wrap_content"
+        android:id="@+id/eta_time"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="23dp"
+        android:layout_marginTop="10dp"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center"
-        android:text=""
         android:textColor="#ffffff"
-        android:textSize="12sp"
-        android:textStyle="bold"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:textSize="@dimen/text_large" />
 
-</RelativeLayout>
+    <TextView
+        android:id="@+id/eta_time_type_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/text_very_small" />
+</FrameLayout>

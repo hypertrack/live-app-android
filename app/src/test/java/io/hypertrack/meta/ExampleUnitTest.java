@@ -1,4 +1,4 @@
-package io.hypertrack.meta;
+package io.hypertrack.sendeta;
 
 import org.junit.Test;
 
