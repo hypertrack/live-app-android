@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,6 +45,7 @@ public class Profile extends BaseActivity implements ProfileView {
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
     private ProgressDialog mProgressDialog;
+    private LinearLayout profileParentLayout;
 
     private Target profileImageDownloadTarget;
     private File profileImage;
@@ -88,6 +90,7 @@ public class Profile extends BaseActivity implements ProfileView {
         mLastNameView = (AutoCompleteTextView) findViewById(R.id.profile_last_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
+        profileParentLayout = (LinearLayout) findViewById(R.id.profile_parent_layout);
 
         // Attach View Presenter to View
         presenter.attachView(this);
@@ -132,13 +135,16 @@ public class Profile extends BaseActivity implements ProfileView {
     public void updateViews(String firstName, String lastName, String profileURL) {
         if (!TextUtils.isEmpty(firstName)) {
             mFirstNameView.setText(firstName);
-            mFirstNameView.setCursorVisible(false);
-            mLastNameView.setCursorVisible(true);
         }
 
         if (!TextUtils.isEmpty(lastName)) {
             mLastNameView.setText(lastName);
-            mLastNameView.setCursorVisible(false);
+
+            if (!TextUtils.isEmpty(firstName)) {
+                profileParentLayout.requestFocus();
+            }
+        } else {
+            mLastNameView.requestFocus();
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
@@ -274,8 +280,6 @@ public class Profile extends BaseActivity implements ProfileView {
             case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, R.string.permission_denied_read_external_storage, Toast.LENGTH_SHORT).show();
                 }
                 break;
         }

@@ -162,6 +162,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
             metaPlace.setGooglePlacesID(place.getGooglePlacesID());
 
             // Remove Text Changed Listener to prevent Autocomplete updates on setText
+            // Text Changed Listener will be added again in OnFocusChangeListener
             addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
 
             addPlaceAddressView.setText(place.getAddress());
@@ -411,9 +412,11 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         right = getResources().getDimensionPixelSize(R.dimen.padding_high);
         addPlaceAddressView.setPadding(left, top, right, bottom);
 
-        // Remove & Add the Text Watcher Again
+        // Remove the Text Watcher Again
+        // Text Changed Listener will be added again in OnFocusChangeListener
         addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
-        addPlaceAddressView.addTextChangedListener(mPlaceAddressTextWatcher);
+
+        mAutocompleteResults.setVisibility(View.GONE);
     }
 
     private void addPlace() {

@@ -13,7 +13,7 @@
 
     <TextView
         android:id="@+id/verify.header_text"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20dp"
         android:layout_marginEnd="@dimen/margin_high"
@@ -21,6 +21,7 @@
         android:layout_marginRight="@dimen/margin_high"
         android:layout_marginStart="@dimen/margin_high"
         android:layout_marginTop="40dp"
+        android:gravity="center_horizontal"
         android:text="@string/verify_phone_number_hearder_note"
         android:textAlignment="center" />
 

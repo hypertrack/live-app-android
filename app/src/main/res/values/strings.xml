@@ -28,7 +28,7 @@
     <string name="geofence_transition_invalid_type">Geofence transition error: invalid transition type %1$d</string>
 
     <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for SendETA</string>
-    <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to %1$s</string>
+    <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to \n%1$s</string>
 
     <!-- Action bar strings -->
     <string name="next">Next</string>
