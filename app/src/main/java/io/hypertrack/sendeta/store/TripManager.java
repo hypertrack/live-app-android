@@ -578,6 +578,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         String formattedDate = dateFormat.format(this.hyperTrackTrip.getETA());
 
         formattedDate = formattedDate.toLowerCase();
+        formattedDate = formattedDate.replace(".", "");
         formattedDate = formattedDate.replace("am", "a");
         formattedDate = formattedDate.replace("pm", "p");
 
