@@ -356,10 +356,13 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage(getString(R.string.fetching_existing_trip));
-        mProgressDialog.show();
+        // Check if current Activity is finishing
+        if (!this.isFinishing()) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.setMessage(getString(R.string.fetching_existing_trip));
+            mProgressDialog.show();
+        }
     }
 
     private void checkIfUserIsOnBoard() {

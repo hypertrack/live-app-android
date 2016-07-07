@@ -10,33 +10,52 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
+
 public class PhoneUtils {
 
     private static final String TAG = PhoneUtils.class.getSimpleName();
 
     public static String getCountryRegionFromPhone(Context paramContext) {
-        TelephonyManager service = null;
-        int res = paramContext.checkCallingOrSelfPermission("android.permission.READ_PHONE_STATE");
-        if (res == PackageManager.PERMISSION_GRANTED) {
-            service = (TelephonyManager) paramContext.getSystemService(Context.TELEPHONY_SERVICE);
-        }
+        TelephonyManager service = (TelephonyManager) paramContext.getSystemService(Context.TELEPHONY_SERVICE);
+
         String code = null;
         if (service != null) {
-            String str = service.getLine1Number();
-            if (!TextUtils.isEmpty(str) && !str.matches("^0*$")) {
-                code = parseNumber(str);
-            }
+            code = service.getNetworkCountryIso();
         }
-        if (code == null) {
-            if (service != null) {
-                code = service.getNetworkCountryIso();
-            }
-            if (TextUtils.isEmpty(code)) {
-                code = paramContext.getResources().getConfiguration().locale.getCountry();
-            }
+
+        if (!TextUtils.isEmpty(code)) {
+            code = service.getSimCountryIso();
         }
+
+        if (TextUtils.isEmpty(code)) {
+            code = paramContext.getResources().getConfiguration().locale.getCountry();
+        }
+
         if (code != null) {
             return code.toUpperCase();
+        }
+
+        return null;
+    }
+
+    private static String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        return inetAddress.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            ex.printStackTrace();
         }
         return null;
     }
