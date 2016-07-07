@@ -42,6 +42,11 @@
     <string name="invalid_lat_lng_used">There was an error fetching address. Please try again</string>
     <string name="no_address_found">There was an error fetching address. Please try again</string>
 
+    <string name="geofence_transition_entered">GEOFENCE_TRANSITION_ENTER</string>
+    <string name="geofence_transition_exited">GEOFENCE_TRANSITION_EXIT</string>
+    <string name="geofence_transition_dwelled">GEOFENCE_TRANSITION_DWELL</string>
+    <string name="unknown_geofence_transition">GEOFENCE_TRANSITION_UNKNOWN</string>
+
     <!-- Progress bar strings -->
     <string name="registration_phone_number">Setting up your account</string>
     <string name="verifying_your_code">Verifying your code</string>

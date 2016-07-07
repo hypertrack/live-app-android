@@ -57,6 +57,7 @@ import retrofit2.Response;
 public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     public static final int LOITERING_DELAY_MS = 30000;
+    private static final int NOTIFICATION_RESPONSIVENESS_MS = 5000;
     private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
 
@@ -157,7 +158,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             if (handler == null) {
                 return;
             }
-            
+
             handler.postDelayed(this, REFRESH_DELAY);
         }
     };
@@ -419,13 +420,16 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 public void onResult(@NonNull Status status) {
                     if (status.isSuccess()) {
                         Log.v(TAG, "Geofencing added successfully");
+                        HTLog.i(TAG, "Geofencing added successfully");
                     } else {
                         Log.v(TAG, "Geofencing not added. There was an error");
+                        HTLog.w(TAG, "Geofencing not added. There was an error");
                     }
                 }
             });
         } catch (SecurityException exception) {
-            Log.v(TAG, "Exeption for geo fence");
+            Log.v(TAG, "Exception for geofence");
+            HTLog.e(TAG, "Exception for geofence");
         }
     }
 
@@ -441,6 +445,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             }
         }
 
+        Log.i(TAG, "OnGeoFence success: Trip end initiated.");
         HTLog.i(TAG, "OnGeoFence success: Trip end initiated.");
 
         this.endTrip(new TripManagerCallback() {
@@ -465,6 +470,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private GeofencingRequest getGeofencingRequest() {
 
+        // called when the transition associated with the Geofence is triggered)
         List<Geofence> geoFenceList = new ArrayList<Geofence>();
         geoFenceList.add(new Geofence.Builder()
                 .setRequestId(GEOFENCE_REQUEST_ID)
@@ -473,13 +479,14 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                         this.place.getLongitude(),
                         GEOFENCE_RADIUS_IN_METERS
                 )
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER)
                 .setLoiteringDelay(LOITERING_DELAY_MS)
+                .setNotificationResponsiveness(NOTIFICATION_RESPONSIVENESS_MS)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build());
 
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_DWELL);
         builder.addGeofences(geoFenceList);
         return builder.build();
     }
@@ -574,10 +581,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             return null;
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("h:mma");
         String formattedDate = dateFormat.format(this.hyperTrackTrip.getETA());
 
-        formattedDate = formattedDate.replace(".", "");
+        formattedDate = formattedDate.toLowerCase();
+        formattedDate = formattedDate.replace("am", "a");
+        formattedDate = formattedDate.replace("pm", "p");
 
         return formattedDate;
     }
