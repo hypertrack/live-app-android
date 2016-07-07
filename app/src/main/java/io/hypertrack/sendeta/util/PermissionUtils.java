@@ -55,8 +55,6 @@ public class PermissionUtils {
         switch (permission) {
             case Manifest.permission.ACCESS_FINE_LOCATION:
                 return R.string.permission_denied_location;
-            case Manifest.permission.GET_ACCOUNTS:
-                return R.string.permission_denied_contacts;
             default:
                 return R.string.permission_declined_default_msg;
         }

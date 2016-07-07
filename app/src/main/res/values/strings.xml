@@ -97,17 +97,10 @@
 
     <string name="permission_denied_location">To use this app, you need to enable location permission. Go to settings and change the permission</string>
     <string name="permission_denied_read_external_storage">Can\'t read device\'s storage. Permission was denied</string>
-    <string name="permission_denied_contacts">Can\'t get your contacts. Permission was denied</string>
-
-    <string name="read_phone_state_permission_title">Read Phone State permission required</string>
-    <string name="read_phone_state_msg">We need access to information about your phone\'s data to provide you with a suggestion for Country Code</string>
 
     <string name="location_permission_rationale_title">Location permission required</string>
     <string name="location_permission_rationale_msg">Location permission denied. We need to know your current location to calculate ETAs</string>
     <string name="location_permission_grant_after_never_allow">Location permission is required for better experience</string>
-
-    <string name="sms_receive_permission_title">Sms Permission Required</string>
-    <string name="sms_receive_permission_msg">We need permission to read your SMS in order to automatically detect the OTP sent to your phone</string>
 
     <string name="read_external_storage_permission_title">Permission required to read external storage</string>
     <string name="read_external_storage_permission_msg">We need permission to read your storage in order for you to choose your Profile Picture</string>

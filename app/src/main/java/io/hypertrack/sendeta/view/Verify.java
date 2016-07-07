@@ -1,14 +1,9 @@
 package io.hypertrack.sendeta.view;
 
 import android.app.ProgressDialog;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -25,7 +20,6 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.IVerifyPresenter;
 import io.hypertrack.sendeta.presenter.VerifyPresenter;
 import io.hypertrack.sendeta.util.KeyboardUtils;
-import io.hypertrack.sendeta.util.SMSReceiver;
 
 public class Verify extends BaseActivity implements VerifyView {
 
@@ -62,20 +56,6 @@ public class Verify extends BaseActivity implements VerifyView {
             }
 
             return false;
-        }
-    };
-
-    BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String code = intent.getStringExtra(SMSReceiver.VERIFICATION_CODE);
-            if (!TextUtils.isEmpty(code)) {
-                if (mProgressDialog != null) {
-                    mProgressDialog.dismiss();
-                }
-
-                verificationCodeView.setText(code);
-            }
         }
     };
 
@@ -227,21 +207,6 @@ public class Verify extends BaseActivity implements VerifyView {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_verify, menu);
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        IntentFilter filter = new IntentFilter(SMSReceiver.SENDETA_SMS_RECIEVED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, filter);
     }
 
     @Override
