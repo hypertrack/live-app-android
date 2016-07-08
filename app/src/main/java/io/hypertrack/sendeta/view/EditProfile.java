@@ -181,7 +181,9 @@ public class EditProfile extends BaseActivity {
                             // Process Image Upload Success for Analytics
                             processImageDataForAnalytics(true, null, oldProfileImage, imageUploadSource);
 
-                            mProgressDialog.dismiss();
+                            if (EditProfile.this.isFinishing() && mProgressDialog != null)
+                                mProgressDialog.dismiss();
+
                             Toast.makeText(EditProfile.this, "Profile Pic uploaded successfully",
                                     Toast.LENGTH_SHORT).show();
 
@@ -195,7 +197,9 @@ public class EditProfile extends BaseActivity {
                             processImageDataForAnalytics(false, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED,
                                     oldProfileImage, imageUploadSource);
 
-                            mProgressDialog.dismiss();
+                            if (EditProfile.this.isFinishing() && mProgressDialog != null)
+                                mProgressDialog.dismiss();
+                            
                             Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED,
                                     Toast.LENGTH_SHORT).show();
                         }
