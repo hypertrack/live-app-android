@@ -289,7 +289,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             // Check if Location was enabled & if valid location was received
             if (currentLocationMarker == null ||
                     new LatLng(0.0, 0.0).equals(currentLocationMarker.getPosition())) {
-                checkIfLocationIsEnabled();
+
+                if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+                    checkIfLocationIsEnabled();
 
             } else {
                 enterDestinationLayoutClicked = true;
@@ -907,7 +909,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         // Initiate location updates if permission granted
         if (PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
                 isLocationEnabled()) {
-            requestForLocationUpdates();
+            requestLocationUpdates();
         }
     }
 
@@ -944,7 +946,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         return false;
     }
 
-    private void requestForLocationUpdates() {
+    private void requestLocationUpdates() {
 
         if (currentLocationDialog == null) {
             // Show currentLocationDialog while Location is being fetched
@@ -1004,7 +1006,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                         // initialize location requests here.
                         //Start Location Service here if not already active
                         Log.d(TAG, "Fetching Location started!");
-                        requestForLocationUpdates();
+                        requestLocationUpdates();
 
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
@@ -1312,7 +1314,10 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         switch (requestCode) {
             case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkIfLocationIsEnabled();
+
+                    if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+                        checkIfLocationIsEnabled();
+
                 } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
                             getString(R.string.location_permission_rationale_title),
@@ -1332,7 +1337,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
                     Log.i(TAG, "User agreed to make required location settings changes.");
                     Log.d(TAG, "Fetching Location started!");
-                    requestForLocationUpdates();
+                    requestLocationUpdates();
                     break;
 
                 case Activity.RESULT_CANCELED:
@@ -1389,7 +1394,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         // Check if Location is Enabled & Resume LocationUpdates
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             if (isLocationEnabled()) {
-                requestForLocationUpdates();
+                requestLocationUpdates();
             }
         } else {
             initGoogleClient();
