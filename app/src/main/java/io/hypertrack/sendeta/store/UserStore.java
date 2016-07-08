@@ -278,7 +278,7 @@ public class UserStore {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                MetaPlace managedPlace = realm.copyToRealm(place);
+                MetaPlace managedPlace = realm.copyToRealmOrUpdate(place);
                 user.getPlaces().add(managedPlace);
                 user = realm.copyToRealmOrUpdate(user);
             }
