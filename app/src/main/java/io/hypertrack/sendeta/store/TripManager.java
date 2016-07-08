@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -408,13 +409,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             return;
         }
 
-        GeofencingRequest request = this.getGeofencingRequest();
-
-        Context context = MetaApplication.getInstance().getAppContext();
-        Intent geofencingIntent = new Intent(context, GeofenceTransitionsIntentService.class);
-        mGeofencePendingIntent = PendingIntent.getService(context, 0, geofencingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         try {
+            GeofencingRequest request = this.getGeofencingRequest();
+
+            Context context = MetaApplication.getInstance().getAppContext();
+            Intent geofencingIntent = new Intent(context, GeofenceTransitionsIntentService.class);
+            mGeofencePendingIntent = PendingIntent.getService(context, 0, geofencingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
             LocationServices.GeofencingApi.addGeofences(mGoogleAPIClient, request, mGeofencePendingIntent).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(@NonNull Status status) {
@@ -428,8 +429,14 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 }
             });
         } catch (SecurityException exception) {
-            Log.v(TAG, "Exception for geofence");
+            Crashlytics.logException(exception);
+            Log.e(TAG, "Exception for geofence");
             HTLog.e(TAG, "Exception for geofence");
+
+        } catch (Exception exception) {
+            Crashlytics.logException(exception);
+            Log.e(TAG, "Exception while adding geofence request");
+            HTLog.e(TAG, "Exception while adding geofence request");
         }
     }
 

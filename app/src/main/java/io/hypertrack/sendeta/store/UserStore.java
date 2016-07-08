@@ -271,7 +271,7 @@ public class UserStore {
     }
 
     private void addPlace(final MetaPlace place) {
-        if (this.user == null) {
+        if (this.user == null || place == null) {
             return;
         }
 
