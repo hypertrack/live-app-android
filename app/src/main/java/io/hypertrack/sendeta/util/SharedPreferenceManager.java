@@ -2,6 +2,7 @@ package io.hypertrack.sendeta.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -21,6 +22,7 @@ public class SharedPreferenceManager {
     private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
+    private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -95,6 +97,28 @@ public class SharedPreferenceManager {
         String tripJSON = gson.toJson(trip);
 
         editor.putString(CURRENT_TRIP, tripJSON);
+        editor.apply();
+    }
+
+    public static Location getLastKnownLocation() {
+        String lastKnownLocationJSON = getSharedPreferences().getString(LAST_KNOWN_LOCATION, null);
+        if (lastKnownLocationJSON == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Location>(){}.getType();
+
+        return gson.fromJson(lastKnownLocationJSON, type);
+    }
+
+    public static void setLastKnownLocation (Location lastKnownLocation) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String lastKnownLocationJSON = gson.toJson(lastKnownLocation);
+
+        editor.putString(LAST_KNOWN_LOCATION, lastKnownLocationJSON);
         editor.apply();
     }
 }

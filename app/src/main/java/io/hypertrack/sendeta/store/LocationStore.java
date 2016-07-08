@@ -1,8 +1,8 @@
 package io.hypertrack.sendeta.store;
 
 import android.location.Location;
-
 import com.google.android.gms.maps.model.LatLng;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 
 /**
  * Created by ulhas on 24/06/16.
@@ -35,8 +35,13 @@ public class LocationStore {
         return this.currentLocation;
     }
 
+    public Location getLastKnownUserLocation() {
+        return SharedPreferenceManager.getLastKnownLocation();
+    }
+
     public void setCurrentLocation(Location location) {
         this.currentLocation = location;
+        SharedPreferenceManager.setLastKnownLocation(location);
     }
 
 }

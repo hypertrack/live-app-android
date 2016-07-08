@@ -117,7 +117,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     protected LocationRequest mLocationRequest;
     private Marker currentLocationMarker, destinationLocationMarker;
 
-    private Location initialUserLocation = new Location("default");
+    private Location defaultLocation = new Location("default");
 
     private SupportMapFragment mMapFragment;
     private AppBarLayout appBarLayout;
@@ -627,8 +627,28 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         updateMapPadding(false);
 
         // Set Default View for map according to User's LastKnownLocation
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                new LatLng(initialUserLocation.getLatitude(), initialUserLocation.getLongitude()), 14.0f));
+        Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
+        if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
+                && lastKnownCachedLocation.getLongitude() != 0.0) {
+
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(lastKnownCachedLocation.getLatitude(), lastKnownCachedLocation.getLongitude()), 12.0f));
+
+            // Add currentLocationMarker based on User's LastKnownCachedLocation
+            LatLng latLng = new LatLng(lastKnownCachedLocation.getLatitude(),
+                    lastKnownCachedLocation.getLongitude());
+            if (currentLocationMarker == null) {
+                addMarkerToCurrentLocation(latLng);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
+            } else {
+                currentLocationMarker.setPosition(latLng);
+            }
+
+            updateMapView();
+        } else {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), 14.0f));
+        }
 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
@@ -1065,8 +1085,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         mAdapter.setBounds(getBounds(latLng, 10000));
 
-        if (initialUserLocation.getLatitude() == 0.0 || initialUserLocation.getLongitude() == 0.0) {
-            initialUserLocation = location;
+        if (defaultLocation.getLatitude() == 0.0 || defaultLocation.getLongitude() == 0.0) {
+            defaultLocation = location;
             // Remove location updates so that it resets
             if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -1373,6 +1393,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     protected void onResume() {
         super.onResume();
 
+        // Check if Location & Network are Enabled
+        updateInfoMessageView();
+
         // Resume FusedLocation Updates
         resumeLocationUpdates();
 
@@ -1389,7 +1412,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void resumeLocationUpdates() {
-        initialUserLocation = new Location("default");
+        defaultLocation = new Location("default");
 
         // Check if Location is Enabled & Resume LocationUpdates
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
