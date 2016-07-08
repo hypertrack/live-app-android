@@ -42,10 +42,10 @@ public class AnalyticsStore implements AnalyticsInterface {
         FacebookSdk.sdkInitialize(application.getApplicationContext());
         AppEventsLogger.activateApp(application);
 
-        if (BuildConfig.DEBUG) {
-            FacebookSdk.setIsDebugEnabled(true);
-            FacebookSdk.addLoggingBehavior(LoggingBehavior.APP_EVENTS);
-        }
+//        if (BuildConfig.DEBUG) {
+//            FacebookSdk.setIsDebugEnabled(true);
+//            FacebookSdk.addLoggingBehavior(LoggingBehavior.APP_EVENTS);
+//        }
 
         if (analyticsStore == null) {
             analyticsStore = new AnalyticsStore(application);

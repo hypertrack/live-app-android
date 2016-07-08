@@ -31,12 +31,22 @@ public class PermissionUtils {
 
     public static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1009;
 
+    public static boolean checkForPermission(@NonNull final Activity activity,
+                                             @NonNull final String permission) {
+        if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Return true if the permission available, else starts permission request from user
      */
     public static boolean requestPermission(@NonNull final Activity activity,
                                             @NonNull final String permission) {
-        if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED) {
+
+        if (checkForPermission(activity, permission)) {
             return true;
         }
 

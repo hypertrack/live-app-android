@@ -54,6 +54,7 @@
     <string name="resending_verification_code">Resending verification code</string>
 
     <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
+    <string name="fetching_current_location">Please wait while we fetch your current location</string>
     <string name="getting_eta_message">Getting your destination</string>
     <string name="starting_trip_message">Preparing your trip</string>
     <string name="ending_trip_message">Ending your trip</string>

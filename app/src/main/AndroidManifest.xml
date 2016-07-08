@@ -102,6 +102,20 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".util.GpsLocationReceiver">
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".util.NetworkChangeReceiver" >
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
         <!-- Register meta-data here -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"

@@ -3,19 +3,27 @@ package io.hypertrack.sendeta.view;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -33,12 +41,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -88,7 +98,9 @@ import io.hypertrack.sendeta.store.callback.TripManagerListener;
 import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
+import io.hypertrack.sendeta.util.GpsLocationReceiver;
 import io.hypertrack.sendeta.util.KeyboardUtils;
+import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 
@@ -96,17 +108,21 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = "Home";
-    private static final long INTERVAL_TIME = 5000;
-
+    private static final long LOCATION_UPDATE_INTERVAL_TIME = 5000;
+    private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
+    private static final long TIMEOUT_LOCATION_LOADER = 15000;
 
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
-    protected LocationRequest locationRequest;
-    private SupportMapFragment mMapFragment;
+    protected LocationRequest mLocationRequest;
+    private Marker currentLocationMarker, destinationLocationMarker;
 
+    private Location initialUserLocation = new Location("default");
+
+    private SupportMapFragment mMapFragment;
     private AppBarLayout appBarLayout;
-    private TextView destinationText, destinationDescription, mAutocompletePlacesView;
-    private LinearLayout enterDestinationLayout;
+    private TextView destinationText, destinationDescription, mAutocompletePlacesView, infoMessageViewText;
+    private LinearLayout enterDestinationLayout, infoMessageView;
     private FrameLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
@@ -114,15 +130,17 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private HTCircleImageView profileViewProfileImage;
-
-    private ProgressDialog mProgressDialog;
     private ProgressBar mAutocompleteLoader;
-
-    private Marker currentLocationMarker, destinationLocationMarker;
+    private ImageView infoMessageViewIcon;
 
     private PlaceAutocompleteAdapter mAdapter;
 
-    private boolean enterDestinationLayoutClicked = false, tripShared = false;
+    private ProgressDialog mProgressDialog, currentLocationDialog;
+    private boolean enterDestinationLayoutClicked = false, tripShared = false,
+            tripRestoreFinished = false, locationPermissionChecked = false;
+
+    private Handler mHandler;
+    private Runnable mRunnable;
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -321,6 +339,55 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         mAdapter.notifyDataSetChanged();
     }
 
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+
+            Log.d(TAG, "Location Changed");
+
+            // Initiate FusedLocation Updates on Location Changed
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && isLocationEnabled()) {
+                // Remove location updates so that it resets
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
+
+                //change the time of location updates
+                createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+
+                //restart location updates with the new interval
+                resumeLocationUpdates();
+            }
+        }
+    };
+
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+
+    private void updateInfoMessageView() {
+        if (!isLocationEnabled()) {
+            infoMessageView.setVisibility(View.VISIBLE);
+
+            if (!isInternetEnabled()) {
+                infoMessageViewText.setText("Location & Internet OFF");
+            } else {
+                infoMessageViewText.setText("Location OFF");
+            }
+        } else {
+            infoMessageView.setVisibility(View.VISIBLE);
+
+            if (!isInternetEnabled()) {
+                infoMessageViewText.setText("Internet OFF");
+            } else {
+                // Both Location & Network Enabled, Hide the Info Message View
+                infoMessageView.setVisibility(View.GONE);
+            }
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -342,13 +409,14 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         checkIfUserIsOnBoard();
 
         initGoogleClient();
-        createLocationRequest();
+        createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
         setupEnterDestinationView();
         setupAutoCompleteView();
         setupShareButton();
         setupSendETAButton();
         setupNavigateButton();
         setupFavoriteButton();
+        setupInfoMessageView();
         initCustomMarkerView();
 
         // Check & Prompt User if Internet is Not Connected
@@ -376,19 +444,22 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void initGoogleClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, 0 /* clientId */, this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .build();
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .enableAutoManage(this, 0 /* clientId */, this)
+                    .addApi(Places.GEO_DATA_API)
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .build();
+        }
+        mGoogleApiClient.connect();
     }
 
-    private void createLocationRequest() {
-        locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        locationRequest.setInterval(INTERVAL_TIME);
-        locationRequest.setFastestInterval(INTERVAL_TIME);
+    private void createLocationRequest(long locationUpdateIntervalTime) {
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(locationUpdateIntervalTime)
+                .setFastestInterval(locationUpdateIntervalTime);
     }
 
     private void setupEnterDestinationView() {
@@ -472,6 +543,12 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         favoriteButton.setVisibility(View.GONE);
     }
 
+    private void setupInfoMessageView() {
+        infoMessageView = (LinearLayout) findViewById(R.id.home_info_message_view);
+        infoMessageViewIcon = (ImageView) findViewById(R.id.home_info_message_icon);
+        infoMessageViewText = (TextView) findViewById(R.id.home_info_message_text);
+    }
+
     private void initCustomMarkerView() {
         // Initialize Custom Marker (Hero Marker) UI View
         customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_hero_marker, null);
@@ -547,11 +624,20 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         updateMapPadding(false);
 
+        // Set Default View for map according to User's LastKnownLocation
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                new LatLng(initialUserLocation.getLatitude(), initialUserLocation.getLongitude()), 14.0f));
+
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
                 restoreTripStateIfNeeded();
-                checkForLocationPermission();
+                tripRestoreFinished = true;
+
+                if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && !locationPermissionChecked) {
+                    locationPermissionChecked = true;
+                    checkForLocationPermission();
+                }
             }
         });
     }
@@ -685,7 +771,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
      * Method to update State Variables & UI to reflect Trip Started
      */
     private void onTripStart() {
-        // TODO: 29/06/16 Add sendETAButton visibility to VISIBLE?
         sendETAButton.setText(getString(R.string.action_end_trip));
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
@@ -810,14 +895,89 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     @Override
     public void onConnected(Bundle bundle) {
         Log.v(TAG, "mGoogleApiClient is connected");
+
+        // CheckForLocationPermission if not already asked
+        if (tripRestoreFinished && !locationPermissionChecked) {
+            locationPermissionChecked = true;
+            checkForLocationPermission();
+        }
+
+        // Initiate location updates if permission granted
+        if (PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
+                isLocationEnabled()) {
+            requestForLocationUpdates();
+        }
+    }
+
+    private boolean isLocationEnabled() {
+        try {
+            ContentResolver contentResolver = this.getContentResolver();
+            // Find out what the settings say about which providers are enabled
+            int mode = Settings.Secure.getInt(
+                    contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
+            if (mode == Settings.Secure.LOCATION_MODE_OFF) {
+                // Location is turned OFF!
+                return false;
+            } else {
+                // Location is turned ON!
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    private boolean isInternetEnabled() {
+        try {
+            ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+            return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private void requestForLocationUpdates() {
+
+        if (currentLocationDialog == null) {
+            // Show currentLocationDialog while Location is being fetched
+            currentLocationDialog = new ProgressDialog(this);
+            currentLocationDialog.setMessage(getString(R.string.fetching_current_location));
+            currentLocationDialog.setCancelable(false);
+        }
+
+        if (currentLocationDialog != null && currentLocationDialog.isShowing()) {
+            currentLocationDialog.show();
+        }
+
+        // Set Timeout Handler to reset currentLocationDialog
+        mRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (currentLocationDialog != null)
+                    currentLocationDialog.dismiss();
+            }
+        };
+        mHandler = new Handler();
+        mHandler.postDelayed(mRunnable, TIMEOUT_LOCATION_LOADER);
+
+        startLocationPolling();
+    }
+
+    private void startLocationPolling() {
         try {
             LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient, locationRequest, this);
+                    mGoogleApiClient, mLocationRequest, this);
         } catch (SecurityException exception) {
-            Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
+            Crashlytics.logException(exception);
+            if (currentLocationDialog != null) {
+                currentLocationDialog.dismiss();
+            }
         }
     }
 
@@ -828,7 +988,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private void checkIfLocationIsEnabled() {
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest).setAlwaysShow(true);
+                .addLocationRequest(mLocationRequest).setAlwaysShow(true);
         PendingResult<LocationSettingsResult> pendingResult =
                 LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
         pendingResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
@@ -874,19 +1034,47 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             return;
         }
 
-        LocationStore.sharedStore().setCurrentLocation(location);
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        Log.d(TAG, "Location: " + latLng.latitude + ", " + latLng.longitude);
 
-        if (currentLocationMarker == null) {
-            addMarkerToCurrentLocation(latLng);
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
-        } else {
-            currentLocationMarker.setPosition(latLng);
+        if (mMap != null) {
+            if (currentLocationMarker == null) {
+                addMarkerToCurrentLocation(latLng);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
+            } else {
+                currentLocationMarker.setPosition(latLng);
+            }
+
+            updateMapView();
         }
 
-        updateMapView();
+        //Dismiss currentLocationDialog on successful Location Fetch
+        if (currentLocationDialog != null && currentLocationDialog.isShowing())
+            currentLocationDialog.dismiss();
+
+        // Remove handler to dismiss currentLocationDialog
+        if (mHandler != null && mRunnable != null) {
+            mHandler.removeCallbacks(mRunnable);
+            mHandler = null;
+            mRunnable = null;
+        }
 
         mAdapter.setBounds(getBounds(latLng, 10000));
+
+        if (initialUserLocation.getLatitude() == 0.0 || initialUserLocation.getLongitude() == 0.0) {
+            initialUserLocation = location;
+            // Remove location updates so that it resets
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+            // Change the time of location updates
+            createLocationRequest(LOCATION_UPDATE_INTERVAL_TIME);
+
+            // Restart location updates with the new interval
+            startLocationPolling();
+        }
+
+        LocationStore.sharedStore().setCurrentLocation(location);
     }
 
     private void addMarkerToCurrentLocation(LatLng latLng) {
@@ -1148,9 +1336,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 case Activity.RESULT_CANCELED:
 
                     Log.i(TAG, "User chose not to make required location settings changes.");
-
                     // Location Service Enable Request denied, boo! Fire LocationDenied event
-
                     break;
             }
 
@@ -1165,14 +1351,48 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Unregister BroadcastReceiver for Location_Change & Network_Change
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
+
+        // Resume FusedLocation Updates
+        resumeLocationUpdates();
+
         updateFavoritesButton();
         updateCurrentLocationMarker();
+
+        // Re-register BroadcastReceiver for Location_Change & Network_Change
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
+                new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
+                new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
 
         AppEventsLogger.activateApp(getApplication());
     }
 
+    private void resumeLocationUpdates() {
+        initialUserLocation = new Location("default");
+
+        // Check if Location is Enabled & Resume LocationUpdates
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            if (isLocationEnabled()) {
+                requestForLocationUpdates();
+            }
+        } else {
+            initGoogleClient();
+        }
+    }
 
     @Override
     public void onConnectionSuspended(int i) {
