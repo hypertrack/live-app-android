@@ -659,12 +659,14 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void updateMapPadding(boolean activeTrip) {
-        int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
-        int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-        int right = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_side_padding) : getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-        int bottom = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_bottom_padding) : getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+        if (mMap != null) {
+            int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+            int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+            int right = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_side_padding) : getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+            int bottom = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_bottom_padding) : getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
 
-        mMap.setPadding(left, top, right, bottom);
+            mMap.setPadding(left, top, right, bottom);
+        }
     }
 
     private void restoreTripStateIfNeeded() {
