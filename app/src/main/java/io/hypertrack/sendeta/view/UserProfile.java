@@ -115,7 +115,9 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
         UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
-                mProgressDialog.dismiss();
+                if (!UserProfile.this.isFinishing() && mProgressDialog != null)
+                    mProgressDialog.dismiss();
+
                 updateFavoritesAdapter();
             }
 
