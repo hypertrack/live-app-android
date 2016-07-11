@@ -1,7 +1,6 @@
 package io.hypertrack.sendeta.util;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -15,6 +14,7 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.Locale;
 
 public class PhoneUtils {
 
@@ -38,6 +38,15 @@ public class PhoneUtils {
 
         if (code != null) {
             return code.toUpperCase();
+        }
+
+        return null;
+    }
+
+    public static String getCountryName(String isoCode) {
+        if (!TextUtils.isEmpty(isoCode)) {
+            Locale locale = new Locale(Locale.getDefault().getDisplayLanguage(), isoCode);
+            return locale.getDisplayCountry().trim();
         }
 
         return null;

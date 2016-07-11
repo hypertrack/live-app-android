@@ -134,6 +134,10 @@
         <service
             android:name=".service.FetchAddressIntentService"
             android:exported="false" />
+
+        <service
+            android:name=".service.FetchLocationIntentService"
+            android:exported="false" />
     </application>
 
 </manifest>

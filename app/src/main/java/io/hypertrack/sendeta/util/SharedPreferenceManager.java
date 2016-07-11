@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.Trip;
 
 /**
@@ -22,6 +23,7 @@ public class SharedPreferenceManager {
     private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
+    private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
 
     private static SharedPreferences getSharedPreferences() {
@@ -97,6 +99,29 @@ public class SharedPreferenceManager {
         String tripJSON = gson.toJson(trip);
 
         editor.putString(CURRENT_TRIP, tripJSON);
+        editor.apply();
+    }
+
+    public static OnboardingUser getOnboardingUser() {
+        String userJSON = getSharedPreferences().getString(ONBOARDED_USER, null);
+
+        if(userJSON == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<OnboardingUser>(){}.getType();
+
+        return gson.fromJson(userJSON, type);
+    }
+
+    public static void setOnboardingUser(OnboardingUser user) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String userJSON = gson.toJson(user);
+
+        editor.putString(ONBOARDED_USER, userJSON);
         editor.apply();
     }
 

@@ -36,7 +36,7 @@ public class LocationStore {
     }
 
     public Location getLastKnownUserLocation() {
-        return SharedPreferenceManager.getLastKnownLocation();
+        return SharedPreferenceManager.getLastKnownLocation() != null ? SharedPreferenceManager.getLastKnownLocation() : new Location("default");
     }
 
     public void setCurrentLocation(Location location) {

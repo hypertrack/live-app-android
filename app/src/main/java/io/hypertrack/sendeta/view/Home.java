@@ -1,6 +1,7 @@
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -19,6 +20,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
@@ -28,6 +30,7 @@ import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -77,8 +80,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
@@ -90,8 +91,10 @@ import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.service.FetchLocationIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
+import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.TripManager;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.store.callback.TripETACallback;
@@ -105,6 +108,7 @@ import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
+import io.hypertrack.sendeta.util.PhoneUtils;
 
 public class Home extends BaseActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
@@ -140,14 +144,13 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private MetaPlace restoreTripMetaPlace;
 
     private ProgressDialog mProgressDialog, currentLocationDialog;
-    private boolean enterDestinationLayoutClicked = false, tripShared = false, shouldRestoreTrip = false,
-            locationPermissionChecked = false, tripRestoreFinished = false, animateDelayForRestoredTrip = false;
+    private boolean enterDestinationLayoutClicked = false, shouldRestoreTrip = false, locationPermissionChecked = false,
+            tripRestoreFinished = false, animateDelayForRestoredTrip = false, locationFrequencyIncreased = true;
 
     private Handler mHandler;
     private Runnable mRunnable;
 
-    private Timer timer;
-    private TimerTask markerBounceTimerTask;
+    private float zoomLevel = 1.0f;
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -363,6 +366,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
                 //restart location updates with the new interval
                 resumeLocationUpdates();
+
+                locationFrequencyIncreased = true;
             }
         }
     };
@@ -413,9 +418,17 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         // Initialize UI Views
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
 
+        // Check if User is Signed-in
         checkIfUserIsOnBoard();
 
+        // Get Default User Location from his CountryCode
+        // SKIP: if Location Permission is Granted and Location is Enabled
+        if (!isLocationEnabled() || !PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            geocodeUserCountryName();
+        }
+
         initGoogleClient();
+
         createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
         setupEnterDestinationView();
         setupAutoCompleteView();
@@ -440,6 +453,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         if (!isUserOnboard) {
             startActivity(new Intent(this, Register.class));
             finish();
+            return;
         } else {
             UserStore.sharedStore.initializeUser();
         }
@@ -455,6 +469,18 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                     .build();
         }
         mGoogleApiClient.connect();
+    }
+
+    private void geocodeUserCountryName() {
+        OnboardingManager onboardingManager = OnboardingManager.sharedManager();
+        String countryName = PhoneUtils.getCountryName(onboardingManager.getUser().getCountryCode());
+
+        if (!TextUtils.isEmpty(countryName)) {
+            Intent intent = new Intent(this, FetchLocationIntentService.class);
+            intent.putExtra(FetchLocationIntentService.RECEIVER, new AddressResultReceiver(new Handler()));
+            intent.putExtra(FetchLocationIntentService.ADDRESS_DATA_EXTRA, countryName);
+            startService(intent);
+        }
     }
 
     private void createLocationRequest(long locationUpdateIntervalTime) {
@@ -502,7 +528,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             public void onClick(View v) {
                 share();
 
-                AnalyticsStore.getLogger().tappedShareIcon(tripShared);
+                // TripShared Flag is always false because couldn't find a way of knowing
+                // whether the user successfully shared the trip details or not
+                AnalyticsStore.getLogger().tappedShareIcon(false);
             }
         });
     }
@@ -662,6 +690,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             // Add currentLocationMarker based on User's LastKnownCachedLocation
             LatLng latLng = new LatLng(lastKnownCachedLocation.getLatitude(),
                     lastKnownCachedLocation.getLongitude());
+
             if (currentLocationMarker == null) {
                 addMarkerToCurrentLocation(latLng);
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
@@ -670,9 +699,12 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             }
 
             updateMapView();
+
         } else {
+            // Else Set Default View for map according to either User's Default Location
+            // (If Country Info was available) or (0.0, 0.0)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), 14.0f));
+                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
         }
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && !locationPermissionChecked) {
@@ -1086,11 +1118,16 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         mAdapter.setBounds(getBounds(latLng, 10000));
 
-        if (defaultLocation.getLatitude() == 0.0 || defaultLocation.getLongitude() == 0.0) {
-            defaultLocation = location;
+        // Check if Location Frequency was decreased to (INITIAL_LOCATION_UPDATE_INTERVAL_TIME)
+        // Remove the existing FusedLocationUpdates, and resume it with
+        // default Polling Frequency (LOCATION_UPDATE_INTERVAL_TIME)
+        if (locationFrequencyIncreased) {
+            locationFrequencyIncreased = false;
+
             // Remove location updates so that it resets
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            }
 
             // Change the time of location updates
             createLocationRequest(LOCATION_UPDATE_INTERVAL_TIME);
@@ -1333,6 +1370,37 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         initCustomMarkerView();
 
         addMarkerToCurrentLocation(position);
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
+                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
+                defaultLocation.setLatitude(latLng.latitude);
+                defaultLocation.setLongitude(latLng.longitude);
+                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
+
+                if (mMap != null) {
+                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
+                        zoomLevel = 4.0f;
+
+                    // Check if any Location Data is available, meaning Country zoom level need not be used
+                    Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
+                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
+                            && lastKnownCachedLocation.getLongitude() != 0.0) {
+                        return;
+                    }
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+                }
+            }
+        }
     }
 
     @Override
