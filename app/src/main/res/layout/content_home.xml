@@ -40,7 +40,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/toolbar"
-                android:background="#D4D4D4"
+                android:background="#d89d3b"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="@dimen/padding_medium"
@@ -57,10 +57,10 @@
                     android:id="@+id/home.info_message_text"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:background="#D4D4D4"
+                    android:background="@null"
                     android:layout_weight="1"
-                    android:text="Location OFF"
-                    android:textColor="@color/text_error"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@android:color/white"
                     android:textSize="@dimen/text_base" />
             </LinearLayout>
 

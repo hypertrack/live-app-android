@@ -77,6 +77,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
@@ -135,9 +137,11 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private PlaceAutocompleteAdapter mAdapter;
 
+    private MetaPlace restoreTripMetaPlace;
+
     private ProgressDialog mProgressDialog, currentLocationDialog;
-    private boolean enterDestinationLayoutClicked = false, tripShared = false,
-            tripRestoreFinished = false, locationPermissionChecked = false;
+    private boolean enterDestinationLayoutClicked = false, tripShared = false, shouldRestoreTrip = false,
+            locationPermissionChecked = false, tripRestoreFinished = false, animateDelayForRestoredTrip = false;
 
     private Handler mHandler;
     private Runnable mRunnable;
@@ -287,9 +291,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             }
 
             // Check if Location was enabled & if valid location was received
-            if (currentLocationMarker == null ||
-                    new LatLng(0.0, 0.0).equals(currentLocationMarker.getPosition())) {
-
+            if (!isLocationEnabled()) {
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
                     checkIfLocationIsEnabled();
 
@@ -374,15 +376,15 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             infoMessageView.setVisibility(View.VISIBLE);
 
             if (!isInternetEnabled()) {
-                infoMessageViewText.setText("Location & Internet OFF");
+                infoMessageViewText.setText(R.string.internet_location_both_off_info_message);
             } else {
-                infoMessageViewText.setText("Location OFF");
+                infoMessageViewText.setText(R.string.location_off_info_message);
             }
         } else {
             infoMessageView.setVisibility(View.VISIBLE);
 
             if (!isInternetEnabled()) {
-                infoMessageViewText.setText("Internet OFF");
+                infoMessageViewText.setText(R.string.internet_off_info_message);
             } else {
                 // Both Location & Network Enabled, Hide the Info Message View
                 infoMessageView.setVisibility(View.GONE);
@@ -426,13 +428,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
-        // Check if current Activity is finishing
-        if (!this.isFinishing()) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.setMessage(getString(R.string.fetching_existing_trip));
-            mProgressDialog.show();
-        }
+        // Check if there is any currently running trip to be restored
+        restoreTripStateIfNeeded();
     }
 
     private void checkIfUserIsOnBoard() {
@@ -571,6 +568,31 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         profileViewProfileImage.setImageBitmap(bitmap);
     }
 
+    private void restoreTripStateIfNeeded() {
+        final TripManager tripManager = TripManager.getSharedManager();
+
+        //Check if there is any existing trip to be restored
+        if (tripManager.shouldRestoreState()) {
+            Log.v(TAG, "Trip is active");
+            HTLog.i(TAG, "Trip restored successfully.");
+
+            restoreTripMetaPlace = tripManager.getPlace();
+
+            destinationText.setGravity(Gravity.LEFT);
+            destinationText.setText(restoreTripMetaPlace.getName());
+
+            destinationDescription.setText(restoreTripMetaPlace.getAddress());
+            destinationDescription.setVisibility(View.VISIBLE);
+
+            shouldRestoreTrip = true;
+
+        } else {
+            Log.v(TAG, "Trip is not active");
+            HTLog.e(TAG, "Trip restore failed.");
+            shouldRestoreTrip = false;
+        }
+    }
+
     public void onEnterDestinationBackClick(View view) {
         enterDestinationLayoutClicked = false;
 
@@ -650,15 +672,19 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                     new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), 14.0f));
         }
 
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && !locationPermissionChecked) {
+            locationPermissionChecked = true;
+            checkForLocationPermission();
+        }
+
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
-                restoreTripStateIfNeeded();
-                tripRestoreFinished = true;
-
-                if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && !locationPermissionChecked) {
-                    locationPermissionChecked = true;
-                    checkForLocationPermission();
+                // Check if Trip has to be Restored & Update Map for that trip
+                if (shouldRestoreTrip && restoreTripMetaPlace != null) {
+                    updateViewForETASuccess(-1, restoreTripMetaPlace.getLatLng());
+                    tripRestoreFinished = true;
+                    onTripStart();
                 }
             }
         });
@@ -688,36 +714,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             int bottom = activeTrip ? getResources().getDimensionPixelSize(R.dimen.map_active_trip_bottom_padding) : getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
 
             mMap.setPadding(left, top, right, bottom);
-        }
-    }
-
-    private void restoreTripStateIfNeeded() {
-        final TripManager tripManager = TripManager.getSharedManager();
-
-        //Check if there is any existing trip to be restored
-        if (tripManager.shouldRestoreState()) {
-            Log.v(TAG, "Trip is active");
-            HTLog.i(TAG, "Trip restored successfully.");
-
-            if (mProgressDialog != null)
-                mProgressDialog.dismiss();
-
-            MetaPlace place = tripManager.getPlace();
-            updateViewForETASuccess(0, place.getLatLng());
-            destinationText.setGravity(Gravity.LEFT);
-            destinationText.setText(place.getName());
-
-            destinationDescription.setText(place.getAddress());
-            destinationDescription.setVisibility(View.VISIBLE);
-
-            onTripStart();
-
-        } else {
-            Log.v(TAG, "Trip is not active");
-            HTLog.e(TAG, "Trip restore failed.");
-
-            if (mProgressDialog != null)
-                mProgressDialog.dismiss();
         }
     }
 
@@ -900,7 +896,8 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
     private void updateTextViewForMinutes(TextView etaTimeTextView, TextView etaTimeTypeTextView, int etaInMinutes) {
         if (etaInMinutes == 0) {
-            etaTimeTextView.setText("--");
+            etaTimeTextView.setText("");
+            etaTimeTypeTextView.setText("");
         } else {
             if (etaInMinutes <= Constants.MINUTES_ON_ETA_MARKER_LIMIT) {
                 etaTimeTextView.setText(String.valueOf(etaInMinutes));
@@ -921,7 +918,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         Log.v(TAG, "mGoogleApiClient is connected");
 
         // CheckForLocationPermission if not already asked
-        if (tripRestoreFinished && !locationPermissionChecked) {
+        if (!locationPermissionChecked) {
             locationPermissionChecked = true;
             checkForLocationPermission();
         }
@@ -1045,6 +1042,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                         // Location settings are not satisfied. However, we have no way
                         // to fix the settings so we won't show the dialog.
                         // This happens when phone is in Airplane/Flight Mode
+                        Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
                         break;
                 }
 
@@ -1171,7 +1169,12 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
         }
 
-        mMap.animateCamera(cameraUpdate);
+        if (tripRestoreFinished && !animateDelayForRestoredTrip) {
+            mMap.animateCamera(cameraUpdate, 2000, null);
+            animateDelayForRestoredTrip = true;
+        } else {
+            mMap.animateCamera(cameraUpdate);
+        }
     }
 
     @Override

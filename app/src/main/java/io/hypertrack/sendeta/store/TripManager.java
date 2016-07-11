@@ -122,7 +122,9 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
             // Restore the current trip with locally cached data
             // Start Refreshing the trip without any delay
-            onTripStart(0);
+
+            // Added a delay to initiate RestoreTripStart Call (to account for delay in onMapLoadedCallback)
+            onTripStart(4000);
             return true;
 
         } else {
@@ -134,9 +136,11 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     final Runnable refreshTask = new Runnable() {
         @Override
         public void run() {
+
             transmitter.refreshTrip(new HTTripStatusCallback() {
                 @Override
                 public void onSuccess(HTTrip htTrip) {
+
                     if (htTrip != null && htTrip.getLive() != null && !htTrip.getLive()) {
                         if (tripEndedListener != null) {
                             tripEndedListener.OnCallback();
@@ -152,7 +156,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
                 @Override
                 public void onError(Exception e) {
-
                 }
             });
 

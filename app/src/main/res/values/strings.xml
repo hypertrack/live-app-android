@@ -66,7 +66,7 @@
 
     <!-- Error Strings -->
     <string name="network_issue">Bad connection. Try again later</string>
-    <string name="invalid_current_location">Unable to get location. Please check permissions in app settings</string>
+    <string name="invalid_current_location">Unable to get location. Please check Location settings</string>
 
     <string name="invalid_phone_number">Not a valid phone number</string>
     <string name="phone_no_registration_failed">We could not process your request at this moment. Please try again</string>
@@ -92,6 +92,10 @@
     <string name="editing_already_saved_place_error">The address you are trying to add already exists in your favorites</string>
 
     <string name="deleting_favorite_place_failed">Error deleting this favorite. Please try again</string>
+    
+    <string name="location_off_info_message">Location OFF</string>
+    <string name="internet_off_info_message">Internet OFF</string>
+    <string name="internet_location_both_off_info_message">Internet &amp; Location OFF</string>
 
     <!-- Permission Error Strings -->
     <string name="permission_declined_default_msg">Permission was denied</string>
