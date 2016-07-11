@@ -146,6 +146,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     private Handler mHandler;
     private Runnable mRunnable;
 
+    private Timer timer;
+    private TimerTask markerBounceTimerTask;
+
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
@@ -682,7 +685,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             public void onMapLoaded() {
                 // Check if Trip has to be Restored & Update Map for that trip
                 if (shouldRestoreTrip && restoreTripMetaPlace != null) {
-                    updateViewForETASuccess(-1, restoreTripMetaPlace.getLatLng());
+                    updateViewForETASuccess(0, restoreTripMetaPlace.getLatLng());
                     tripRestoreFinished = true;
                     onTripStart();
                 }
