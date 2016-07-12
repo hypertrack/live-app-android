@@ -110,7 +110,6 @@ public class Profile extends BaseActivity implements ProfileView {
             // Show Rationale & Request for READ_EXTERNAL_STORAGE permission
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
-                        getString(R.string.read_external_storage_permission_title),
                         getString(R.string.read_external_storage_permission_msg));
             } else {
                 PermissionUtils.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -280,6 +279,9 @@ public class Profile extends BaseActivity implements ProfileView {
             case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     onProfileImageViewClicked(null);
+                } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
+                            getString(R.string.read_external_storage_permission_never_allow));
                 }
                 break;
         }

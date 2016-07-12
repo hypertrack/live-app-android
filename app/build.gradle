@@ -122,7 +122,7 @@ dependencies {
     debugCompile('io.hypertrack:transmitter:0.4.13:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:0.4.13:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:0.4.14:release@aar') {
         transitive = true;
     }
     debugCompile('io.hypertrack:consumer:0.4.13:debug@aar') {

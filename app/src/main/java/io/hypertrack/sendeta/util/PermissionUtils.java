@@ -9,10 +9,8 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.view.View;
 
 import io.hypertrack.sendeta.R;
 
@@ -64,7 +62,7 @@ public class PermissionUtils {
     private static int getPermissionDeclinedMessage(final String permission) {
         switch (permission) {
             case Manifest.permission.ACCESS_FINE_LOCATION:
-                return R.string.permission_denied_location;
+                return R.string.location_permission_never_allow;
             default:
                 return R.string.permission_declined_default_msg;
         }
@@ -94,6 +92,21 @@ public class PermissionUtils {
     public static void requestCallPermissions(Activity activity) {
         ActivityCompat.requestPermissions(activity,
                 new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
+    }
+
+    public static AlertDialog showRationaleMessageAsDialog(@NonNull final Activity activity,
+                                                           @NonNull final String permission,
+                                                           @NonNull final String message) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setMessage(message);
+        builder.setPositiveButton(activity.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                PermissionUtils.requestPermission(activity, permission);
+            }
+        });
+        return builder.show();
     }
 
     public static AlertDialog showRationaleMessageAsDialog(@NonNull final Activity activity,
@@ -128,12 +141,10 @@ public class PermissionUtils {
      * @return snackbar snackbar instance which can be useful to set callbacks,if needed
      */
     public static AlertDialog.Builder showPermissionDeclineDialog(@NonNull final Activity activity,
-                                                       @NonNull final String permission,
-                                                       @NonNull final String title,
-                                                       @NonNull final String message) {
+                                                                  @NonNull final String permission,
+                                                                  @NonNull final String message) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(title);
         builder.setMessage(message);
         builder.setPositiveButton(activity.getString(R.string.action_settings), new DialogInterface.OnClickListener() {
 
@@ -159,25 +170,29 @@ public class PermissionUtils {
      *                   helps in deciding the message string for Snackbar
      * @return snackbar snackbar instance which can be useful to set callbacks,if needed
      */
-    public static Snackbar showPermissionDeclineMessage(@NonNull final Activity activity,
-                                                        @NonNull final String permission) {
-        Snackbar snackbar = Snackbar
-                .make(activity.findViewById(android.R.id.content), getPermissionDeclinedMessage(
-                        permission), Snackbar.LENGTH_LONG);
+    public static AlertDialog.Builder showPermissionDeclineDialog(@NonNull final Activity activity,
+                                                       @NonNull final String permission,
+                                                       @NonNull final String title,
+                                                       @NonNull final String message) {
 
-        snackbar.setAction(R.string.action_settings, new View.OnClickListener() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(title);
+        builder.setMessage(message);
+        builder.setPositiveButton(activity.getString(R.string.action_settings), new DialogInterface.OnClickListener() {
+
             @Override
-            public void onClick(final View v) {
+            public void onClick(DialogInterface dialog, int which) {
                 openSettings(activity);
             }
         });
-        snackbar.setActionTextColor(ContextCompat.getColor(activity, android.R.color.white)).show();
-        snackbar.setCallback(new Snackbar.Callback() {
+        builder.setNegativeButton(activity.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
             @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
             }
         });
-        return snackbar;
+        builder.show();
+
+        return builder;
     }
 }

@@ -288,7 +288,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 // Show Rationale & Request for LOCATION permission
                 if (ActivityCompat.shouldShowRequestPermissionRationale(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     PermissionUtils.showRationaleMessageAsDialog(Home.this, Manifest.permission.ACCESS_FINE_LOCATION,
-                            getString(R.string.location_permission_rationale_title), getString(R.string.location_permission_rationale_msg));
+                            getString(R.string.location_permission_rationale_msg));
                 } else {
                     PermissionUtils.requestPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION);
                 }
@@ -739,7 +739,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             // Show Rationale & Request for LOCATION permission
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
-                        getString(R.string.location_permission_rationale_title),
                         getString(R.string.location_permission_rationale_msg));
             } else {
                 PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -1420,8 +1419,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
                 } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
-                            getString(R.string.location_permission_rationale_title),
-                            getString(R.string.permission_denied_location));
+                            getString(R.string.location_permission_never_allow));
                 }
                 break;
         }

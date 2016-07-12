@@ -100,13 +100,11 @@
     <!-- Permission Error Strings -->
     <string name="permission_declined_default_msg">Permission was denied</string>
 
-    <string name="permission_denied_location">To use this app, you need to enable location permission. Go to settings and change the permission</string>
-    <string name="permission_denied_read_external_storage">Can\'t read device\'s storage. Permission was denied</string>
+    <string name="location_permission_rationale_msg">To let your friends and family track you live, you need to allow SendETA to access this device’s location</string>
+    <string name="location_permission_never_allow">To let your friends and family track you live, you need to allow SendETA to access this device’s location.
+        \n\nGo to Settings, tap on Permissions, and turn on Location.</string>
 
-    <string name="location_permission_rationale_title">Location permission required</string>
-    <string name="location_permission_rationale_msg">Location permission denied. We need to know your current location to calculate ETAs</string>
-    <string name="location_permission_grant_after_never_allow">Location permission is required for better experience</string>
-
-    <string name="read_external_storage_permission_title">Permission required to read external storage</string>
-    <string name="read_external_storage_permission_msg">We need permission to read your storage in order for you to choose your Profile Picture</string>
+    <string name="read_external_storage_permission_msg">To upload and change a profile photo, you need to allow SendETA to access photos on your device</string>
+    <string name="read_external_storage_permission_never_allow">To upload and change a profile photo, you need to allow SendETA to access photos on your device.
+        \n\nGo to Settings, tap on Permissions, and turn on Storage.</string>
 </resources>
