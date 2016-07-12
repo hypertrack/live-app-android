@@ -1,10 +1,14 @@
 package io.hypertrack.sendeta.view;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -24,6 +28,7 @@ import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
+import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
@@ -134,7 +139,20 @@ public class EditProfile extends BaseActivity {
     }
 
     public void onProfileImageViewClicked(View view) {
-        EasyImage.openChooser(EditProfile.this, "Please select", true);
+        // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            EasyImage.openChooser(EditProfile.this, "Please select", true);
+
+        } else {
+            // Show Rationale & Request for READ_EXTERNAL_STORAGE permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        getString(R.string.read_external_storage_permission_title),
+                        getString(R.string.read_external_storage_permission_msg));
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+        }
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
@@ -152,10 +170,12 @@ public class EditProfile extends BaseActivity {
     }
 
     private void updateUserInfo() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Updating profile");
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
+        if (!this.isFinishing()) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Updating profile");
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+        }
 
         String firstName = mFirstNameView.getText().toString();
         if (!TextUtils.isEmpty(firstName)) {
@@ -181,7 +201,7 @@ public class EditProfile extends BaseActivity {
                             // Process Image Upload Success for Analytics
                             processImageDataForAnalytics(true, null, oldProfileImage, imageUploadSource);
 
-                            if (EditProfile.this.isFinishing() && mProgressDialog != null)
+                            if (!EditProfile.this.isFinishing() && mProgressDialog != null)
                                 mProgressDialog.dismiss();
 
                             Toast.makeText(EditProfile.this, "Profile Pic uploaded successfully",
@@ -197,7 +217,7 @@ public class EditProfile extends BaseActivity {
                             processImageDataForAnalytics(false, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED,
                                     oldProfileImage, imageUploadSource);
 
-                            if (EditProfile.this.isFinishing() && mProgressDialog != null)
+                            if (!EditProfile.this.isFinishing() && mProgressDialog != null)
                                 mProgressDialog.dismiss();
                             
                             Toast.makeText(EditProfile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED,
@@ -209,9 +229,8 @@ public class EditProfile extends BaseActivity {
 
                     Toast.makeText(EditProfile.this, "The image you are trying to save is same as the existing one.",
                             Toast.LENGTH_SHORT).show();
-                    mProgressDialog.dismiss();
-//                    broadcastResultIntent();
-//                    finish();
+                    if (!EditProfile.this.isFinishing() && mProgressDialog != null)
+                        mProgressDialog.dismiss();
                 }
             }
 
@@ -292,6 +311,18 @@ public class EditProfile extends BaseActivity {
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    onProfileImageViewClicked(null);
+                    //Toast.makeText(this,"Permission Granted, Now you can access location data.",Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 
     @Override
