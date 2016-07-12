@@ -543,10 +543,16 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!TripManager.getSharedManager().isTripActive()) {
-                    startTrip();
+                //Check if Location Permission has been granted & Location has been enabled
+                if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        && isLocationEnabled()) {
+                    if (!TripManager.getSharedManager().isTripActive()) {
+                        startTrip();
+                    } else {
+                        endTrip();
+                    }
                 } else {
-                    endTrip();
+                    checkForLocationPermission();
                 }
             }
         });
