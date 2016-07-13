@@ -55,10 +55,10 @@
 
                 <TextView
                     android:id="@+id/home.info_message_text"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
-                    android:layout_weight="1"
+                    android:gravity="center"
                     android:fontFamily="sans-serif-medium"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/text_base" />

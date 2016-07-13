@@ -384,7 +384,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             infoMessageView.setVisibility(View.VISIBLE);
 
             if (!isInternetEnabled()) {
-                infoMessageViewText.setText(R.string.internet_location_both_off_info_message);
+                infoMessageViewText.setText(R.string.location_off_info_message);
             } else {
                 infoMessageViewText.setText(R.string.location_off_info_message);
             }
@@ -935,9 +935,9 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void updateTextViewForMinutes(TextView etaTimeTextView, TextView etaTimeTypeTextView, int etaInMinutes) {
-        if (etaInMinutes == 0) {
-            etaTimeTextView.setText("");
-            etaTimeTypeTextView.setText("");
+        if (etaInMinutes <= 0) {
+            etaTimeTextView.setText("0");
+            etaTimeTypeTextView.setText("min");
         } else {
             if (etaInMinutes <= Constants.MINUTES_ON_ETA_MARKER_LIMIT) {
                 etaTimeTextView.setText(String.valueOf(etaInMinutes));

@@ -51,11 +51,11 @@ android {
         def versionMajor = 1
         def versionMinor = 0
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
-        def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
+//        def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
         versionProps['VERSION_PATCH'] = versionPatch.toString()
-        versionProps['VERSION_BUILD'] = versionBuild.toString()
+//        versionProps['VERSION_BUILD'] = versionBuild.toString()
         versionProps['VERSION_NUMBER'] = versionNumber.toString()
         versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
         versionProps.store(versionPropsFile.newWriter(), null)

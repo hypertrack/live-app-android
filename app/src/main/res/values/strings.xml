@@ -93,8 +93,8 @@
 
     <string name="deleting_favorite_place_failed">Error deleting this favorite. Please try again</string>
     
-    <string name="location_off_info_message">Location OFF</string>
-    <string name="internet_off_info_message">Internet OFF</string>
+    <string name="location_off_info_message">Please turn on your location</string>
+    <string name="internet_off_info_message">Unable to connect to internet</string>
     <string name="internet_location_both_off_info_message">Internet &amp; Location OFF</string>
 
     <!-- Permission Error Strings -->
