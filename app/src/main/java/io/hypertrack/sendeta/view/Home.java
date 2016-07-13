@@ -244,11 +244,11 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     private void onETASuccess(TripETAResponse response, MetaPlace place) {
-        updateViewForETASuccess((int) response.getDuration() / 60, place.getLatLng());
+        updateViewForETASuccess(new Integer((int) response.getDuration() / 60), place.getLatLng());
         TripManager.getSharedManager().setPlace(place);
     }
 
-    private void updateViewForETASuccess(int etaInMinutes, LatLng latLng) {
+    private void updateViewForETASuccess(Integer etaInMinutes, LatLng latLng) {
         showSendETAButton();
         updateDestinationMarker(latLng, etaInMinutes);
         updateMapView();
@@ -723,7 +723,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
             public void onMapLoaded() {
                 // Check if Trip has to be Restored & Update Map for that trip
                 if (shouldRestoreTrip && restoreTripMetaPlace != null) {
-                    updateViewForETASuccess(0, restoreTripMetaPlace.getLatLng());
+                    updateViewForETASuccess(null, restoreTripMetaPlace.getLatLng());
                     tripRestoreFinished = true;
                     onTripStart();
                 }
@@ -882,7 +882,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
 
         etaInMinutes = Math.max(etaInMinutes, 1);
 
-        updateDestinationMarker(destinationLocation, etaInMinutes);
+        updateDestinationMarker(destinationLocation, new Integer(etaInMinutes));
     }
 
     /**
@@ -913,7 +913,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         updateMapPadding(false);
     }
 
-    private void updateDestinationMarker(LatLng destinationLocation, int etaInMinutes) {
+    private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
             destinationLocationMarker = null;
@@ -926,7 +926,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, markerView))));
     }
 
-    private View getDestinationMarkerView(int etaInMinutes) {
+    private View getDestinationMarkerView(Integer etaInMinutes) {
         View marker = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_destination_marker_layout, null);
         TextView etaTimeTextView = (TextView) marker.findViewById(R.id.eta_time);
         TextView etaTimeTypeTextView = (TextView) marker.findViewById(R.id.eta_time_type_text);
@@ -934,8 +934,11 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         return marker;
     }
 
-    private void updateTextViewForMinutes(TextView etaTimeTextView, TextView etaTimeTypeTextView, int etaInMinutes) {
-        if (etaInMinutes <= 0) {
+    private void updateTextViewForMinutes(TextView etaTimeTextView, TextView etaTimeTypeTextView, Integer etaInMinutes) {
+        if (etaInMinutes == null) {
+            etaTimeTextView.setText("");
+            etaTimeTypeTextView.setText("");
+        } else if (etaInMinutes <= 0) {
             etaTimeTextView.setText("0");
             etaTimeTypeTextView.setText("min");
         } else {
