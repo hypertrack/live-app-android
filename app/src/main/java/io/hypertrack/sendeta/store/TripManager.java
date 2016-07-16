@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -57,18 +56,16 @@ import retrofit2.Response;
  */
 public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
-    public static final int LOITERING_DELAY_MS = 30000;
-    private static final int NOTIFICATION_RESPONSIVENESS_MS = 5000;
-    private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
-    private static final float GEOFENCE_RADIUS_IN_METERS = 100;
-
     private static final String TAG = TripManager.class.getSimpleName();
+
     private static final long REFRESH_DELAY = 30000;
 
-    private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
+    public static final int LOITERING_DELAY_MS = 30000;
+    private static final int NOTIFICATION_RESPONSIVENESS_MS = 5000;
+    private static final float GEOFENCE_RADIUS_IN_METERS = 100;
+    private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
 
-    private TripManagerListener tripRefreshedListener;
-    private TripManagerListener tripEndedListener;
+    private HTTransmitterService transmitter = HTTransmitterService.getInstance(MetaApplication.getInstance().getApplicationContext());
 
     private Trip trip;
     private MetaPlace place;
@@ -76,11 +73,14 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private HTTrip hyperTrackTrip;
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
 
-    private PendingIntent mGeofencePendingIntent;
     private GoogleApiClient mGoogleAPIClient;
-    private boolean shouldWaitForGoogleAPIClient;
-    private BroadcastReceiver mTripEndedReceiver;
+    public GeofencingRequest geofencingRequest;
+    private PendingIntent mGeofencePendingIntent;
+    private boolean addGeofencingRequest;
 
+    private TripManagerListener tripRefreshedListener;
+    private TripManagerListener tripEndedListener;
+    private BroadcastReceiver mTripEndedReceiver;
     private Handler handler;
 
     private static TripManager sSharedManager;
@@ -98,10 +98,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void setupGoogleAPIClient() {
-        this.mGoogleAPIClient = new GoogleApiClient.Builder(MetaApplication.getInstance().getApplicationContext())
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .build();
+        if (this.mGoogleAPIClient == null) {
+            this.mGoogleAPIClient = new GoogleApiClient.Builder(MetaApplication.getInstance().getApplicationContext())
+                    .addApi(LocationServices.API)
+                    .addConnectionCallbacks(this)
+                    .build();
+        }
 
         this.mGoogleAPIClient.connect();
     }
@@ -353,6 +355,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         this.clearTrip();
         this.transmitter.clearCurrentTrip();
         this.unregisterForTripEndedBroadcast();
+        // Remove GeoFencingRequest from SharedPreferences
+        SharedPreferenceManager.removeGeofencingRequest();
     }
 
     private void clearListeners() {
@@ -365,7 +369,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         onTripStart(REFRESH_DELAY);
     }
 
-    private void onTripStart (final long delay) {
+    private void onTripStart(final long delay) {
         this.setupGeofencing();
         this.startRefreshingTrip(delay);
         this.registerForTripEndedBroadcast();
@@ -406,40 +410,53 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         }
     }
 
-    private void setupGeofencing() {
-        if (!this.mGoogleAPIClient.isConnected()) {
-            this.shouldWaitForGoogleAPIClient = true;
+    public void setupGeofencing() {
+        try {
+            geofencingRequest = this.getGeofencingRequest();
+
+            // Save this request to SharedPreferences (to be restored later if removed)
+            SharedPreferenceManager.setGeofencingRequest(geofencingRequest);
+
+            // Add Geofencing Request
+            addGeofencingRequest();
+        } catch (Exception exception) {
+            Crashlytics.logException(exception);
+            HTLog.e(TAG, "Exception while adding geofence request");
+        }
+    }
+
+    public void addGeofencingRequest() {
+        if (geofencingRequest == null) {
+            HTLog.e(TAG, "Error while adding geofence request: geofencingRequest is null");
+            return;
+        }
+
+        if (this.mGoogleAPIClient == null || !this.mGoogleAPIClient.isConnected()) {
+            this.addGeofencingRequest = true;
+            setupGoogleAPIClient();
             return;
         }
 
         try {
-            GeofencingRequest request = this.getGeofencingRequest();
-
             Context context = MetaApplication.getInstance().getAppContext();
             Intent geofencingIntent = new Intent(context, GeofenceTransitionsIntentService.class);
             mGeofencePendingIntent = PendingIntent.getService(context, 0, geofencingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-            LocationServices.GeofencingApi.addGeofences(mGoogleAPIClient, request, mGeofencePendingIntent).setResultCallback(new ResultCallback<Status>() {
+            LocationServices.GeofencingApi.addGeofences(mGoogleAPIClient, geofencingRequest, mGeofencePendingIntent).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(@NonNull Status status) {
                     if (status.isSuccess()) {
-                        Log.v(TAG, "Geofencing added successfully");
                         HTLog.i(TAG, "Geofencing added successfully");
+                        addGeofencingRequest = false;
                     } else {
-                        Log.v(TAG, "Geofencing not added. There was an error");
                         HTLog.w(TAG, "Geofencing not added. There was an error");
+                        addGeofencingRequest = true;
                     }
                 }
             });
         } catch (SecurityException exception) {
             Crashlytics.logException(exception);
-            Log.e(TAG, "Exception for geofence");
             HTLog.e(TAG, "Exception for geofence");
-
-        } catch (Exception exception) {
-            Crashlytics.logException(exception);
-            Log.e(TAG, "Exception while adding geofence request");
-            HTLog.e(TAG, "Exception while adding geofence request");
         }
     }
 
@@ -455,7 +472,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
             }
         }
 
-        Log.i(TAG, "OnGeoFence success: Trip end initiated.");
         HTLog.i(TAG, "OnGeoFence success: Trip end initiated.");
 
         this.endTrip(new TripManagerCallback() {
@@ -533,15 +549,13 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (this.shouldWaitForGoogleAPIClient) {
-            this.setupGoogleAPIClient();
-            this.shouldWaitForGoogleAPIClient = false;
+        if (this.addGeofencingRequest) {
+            addGeofencingRequest();
         }
     }
 
     @Override
     public void onConnectionSuspended(int i) {
-        this.shouldWaitForGoogleAPIClient = false;
     }
 
     private void savePlace() {

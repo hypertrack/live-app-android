@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
 
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -25,6 +26,7 @@ public class SharedPreferenceManager {
     private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
+    private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -144,6 +146,34 @@ public class SharedPreferenceManager {
         String lastKnownLocationJSON = gson.toJson(lastKnownLocation);
 
         editor.putString(LAST_KNOWN_LOCATION, lastKnownLocationJSON);
+        editor.apply();
+    }
+
+    public static GeofencingRequest getGeofencingRequest() {
+        String geofencingRequestJSON = getSharedPreferences().getString(GEOFENCING_REQUEST, null);
+        if (geofencingRequestJSON == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<GeofencingRequest>(){}.getType();
+
+        return gson.fromJson(geofencingRequestJSON, type);
+    }
+
+    public static void setGeofencingRequest (GeofencingRequest request) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String geofencingRequestJSON = gson.toJson(request);
+
+        editor.putString(GEOFENCING_REQUEST, geofencingRequestJSON);
+        editor.apply();
+    }
+
+    public static void removeGeofencingRequest() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(GEOFENCING_REQUEST);
         editor.apply();
     }
 }

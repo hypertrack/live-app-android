@@ -21,7 +21,7 @@
 
     <string name="error_field_required">This field is required</string>
 
-    <string name="geofence_not_available">Geofence service is not available now</string>
+    <string name="geofence_not_available">Geofence service is not available now. Network Location Provider is disabled</string>
     <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
     <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call</string>
     <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
