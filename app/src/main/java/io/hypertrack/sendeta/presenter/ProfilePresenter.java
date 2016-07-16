@@ -61,6 +61,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
         if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
+            OnboardingUser.setOnboardingUser();
         }
 
         profileInteractor.updateUserProfile(new OnProfileUpdateCallback() {

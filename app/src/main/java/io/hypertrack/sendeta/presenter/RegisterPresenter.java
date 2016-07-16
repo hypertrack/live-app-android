@@ -4,6 +4,7 @@ import android.text.TextUtils;
 
 import io.hypertrack.sendeta.interactor.callback.OnRegisterCallback;
 import io.hypertrack.sendeta.interactor.RegisterInteractor;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.util.ErrorMessages;
@@ -30,9 +31,10 @@ public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
     @Override
     public void attemptRegistration(String number, String isoCode) {
 
-        if(!TextUtils.isEmpty(number) && number.length() == 10) {
+        if(!TextUtils.isEmpty(number)) {
             onboardingManager.getUser().setContactNumber(number);
             onboardingManager.getUser().setCountryCode(isoCode);
+            OnboardingUser.setOnboardingUser();
 
             registerInteractor.registerPhoneNumber(new OnRegisterCallback() {
                 @Override

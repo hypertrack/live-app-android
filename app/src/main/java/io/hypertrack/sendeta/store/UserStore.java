@@ -271,14 +271,14 @@ public class UserStore {
     }
 
     private void addPlace(final MetaPlace place) {
-        if (this.user == null) {
+        if (this.user == null || place == null) {
             return;
         }
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                MetaPlace managedPlace = realm.copyToRealm(place);
+                MetaPlace managedPlace = realm.copyToRealmOrUpdate(place);
                 user.getPlaces().add(managedPlace);
                 user = realm.copyToRealmOrUpdate(user);
             }

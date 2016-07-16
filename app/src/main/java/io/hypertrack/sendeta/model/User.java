@@ -113,12 +113,12 @@ public class User extends RealmObject {
     }
 
     public MetaPlace getHome() {
-        if (this.places.size() == 0) {
+        if (this.getPlaces().size() == 0) {
             return null;
         }
 
         MetaPlace place = null;
-        for (MetaPlace candidate: this.places) {
+        for (MetaPlace candidate: this.getPlaces()) {
             if (candidate.isHome()) {
                 place = candidate;
                 break;
@@ -129,12 +129,12 @@ public class User extends RealmObject {
     }
 
     public MetaPlace getWork() {
-        if (this.places.size() == 0) {
+        if (this.getPlaces().size() == 0) {
             return null;
         }
 
         MetaPlace place = null;
-        for (MetaPlace candidate: this.places) {
+        for (MetaPlace candidate: this.getPlaces()) {
             if (candidate.isWork()) {
                 place = candidate;
                 break;
@@ -155,7 +155,7 @@ public class User extends RealmObject {
     public List<MetaPlace> getOtherPlaces() {
         List<MetaPlace> otherPlaces = new ArrayList<>();
 
-        for (MetaPlace candidate : this.places) {
+        for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.isWork() || candidate.isHome()) {
                 continue;
             }
@@ -167,11 +167,11 @@ public class User extends RealmObject {
     }
 
     public boolean hasPlace(MetaPlace place) {
-        if (this.places.size() == 0) {
+        if (this.getPlaces().size() == 0) {
             return false;
         }
 
-        for (MetaPlace candidate : this.places) {
+        for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.getName().equalsIgnoreCase(place.getName())) {
                 return true;
             }
@@ -181,11 +181,11 @@ public class User extends RealmObject {
     }
 
     public boolean isSynced(MetaPlace place) {
-        if (this.places.size() == 0) {
+        if (this.getPlaces().size() == 0) {
             return false;
         }
 
-        for (MetaPlace candidate : this.places) {
+        for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.getId() == place.getId()) {
                 return true;
             }
@@ -195,11 +195,11 @@ public class User extends RealmObject {
     }
 
     public boolean isFavorite(MetaPlace place) {
-        if (this.places.size() == 0) {
+        if (this.getPlaces().size() == 0) {
             return false;
         }
 
-        for (MetaPlace candidate : this.places) {
+        for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.getId() == place.getId()
                     || candidate.getGooglePlacesID().equalsIgnoreCase(place.getGooglePlacesID())
                     || candidate.getHyperTrackDestinationID().equalsIgnoreCase(place.getHyperTrackDestinationID())

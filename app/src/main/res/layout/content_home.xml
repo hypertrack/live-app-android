@@ -31,7 +31,38 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:elevation="8dp"/>
+
+            <!-- info message container-->
+            <LinearLayout
+                android:id="@+id/home.info_message_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/toolbar"
+                android:background="#d89d3b"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/padding_medium"
+                tools:visibility="visible"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/home.info_message_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/margin_medium"/>
+
+                <TextView
+                    android:id="@+id/home.info_message_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_base" />
+            </LinearLayout>
 
         </android.support.design.widget.AppBarLayout>
 

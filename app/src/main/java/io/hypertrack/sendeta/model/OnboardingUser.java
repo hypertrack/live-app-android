@@ -1,7 +1,5 @@
 package io.hypertrack.sendeta.model;
 
-import android.util.Log;
-
 import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -10,6 +8,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import java.io.File;
 
 import io.hypertrack.sendeta.store.OnboardingManager;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 
 /**
  * Created by ulhas on 15/06/16.
@@ -38,6 +37,38 @@ public class OnboardingUser {
 
     private boolean isExistingUser;
 
+    private OnboardingUser(){
+    }
+
+    public static OnboardingUser onboardingUser;
+
+    public static OnboardingUser sharedOnboardingUser() {
+        if (onboardingUser == null) {
+
+            synchronized (OnboardingUser.class) {
+                if (onboardingUser == null) {
+                    onboardingUser = getOnboardingUser();
+                }
+            }
+        }
+
+        return onboardingUser;
+    }
+
+    public static OnboardingUser getOnboardingUser() {
+        OnboardingUser onboardingUser = new OnboardingUser();
+
+        if (SharedPreferenceManager.getOnboardingUser() != null) {
+            onboardingUser = SharedPreferenceManager.getOnboardingUser();
+        }
+
+        return onboardingUser;
+    }
+
+    public static void setOnboardingUser(){
+        SharedPreferenceManager.setOnboardingUser(onboardingUser);
+    }
+
     /**
      * Method to update OnboardingUser Data
      *
@@ -45,8 +76,6 @@ public class OnboardingUser {
      */
     public void update(OnboardingUser user) {
         this.setId(user.getId());
-        this.setCountryCode(user.getCountryCode());
-        this.setContactNumber(user.getContactNumber());
 
         this.setFirstName(user.getFirstName());
         this.setLastName(user.getLastName());
@@ -57,9 +86,16 @@ public class OnboardingUser {
         this.setToken(user.getToken());
         this.setPhotoURL(user.getPhotoURL());
 
+        this.setOnboardingUser();
+
         // IMPORTANT: Do not update isExistingUser Flag while updating OnboardingUser
         // isExistingUser Flag is received while User registers his number (Login)
         // this.isExistingUser = this.isExistingUser;
+
+        // IMPORTANT: Do not update CountryCode & ContactNumber Flag while updating OnboardingUser
+        // These data are received during his registration
+        // this.setCountryCode(user.getCountryCode());
+        // this.setContactNumber(user.getContactNumber());
     }
 
     public Integer getId() {

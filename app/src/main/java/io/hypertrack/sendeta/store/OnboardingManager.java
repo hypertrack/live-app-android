@@ -41,7 +41,7 @@ public class OnboardingManager {
     }
 
     private OnboardingManager() {
-        this.onboardingUser = new OnboardingUser();
+        this.onboardingUser = OnboardingUser.sharedOnboardingUser();
     }
 
     public OnboardingUser getUser() {
@@ -75,6 +75,7 @@ public class OnboardingManager {
                     } else {
                         onboardingUser.setExistingUser(false);
                     }
+                    OnboardingUser.setOnboardingUser();
 
                     if (callback != null) {
                         callback.onSuccess();
