@@ -8,16 +8,30 @@
     android:paddingLeft="@dimen/margin_high"
     android:paddingTop="24dp">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
     <io.hypertrack.sendeta.util.images.RoundedImageView
         android:id="@+id/drawer_header.profile_image"
         android:layout_width="64dp"
         android:layout_height="64dp"
+        android:layout_alignParentLeft="true"
         android:layout_marginBottom="@dimen/margin_low"
         android:layout_marginTop="@dimen/margin_high"
         android:background="@drawable/circle_image_button"
         android:padding="0dp"
         android:scaleType="fitCenter"
         android:src="@drawable/default_profile_pic" />
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginTop="@dimen/margin_xxxhigh"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/ic_add_business_profile"/>
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -38,7 +52,6 @@
                 android:fontFamily="sans-serif-medium"
                 android:paddingBottom="@dimen/padding_low"
                 android:paddingTop="@dimen/padding_base"
-                android:text="Name"
                 android:textColor="@color/text_dark_bg_base"
                 android:textSize="@dimen/text_base" />
 
@@ -50,11 +63,9 @@
                 android:padding="0dp" />
 
             <TextView
-
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Business Profile"
                 android:textColor="@color/text_dark_bg_secondary"
                 android:textSize="@dimen/text_base" />
         </LinearLayout>

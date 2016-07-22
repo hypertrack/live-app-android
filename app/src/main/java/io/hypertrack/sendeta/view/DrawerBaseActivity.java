@@ -7,7 +7,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -119,6 +118,7 @@ public class DrawerBaseActivity extends BaseActivity {
 
         if (user != null) {
 
+            // Set Profile Name
             if (profileUserName != null && !TextUtils.isEmpty(user.getFullName())) {
                 profileUserName.setText(user.getFullName());
             }
