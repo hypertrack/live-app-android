@@ -14,13 +14,13 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!--<permission-->
-        <!--android:name="io.hypertrack.sendeta.permission.C2D_MESSAGE"-->
-        <!--android:protectionLevel="signature" />-->
-<!---->
+    <!--android:name="io.hypertrack.sendeta.permission.C2D_MESSAGE"-->
+    <!--android:protectionLevel="signature" />-->
+    <!---->
     <!--<uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />-->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -29,9 +29,9 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${applicationLabel}"
-        tools:replace="android:label"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:label">
 
         <!-- Register Activities here -->
         <activity
@@ -85,6 +85,8 @@
 
         <activity android:name=".view.AddFavoritePlace" />
 
+        <activity android:name=".view.BusinessProfile" />
+
         <activity
             android:name=".SplashScreen"
             android:screenOrientation="portrait"
@@ -118,15 +120,17 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.NetworkChangeReceiver" >
+        <receiver android:name=".util.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.BootReceiver"
-            android:exported="false" android:enabled="true">
+        <receiver
+            android:name=".util.BootReceiver"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -140,7 +144,9 @@
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
         <!-- Register Services here -->
         <service

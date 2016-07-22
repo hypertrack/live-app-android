@@ -18,6 +18,8 @@ public class Constants {
     // REQUEST_CODEs
     public static final int REQUEST_CHECK_SETTINGS = 1;
     public static final int FAVORITE_PLACE_REQUEST_CODE = 100;
+    public static final int EDIT_PROFILE_REQUEST_CODE = 101;
+    public static final int BUSINESS_PROFILE_REQUEST_CODE = 102;
     public static final int SHARE_REQUEST_CODE = 200;
 
     //Enums for Location Settings

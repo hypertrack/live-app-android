@@ -26,6 +26,7 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
@@ -37,7 +38,6 @@ import io.hypertrack.sendeta.util.images.RoundedImageView;
 public class EditProfile extends BaseActivity {
 
     public static final String TAG = "EditProfile";
-    public static final int EDIT_PROFILE_RESULT_CODE = 101;
 
     private ProgressDialog mProgressDialog;
     private RoundedImageView mProfileImageView;
@@ -243,7 +243,7 @@ public class EditProfile extends BaseActivity {
 
     private void broadcastResultIntent() {
         Intent intent = new Intent();
-        setResult(EDIT_PROFILE_RESULT_CODE, intent);
+        setResult(Constants.EDIT_PROFILE_REQUEST_CODE, intent);
     }
 
     /**

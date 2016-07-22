@@ -12,7 +12,7 @@ import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.BusinessProfileOnClickListener;
-import io.hypertrack.sendeta.model.BusinessProfile;
+import io.hypertrack.sendeta.model.BusinessProfileModel;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.UserStore;
 
@@ -21,13 +21,14 @@ import io.hypertrack.sendeta.store.UserStore;
  */
 public class BusinessProfilesAdapter extends RecyclerView.Adapter<BusinessProfilesAdapter.BusinessProfileViewHolder> {
 
-    private List<BusinessProfile> businessProfiles = new ArrayList<>();
+    private List<BusinessProfileModel> businessProfiles = new ArrayList<>();
     private BusinessProfileOnClickListener listener;
 
-    private BusinessProfilesAdapter() {}
+    private BusinessProfilesAdapter() {
+    }
 
-    public BusinessProfilesAdapter(List<BusinessProfile> businessProfiles, BusinessProfileOnClickListener listener) {
-        this.businessProfiles = businessProfiles;
+    public BusinessProfilesAdapter(List<BusinessProfileModel> businessProfiles, BusinessProfileOnClickListener listener) {
+        this.businessProfiles = businessProfiles != null ? businessProfiles : new ArrayList<BusinessProfileModel>();
         this.listener = listener;
     }
 
@@ -43,7 +44,7 @@ public class BusinessProfilesAdapter extends RecyclerView.Adapter<BusinessProfil
             holder.mBusinessProfileName.setText("Add Business Profile");
             holder.mBusinessProfileActionIcon.setImageResource(R.drawable.ic_action_add);
         } else {
-            BusinessProfile profile = this.businessProfiles.get(position);
+            BusinessProfileModel profile = this.businessProfiles.get(position);
             holder.mBusinessProfileName.setText(profile.getCompanyName());
             if (profile.isVerified()) {
                 holder.mBusinessProfileActionIcon.setImageResource(R.drawable.ic_action_delete);
@@ -86,7 +87,25 @@ public class BusinessProfilesAdapter extends RecyclerView.Adapter<BusinessProfil
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    //Handle Addition/Deletion here
+
+                    // Check if the row clicked had a valid position index
+                    if (getAdapterPosition() != RecyclerView.NO_POSITION) {
+
+                        // User clicked to set-up Business Profile
+                        if (isLastRow(getAdapterPosition())) {
+                            listener.onAddBusinessProfile();
+
+                        } else {
+                            final BusinessProfileModel businessProfile = businessProfiles.get(getAdapterPosition());
+
+                            // Check if user clicked to remove an existing Business Profile or verify a pending invite
+                            if (businessProfile.isVerified()) {
+                                listener.onDeleteBusinessProfile(businessProfile);
+                            } else {
+                                listener.onVerifyPendingBusinessProfile(businessProfile);
+                            }
+                        }
+                    }
                 }
             });
         }

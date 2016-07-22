@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/business_profile.title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginRight="@dimen/margin_high"
+        android:layout_marginTop="@dimen/margin_xxhigh"
+        android:gravity="center"
+        android:textColor="@color/text_highlight"
+        android:textSize="@dimen/text_very_large" />
+
+    <TextView
+        android:id="@+id/business_profile.message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin_base"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginRight="@dimen/margin_high"
+        android:layout_marginTop="@dimen/margin_base"
+        android:gravity="center"
+        android:textColor="@color/text_tertiary"
+        android:textSize="@dimen/text_very_large" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/margin_xhigh"
+        android:layout_weight="1"
+        android:src="@drawable/business_profile_background" />
+
+    <TextView
+        android:id="@+id/business_profile.invite_tnc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_xhigh"
+        android:layout_marginRight="@dimen/margin_xhigh"
+        android:layout_marginTop="@dimen/margin_base"
+        android:gravity="center"
+        android:text="@string/business_profile_invite_tnc"
+        android:textColor="@color/text_tertiary"
+        android:textSize="@dimen/text_base"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginRight="@dimen/margin_high"
+        android:layout_marginTop="@dimen/margin_base"
+        android:layout_marginBottom="@dimen/margin_base"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/business_profile.primary_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/padding_base"
+            android:background="?attr/selectableItemBackground"
+            android:gravity="center"
+            android:textAllCaps="true"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_large" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/business_profile.secondary_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/margin_high"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginRight="@dimen/margin_high"
+        android:background="?attr/selectableItemBackground"
+        android:gravity="center"
+        android:padding="@dimen/padding_base"
+        android:textColor="@color/text_tertiary"
+        android:textSize="@dimen/text_large" />
+</LinearLayout>

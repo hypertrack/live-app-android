@@ -10,7 +10,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by piyush on 22/07/16.
  */
-public class BusinessProfile extends RealmObject implements Serializable{
+public class BusinessProfileModel extends RealmObject implements Serializable{
 
     @PrimaryKey
     private int id;

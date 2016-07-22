@@ -20,8 +20,7 @@ import io.hypertrack.sendeta.adapter.BusinessProfilesAdapter;
 import io.hypertrack.sendeta.adapter.FavoritePlacesAdapter;
 import io.hypertrack.sendeta.adapter.callback.BusinessProfileOnClickListener;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
-import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.model.*;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
@@ -61,7 +60,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             setTitle(user.getFullName());
 
         // Initialize UI Views
-        profileImageView = (ImageView)findViewById(R.id.settings_image);
+        profileImageView = (ImageView) findViewById(R.id.settings_image);
         mFavoritePlacesRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
         mBusinessProfilesRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
 
@@ -80,14 +79,19 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             }
         });
 
-        // Initialize RecyclerView & Set Adapter
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        layoutManager.setAutoMeasureEnabled(true);
-        mFavoritePlacesRecyclerView.setLayoutManager(layoutManager);
-        mBusinessProfilesRecyclerView.setLayoutManager(layoutManager);
-
+        // Initialize Favorite Places RecyclerView & Set Adapter
+        LinearLayoutManager favoritePlacesLayoutManager = new LinearLayoutManager(this);
+        favoritePlacesLayoutManager.setAutoMeasureEnabled(true);
+        mFavoritePlacesRecyclerView.setLayoutManager(favoritePlacesLayoutManager);
         setupFavoritePlacesAdapter();
+
+        // Initialize Business Profiles RecyclerView & Set Adapter
+        LinearLayoutManager businessProfilesLayoutManager = new LinearLayoutManager(this);
+        businessProfilesLayoutManager.setAutoMeasureEnabled(true);
+        mBusinessProfilesRecyclerView.setLayoutManager(businessProfilesLayoutManager);
         setupBusinessProfilesAdapter();
+
+        // Set up User's Profile Image
         updateProfileImage();
     }
 
@@ -106,7 +110,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             return;
         }
 
-        // Initialize Adapter with User's Favorites data
+        // Initialize Adapter with User's Business Profiles data
         businessProfilesAdapter = new BusinessProfilesAdapter(null, this);
         mBusinessProfilesRecyclerView.setAdapter(businessProfilesAdapter);
     }
@@ -149,7 +153,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         });
     }
 
-    private void updateFavoritesAdapter(){
+    private void updateFavoritesAdapter() {
         if (user == null) {
             return;
         }
@@ -164,7 +168,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
     public void onEditAccountClick(View view) {
         Intent editProfileIntent = new Intent(this, EditProfile.class);
-        startActivityForResult(editProfileIntent, EditProfile.EDIT_PROFILE_RESULT_CODE, null);
+        startActivityForResult(editProfileIntent, Constants.EDIT_PROFILE_REQUEST_CODE, null);
 
         AnalyticsStore.getLogger().tappedEditProfile();
     }
@@ -255,21 +259,26 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
     @Override
     public void onAddBusinessProfile() {
-
+        // Start BusinessProfile Activity with no parameters
+        showBusinessProfileScreen(null);
     }
 
     @Override
-    public void onDeleteBusinessProfile() {
-
+    public void onDeleteBusinessProfile(BusinessProfileModel businessProfile) {
+        // Start BusinessProfile Activity with to be deleted BusinessProfileModel as parameter
+        showBusinessProfileScreen(businessProfile);
     }
 
     @Override
-    public void onConfirmPendingBusinessProfile() {
-
+    public void onVerifyPendingBusinessProfile(BusinessProfileModel businessProfile) {
+        // Start BusinessProfile Activity with to be verified BusinessProfileModel as parameter
+        showBusinessProfileScreen(businessProfile);
     }
 
-    private void showBusinessProfileScreen() {
-
+    private void showBusinessProfileScreen(BusinessProfileModel businessProfile) {
+        Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
+        businessProfileIntent.putExtra(BusinessProfile.KEY_BUSINESS_PROFILE, businessProfile);
+        startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
     }
 
     @Override
@@ -279,13 +288,15 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         if (requestCode == Constants.FAVORITE_PLACE_REQUEST_CODE) {
             updateFavoritesAdapter();
 
-        } else if (requestCode == EditProfile.EDIT_PROFILE_RESULT_CODE) {
+        } else if (requestCode == Constants.EDIT_PROFILE_REQUEST_CODE) {
 
             // Set Toolbar Title as User Name
             if (user != null)
                 setTitle(user.getFullName());
 
             updateProfileImage();
+        } else if (requestCode == Constants.BUSINESS_PROFILE_REQUEST_CODE) {
+            // Update the Business Profile List Data on successful addition of Business Profile
         }
     }
 }

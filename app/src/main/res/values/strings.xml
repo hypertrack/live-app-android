@@ -21,6 +21,7 @@
     <string name="title_activity_signup_profile">Profile</string>
     <string name="title_activity_verify">Verify Phone</string>
     <string name="title_activity_add_fav_place">Add Favorite</string>
+    <string name="title_activity_business_profile">Business Profile</string>
 
     <string name="error_field_required">This field is required</string>
 
@@ -110,4 +111,16 @@
     <string name="read_external_storage_permission_msg">To upload and change a profile photo, you need to allow SendETA to access photos on your device</string>
     <string name="read_external_storage_permission_never_allow">To upload and change a profile photo, you need to allow SendETA to access photos on your device.
         \n\nGo to Settings, tap on Permissions, and turn on Storage.</string>
+
+    <!-- Business Profile Screen Strings -->
+    <string name="business_profile_invite_message">wants to track your business trips using SendETA</string>
+    <string name="business_profile_invite_tnc">By clicking ACCEPT, you agree to sharing your location data with %1$s</string>
+    <string name="business_profile_invite_primary_btn">Accept</string>
+    <string name="business_profile_invite_secondary_btn">Reject</string>
+
+    <string name="business_profile_setup_title">SendETA for Business</string>
+    <string name="business_profile_setup_message">Monitor your operations and power a great customer experience</string>
+    <string name="business_profile_setup_primary_btn">set-up now</string>
+    <string name="business_profile_setup_secondary_btn">Share</string>
+
 </resources>

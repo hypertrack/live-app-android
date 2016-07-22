@@ -186,6 +186,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_favorite_place);
 
+        // Initialize Toolbar
         initToolbar(getString(R.string.title_activity_add_fav_place));
 
         // Fetch Meta Place object passed with intent
