@@ -24,7 +24,6 @@ import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
 public class UserProfile extends BaseActivity implements FavoritePlaceOnClickListener {
