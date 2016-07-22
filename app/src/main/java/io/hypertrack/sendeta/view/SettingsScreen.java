@@ -16,7 +16,9 @@ import android.widget.ScrollView;
 import android.widget.Toast;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.adapter.BusinessProfilesAdapter;
 import io.hypertrack.sendeta.adapter.FavoritePlacesAdapter;
+import io.hypertrack.sendeta.adapter.callback.BusinessProfileOnClickListener;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.User;
@@ -26,16 +28,22 @@ import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
-public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener {
+public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener, BusinessProfileOnClickListener {
 
     private final String TAG = "SettingsScreen";
 
-    private ScrollView mScrollView;
-    private RecyclerView mRecyclerView;
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-    private FavoritePlacesAdapter favoritePlacesAdapter;
     private ProgressDialog mProgressDialog;
     private ImageView profileImageView;
+
+    private RecyclerView mFavoritePlacesRecyclerView;
+    private FavoritePlacesAdapter favoritePlacesAdapter;
+
+    private RecyclerView mBusinessProfilesRecyclerView;
+    private BusinessProfilesAdapter businessProfilesAdapter;
+
+    private ScrollView mScrollView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
 
     private User user;
 
@@ -54,7 +62,9 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
         // Initialize UI Views
         profileImageView = (ImageView)findViewById(R.id.settings_image);
-        mRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
+        mFavoritePlacesRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
+        mBusinessProfilesRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
+
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
@@ -73,9 +83,11 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         // Initialize RecyclerView & Set Adapter
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setAutoMeasureEnabled(true);
-        mRecyclerView.setLayoutManager(layoutManager);
+        mFavoritePlacesRecyclerView.setLayoutManager(layoutManager);
+        mBusinessProfilesRecyclerView.setLayoutManager(layoutManager);
 
         setupFavoritePlacesAdapter();
+        setupBusinessProfilesAdapter();
         updateProfileImage();
     }
 
@@ -86,7 +98,17 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
         // Initialize Adapter with User's Favorites data
         favoritePlacesAdapter = new FavoritePlacesAdapter(user.getHome(), user.getWork(), user.getOtherPlaces(), this);
-        mRecyclerView.setAdapter(favoritePlacesAdapter);
+        mFavoritePlacesRecyclerView.setAdapter(favoritePlacesAdapter);
+    }
+
+    private void setupBusinessProfilesAdapter() {
+        if (user == null) {
+            return;
+        }
+
+        // Initialize Adapter with User's Favorites data
+        businessProfilesAdapter = new BusinessProfilesAdapter(null, this);
+        mBusinessProfilesRecyclerView.setAdapter(businessProfilesAdapter);
     }
 
     private void updateProfileImage() {
@@ -150,37 +172,37 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     @Override
     public void OnAddHomeClick() {
         MetaPlace newHome = new MetaPlace(MetaPlace.HOME, LocationStore.sharedStore().getCurrentLatLng());
-        showAddPlace(newHome);
+        showAddPlaceScreen(newHome);
     }
 
     @Override
     public void OnEditHomeClick(MetaPlace place) {
-        showAddPlace(new MetaPlace(place));
+        showAddPlaceScreen(new MetaPlace(place));
     }
 
     @Override
     public void OnAddWorkClick() {
         MetaPlace newWork = new MetaPlace(MetaPlace.WORK, LocationStore.sharedStore().getCurrentLatLng());
-        showAddPlace(newWork);
+        showAddPlaceScreen(newWork);
     }
 
     @Override
     public void OnEditWorkClick(MetaPlace place) {
-        showAddPlace(new MetaPlace(place));
+        showAddPlaceScreen(new MetaPlace(place));
     }
 
     @Override
     public void OnAddPlaceClick() {
         MetaPlace newPlace = new MetaPlace(LocationStore.sharedStore().getCurrentLatLng());
-        showAddPlace(newPlace);
+        showAddPlaceScreen(newPlace);
     }
 
     @Override
     public void OnEditPlaceClick(MetaPlace place) {
-        showAddPlace(new MetaPlace(place));
+        showAddPlaceScreen(new MetaPlace(place));
     }
 
-    private void showAddPlace(MetaPlace place) {
+    private void showAddPlaceScreen(MetaPlace place) {
         // Start an intent to AddFavoritePlace with MetaPlace object as parameter
         Intent addFavPlaceIntent = new Intent(this, AddFavoritePlace.class);
         addFavPlaceIntent.putExtra("meta_place", place);
@@ -229,6 +251,25 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         });
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    public void onAddBusinessProfile() {
+
+    }
+
+    @Override
+    public void onDeleteBusinessProfile() {
+
+    }
+
+    @Override
+    public void onConfirmPendingBusinessProfile() {
+
+    }
+
+    private void showBusinessProfileScreen() {
+
     }
 
     @Override
