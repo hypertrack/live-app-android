@@ -7,6 +7,9 @@
     <string name="favorite_place_name_hint">Name your favorite (eg. Dave\'s Home)</string>
     <string name="favorite_place_address_hint">Search for an address</string>
 
+    <string name="drawer_open">open</string>
+    <string name="drawer_close">close</string>
+
     <!-- Strings related to login -->
     <string name="prompt_firstname">First Name</string>
     <string name="prompt_lastname">Last Name</string>

@@ -31,8 +31,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:elevation="8dp"/>
+                app:elevation="8dp"
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
 
             <!-- info message container-->
             <LinearLayout
@@ -44,22 +44,22 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="@dimen/padding_medium"
-                tools:visibility="visible"
-                android:visibility="gone">
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <ImageView
                     android:id="@+id/home.info_message_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/margin_medium"/>
+                    android:layout_marginRight="@dimen/margin_medium" />
 
                 <TextView
                     android:id="@+id/home.info_message_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@null"
-                    android:gravity="center"
                     android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/text_base" />
             </LinearLayout>
@@ -163,14 +163,14 @@
                                 android:id="@+id/autocomplete_places"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_weight="1"
                                 android:layout_marginLeft="@dimen/margin_max"
                                 android:layout_marginRight="@dimen/margin_xxxhigh"
-                                android:paddingTop="@dimen/padding_high"
-                                android:paddingBottom="@dimen/padding_high"
+                                android:layout_weight="1"
                                 android:background="@null"
                                 android:ellipsize="end"
                                 android:hint="@string/autocomplete_hint"
+                                android:paddingBottom="@dimen/padding_high"
+                                android:paddingTop="@dimen/padding_high"
                                 android:singleLine="true"
                                 android:textColor="@color/text_base"
                                 android:textSize="@dimen/text_medium" />
@@ -180,9 +180,9 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
+                                android:onClick="onEnterDestinationBackClick"
                                 android:paddingLeft="@dimen/padding_xhigh"
                                 android:paddingRight="@dimen/padding_xhigh"
-                                android:onClick="onEnterDestinationBackClick"
                                 android:scaleType="centerInside"
                                 android:src="@drawable/ic_navigation_arrow_back" />
 

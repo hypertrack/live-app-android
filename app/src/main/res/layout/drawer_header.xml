@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="24dp"
+    android:background="#474D62"
+    android:orientation="vertical"
+    android:paddingLeft="@dimen/margin_high">
+
+    <FrameLayout
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="@dimen/margin_high"
+        android:layout_marginBottom="@dimen/margin_low">
+
+        <io.hypertrack.sendeta.util.images.RoundedImageView
+            android:id="@+id/drawer_header.profile_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/circle_image_button"
+            android:onClick="onProfileImageViewClicked"
+            android:padding="0dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/default_profile_pic" />
+
+        <ProgressBar
+            android:id="@+id/drawer_header.profile_image_loader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/drawer_header_subtitle_height"
+        android:layout_marginBottom="@dimen/margin_base"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/drawer_header.name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/padding_base"
+                android:paddingBottom="@dimen/padding_low"
+                android:fontFamily="sans-serif-medium"
+                android:text="Name"
+                android:textColor="@color/text_dark_bg_base"
+                android:textSize="@dimen/text_base" />
+
+            <Spinner
+                android:id="@+id/drawer_header.profile_picker"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:layout_margin="0dp"/>
+
+            <TextView
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Business Profile"
+                android:textColor="@color/text_dark_bg_secondary"
+                android:textSize="@dimen/text_base" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

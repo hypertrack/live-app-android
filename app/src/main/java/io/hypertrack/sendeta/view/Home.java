@@ -36,8 +36,6 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -110,7 +108,7 @@ import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.PhoneUtils;
 
-public class Home extends BaseActivity implements ResultCallback<Status>, LocationListener,
+public class Home extends DrawerBaseActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = "Home";
@@ -406,7 +404,7 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
         setContentView(R.layout.activity_home);
 
         // Initialize Toolbar without Home Button
-        initToolbar(getResources().getString(R.string.app_name), false);
+        initToolbarWithDrawer(getResources().getString(R.string.app_name));
 
         // Initialize Maps
         MapsInitializer.initialize(getApplicationContext());
@@ -1292,18 +1290,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     }
 
     /**
-     * Method to Open User Profile Screen
-     *
-     * @param menuItem
-     */
-    public void onProfileButtonClicked(MenuItem menuItem) {
-        Intent profileIntent = new Intent(this, UserProfile.class);
-        startActivity(profileIntent);
-
-        AnalyticsStore.getLogger().tappedProfile();
-    }
-
-    /**
      * Method to add current selected destination as a Favorite
      * (NOTE: Only Applicable for Live Trip)
      *
@@ -1515,12 +1501,6 @@ public class Home extends BaseActivity implements ResultCallback<Status>, Locati
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
                 + connectionResult.getErrorCode());
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override

@@ -54,4 +54,6 @@
     <dimen name="image_view_size">100dp</dimen>
     <dimen name="image_view_size_half">50dp</dimen>
 
+    <dimen name="drawer_header_subtitle_height">56dp</dimen>
+
 </resources>
