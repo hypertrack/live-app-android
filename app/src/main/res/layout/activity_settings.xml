@@ -28,13 +28,13 @@
             android:layout_height="match_parent">
 
             <LinearLayout
-                android:id="@+id/user_profile.parent_layout"
+                android:id="@+id/settings.parent_layout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <io.hypertrack.sendeta.util.images.RoundedImageView
-                    android:id="@+id/user_profile.image"
+                    android:id="@+id/settings.image"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
                     android:layout_gravity="center_horizontal"
@@ -46,7 +46,7 @@
                     android:src="@drawable/default_profile_pic" />
 
                 <TextView
-                    android:id="@+id/user_profile.edit_account"
+                    android:id="@+id/settings.edit_account"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -68,7 +68,23 @@
                     android:textSize="@dimen/text_medium" />
 
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/user_profile.saved_places"
+                    android:id="@+id/settings.saved_places"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="@dimen/margin_high" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_high"
+                    android:layout_marginTop="@dimen/margin_high"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Business Profiles"
+                    android:textColor="@color/text_base"
+                    android:textSize="@dimen/text_medium" />
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/settings.business_profiles"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="@dimen/margin_high" />

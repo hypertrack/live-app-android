@@ -42,7 +42,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_user_profile);
+        setContentView(R.layout.activity_settings);
 
         // Initialize Toolbar
         initToolbar();
@@ -53,8 +53,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             setTitle(user.getFullName());
 
         // Initialize UI Views
-        profileImageView = (ImageView)findViewById(R.id.user_profile_image);
-        mRecyclerView = (RecyclerView) findViewById(R.id.user_profile_saved_places);
+        profileImageView = (ImageView)findViewById(R.id.settings_image);
+        mRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
 
