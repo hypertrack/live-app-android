@@ -26,9 +26,9 @@ import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
-public class UserProfile extends BaseActivity implements FavoritePlaceOnClickListener {
+public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener {
 
-    private final String TAG = "UserProfile";
+    private final String TAG = "SettingsScreen";
 
     private ScrollView mScrollView;
     private RecyclerView mRecyclerView;
@@ -114,7 +114,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
         UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
-                if (!UserProfile.this.isFinishing() && mProgressDialog != null)
+                if (!SettingsScreen.this.isFinishing() && mProgressDialog != null)
                     mProgressDialog.dismiss();
 
                 updateFavoritesAdapter();
@@ -198,7 +198,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
             public void onClick(DialogInterface dialogInterface, int i) {
 
                 // User agreed to proceed with Deleting Favorite Place
-                mProgressDialog = new ProgressDialog(UserProfile.this);
+                mProgressDialog = new ProgressDialog(SettingsScreen.this);
                 mProgressDialog.setMessage("Deleting place");
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.show();
@@ -214,7 +214,7 @@ public class UserProfile extends BaseActivity implements FavoritePlaceOnClickLis
                     @Override
                     public void OnError() {
                         mProgressDialog.dismiss();
-                        Toast.makeText(UserProfile.this, R.string.deleting_favorite_place_failed,
+                        Toast.makeText(SettingsScreen.this, R.string.deleting_favorite_place_failed,
                                 Toast.LENGTH_SHORT).show();
                     }
                 });

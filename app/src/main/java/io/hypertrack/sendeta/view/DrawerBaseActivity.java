@@ -69,7 +69,7 @@ public class DrawerBaseActivity extends BaseActivity {
                             case R.id.drawer_settings: {
                                 AnalyticsStore.getLogger().tappedProfile();
 
-                                Intent settingsIntent = new Intent(DrawerBaseActivity.this, UserProfile.class);
+                                Intent settingsIntent = new Intent(DrawerBaseActivity.this, SettingsScreen.class);
                                 startActivity(settingsIntent);
                                 break;
                             }

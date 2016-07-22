@@ -79,7 +79,7 @@
             android:name=".view.Profile"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <activity android:name=".view.UserProfile" />
+        <activity android:name=".view.SettingsScreen" />
 
         <activity android:name=".view.EditProfile" />
 
