@@ -403,9 +403,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Check if User is Signed-in
-        checkIfUserIsOnBoard();
-
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
 

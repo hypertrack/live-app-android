@@ -33,13 +33,7 @@
             android:name=".view.Home"
             android:label="${applicationLabel}"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".view.Register"
             android:screenOrientation="portrait"
@@ -83,16 +77,25 @@
         <activity android:name=".view.BusinessProfile" />
 
         <activity
-            android:name=".SplashScreen"
+            android:name=".view.SplashScreen"
+            android:label="${applicationLabel}"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Transparent">
+
+            <!-- Intent Filter to handle browsable deeplinks -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="com.shuttl" />
+                <data android:scheme="www.sendeta.com/" />
+            </intent-filter>
+
+            <!-- Intent Filter to make this Screen as the launcher screen -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
