@@ -454,13 +454,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         Spinner profileAccountsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_profile_accounts);
         profileAccountsSpinner.setVisibility(View.VISIBLE);
 
-        ArrayList<String> accountProfilesList = new ArrayList<>();
-        accountProfilesList.add("Personal");
-
-        // Add AccountProfiles saved in SharedPreferences
-        ArrayList<String> savedAccountProfilesList = AccountProfileSharedPrefsManager.getAccountProfileNamesList(this);
-        if (accountProfilesList != null)
-            accountProfilesList.addAll(savedAccountProfilesList);
+        // Fetch AccountProfiles saved in SharedPreferences
+        ArrayList<String> accountProfilesList = AccountProfileSharedPrefsManager.getAccountProfileNamesList(this);
 
         // Setup Adapter with accountProfilesList to handle Spinner & Dropdown views
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, accountProfilesList);

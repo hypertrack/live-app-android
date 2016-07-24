@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.AppBarOverlay">
 
-        <include layout="@layout/toolbar"/>
+        <include layout="@layout/toolbar" />
 
     </android.support.design.widget.AppBarLayout>
 
@@ -71,7 +71,9 @@
                     android:id="@+id/settings.saved_places"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="@dimen/margin_high" />
+                    android:layout_marginTop="@dimen/margin_medium"
+                    android:paddingTop="@dimen/padding_base"
+                    android:scrollbars="vertical" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -87,7 +89,9 @@
                     android:id="@+id/settings.business_profiles"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginTop="@dimen/margin_high" />
+                    android:layout_marginTop="@dimen/margin_medium"
+                    android:paddingTop="@dimen/padding_base"
+                    android:scrollbars="vertical" />
             </LinearLayout>
         </ScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>

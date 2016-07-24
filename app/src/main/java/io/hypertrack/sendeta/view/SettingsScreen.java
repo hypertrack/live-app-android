@@ -224,8 +224,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
         // Create a confirmation Dialog for Deleting a User Favorite Place
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Do you want to delete this favorite address?");
-        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+        builder.setMessage(R.string.favorite_place_delete_dialog_message);
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
@@ -252,7 +252,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 });
             }
         });
-        builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // User dismissed to delete Favorite Place
@@ -270,12 +270,6 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     }
 
     @Override
-    public void onDeleteBusinessProfile(AccountProfile businessProfile) {
-        // Start BusinessProfile Activity with to be deleted Account Profile as parameter
-        showBusinessProfileScreen(businessProfile);
-    }
-
-    @Override
     public void onVerifyPendingBusinessProfile(AccountProfile businessProfile) {
         // Start BusinessProfile Activity with to be verified Account Profile as parameter
         showBusinessProfileScreen(businessProfile);
@@ -285,6 +279,37 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
         businessProfileIntent.putExtra(BusinessProfile.KEY_BUSINESS_PROFILE, businessProfile);
         startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
+    }
+
+    @Override
+    public void onDeleteBusinessProfile(AccountProfile businessProfile) {
+        // Start BusinessProfile Activity with to be deleted Account Profile as parameter
+        // Create a confirmation Dialog for Deleting a User Favorite Place
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.business_profile_delete_dialog_message);
+        builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+
+                // User agreed to proceed with Deleting Business Profile
+                mProgressDialog = new ProgressDialog(SettingsScreen.this);
+                mProgressDialog.setMessage("Deleting business profile");
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
+
+                // TODO: 25/07/16 Delete User Business Profile from DB & Server here
+
+            }
+        });
+        builder.setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // User dismissed to delete Favorite Place
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
     @Override

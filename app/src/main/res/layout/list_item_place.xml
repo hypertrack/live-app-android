@@ -44,7 +44,6 @@
                     android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
                     android:singleLine="true"
-                    android:text="Title"
                     android:textColor="@color/text_base"
                     android:textSize="@dimen/text_medium" />
 
