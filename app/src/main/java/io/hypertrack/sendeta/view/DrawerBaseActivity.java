@@ -148,24 +148,18 @@ public class DrawerBaseActivity extends BaseActivity {
 
             // Set Profile Accounts if there exists more than one
             if (profileAccountsSpinner != null) {
-                accountProfilesList = new ArrayList<>();
-                accountProfilesList.add("Personal");
-
-                // Add Business Profiles saved in SharedPreferences
-                ArrayList<String> accountBusinessProfilesList =
-                        AccountProfileSharedPrefsManager.getBusinessProfileNamesList(this);
-                if (accountBusinessProfilesList != null)
-                    accountProfilesList.addAll(accountBusinessProfilesList);
+                // Fetch AccountProfiles saved in SharedPreferences
+                accountProfilesList = AccountProfileSharedPrefsManager.getAccountProfileNamesList(this);
 
                 AccountProfileSpinnerAdapter adapter = new AccountProfileSpinnerAdapter(this,
-                        R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), accountProfilesList);
+                        R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.accountProfilesList);
                 profileAccountsSpinner.setAdapter(adapter);
                 profileAccountsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
-                // Set Default s election to the last selected Account Profile
+                // Set Default s election to the last selected AccountProfile
                 String accountProfileSelected = AccountProfileSharedPrefsManager.getAccountProfileSelected(this);
-                if (!TextUtils.isEmpty(accountProfileSelected) && accountProfilesList.contains(accountProfileSelected)) {
-                    profileAccountsSpinner.setSelection(accountProfilesList.indexOf(accountProfileSelected));
+                if (!TextUtils.isEmpty(accountProfileSelected) && this.accountProfilesList.contains(accountProfileSelected)) {
+                    profileAccountsSpinner.setSelection(this.accountProfilesList.indexOf(accountProfileSelected));
                 }
             }
         }

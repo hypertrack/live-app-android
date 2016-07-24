@@ -32,7 +32,16 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:elevation="8dp"
-                app:popupTheme="@style/AppTheme.PopupOverlay" />
+                app:popupTheme="@style/AppTheme.PopupOverlay">
+
+                <Spinner
+                    android:id="@+id/toolbar.profile_accounts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:gravity="right"
+                    android:visibility="gone" />
+            </android.support.v7.widget.Toolbar>
 
             <!-- info message container-->
             <LinearLayout

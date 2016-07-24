@@ -29,6 +29,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -38,6 +39,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -46,6 +48,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -76,6 +79,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -90,6 +94,7 @@ import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
+import io.hypertrack.sendeta.store.AccountProfileSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
@@ -405,6 +410,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
+        setupAccountProfileSpinner();
 
         // Initialize Maps
         MapsInitializer.initialize(getApplicationContext());
@@ -441,6 +447,25 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if there is any currently running trip to be restored
         restoreTripStateIfNeeded();
+    }
+
+    private void setupAccountProfileSpinner() {
+        Toolbar toolbar = getToolbar();
+        Spinner profileAccountsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_profile_accounts);
+        profileAccountsSpinner.setVisibility(View.VISIBLE);
+
+        ArrayList<String> accountProfilesList = new ArrayList<>();
+        accountProfilesList.add("Personal");
+
+        // Add AccountProfiles saved in SharedPreferences
+        ArrayList<String> savedAccountProfilesList = AccountProfileSharedPrefsManager.getAccountProfileNamesList(this);
+        if (accountProfilesList != null)
+            accountProfilesList.addAll(savedAccountProfilesList);
+
+        // Setup Adapter with accountProfilesList to handle Spinner & Dropdown views
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, accountProfilesList);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        profileAccountsSpinner.setAdapter(adapter);
     }
 
     private void initGoogleClient() {

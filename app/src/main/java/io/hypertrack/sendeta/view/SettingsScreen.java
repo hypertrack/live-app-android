@@ -15,19 +15,22 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.adapter.BusinessProfilesAdapter;
+import io.hypertrack.sendeta.adapter.AccountProfilesAdapter;
 import io.hypertrack.sendeta.adapter.FavoritePlacesAdapter;
-import io.hypertrack.sendeta.adapter.callback.BusinessProfileOnClickListener;
+import io.hypertrack.sendeta.adapter.callback.AccountProfileOnClickListener;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
 import io.hypertrack.sendeta.model.*;
+import io.hypertrack.sendeta.store.AccountProfileSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
-public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener, BusinessProfileOnClickListener {
+public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener, AccountProfileOnClickListener {
 
     private final String TAG = "SettingsScreen";
 
@@ -37,8 +40,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     private RecyclerView mFavoritePlacesRecyclerView;
     private FavoritePlacesAdapter favoritePlacesAdapter;
 
-    private RecyclerView mBusinessProfilesRecyclerView;
-    private BusinessProfilesAdapter businessProfilesAdapter;
+    private RecyclerView mAccountProfilesRecyclerView;
+    private AccountProfilesAdapter accountProfilesAdapter;
 
     private ScrollView mScrollView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -62,7 +65,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         // Initialize UI Views
         profileImageView = (ImageView) findViewById(R.id.settings_image);
         mFavoritePlacesRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
-        mBusinessProfilesRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
+        mAccountProfilesRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
@@ -86,10 +89,10 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         setupFavoritePlacesAdapter();
 
         // Initialize Business Profiles RecyclerView & Set Adapter
-        LinearLayoutManager businessProfilesLayoutManager = new LinearLayoutManager(this);
-        businessProfilesLayoutManager.setAutoMeasureEnabled(true);
-        mBusinessProfilesRecyclerView.setLayoutManager(businessProfilesLayoutManager);
-        setupBusinessProfilesAdapter();
+        LinearLayoutManager accountProfilesLayoutManager = new LinearLayoutManager(this);
+        accountProfilesLayoutManager.setAutoMeasureEnabled(true);
+        mAccountProfilesRecyclerView.setLayoutManager(accountProfilesLayoutManager);
+        setupAccountProfilesAdapter();
 
         // Set up User's Profile Image
         updateProfileImage();
@@ -105,14 +108,17 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         mFavoritePlacesRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 
-    private void setupBusinessProfilesAdapter() {
+    private void setupAccountProfilesAdapter() {
         if (user == null) {
             return;
         }
 
-        // Initialize Adapter with User's Business Profiles data
-        businessProfilesAdapter = new BusinessProfilesAdapter(null, this);
-        mBusinessProfilesRecyclerView.setAdapter(businessProfilesAdapter);
+        // Fetch AccountProfiles saved in SharedPreferences
+        ArrayList<AccountProfile> accountProfilesList = AccountProfileSharedPrefsManager.getAccountProfilesList(this);
+
+        // Initialize Adapter with User's Account Profiles data
+        accountProfilesAdapter = new AccountProfilesAdapter(accountProfilesList, this);
+        mAccountProfilesRecyclerView.setAdapter(accountProfilesAdapter);
     }
 
     private void updateProfileImage() {
@@ -264,18 +270,18 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     }
 
     @Override
-    public void onDeleteBusinessProfile(BusinessProfileModel businessProfile) {
-        // Start BusinessProfile Activity with to be deleted BusinessProfileModel as parameter
+    public void onDeleteBusinessProfile(AccountProfile businessProfile) {
+        // Start BusinessProfile Activity with to be deleted Account Profile as parameter
         showBusinessProfileScreen(businessProfile);
     }
 
     @Override
-    public void onVerifyPendingBusinessProfile(BusinessProfileModel businessProfile) {
-        // Start BusinessProfile Activity with to be verified BusinessProfileModel as parameter
+    public void onVerifyPendingBusinessProfile(AccountProfile businessProfile) {
+        // Start BusinessProfile Activity with to be verified Account Profile as parameter
         showBusinessProfileScreen(businessProfile);
     }
 
-    private void showBusinessProfileScreen(BusinessProfileModel businessProfile) {
+    private void showBusinessProfileScreen(AccountProfile businessProfile) {
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
         businessProfileIntent.putExtra(BusinessProfile.KEY_BUSINESS_PROFILE, businessProfile);
         startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);

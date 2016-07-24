@@ -8,7 +8,7 @@ public class Constants {
     public static final String TAG = Constants.class.getSimpleName();
 
     public static final String SHARED_PREFERENCES_NAME = "io.hypertrack.meta";
-    public static final String BUSINESS_PROFILE_SHARED_PREFERENCES_NAME = "io.hypertrack.meta.business_profile";
+    public static final String ACCOUNT_PROFILE_SHARED_PREFERENCES_NAME = "io.hypertrack.meta.account_profile";
     public static final String DEFAULT_STRING_VALUE = "none";
 
     // Constants to Round off ETATimes

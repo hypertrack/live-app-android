@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
     <FrameLayout
@@ -63,6 +64,8 @@
                 android:id="@+id/item_place.delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="@android:color/white"
                 android:src="@drawable/ic_action_delete"
                 android:visibility="visible" />
         </LinearLayout>
