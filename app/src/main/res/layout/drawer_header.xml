@@ -1,73 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#474D62"
     android:orientation="vertical"
     android:paddingLeft="@dimen/margin_high"
-    android:paddingTop="24dp">
+    android:paddingTop="@dimen/padding_xxxhigh">
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/margin_high"
+        android:layout_marginTop="@dimen/margin_base">
 
-    <io.hypertrack.sendeta.util.images.RoundedImageView
-        android:id="@+id/drawer_header.profile_image"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="@dimen/margin_low"
-        android:layout_marginTop="@dimen/margin_high"
-        android:background="@drawable/circle_image_button"
-        android:padding="0dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/default_profile_pic" />
+        <io.hypertrack.sendeta.util.images.RoundedImageView
+            android:id="@+id/drawer_header.profile_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="@dimen/margin_low"
+            android:background="@drawable/circle_image_button"
+            android:scaleType="fitCenter"
+            android:src="@drawable/default_profile_pic" />
 
         <ImageView
             android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginTop="@dimen/margin_xxxhigh"
-            android:layout_marginRight="@dimen/margin_high"
+            android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:src="@drawable/ic_add_business_profile"/>
+            android:paddingLeft="@dimen/padding_base"
+            android:paddingRight="@dimen/padding_base"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_add_business_profile"
+            android:visibility="visible" />
     </RelativeLayout>
 
-    <LinearLayout
+    <Spinner
+        android:id="@+id/drawer_header.profile_accounts"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/drawer_header_subtitle_height"
-        android:layout_marginBottom="@dimen/margin_base"
-        android:orientation="horizontal">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/drawer_header.profile_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-medium"
-                android:paddingBottom="@dimen/padding_low"
-                android:paddingTop="@dimen/padding_base"
-                android:textColor="@color/text_dark_bg_base"
-                android:textSize="@dimen/text_base" />
-
-            <Spinner
-                android:id="@+id/drawer_header.account_picker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="0dp"
-                android:padding="0dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/text_dark_bg_secondary"
-                android:textSize="@dimen/text_base" />
-        </LinearLayout>
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:background="?android:selectableItemBackground"
+        android:dropDownVerticalOffset="56dp" />
 </LinearLayout>

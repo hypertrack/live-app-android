@@ -443,17 +443,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         restoreTripStateIfNeeded();
     }
 
-    private void checkIfUserIsOnBoard() {
-        boolean isUserOnboard = UserStore.isUserLoggedIn();
-        if (!isUserOnboard) {
-            startActivity(new Intent(this, Register.class));
-            finish();
-            return;
-        } else {
-            UserStore.sharedStore.initializeUser();
-        }
-    }
-
     private void initGoogleClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -1351,18 +1340,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         favoriteButton.setClickable(true);
     }
 
-    private void updateCurrentLocationMarker() {
-        if (currentLocationMarker == null) {
-            return;
-        }
-
-        LatLng position = currentLocationMarker.getPosition();
-        currentLocationMarker.remove();
-        initCustomMarkerView();
-
-        addMarkerToCurrentLocation(position);
-    }
-
     @SuppressLint("ParcelCreator")
     private class AddressResultReceiver extends ResultReceiver {
         public AddressResultReceiver(Handler handler) {
@@ -1473,6 +1450,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
 
         AppEventsLogger.activateApp(getApplication());
+    }
+
+    private void updateCurrentLocationMarker() {
+        if (currentLocationMarker == null) {
+            return;
+        }
+
+        LatLng position = currentLocationMarker.getPosition();
+        currentLocationMarker.remove();
+        initCustomMarkerView();
+
+        addMarkerToCurrentLocation(position);
     }
 
     private void resumeLocationUpdates() {

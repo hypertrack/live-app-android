@@ -9,11 +9,16 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Spinner;
+
+import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.adapter.AccountProfileSpinnerAdapter;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.store.AccountProfileSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
 
@@ -24,10 +29,12 @@ public class DrawerBaseActivity extends BaseActivity {
 
     private User user;
     private ImageView profileImageView;
-    private TextView profileUserName;
+    private Spinner profileAccountsSpinner;
 
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
+
+    private ArrayList<String> accountProfilesList;
 
     public void initToolbarWithDrawer() {
         initToolbarWithDrawer(null);
@@ -44,7 +51,7 @@ public class DrawerBaseActivity extends BaseActivity {
 
         if (navigationHeaderView != null) {
             profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
-            profileUserName = (TextView) navigationHeaderView.findViewById(R.id.drawer_header_profile_name);
+            profileAccountsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_profile_accounts);
         }
 
         // Update User Data in Navigation Drawer Header
@@ -118,20 +125,53 @@ public class DrawerBaseActivity extends BaseActivity {
 
         if (user != null) {
 
-            // Set Profile Name
-            if (profileUserName != null && !TextUtils.isEmpty(user.getFullName())) {
-                profileUserName.setText(user.getFullName());
-            }
-
+            // Set Profile Picture if one exists for Current User
             if (profileImageView != null) {
                 Bitmap bitmap = user.getImageBitmap();
 
-                // Set Profile Picture if one exists for Current User
                 if (bitmap != null) {
                     profileImageView.setImageBitmap(bitmap);
                     profileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
                 }
             }
+
+            // Set Profile Accounts if there exists more than one
+            if (profileAccountsSpinner != null) {
+                accountProfilesList = new ArrayList<>();
+                accountProfilesList.add("Personal");
+
+                // Add Business Profiles saved in SharedPreferences
+                ArrayList<String> accountBusinessProfilesList =
+                        AccountProfileSharedPrefsManager.getBusinessProfileNamesList(this);
+                if (accountBusinessProfilesList != null)
+                    accountProfilesList.addAll(accountBusinessProfilesList);
+
+                AccountProfileSpinnerAdapter adapter = new AccountProfileSpinnerAdapter(this,
+                        R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), accountProfilesList);
+                profileAccountsSpinner.setAdapter(adapter);
+                profileAccountsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+
+                String accountProfileSelected = AccountProfileSharedPrefsManager.getAccountProfileSelected(this);
+                if (!TextUtils.isEmpty(accountProfileSelected) && accountProfilesList.contains(accountProfileSelected)) {
+                    profileAccountsSpinner.setSelection(accountProfilesList.indexOf(accountProfileSelected));
+                }
+            }
         }
     }
+
+    private AdapterView.OnItemSelectedListener mOnItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            if (accountProfilesList != null && !TextUtils.isEmpty(accountProfilesList.get(position))) {
+                // Save the selected Account Profile in SharedPreferences
+                AccountProfileSharedPrefsManager.saveAccountProfileSelected(DrawerBaseActivity.this,
+                        accountProfilesList.get(position));
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+        }
+    };
 }

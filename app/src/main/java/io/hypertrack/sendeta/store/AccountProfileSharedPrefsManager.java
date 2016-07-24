@@ -16,10 +16,11 @@ import io.hypertrack.sendeta.util.Constants;
 /**
  * Created by piyush on 23/07/16.
  */
-public class BusinessProfileSharedPrefsManager {
+public class AccountProfileSharedPrefsManager {
 
     private static final String PREF_NAME = Constants.BUSINESS_PROFILE_SHARED_PREFERENCES_NAME;
     private static final String BUSINESS_PROFILES = "io.hypertrack.meta.business_profile:BusinessProfiles";
+    private static final String ACCOUNT_PROFILE_SELECTED = "io.hypertrack.meta.business_profile:AccountProfileSelected";
 
     private static SharedPreferences getSharedPreferences(Context context) {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -29,17 +30,63 @@ public class BusinessProfileSharedPrefsManager {
         return getSharedPreferences(context).edit();
     }
 
-    public static ArrayList<BusinessProfileModel> getBusinessProfiles(Context context) {
+    public static final String getAccountProfileSelected(Context context) {
+        String accountProfileName = getSharedPreferences(context).getString(ACCOUNT_PROFILE_SELECTED, null);
+        return accountProfileName;
+    }
+
+    public static void saveAccountProfileSelected(Context context, String accountProfileName) {
+        SharedPreferences.Editor editor = getEditor(context);
+        editor.putString(ACCOUNT_PROFILE_SELECTED, accountProfileName);
+        editor.apply();
+    }
+
+    public static ArrayList<BusinessProfileModel> getBusinessProfilesList(Context context) {
         String businessProfilesJSON = getSharedPreferences(context).getString(BUSINESS_PROFILES, null);
         if (TextUtils.isEmpty(businessProfilesJSON)) {
             return null;
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<ArrayList<BusinessProfileModel>>() {
-        }.getType();
+        Type type = new TypeToken<ArrayList<BusinessProfileModel>>() {}.getType();
 
         return gson.fromJson(businessProfilesJSON, type);
+    }
+
+    public static ArrayList<String> getBusinessProfileNamesList(Context context) {
+        ArrayList<BusinessProfileModel> businessProfiles = getBusinessProfilesList(context);
+
+        if (businessProfiles == null || businessProfiles.size() == 0)
+            return null;
+
+        ArrayList<String> businessProfileNames = new ArrayList<>();
+        for (BusinessProfileModel model : businessProfiles) {
+            if (model != null && !TextUtils.isEmpty(model.getCompanyName()))
+                businessProfileNames.add(model.getCompanyName());
+        }
+
+        return businessProfileNames;
+    }
+
+    public static BusinessProfileModel getBusinessProfileForCompanyName(Context context, String companyName) {
+        if (TextUtils.isEmpty(companyName))
+            return null;
+
+        // Fetch BusinessProfiles From SharedPreferences
+        ArrayList<BusinessProfileModel> businessProfilesList = getBusinessProfilesList(context);
+
+        // Check if there are any BusinessProfiles saved in SharedPreferences
+        if (businessProfilesList == null || businessProfilesList.size() == 0)
+            return null;
+
+        // Check if any saved BusinessProfiles matches the given companyName
+        for (BusinessProfileModel model : businessProfilesList) {
+            if (companyName.equalsIgnoreCase(model.getCompanyName())) {
+                return model;
+            }
+        }
+
+        return null;
     }
 
     public static boolean addBusinessProfile(Context context, BusinessProfileModel businessProfile) {
@@ -47,7 +94,7 @@ public class BusinessProfileSharedPrefsManager {
             return false;
 
         // Fetch BusinessProfiles From SharedPreferences
-        ArrayList<BusinessProfileModel> businessProfilesList = BusinessProfileSharedPrefsManager.getBusinessProfiles(context);
+        ArrayList<BusinessProfileModel> businessProfilesList = getBusinessProfilesList(context);
 
         // Check if businessProfilesList is empty
         if (businessProfilesList == null || businessProfilesList.size() == 0) {
@@ -76,7 +123,7 @@ public class BusinessProfileSharedPrefsManager {
             return false;
 
         // Fetch BusinessProfiles From SharedPreferences
-        ArrayList<BusinessProfileModel> businessProfilesList = BusinessProfileSharedPrefsManager.getBusinessProfiles(context);
+        ArrayList<BusinessProfileModel> businessProfilesList = getBusinessProfilesList(context);
 
         // Check if businessProfilesList is empty
         if (businessProfilesList == null || businessProfilesList.size() == 0) {
