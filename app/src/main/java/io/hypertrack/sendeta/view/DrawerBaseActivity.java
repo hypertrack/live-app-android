@@ -30,11 +30,20 @@ public class DrawerBaseActivity extends BaseActivity {
     private User user;
     private ImageView profileImageView;
     private Spinner profileAccountsSpinner;
+    private ImageView addBusinessProfileIcon;
 
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
     private ArrayList<String> accountProfilesList;
+
+    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent addBusinessProfileIntent = new Intent(DrawerBaseActivity.this, BusinessProfile.class);
+            startActivity(addBusinessProfileIntent);
+        }
+    };
 
     public void initToolbarWithDrawer() {
         initToolbarWithDrawer(null);
@@ -52,6 +61,8 @@ public class DrawerBaseActivity extends BaseActivity {
         if (navigationHeaderView != null) {
             profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
             profileAccountsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_profile_accounts);
+            addBusinessProfileIcon = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_add_business_profile);
+            addBusinessProfileIcon.setOnClickListener(mOnClickListener);
         }
 
         // Update User Data in Navigation Drawer Header
@@ -151,6 +162,7 @@ public class DrawerBaseActivity extends BaseActivity {
                 profileAccountsSpinner.setAdapter(adapter);
                 profileAccountsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
+                // Set Default s election to the last selected Account Profile
                 String accountProfileSelected = AccountProfileSharedPrefsManager.getAccountProfileSelected(this);
                 if (!TextUtils.isEmpty(accountProfileSelected) && accountProfilesList.contains(accountProfileSelected)) {
                     profileAccountsSpinner.setSelection(accountProfilesList.indexOf(accountProfileSelected));

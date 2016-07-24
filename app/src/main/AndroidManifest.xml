@@ -30,53 +30,6 @@
 
         <!-- Register Activities here -->
         <activity
-            android:name=".view.Home"
-            android:label="${applicationLabel}"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
-        <activity
-            android:name=".view.Register"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
-        <activity
-            android:name=".view.Verify"
-            android:parentActivityName=".view.Register"
-            android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.Register" />
-        </activity>
-
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
-        <!--
-            <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-        -->
-
-        <activity
-            android:name=".view.Profile"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
-
-        <activity android:name=".view.SettingsScreen" />
-
-        <activity android:name=".view.EditProfile" />
-
-        <activity android:name=".view.AddFavoritePlace" />
-
-        <activity android:name=".view.BusinessProfile" />
-
-        <activity
             android:name=".view.SplashScreen"
             android:label="${applicationLabel}"
             android:screenOrientation="portrait"
@@ -98,6 +51,63 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".view.Home"
+            android:label="${applicationLabel}"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".view.Register"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
+
+        <activity
+            android:name=".view.Verify"
+            android:parentActivityName=".view.Register"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize">
+        </activity>
+
+        <!--
+             The API key for Google Maps-based APIs is defined as a string resource.
+             (See the file "res/values/google_maps_api.xml").
+             Note that the API key is linked to the encryption key used to sign the APK.
+             You need a different API key for each encryption key, including the release key that is used to
+             sign the APK for publishing.
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
+        -->
+        <!--
+            <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+        -->
+
+        <activity
+            android:name=".view.Profile"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+
+        <activity
+            android:name=".view.SettingsScreen"
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.EditProfile"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.AddFavoritePlace"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.BusinessProfile"
+            android:parentActivityName=".view.SettingsScreen"
+            android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->
         <receiver
