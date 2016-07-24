@@ -53,11 +53,11 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 updateViewsToSetUpBusinessProfile();
             else
                 updateViewsForPendingInvite(businessProfile);
+        } else {
+            updateViewsToSetUpBusinessProfile();
         }
     }
 
-    // TODO: 23/07/16 Remove these methods from BusinessProfileView if cant find a solution for this
-    @Override
     public void updateViewsToSetUpBusinessProfile() {
         businessProfileTitle.setText(getString(R.string.business_profile_setup_title));
         businessProfileMessage.setText(getString(R.string.business_profile_setup_message));
@@ -82,7 +82,6 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         });
     }
 
-    @Override
     public void updateViewsForPendingInvite(BusinessProfileModel businessProfile) {
         String pendingInviteCompanyName = businessProfile.getCompanyName();
 
