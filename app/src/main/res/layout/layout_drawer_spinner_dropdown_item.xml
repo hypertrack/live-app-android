@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="#676D82"
+    android:background="#474D62"
     android:orientation="horizontal">
 
     <ImageView
@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:paddingLeft="@dimen/padding_base"
-        android:tint="#444444"
+        android:tint="#AAFFFFFF"
         android:src="@drawable/ic_home" />
 
     <TextView
