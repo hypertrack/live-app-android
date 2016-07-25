@@ -6,11 +6,17 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by piyush on 22/07/16.
  */
-public class Membership implements Serializable {
+public class Membership extends RealmObject implements Serializable {
 
+    public static final String DEFAULT = "default";
+
+    @PrimaryKey
     @SerializedName("account_id")
     private int accountId;
 
@@ -88,6 +94,10 @@ public class Membership implements Serializable {
         this.hypertrackDriverId = hypertrackDriverId;
     }
 
+    public boolean isDefault() {
+        return this.name.equalsIgnoreCase(DEFAULT);
+    }
+
     private Membership() {
     }
 
@@ -97,5 +107,17 @@ public class Membership implements Serializable {
         this.isAccepted = true;
         this.accountPublishableKey = accountPublishableKey;
         this.hypertrackDriverId = hypertrackDriverId;
+    }
+
+    @Override
+    public String toString() {
+        return "Membership{" +
+                "account_id=" + accountId +
+                ", is_accepted='" + isAccepted + '\'' +
+                ", is_rejected='" + isRejected + '\'' +
+                ", name='" + name + '\'' +
+                ", hypertrack_account_id='" + hypertrackAccountId + '\'' +
+                ", hypertrack_driver_id='" + hypertrackDriverId + '\'' +
+                '}';
     }
 }

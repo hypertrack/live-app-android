@@ -44,6 +44,9 @@ public class User extends RealmObject {
 
     private RealmList<MetaPlace> places;
 
+    @SerializedName("memberships")
+    private ArrayList<Membership> memberships;
+
     public Integer getId() {
         return id;
     }
@@ -100,6 +103,14 @@ public class User extends RealmObject {
         this.places = places;
     }
 
+    public ArrayList<Membership> getMemberships() {
+        return memberships;
+    }
+
+    public void setMemberships(ArrayList<Membership> memberships) {
+        this.memberships = memberships;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -109,6 +120,7 @@ public class User extends RealmObject {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
                 ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
+                ", memberships='" + memberships.toString() + '\'' +
                 '}';
     }
 
@@ -256,5 +268,39 @@ public class User extends RealmObject {
         }
 
         this.photoData = bytes;
+    }
+
+    public Membership getPersonalMembership() {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        Membership membership = null;
+        for (Membership candidate: this.getMemberships()) {
+            if (candidate.isDefault()) {
+                membership = candidate;
+                break;
+            }
+        }
+
+        return membership;
+    }
+
+    public List<Membership> getBusinessMemberships() {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        List<Membership> businessMemberships = new ArrayList<>();
+
+        for (Membership candidate : this.getMemberships()) {
+            if (candidate.isDefault()) {
+                continue;
+            }
+
+            businessMemberships.add(candidate);
+        }
+
+        return businessMemberships;
     }
 }

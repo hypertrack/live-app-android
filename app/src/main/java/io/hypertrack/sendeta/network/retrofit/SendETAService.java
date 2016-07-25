@@ -3,6 +3,8 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
+import io.hypertrack.sendeta.model.Membership;
+import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.Trip;
@@ -64,4 +66,14 @@ public interface SendETAService {
 
     @GET("/api/v1/users/{id}/task/")
     Call<Map <String, Object>> createTask(@Path("id") int id, @Query("destination_id") String destinationID);
+
+    // Membership Calls
+    @POST(" /api/v1/users/{id}/accept_membership/")
+    Call<Membership> acceptMembership(@Path("id") int id, @Body MembershipDTO membership);
+
+    @POST(" /api/v1/users/{id}/reject_membership/")
+    Call<Membership> rejectMembership(@Path("id") int id, @Body MembershipDTO membership);
+
+    @POST(" /api/v1/users/{id}/delete_membership/")
+    Call<Membership> deleteMembership(@Path("id") int id, @Body MembershipDTO membership);
 }

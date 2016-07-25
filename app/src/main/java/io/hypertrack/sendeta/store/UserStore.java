@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import io.hypertrack.sendeta.model.Membership;
+import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
+import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
@@ -478,6 +481,130 @@ public class UserStore {
                 if (callback != null) {
                     callback.OnError();
                 }
+            }
+        });
+    }
+
+    public void acceptMembership(Membership membership, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        MembershipDTO membershipDTO = new MembershipDTO(membership);
+
+        Call<Membership> call = sendETAService.acceptMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    updateMembership(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void rejectMembership(Membership membership, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        MembershipDTO membershipDTO = new MembershipDTO(membership);
+
+        Call<Membership> call = sendETAService.rejectMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    updateMembership(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void deleteMembership(final Membership membership, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        MembershipDTO membershipDTO = new MembershipDTO(membership);
+
+        Call<Membership> call = sendETAService.deleteMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    deleteMembership(membership);
+
+                    if (callback != null) {
+                        callback.OnSuccess(membership);
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    private void updateMembership(final Membership membership) {
+        if (this.user == null || membership == null) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.copyToRealmOrUpdate(membership);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    private void deleteMembership(final Membership membership) {
+        if (this.user == null || membership == null) {
+            return;
+        }
+
+        final Membership managedMembershipToDelete = realm.where(Membership.class).equalTo("id", membership.getAccountId()).findFirst();
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                managedMembershipToDelete.deleteFromRealm();
+                user.getPlaces().remove(membership);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
