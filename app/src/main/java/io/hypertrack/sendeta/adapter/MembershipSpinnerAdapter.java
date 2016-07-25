@@ -16,16 +16,16 @@ import io.hypertrack.sendeta.R;
 /**
  * Created by piyush on 24/07/16.
  */
-public class AccountProfileSpinnerAdapter extends ArrayAdapter<String>{
+public class MembershipSpinnerAdapter extends ArrayAdapter<String>{
     private Context mContext;
     private String userName;
-    private ArrayList<String> accountProfilesList;
+    private ArrayList<String> membershipsList;
 
-    public AccountProfileSpinnerAdapter(Context mContext, int resource, String userName, ArrayList<String> accountProfilesList) {
-        super(mContext, resource, accountProfilesList);
+    public MembershipSpinnerAdapter(Context mContext, int resource, String userName, ArrayList<String> membershipsList) {
+        super(mContext, resource, membershipsList);
         this.mContext = mContext;
         this.userName = userName;
-        this.accountProfilesList = accountProfilesList;
+        this.membershipsList = membershipsList;
     }
 
     @Override
@@ -35,10 +35,10 @@ public class AccountProfileSpinnerAdapter extends ArrayAdapter<String>{
             convertView.setTag("DROPDOWN");
         }
 
-        ImageView accountProfileIcon = (ImageView) convertView.findViewById(R.id.spinner_dropdown_item_icon);
-        TextView accountProfileName = (TextView) convertView.findViewById(R.id.spinner_dropdown_item_name);
-        accountProfileIcon.setVisibility(View.VISIBLE);
-        accountProfileName.setText(accountProfilesList.get(position));
+        ImageView membershipIcon = (ImageView) convertView.findViewById(R.id.spinner_dropdown_item_icon);
+        TextView membershipName = (TextView) convertView.findViewById(R.id.spinner_dropdown_item_name);
+        membershipIcon.setVisibility(View.VISIBLE);
+        membershipName.setText(membershipsList.get(position));
 
         return convertView;
     }
@@ -57,7 +57,7 @@ public class AccountProfileSpinnerAdapter extends ArrayAdapter<String>{
             userNameView.setVisibility(View.VISIBLE);
             userNameView.setText(userName);
         }
-        selectedProfileNameView.setText(accountProfilesList.get(position));
+        selectedProfileNameView.setText(membershipsList.get(position));
 
         return convertView;
     }

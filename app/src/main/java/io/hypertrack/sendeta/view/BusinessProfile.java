@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.AccountProfile;
+import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.presenter.BusinessProfilePresenter;
 import io.hypertrack.sendeta.presenter.IBusinessProfilePresenter;
 
@@ -48,7 +48,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
         Intent intent = getIntent();
         if (intent != null && intent.hasExtra(KEY_BUSINESS_PROFILE)){
-            AccountProfile businessProfile = (AccountProfile) intent.getSerializableExtra(KEY_BUSINESS_PROFILE);
+            Membership businessProfile = (Membership) intent.getSerializableExtra(KEY_BUSINESS_PROFILE);
             if (businessProfile == null)
                 updateViewsToSetUpBusinessProfile();
             else
@@ -82,7 +82,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         });
     }
 
-    public void updateViewsForPendingInvite(AccountProfile businessProfile) {
+    public void updateViewsForPendingInvite(Membership businessProfile) {
         String pendingInviteCompanyName = businessProfile.getName();
 
         // Check if the pending invite was for a valid company name

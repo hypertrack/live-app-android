@@ -36,7 +36,7 @@
     </RelativeLayout>
 
     <Spinner
-        android:id="@+id/drawer_header.profile_accounts"
+        android:id="@+id/drawer_header.memberships"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:selectableItemBackground"

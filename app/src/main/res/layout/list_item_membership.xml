@@ -14,7 +14,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/item_account_profile.name"
+            android:id="@+id/item_membership.name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -27,7 +27,7 @@
             android:textSize="@dimen/text_medium" />
 
         <ImageView
-            android:id="@+id/item_account_profile.action_icon"
+            android:id="@+id/item_membership.action_icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:paddingRight="@dimen/padding_base"

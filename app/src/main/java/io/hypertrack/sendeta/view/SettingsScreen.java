@@ -18,19 +18,19 @@ import android.widget.Toast;
 import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.adapter.AccountProfilesAdapter;
+import io.hypertrack.sendeta.adapter.MembershipsAdapter;
 import io.hypertrack.sendeta.adapter.FavoritePlacesAdapter;
-import io.hypertrack.sendeta.adapter.callback.AccountProfileOnClickListener;
+import io.hypertrack.sendeta.adapter.callback.MembershipOnClickListener;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
 import io.hypertrack.sendeta.model.*;
-import io.hypertrack.sendeta.store.AccountProfileSharedPrefsManager;
+import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
-public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener, AccountProfileOnClickListener {
+public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClickListener, MembershipOnClickListener {
 
     private final String TAG = "SettingsScreen";
 
@@ -40,8 +40,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     private RecyclerView mFavoritePlacesRecyclerView;
     private FavoritePlacesAdapter favoritePlacesAdapter;
 
-    private RecyclerView mAccountProfilesRecyclerView;
-    private AccountProfilesAdapter accountProfilesAdapter;
+    private RecyclerView mMembershipsRecyclerView;
+    private MembershipsAdapter membershipsAdapter;
 
     private ScrollView mScrollView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
@@ -65,7 +65,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         // Initialize UI Views
         profileImageView = (ImageView) findViewById(R.id.settings_image);
         mFavoritePlacesRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
-        mAccountProfilesRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
+        mMembershipsRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
         mScrollView = (ScrollView) findViewById(R.id.scrollView);
@@ -89,10 +89,10 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         setupFavoritePlacesAdapter();
 
         // Initialize Business Profiles RecyclerView & Set Adapter
-        LinearLayoutManager accountProfilesLayoutManager = new LinearLayoutManager(this);
-        accountProfilesLayoutManager.setAutoMeasureEnabled(true);
-        mAccountProfilesRecyclerView.setLayoutManager(accountProfilesLayoutManager);
-        setupAccountProfilesAdapter();
+        LinearLayoutManager membershipsLayoutManager = new LinearLayoutManager(this);
+        membershipsLayoutManager.setAutoMeasureEnabled(true);
+        mMembershipsRecyclerView.setLayoutManager(membershipsLayoutManager);
+        setupMembershipsAdapter();
 
         // Set up User's Profile Image
         updateProfileImage();
@@ -108,17 +108,17 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         mFavoritePlacesRecyclerView.setAdapter(favoritePlacesAdapter);
     }
 
-    private void setupAccountProfilesAdapter() {
+    private void setupMembershipsAdapter() {
         if (user == null) {
             return;
         }
 
-        // Fetch AccountProfiles saved in SharedPreferences
-        ArrayList<AccountProfile> accountProfilesList = AccountProfileSharedPrefsManager.getAccountProfilesList(this);
+        // Fetch Memberships saved in SharedPreferences
+        ArrayList<Membership> membershipsList = MembershipSharedPrefsManager.getMembershipsList(this);
 
-        // Initialize Adapter with User's Account Profiles data
-        accountProfilesAdapter = new AccountProfilesAdapter(accountProfilesList, this);
-        mAccountProfilesRecyclerView.setAdapter(accountProfilesAdapter);
+        // Initialize Adapter with User's Memberships data
+        membershipsAdapter = new MembershipsAdapter(membershipsList, this);
+        mMembershipsRecyclerView.setAdapter(membershipsAdapter);
     }
 
     private void updateProfileImage() {
@@ -264,26 +264,26 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     }
 
     @Override
-    public void onAddBusinessProfile() {
+    public void onAddMembership() {
         // Start BusinessProfile Activity with no parameters
         showBusinessProfileScreen(null);
     }
 
     @Override
-    public void onVerifyPendingBusinessProfile(AccountProfile businessProfile) {
-        // Start BusinessProfile Activity with to be verified Account Profile as parameter
+    public void onVerifyPendingMembership(Membership businessProfile) {
+        // Start BusinessProfile Activity with to be verified Membership as parameter
         showBusinessProfileScreen(businessProfile);
     }
 
-    private void showBusinessProfileScreen(AccountProfile businessProfile) {
+    private void showBusinessProfileScreen(Membership businessProfile) {
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
         businessProfileIntent.putExtra(BusinessProfile.KEY_BUSINESS_PROFILE, businessProfile);
         startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
     }
 
     @Override
-    public void onDeleteBusinessProfile(AccountProfile businessProfile) {
-        // Start BusinessProfile Activity with to be deleted Account Profile as parameter
+    public void onDeleteMembership(Membership businessProfile) {
+        // Start BusinessProfile Activity with to be deleted Memberships as parameter
         // Create a confirmation Dialog for Deleting a User Favorite Place
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage(R.string.business_profile_delete_dialog_message);

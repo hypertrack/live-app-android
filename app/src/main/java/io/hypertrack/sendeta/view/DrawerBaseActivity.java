@@ -16,9 +16,9 @@ import android.widget.Spinner;
 import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.adapter.AccountProfileSpinnerAdapter;
+import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
 import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.AccountProfileSharedPrefsManager;
+import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
 
@@ -29,13 +29,13 @@ public class DrawerBaseActivity extends BaseActivity {
 
     private User user;
     private ImageView profileImageView;
-    private Spinner profileAccountsSpinner;
+    private Spinner membershipsSpinner;
     private ImageView addBusinessProfileIcon;
 
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
-    private ArrayList<String> accountProfilesList;
+    private ArrayList<String> membershipsList;
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -60,7 +60,7 @@ public class DrawerBaseActivity extends BaseActivity {
 
         if (navigationHeaderView != null) {
             profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
-            profileAccountsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_profile_accounts);
+            membershipsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_memberships);
             addBusinessProfileIcon = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_add_business_profile);
             addBusinessProfileIcon.setOnClickListener(mOnClickListener);
         }
@@ -146,20 +146,20 @@ public class DrawerBaseActivity extends BaseActivity {
                 }
             }
 
-            // Set Profile Accounts if there exists more than one
-            if (profileAccountsSpinner != null) {
-                // Fetch AccountProfiles saved in SharedPreferences
-                accountProfilesList = AccountProfileSharedPrefsManager.getAccountProfileNamesList(this);
+            // Set Memberships if there exists more than one
+            if (membershipsSpinner != null) {
+                // Fetch Memberships saved in SharedPreferences
+                membershipsList = MembershipSharedPrefsManager.getMembershipNamesList(this);
 
-                AccountProfileSpinnerAdapter adapter = new AccountProfileSpinnerAdapter(this,
-                        R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.accountProfilesList);
-                profileAccountsSpinner.setAdapter(adapter);
-                profileAccountsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+                MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this,
+                        R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.membershipsList);
+                membershipsSpinner.setAdapter(adapter);
+                membershipsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
-                // Set Default s election to the last selected AccountProfile
-                String accountProfileSelected = AccountProfileSharedPrefsManager.getAccountProfileSelected(this);
-                if (!TextUtils.isEmpty(accountProfileSelected) && this.accountProfilesList.contains(accountProfileSelected)) {
-                    profileAccountsSpinner.setSelection(this.accountProfilesList.indexOf(accountProfileSelected));
+                // Set Default s election to the last selected Membership
+                String membershipSelected = MembershipSharedPrefsManager.getMembershipSelected(this);
+                if (!TextUtils.isEmpty(membershipSelected) && this.membershipsList.contains(membershipSelected)) {
+                    membershipsSpinner.setSelection(this.membershipsList.indexOf(membershipSelected));
                 }
             }
         }
@@ -169,10 +169,10 @@ public class DrawerBaseActivity extends BaseActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-            if (accountProfilesList != null && !TextUtils.isEmpty(accountProfilesList.get(position))) {
-                // Save the selected Account Profile in SharedPreferences
-                AccountProfileSharedPrefsManager.saveAccountProfileSelected(DrawerBaseActivity.this,
-                        accountProfilesList.get(position));
+            if (membershipsList != null && !TextUtils.isEmpty(membershipsList.get(position))) {
+                // Save the selected Membership in SharedPreferences
+                MembershipSharedPrefsManager.saveMembershipSelected(DrawerBaseActivity.this,
+                        membershipsList.get(position));
             }
         }
 

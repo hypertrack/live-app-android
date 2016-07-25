@@ -94,7 +94,7 @@ import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
-import io.hypertrack.sendeta.store.AccountProfileSharedPrefsManager;
+import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
@@ -410,7 +410,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
-        setupAccountProfileSpinner();
+        setupMembershipSpinner();
 
         // Initialize Maps
         MapsInitializer.initialize(getApplicationContext());
@@ -449,18 +449,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         restoreTripStateIfNeeded();
     }
 
-    private void setupAccountProfileSpinner() {
+    private void setupMembershipSpinner() {
         Toolbar toolbar = getToolbar();
-        Spinner profileAccountsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_profile_accounts);
-        profileAccountsSpinner.setVisibility(View.VISIBLE);
+        Spinner membershipsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_membership_spinner);
+        membershipsSpinner.setVisibility(View.VISIBLE);
 
-        // Fetch AccountProfiles saved in SharedPreferences
-        ArrayList<String> accountProfilesList = AccountProfileSharedPrefsManager.getAccountProfileNamesList(this);
+        // Fetch Memberships saved in SharedPreferences
+        ArrayList<String> membershipNamesList = MembershipSharedPrefsManager.getMembershipNamesList(this);
 
-        // Setup Adapter with accountProfilesList to handle Spinner & Dropdown views
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, accountProfilesList);
+        // Setup Adapter with membershipNamesList to handle Spinner & Dropdown views
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, membershipNamesList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        profileAccountsSpinner.setAdapter(adapter);
+        membershipsSpinner.setAdapter(adapter);
     }
 
     private void initGoogleClient() {

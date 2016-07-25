@@ -35,7 +35,7 @@
                 app:popupTheme="@style/AppTheme.PopupOverlay">
 
                 <Spinner
-                    android:id="@+id/toolbar.profile_accounts"
+                    android:id="@+id/toolbar.membership_spinner"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
