@@ -65,6 +65,17 @@ public class SplashScreen extends BaseActivity{
                 finish();
                 break;
 
+            case DeepLinkUtil.RECEIVE_ETA_FOR_DESTINATION:
+                TaskStackBuilder.create(this)
+                        .addNextIntentWithParentStack(new Intent(this, Home.class)
+                                .putExtra(Home.KEY_ETA_FOR_DESTINATION, true)
+                                .putExtra(Home.KEY_ETA_FOR_DESTINATION_LAT, appDeepLink.lat)
+                                .putExtra(Home.KEY_ETA_FOR_DESTINATION_LNG, appDeepLink.lng)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                        .startActivities();
+                finish();
+                break;
+
             case DeepLinkUtil.DEFAULT:
             default:
                 startActivity(new Intent(this, Home.class));

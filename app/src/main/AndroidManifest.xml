@@ -48,6 +48,10 @@
                 <data android:scheme="http"
                     android:host="www.sendeta.com"
                     android:pathPrefix="/accept" />
+
+                <data android:scheme="http"
+                    android:host="www.sendeta.com"
+                    android:pathPrefix="/request"/>
             </intent-filter>
 
             <!-- Intent Filter to make this Screen as the launcher screen -->

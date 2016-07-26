@@ -11,6 +11,10 @@ public class AppDeepLink {
 
     public int id;
 
+    // Used for Push Destination Location feature
+    public Double lat;
+    public Double lng;
+
     public AppDeepLink(int mId) {
         this.mId = mId;
     }

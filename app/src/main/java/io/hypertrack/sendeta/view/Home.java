@@ -120,6 +120,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
     private static final long TIMEOUT_LOCATION_LOADER = 15000;
 
+    public static final String KEY_ETA_FOR_DESTINATION = "eta_for_destination";
+    public static final String KEY_ETA_FOR_DESTINATION_LAT = "lat";
+    public static final String KEY_ETA_FOR_DESTINATION_LNG = "lng";
+
     private User user;
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
@@ -153,6 +157,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTrip = false, locationPermissionChecked = false,
             tripRestoreFinished = false, animateDelayForRestoredTrip = false, locationFrequencyIncreased = true;
 
+    private boolean etaForDestinationDeepLink = false;
+    private LatLng etaForDestinationLocation;
+
     private Handler mHandler;
     private Runnable mRunnable;
 
@@ -161,6 +168,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
+            // Reset Handle etaForDestination DeepLink flag
+            etaForDestinationDeepLink = false;
 
             // On Click Disable handling/showing any more results
             mAdapter.setSearching(false);
@@ -180,9 +189,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             destinationText.setGravity(Gravity.LEFT);
             destinationText.setText(place.getName());
 
-            // Set the selected Place Description as Place Address
-            destinationDescription.setText(place.getAddress());
-            destinationDescription.setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmpty(place.getAddress())) {
+                // Set the selected Place Description as Place Address
+                destinationDescription.setText(place.getAddress());
+                destinationDescription.setVisibility(View.VISIBLE);
+            }
 
             KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
             onSelectPlace(place);
@@ -233,14 +244,20 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         TripManager.getSharedManager().getETA(currentLocationMarker.getPosition(), destinationLocation, new TripETACallback() {
             @Override
             public void OnSuccess(TripETAResponse etaResponse) {
-                mProgressDialog.dismiss();
-                callback.OnSuccess(etaResponse);
+                if (mProgressDialog != null && !Home.this.isFinishing())
+                    mProgressDialog.dismiss();
+
+                if (callback != null)
+                    callback.OnSuccess(etaResponse);
             }
 
             @Override
             public void OnError() {
-                mProgressDialog.dismiss();
-                callback.OnError();
+                if (mProgressDialog != null && !Home.this.isFinishing())
+                    mProgressDialog.dismiss();
+
+                if (callback != null)
+                    callback.OnError();
             }
         });
     }
@@ -288,6 +305,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private AdapterView.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            enterDestinationLayoutClicked = true;
 
             // Check If LOCATION Permission is available
             if (!(ContextCompat.checkSelfPermission(Home.this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)) {
@@ -308,8 +326,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     checkIfLocationIsEnabled();
 
             } else {
-                enterDestinationLayoutClicked = true;
-
                 // Reset Current State when user chooses to edit destination
                 TripManager.getSharedManager().clearState();
                 OnTripEnd();
@@ -467,6 +483,33 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if there is any currently running trip to be restored
         restoreTripStateIfNeeded();
+
+        // Check if there is no Active Trip currently
+        if (shouldRestoreTrip == false) {
+            Intent intent = getIntent();
+
+            // Handle RECEIVE_ETA_FOR_DESTINATION DeepLink
+            if (intent != null && intent.hasExtra(KEY_ETA_FOR_DESTINATION)
+                    && intent.getBooleanExtra(KEY_ETA_FOR_DESTINATION, false)) {
+
+                etaForDestinationDeepLink = true;
+                handleETAForDestinationIntent(intent);
+            }
+        }
+    }
+
+    private void handleETAForDestinationIntent(Intent intent) {
+        Double etaForDestinationLat = intent.getDoubleExtra(KEY_ETA_FOR_DESTINATION_LAT, 0.0);
+        Double etaForDestinationLng = intent.getDoubleExtra(KEY_ETA_FOR_DESTINATION_LNG, 0.0);
+
+        if (etaForDestinationLat != 0.0 && etaForDestinationLng != 0.0) {
+
+            etaForDestinationLocation = new LatLng(etaForDestinationLat, etaForDestinationLng);
+            checkForLocationPermission();
+        } else {
+            etaForDestinationDeepLink = false;
+            Toast.makeText(Home.this, "Invalid Lat Lng", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void setupMembershipsSpinner() {
@@ -494,7 +537,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private void setPreviouslySelectedMembership(List<Membership> membershipsList){
+    private void setPreviouslySelectedMembership(List<Membership> membershipsList) {
         Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
         if (selectedMembershipAccId != null && user.isAcceptedMembership(selectedMembershipAccId)) {
 
@@ -1121,6 +1164,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         Log.d(TAG, "Fetching Location started!");
                         requestLocationUpdates();
 
+                        // Perform EnterDestinationLayout Click on Location Enabled, if user clicked on it
+                        if (enterDestinationLayoutClicked && enterDestinationLayout != null) {
+                            enterDestinationLayout.performClick();
+
+                            // Handle ETAForDestination DeepLink
+                        } else if (etaForDestinationDeepLink) {
+                            mPlaceAutoCompleteListener.OnSuccess(new MetaPlace(etaForDestinationLocation.toString(),
+                                    etaForDestinationLocation));
+                        }
+
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         // Location settings are not satisfied, but this can be fixed
@@ -1129,6 +1182,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                             // Show the dialog by calling startResolutionForResult(),
                             // and check the result in onActivityResult().
                             status.startResolutionForResult(Home.this, Constants.REQUEST_CHECK_SETTINGS);
+
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
                             e.printStackTrace();
@@ -1139,6 +1193,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         // to fix the settings so we won't show the dialog.
                         // This happens when phone is in Airplane/Flight Mode
                         Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
+
+                        // Reset EnterDestinationLayoutClicked Flag if Location change was unavailable
+                        if (enterDestinationLayoutClicked)
+                            enterDestinationLayoutClicked = false;
+
+                        // Reset handle etaForDestination DeepLink Flag if Location change was unavailable
+                        if (etaForDestinationDeepLink)
+                            etaForDestinationDeepLink = false;
+
                         break;
                 }
 
@@ -1204,6 +1267,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         currentLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, customMarkerView))));
+
+        // Handle ETAForDestination DeepLink
+        if (etaForDestinationDeepLink) {
+            mPlaceAutoCompleteListener.OnSuccess(new MetaPlace(etaForDestinationLocation.toString(),
+                    etaForDestinationLocation));
+        }
     }
 
     private Bitmap getBitMapForView(Context context, View view) {
@@ -1452,6 +1521,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
                             getString(R.string.location_permission_never_allow));
+
+                    // Reset EnterDestinationLayoutClicked Flag if Location permission was denied
+                    if (enterDestinationLayoutClicked)
+                        enterDestinationLayoutClicked = false;
+
+                    // Reset handle etaForDestination DeepLink Flag if Location Permission was denied
+                    if (etaForDestinationDeepLink)
+                        etaForDestinationDeepLink = false;
                 }
                 break;
         }
@@ -1468,12 +1545,28 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     Log.i(TAG, "User agreed to make required location settings changes.");
                     Log.d(TAG, "Fetching Location started!");
                     requestLocationUpdates();
+
+                    // Perform EnterDestinationLayout Click on Location Enabled, if user clicked on it
+                    if (enterDestinationLayoutClicked && enterDestinationLayout != null) {
+                        enterDestinationLayout.performClick();
+
+                        // Handle ETAForDestination DeepLink
+                    } else if (etaForDestinationDeepLink) {
+                        mPlaceAutoCompleteListener.OnSuccess(new MetaPlace(etaForDestinationLocation.toString(),
+                                etaForDestinationLocation));
+                    }
+
                     break;
 
                 case Activity.RESULT_CANCELED:
 
-                    Log.i(TAG, "User chose not to make required location settings changes.");
                     // Location Service Enable Request denied, boo! Fire LocationDenied event
+                    Log.i(TAG, "User chose not to make required location settings changes.");
+
+                    // Reset EnterDestinationLayoutClicked Flag if Location permission was denied
+                    if (enterDestinationLayoutClicked)
+                        enterDestinationLayoutClicked = false;
+
                     break;
             }
 
