@@ -40,9 +40,6 @@ public class User extends RealmObject {
 
     private byte[] photoData;
 
-    @SerializedName("hypertrack_driver_id")
-    private String hypertrackDriverID;
-
     private RealmList<MetaPlace> places;
 
     @SerializedName("memberships")
@@ -91,14 +88,6 @@ public class User extends RealmObject {
         this.photo = photo;
     }
 
-    public String getHypertrackDriverID() {
-        return hypertrackDriverID;
-    }
-
-    public void setHypertrackDriverID(String hypertrackDriverID) {
-        this.hypertrackDriverID = hypertrackDriverID;
-    }
-
     public RealmList<MetaPlace> getPlaces() {
         return places;
     }
@@ -131,7 +120,6 @@ public class User extends RealmObject {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
-                ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
                 ", selectedMembershipAccountId='" + selectedMembershipAccountId + '\'' +
                 ", memberships='" + memberships.toString() + '\'' +
                 '}';

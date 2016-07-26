@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.model.HTTrip;
@@ -250,7 +251,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     }
 
-    public void startTrip(int  selectedAccountId, final TripManagerCallback callback) {
+    public void startTrip(int selectedAccountId, final TripManagerCallback callback) {
         if (this.place == null || selectedAccountId != 0) {
             if (callback != null) {
                 callback.OnError();
@@ -261,8 +262,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
         UserStore.sharedStore.getTask(this.place, this.selectedAccountId, new UserStoreGetTaskCallback() {
             @Override
-            public void OnSuccess(String taskID) {
-                HTTripParams tripParams = getTripParams(taskID);
+            public void OnSuccess(String taskID, String hypertrackDriverID, String publishableKey) {
+
+                // Set PublishableKey fetched for the selectedAccountId
+                HyperTrack.setPublishableApiKey(publishableKey, MetaApplication.getInstance().getApplicationContext());
+
+                HTTripParams tripParams = getTripParams(taskID, hypertrackDriverID);
                 transmitter.startTrip(tripParams, new HTTripStatusCallback() {
                     @Override
                     public void onSuccess(HTTrip htTrip) {
@@ -397,12 +402,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         }
     }
 
-    private HTTripParams getTripParams(String taskID) {
+    private HTTripParams getTripParams(String taskID, String hypertrackDriverID) {
         ArrayList<String> taskIDs = new ArrayList<>();
         taskIDs.add(taskID);
 
         return new HTTripParamsBuilder()
-                .setDriverID(UserStore.sharedStore.getUser().getHypertrackDriverID())
+                .setDriverID(hypertrackDriverID)
                 .setTaskIDs(taskIDs)
                 .setVehicleType(this.vehicleType)
                 .createHTTripParams();

@@ -130,12 +130,19 @@ public class UserStore {
                 if (response.isSuccessful()) {
                     Map<String, Object> responseDTO = response.body();
 
-                    if (callback != null) {
-                        if (responseDTO != null) {
-                            callback.OnSuccess((String) responseDTO.get("id"));
-                        } else {
-                            callback.OnError();
+                    try {
+                        if (callback != null) {
+                            if (responseDTO != null) {
+                                callback.OnSuccess((String) responseDTO.get("id"),
+                                        (String) responseDTO.get("hypertrack_driver_id"), (String) responseDTO.get("publishable_key"));
+                            } else {
+                                callback.OnError();
+                            }
                         }
+
+                    } catch (Exception e) {
+                        Crashlytics.logException();
+                        e.printStackTrace();
                     }
                 } else {
                     if (callback != null) {
@@ -168,7 +175,8 @@ public class UserStore {
 
                     if (callback != null) {
                         if (responseDTO != null) {
-                            callback.OnSuccess((String) responseDTO.get("id"));
+                            callback.OnSuccess((String) responseDTO.get("id"),
+                                    (String) responseDTO.get("hypertrack_driver_id"), (String) responseDTO.get("publishable_key"));
                         } else {
                             callback.OnError();
                         }
