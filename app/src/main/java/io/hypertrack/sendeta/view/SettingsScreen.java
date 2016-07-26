@@ -15,15 +15,16 @@ import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.adapter.MembershipsAdapter;
 import io.hypertrack.sendeta.adapter.FavoritePlacesAdapter;
-import io.hypertrack.sendeta.adapter.callback.MembershipOnClickListener;
+import io.hypertrack.sendeta.adapter.MembershipsAdapter;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
-import io.hypertrack.sendeta.model.*;
-import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
+import io.hypertrack.sendeta.adapter.callback.MembershipOnClickListener;
+import io.hypertrack.sendeta.model.Membership;
+import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
@@ -113,8 +114,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             return;
         }
 
-        // Fetch Memberships saved in SharedPreferences
-        ArrayList<Membership> membershipsList = MembershipSharedPrefsManager.getMembershipsList(this);
+        // Fetch Memberships saved in DB
+        List<Membership> membershipsList = user.getAcceptedMemberships();
 
         // Initialize Adapter with User's Memberships data
         membershipsAdapter = new MembershipsAdapter(membershipsList, this);

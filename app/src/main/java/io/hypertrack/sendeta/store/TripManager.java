@@ -120,7 +120,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.trip != null
                 && this.place != null
                 && transmitter.isTripActive()
-                && transmitter.getActiveTripID().equalsIgnoreCase(this.trip.getHypertrackTripID())) {
+//                && transmitter.getActiveTripID().equalsIgnoreCase(this.trip.getHypertrackTripID())
+                ) {
 
             // Restore the current trip with locally cached data
             // Start Refreshing the trip without any delay

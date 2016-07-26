@@ -5,10 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.Window;
 
-import io.hypertrack.sendeta.BuildConfig;
-import io.hypertrack.sendeta.model.Membership;
-import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
 import io.hypertrack.sendeta.store.UserStore;
 
 /**
@@ -32,18 +28,6 @@ public class SplashScreen extends BaseActivity{
             finish();
         } else {
             UserStore.sharedStore.initializeUser();
-
-            // Migrate the Existing User to Memberships by adding his currently existent Personal Membership
-            if (MembershipSharedPrefsManager.getMembershipForName(this, "Personal") == null) {
-                User user = UserStore.sharedStore.getUser();
-
-                if (user != null) {
-                    Membership personalProfile = new Membership(user.getId(), "Personal",
-                            user.getHypertrackDriverID(), BuildConfig.API_KEY);
-                    MembershipSharedPrefsManager.addMembership(this, personalProfile);
-                }
-            }
-
             startActivity(new Intent(this, Home.class));
             finish();
         }
