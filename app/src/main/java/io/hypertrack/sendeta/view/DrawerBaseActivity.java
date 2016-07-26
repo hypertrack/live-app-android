@@ -78,11 +78,11 @@ public class DrawerBaseActivity extends BaseActivity {
                             case R.id.drawer_send_eta: {
                                 break;
                             }
-                            case R.id.drawer_receive_eta: {
+//                            case R.id.drawer_receive_eta: {
 //                                Intent receiveETAIntent = new Intent(DrawerBaseActivity.this, MyBookingsActivity.class);
 //                                startActivity(receiveETAIntent);
-                                break;
-                            }
+//                                break;
+//                            }
                             case R.id.drawer_settings: {
                                 AnalyticsStore.getLogger().tappedProfile();
 

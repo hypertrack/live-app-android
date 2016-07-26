@@ -6,10 +6,10 @@
             android:id="@+id/drawer_send_eta"
             android:icon="@drawable/ic_send"
             android:title="Send ETA" />
-        <item
-            android:id="@+id/drawer_receive_eta"
-            android:icon="@drawable/ic_receive"
-            android:title="Receive ETA" />
+        <!--<item-->
+            <!--android:id="@+id/drawer_receive_eta"-->
+            <!--android:icon="@drawable/ic_receive"-->
+            <!--android:title="Receive ETA" />-->
         <item
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_settings"
