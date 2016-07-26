@@ -12,6 +12,7 @@ import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
+import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
@@ -58,6 +59,7 @@ public class UserStore {
             public void execute(Realm realm) {
                 if (user != null) {
                     userToAdd.setPlaces(user.getPlaces());
+                    userToAdd.setMemberships(user.getMemberships());
                 }
                 user = realm.copyToRealmOrUpdate(userToAdd);
             }
@@ -93,17 +95,21 @@ public class UserStore {
             return;
         }
 
+        // TODO: 26/07/16 Add accountI
         if (place.hasDestination()) {
-            this.getTaskForDestination(place.getHyperTrackDestinationID(), callback);
+            this.getTaskForPlaceId(place.getId(), "", callback);
         } else {
             this.getTaskForPlace(place, callback);
         }
     }
 
-    private void getTaskForDestination(String destinationID, final UserStoreGetTaskCallback callback) {
+    private void getTaskForPlaceId(int placeId, String accountId, final UserStoreGetTaskCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), destinationID);
+        TaskDTO taskDTO = new TaskDTO(placeId, accountId);
+
+
+        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -352,9 +358,9 @@ public class UserStore {
     /**
      * Method to process deleted User Favorite Data to log Analytics Event
      *
-     * @param status        Flag to indicate status of FavoritePlace Deletion event
-     * @param errorMessage  ErrorMessage in case of Failure
-     * @param metaPlace     The Place object which is being deleted
+     * @param status       Flag to indicate status of FavoritePlace Deletion event
+     * @param errorMessage ErrorMessage in case of Failure
+     * @param metaPlace    The Place object which is being deleted
      */
     private void processDeletedMetaPlaceForAnalytics(boolean status, String errorMessage, MetaPlace metaPlace) {
 
@@ -481,6 +487,20 @@ public class UserStore {
                 if (callback != null) {
                     callback.OnError();
                 }
+            }
+        });
+    }
+
+    public int getSelectedMembershipAccountId() {
+        return this.user.getSelectedMembershipAccountId();
+    }
+
+    public void updateSelectedMembership(final int selectedMembershipAccountId) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.setSelectedMembershipAccountId(selectedMembershipAccountId);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }

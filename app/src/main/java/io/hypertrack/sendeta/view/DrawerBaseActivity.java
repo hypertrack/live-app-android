@@ -6,19 +6,18 @@ import android.support.design.internal.NavigationMenuView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
+import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
 
@@ -35,7 +34,7 @@ public class DrawerBaseActivity extends BaseActivity {
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
-    private ArrayList<String> membershipsList;
+    private List<Membership> membershipsList;
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -146,21 +145,36 @@ public class DrawerBaseActivity extends BaseActivity {
                 }
             }
 
-            // Set Memberships if there exists more than one
             if (membershipsSpinner != null) {
-                // Fetch Memberships saved in SharedPreferences
-                membershipsList = MembershipSharedPrefsManager.getMembershipNamesList(this);
+                // Fetch Memberships saved in DB
+                membershipsList = user.getAcceptedMemberships();
+                setupMembershipsSpinner(membershipsList);
+            }
+        }
+    }
 
-                MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this,
-                        R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.membershipsList);
-                membershipsSpinner.setAdapter(adapter);
-                membershipsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+    private void setupMembershipsSpinner(List<Membership> membershipsList) {
+        if (membershipsList != null) {
+            MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this,
+                    R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.membershipsList);
+            membershipsSpinner.setAdapter(adapter);
+            membershipsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
 
-                // Set Default s election to the last selected Membership
-                String membershipSelected = MembershipSharedPrefsManager.getMembershipSelected(this);
-                if (!TextUtils.isEmpty(membershipSelected) && this.membershipsList.contains(membershipSelected)) {
-                    membershipsSpinner.setSelection(this.membershipsList.indexOf(membershipSelected));
-                }
+            // Set Previously Selected Membership in Spinner
+            setPreviouslySelectedMembership();
+        } else {
+            membershipsSpinner.setVisibility(View.GONE);
+        }
+    }
+
+    private void setPreviouslySelectedMembership(){
+        Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
+        if (selectedMembershipAccId != null && user.isAcceptedMembership(selectedMembershipAccId)) {
+
+            // Set Default selection to the last selected Membership
+            Membership selectedMembership = user.getMembershipForAccountId(selectedMembershipAccId);
+            if (selectedMembership != null && membershipsList.contains(selectedMembership)) {
+                membershipsSpinner.setSelection(membershipsList.indexOf(selectedMembership));
             }
         }
     }
@@ -169,10 +183,9 @@ public class DrawerBaseActivity extends BaseActivity {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-            if (membershipsList != null && !TextUtils.isEmpty(membershipsList.get(position))) {
-                // Save the selected Membership in SharedPreferences
-                MembershipSharedPrefsManager.saveMembershipSelected(DrawerBaseActivity.this,
-                        membershipsList.get(position));
+            if (membershipsList != null) {
+                // Update the selected Membership in UserStore
+                UserStore.sharedStore.updateSelectedMembership(membershipsList.get(position).getAccountId());
             }
         }
 

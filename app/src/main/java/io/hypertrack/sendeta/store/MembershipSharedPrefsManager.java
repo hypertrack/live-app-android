@@ -30,14 +30,18 @@ public class MembershipSharedPrefsManager {
         return getSharedPreferences(context).edit();
     }
 
-    public static final String getMembershipSelected(Context context) {
-        String membershipName = getSharedPreferences(context).getString(MEMBERSHIP_SELECTED, null);
-        return membershipName;
+    public static final Integer getMembershipSelected(Context context) {
+        String membershipAccountId = getSharedPreferences(context).getString(MEMBERSHIP_SELECTED, null);
+
+        if (TextUtils.isEmpty(membershipAccountId))
+            return null;
+
+        return Integer.valueOf(membershipAccountId);
     }
 
-    public static void saveMembershipSelected(Context context, String membershipName) {
+    public static void saveMembershipSelected(Context context, int membershipAccountId) {
         SharedPreferences.Editor editor = getEditor(context);
-        editor.putString(MEMBERSHIP_SELECTED, membershipName);
+        editor.putString(MEMBERSHIP_SELECTED, String.valueOf(membershipAccountId));
         editor.apply();
     }
 

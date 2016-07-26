@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.BufferedInputStream;
@@ -45,7 +46,10 @@ public class User extends RealmObject {
     private RealmList<MetaPlace> places;
 
     @SerializedName("memberships")
-    private ArrayList<Membership> memberships;
+    private RealmList<Membership> memberships;
+
+    @Expose(serialize = false, deserialize = false)
+    private int selectedMembershipAccountId;
 
     public Integer getId() {
         return id;
@@ -103,12 +107,20 @@ public class User extends RealmObject {
         this.places = places;
     }
 
-    public ArrayList<Membership> getMemberships() {
+    public RealmList<Membership> getMemberships() {
         return memberships;
     }
 
-    public void setMemberships(ArrayList<Membership> memberships) {
+    public void setMemberships(RealmList<Membership> memberships) {
         this.memberships = memberships;
+    }
+
+    public int getSelectedMembershipAccountId() {
+        return selectedMembershipAccountId;
+    }
+
+    public void setSelectedMembershipAccountId(int selectedMembershipAccountId) {
+        this.selectedMembershipAccountId = selectedMembershipAccountId;
     }
 
     @Override
@@ -120,6 +132,7 @@ public class User extends RealmObject {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
                 ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
+                ", selectedMembershipAccountId='" + selectedMembershipAccountId + '\'' +
                 ", memberships='" + memberships.toString() + '\'' +
                 '}';
     }
@@ -214,7 +227,6 @@ public class User extends RealmObject {
         for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.getId() == place.getId()
                     || candidate.getGooglePlacesID().equalsIgnoreCase(place.getGooglePlacesID())
-                    || candidate.getHyperTrackDestinationID().equalsIgnoreCase(place.getHyperTrackDestinationID())
                     || (candidate.getLatitude().equals(place.getLatitude()) && candidate.getLongitude().equals(place.getLongitude()))) {
                 return true;
             }
@@ -270,7 +282,23 @@ public class User extends RealmObject {
         this.photoData = bytes;
     }
 
-    public Membership getPersonalMembership() {
+    public Membership getMembershipForAccountId(int accountId) {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        Membership membership = null;
+        for (Membership candidate: this.getMemberships()) {
+            if (candidate.getAccountId() == accountId) {
+                membership = candidate;
+                break;
+            }
+        }
+
+        return membership;
+    }
+
+    public Membership getDefaultMembership() {
         if (this.getMemberships() == null || this.getMemberships().size() == 0) {
             return null;
         }
@@ -302,5 +330,34 @@ public class User extends RealmObject {
         }
 
         return businessMemberships;
+    }
+
+    public List<Membership> getAcceptedMemberships() {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        List<Membership> acceptedMemberships = new ArrayList<>();
+
+        for (Membership candidate : this.getMemberships()) {
+            if (candidate.isAccepted()) {
+                acceptedMemberships.add(candidate);
+            }
+        }
+
+        return acceptedMemberships;
+    }
+
+    public boolean isAcceptedMembership(int accountId) {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0)
+            return false;
+
+        for (Membership candidate : this.getMemberships()) {
+            if (candidate.getAccountId() == accountId && candidate.isAccepted()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

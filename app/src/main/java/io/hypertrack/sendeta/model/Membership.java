@@ -1,7 +1,5 @@
 package io.hypertrack.sendeta.model;
 
-import android.support.annotation.NonNull;
-
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
@@ -26,17 +24,8 @@ public class Membership extends RealmObject implements Serializable {
     @SerializedName("is_rejected")
     private boolean isRejected;
 
-    @SerializedName("name")
+    @SerializedName("account_name")
     private String name;
-
-    @SerializedName("account_publishable_key")
-    private String accountPublishableKey;
-
-    @SerializedName("hypertrack_account_id")
-    private String hypertrackAccountId;
-
-    @SerializedName("hypertrack_driver_id")
-    private String hypertrackDriverId;
 
     public int getAccountId() {
         return accountId;
@@ -70,43 +59,11 @@ public class Membership extends RealmObject implements Serializable {
         this.name = name;
     }
 
-    public String getAccountPublishableKey() {
-        return accountPublishableKey;
-    }
-
-    public void setAccountPublishableKey(String accountPublishableKey) {
-        this.accountPublishableKey = accountPublishableKey;
-    }
-
-    public String getHypertrackAccountId() {
-        return hypertrackAccountId;
-    }
-
-    public void setHypertrackAccountId(String hypertrackAccountId) {
-        this.hypertrackAccountId = hypertrackAccountId;
-    }
-
-    public String getHypertrackDriverId() {
-        return hypertrackDriverId;
-    }
-
-    public void setHypertrackDriverId(String hypertrackDriverId) {
-        this.hypertrackDriverId = hypertrackDriverId;
-    }
-
     public boolean isDefault() {
         return this.name.equalsIgnoreCase(DEFAULT);
     }
 
-    private Membership() {
-    }
-
-    public Membership(int accountId, @NonNull String name, @NonNull String hypertrackDriverId, @NonNull String accountPublishableKey) {
-        this.accountId = accountId;
-        this.name = name;
-        this.isAccepted = true;
-        this.accountPublishableKey = accountPublishableKey;
-        this.hypertrackDriverId = hypertrackDriverId;
+    public Membership() {
     }
 
     @Override
@@ -116,8 +73,6 @@ public class Membership extends RealmObject implements Serializable {
                 ", is_accepted='" + isAccepted + '\'' +
                 ", is_rejected='" + isRejected + '\'' +
                 ", name='" + name + '\'' +
-                ", hypertrack_account_id='" + hypertrackAccountId + '\'' +
-                ", hypertrack_driver_id='" + hypertrackDriverId + '\'' +
                 '}';
     }
 }

@@ -9,19 +9,20 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.Membership;
 
 /**
  * Created by piyush on 24/07/16.
  */
-public class MembershipSpinnerAdapter extends ArrayAdapter<String>{
+public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
     private Context mContext;
     private String userName;
-    private ArrayList<String> membershipsList;
+    private List<Membership> membershipsList;
 
-    public MembershipSpinnerAdapter(Context mContext, int resource, String userName, ArrayList<String> membershipsList) {
+    public MembershipSpinnerAdapter(Context mContext, int resource, String userName, List<Membership> membershipsList) {
         super(mContext, resource, membershipsList);
         this.mContext = mContext;
         this.userName = userName;
@@ -36,9 +37,9 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<String>{
         }
 
         ImageView membershipIcon = (ImageView) convertView.findViewById(R.id.spinner_dropdown_item_icon);
-        TextView membershipName = (TextView) convertView.findViewById(R.id.spinner_dropdown_item_name);
+        TextView accountProfileName = (TextView) convertView.findViewById(R.id.spinner_dropdown_item_name);
         membershipIcon.setVisibility(View.VISIBLE);
-        membershipName.setText(membershipsList.get(position));
+        accountProfileName.setText(membershipsList.get(position).getName());
 
         return convertView;
     }
@@ -57,7 +58,7 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<String>{
             userNameView.setVisibility(View.VISIBLE);
             userNameView.setText(userName);
         }
-        selectedProfileNameView.setText(membershipsList.get(position));
+        selectedProfileNameView.setText(membershipsList.get(position).getName());
 
         return convertView;
     }

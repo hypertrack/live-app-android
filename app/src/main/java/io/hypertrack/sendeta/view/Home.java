@@ -452,15 +452,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void setupMembershipSpinner() {
         Toolbar toolbar = getToolbar();
         Spinner membershipsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_membership_spinner);
-        membershipsSpinner.setVisibility(View.VISIBLE);
+        membershipsSpinner.setVisibility(View.GONE);
 
         // Fetch Memberships saved in SharedPreferences
-        ArrayList<String> membershipNamesList = MembershipSharedPrefsManager.getMembershipNamesList(this);
+//        ArrayList<String> membershipNamesList = MembershipSharedPrefsManager.getMembershipNamesList(this);
 
         // Setup Adapter with membershipNamesList to handle Spinner & Dropdown views
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, membershipNamesList);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        membershipsSpinner.setAdapter(adapter);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, membershipNamesList);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        membershipsSpinner.setAdapter(adapter);
     }
 
     private void initGoogleClient() {

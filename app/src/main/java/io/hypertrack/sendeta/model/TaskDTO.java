@@ -5,11 +5,15 @@ import com.google.gson.annotations.SerializedName;
 import io.hypertrack.lib.common.model.HTLocation;
 
 /**
- * Created by ulhas on 19/06/16.
+ * Created by piyush on 26/07/16.
  */
-public class PlaceDTO {
+public class TaskDTO{
 
-    private int id;
+    @SerializedName("place_id")
+    private int placeId;
+
+    @SerializedName("account_id")
+    private String accountId;
 
     @SerializedName("google_places_id")
     private String googlePlacesID;
@@ -20,12 +24,20 @@ public class PlaceDTO {
 
     private HTLocation location;
 
-    public int getId() {
-        return id;
+    public int getPlaceId() {
+        return placeId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setPlaceId(int placeId) {
+        this.placeId = placeId;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getGooglePlacesID() {
@@ -60,11 +72,8 @@ public class PlaceDTO {
         this.location = location;
     }
 
-    public PlaceDTO(MetaPlace place) {
-        this.id = place.getId();
-        this.address = place.getAddress();
-        this.googlePlacesID = place.getGooglePlacesID();
-        this.name = place.getName();
-        this.location = new HTLocation(place.getLatitude(), place.getLongitude());
+    public TaskDTO(int placeId, String accountId) {
+        this.placeId = placeId;
+        this.accountId = accountId;
     }
 }
