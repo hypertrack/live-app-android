@@ -28,13 +28,13 @@ public class DrawerBaseActivity extends BaseActivity {
 
     private User user;
     private ImageView profileImageView;
-    private Spinner membershipsSpinner;
+    private Spinner drawerMembershipsSpinner;
     private ImageView addBusinessProfileIcon;
 
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
 
-    private List<Membership> membershipsList;
+    private List<Membership> drawerMembershipsList;
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         @Override
@@ -59,7 +59,7 @@ public class DrawerBaseActivity extends BaseActivity {
 
         if (navigationHeaderView != null) {
             profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
-            membershipsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_memberships);
+            drawerMembershipsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_memberships);
             addBusinessProfileIcon = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_add_business_profile);
             addBusinessProfileIcon.setOnClickListener(mOnClickListener);
         }
@@ -118,6 +118,10 @@ public class DrawerBaseActivity extends BaseActivity {
             public void onDrawerOpened(View drawerView) {
                 // Code here will be triggered once the drawer open as
                 // we dont want anything to happen so we leave this blank
+
+                if (drawerMembershipsList != null && drawerMembershipsSpinner != null)
+                    setSelectedMembership();
+
                 super.onDrawerOpened(drawerView);
             }
         };
@@ -145,47 +149,48 @@ public class DrawerBaseActivity extends BaseActivity {
                 }
             }
 
-            if (membershipsSpinner != null) {
+            if (drawerMembershipsSpinner != null) {
                 // Fetch Memberships saved in DB
-                membershipsList = user.getAcceptedMemberships();
-                setupMembershipsSpinner(membershipsList);
+                drawerMembershipsList = user.getAcceptedMemberships();
+                setupDrawerMembershipsSpinner();
             }
         }
     }
 
-    private void setupMembershipsSpinner(List<Membership> membershipsList) {
-        if (membershipsList != null) {
-            MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this,
-                    R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.membershipsList);
-            membershipsSpinner.setAdapter(adapter);
-            membershipsSpinner.setOnItemSelectedListener(mOnItemSelectedListener);
+    private void setupDrawerMembershipsSpinner() {
+        if (drawerMembershipsList != null) {
+            MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_drawer_spinner,
+                    R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.drawerMembershipsList);
+            drawerMembershipsSpinner.setAdapter(adapter);
+            drawerMembershipsSpinner.setOnItemSelectedListener(mOnDrawerMembershipSelectedListener);
 
             // Set Previously Selected Membership in Spinner
-            setPreviouslySelectedMembership();
+            setSelectedMembership();
         } else {
-            membershipsSpinner.setVisibility(View.GONE);
+            drawerMembershipsSpinner.setVisibility(View.GONE);
         }
     }
 
-    private void setPreviouslySelectedMembership(){
+    private void setSelectedMembership(){
         Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
-        if (selectedMembershipAccId != null && user.isAcceptedMembership(selectedMembershipAccId)) {
 
+        if (selectedMembershipAccId != null) {
             // Set Default selection to the last selected Membership
             Membership selectedMembership = user.getMembershipForAccountId(selectedMembershipAccId);
-            if (selectedMembership != null && membershipsList.contains(selectedMembership)) {
-                membershipsSpinner.setSelection(membershipsList.indexOf(selectedMembership));
+
+            if (selectedMembership != null && selectedMembership.isAccepted() && drawerMembershipsList.contains(selectedMembership)) {
+                drawerMembershipsSpinner.setSelection(drawerMembershipsList.indexOf(selectedMembership));
             }
         }
     }
 
-    private AdapterView.OnItemSelectedListener mOnItemSelectedListener = new AdapterView.OnItemSelectedListener() {
+    private AdapterView.OnItemSelectedListener mOnDrawerMembershipSelectedListener = new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 
-            if (membershipsList != null) {
+            if (drawerMembershipsList != null) {
                 // Update the selected Membership in UserStore
-                UserStore.sharedStore.updateSelectedMembership(membershipsList.get(position).getAccountId());
+                UserStore.sharedStore.updateSelectedMembership(drawerMembershipsList.get(position).getAccountId());
             }
         }
 

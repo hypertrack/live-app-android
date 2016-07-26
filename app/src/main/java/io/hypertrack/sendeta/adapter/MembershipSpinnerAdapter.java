@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -21,24 +20,26 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
     private Context mContext;
     private String userName;
     private List<Membership> membershipsList;
+    private int dropdownResourceId, spinnerResourceId;
 
-    public MembershipSpinnerAdapter(Context mContext, int resource, String userName, List<Membership> membershipsList) {
-        super(mContext, resource, membershipsList);
+    public MembershipSpinnerAdapter(Context mContext, int spinnerResourceId, int dropdownResourceId,
+                                    String userName, List<Membership> membershipsList) {
+        super(mContext, dropdownResourceId, membershipsList);
         this.mContext = mContext;
         this.userName = userName;
         this.membershipsList = membershipsList;
+        this.spinnerResourceId = spinnerResourceId;
+        this.dropdownResourceId = dropdownResourceId;
     }
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
         if (convertView == null || !convertView.getTag().toString().equals("DROPDOWN")) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.layout_drawer_spinner_dropdown_item, parent, false);
+            convertView = LayoutInflater.from(mContext).inflate(dropdownResourceId, parent, false);
             convertView.setTag("DROPDOWN");
         }
 
-        ImageView membershipIcon = (ImageView) convertView.findViewById(R.id.spinner_dropdown_item_icon);
         TextView accountProfileName = (TextView) convertView.findViewById(R.id.spinner_dropdown_item_name);
-        membershipIcon.setVisibility(View.VISIBLE);
         accountProfileName.setText(membershipsList.get(position).getAccountName());
 
         return convertView;
@@ -48,17 +49,18 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null || !convertView.getTag().toString().equals("NON_DROPDOWN")) {
             LayoutInflater inflater = LayoutInflater.from(mContext);
-            convertView = inflater.inflate(R.layout.layout_drawer_spinner, parent, false);
+            convertView = inflater.inflate(spinnerResourceId, parent, false);
             convertView.setTag("NON_DROPDOWN");
         }
 
-        TextView userNameView = (TextView) convertView.findViewById(R.id.drawer_spinner_user_name);
-        TextView selectedProfileNameView = (TextView) convertView.findViewById(R.id.drawer_spiner_selected_profile_name);
-        if (!TextUtils.isEmpty(userName)) {
+        TextView userNameView = (TextView) convertView.findViewById(R.id.spinner_user_name);
+        TextView selectedAccountNameView = (TextView) convertView.findViewById(R.id.spinner_selected_account_name);
+
+        if (userNameView != null && !TextUtils.isEmpty(userName)) {
             userNameView.setVisibility(View.VISIBLE);
             userNameView.setText(userName);
         }
-        selectedProfileNameView.setText(membershipsList.get(position).getAccountName());
+        selectedAccountNameView.setText(membershipsList.get(position).getAccountName());
 
         return convertView;
     }

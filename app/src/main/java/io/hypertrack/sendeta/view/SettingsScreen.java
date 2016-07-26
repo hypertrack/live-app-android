@@ -288,7 +288,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         // Start BusinessProfile Activity with to be deleted Memberships as parameter
         // Create a confirmation Dialog for Deleting a User Favorite Place
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.business_profile_delete_dialog_message);
+        builder.setMessage(R.string.business_profile_delete_dialog_msg);
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

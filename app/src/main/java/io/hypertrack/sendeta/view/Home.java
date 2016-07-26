@@ -39,7 +39,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -79,7 +78,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -88,13 +86,14 @@ import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
+import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
-import io.hypertrack.sendeta.store.MembershipSharedPrefsManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
@@ -142,6 +141,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private HTCircleImageView profileViewProfileImage;
     private ProgressBar mAutocompleteLoader;
     private ImageView infoMessageViewIcon;
+
+    private Spinner membershipsSpinner;
+    private List<Membership> membershipsList;
 
     private PlaceAutocompleteAdapter mAdapter;
 
@@ -404,6 +406,21 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
+    private AdapterView.OnItemSelectedListener mOnMembershipSelectedListener = new AdapterView.OnItemSelectedListener() {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+            if (membershipsList != null) {
+                // Update the selected Membership in UserStore
+                UserStore.sharedStore.updateSelectedMembership(membershipsList.get(position).getAccountId());
+            }
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -411,7 +428,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
-        setupMembershipSpinner();
+
+        // Setup Membership Spinner
+        setupMembershipsSpinner();
 
         // Initialize Maps
         MapsInitializer.initialize(getApplicationContext());
@@ -450,18 +469,41 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         restoreTripStateIfNeeded();
     }
 
-    private void setupMembershipSpinner() {
+    private void setupMembershipsSpinner() {
         Toolbar toolbar = getToolbar();
-        Spinner membershipsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_membership_spinner);
-        membershipsSpinner.setVisibility(View.GONE);
+        membershipsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_membership_spinner);
 
-        // Fetch Memberships saved in SharedPreferences
-//        ArrayList<String> membershipNamesList = MembershipSharedPrefsManager.getMembershipNamesList(this);
+        user = UserStore.sharedStore.getUser();
 
-        // Setup Adapter with membershipNamesList to handle Spinner & Dropdown views
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, membershipNamesList);
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        membershipsSpinner.setAdapter(adapter);
+        if (user != null) {
+            membershipsList = user.getAcceptedMemberships();
+        }
+
+        if (membershipsList != null && membershipsList.size() > 0) {
+            membershipsSpinner.setVisibility(View.VISIBLE);
+
+            MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_home_spinner,
+                    R.layout.layout_home_spinner_dropdown_item, user.getFullName(), membershipsList);
+            membershipsSpinner.setAdapter(adapter);
+            membershipsSpinner.setOnItemSelectedListener(mOnMembershipSelectedListener);
+
+            // Set Previously Selected Membership in Spinner
+            setPreviouslySelectedMembership(membershipsList);
+        } else {
+            membershipsSpinner.setVisibility(View.GONE);
+        }
+    }
+
+    private void setPreviouslySelectedMembership(List<Membership> membershipsList){
+        Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
+        if (selectedMembershipAccId != null && user.isAcceptedMembership(selectedMembershipAccId)) {
+
+            // Set Default selection to the last selected Membership
+            Membership selectedMembership = user.getMembershipForAccountId(selectedMembershipAccId);
+            if (selectedMembership != null && membershipsList.contains(selectedMembership)) {
+                membershipsSpinner.setSelection(membershipsList.indexOf(selectedMembership));
+            }
+        }
     }
 
     private void initGoogleClient() {

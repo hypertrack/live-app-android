@@ -99,9 +99,13 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     public void showMembershipActionSuccess(boolean acceptInvite) {
         businessProfileLoaderLayout.setVisibility(View.GONE);
         if (acceptInvite) {
-            Toast.makeText(BusinessProfile.this, "Your membership is successfully accepted.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BusinessProfile.this, R.string.business_profile_accepted_success_msg,
+                    Toast.LENGTH_SHORT).show();
+            finish();
         } else {
-            Toast.makeText(BusinessProfile.this, "Your membership is successfully rejected.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BusinessProfile.this, R.string.business_profile_rejected_success_msg,
+                    Toast.LENGTH_SHORT).show();
+            finish();
         }
     }
 
@@ -109,9 +113,11 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     public void showMembershipActionError(boolean acceptInvite) {
         businessProfileLoaderLayout.setVisibility(View.GONE);
         if (acceptInvite) {
-            Toast.makeText(BusinessProfile.this, "There was an error accepting your membership. Please try again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BusinessProfile.this, R.string.business_profile_accepted_error_msg,
+                    Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(BusinessProfile.this, "There was an error rejecting your membership. Please try again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(BusinessProfile.this, R.string.business_profile_rejected_error_msg,
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -120,13 +126,13 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         // Check if the pending invite was for a valid company name
         if (!TextUtils.isEmpty(accountName)) {
             businessProfileTitle.setText(accountName);
-            businessProfileMessage.setText(getString(R.string.business_profile_invite_message));
+            businessProfileMessage.setText(R.string.business_profile_invite_msg);
 
             // Show Business Profile Pending Invite TnC View with companyName as a parameter
             businessProfileInviteTnC.setText(getString(R.string.business_profile_invite_tnc, accountName));
             businessProfileInviteTnC.setVisibility(View.VISIBLE);
 
-            businessProfilePrimaryBtn.setText(getString(R.string.business_profile_invite_primary_btn));
+            businessProfilePrimaryBtn.setText(R.string.business_profile_invite_primary_btn);
             businessProfilePrimaryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -135,7 +141,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 }
             });
 
-            businessProfileSecondaryBtn.setText(getString(R.string.business_profile_invite_secondary_btn));
+            businessProfileSecondaryBtn.setText(R.string.business_profile_invite_secondary_btn);
             businessProfileSecondaryBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -150,10 +156,10 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     }
 
     public void updateViewsToSetUpBusinessProfile() {
-        businessProfileTitle.setText(getString(R.string.business_profile_setup_title));
-        businessProfileMessage.setText(getString(R.string.business_profile_setup_message));
-        businessProfilePrimaryBtn.setText(getString(R.string.business_profile_setup_primary_btn));
-        businessProfileSecondaryBtn.setText(getString(R.string.business_profile_setup_secondary_btn));
+        businessProfileTitle.setText(R.string.business_profile_setup_title);
+        businessProfileMessage.setText(R.string.business_profile_setup_msg);
+        businessProfilePrimaryBtn.setText(R.string.business_profile_setup_primary_btn);
+        businessProfileSecondaryBtn.setText(R.string.business_profile_setup_secondary_btn);
 
         businessProfilePrimaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -186,11 +192,10 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
     public void updateViewsForNoMembershipInvite() {
         businessProfileTitle.setText(R.string.business_profile_no_invite_title);
-        businessProfileMessage.setText(R.string.business_profile_no_invite_message);
+        businessProfileMessage.setText(R.string.business_profile_no_invite_msg);
         businessProfilePrimaryBtn.setText(R.string.business_profile_okay_primary_btn);
         businessProfileInviteTnC.setVisibility(View.GONE);
-        businessProfileSecondaryBtn.setText("");
-        businessProfileSecondaryBtn.setOnClickListener(null);
+        businessProfileSecondaryBtn.setVisibility(View.GONE);
 
         businessProfilePrimaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
