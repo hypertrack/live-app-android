@@ -8,6 +8,7 @@ import io.hypertrack.sendeta.model.Membership;
 public interface BusinessProfileView {
 
     void handleGetMembershipSuccess(Membership membership);
-    void showGetMembershipSuccess();
-    void showGetMembershipError();
+    void handleGetMembershipError();
+    void showMembershipActionSuccess(boolean acceptInvite);
+    void showMembershipActionError(boolean acceptInvite);
 }

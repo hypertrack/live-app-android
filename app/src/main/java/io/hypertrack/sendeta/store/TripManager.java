@@ -70,6 +70,8 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private Trip trip;
     private MetaPlace place;
 
+    private int selectedAccountId;
+
     private HTTrip hyperTrackTrip;
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
 
@@ -248,14 +250,16 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     }
 
-    public void startTrip(final TripManagerCallback callback) {
-        if (this.place == null) {
+    public void startTrip(int  selectedAccountId, final TripManagerCallback callback) {
+        if (this.place == null || selectedAccountId != 0) {
             if (callback != null) {
                 callback.OnError();
             }
         }
 
-        UserStore.sharedStore.getTask(this.place, new UserStoreGetTaskCallback() {
+        this.selectedAccountId = selectedAccountId;
+
+        UserStore.sharedStore.getTask(this.place, this.selectedAccountId, new UserStoreGetTaskCallback() {
             @Override
             public void OnSuccess(String taskID) {
                 HTTripParams tripParams = getTripParams(taskID);

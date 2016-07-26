@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/selectableItemBackground"
                 android:gravity="center"
-                android:padding="@dimen/padding_base"
+                android:padding="@dimen/padding_medium"
                 android:textAllCaps="true"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/text_large" />
@@ -85,7 +85,7 @@
             android:layout_marginRight="@dimen/margin_high"
             android:background="?attr/selectableItemBackground"
             android:gravity="center"
-            android:padding="@dimen/padding_base"
+            android:padding="@dimen/padding_medium"
             android:textColor="@color/text_tertiary"
             android:textSize="@dimen/text_large" />
 

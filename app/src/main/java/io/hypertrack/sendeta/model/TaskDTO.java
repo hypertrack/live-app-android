@@ -13,7 +13,7 @@ public class TaskDTO{
     private int placeId;
 
     @SerializedName("account_id")
-    private String accountId;
+    private int accountId;
 
     @SerializedName("google_places_id")
     private String googlePlacesID;
@@ -32,11 +32,11 @@ public class TaskDTO{
         this.placeId = placeId;
     }
 
-    public String getAccountId() {
+    public int getAccountId() {
         return accountId;
     }
 
-    public void setAccountId(String accountId) {
+    public void setAccountId(int accountId) {
         this.accountId = accountId;
     }
 
@@ -72,8 +72,17 @@ public class TaskDTO{
         this.location = location;
     }
 
-    public TaskDTO(int placeId, String accountId) {
+    public TaskDTO(int placeId, int accountId) {
         this.placeId = placeId;
         this.accountId = accountId;
+    }
+
+    public TaskDTO(MetaPlace place, int accountId) {
+        this.accountId = accountId;
+        this.placeId = place.getId();
+        this.address = place.getAddress();
+        this.googlePlacesID = place.getGooglePlacesID();
+        this.name = place.getName();
+        this.location = new HTLocation(place.getLatitude(), place.getLongitude());
     }
 }

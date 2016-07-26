@@ -1,7 +1,5 @@
 package io.hypertrack.sendeta.util;
 
-import android.text.TextUtils;
-
 import io.hypertrack.sendeta.model.AppDeepLink;
 
 /**
@@ -31,36 +29,36 @@ public class DeepLinkUtil {
                     appDeepLink.mId = DeepLinkUtil.MEMBERSHIP;
                 } else {
 
-                    String allData = url.split("\\?", 2)[1];
-
-                    if (!TextUtils.isEmpty(allData)) {
-
-                        String paramData[] = allData.split("\\*");
-
-                        appDeepLink.mId = Integer.valueOf(paramData[0].split("=")[1]);
-
-                        //check if it has params or not
-                        if (paramData.length > 1) {
-                            String params[] = paramData[1].split("\\*");
-
-                            for (String param : params) {
-
-                                String data[] = param.split("=");
-
-                                switch (data[0]) {
-
-                                    case KEY_MEMBERSHIP_ID: {
-                                        try {
-                                            appDeepLink.id = Double.valueOf(data[1]);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
+//                    String allData = url.split("\\?", 2)[1];
+//
+//                    if (!TextUtils.isEmpty(allData)) {
+//
+//                        String paramData[] = allData.split("\\*");
+//
+//                        appDeepLink.mId = Integer.valueOf(paramData[0].split("=")[1]);
+//
+//                        //check if it has params or not
+//                        if (paramData.length > 1) {
+//                            String params[] = paramData[1].split("\\*");
+//
+//                            for (String param : params) {
+//
+//                                String data[] = param.split("=");
+//
+//                                switch (data[0]) {
+//
+//                                    case KEY_MEMBERSHIP_ID: {
+//                                        try {
+//                                            appDeepLink.id = Integer.valueOf(data[1]);
+//                                        } catch (Exception e) {
+//                                            e.printStackTrace();
+//                                        }
+//                                        break;
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -57,12 +57,11 @@ public class SplashScreen extends BaseActivity{
     private void proceedToNextScreen(AppDeepLink appDeepLink) {
         switch (appDeepLink.mId) {
             case DeepLinkUtil.MEMBERSHIP:
-
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, BusinessProfile.class)
-                                .putExtra(BusinessProfile.KEY_MEMBERSHIP_ID, appDeepLink.id)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                        .startActivities();
+                    TaskStackBuilder.create(this)
+                            .addNextIntentWithParentStack(new Intent(this, BusinessProfile.class)
+                                    .putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                            .startActivities();
                 finish();
                 break;
 

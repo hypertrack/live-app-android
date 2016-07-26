@@ -9,8 +9,7 @@ public class AppDeepLink {
     //screen identifier
     public int mId;
 
-    //used for MembershipId
-    public double id;
+    public int id;
 
     public AppDeepLink(int mId) {
         this.mId = mId;

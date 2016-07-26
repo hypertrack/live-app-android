@@ -121,6 +121,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
     private static final long TIMEOUT_LOCATION_LOADER = 15000;
 
+    private User user;
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
@@ -164,7 +165,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             // Check if selected place is a User Favorite to log Analytics Event
             boolean isFavorite = false;
-            User user = UserStore.sharedStore.getUser();
+            user = UserStore.sharedStore.getUser();
             if (user != null) {
                 isFavorite = user.isSynced(place);
             }
@@ -339,7 +340,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void updateAutoCompleteResults() {
         List<MetaPlace> places = null;
-        User user = UserStore.sharedStore.getUser();
+        user = UserStore.sharedStore.getUser();
         if (user != null) {
             places = user.getPlaces();
         }
@@ -598,7 +599,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void updateProfileImage() {
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
-        User user = UserStore.sharedStore.getUser();
+        user = UserStore.sharedStore.getUser();
         if (user != null) {
             Bitmap userImageBitmap = user.getImageBitmap();
             if (userImageBitmap != null) {
@@ -770,7 +771,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mProgressDialog.setMessage(getString(R.string.starting_trip_message));
         mProgressDialog.show();
 
-        TripManager.getSharedManager().startTrip(new TripManagerCallback() {
+        user = UserStore.sharedStore.getUser();
+        if (user == null) {
+            mProgressDialog.dismiss();
+            return;
+        }
+
+        TripManager.getSharedManager().startTrip(this.user.getSelectedMembershipAccountId(), new TripManagerCallback() {
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
@@ -1335,7 +1342,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return;
             }
 
-            User user = UserStore.sharedStore.getUser();
+            user = UserStore.sharedStore.getUser();
             if (user == null) {
                 return;
             }

@@ -11,16 +11,15 @@ import java.util.UUID;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
-import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
+import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
+import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
@@ -102,7 +101,7 @@ public class UserStore {
         return realm.where(User.class).findAll().size() > 0;
     }
 
-    public void getTask(MetaPlace place, final UserStoreGetTaskCallback callback) {
+    public void getTask(MetaPlace place, int selectedAccountId, final UserStoreGetTaskCallback callback) {
         if (this.user == null || place == null) {
             if (callback != null) {
                 callback.OnError();
@@ -111,19 +110,17 @@ public class UserStore {
             return;
         }
 
-        // TODO: 26/07/16 Add accountI
         if (place.hasDestination()) {
-            this.getTaskForPlaceId(place.getId(), "", callback);
+            this.getTaskForPlaceId(place.getId(), selectedAccountId, callback);
         } else {
-            this.getTaskForPlace(place, callback);
+            this.getTaskForPlace(place, selectedAccountId, callback);
         }
     }
 
-    private void getTaskForPlaceId(int placeId, String accountId, final UserStoreGetTaskCallback callback) {
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-
+    private void getTaskForPlaceId(int placeId, int accountId, final UserStoreGetTaskCallback callback) {
         TaskDTO taskDTO = new TaskDTO(placeId, accountId);
 
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
         Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
@@ -156,12 +153,12 @@ public class UserStore {
         });
     }
 
-    private void getTaskForPlace(MetaPlace place, final UserStoreGetTaskCallback callback) {
-        PlaceDTO placeDTO = new PlaceDTO(place);
+    private void getTaskForPlace(MetaPlace place, int selectedAccountId, final UserStoreGetTaskCallback callback) {
+        TaskDTO taskDTO = new TaskDTO(place, selectedAccountId);
 
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), placeDTO);
+        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -591,7 +588,7 @@ public class UserStore {
             public void onResponse(Call<Membership> call, Response<Membership> response) {
                 if (response.isSuccessful()) {
 
-                    updateMembership(response.body());
+                    editMembership(response.body());
 
                     if (callback != null) {
                         callback.OnSuccess(response.body());
@@ -622,7 +619,7 @@ public class UserStore {
             public void onResponse(Call<Membership> call, Response<Membership> response) {
                 if (response.isSuccessful()) {
 
-                    updateMembership(response.body());
+                    editMembership(response.body());
 
                     if (callback != null) {
                         callback.OnSuccess(response.body());
@@ -653,7 +650,7 @@ public class UserStore {
             public void onResponse(Call<Membership> call, Response<Membership> response) {
                 if (response.isSuccessful()) {
 
-                    deleteMembership(membership);
+                    removeMembership(membership);
 
                     if (callback != null) {
                         callback.OnSuccess(membership);
@@ -689,7 +686,7 @@ public class UserStore {
         });
     }
 
-    private void updateMembership(final Membership membership) {
+    private void editMembership(final Membership membership) {
         if (this.user == null || membership == null) {
             return;
         }
@@ -703,7 +700,7 @@ public class UserStore {
         });
     }
 
-    private void deleteMembership(final Membership membership) {
+    private void removeMembership(final Membership membership) {
         if (this.user == null || membership == null) {
             return;
         }

@@ -51,9 +51,6 @@ public interface SendETAService {
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
 
     @POST("/api/v1/users/{id}/create_task/")
-    Call<Map<String, Object>> createTask(@Path("id") int id, @Body PlaceDTO placeDTO);
-
-    @POST("/api/v1/users/{id}/create_task/")
     Call<Map<String, Object>> createTask(@Path("id") int id, @Body TaskDTO placeDTO);
 
     @POST("/api/v1/places/")
@@ -78,12 +75,12 @@ public interface SendETAService {
     @GET("/api/v1/users/{id}/membership/")
     Call<Membership> getMembershipForAccountId(@Path("id") int id, @Query("account_id") int accountId);
 
-    @POST(" /api/v1/users/{id}/accept_membership/")
+    @POST("/api/v1/users/{id}/accept_membership/")
     Call<Membership> acceptMembership(@Path("id") int id, @Body MembershipDTO membership);
 
-    @POST(" /api/v1/users/{id}/reject_membership/")
+    @POST("/api/v1/users/{id}/reject_membership/")
     Call<Membership> rejectMembership(@Path("id") int id, @Body MembershipDTO membership);
 
-    @POST(" /api/v1/users/{id}/delete_membership/")
+    @POST("/api/v1/users/{id}/delete_membership/")
     Call<Membership> deleteMembership(@Path("id") int id, @Body MembershipDTO membership);
 }

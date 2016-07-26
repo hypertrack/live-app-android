@@ -25,23 +25,40 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
     }
 
     @Override
-    public void attemptVerifyPendingBusinessProfile(final Membership membership) {
+    public void attemptAcceptPendingBusinessProfile(final Membership membership) {
         UserStore.sharedStore.acceptMembership(membership, new UserStoreMembershipCallback() {
             @Override
             public void OnSuccess(Membership membership) {
                 if (view != null)
-                    view.showGetMembershipSuccess();
+                    view.showMembershipActionSuccess(true);
             }
 
             @Override
             public void OnError() {
                 if(view != null)
-                    view.showGetMembershipError();
+                    view.showMembershipActionError(true);
             }
         });
     }
 
-    public void getMembershipForAccountId() {
+    @Override
+    public void attemptRejectPendingBusinessProfile(final Membership membership) {
+        UserStore.sharedStore.rejectMembership(membership, new UserStoreMembershipCallback() {
+            @Override
+            public void OnSuccess(Membership membership) {
+                if (view != null)
+                    view.showMembershipActionSuccess(false);
+            }
+
+            @Override
+            public void OnError() {
+                if(view != null)
+                    view.showMembershipActionError(false);
+            }
+        });
+    }
+
+    public void getMembershipsForUser() {
         UserStore.sharedStore.getUserData(new UserStoreGetUserDataCallback() {
             @Override
             public void OnSuccess(User user) {
@@ -49,20 +66,20 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
                 User updatedUser = UserStore.sharedStore.getUser();
 
                 if (updatedUser != null && updatedUser.getPendingMemberships() != null) {
-                    if (updatedUser.getMemberships().size() > 0 && updatedUser.getMemberships().get(0) != null) {
-                        view.handleGetMembershipSuccess(updatedUser.getMemberships().get(0));
+                    if (updatedUser.getPendingMemberships().size() > 0 && updatedUser.getPendingMemberships().get(0) != null) {
+                        view.handleGetMembershipSuccess(updatedUser.getPendingMemberships().get(0));
                         return;
                     }
                 }
 
                 if (view != null)
-                    view.showGetMembershipError();
+                    view.handleGetMembershipError();
             }
 
             @Override
             public void OnError() {
                 if (view != null)
-                    view.showGetMembershipError();
+                    view.handleGetMembershipError();
             }
         });
     }

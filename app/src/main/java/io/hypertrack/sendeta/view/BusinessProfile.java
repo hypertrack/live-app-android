@@ -1,6 +1,7 @@
 package io.hypertrack.sendeta.view;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
@@ -13,6 +14,7 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.presenter.BusinessProfilePresenter;
 import io.hypertrack.sendeta.presenter.IBusinessProfilePresenter;
+import io.hypertrack.sendeta.util.Constants;
 
 /**
  * Created by piyush on 22/07/16.
@@ -21,6 +23,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
     public static final String TAG = BusinessProfile.class.getSimpleName();
     public static final String KEY_MEMBERSHIP = "membership";
+    public static final String KEY_MEMBERSHIP_INVITE = "membership_invite";
     public static final String KEY_MEMBERSHIP_ID = "membership_id";
 
     private TextView businessProfileTitle;
@@ -56,11 +59,11 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
         Intent intent = getIntent();
         if (intent != null) {
-            if (intent.hasExtra(KEY_MEMBERSHIP_ID)) {
+            if (intent.hasExtra(KEY_MEMBERSHIP_INVITE) && intent.getBooleanExtra(KEY_MEMBERSHIP_INVITE, false)) {
                 businessProfileLoaderLayout.setVisibility(View.VISIBLE);
 
                 // Get Membership from Network Call
-                presenter.getMembershipForAccountId();
+                presenter.getMembershipsForUser();
 
             } else if (intent.hasExtra(KEY_MEMBERSHIP)) {
                 Membership membership = (Membership) intent.getSerializableExtra(KEY_MEMBERSHIP);
@@ -76,28 +79,40 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
     @Override
     public void handleGetMembershipSuccess(Membership membership) {
+        businessProfileLoaderLayout.setVisibility(View.GONE);
 
         if (membership != null) {
             updateViewsForMembershipInvite(membership);
         } else {
             updateViewsForNoMembershipInvite();
         }
-
-        showGetMembershipSuccess();
     }
 
     @Override
-    public void showGetMembershipSuccess() {
+    public void handleGetMembershipError() {
         businessProfileLoaderLayout.setVisibility(View.GONE);
-        Toast.makeText(BusinessProfile.this, "Membership success", Toast.LENGTH_SHORT).show();
-    }
 
-    @Override
-    public void showGetMembershipError() {
         updateViewsForNoMembershipInvite();
+    }
 
+    @Override
+    public void showMembershipActionSuccess(boolean acceptInvite) {
         businessProfileLoaderLayout.setVisibility(View.GONE);
-        Toast.makeText(BusinessProfile.this, "Membership fetched error!", Toast.LENGTH_SHORT).show();
+        if (acceptInvite) {
+            Toast.makeText(BusinessProfile.this, "Your membership is successfully accepted.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(BusinessProfile.this, "Your membership is successfully rejected.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void showMembershipActionError(boolean acceptInvite) {
+        businessProfileLoaderLayout.setVisibility(View.GONE);
+        if (acceptInvite) {
+            Toast.makeText(BusinessProfile.this, "There was an error accepting your membership. Please try again.", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(BusinessProfile.this, "There was an error rejecting your membership. Please try again.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void updateViewsForMembershipInvite(final Membership membership) {
@@ -116,7 +131,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 @Override
                 public void onClick(View v) {
                     //Handle Business Profile "Accept" CTA here
-                    presenter.attemptVerifyPendingBusinessProfile(membership);
+                    presenter.attemptAcceptPendingBusinessProfile(membership);
                 }
             });
 
@@ -125,7 +140,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 @Override
                 public void onClick(View v) {
                     //Handle Business Profile "Reject" CTA here
-
+                    presenter.attemptRejectPendingBusinessProfile(membership);
                 }
             });
         } else {
@@ -137,32 +152,45 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     public void updateViewsToSetUpBusinessProfile() {
         businessProfileTitle.setText(getString(R.string.business_profile_setup_title));
         businessProfileMessage.setText(getString(R.string.business_profile_setup_message));
-
-        // Hide Business Profile Pending Invite TnC View
-        businessProfileInviteTnC.setVisibility(View.GONE);
-
         businessProfilePrimaryBtn.setText(getString(R.string.business_profile_setup_primary_btn));
+        businessProfileSecondaryBtn.setText(getString(R.string.business_profile_setup_secondary_btn));
+
         businessProfilePrimaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Handle Business Profile "Set-Up Now" CTA here
+                // TODO: 26/07/16 Add Setup Business Profile URL here
+                String url = "http://www.google.com";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
             }
         });
 
-        businessProfileSecondaryBtn.setText(getString(R.string.business_profile_setup_secondary_btn));
         businessProfileSecondaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //Handle Business Profile "Share" CTA here
+                // TODO: 26/07/16 Add Share Message
+                String shareMessage = "Setup Business Profile @ <link>";
+                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                sharingIntent.setType("text/plain");
+                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+                startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), Constants.SHARE_REQUEST_CODE);
             }
         });
+
+        businessProfileInviteTnC.setVisibility(View.GONE);
+        businessProfileLoaderLayout.setVisibility(View.GONE);
     }
 
     public void updateViewsForNoMembershipInvite() {
         businessProfileTitle.setText(R.string.business_profile_no_invite_title);
         businessProfileMessage.setText(R.string.business_profile_no_invite_message);
         businessProfilePrimaryBtn.setText(R.string.business_profile_okay_primary_btn);
-        businessProfileSecondaryBtn.setVisibility(View.GONE);
+        businessProfileInviteTnC.setVisibility(View.GONE);
+        businessProfileSecondaryBtn.setText("");
+        businessProfileSecondaryBtn.setOnClickListener(null);
 
         businessProfilePrimaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override

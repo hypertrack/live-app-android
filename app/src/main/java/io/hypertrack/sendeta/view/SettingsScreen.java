@@ -28,6 +28,7 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
@@ -271,19 +272,19 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     }
 
     @Override
-    public void onVerifyPendingMembership(Membership businessProfile) {
+    public void onVerifyPendingMembership(Membership membership) {
         // Start BusinessProfile Activity with to be verified Membership as parameter
-        showBusinessProfileScreen(businessProfile);
+        showBusinessProfileScreen(membership);
     }
 
-    private void showBusinessProfileScreen(Membership businessProfile) {
+    private void showBusinessProfileScreen(Membership membership) {
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
-        businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP, businessProfile);
+        businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP, membership);
         startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
     }
 
     @Override
-    public void onDeleteMembership(Membership businessProfile) {
+    public void onDeleteMembership(final Membership membership) {
         // Start BusinessProfile Activity with to be deleted Memberships as parameter
         // Create a confirmation Dialog for Deleting a User Favorite Place
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -298,7 +299,19 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.show();
 
-                // TODO: 25/07/16 Delete User Business Profile from DB & Server here
+                UserStore.sharedStore.deleteMembership(membership, new UserStoreMembershipCallback() {
+                    @Override
+                    public void OnSuccess(Membership membership) {
+                        Toast.makeText(SettingsScreen.this, "Business Profile has been deleted successfully.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void OnError() {
+                        Toast.makeText(SettingsScreen.this, "There was an error deleting business profile. Please try again.",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
 
             }
         });

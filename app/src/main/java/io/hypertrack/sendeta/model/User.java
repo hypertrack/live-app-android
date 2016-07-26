@@ -298,20 +298,21 @@ public class User extends RealmObject {
         return membership;
     }
 
-    public Membership getPendingMemberships() {
+    public List<Membership> getPendingMemberships() {
         if (this.getMemberships() == null || this.getMemberships().size() == 0) {
             return null;
         }
 
-        Membership membership = null;
+        List<Membership> membershipsList = new ArrayList<>();
+
         for (Membership candidate: this.getMemberships()) {
             if (!candidate.isAccepted() && !candidate.isRejected()) {
-                membership = candidate;
+                membershipsList.add(candidate);
                 break;
             }
         }
 
-        return membership;
+        return membershipsList;
     }
 
     public List<Membership> getAcceptedMemberships() {
