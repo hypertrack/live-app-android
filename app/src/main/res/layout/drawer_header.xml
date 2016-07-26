@@ -4,12 +4,12 @@
     android:layout_height="wrap_content"
     android:background="#474D62"
     android:orientation="vertical"
-    android:paddingLeft="@dimen/margin_high"
     android:paddingTop="@dimen/padding_xxxhigh">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_high"
         android:layout_marginRight="@dimen/margin_high"
         android:layout_marginTop="@dimen/margin_base">
 
@@ -40,5 +40,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:selectableItemBackground"
-        android:dropDownVerticalOffset="56dp" />
+        android:dropDownVerticalOffset="58dp" />
 </LinearLayout>

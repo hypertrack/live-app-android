@@ -136,8 +136,10 @@
     <string name="business_profile_okay_primary_btn">Okay</string>
 
     <string name="business_profile_accepted_success_msg">Your business profile is successfully accepted.</string>
-    <string name="business_profile_accepted_error_msg">Your business profile is successfully accepted.</string>
-    <string name="business_profile_rejected_success_msg">Error occurred while accepting your business profile. Please try again.</string>
+    <string name="business_profile_rejected_success_msg">Your business profile is successfully accepted.</string>
+    <string name="business_profile_deleted_success_msg">Your business profile is deleted successfully.</string>
+    <string name="business_profile_accepted_error_msg">Error occurred while accepting your business profile. Please try again.</string>
     <string name="business_profile_rejected_error_msg">Error occurred while rejecting your business profile. Please try again.</string>
+    <string name="business_profile_delete_error_msg">Error occurred while deleting your business profile. Please try again.</string>
 
 </resources>

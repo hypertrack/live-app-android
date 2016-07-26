@@ -7,12 +7,12 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ScrollView;
 import android.widget.Toast;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     private RecyclerView mMembershipsRecyclerView;
     private MembershipsAdapter membershipsAdapter;
 
-    private ScrollView mScrollView;
+    private NestedScrollView mScrollView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private User user;
@@ -71,7 +71,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         mMembershipsRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipeRefreshLayout);
-        mScrollView = (ScrollView) findViewById(R.id.scrollView);
+        mScrollView = (NestedScrollView) findViewById(R.id.scrollView);
 
         // Scroll User Favorite List to top by default
         mScrollView.smoothScrollTo(0, 0);
@@ -81,7 +81,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                refreshFavorites();
+                refreshUserData();
             }
         });
 
@@ -137,12 +137,12 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         }
     }
 
-    private void refreshFavorites() {
+    private void refreshUserData() {
         // Hide the Swipe Refresh Loader
         mSwipeRefreshLayout.setRefreshing(false);
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage("Refresh favorite places");
+        mProgressDialog.setMessage("Refreshing profile data");
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -275,13 +275,17 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 UserStore.sharedStore.deletePlace(new MetaPlace(place), new SuccessErrorCallback() {
                     @Override
                     public void OnSuccess() {
-                        mProgressDialog.dismiss();
+                        if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
+                            mProgressDialog.dismiss();
+
                         updateFavoritesAdapter();
                     }
 
                     @Override
                     public void OnError() {
-                        mProgressDialog.dismiss();
+                        if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
+                            mProgressDialog.dismiss();
+
                         Toast.makeText(SettingsScreen.this, R.string.deleting_favorite_place_failed,
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -336,13 +340,19 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 UserStore.sharedStore.deleteMembership(membership, new UserStoreMembershipCallback() {
                     @Override
                     public void OnSuccess(Membership membership) {
-                        Toast.makeText(SettingsScreen.this, "Business Profile has been deleted successfully.",
+                        if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
+                            mProgressDialog.dismiss();
+
+                        Toast.makeText(SettingsScreen.this, R.string.business_profile_deleted_success_msg,
                                 Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void OnError() {
-                        Toast.makeText(SettingsScreen.this, "There was an error deleting business profile. Please try again.",
+                        if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
+                            mProgressDialog.dismiss();
+
+                        Toast.makeText(SettingsScreen.this, R.string.business_profile_delete_error_msg,
                                 Toast.LENGTH_SHORT).show();
                     }
                 });

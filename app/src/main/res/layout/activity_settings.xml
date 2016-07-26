@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <ScrollView
+        <android.support.v4.widget.NestedScrollView
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -70,7 +70,7 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/settings.saved_places"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginTop="@dimen/margin_medium"
                     android:paddingTop="@dimen/padding_base"
                     android:scrollbars="vertical" />
@@ -88,11 +88,11 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/settings.business_profiles"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:layout_marginTop="@dimen/margin_medium"
                     android:paddingTop="@dimen/padding_base"
                     android:scrollbars="vertical" />
             </LinearLayout>
-        </ScrollView>
+        </android.support.v4.widget.NestedScrollView>
     </android.support.v4.widget.SwipeRefreshLayout>
 </LinearLayout>
