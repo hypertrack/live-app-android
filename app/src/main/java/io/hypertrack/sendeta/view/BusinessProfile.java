@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.Membership;
@@ -18,7 +19,8 @@ import io.hypertrack.sendeta.presenter.IBusinessProfilePresenter;
 public class BusinessProfile extends BaseActivity implements BusinessProfileView{
 
     public static final String TAG = BusinessProfile.class.getSimpleName();
-    public static final String KEY_BUSINESS_PROFILE = "business_profile";
+    public static final String KEY_MEMBERSHIP = "membership";
+    public static final String KEY_MEMBERSHIP_ID = "membership_id";
 
     private TextView businessProfileTitle;
     private TextView businessProfileMessage;
@@ -47,15 +49,34 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         presenter.attachView(this);
 
         Intent intent = getIntent();
-        if (intent != null && intent.hasExtra(KEY_BUSINESS_PROFILE)){
-            Membership businessProfile = (Membership) intent.getSerializableExtra(KEY_BUSINESS_PROFILE);
-            if (businessProfile == null)
+        if (intent != null) {
+            if (intent.hasExtra(KEY_MEMBERSHIP_ID)) {
+                double accountId = intent.getDoubleExtra(KEY_MEMBERSHIP_ID, -1);
+
+                // Get Membership from Network Call
+                presenter.getMembershipForAccountId((int) accountId);
+            }
+
+            if (intent.hasExtra(KEY_MEMBERSHIP)) {
+                Membership businessProfile = (Membership) intent.getSerializableExtra(KEY_MEMBERSHIP);
+                if (businessProfile == null)
+                    updateViewsToSetUpBusinessProfile();
+                else
+                    updateViewsForPendingInvite(businessProfile);
+            } else {
                 updateViewsToSetUpBusinessProfile();
-            else
-                updateViewsForPendingInvite(businessProfile);
-        } else {
-            updateViewsToSetUpBusinessProfile();
+            }
         }
+    }
+
+    @Override
+    public void showGetMembershipSuccess(Membership membership) {
+        Toast.makeText(BusinessProfile.this, "Membership fetched: " + membership.toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void showGetMembershipError() {
+        Toast.makeText(BusinessProfile.this, "Membership fetched error!", Toast.LENGTH_SHORT).show();
     }
 
     public void updateViewsToSetUpBusinessProfile() {

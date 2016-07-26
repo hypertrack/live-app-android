@@ -278,7 +278,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
     private void showBusinessProfileScreen(Membership businessProfile) {
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
-        businessProfileIntent.putExtra(BusinessProfile.KEY_BUSINESS_PROFILE, businessProfile);
+        businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP, businessProfile);
         startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
     }
 

@@ -23,6 +23,8 @@
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
 
+    <string name="filter_title_viewaccept">accept</string>
+
     <string name="error_field_required">This field is required</string>
 
     <string name="geofence_not_available">Geofence service is not available now. Network Location Provider is disabled</string>

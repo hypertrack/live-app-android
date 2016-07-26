@@ -505,6 +505,36 @@ public class UserStore {
         });
     }
 
+    public void getMembershipForAccountId(int accountId, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
+        Call<Membership> call = sendETAService.getMembershipForAccountId(this.user.getId(), accountId);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    addMembership(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
     public void acceptMembership(Membership membership, final UserStoreMembershipCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         MembershipDTO membershipDTO = new MembershipDTO(membership);
@@ -594,6 +624,21 @@ public class UserStore {
                 if (callback != null) {
                     callback.OnError();
                 }
+            }
+        });
+    }
+
+    private void addMembership(final Membership membership) {
+        if (this.user == null || membership == null) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Membership managedMembership = realm.copyToRealmOrUpdate(membership);
+                user.getMemberships().add(managedMembership);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }

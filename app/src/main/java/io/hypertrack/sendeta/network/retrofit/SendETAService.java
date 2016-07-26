@@ -72,6 +72,9 @@ public interface SendETAService {
     Call<Map <String, Object>> createTask(@Path("id") int id, @Query("destination_id") String destinationID);
 
     // Membership Calls
+    @GET("/api/v1/users/{id}/membership/")
+    Call<Membership> getMembershipForAccountId(@Path("id") int id, @Query("account_id") int accountId);
+
     @POST(" /api/v1/users/{id}/accept_membership/")
     Call<Membership> acceptMembership(@Path("id") int id, @Body MembershipDTO membership);
 
