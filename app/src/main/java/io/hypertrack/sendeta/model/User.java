@@ -298,38 +298,20 @@ public class User extends RealmObject {
         return membership;
     }
 
-    public Membership getDefaultMembership() {
+    public Membership getPendingMemberships() {
         if (this.getMemberships() == null || this.getMemberships().size() == 0) {
             return null;
         }
 
         Membership membership = null;
         for (Membership candidate: this.getMemberships()) {
-            if (candidate.isDefault()) {
+            if (!candidate.isAccepted() && !candidate.isRejected()) {
                 membership = candidate;
                 break;
             }
         }
 
         return membership;
-    }
-
-    public List<Membership> getBusinessMemberships() {
-        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
-            return null;
-        }
-
-        List<Membership> businessMemberships = new ArrayList<>();
-
-        for (Membership candidate : this.getMemberships()) {
-            if (candidate.isDefault()) {
-                continue;
-            }
-
-            businessMemberships.add(candidate);
-        }
-
-        return businessMemberships;
     }
 
     public List<Membership> getAcceptedMemberships() {

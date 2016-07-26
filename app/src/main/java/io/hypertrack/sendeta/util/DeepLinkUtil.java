@@ -25,31 +25,38 @@ public class DeepLinkUtil {
         if (url != null && url.length() > 0) {
 
             try {
-                String allData = url.split("\\?", 2)[1];
 
-                if (!TextUtils.isEmpty(allData)) {
+                // Add Business Profile Screen mId
+                if (url.contains("/accept")) {
+                    appDeepLink.mId = DeepLinkUtil.MEMBERSHIP;
+                } else {
 
-                    String paramData[] = allData.split("\\*");
+                    String allData = url.split("\\?", 2)[1];
 
-                    appDeepLink.mId = Integer.valueOf(paramData[0].split("=")[1]);
+                    if (!TextUtils.isEmpty(allData)) {
 
-                    //check if it has params or not
-                    if (paramData.length > 1) {
-                        String params[] = paramData[1].split("\\*");
+                        String paramData[] = allData.split("\\*");
 
-                        for (String param : params) {
+                        appDeepLink.mId = Integer.valueOf(paramData[0].split("=")[1]);
 
-                            String data[] = param.split("=");
+                        //check if it has params or not
+                        if (paramData.length > 1) {
+                            String params[] = paramData[1].split("\\*");
 
-                            switch (data[0]) {
+                            for (String param : params) {
 
-                                case KEY_MEMBERSHIP_ID: {
-                                    try {
-                                        appDeepLink.id = Double.valueOf(data[1]);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
+                                String data[] = param.split("=");
+
+                                switch (data[0]) {
+
+                                    case KEY_MEMBERSHIP_ID: {
+                                        try {
+                                            appDeepLink.id = Double.valueOf(data[1]);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
                         }

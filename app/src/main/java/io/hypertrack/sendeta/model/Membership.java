@@ -25,7 +25,7 @@ public class Membership extends RealmObject implements Serializable {
     private boolean isRejected;
 
     @SerializedName("account_name")
-    private String name;
+    private String accountName;
 
     public int getAccountId() {
         return accountId;
@@ -51,16 +51,16 @@ public class Membership extends RealmObject implements Serializable {
         isRejected = rejected;
     }
 
-    public String getName() {
-        return name;
+    public String getAccountName() {
+        return accountName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
     public boolean isDefault() {
-        return this.name.equalsIgnoreCase(DEFAULT);
+        return this.accountName.equalsIgnoreCase(DEFAULT);
     }
 
     public Membership() {
@@ -72,7 +72,7 @@ public class Membership extends RealmObject implements Serializable {
                 "account_id=" + accountId +
                 ", is_accepted='" + isAccepted + '\'' +
                 ", is_rejected='" + isRejected + '\'' +
-                ", name='" + name + '\'' +
+                ", name='" + accountName + '\'' +
                 '}';
     }
 }

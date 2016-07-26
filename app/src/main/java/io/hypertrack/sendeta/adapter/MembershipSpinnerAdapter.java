@@ -39,7 +39,7 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
         ImageView membershipIcon = (ImageView) convertView.findViewById(R.id.spinner_dropdown_item_icon);
         TextView accountProfileName = (TextView) convertView.findViewById(R.id.spinner_dropdown_item_name);
         membershipIcon.setVisibility(View.VISIBLE);
-        accountProfileName.setText(membershipsList.get(position).getName());
+        accountProfileName.setText(membershipsList.get(position).getAccountName());
 
         return convertView;
     }
@@ -58,7 +58,7 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
             userNameView.setVisibility(View.VISIBLE);
             userNameView.setText(userName);
         }
-        selectedProfileNameView.setText(membershipsList.get(position).getName());
+        selectedProfileNameView.setText(membershipsList.get(position).getAccountName());
 
         return convertView;
     }

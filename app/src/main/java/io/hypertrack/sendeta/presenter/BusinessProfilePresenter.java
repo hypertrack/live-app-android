@@ -1,8 +1,9 @@
 package io.hypertrack.sendeta.presenter;
 
-import io.hypertrack.sendeta.interactor.BusinessProfileInteractor;
 import io.hypertrack.sendeta.model.Membership;
+import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.view.BusinessProfileView;
 
@@ -12,12 +13,10 @@ import io.hypertrack.sendeta.view.BusinessProfileView;
 public class BusinessProfilePresenter implements IBusinessProfilePresenter<BusinessProfileView> {
 
     private BusinessProfileView view;
-    private BusinessProfileInteractor businessProfileInteractor;
 
     @Override
     public void attachView(BusinessProfileView view) {
         this.view = view;
-        businessProfileInteractor = new BusinessProfileInteractor();
     }
 
     @Override
@@ -26,27 +25,45 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
     }
 
     @Override
-    public void attemptVerifyPendingBusinessProfile() {
-        businessProfileInteractor.verifyBusinessProfilePendingInvite();
+    public void attemptVerifyPendingBusinessProfile(final Membership membership) {
+        UserStore.sharedStore.acceptMembership(membership, new UserStoreMembershipCallback() {
+            @Override
+            public void OnSuccess(Membership membership) {
+                if (view != null)
+                    view.showGetMembershipSuccess();
+            }
+
+            @Override
+            public void OnError() {
+                if(view != null)
+                    view.showGetMembershipError();
+            }
+        });
     }
 
-    public void getMembershipForAccountId(int accountId) {
-        if (accountId != -1) {
-            UserStore.sharedStore.getMembershipForAccountId(accountId, new UserStoreMembershipCallback() {
-                @Override
-                public void OnSuccess(Membership membership) {
+    public void getMembershipForAccountId() {
+        UserStore.sharedStore.getUserData(new UserStoreGetUserDataCallback() {
+            @Override
+            public void OnSuccess(User user) {
 
-                    if (view != null)
-                        view.showGetMembershipSuccess(membership);
+                User updatedUser = UserStore.sharedStore.getUser();
+
+                if (updatedUser != null && updatedUser.getPendingMemberships() != null) {
+                    if (updatedUser.getMemberships().size() > 0 && updatedUser.getMemberships().get(0) != null) {
+                        view.handleGetMembershipSuccess(updatedUser.getMemberships().get(0));
+                        return;
+                    }
                 }
 
-                @Override
-                public void OnError() {
-                    if (view != null)
-                        view.showGetMembershipError();
-                }
-            });
-        }
+                if (view != null)
+                    view.showGetMembershipError();
+            }
+
+            @Override
+            public void OnError() {
+                if (view != null)
+                    view.showGetMembershipError();
+            }
+        });
     }
-
 }

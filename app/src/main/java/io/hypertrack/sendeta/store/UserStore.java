@@ -16,6 +16,7 @@ import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
+import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
@@ -62,6 +63,21 @@ public class UserStore {
                     userToAdd.setMemberships(user.getMemberships());
                 }
                 user = realm.copyToRealmOrUpdate(userToAdd);
+            }
+        });
+    }
+
+    private void updateUserData(final User updatedUser) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                if (user != null) {
+                    List<Membership> membershipsToAdd = realm.copyToRealmOrUpdate(updatedUser.getMemberships());
+                    RealmList<Membership> membershipsList = new RealmList<>(membershipsToAdd.toArray(new Membership[membershipsToAdd.size()]));
+                    user.setMemberships(membershipsList);
+                }
+
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
@@ -501,6 +517,36 @@ public class UserStore {
             public void execute(Realm realm) {
                 user.setSelectedMembershipAccountId(selectedMembershipAccountId);
                 user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    public void getUserData(final UserStoreGetUserDataCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
+        Call<User> call = sendETAService.getUserData(this.user.getId());
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+
+                    updateUserData(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
             }
         });
     }

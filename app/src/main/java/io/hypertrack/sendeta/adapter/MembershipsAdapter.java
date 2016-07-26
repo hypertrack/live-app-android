@@ -28,7 +28,9 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
     }
 
     public MembershipsAdapter(List<Membership> memberships, MembershipOnClickListener listener) {
-        this.memberships = memberships;
+        if (memberships != null) {
+            this.memberships = memberships;
+        }
         this.listener = listener;
     }
 
@@ -43,7 +45,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
         // Check if this row is the first in the list
         if (this.isFirstRow(position)) {
             Membership profile = this.memberships.get(position);
-            holder.mMembershipName.setText(profile.getName());
+            holder.mMembershipName.setText(profile.getAccountName());
             holder.mMembershipActionIcon.setVisibility(View.GONE);
 
             // Check if this row is the last in the list
@@ -54,7 +56,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
 
         } else {
             Membership profile = this.memberships.get(position);
-            holder.mMembershipName.setText(profile.getName());
+            holder.mMembershipName.setText(profile.getAccountName());
 
             if (profile.isAccepted()) {
                 holder.mMembershipActionIcon.setImageResource(R.drawable.ic_action_delete);

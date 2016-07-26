@@ -65,8 +65,8 @@ public class MembershipSharedPrefsManager {
 
         ArrayList<String> membershipNames = new ArrayList<>();
         for (Membership model : membershipsList) {
-            if (model != null && !TextUtils.isEmpty(model.getName()))
-                membershipNames.add(model.getName());
+            if (model != null && !TextUtils.isEmpty(model.getAccountName()))
+                membershipNames.add(model.getAccountName());
         }
 
         return membershipNames;
@@ -85,7 +85,7 @@ public class MembershipSharedPrefsManager {
 
         // Check if any saved Membership matches the given name
         for (Membership model : membershipsList) {
-            if (name.equalsIgnoreCase(model.getName())) {
+            if (name.equalsIgnoreCase(model.getAccountName())) {
                 return model;
             }
         }
@@ -94,7 +94,7 @@ public class MembershipSharedPrefsManager {
     }
 
     public static boolean addMembership(Context context, Membership membership) {
-        if (membership == null || TextUtils.isEmpty(membership.getName()))
+        if (membership == null || TextUtils.isEmpty(membership.getAccountName()))
             return false;
 
         // Fetch Memberships From SharedPreferences
@@ -123,7 +123,7 @@ public class MembershipSharedPrefsManager {
     }
 
     public static boolean deleteBusinessProfile(Context context, Membership businessProfile) {
-        if (businessProfile == null || TextUtils.isEmpty(businessProfile.getName()))
+        if (businessProfile == null || TextUtils.isEmpty(businessProfile.getAccountName()))
             return false;
 
         // Fetch Memberships From SharedPreferences
@@ -136,7 +136,7 @@ public class MembershipSharedPrefsManager {
 
         // Check if businessProfile exists in the membershipsList & delete it
         for (Membership model : membershipsList) {
-            if (model != null && model.getName().equalsIgnoreCase(businessProfile.getName())) {
+            if (model != null && model.getAccountName().equalsIgnoreCase(businessProfile.getAccountName())) {
                 membershipsList.remove(model);
 
                 SharedPreferences.Editor editor = getEditor(context);

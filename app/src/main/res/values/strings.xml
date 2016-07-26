@@ -23,7 +23,7 @@
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
 
-    <string name="filter_title_viewaccept">accept</string>
+    <string name="filter_title_viewaccept">SendETA</string>
 
     <string name="error_field_required">This field is required</string>
 
@@ -123,11 +123,16 @@
     <string name="business_profile_invite_primary_btn">Accept</string>
     <string name="business_profile_invite_secondary_btn">Reject</string>
 
-    <string name="business_profile_setup_title">SendETA for Business</string>
+    <string name="business_profile_setup_title">SendETA with Hypertrack</string>
     <string name="business_profile_setup_message">Monitor your operations and power a great customer experience</string>
     <string name="business_profile_setup_primary_btn">set-up now</string>
     <string name="business_profile_setup_secondary_btn">Share</string>
 
     <string name="business_profile_delete_dialog_message">Do you want to delete this business profile?</string>
+
+    <string name="business_profile_no_invite_title">Oops!</string>
+    <string name="business_profile_no_invite_message">Looks like you dont have any pending invite to set up a business profile</string>
+
+    <string name="business_profile_okay_primary_btn">Okay</string>
 
 </resources>
