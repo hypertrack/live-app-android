@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.crashlytics.android.Crashlytics;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -141,7 +142,7 @@ public class UserStore {
                         }
 
                     } catch (Exception e) {
-                        Crashlytics.logException();
+                        Crashlytics.logException(e);
                         e.printStackTrace();
                     }
                 } else {

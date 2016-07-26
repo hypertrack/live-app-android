@@ -28,6 +28,7 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
@@ -48,8 +49,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     private ScrollView mScrollView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
-
     private User user;
+    private boolean isRefreshFavoritesCompleted, isRefreshUserDataCompleted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,7 +149,9 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         UserStore.sharedStore.updatePlaces(new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
-                if (!SettingsScreen.this.isFinishing() && mProgressDialog != null)
+                isRefreshFavoritesCompleted = true;
+                if (!SettingsScreen.this.isFinishing() && mProgressDialog != null
+                        && isRefreshUserDataCompleted)
                     mProgressDialog.dismiss();
 
                 updateFavoritesAdapter();
@@ -156,7 +159,30 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
             @Override
             public void OnError() {
-                mProgressDialog.dismiss();
+                isRefreshFavoritesCompleted = true;
+                if (!SettingsScreen.this.isFinishing() && mProgressDialog != null
+                        && isRefreshUserDataCompleted)
+                    mProgressDialog.dismiss();
+            }
+        });
+
+        UserStore.sharedStore.getUserData(new UserStoreGetUserDataCallback() {
+            @Override
+            public void OnSuccess(User user) {
+                isRefreshUserDataCompleted = true;
+                if (!SettingsScreen.this.isFinishing() && mProgressDialog != null
+                        && isRefreshFavoritesCompleted)
+                    mProgressDialog.dismiss();
+
+                updateMembershipsAdapter();
+            }
+
+            @Override
+            public void OnError() {
+                isRefreshUserDataCompleted = true;
+                if (!SettingsScreen.this.isFinishing() && mProgressDialog != null
+                        && isRefreshUserDataCompleted)
+                    mProgressDialog.dismiss();
             }
         });
     }
@@ -173,6 +199,14 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         favoritePlacesAdapter.notifyDataSetChanged();
     }
 
+    private void updateMembershipsAdapter() {
+        if (user == null) {
+            return;
+        }
+
+        membershipsAdapter.setMembershipsList(user.getAcceptedMemberships());
+        membershipsAdapter.notifyDataSetChanged();
+    }
 
     public void onEditAccountClick(View view) {
         Intent editProfileIntent = new Intent(this, EditProfile.class);

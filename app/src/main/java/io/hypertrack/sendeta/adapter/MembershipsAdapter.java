@@ -34,6 +34,12 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
         this.listener = listener;
     }
 
+    public void setMembershipsList(List<Membership> memberships) {
+        if (memberships == null)
+            memberships = new ArrayList<>();
+
+        this.memberships = memberships;
+    }
     @Override
     public MembershipViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_membership, parent, false);
@@ -43,7 +49,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
     @Override
     public void onBindViewHolder(MembershipViewHolder holder, int position) {
         // Check if this row is the first in the list
-        if (this.isFirstRow(position)) {
+        if (this.isDefaultRow(position)) {
             Membership profile = this.memberships.get(position);
             holder.mMembershipName.setText(profile.getAccountName());
             holder.mMembershipActionIcon.setVisibility(View.GONE);
@@ -80,8 +86,9 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
         return this.memberships.size() + defaultRow;
     }
 
-    private boolean isFirstRow(int position) {
-        if (position == 0)
+    private boolean isDefaultRow(int position) {
+        if (position < memberships.size() && memberships.get(position) != null
+                && memberships.get(position).isDefault())
             return true;
 
         return false;
@@ -112,7 +119,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
                     // Check if the row clicked had a valid position index
                     if (getAdapterPosition() != RecyclerView.NO_POSITION) {
 
-                        if (isFirstRow(getAdapterPosition())) {
+                        if (isDefaultRow(getAdapterPosition())) {
                             // Do nothing as Personal Membership cannot be modified.
 
                         } else if (isLastRow(getAdapterPosition())) {

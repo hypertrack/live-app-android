@@ -252,10 +252,12 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void startTrip(int selectedAccountId, final TripManagerCallback callback) {
-        if (this.place == null || selectedAccountId != 0) {
+        if (this.place == null || selectedAccountId <= 0) {
             if (callback != null) {
                 callback.OnError();
             }
+
+            return;
         }
 
         this.selectedAccountId = selectedAccountId;
