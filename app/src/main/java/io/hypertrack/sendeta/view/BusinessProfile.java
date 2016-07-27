@@ -166,7 +166,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
             public void onClick(View v) {
                 //Handle Business Profile "Set-Up Now" CTA here
                 // TODO: 26/07/16 Add Setup Business Profile URL here
-                String url = "http://www.google.com";
+                String url = "http://www.sendeta.com";
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
                 startActivity(i);
@@ -178,7 +178,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
             public void onClick(View v) {
                 //Handle Business Profile "Share" CTA here
                 // TODO: 26/07/16 Add Share Message
-                String shareMessage = "Setup Business Profile @ <link>";
+                String shareMessage = getString(R.string.business_profile_share_msg);
                 Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                 sharingIntent.setType("text/plain");
                 sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
