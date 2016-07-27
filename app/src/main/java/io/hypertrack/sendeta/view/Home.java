@@ -36,6 +36,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -77,7 +78,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
@@ -89,9 +93,11 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
+import io.hypertrack.sendeta.model.Destination;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
@@ -130,10 +136,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
     private static final long TIMEOUT_LOCATION_LOADER = 15000;
 
-    public static final String KEY_ETA_FOR_DESTINATION = "eta_for_destination";
-    public static final String KEY_ETA_FOR_DESTINATION_LAT = "lat";
-    public static final String KEY_ETA_FOR_DESTINATION_LNG = "lng";
-
     private User user;
     private GoogleMap mMap;
     protected GoogleApiClient mGoogleApiClient;
@@ -169,9 +171,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTrip = false, locationPermissionChecked = false,
             tripRestoreFinished = false, animateDelayForRestoredTrip = false, locationFrequencyIncreased = true;
 
-    private boolean selectETAForDestinationPlace = false, handleETAForDestinationDeepLink = false,
+    private boolean selectPushDestinationPlace = false, handlePushDestinationDeepLink = false,
             destinationAddressGeocoded = false;
-    private MetaPlace etaForDestinationPlace;
+    private MetaPlace pushDestinationPlace;
+    private int pushDestinationAccountId;
+    private Task pushDestinationTask;
 
     private boolean isReceiverRegistered;
     private Handler mHandler;
@@ -183,14 +187,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         @Override
         public void OnSuccess(MetaPlace place) {
 
-            // Set etaForDestination Location Address received from ReverseGeocoding
-            if (selectETAForDestinationPlace && destinationAddressGeocoded) {
-                place = etaForDestinationPlace;
+            // Set pushDestination Location Address received from ReverseGeocoding
+            if (selectPushDestinationPlace && destinationAddressGeocoded) {
+                place = pushDestinationPlace;
                 destinationAddressGeocoded = false;
             }
 
-            // Reset Handle etaForDestination DeepLink flag
-            selectETAForDestinationPlace = false;
+            // Reset Handle pushDestination DeepLink flag
+            selectPushDestinationPlace = false;
 
             // On Click Disable handling/showing any more results
             mAdapter.setSearching(false);
@@ -521,13 +525,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (shouldRestoreTrip == false) {
             Intent intent = getIntent();
 
+            // TODO: 28/07/16 What to do in case of Active Trip
             // Handle RECEIVE_ETA_FOR_DESTINATION DeepLink
-            if (intent != null && intent.hasExtra(KEY_ETA_FOR_DESTINATION)
-                    && intent.getBooleanExtra(KEY_ETA_FOR_DESTINATION, false)) {
+            if (intent != null && intent.hasExtra(Constants.KEY_PUSH_DESTINATION)
+                    && intent.getBooleanExtra(Constants.KEY_PUSH_DESTINATION, false)) {
 
-                handleETAForDestinationDeepLink = true;
-                selectETAForDestinationPlace = true;
-                handleETAForDestinationIntent(intent);
+                handlePushDestinationDeepLink = true;
+                selectPushDestinationPlace = true;
+                handlePushDestinationIntent(intent);
             }
         }
     }
@@ -557,13 +562,28 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             membershipsSpinner.setOnItemSelectedListener(mOnMembershipSelectedListener);
 
             // Set Previously Selected Membership in Spinner
-            setPreviouslySelectedMembership(membershipsList);
+            setPreviouslySelectedMembership();
+
+            membershipsSpinner.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (membershipsList.size() > 1) {
+                        membershipsSpinner.performClick();
+                    }
+                    return false;
+                }
+            });
         } else {
             membershipsSpinnerLayout.setVisibility(View.GONE);
         }
     }
 
-    private void setPreviouslySelectedMembership(List<Membership> membershipsList) {
+    private void setPreviouslySelectedMembership() {
+        if (membershipsList == null) {
+            user = UserStore.sharedStore.getUser();
+            membershipsList = user.getAcceptedMemberships();
+        }
+
         Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
         if (selectedMembershipAccId != null && user.isAcceptedMembership(selectedMembershipAccId)) {
 
@@ -670,8 +690,25 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
                         && isLocationEnabled()) {
                     if (!TripManager.getSharedManager().isTripActive()) {
+
+                        // Check if the selectedAccountId is different from pushDestinationAccountId
+                        if (handlePushDestinationDeepLink && pushDestinationAccountId != 0) {
+                            User user = UserStore.sharedStore.getUser();
+                            if (user != null && pushDestinationAccountId != user.getSelectedMembershipAccountId()) {
+
+                                Toast.makeText(Home.this, R.string.push_destination_incorrect_account_id,
+                                        Toast.LENGTH_SHORT).show();
+
+                                AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_ERROR_INVALID_ACCOUNT_ID);
+                                return;
+                            }
+                        }
+
+                        // Start the Trip
                         startTrip();
                     } else {
+
+                        // End the Trip
                         endTrip();
                     }
                 } else {
@@ -753,28 +790,73 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private void handleETAForDestinationIntent(Intent intent) {
-        Double etaForDestinationLat = intent.getDoubleExtra(KEY_ETA_FOR_DESTINATION_LAT, 0.0);
-        Double etaForDestinationLng = intent.getDoubleExtra(KEY_ETA_FOR_DESTINATION_LNG, 0.0);
+    private void handlePushDestinationIntent(Intent intent) {
+        String accountIdData = intent.getStringExtra(Constants.KEY_ACCOUNT_ID);
+        pushDestinationAccountId = accountIdData != null ? Integer.valueOf(accountIdData) : 0;
 
-        if (etaForDestinationLat != 0.0 && etaForDestinationLng != 0.0) {
+        UserStore.sharedStore.updateSelectedMembership(pushDestinationAccountId);
+        setPreviouslySelectedMembership();
 
-            LatLng destinationLatLng = new LatLng(etaForDestinationLat, etaForDestinationLng);
+        // Fetch Task from Intent Params, if available
+        String taskData = intent.getStringExtra(Constants.KEY_TASK);
+        if (!TextUtils.isEmpty(taskData)) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<Task>() {}.getType();
+            pushDestinationTask = gson.fromJson(taskData, type);
+        }
+
+        if (pushDestinationTask != null) {
+            Destination destination = pushDestinationTask.getDestination();
+
+            // Check if a valid destination & a valid Location has been provided
+            if (destination != null && destination.getLocation() != null) {
+
+                // Check if valid coordinates have been provided in the Location
+                double[] destinationCoordinates = destination.getLocation().getCoordinates();
+                if (destinationCoordinates[0] != 0.0 && destinationCoordinates[1] != 0.0) {
+
+                    // Check if valid Destination Address was provided or not
+                    if (TextUtils.isEmpty(destination.getAddress())) {
+                        StringBuilder destinationName = new StringBuilder(destinationCoordinates[1] + ", " +
+                                destinationCoordinates[0]);
+
+                        pushDestinationPlace = new MetaPlace(destinationName.toString(),
+                                destinationCoordinates[1], destinationCoordinates[0]);
+
+                        // Reverse Geocode the Destination Location Coordinates to an Address
+                        reverseGeocode(new LatLng(destinationCoordinates[1], destinationCoordinates[0]));
+                    } else {
+
+                        pushDestinationPlace = new MetaPlace(destination.getAddress(), destinationCoordinates[1],
+                                destinationCoordinates[0]);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // Check if the DeepLink had Lat & Lng, handle it appropriately
+        Double pushDestinationLat = intent.getDoubleExtra(Constants.KEY_PUSH_DESTINATION_LAT, 0.0);
+        Double pushDestinationLng = intent.getDoubleExtra(Constants.KEY_PUSH_DESTINATION_LNG, 0.0);
+
+        if (pushDestinationLat != 0.0 && pushDestinationLng != 0.0) {
+
+            LatLng destinationLatLng = new LatLng(pushDestinationLat, pushDestinationLng);
             StringBuilder destinationName = new StringBuilder(destinationLatLng.latitude + ", " +
                     destinationLatLng.longitude);
 
-            etaForDestinationPlace = new MetaPlace(destinationName.toString(), destinationLatLng);
+            pushDestinationPlace = new MetaPlace(destinationName.toString(), destinationLatLng);
 
             // Reverse Geocode LatLng to an Address
             reverseGeocode(destinationLatLng);
 
             // ETA for given Destination Location will be fetched when Location Permission is granted,
             // Location Settings are Enabled and currentLocation is available
-
-        } else {
-            handleETAForDestinationDeepLink = false;
-            selectETAForDestinationPlace = false;
+            return;
         }
+
+        handlePushDestinationDeepLink = false;
+        selectPushDestinationPlace = false;
     }
 
     private void reverseGeocode(LatLng latLng) {
@@ -926,13 +1008,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
-        // Update Reverse Geocoded Address for ETAForDestination DeepLink
-        if (handleETAForDestinationDeepLink && destinationAddressGeocoded) {
+        // Update Reverse Geocoded Address for pushDestination DeepLink
+        if (handlePushDestinationDeepLink && destinationAddressGeocoded) {
             updateDestinationLocationAddress();
         }
 
-        // Reset handle ETAForDestination DeepLink Flag
-        handleETAForDestinationDeepLink = false;
+        // Reset handle pushDestination DeepLink Flag
+        handlePushDestinationDeepLink = false;
 
         TripManager.getSharedManager().startTrip(this.user.getSelectedMembershipAccountId(), new TripManagerCallback() {
             @Override
@@ -957,7 +1039,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateDestinationLocationAddress() {
-        final MetaPlace destinationPlace = etaForDestinationPlace;
+        final MetaPlace destinationPlace = pushDestinationPlace;
 
         // Update the selected place with updated destinationLocationAddress
         TripManager.getSharedManager().setPlace(destinationPlace);
@@ -1263,9 +1345,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         if (enterDestinationLayoutClicked && enterDestinationLayout != null) {
                             enterDestinationLayout.performClick();
 
-                            // Handle ETAForDestination DeepLink
-                        } else if (selectETAForDestinationPlace) {
-                            mPlaceAutoCompleteListener.OnSuccess(etaForDestinationPlace);
+                            // Handle pushDestination DeepLink
+                        } else if (selectPushDestinationPlace) {
+                            mPlaceAutoCompleteListener.OnSuccess(pushDestinationPlace);
                         }
 
                         break;
@@ -1292,9 +1374,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         if (enterDestinationLayoutClicked)
                             enterDestinationLayoutClicked = false;
 
-                        // Reset handle etaForDestination DeepLink Flag if Location change was unavailable
-                        if (selectETAForDestinationPlace)
-                            selectETAForDestinationPlace = false;
+                        // Reset handle pushDestination DeepLink Flag if Location change was unavailable
+                        if (selectPushDestinationPlace)
+                            selectPushDestinationPlace = false;
 
                         break;
                 }
@@ -1362,9 +1444,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 .position(latLng)
                 .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, customMarkerView))));
 
-        // Handle ETAForDestination DeepLink
-        if (selectETAForDestinationPlace && isLocationEnabled()) {
-            mPlaceAutoCompleteListener.OnSuccess(etaForDestinationPlace);
+        // Handle pushDestination DeepLink
+        if (selectPushDestinationPlace && isLocationEnabled()) {
+            mPlaceAutoCompleteListener.OnSuccess(pushDestinationPlace);
         }
     }
 
@@ -1617,9 +1699,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 String geocodedAddress = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
 
                 if (!TextUtils.isEmpty(geocodedAddress)) {
-                    etaForDestinationPlace.setName(geocodedAddress);
+                    pushDestinationPlace.setName(geocodedAddress);
 
-                    if (handleETAForDestinationDeepLink) {
+                    if (handlePushDestinationDeepLink) {
                         updateDestinationLocationAddress();
                     }
 
@@ -1647,9 +1729,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     if (enterDestinationLayoutClicked)
                         enterDestinationLayoutClicked = false;
 
-                    // Reset handle etaForDestination DeepLink Flag if Location Permission was denied
-                    if (selectETAForDestinationPlace)
-                        selectETAForDestinationPlace = false;
+                    // Reset handle pushDestination DeepLink Flag if Location Permission was denied
+                    if (selectPushDestinationPlace)
+                        selectPushDestinationPlace = false;
                 }
                 break;
         }
@@ -1671,9 +1753,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     if (enterDestinationLayoutClicked && enterDestinationLayout != null) {
                         enterDestinationLayout.performClick();
 
-                        // Handle ETAForDestination DeepLink
-                    } else if (selectETAForDestinationPlace) {
-                        mPlaceAutoCompleteListener.OnSuccess(etaForDestinationPlace);
+                        // Handle pushDestination DeepLink
+                    } else if (selectPushDestinationPlace) {
+                        mPlaceAutoCompleteListener.OnSuccess(pushDestinationPlace);
                     }
 
                     break;
@@ -1763,7 +1845,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * <p>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
-     *
      */
     private void sendGCMRegistrationToServer() {
         final String token = SharedPreferenceManager.getGCMToken();
@@ -1802,8 +1883,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private void registerGCMReceiver(){
-        if(!isReceiverRegistered) {
+    private void registerGCMReceiver() {
+        if (!isReceiverRegistered) {
             LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
                     new IntentFilter(RegistrationIntentService.REGISTRATION_COMPLETE));
             isReceiverRegistered = true;
@@ -1815,7 +1896,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onDrawerClosed(drawerView);
 
         if (membershipsList != null)
-            setPreviouslySelectedMembership(membershipsList);
+            setPreviouslySelectedMembership();
     }
 
     private void updateCurrentLocationMarker() {

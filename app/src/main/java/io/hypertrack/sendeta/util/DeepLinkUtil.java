@@ -16,7 +16,7 @@ public class DeepLinkUtil {
     public static final int DEFAULT = HOME;
 
     //deeplink mapping keys
-    public static final String KEY_MEMBERSHIP_ID = "id";
+    public static final String KEY_ID = "id";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
 
@@ -57,7 +57,7 @@ public class DeepLinkUtil {
 
                                     switch (data[0]) {
 
-                                        case KEY_MEMBERSHIP_ID: {
+                                        case KEY_ID: {
                                             try {
                                                 appDeepLink.id = Integer.valueOf(data[1]);
                                             } catch (Exception e) {

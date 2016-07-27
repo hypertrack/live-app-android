@@ -10,6 +10,7 @@ import android.view.Window;
 
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
 
 /**
@@ -68,9 +69,10 @@ public class SplashScreen extends BaseActivity{
             case DeepLinkUtil.RECEIVE_ETA_FOR_DESTINATION:
                 TaskStackBuilder.create(this)
                         .addNextIntentWithParentStack(new Intent(this, Home.class)
-                                .putExtra(Home.KEY_ETA_FOR_DESTINATION, true)
-                                .putExtra(Home.KEY_ETA_FOR_DESTINATION_LAT, appDeepLink.lat)
-                                .putExtra(Home.KEY_ETA_FOR_DESTINATION_LNG, appDeepLink.lng)
+                                .putExtra(Constants.KEY_PUSH_DESTINATION, true)
+                                .putExtra(Constants.KEY_ACCOUNT_ID, appDeepLink.id)
+                                .putExtra(Constants.KEY_PUSH_DESTINATION_LAT, appDeepLink.lat)
+                                .putExtra(Constants.KEY_PUSH_DESTINATION_LNG, appDeepLink.lng)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 finish();

@@ -29,10 +29,9 @@ public class Constants {
     public static final double MAP_DEFAULT_LONGITUDE_DELHI = 77.209053;
 
     // Notification Key Constants
-    public static final String NOTIFICATION_KEY_ID = "id";
-    public static final String NOTIFICATION_KEY_DEEP_LINK = "dl";
-    public static final String NOTIFICATION_TITILE = "Title";
-    public static final String NOTIFICATION_DESC = "Description";
-    public static final String NOTIFICATION_TASK = "Description";
-
+    public static final String KEY_PUSH_DESTINATION = "push_destination";
+    public static final String KEY_ACCOUNT_ID = "account_id";
+    public static final String KEY_TASK = "task";
+    public static final String KEY_PUSH_DESTINATION_LAT = "lat";
+    public static final String KEY_PUSH_DESTINATION_LNG = "lng";
 }

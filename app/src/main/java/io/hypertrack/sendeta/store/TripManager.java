@@ -28,20 +28,25 @@ import java.util.List;
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
+import io.hypertrack.lib.transmitter.model.HTTaskParams;
+import io.hypertrack.lib.transmitter.model.HTTaskParamsBuilder;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
+import io.hypertrack.lib.transmitter.model.callback.HTTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.Trip;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
+import io.hypertrack.sendeta.store.callback.TaskManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripETACallback;
 import io.hypertrack.sendeta.store.callback.TripManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripManagerListener;
@@ -248,7 +253,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void sendETA(List<String> phoneNumbers, final TripManagerCallback callback) {
-
     }
 
     public void startTrip(int selectedAccountId, final TripManagerCallback callback) {
@@ -311,6 +315,55 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
             @Override
             public void OnError() {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void startTaskForTaskID(int selectedAccountId, Task task, final TaskManagerCallback callback) {
+        if (selectedAccountId <= 0) {
+            if (callback != null) {
+                callback.OnError();
+            }
+
+            return;
+        }
+
+        this.selectedAccountId = selectedAccountId;
+
+        // Set PublishableKey fetched for the selectedAccountId
+        HyperTrack.setPublishableApiKey(task.getPublishableKey(), MetaApplication.getInstance().getApplicationContext());
+
+        HTTaskParams taskParams = getTaskParams(task);
+        transmitter.startTask(taskParams, new HTTaskStatusCallback() {
+            @Override
+            public void onSuccess(io.hypertrack.lib.common.model.HTTask htTask) {
+//                hyperTrackTrip = htTrip;
+//
+//                addTrip(new TripManagerCallback() {
+//                    @Override
+//                    public void OnSuccess() {
+//                        if (place == null) {
+//                            place = SharedPreferenceManager.getPlace();
+//                        }
+//
+//                        onTripStart();
+//                        if (callback != null) {
+//                            callback.OnSuccess();
+//                        }
+//                  }
+
+                if (callback != null)
+                    callback.OnError();
+            }
+
+            @Override
+            public void onError(Exception e) {
+//                transmitter.clearCurrentTrip();
+//                hyperTrackTrip = null;
+
                 if (callback != null) {
                     callback.OnError();
                 }
@@ -413,6 +466,14 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
                 .setTaskIDs(taskIDs)
                 .setVehicleType(this.vehicleType)
                 .createHTTripParams();
+    }
+
+    private HTTaskParams getTaskParams(Task task) {
+        return new HTTaskParamsBuilder()
+                .setTaskID(task.getId())
+                .setDriverID(task.getDriverId())
+                .setVehicleType(task.getVehicleType())
+                .createHTTaskParams();
     }
 
     private void stopGeofencing() {

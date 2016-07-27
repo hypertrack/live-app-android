@@ -109,7 +109,9 @@ public class User extends RealmObject {
     }
 
     public void setSelectedMembershipAccountId(int selectedMembershipAccountId) {
-        this.selectedMembershipAccountId = selectedMembershipAccountId;
+        Membership membership = getMembershipForAccountId(selectedMembershipAccountId);
+        if (membership != null && membership.isAccepted())
+            this.selectedMembershipAccountId = selectedMembershipAccountId;
     }
 
     @Override
