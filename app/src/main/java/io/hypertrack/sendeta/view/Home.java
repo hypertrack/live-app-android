@@ -1698,6 +1698,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         AppEventsLogger.activateApp(getApplication());
     }
 
+    @Override
+    public void onDrawerClosed(View drawerView) {
+        super.onDrawerClosed(drawerView);
+
+        if (membershipsList != null)
+            setPreviouslySelectedMembership(membershipsList);
+    }
+
     private void updateCurrentLocationMarker() {
         if (currentLocationMarker == null) {
             return;

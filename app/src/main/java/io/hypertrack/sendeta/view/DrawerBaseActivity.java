@@ -24,7 +24,7 @@ import io.hypertrack.sendeta.store.UserStore;
 /**
  * Created by piyush on 22/07/16.
  */
-public class DrawerBaseActivity extends BaseActivity {
+public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.DrawerListener {
 
     private User user;
     private ImageView profileImageView;
@@ -105,29 +105,10 @@ public class DrawerBaseActivity extends BaseActivity {
         }
 
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
-                getToolbar(), R.string.drawer_open, R.string.drawer_close) {
-
-            @Override
-            public void onDrawerClosed(View drawerView) {
-                // Code here will be triggered once the drawer closes as
-                // we dont want anything to happen so we leave this blank
-                super.onDrawerClosed(drawerView);
-            }
-
-            @Override
-            public void onDrawerOpened(View drawerView) {
-                // Code here will be triggered once the drawer open as
-                // we dont want anything to happen so we leave this blank
-
-                if (drawerMembershipsList != null && drawerMembershipsSpinner != null)
-                    setSelectedMembership();
-
-                super.onDrawerOpened(drawerView);
-            }
-        };
+                getToolbar(), R.string.drawer_open, R.string.drawer_close);
 
         //Setting the actionbarToggle to drawer layout
-        drawerLayout.addDrawerListener(actionBarDrawerToggle);
+        drawerLayout.addDrawerListener(this);
 
         //calling sync state is necessary or else your hamburger icon wont show up
         actionBarDrawerToggle.syncState();
@@ -198,4 +179,27 @@ public class DrawerBaseActivity extends BaseActivity {
         public void onNothingSelected(AdapterView<?> parent) {
         }
     };
+
+    @Override
+    public void onDrawerSlide(View drawerView, float slideOffset) {
+    }
+
+    @Override
+    public void onDrawerOpened(View drawerView) {
+        // Code here will be triggered once the drawer open as
+        // we dont want anything to happen so we leave this blank
+
+        if (drawerMembershipsList != null && drawerMembershipsSpinner != null)
+            setSelectedMembership();
+    }
+
+    @Override
+    public void onDrawerClosed(View drawerView) {
+        // Code here will be triggered once the drawer closes as
+        // we dont want anything to happen so we leave this blank
+    }
+
+    @Override
+    public void onDrawerStateChanged(int newState) {
+    }
 }
