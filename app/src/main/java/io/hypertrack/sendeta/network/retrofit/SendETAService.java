@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
+import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -13,6 +14,7 @@ import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.VerifyResponse;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -83,4 +85,8 @@ public interface SendETAService {
 
     @POST("/api/v1/users/{id}/delete_membership/")
     Call<Membership> deleteMembership(@Path("id") int id, @Body MembershipDTO membership);
+
+    //Add GCM Token Call
+    @POST("/api/v1/users/{id}/add_device/")
+    Call<ResponseBody> addGCMToken(@Path("id") int id, @Body GCMAddDeviceDTO gcmAddDeviceDTO);
 }

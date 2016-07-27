@@ -29,7 +29,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -54,6 +53,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -89,12 +89,16 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
+import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.network.retrofit.SendETAService;
+import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
+import io.hypertrack.sendeta.service.RegistrationIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
@@ -112,6 +116,11 @@ import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.PhoneUtils;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Home extends DrawerBaseActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
@@ -164,6 +173,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             destinationAddressGeocoded = false;
     private MetaPlace etaForDestinationPlace;
 
+    private boolean isReceiverRegistered;
     private Handler mHandler;
     private Runnable mRunnable;
 
@@ -414,6 +424,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     };
 
+    BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            sendGCMRegistrationToServer();
+        }
+    };
+
     private void updateInfoMessageView() {
         if (!isLocationEnabled()) {
             infoMessageView.setVisibility(View.VISIBLE);
@@ -454,6 +471,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // Start GCM Registration
+        startGcmRegistration();
 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
@@ -509,6 +529,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 selectETAForDestinationPlace = true;
                 handleETAForDestinationIntent(intent);
             }
+        }
+    }
+
+    private void startGcmRegistration() {
+        user = UserStore.sharedStore.getUser();
+        if (user != null && user.getId() != null && checkPlayServices()) {
+            Intent intent = new Intent(this, RegistrationIntentService.class);
+            startService(intent);
         }
     }
 
@@ -1679,6 +1707,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Unregister BroadcastReceiver for Location_Change & Network_Change
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+        isReceiverRegistered = false;
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -1697,13 +1727,87 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateFavoritesButton();
         updateCurrentLocationMarker();
 
-        // Re-register BroadcastReceiver for Location_Change & Network_Change
+        // Re-register BroadcastReceiver for Location_Change, Network_Change & GCM
         LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
                 new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
         LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
+        registerGCMReceiver();
 
         AppEventsLogger.activateApp(getApplication());
+    }
+
+    /**
+     * Check the device to make sure it has the Google Play Services APK. If
+     * it doesn't, display a dialog that allows users to download the APK from
+     * the Google Play Store or enable it in the device's system settings.
+     */
+    private boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, Constants.PLAY_SERVICES_RESOLUTION_REQUEST)
+                        .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Persist registration to third-party servers.
+     * <p>
+     * Modify this method to associate the user's GCM registration token with any server-side account
+     * maintained by your application.
+     *
+     */
+    private void sendGCMRegistrationToServer() {
+        final String token = SharedPreferenceManager.getGCMToken();
+
+        try {
+            User user = UserStore.sharedStore.getUser();
+
+            if (user != null && token.length() > 0) {
+                GCMAddDeviceDTO gcmAddDeviceDTO = new GCMAddDeviceDTO(this, token);
+
+                SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                        SharedPreferenceManager.getUserAuthToken());
+
+                Call<ResponseBody> call = sendETAService.addGCMToken(user.getId(), gcmAddDeviceDTO);
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.isSuccessful()) {
+                            Log.d(TAG, "Registration Key pushed to server successfully");
+                        } else {
+                            Log.e(TAG, "Registration Key push to server failed: " + response.raw().networkResponse().code()
+                                    + ", " + response.raw().networkResponse().message() + ", "
+                                    + response.raw().networkResponse().request().url());
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.e(TAG, "Registration Key push to server failed: " + t.getMessage());
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(TAG, "Registration Key push to server failed: " + e.getMessage());
+        }
+    }
+
+    private void registerGCMReceiver(){
+        if(!isReceiverRegistered) {
+            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                    new IntentFilter(RegistrationIntentService.REGISTRATION_COMPLETE));
+            isReceiverRegistered = true;
+        }
     }
 
     @Override
