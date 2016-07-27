@@ -1772,7 +1772,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             User user = UserStore.sharedStore.getUser();
 
             if (user != null && token.length() > 0) {
-                GCMAddDeviceDTO gcmAddDeviceDTO = new GCMAddDeviceDTO(this, token);
+                GCMAddDeviceDTO gcmAddDeviceDTO = new GCMAddDeviceDTO(token);
 
                 SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
                         SharedPreferenceManager.getUserAuthToken());

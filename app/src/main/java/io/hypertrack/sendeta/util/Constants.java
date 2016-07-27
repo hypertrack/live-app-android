@@ -27,4 +27,12 @@ public class Constants {
     //Enums for Location Settings
     public static final double MAP_DEFAULT_LATITUDE_DELHI = 28.614092;
     public static final double MAP_DEFAULT_LONGITUDE_DELHI = 77.209053;
+
+    // Notification Key Constants
+    public static final String NOTIFICATION_KEY_ID = "id";
+    public static final String NOTIFICATION_KEY_DEEP_LINK = "dl";
+    public static final String NOTIFICATION_TITILE = "Title";
+    public static final String NOTIFICATION_DESC = "Description";
+    public static final String NOTIFICATION_TASK = "Description";
+
 }
