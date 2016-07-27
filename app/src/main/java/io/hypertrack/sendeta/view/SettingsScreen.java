@@ -120,7 +120,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         List<Membership> membershipsList = user.getAcceptedMemberships();
 
         // Initialize Adapter with User's Memberships data
-        membershipsAdapter = new MembershipsAdapter(membershipsList, this);
+        membershipsAdapter = new MembershipsAdapter(this, membershipsList, this);
         mMembershipsRecyclerView.setAdapter(membershipsAdapter);
     }
 

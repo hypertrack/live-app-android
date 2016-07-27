@@ -141,6 +141,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Button sendETAButton;
+    private LinearLayout bottomButtonLayout;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private HTCircleImageView profileViewProfileImage;
@@ -148,6 +149,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private ImageView infoMessageViewIcon;
 
     private Spinner membershipsSpinner;
+    private CardView membershipsSpinnerLayout;
     private List<Membership> membershipsList;
 
     private PlaceAutocompleteAdapter mAdapter;
@@ -289,6 +291,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void showSendETAButton() {
         sendETAButton.setText(getString(R.string.action_send_eta));
         sendETAButton.setVisibility(View.VISIBLE);
+        bottomButtonLayout.setVisibility(View.VISIBLE);
+        membershipsSpinnerLayout.setVisibility(View.VISIBLE);
     }
 
     private TextWatcher mTextWatcher = new TextWatcher() {
@@ -509,8 +513,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void setupMembershipsSpinner() {
-        Toolbar toolbar = getToolbar();
-        membershipsSpinner = (Spinner) toolbar.findViewById(R.id.toolbar_membership_spinner);
+        membershipsSpinner = (Spinner) findViewById(R.id.home_membership_spinner);
+        membershipsSpinnerLayout = (CardView) findViewById(R.id.home_membership_spinner_layout);
 
         user = UserStore.sharedStore.getUser();
 
@@ -519,8 +523,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         if (membershipsList != null && membershipsList.size() > 0) {
-            membershipsSpinner.setVisibility(View.VISIBLE);
-
             MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_home_spinner,
                     R.layout.layout_home_spinner_dropdown_item, user.getFullName(), membershipsList);
             membershipsSpinner.setAdapter(adapter);
@@ -529,7 +531,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             // Set Previously Selected Membership in Spinner
             setPreviouslySelectedMembership(membershipsList);
         } else {
-            membershipsSpinner.setVisibility(View.GONE);
+            membershipsSpinnerLayout.setVisibility(View.GONE);
         }
     }
 
@@ -630,6 +632,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void setupSendETAButton() {
         // Initialize SendETA Button UI View
         sendETAButton = (Button) findViewById(R.id.sendETAButton);
+        bottomButtonLayout = (LinearLayout) findViewById(R.id.home_bottomButtonLayout);
 
         // Set Click Listener for SendETA Button
         sendETAButton.setOnClickListener(new View.OnClickListener() {
@@ -846,8 +849,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onMapLoaded() {
                 // Check if Trip has to be Restored & Update Map for that trip
                 if (shouldRestoreTrip && restoreTripMetaPlace != null) {
-                    updateViewForETASuccess(null, restoreTripMetaPlace.getLatLng());
                     tripRestoreFinished = true;
+                    updateViewForETASuccess(null, restoreTripMetaPlace.getLatLng());
                     onTripStart();
                 }
             }
@@ -987,6 +990,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      */
     private void onTripStart() {
         sendETAButton.setText(getString(R.string.action_end_trip));
+        membershipsSpinnerLayout.setVisibility(View.GONE);
+
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
         enterDestinationLayout.setOnClickListener(null);
@@ -1045,6 +1050,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      */
     private void OnTripEnd() {
         sendETAButton.setVisibility(View.GONE);
+        membershipsSpinnerLayout.setVisibility(View.GONE);
+        bottomButtonLayout.setVisibility(View.GONE);
+
         shareButton.setVisibility(View.GONE);
         navigateButton.setVisibility(View.GONE);
 

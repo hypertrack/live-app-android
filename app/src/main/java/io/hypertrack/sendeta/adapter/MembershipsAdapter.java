@@ -1,6 +1,9 @@
 package io.hypertrack.sendeta.adapter;
 
+import android.content.Context;
+import android.os.Build;
 import android.support.v7.widget.RecyclerView;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,13 +24,15 @@ import io.hypertrack.sendeta.store.UserStore;
  */
 public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.MembershipViewHolder> {
 
+    private Context context;
     private List<Membership> memberships = new ArrayList<>();
     private MembershipOnClickListener listener;
 
     private MembershipsAdapter() {
     }
 
-    public MembershipsAdapter(List<Membership> memberships, MembershipOnClickListener listener) {
+    public MembershipsAdapter(Context context, List<Membership> memberships, MembershipOnClickListener listener) {
+        this.context = context;
         if (memberships != null) {
             this.memberships = memberships;
         }
@@ -40,6 +45,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
 
         this.memberships = memberships;
     }
+
     @Override
     public MembershipViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_membership, parent, false);
@@ -52,25 +58,31 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
         if (this.isDefaultRow(position)) {
             Membership profile = this.memberships.get(position);
             holder.mMembershipName.setText(profile.getAccountName());
-            holder.mMembershipActionIcon.setVisibility(View.GONE);
+            holder.mMembershipIcon.setImageResource(R.drawable.ic_home);
+            holder.mMembershipDeleteIcon.setVisibility(View.GONE);
 
             // Check if this row is the last in the list
         } else if (this.isLastRow(position)) {
             holder.mMembershipName.setText("Add Business Profile");
-            holder.mMembershipActionIcon.setVisibility(View.VISIBLE);
-            holder.mMembershipActionIcon.setImageResource(R.drawable.ic_action_add);
+            holder.mMembershipIcon.setImageResource(R.drawable.ic_action_add);
+            holder.mMembershipDeleteIcon.setVisibility(View.GONE);
 
         } else {
             Membership profile = this.memberships.get(position);
             holder.mMembershipName.setText(profile.getAccountName());
+            holder.mMembershipIcon.setImageResource(R.drawable.ic_work);
+            holder.mMembershipDeleteIcon.setVisibility(View.VISIBLE);
+            holder.mMembershipIcon.setVisibility(View.VISIBLE);
+        }
+    }
 
-            if (profile.isAccepted()) {
-                holder.mMembershipActionIcon.setImageResource(R.drawable.ic_action_delete);
-            } else {
-                holder.mMembershipActionIcon.setImageResource(R.drawable.ic_action_add);
-            }
-
-            holder.mMembershipActionIcon.setVisibility(View.VISIBLE);
+    private void setBackgroundResource(View view, int resourceId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // If we're running on Honeycomb or newer, then we can use the Theme's
+            // selectableItemBackground to ensure that the View has a pressed state
+            TypedValue outValue = new TypedValue();
+            context.getTheme().resolveAttribute(resourceId, outValue, true);
+            view.setBackgroundResource(outValue.resourceId);
         }
     }
 
@@ -88,7 +100,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
 
     private boolean isDefaultRow(int position) {
         if (position < memberships.size() && memberships.get(position) != null
-                && memberships.get(position).isDefault())
+                && memberships.get(position).isPersonal())
             return true;
 
         return false;
@@ -105,12 +117,14 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
     public class MembershipViewHolder extends RecyclerView.ViewHolder {
 
         private TextView mMembershipName;
-        private ImageView mMembershipActionIcon;
+        private ImageView mMembershipIcon;
+        private ImageView mMembershipDeleteIcon;
 
         public MembershipViewHolder(View view) {
             super(view);
             mMembershipName = (TextView) view.findViewById(R.id.item_membership_name);
-            mMembershipActionIcon = (ImageView) view.findViewById(R.id.item_membership_action_icon);
+            mMembershipIcon = (ImageView) view.findViewById(R.id.item_membership_action_icon);
+            mMembershipDeleteIcon = (ImageView) view.findViewById(R.id.item_membership_action_delete);
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

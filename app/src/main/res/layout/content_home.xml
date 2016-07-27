@@ -32,17 +32,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:elevation="8dp"
-                app:popupTheme="@style/AppTheme.PopupOverlay">
-
-                <Spinner
-                    android:id="@+id/toolbar.membership_spinner"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:background="?android:attr/selectableItemBackground"
-                    android:gravity="right"
-                    android:visibility="gone" />
-            </android.support.v7.widget.Toolbar>
+                app:popupTheme="@style/AppTheme.PopupOverlay"></android.support.v7.widget.Toolbar>
 
             <!-- info message container-->
             <LinearLayout
@@ -229,46 +219,86 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom">
+        android:layout_gravity="bottom"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/sendETAButton"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/cta_button_size"
-            android:layout_alignParentBottom="true"
-            android:background="@color/colorAccent"
-            android:gravity="center"
-            android:padding="@dimen/padding_high"
-            android:textColor="#ffffff"
-            android:visibility="gone" />
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:orientation="vertical">
 
-        <ImageButton
-            android:id="@+id/navigateButton"
-            android:layout_width="@dimen/cta_button_size"
-            android:layout_height="@dimen/cta_button_size"
-            android:layout_above="@+id/shareButton"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="@dimen/margin_high"
-            android:background="@drawable/circle_primary_background"
-            android:padding="@dimen/padding_high"
-            android:src="@drawable/ic_navigate_nocircle"
-            android:visibility="gone" />
+            <ImageButton
+                android:id="@+id/navigateButton"
+                android:layout_width="@dimen/cta_button_size"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_gravity="right|center"
+                android:layout_marginBottom="@dimen/margin_base"
+                android:layout_marginEnd="@dimen/margin_high"
+                android:background="@drawable/circle_primary_background"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_navigate_nocircle"
+                android:visibility="gone" />
 
-        <ImageButton
-            android:id="@+id/shareButton"
-            android:layout_width="@dimen/cta_button_size"
-            android:layout_height="@dimen/cta_button_size"
-            android:layout_above="@+id/sendETAButton"
-            android:layout_alignParentEnd="true"
-            android:layout_marginBottom="@dimen/margin_base"
-            android:layout_marginEnd="@dimen/margin_high"
-            android:layout_marginTop="@dimen/margin_base"
-            android:background="@drawable/circle_primary_background"
-            android:padding="@dimen/padding_high"
-            android:src="@drawable/ic_share_nocircle"
-            android:visibility="gone" />
-    </RelativeLayout>
+            <ImageButton
+                android:id="@+id/shareButton"
+                android:layout_width="@dimen/cta_button_size"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_gravity="right|center"
+                android:layout_marginEnd="@dimen/margin_high"
+                android:background="@drawable/circle_primary_background"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:src="@drawable/ic_share_nocircle"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/home.bottomButtonLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/drawable_background_gradient_home"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <android.support.v7.widget.CardView
+                    android:id="@+id/home.membership_spinner_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/padding_high"
+                    android:layout_marginRight="@dimen/padding_high"
+                    android:background="@android:color/white"
+                    android:elevation="0dp"
+                    android:visibility="gone"
+                    app:cardCornerRadius="2dp">
+
+                    <Spinner
+                        android:id="@+id/home.membership_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="center"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:spinnerMode="dialog"
+                        android:visibility="visible" />
+
+                </android.support.v7.widget.CardView>
+
+                <Button
+                    android:id="@+id/sendETAButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cta_button_size"
+                    android:layout_margin="@dimen/margin_high"
+                    android:layout_alignParentBottom="true"
+                    android:background="@color/colorAccent"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_high"
+                    android:textColor="#ffffff"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
 </FrameLayout>

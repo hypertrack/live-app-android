@@ -30,8 +30,10 @@ import com.squareup.picasso.Target;
 import java.io.File;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
+import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
@@ -201,10 +203,21 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void navigateToHomeScreen() {
+
+        UserStore.sharedStore.initializeUser();
         showProgress(false);
-        Intent intent = new Intent(Profile.this, Home.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+
+        User user = UserStore.sharedStore.getUser();
+        if (user != null && user.getPendingMemberships() != null && user.getPendingMemberships().size() > 0) {
+            Intent intent = new Intent(Profile.this, BusinessProfile.class);
+            intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(Profile.this, Home.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+        }
     }
 
     @Override

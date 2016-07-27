@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import io.hypertrack.sendeta.model.Membership;
 /**
  * Created by piyush on 24/07/16.
  */
-public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
+public class MembershipSpinnerAdapter extends ArrayAdapter<Membership> {
     private Context mContext;
     private String userName;
     private List<Membership> membershipsList;
@@ -55,11 +56,21 @@ public class MembershipSpinnerAdapter extends ArrayAdapter<Membership>{
 
         TextView userNameView = (TextView) convertView.findViewById(R.id.spinner_user_name);
         TextView selectedAccountNameView = (TextView) convertView.findViewById(R.id.spinner_selected_account_name);
+        ImageView membershipIconView = (ImageView) convertView.findViewById(R.id.spinner_selected_account_icon);
 
         if (userNameView != null && !TextUtils.isEmpty(userName)) {
             userNameView.setVisibility(View.VISIBLE);
             userNameView.setText(userName);
         }
+
+        if (membershipIconView != null && membershipsList.get(position) != null) {
+            if (membershipsList.get(position).isPersonal()) {
+                membershipIconView.setImageResource(R.drawable.ic_home);
+            } else {
+                membershipIconView.setImageResource(R.drawable.ic_work);
+            }
+        }
+
         selectedAccountNameView.setText(membershipsList.get(position).getAccountName());
 
         return convertView;

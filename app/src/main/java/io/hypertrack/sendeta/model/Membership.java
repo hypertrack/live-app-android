@@ -12,7 +12,7 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Membership extends RealmObject implements Serializable {
 
-    public static final String DEFAULT = "default";
+    public static final String PERSONAL = "personal";
 
     @PrimaryKey
     @SerializedName("account_id")
@@ -59,8 +59,8 @@ public class Membership extends RealmObject implements Serializable {
         this.accountName = accountName;
     }
 
-    public boolean isDefault() {
-        return this.accountName.equalsIgnoreCase(DEFAULT);
+    public boolean isPersonal() {
+        return this.accountName.equalsIgnoreCase(PERSONAL);
     }
 
     public Membership() {
