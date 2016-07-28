@@ -795,8 +795,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             destinationText.setGravity(Gravity.LEFT);
             destinationText.setText(restoreTripMetaPlace.getName());
 
-            destinationDescription.setText(restoreTripMetaPlace.getAddress());
-            destinationDescription.setVisibility(View.VISIBLE);
+            if (!TextUtils.isEmpty(restoreTripMetaPlace.getAddress())) {
+                destinationDescription.setText(restoreTripMetaPlace.getAddress());
+                destinationDescription.setVisibility(View.VISIBLE);
+            }
 
             shouldRestoreTrip = true;
 
@@ -1866,7 +1868,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p/>
+     * <p>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */

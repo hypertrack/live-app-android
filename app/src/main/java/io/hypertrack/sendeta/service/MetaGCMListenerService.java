@@ -27,7 +27,7 @@ public class MetaGCMListenerService extends GcmListenerService {
     private static final String TAG = MetaGCMListenerService.class.getSimpleName();
 
     private static final String KEY_NOTIFICATION_TYPE = "type";
-
+    private static final String KEY_NOTIFICATION_ID = "id";
     // Notification Types
     public static final String NOTIFICATION_TYPE_DEFAULT = "default";
     public static final String NOTIFICATION_TYPE_TASK_CREATED = "task.created";
@@ -38,8 +38,8 @@ public class MetaGCMListenerService extends GcmListenerService {
     public static final int NOTIFICATION_TYPE_TASK_CREATED_ID = 2;
     public static final int NOTIFICATION_TYPE_ACCEPT_INVITE_ID = 3;
 
-    public static final String NOTIFICATION_KEY_MESSAGE = "message";
-    public static final String NOTIFICATION_KEY_TITLE = "title";
+    public static final String NOTIFICATION_KEY_MESSAGE = "body";
+    public static final String NOTIFICATION_KEY_TITLE = "message";
 
     // Notification keys for NOTIFICATION_TYPE_TASK_CREATED
     public static final String NOTIFICATION_KEY_ACCOUNT_ID = "account_id";
@@ -56,35 +56,48 @@ public class MetaGCMListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         String title = data.getString(NOTIFICATION_KEY_TITLE);
         String message = data.getString(NOTIFICATION_KEY_MESSAGE);
-        Log.d(TAG, message);
-        Log.d(TAG, data.toString());
+        Log.d(TAG, message != null ? message : "Message key not present or value is NULL.");
+        Log.d(TAG, data != null ? data.toString() : "Message key not present or value is NULL.");
 
-        int notificationId = getNotificationType(data);
+        String notificationType = getNotificationType(data);
+
+        // Get Notification Id
+        int notificationId = NOTIFICATION_TYPE_DEFAULT_ID;
+        if (!TextUtils.isEmpty(data.getString(KEY_NOTIFICATION_ID))) {
+            notificationId = Integer.valueOf(data.getString(KEY_NOTIFICATION_ID));
+        } else {
+            if (NOTIFICATION_TYPE_ACCEPT_INVITE.equals(notificationType)) {
+                notificationId = NOTIFICATION_TYPE_ACCEPT_INVITE_ID;
+            } else if (NOTIFICATION_TYPE_TASK_CREATED.equals(notificationType)) {
+                notificationId = NOTIFICATION_TYPE_TASK_CREATED_ID;
+            }
+        }
 
         // Parse GCM payload
-        Intent intent = parseGCMData(notificationId, data);
+        Intent intent = parseGCMData(notificationType, data);
 
         // Generate & Send the notification with the given parameters
         sendNotification(notificationId, title, message, intent);
     }
 
-    private int getNotificationType(Bundle data) {
+    private String getNotificationType(Bundle data) {
+
         if (NOTIFICATION_TYPE_TASK_CREATED.equalsIgnoreCase(
                 data.getString(KEY_NOTIFICATION_TYPE)))
-            return NOTIFICATION_TYPE_TASK_CREATED_ID;
+            return NOTIFICATION_TYPE_TASK_CREATED;
 
         if(NOTIFICATION_TYPE_ACCEPT_INVITE.equalsIgnoreCase(
                 data.getString(KEY_NOTIFICATION_TYPE)))
-            return NOTIFICATION_TYPE_ACCEPT_INVITE_ID;
+            return NOTIFICATION_TYPE_ACCEPT_INVITE;
 
-        return NOTIFICATION_TYPE_DEFAULT_ID;
+        return NOTIFICATION_TYPE_DEFAULT;
     }
 
-    private Intent parseGCMData(int notificationId, Bundle data) {
+    private Intent parseGCMData(String notificationType, Bundle data) {
         Intent intent = new Intent();
 
         // Check if the notification is NOTIFICATION_TYPE_TASK_CREATED type
-        if (data != null && notificationId == NOTIFICATION_TYPE_TASK_CREATED_ID) {
+        if (data != null && NOTIFICATION_TYPE_TASK_CREATED.equals(notificationType)) {
 
             // Set Push Destination (Task.Created) Intent For Home Screen
             intent.setClass(getApplicationContext(), Home.class);
@@ -96,7 +109,7 @@ public class MetaGCMListenerService extends GcmListenerService {
 
         }
 
-        if (data != null && notificationId == NOTIFICATION_TYPE_ACCEPT_INVITE_ID) {
+        if (data != null && NOTIFICATION_TYPE_ACCEPT_INVITE.equals(notificationType)) {
 
             // Set Intent For BusinessProfile Screen to handle Pending Membership Invites
             intent.setClass(getApplicationContext(), BusinessProfile.class);
@@ -122,14 +135,14 @@ public class MetaGCMListenerService extends GcmListenerService {
         if (intent == null)
             return;
 
-        intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         // the requestCode has been set to mNotificationId because the pending intent used to be replaced
         // for an old un-clicked notification when a new notification is received
         // (due to use of PendingIntent.FLAG_UPDATE_CURRENT which replaces the existing pending
         // intent with same request code)
         PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), mNotificationId, intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT);
 
         // Check if proper message was provided
         if (TextUtils.isEmpty(message))
