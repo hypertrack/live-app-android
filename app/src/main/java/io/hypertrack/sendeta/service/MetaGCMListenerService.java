@@ -141,7 +141,7 @@ public class MetaGCMListenerService extends GcmListenerService {
         // Sets the parameters required for standard notification
         builder.setContentTitle(getApplicationContext().getString(R.string.app_name))
                 .setContentText(message)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(android.R.color.transparent)
                 .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.mipmap.ic_launcher))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)

@@ -521,18 +521,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Check if there is any currently running trip to be restored
         restoreTripStateIfNeeded();
 
-        // Check if there is no Active Trip currently
-        if (shouldRestoreTrip == false) {
-            Intent intent = getIntent();
+        // Handle RECEIVE_ETA_FOR_DESTINATION DeepLink
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra(Constants.KEY_PUSH_DESTINATION)
+                && intent.getBooleanExtra(Constants.KEY_PUSH_DESTINATION, false)) {
 
-            // TODO: 28/07/16 What to do in case of Active Trip
-            // Handle RECEIVE_ETA_FOR_DESTINATION DeepLink
-            if (intent != null && intent.hasExtra(Constants.KEY_PUSH_DESTINATION)
-                    && intent.getBooleanExtra(Constants.KEY_PUSH_DESTINATION, false)) {
-
+            // Check if there is no Active Trip currently
+            if (!shouldRestoreTrip) {
                 handlePushDestinationDeepLink = true;
                 selectPushDestinationPlace = true;
                 handlePushDestinationIntent(intent);
+            } else {
+                Toast.makeText(Home.this, R.string.notification_deeplink_active_trip_error, Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -1842,7 +1842,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */

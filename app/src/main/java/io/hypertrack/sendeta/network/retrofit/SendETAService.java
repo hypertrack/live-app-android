@@ -84,7 +84,7 @@ public interface SendETAService {
     Call<Membership> rejectMembership(@Path("id") int id, @Body MembershipDTO membership);
 
     @POST("/api/v1/users/{id}/delete_membership/")
-    Call<Membership> deleteMembership(@Path("id") int id, @Body MembershipDTO membership);
+    Call<ResponseBody> deleteMembership(@Path("id") int id, @Body MembershipDTO membership);
 
     //Add GCM Token Call
     @POST("/api/v1/users/{id}/add_device/")

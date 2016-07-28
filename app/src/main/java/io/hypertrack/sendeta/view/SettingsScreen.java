@@ -117,7 +117,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         }
 
         // Fetch Memberships saved in DB
-        List<Membership> membershipsList = user.getAcceptedMemberships();
+        List<Membership> membershipsList = user.getActiveMemberships();
 
         // Initialize Adapter with User's Memberships data
         membershipsAdapter = new MembershipsAdapter(this, membershipsList, this);

@@ -119,6 +119,7 @@
     <string name="favorite_place_delete_dialog_message">Do you want to delete this favorite address?</string>
 
     <!-- Business Profile Screen Strings -->
+    <string name="business_profile_add_profile">Add profile</string>
     <string name="business_profile_invite_msg">wants to track your business trips using SendETA</string>
     <string name="business_profile_invite_tnc">By clicking ACCEPT, you agree to sharing your location data with %1$s</string>
     <string name="business_profile_invite_primary_btn">Accept</string>
@@ -144,6 +145,9 @@
     <string name="business_profile_delete_error_msg">Error occurred while deleting your business profile. Please try again.</string>
 
     <string name="business_profile_share_msg">We can use HyperTrack with SendETA to monitor our operations and power a great customer experience. Read more at www.hypertrack.io/sendeta</string>
+
     <!-- Notification Strings -->
     <string name="notification_fallback_message">Send your real-time ETA to your friends &amp; family and let them track you on a map when you are on the way.</string>
+
+    <string name="notification_deeplink_active_trip_error">To accept this task, you need to first complete the ongoing task</string>
 </resources>

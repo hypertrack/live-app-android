@@ -2,13 +2,14 @@ package io.hypertrack.sendeta.store;
 
 import android.graphics.Bitmap;
 
+import com.crashlytics.android.Crashlytics;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.crashlytics.android.Crashlytics;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -28,6 +29,7 @@ import io.realm.Realm;
 import io.realm.RealmList;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -653,13 +655,11 @@ public class UserStore {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         MembershipDTO membershipDTO = new MembershipDTO(membership);
 
-        Call<Membership> call = sendETAService.deleteMembership(this.user.getId(), membershipDTO);
-        call.enqueue(new Callback<Membership>() {
+        Call<ResponseBody> call = sendETAService.deleteMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<ResponseBody>() {
             @Override
-            public void onResponse(Call<Membership> call, Response<Membership> response) {
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-
-                    removeMembership(membership);
 
                     if (callback != null) {
                         callback.OnSuccess(membership);
@@ -672,7 +672,7 @@ public class UserStore {
             }
 
             @Override
-            public void onFailure(Call<Membership> call, Throwable t) {
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
                 if (callback != null) {
                     callback.OnError();
                 }

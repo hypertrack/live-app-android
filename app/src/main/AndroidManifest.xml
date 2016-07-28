@@ -26,8 +26,7 @@
         android:label="${applicationLabel}"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:node="replace"
-        tools:replace="label">
+        tools:replace="android:label">
 
         <!-- Register Activities here -->
         <activity

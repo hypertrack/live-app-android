@@ -63,7 +63,7 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
 
             // Check if this row is the last in the list
         } else if (this.isLastRow(position)) {
-            holder.mMembershipName.setText("Add Business Profile");
+            holder.mMembershipName.setText(R.string.business_profile_add_profile);
             holder.mMembershipIcon.setImageResource(R.drawable.ic_action_add);
             holder.mMembershipDeleteIcon.setVisibility(View.GONE);
 
@@ -126,6 +126,18 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
             mMembershipIcon = (ImageView) view.findViewById(R.id.item_membership_action_icon);
             mMembershipDeleteIcon = (ImageView) view.findViewById(R.id.item_membership_action_delete);
 
+            mMembershipDeleteIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    final Membership membership = memberships.get(getAdapterPosition());
+
+                    // Check if user clicked to remove an existing Business Membership or verify a pending invite
+                    if (membership.isAccepted()) {
+                        listener.onDeleteMembership(membership);
+                    }
+                }
+            });
+
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -143,10 +155,8 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
                         } else {
                             final Membership membership = memberships.get(getAdapterPosition());
 
-                            // Check if user clicked to remove an existing Business Membership or verify a pending invite
-                            if (membership.isAccepted()) {
-                                listener.onDeleteMembership(membership);
-                            } else {
+                            // If current profile is Accepted, So user clicked to verify a pending invite
+                            if (!membership.isAccepted()) {
                                 listener.onVerifyPendingMembership(membership);
                             }
                         }

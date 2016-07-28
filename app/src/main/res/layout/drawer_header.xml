@@ -32,7 +32,7 @@
             android:paddingRight="@dimen/padding_base"
             android:scaleType="centerInside"
             android:src="@drawable/ic_add_business_profile"
-            android:visibility="visible" />
+            android:visibility="gone" />
     </RelativeLayout>
 
     <Spinner
