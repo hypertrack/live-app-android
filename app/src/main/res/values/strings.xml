@@ -145,6 +145,7 @@
     <string name="business_profile_delete_error_msg">Error occurred while deleting your business profile. Please try again.</string>
 
     <string name="business_profile_share_msg">We can use HyperTrack with SendETA to monitor our operations and power a great customer experience. Read more at www.hypertrack.io/sendeta</string>
+    <string name="business_profile_setup_url">dashboard.hypertrack.io/signup/sendeta</string>
 
     <!-- Notification Strings -->
     <string name="notification_fallback_message">Send your real-time ETA to your friends &amp; family and let them track you on a map when you are on the way.</string>

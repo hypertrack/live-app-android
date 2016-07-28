@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.fabric.sdk.android.Fabric;
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.store.AnalyticsStore;
@@ -37,9 +36,6 @@ public class MetaApplication extends Application {
         Fabric.with(this, new Crashlytics());
         mInstance = this;
         this.mContext = getApplicationContext();
-
-        // Initialize Hypertrack Transmitter SDK
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
 
         // Initialize Realm to maintain app databases
         this.setupRealm();
