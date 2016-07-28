@@ -12,7 +12,7 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Membership extends RealmObject implements Serializable {
 
-    public static final String PERSONAL = "personal";
+    public static final String PERSONAL = "Personal";
 
     @PrimaryKey
     @SerializedName("account_id")

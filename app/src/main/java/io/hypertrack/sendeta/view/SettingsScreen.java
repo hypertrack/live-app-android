@@ -117,7 +117,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         }
 
         // Fetch Memberships saved in DB
-        List<Membership> membershipsList = user.getActiveMemberships();
+        List<Membership> membershipsList = user.getActiveBusinessMemberships();
 
         // Initialize Adapter with User's Memberships data
         membershipsAdapter = new MembershipsAdapter(this, membershipsList, this);
@@ -204,7 +204,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             return;
         }
 
-        membershipsAdapter.setMembershipsList(user.getActiveMemberships());
+        membershipsAdapter.setMembershipsList(user.getActiveBusinessMemberships());
         membershipsAdapter.notifyDataSetChanged();
     }
 

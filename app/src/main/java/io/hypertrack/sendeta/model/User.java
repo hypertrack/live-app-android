@@ -291,12 +291,25 @@ public class User extends RealmObject {
     public List<Membership> getActiveMemberships() {
         List<Membership> activeMemberships = new ArrayList<>();
 
-        if (this.getPendingMemberships() != null) {
-            activeMemberships.addAll(this.getPendingMemberships());
+        for (Membership candidate: this.getMemberships()) {
+            if (candidate.isAccepted() || (!candidate.isAccepted() && !candidate.isRejected())){
+                activeMemberships.add(candidate);
+                break;
+            }
         }
 
-        if (this.getAcceptedMemberships() != null) {
-            activeMemberships.addAll(this.getAcceptedMemberships());
+        return activeMemberships;
+    }
+
+    public List<Membership> getActiveBusinessMemberships() {
+        List<Membership> activeMemberships = new ArrayList<>();
+
+        for (Membership candidate: this.getMemberships()) {
+            if (!candidate.isPersonal() && candidate.isAccepted()
+                    || (!candidate.isAccepted() && !candidate.isRejected())){
+                activeMemberships.add(candidate);
+                break;
+            }
         }
 
         return activeMemberships;
@@ -324,13 +337,25 @@ public class User extends RealmObject {
             return null;
         }
 
+        Membership personalMembership = null;
+        List<Membership> acceptedBusinessMemberships = new ArrayList<>();
         List<Membership> acceptedMemberships = new ArrayList<>();
 
         for (Membership candidate : this.getMemberships()) {
-            if (candidate.isAccepted()) {
-                acceptedMemberships.add(candidate);
+            if (candidate.isPersonal()) {
+                personalMembership = candidate;
+            }
+
+            if (candidate.isAccepted() && !candidate.isPersonal()) {
+                acceptedBusinessMemberships.add(candidate);
             }
         }
+
+        if (personalMembership != null)
+            acceptedMemberships.add(personalMembership);
+
+        if (acceptedBusinessMemberships != null && acceptedBusinessMemberships.size() > 0)
+            acceptedMemberships.addAll(acceptedBusinessMemberships);
 
         return acceptedMemberships;
     }

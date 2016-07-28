@@ -82,7 +82,7 @@
                     android:layout_marginLeft="@dimen/margin_high"
                     android:layout_marginTop="@dimen/margin_xhigh"
                     android:fontFamily="sans-serif-medium"
-                    android:text="Profiles"
+                    android:text="Business Profiles"
                     android:textColor="@color/text_base"
                     android:textSize="@dimen/text_medium" />
 

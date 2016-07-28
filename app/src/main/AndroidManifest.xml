@@ -116,7 +116,7 @@
 
         <activity
             android:name=".view.BusinessProfile"
-            android:parentActivityName=".view.SettingsScreen"
+            android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->
