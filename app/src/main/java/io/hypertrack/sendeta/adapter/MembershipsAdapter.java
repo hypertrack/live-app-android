@@ -60,19 +60,27 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
             holder.mMembershipName.setText(profile.getAccountName());
             holder.mMembershipIcon.setImageResource(R.drawable.ic_home);
             holder.mMembershipDeleteIcon.setVisibility(View.GONE);
+            holder.mMembershipPendingText.setVisibility(View.GONE);
 
             // Check if this row is the last in the list
         } else if (this.isLastRow(position)) {
             holder.mMembershipName.setText(R.string.business_profile_add_profile);
             holder.mMembershipIcon.setImageResource(R.drawable.ic_action_add);
             holder.mMembershipDeleteIcon.setVisibility(View.GONE);
+            holder.mMembershipPendingText.setVisibility(View.GONE);
 
         } else {
             Membership profile = this.memberships.get(position);
             holder.mMembershipName.setText(profile.getAccountName());
             holder.mMembershipIcon.setImageResource(R.drawable.ic_work);
-            holder.mMembershipDeleteIcon.setVisibility(View.VISIBLE);
             holder.mMembershipIcon.setVisibility(View.VISIBLE);
+            if (profile.isAccepted()) {
+                holder.mMembershipPendingText.setVisibility(View.GONE);
+                holder.mMembershipDeleteIcon.setVisibility(View.VISIBLE);
+            } else {
+                holder.mMembershipDeleteIcon.setVisibility(View.GONE);
+                holder.mMembershipPendingText.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -119,12 +127,14 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
         private TextView mMembershipName;
         private ImageView mMembershipIcon;
         private ImageView mMembershipDeleteIcon;
+        private TextView mMembershipPendingText;
 
         public MembershipViewHolder(View view) {
             super(view);
             mMembershipName = (TextView) view.findViewById(R.id.item_membership_name);
             mMembershipIcon = (ImageView) view.findViewById(R.id.item_membership_action_icon);
             mMembershipDeleteIcon = (ImageView) view.findViewById(R.id.item_membership_action_delete);
+            mMembershipPendingText = (TextView) view.findViewById(R.id.item_membership_pending_text);
 
             mMembershipDeleteIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -141,7 +151,6 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     // Check if the row clicked had a valid position index
                     if (getAdapterPosition() != RecyclerView.NO_POSITION) {
 

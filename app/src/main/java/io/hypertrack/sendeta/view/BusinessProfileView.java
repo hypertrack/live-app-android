@@ -9,6 +9,6 @@ public interface BusinessProfileView {
 
     void handleGetMembershipSuccess(Membership membership);
     void handleGetMembershipError();
-    void showMembershipActionSuccess(boolean acceptInvite);
-    void showMembershipActionError(boolean acceptInvite);
+    void showMembershipActionSuccess(boolean acceptInvite, String accountName);
+    void showMembershipActionError(boolean acceptInvite, String accountName);
 }

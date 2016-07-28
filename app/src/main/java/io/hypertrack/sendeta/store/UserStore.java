@@ -661,6 +661,8 @@ public class UserStore {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
 
+                    removeMembership(membership);
+
                     if (callback != null) {
                         callback.OnSuccess(membership);
                     }
@@ -714,7 +716,7 @@ public class UserStore {
             return;
         }
 
-        final Membership managedMembershipToDelete = realm.where(Membership.class).equalTo("id", membership.getAccountId()).findFirst();
+        final Membership managedMembershipToDelete = realm.where(Membership.class).equalTo("accountId", membership.getAccountId()).findFirst();
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override

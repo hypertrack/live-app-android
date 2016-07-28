@@ -135,21 +135,24 @@ public class MetaGCMListenerService extends GcmListenerService {
         if (TextUtils.isEmpty(message))
             message = getApplicationContext().getString(R.string.notification_fallback_message);
 
+        if (TextUtils.isEmpty(title))
+            title = getApplicationContext().getString(R.string.app_name);
+
         // Set the default Notification Sound for the current notification
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
+        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
+        bigTextStyle.bigText(message);
+
         // Sets the parameters required for standard notification
-        builder.setContentTitle(getApplicationContext().getString(R.string.app_name))
+        builder.setStyle(bigTextStyle)
+                .setContentTitle(title)
                 .setContentText(message)
-                .setSmallIcon(android.R.color.transparent)
-                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.mipmap.ic_launcher))
+                .setSmallIcon(R.drawable.ic_logo_notification_small)
+                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.ic_logo_notification_large))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
-
-        // Set the title sent from the Server as notification title
-        if (!TextUtils.isEmpty(title))
-            builder.setContentTitle(title);
 
         // Send the Notification with the specified parameters
         NotificationManager notificationManager =

@@ -303,7 +303,23 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void showSendETAButton() {
-        sendETAButton.setText(getString(R.string.action_send_eta));
+        // Set SendETA Button Text
+        String sendETAButtonText = getString(R.string.action_send_eta);
+        if (handlePushDestinationDeepLink) {
+
+            if (this.user != null) {
+                Membership selectedAccount = user.getMembershipForAccountId(pushDestinationAccountId);
+
+                String accountNameText = selectedAccount != null ? selectedAccount.getAccountName() : sendETAButtonText;
+                sendETAButton.setText(sendETAButtonText + " to " + accountNameText);
+            } else {
+                sendETAButton.setText(sendETAButtonText);
+            }
+
+        } else {
+            sendETAButton.setText(sendETAButtonText);
+        }
+
         sendETAButton.setVisibility(View.VISIBLE);
         bottomButtonLayout.setVisibility(View.VISIBLE);
         membershipsSpinnerLayout.setVisibility(View.VISIBLE);
@@ -555,11 +571,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             membershipsList = user.getAcceptedMemberships();
         }
 
-        if (membershipsList != null && membershipsList.size() > 0) {
+        if (membershipsList != null && membershipsList.size() > 1) {
             MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_home_spinner,
                     R.layout.layout_home_spinner_dropdown_item, user.getFullName(), membershipsList);
             membershipsSpinner.setAdapter(adapter);
             membershipsSpinner.setOnItemSelectedListener(mOnMembershipSelectedListener);
+            membershipsSpinner.setPrompt("Select Profile");
 
             // Set Previously Selected Membership in Spinner
             setPreviouslySelectedMembership();
@@ -1013,15 +1030,19 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             updateDestinationLocationAddress();
         }
 
-        // Reset handle pushDestination DeepLink Flag
-        handlePushDestinationDeepLink = false;
-
         TripManager.getSharedManager().startTrip(this.user.getSelectedMembershipAccountId(), new TripManagerCallback() {
             @Override
             public void OnSuccess() {
                 mProgressDialog.dismiss();
-                share();
+
+                // Dont show Share Card by default for Business Account Trips
+                if (!handlePushDestinationDeepLink) {
+                    share();
+                }
                 onTripStart();
+
+                // Reset handle pushDestination DeepLink Flag
+                handlePushDestinationDeepLink = false;
 
                 AnalyticsStore.getLogger().startedTrip(true, null);
                 HTLog.i(TAG, "Trip started successfully.");
@@ -1032,6 +1053,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 mProgressDialog.dismiss();
                 showStartTripError();
                 HTLog.e(TAG, "Trip start failed.");
+
+                // Reset handle pushDestination DeepLink Flag
+                handlePushDestinationDeepLink = false;
 
                 AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
             }

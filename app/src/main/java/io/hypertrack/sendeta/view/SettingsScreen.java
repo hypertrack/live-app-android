@@ -204,7 +204,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             return;
         }
 
-        membershipsAdapter.setMembershipsList(user.getAcceptedMemberships());
+        membershipsAdapter.setMembershipsList(user.getActiveMemberships());
         membershipsAdapter.notifyDataSetChanged();
     }
 
@@ -306,18 +306,23 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     @Override
     public void onAddMembership() {
         // Start BusinessProfile Activity with no parameters
-        showBusinessProfileScreen(null);
+        showBusinessProfileScreen(0);
     }
 
     @Override
     public void onVerifyPendingMembership(Membership membership) {
         // Start BusinessProfile Activity with to be verified Membership as parameter
-        showBusinessProfileScreen(membership);
+        showBusinessProfileScreen(membership.getAccountId());
     }
 
-    private void showBusinessProfileScreen(Membership membership) {
+    private void showBusinessProfileScreen(int membershipAccountId) {
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
-        businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP, membership);
+        if (membershipAccountId != 0) {
+            businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
+//        businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_ID, membershipAccountId);
+        } else {
+            businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, false);
+        }
         startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
     }
 
@@ -343,8 +348,11 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                         if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
                             mProgressDialog.dismiss();
 
-                        Toast.makeText(SettingsScreen.this, R.string.business_profile_deleted_success_msg,
+                        Toast.makeText(SettingsScreen.this,
+                                getString(R.string.business_profile_deleted_success_msg, membership.getAccountName()),
                                 Toast.LENGTH_SHORT).show();
+
+                        updateMembershipsAdapter();
                     }
 
                     @Override
@@ -352,7 +360,8 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                         if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
                             mProgressDialog.dismiss();
 
-                        Toast.makeText(SettingsScreen.this, R.string.business_profile_delete_error_msg,
+                        Toast.makeText(SettingsScreen.this,
+                                getString(R.string.business_profile_delete_error_msg, membership.getAccountName()),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -386,6 +395,11 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
             updateProfileImage();
         } else if (requestCode == Constants.BUSINESS_PROFILE_REQUEST_CODE) {
             // Update the Business Profile List Data on successful addition of Business Profile
+            if (data != null && data.hasExtra("success")) {
+                if (data.getBooleanExtra("success", false)) {
+                    updateMembershipsAdapter();
+                }
+            }
         }
     }
 }

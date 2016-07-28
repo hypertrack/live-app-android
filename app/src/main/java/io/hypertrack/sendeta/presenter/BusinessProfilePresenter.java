@@ -30,13 +30,13 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
             @Override
             public void OnSuccess(Membership membership) {
                 if (view != null)
-                    view.showMembershipActionSuccess(true);
+                    view.showMembershipActionSuccess(true, membership.getAccountName());
             }
 
             @Override
             public void OnError() {
                 if(view != null)
-                    view.showMembershipActionError(true);
+                    view.showMembershipActionError(true, membership.getAccountName());
             }
         });
     }
@@ -47,13 +47,13 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
             @Override
             public void OnSuccess(Membership membership) {
                 if (view != null)
-                    view.showMembershipActionSuccess(false);
+                    view.showMembershipActionSuccess(false, membership.getAccountName());
             }
 
             @Override
             public void OnError() {
                 if(view != null)
-                    view.showMembershipActionError(false);
+                    view.showMembershipActionError(false, membership.getAccountName());
             }
         });
     }

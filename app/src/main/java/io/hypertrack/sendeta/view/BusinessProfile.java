@@ -96,21 +96,33 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     }
 
     @Override
-    public void showMembershipActionSuccess(boolean acceptInvite) {
+    public void showMembershipActionSuccess(boolean acceptInvite, String accountName) {
         businessProfileLoaderLayout.setVisibility(View.GONE);
         if (acceptInvite) {
-            Toast.makeText(BusinessProfile.this, R.string.business_profile_accepted_success_msg,
+            Toast.makeText(BusinessProfile.this, getString(R.string.business_profile_accepted_success_msg, accountName),
                     Toast.LENGTH_SHORT).show();
-            finish();
+
         } else {
-            Toast.makeText(BusinessProfile.this, R.string.business_profile_rejected_success_msg,
+            Toast.makeText(BusinessProfile.this, getString(R.string.business_profile_rejected_success_msg, accountName),
                     Toast.LENGTH_SHORT).show();
-            finish();
         }
+
+        returnToSettingsScreen(true);
+    }
+
+    private void returnToSettingsScreen(boolean status) {
+        Intent returnIntent = new Intent();
+
+        if (status) {
+            returnIntent.putExtra("success", true);
+        }
+        setResult(RESULT_OK, returnIntent);
+
+        finish();
     }
 
     @Override
-    public void showMembershipActionError(boolean acceptInvite) {
+    public void showMembershipActionError(boolean acceptInvite, String accountName) {
         businessProfileLoaderLayout.setVisibility(View.GONE);
         if (acceptInvite) {
             Toast.makeText(BusinessProfile.this, R.string.business_profile_accepted_error_msg,
@@ -119,6 +131,8 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
             Toast.makeText(BusinessProfile.this, R.string.business_profile_rejected_error_msg,
                     Toast.LENGTH_SHORT).show();
         }
+
+        returnToSettingsScreen(false);
     }
 
     public void updateViewsForMembershipInvite(final Membership membership) {

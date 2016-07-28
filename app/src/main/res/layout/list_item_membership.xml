@@ -30,7 +30,7 @@
             android:fontFamily="sans-serif-medium"
             android:padding="@dimen/padding_high"
             android:singleLine="true"
-            android:text="Add Business Profile"
+            android:text="Add Profile"
             android:textColor="@color/text_base"
             android:textSize="@dimen/text_medium" />
 
@@ -41,7 +41,20 @@
             android:layout_gravity="center"
             android:foreground="?android:attr/selectableItemBackground"
             android:background="@android:color/white"
-            android:src="@drawable/ic_action_delete" />
+            android:src="@drawable/ic_action_delete"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/item_membership.pending_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAllCaps="true"
+            android:text="Pending"
+            android:textColor="@color/text_tertiary"
+            android:textSize="@dimen/text_small"
+            android:background="@android:color/white"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <View
