@@ -2,20 +2,27 @@ package io.hypertrack.sendeta.store;
 
 import android.graphics.Bitmap;
 
+import com.crashlytics.android.Crashlytics;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import io.hypertrack.sendeta.model.Membership;
+import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.PlaceDTO;
+import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
+import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
+import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
+import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
@@ -23,6 +30,7 @@ import io.realm.Realm;
 import io.realm.RealmList;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -55,8 +63,24 @@ public class UserStore {
             public void execute(Realm realm) {
                 if (user != null) {
                     userToAdd.setPlaces(user.getPlaces());
+                    userToAdd.setMemberships(user.getMemberships());
                 }
                 user = realm.copyToRealmOrUpdate(userToAdd);
+            }
+        });
+    }
+
+    private void updateUserData(final User updatedUser) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                if (user != null) {
+                    List<Membership> membershipsToAdd = realm.copyToRealmOrUpdate(updatedUser.getMemberships());
+                    RealmList<Membership> membershipsList = new RealmList<>(membershipsToAdd.toArray(new Membership[membershipsToAdd.size()]));
+                    user.setMemberships(membershipsList);
+                }
+
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
@@ -81,7 +105,7 @@ public class UserStore {
         return realm.where(User.class).findAll().size() > 0;
     }
 
-    public void getTask(MetaPlace place, final UserStoreGetTaskCallback callback) {
+    public void getTask(MetaPlace place, int selectedAccountId, final UserStoreGetTaskCallback callback) {
         if (this.user == null || place == null) {
             if (callback != null) {
                 callback.OnError();
@@ -91,16 +115,18 @@ public class UserStore {
         }
 
         if (place.hasDestination()) {
-            this.getTaskForDestination(place.getHyperTrackDestinationID(), callback);
+            this.getTaskForPlaceId(place.getId(), selectedAccountId, callback);
         } else {
-            this.getTaskForPlace(place, callback);
+            this.getTaskForPlace(place, selectedAccountId, callback);
         }
     }
 
-    private void getTaskForDestination(String destinationID, final UserStoreGetTaskCallback callback) {
+    private void getTaskForPlaceId(int placeId, int accountId, final UserStoreGetTaskCallback callback) {
+        TaskDTO taskDTO = new TaskDTO(placeId, accountId);
+
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), destinationID);
+        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -108,12 +134,19 @@ public class UserStore {
                 if (response.isSuccessful()) {
                     Map<String, Object> responseDTO = response.body();
 
-                    if (callback != null) {
-                        if (responseDTO != null) {
-                            callback.OnSuccess((String) responseDTO.get("id"));
-                        } else {
-                            callback.OnError();
+                    try {
+                        if (callback != null) {
+                            if (responseDTO != null) {
+                                callback.OnSuccess((String) responseDTO.get("id"),
+                                        (String) responseDTO.get("hypertrack_driver_id"), (String) responseDTO.get("publishable_key"));
+                            } else {
+                                callback.OnError();
+                            }
                         }
+
+                    } catch (Exception e) {
+                        Crashlytics.logException(e);
+                        e.printStackTrace();
                     }
                 } else {
                     if (callback != null) {
@@ -131,12 +164,12 @@ public class UserStore {
         });
     }
 
-    private void getTaskForPlace(MetaPlace place, final UserStoreGetTaskCallback callback) {
-        PlaceDTO placeDTO = new PlaceDTO(place);
+    private void getTaskForPlace(MetaPlace place, int selectedAccountId, final UserStoreGetTaskCallback callback) {
+        TaskDTO taskDTO = new TaskDTO(place, selectedAccountId);
 
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), placeDTO);
+        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -146,7 +179,8 @@ public class UserStore {
 
                     if (callback != null) {
                         if (responseDTO != null) {
-                            callback.OnSuccess((String) responseDTO.get("id"));
+                            callback.OnSuccess((String) responseDTO.get("id"),
+                                    (String) responseDTO.get("hypertrack_driver_id"), (String) responseDTO.get("publishable_key"));
                         } else {
                             callback.OnError();
                         }
@@ -349,9 +383,9 @@ public class UserStore {
     /**
      * Method to process deleted User Favorite Data to log Analytics Event
      *
-     * @param status        Flag to indicate status of FavoritePlace Deletion event
-     * @param errorMessage  ErrorMessage in case of Failure
-     * @param metaPlace     The Place object which is being deleted
+     * @param status       Flag to indicate status of FavoritePlace Deletion event
+     * @param errorMessage ErrorMessage in case of Failure
+     * @param metaPlace    The Place object which is being deleted
      */
     private void processDeletedMetaPlaceForAnalytics(boolean status, String errorMessage, MetaPlace metaPlace) {
 
@@ -478,6 +512,220 @@ public class UserStore {
                 if (callback != null) {
                     callback.OnError();
                 }
+            }
+        });
+    }
+
+    public int getSelectedMembershipAccountId() {
+        return this.user.getSelectedMembershipAccountId();
+    }
+
+    public void updateSelectedMembership(final int selectedMembershipAccountId) {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                user.setSelectedMembershipAccountId(selectedMembershipAccountId);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    public void getUserData(final UserStoreGetUserDataCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
+        Call<User> call = sendETAService.getUserData(this.user.getId());
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+
+                    updateUserData(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void getMembershipForAccountId(int accountId, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+
+        Call<Membership> call = sendETAService.getMembershipForAccountId(this.user.getId(), accountId);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    addMembership(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void acceptMembership(Membership membership, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        MembershipDTO membershipDTO = new MembershipDTO(membership);
+
+        Call<Membership> call = sendETAService.acceptMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    editMembership(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void rejectMembership(Membership membership, final UserStoreMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        MembershipDTO membershipDTO = new MembershipDTO(membership);
+
+        Call<Membership> call = sendETAService.rejectMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<Membership>() {
+            @Override
+            public void onResponse(Call<Membership> call, Response<Membership> response) {
+                if (response.isSuccessful()) {
+
+                    editMembership(response.body());
+
+                    if (callback != null) {
+                        callback.OnSuccess(response.body());
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Membership> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    public void deleteMembership(final Membership membership, final UserStoreDeleteMembershipCallback callback) {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        MembershipDTO membershipDTO = new MembershipDTO(membership);
+        final String accountName = new String(membership.getAccountName());
+
+        Call<ResponseBody> call = sendETAService.deleteMembership(this.user.getId(), membershipDTO);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+
+                    removeMembership(membership);
+
+                    if (callback != null) {
+                        callback.OnSuccess(new String (accountName));
+                    }
+                } else {
+                    if (callback != null) {
+                        callback.OnError();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                if (callback != null) {
+                    callback.OnError();
+                }
+            }
+        });
+    }
+
+    private void addMembership(final Membership membership) {
+        if (this.user == null || membership == null) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Membership managedMembership = realm.copyToRealmOrUpdate(membership);
+                user.getMemberships().add(managedMembership);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    private void editMembership(final Membership membership) {
+        if (this.user == null || membership == null) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.copyToRealmOrUpdate(membership);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    private void removeMembership(final Membership membership) {
+        if (this.user == null || membership == null) {
+            return;
+        }
+
+        final Membership managedMembershipToDelete = realm.where(Membership.class).equalTo("accountId", membership.getAccountId()).findFirst();
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                managedMembershipToDelete.deleteFromRealm();
+                user.getPlaces().remove(membership);
+                user = realm.copyToRealmOrUpdate(user);
             }
         });
     }

@@ -20,9 +20,6 @@ public class MetaPlace extends RealmObject implements Serializable{
     @PrimaryKey
     private int id;
 
-    @SerializedName("hypertrack_destination_id")
-    private String hyperTrackDestinationID;
-
     @SerializedName("google_places_id")
     private String googlePlacesID;
 
@@ -39,14 +36,6 @@ public class MetaPlace extends RealmObject implements Serializable{
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getHyperTrackDestinationID() {
-        return hyperTrackDestinationID;
-    }
-
-    public void setHyperTrackDestinationID(String hyperTrackDestinationID) {
-        this.hyperTrackDestinationID = hyperTrackDestinationID;
     }
 
     public String getGooglePlacesID() {
@@ -93,7 +82,6 @@ public class MetaPlace extends RealmObject implements Serializable{
     public String toString() {
         return "MetaPlace{" +
                 "id=" + id +
-                ", hyperTrackDestinationID='" + hyperTrackDestinationID + '\'' +
                 ", googlePlacesID='" + googlePlacesID + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
@@ -150,7 +138,6 @@ public class MetaPlace extends RealmObject implements Serializable{
         this.id = place.getId();
         this.longitude = place.getLongitude();
         this.latitude = place.getLatitude();
-        this.hyperTrackDestinationID = place.getHyperTrackDestinationID();
     }
 
     public void update(MetaPlace place) {
@@ -160,7 +147,6 @@ public class MetaPlace extends RealmObject implements Serializable{
         this.id = place.getId();
         this.longitude = place.getLongitude();
         this.latitude = place.getLatitude();
-        this.hyperTrackDestinationID = place.getHyperTrackDestinationID();
     }
 
     public MetaPlace(Place place) {
@@ -182,7 +168,7 @@ public class MetaPlace extends RealmObject implements Serializable{
     }
 
     public boolean hasDestination() {
-        return (this.hyperTrackDestinationID != null && !this.hyperTrackDestinationID.isEmpty());
+        return this.id != 0;
     }
 
     public boolean isEqualPlace(MetaPlace place) {

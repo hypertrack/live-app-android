@@ -33,10 +33,12 @@
     <dimen name="text_base">14sp</dimen>
     <dimen name="text_medium">16sp</dimen>
     <dimen name="text_large">20sp</dimen>
+    <dimen name="text_very_large">24sp</dimen>
     <dimen name="text_extra_large">32sp</dimen>
 
     <!-- Button dimensions -->
     <dimen name="cta_button_size">50dp</dimen>
+    <dimen name="home_cta_bottom_layout_size">160dp</dimen>
     <dimen name="cta_button_radius">25dp</dimen>
 
     <!-- Standard Elevation Dimensions-->
@@ -48,10 +50,12 @@
     <dimen name="map_side_padding">48dp</dimen>
     <dimen name="map_active_trip_side_padding">100dp</dimen>
     <dimen name="map_top_padding">240dp</dimen>
-    <dimen name="map_bottom_padding">56dp</dimen>
+    <dimen name="map_bottom_padding">120dp</dimen>
     <dimen name="map_active_trip_bottom_padding">56dp</dimen>
 
     <dimen name="image_view_size">100dp</dimen>
     <dimen name="image_view_size_half">50dp</dimen>
+
+    <dimen name="drawer_header_subtitle_height">56dp</dimen>
 
 </resources>

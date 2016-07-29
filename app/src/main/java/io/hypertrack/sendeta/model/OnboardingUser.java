@@ -65,6 +65,10 @@ public class OnboardingUser {
         return onboardingUser;
     }
 
+    /**
+     * IMPORTANT: Call this method on every update to onBoardingUser data to get the changes
+     * reflected in the SharedPreferences for future reference.
+     */
     public static void setOnboardingUser(){
         SharedPreferenceManager.setOnboardingUser(onboardingUser);
     }

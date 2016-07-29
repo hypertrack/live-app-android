@@ -2,12 +2,21 @@ package io.hypertrack.sendeta;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import io.fabric.sdk.android.Fabric;
-import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.sendeta.model.DBMigration;
+import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.store.AnalyticsStore;
+import io.hypertrack.sendeta.store.RealmStore;
 import io.hypertrack.sendeta.util.DevDebugUtils;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -19,6 +28,7 @@ public class MetaApplication extends Application {
 
     private static MetaApplication mInstance;
     private Context mContext;
+    private static final String TAG = MetaApplication.class.getSimpleName();
 
     @Override
     public void onCreate() {
@@ -27,11 +37,20 @@ public class MetaApplication extends Application {
         mInstance = this;
         this.mContext = getApplicationContext();
 
-        // Initialize Hypertrack Transmitter SDK
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
-
         // Initialize Realm to maintain app databases
         this.setupRealm();
+
+//        RealmConfiguration config = new RealmConfiguration.Builder(context)
+//                .schemaVersion(2) // Must be bumped when the schema changes
+//                .migration(new MyMigration()) // Migration to run
+//                .build();
+//
+//        Realm.setDefaultConfiguration(config);
+
+// This will automatically trigger the migration if needed
+//        Realm realm = Realm.getDefaultInstance();
+
+//        this.migrateRealmDB();
 
         // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
@@ -39,11 +58,6 @@ public class MetaApplication extends Application {
         // Initialize Stetho to debug Databases
         // (NOTE: IFF current Build Variant is DEBUG)
         DevDebugUtils.installStetho(this);
-    }
-
-    private void setupRealm() {
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this).deleteRealmIfMigrationNeeded().build();
-        Realm.setDefaultConfiguration(realmConfiguration);
     }
 
     public Context getAppContext() {
@@ -54,4 +68,59 @@ public class MetaApplication extends Application {
         return mInstance;
     }
 
+    private void migrateRealmDB() {
+        // Or you can add the migration code to the configuration. This will run the migration code without throwing
+        // a RealmMigrationNeededException.
+        RealmConfiguration config = new RealmConfiguration.Builder(this)
+                .name("default1")
+                .schemaVersion(2)
+                .migration(new DBMigration())
+                .build();
+
+        RealmStore.getShareStore().setConfig(config);
+        RealmStore.getShareStore().setRealm(Realm.getInstance(config)); // Automatically run migration if needed
+
+        Toast.makeText(this, "Default1", Toast.LENGTH_SHORT).show();
+        showStatus(RealmStore.getShareStore().getRealm());
+    }
+
+    private void showStatus(Realm realm) {
+        String txt = realmString(realm);
+        Log.i(TAG, txt);
+        Toast.makeText(this, txt, Toast.LENGTH_SHORT).show();
+    }
+
+    private String realmString(Realm realm) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Membership membership : realm.where(Membership.class).findAll()) {
+            stringBuilder.append(membership.toString()).append("\n");
+        }
+
+        return (stringBuilder.length() == 0) ? "<data was deleted>" : stringBuilder.toString();
+    }
+
+    private String copyBundledRealmFile(InputStream inputStream, String outFileName) {
+        try {
+            File file = new File(this.getFilesDir(), outFileName);
+            FileOutputStream outputStream = new FileOutputStream(file);
+            byte[] buf = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buf)) > 0) {
+                outputStream.write(buf, 0, bytesRead);
+            }
+            outputStream.close();
+            return file.getAbsolutePath();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private void setupRealm() {
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
+                .schemaVersion(1)
+                .deleteRealmIfMigrationNeeded().build();
+        Realm.setDefaultConfiguration(realmConfiguration);
+    }
 }
+

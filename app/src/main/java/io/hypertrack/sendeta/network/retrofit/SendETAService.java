@@ -3,13 +3,18 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
+import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
+import io.hypertrack.sendeta.model.Membership;
+import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
+import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.Trip;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.VerifyResponse;
 import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -48,7 +53,7 @@ public interface SendETAService {
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
 
     @POST("/api/v1/users/{id}/create_task/")
-    Call<Map<String, Object>> createTask(@Path("id") int id, @Body PlaceDTO placeDTO);
+    Call<Map<String, Object>> createTask(@Path("id") int id, @Body TaskDTO placeDTO);
 
     @POST("/api/v1/places/")
     Call<MetaPlace> addPlace(@Body PlaceDTO place);
@@ -64,4 +69,24 @@ public interface SendETAService {
 
     @GET("/api/v1/users/{id}/task/")
     Call<Map <String, Object>> createTask(@Path("id") int id, @Query("destination_id") String destinationID);
+
+    // Membership Calls
+    @GET("/api/v1/users/{id}/")
+    Call<User> getUserData(@Path("id") int id);
+
+    @GET("/api/v1/users/{id}/membership/")
+    Call<Membership> getMembershipForAccountId(@Path("id") int id, @Query("account_id") int accountId);
+
+    @POST("/api/v1/users/{id}/accept_membership/")
+    Call<Membership> acceptMembership(@Path("id") int id, @Body MembershipDTO membership);
+
+    @POST("/api/v1/users/{id}/reject_membership/")
+    Call<Membership> rejectMembership(@Path("id") int id, @Body MembershipDTO membership);
+
+    @POST("/api/v1/users/{id}/delete_membership/")
+    Call<ResponseBody> deleteMembership(@Path("id") int id, @Body MembershipDTO membership);
+
+    //Add GCM Token Call
+    @POST("/api/v1/users/{id}/add_device/")
+    Call<ResponseBody> addGCMToken(@Path("id") int id, @Body GCMAddDeviceDTO gcmAddDeviceDTO);
 }

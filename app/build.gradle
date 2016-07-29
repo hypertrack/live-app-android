@@ -15,6 +15,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'com.mindera.gradle.slack'
 apply plugin: 'realm-android'
+apply plugin: 'com.google.gms.google-services'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -49,7 +50,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 0
+        def versionMinor = 1
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
 //        def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
@@ -87,7 +88,7 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
-            buildConfigField "String", "BASE_URL", '"http://api.sendeta.com"'
+            buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -98,7 +99,7 @@ android {
             applicationIdSuffix ".debug"
             manifestPlaceholders = [applicationLabel: "SendETA Debug"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
-            buildConfigField "String", "BASE_URL", '"http://meta-api-staging.herokuapp.com/"'
+            buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             resValue "string", "facebook_app_id", "1548496698792614"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -119,10 +120,10 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
-    debugCompile('io.hypertrack:transmitter:0.4.13:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:1.0.7:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:0.4.14:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:1.0.7:release@aar') {
         transitive = true;
     }
     debugCompile('io.hypertrack:consumer:0.4.13:debug@aar') {
@@ -131,7 +132,8 @@ dependencies {
     releaseCompile('io.hypertrack:consumer:0.4.13:release@aar') {
         transitive = true;
     }
-    compile 'com.google.maps.android:android-maps-utils:0.4+'
+//    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
+    compile 'com.google.android.gms:play-services-gcm:8.3.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }

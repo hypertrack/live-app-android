@@ -22,6 +22,7 @@ public class SharedPreferenceManager {
 
     private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
     private static final String USER_AUTH_TOKEN = "user_auth_token";
+    private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
@@ -58,6 +59,17 @@ public class SharedPreferenceManager {
         Type type = new TypeToken<MetaPlace>(){}.getType();
 
         return gson.fromJson(placeJson, type);
+    }
+
+    public static String getGCMToken() {
+        return getSharedPreferences().getString(GCM_TOKEN, "");
+    }
+
+    public static void setGcmToken(String token) {
+        SharedPreferences.Editor editor = getEditor();
+
+        editor.putString(GCM_TOKEN, token);
+        editor.apply();
     }
 
     public static void deletePlace() {

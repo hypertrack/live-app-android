@@ -14,14 +14,9 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <!--<permission-->
-        <!--android:name="io.hypertrack.sendeta.permission.C2D_MESSAGE"-->
-        <!--android:protectionLevel="signature" />-->
-<!---->
-    <!--<uses-permission android:name="io.hypertrack.meta.permission.C2D_MESSAGE" />-->
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
     <application
@@ -29,37 +24,63 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${applicationLabel}"
-        tools:replace="android:label"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        tools:replace="android:label">
 
         <!-- Register Activities here -->
+        <activity
+            android:name=".view.SplashScreen"
+            android:allowTaskReparenting="false"
+            android:label="${applicationLabel}"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Transparent">
+
+            <!-- Intent Filter to make this Screen as the launcher screen -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Intent Filter to handle browsable deeplinks -->
+            <intent-filter android:label="@string/filter_title_viewaccept">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.sendeta.com"
+                    android:pathPrefix="/accept"
+                    android:scheme="http" />
+
+                <data
+                    android:host="www.sendeta.com"
+                    android:pathPrefix="/request"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".view.Home"
             android:label="${applicationLabel}"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
+
         <activity
             android:name=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
+
         <activity
             android:name=".view.Verify"
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".view.Register" />
-        </activity>
+            android:windowSoftInputMode="adjustResize"></activity>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -77,20 +98,28 @@
 
         <activity
             android:name=".view.Profile"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <activity android:name=".view.UserProfile" />
+        <activity
+            android:name=".view.SettingsScreen"
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".view.EditProfile" />
+        <activity
+            android:name=".view.EditProfile"
+            android:screenOrientation="portrait" />
 
-        <activity android:name=".view.AddFavoritePlace" />
+        <activity
+            android:name=".view.AddFavoritePlace"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.BusinessProfile"
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->
-        <!--<receiver android:name=".util.SMSReceiver">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.provider.Telephony.SMS_RECEIVED" />-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
             android:exported="true"
@@ -109,15 +138,17 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.NetworkChangeReceiver" >
+        <receiver android:name=".util.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.BootReceiver"
-            android:exported="false" android:enabled="true">
+        <receiver
+            android:name=".util.BootReceiver"
+            android:enabled="true"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
@@ -131,7 +162,13 @@
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
 
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
 
         <!-- Register Services here -->
         <service
@@ -145,6 +182,26 @@
         <service
             android:name=".service.FetchLocationIntentService"
             android:exported="false" />
+
+        <service android:name=".service.RegistrationIntentService"
+            android:exported="false" />
+
+        <service
+            android:name=".service.MetaInstanceIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".service.MetaGCMListenerService"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
