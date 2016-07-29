@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="none">
+        <item
+            android:id="@+id/drawer_send_eta"
+            android:icon="@drawable/ic_send"
+            android:title="Send ETA" />
+        <!--<item-->
+            <!--android:id="@+id/drawer_receive_eta"-->
+            <!--android:icon="@drawable/ic_receive"-->
+            <!--android:title="Receive ETA" />-->
+        <item
+            android:id="@+id/drawer_settings"
+            android:icon="@drawable/ic_settings"
+            android:title="Settings" />
+    </group>
+</menu>

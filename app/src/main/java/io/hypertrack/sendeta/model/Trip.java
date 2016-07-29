@@ -10,9 +10,6 @@ import io.realm.annotations.PrimaryKey;
  */
 public class Trip extends RealmObject {
 
-    @SerializedName("hypertrack_trip_id")
-    private String hypertrackTripID;
-
     @SerializedName("hypertrack_task_id")
     private String hypertrackTaskID;
 
@@ -28,14 +25,6 @@ public class Trip extends RealmObject {
 
     public void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
-    }
-
-    public String getHypertrackTripID() {
-        return hypertrackTripID;
-    }
-
-    public void setHypertrackTripID(String hypertrackTripID) {
-        this.hypertrackTripID = hypertrackTripID;
     }
 
     public String getId() {
@@ -57,7 +46,6 @@ public class Trip extends RealmObject {
     @Override
     public String toString() {
         return "Trip{" +
-                ", hypertrackTripID='" + hypertrackTripID + '\'' +
                 ", hypertrackTaskID='" + hypertrackTaskID + '\'' +
                 ", id='" + id + '\'' +
                 ", shareUrl='" + shareUrl + '\'' +

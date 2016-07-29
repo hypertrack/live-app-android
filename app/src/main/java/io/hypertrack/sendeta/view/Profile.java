@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
@@ -29,12 +30,16 @@ import com.squareup.picasso.Target;
 
 import java.io.File;
 
+import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
+import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
@@ -195,16 +200,37 @@ public class Profile extends BaseActivity implements ProfileView {
         // TODO: 30/06/16 Add Background Upload of Image
         Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
 
-        // Complete User Signup on Profile Pic Upload Failure
+        // Complete User SignUp on Profile Pic Upload Failure
         navigateToHomeScreen();
     }
 
     @Override
     public void navigateToHomeScreen() {
+
+        UserStore.sharedStore.initializeUser();
         showProgress(false);
-        Intent intent = new Intent(Profile.this, Home.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+
+        // Clear Existing running trip on Registration Successful
+        SharedPreferenceManager.deleteTrip();
+        SharedPreferenceManager.deletePlace();
+        HTLog.i("Profile", "User Registration successful: Clearing Active Trip, if any");
+
+        User user = UserStore.sharedStore.getUser();
+        Intent intent;
+        if (user != null && user.getPendingMemberships() != null && user.getPendingMemberships().size() > 0) {
+            intent = new Intent(Profile.this, BusinessProfile.class);
+            intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        } else {
+            intent = new Intent(Profile.this, Home.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        }
+
+        TaskStackBuilder.create(Profile.this)
+                .addNextIntentWithParentStack(intent)
+                .startActivities();
+
+        finish();
     }
 
     @Override

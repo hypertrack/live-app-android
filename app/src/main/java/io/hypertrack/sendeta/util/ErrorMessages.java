@@ -26,6 +26,7 @@ public class ErrorMessages {
 
     // Trip ErrorMessages
     public static final String START_TRIP_FAILED = "There was an error starting the trip. Please try again";
+    public static final String START_TRIP_ERROR_INVALID_ACCOUNT_ID = "There was an error starting the trip. Please select the correct Account and try again.";
 
     public static final String END_TRIP_FAILED = "There was an error ending the trip. Please try again";
     public static final String AUTO_END_TRIP_FAILED = "There was an error Auto ending the trip. Please try again";

@@ -10,6 +10,7 @@
 
     <color name="appBackground">#F4F4F4</color>
 
+    <!-- Default Text Colors -->
     <color name="text_base">#6a6a6a</color>
     <color name="text_secondary">#888888</color>
     <color name="text_tertiary">#b2b2b2</color>
@@ -17,6 +18,11 @@
     <color name="text_error">#DD2C00</color>
     <color name="text_warning">#D78A00</color>
     <color name="text_highlight">@color/colorAccent</color>
+
+    <!-- Dark Background Text Colors -->
+    <color name="text_dark_bg_base">#FFFFFF</color>
+    <color name="text_dark_bg_secondary">#AAFFFFFF</color>
+    <color name="text_dark_bg_disabled">#78FFFFFF</color>
 
     <color name="border_color">#C8C8C8</color>
 

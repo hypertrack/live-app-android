@@ -11,9 +11,6 @@ public class PlaceDTO {
 
     private int id;
 
-    @SerializedName("hypertrack_destination_id")
-    private String hyperTrackDestinationID;
-
     @SerializedName("google_places_id")
     private String googlePlacesID;
 
@@ -29,14 +26,6 @@ public class PlaceDTO {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getHyperTrackDestinationID() {
-        return hyperTrackDestinationID;
-    }
-
-    public void setHyperTrackDestinationID(String hyperTrackDestinationID) {
-        this.hyperTrackDestinationID = hyperTrackDestinationID;
     }
 
     public String getGooglePlacesID() {
@@ -75,7 +64,6 @@ public class PlaceDTO {
         this.id = place.getId();
         this.address = place.getAddress();
         this.googlePlacesID = place.getGooglePlacesID();
-        this.hyperTrackDestinationID = place.getHyperTrackDestinationID();
         this.name = place.getName();
         this.location = new HTLocation(place.getLatitude(), place.getLongitude());
     }

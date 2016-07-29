@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.model;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.BufferedInputStream;
@@ -39,10 +40,13 @@ public class User extends RealmObject {
 
     private byte[] photoData;
 
-    @SerializedName("hypertrack_driver_id")
-    private String hypertrackDriverID;
-
     private RealmList<MetaPlace> places;
+
+    @SerializedName("memberships")
+    private RealmList<Membership> memberships;
+
+    @Expose(serialize = false, deserialize = false)
+    private int selectedMembershipAccountId;
 
     public Integer getId() {
         return id;
@@ -84,20 +88,30 @@ public class User extends RealmObject {
         this.photo = photo;
     }
 
-    public String getHypertrackDriverID() {
-        return hypertrackDriverID;
-    }
-
-    public void setHypertrackDriverID(String hypertrackDriverID) {
-        this.hypertrackDriverID = hypertrackDriverID;
-    }
-
     public RealmList<MetaPlace> getPlaces() {
         return places;
     }
 
     public void setPlaces(RealmList<MetaPlace> places) {
         this.places = places;
+    }
+
+    public RealmList<Membership> getMemberships() {
+        return memberships;
+    }
+
+    public void setMemberships(RealmList<Membership> memberships) {
+        this.memberships = memberships;
+    }
+
+    public int getSelectedMembershipAccountId() {
+        return selectedMembershipAccountId;
+    }
+
+    public void setSelectedMembershipAccountId(int selectedMembershipAccountId) {
+        Membership membership = getMembershipForAccountId(selectedMembershipAccountId);
+        if (membership != null && membership.isAccepted())
+            this.selectedMembershipAccountId = selectedMembershipAccountId;
     }
 
     @Override
@@ -108,7 +122,8 @@ public class User extends RealmObject {
                 ", lastName='" + lastName + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
-                ", hypertrackDriverID='" + hypertrackDriverID + '\'' +
+                ", selectedMembershipAccountId='" + selectedMembershipAccountId + '\'' +
+                ", memberships='" + memberships.toString() + '\'' +
                 '}';
     }
 
@@ -202,7 +217,6 @@ public class User extends RealmObject {
         for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.getId() == place.getId()
                     || candidate.getGooglePlacesID().equalsIgnoreCase(place.getGooglePlacesID())
-                    || candidate.getHyperTrackDestinationID().equalsIgnoreCase(place.getHyperTrackDestinationID())
                     || (candidate.getLatitude().equals(place.getLatitude()) && candidate.getLongitude().equals(place.getLongitude()))) {
                 return true;
             }
@@ -256,5 +270,106 @@ public class User extends RealmObject {
         }
 
         this.photoData = bytes;
+    }
+
+    public Membership getMembershipForAccountId(int accountId) {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        Membership membership = null;
+        for (Membership candidate: this.getMemberships()) {
+            if (candidate.getAccountId() == accountId) {
+                membership = candidate;
+                break;
+            }
+        }
+
+        return membership;
+    }
+
+    public List<Membership> getActiveMemberships() {
+        List<Membership> activeMemberships = new ArrayList<>();
+
+        for (Membership candidate: this.getMemberships()) {
+            if (candidate.isAccepted() || (!candidate.isAccepted() && !candidate.isRejected())){
+                activeMemberships.add(candidate);
+                break;
+            }
+        }
+
+        return activeMemberships;
+    }
+
+    public List<Membership> getActiveBusinessMemberships() {
+        List<Membership> activeMemberships = new ArrayList<>();
+
+        for (Membership candidate: this.getMemberships()) {
+            if (!candidate.isPersonal() && candidate.isAccepted()
+                    || (!candidate.isAccepted() && !candidate.isRejected())){
+                activeMemberships.add(candidate);
+                break;
+            }
+        }
+
+        return activeMemberships;
+    }
+
+    public List<Membership> getPendingMemberships() {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        List<Membership> membershipsList = new ArrayList<>();
+
+        for (Membership candidate: this.getMemberships()) {
+            if (!candidate.isAccepted() && !candidate.isRejected()) {
+                membershipsList.add(candidate);
+                break;
+            }
+        }
+
+        return membershipsList;
+    }
+
+    public List<Membership> getAcceptedMemberships() {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0) {
+            return null;
+        }
+
+        Membership personalMembership = null;
+        List<Membership> acceptedBusinessMemberships = new ArrayList<>();
+        List<Membership> acceptedMemberships = new ArrayList<>();
+
+        for (Membership candidate : this.getMemberships()) {
+            if (candidate.isPersonal()) {
+                personalMembership = candidate;
+            }
+
+            if (candidate.isAccepted() && !candidate.isPersonal()) {
+                acceptedBusinessMemberships.add(candidate);
+            }
+        }
+
+        if (personalMembership != null)
+            acceptedMemberships.add(personalMembership);
+
+        if (acceptedBusinessMemberships != null && acceptedBusinessMemberships.size() > 0)
+            acceptedMemberships.addAll(acceptedBusinessMemberships);
+
+        return acceptedMemberships;
+    }
+
+    public boolean isAcceptedMembership(int accountId) {
+        if (this.getMemberships() == null || this.getMemberships().size() == 0)
+            return false;
+
+        for (Membership candidate : this.getMemberships()) {
+            if (candidate.getAccountId() == accountId && candidate.isAccepted()) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

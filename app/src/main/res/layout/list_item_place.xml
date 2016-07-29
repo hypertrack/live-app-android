@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
     <FrameLayout
@@ -43,7 +44,6 @@
                     android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
                     android:singleLine="true"
-                    android:text="Title"
                     android:textColor="@color/text_base"
                     android:textSize="@dimen/text_medium" />
 
@@ -63,6 +63,8 @@
                 android:id="@+id/item_place.delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:background="@android:color/white"
                 android:src="@drawable/ic_action_delete"
                 android:visibility="gone" />
         </LinearLayout>
@@ -70,6 +72,6 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:background="@drawable/divider_light_border_bottom" />
 </LinearLayout>
