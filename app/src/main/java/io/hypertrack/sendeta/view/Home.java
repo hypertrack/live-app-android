@@ -820,7 +820,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         String taskData = intent.getStringExtra(Constants.KEY_TASK);
         if (!TextUtils.isEmpty(taskData)) {
             Gson gson = new Gson();
-            Type type = new TypeToken<Task>() {}.getType();
+            Type type = new TypeToken<Task>() {
+            }.getType();
             pushDestinationTask = gson.fromJson(taskData, type);
         }
 
@@ -1027,41 +1028,67 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
-        // Update Reverse Geocoded Address for pushDestination DeepLink
-        if (handlePushDestinationDeepLink && destinationAddressGeocoded) {
-            updateDestinationLocationAddress();
-        }
+        // Use startTripWithTaskID for Pushed Destination DeepLink
+        if (handlePushDestinationDeepLink) {
+            if (destinationAddressGeocoded) {
+                updateDestinationLocationAddress();
+            }
 
-        TripManager.getSharedManager().startTrip(this.user.getSelectedMembershipAccountId(), new TripManagerCallback() {
-            @Override
-            public void OnSuccess() {
-                mProgressDialog.dismiss();
+            TripManager.getSharedManager().startTripWithTaskID(this.user.getSelectedMembershipAccountId(),
+                    pushDestinationTask, new TripManagerCallback() {
+                @Override
+                public void OnSuccess() {
+                    mProgressDialog.dismiss();
 
-                // Dont show Share Card by default for Business Account Trips
-                if (!handlePushDestinationDeepLink) {
-                    share();
+                    // Dont show Share Card by default for Business Account Trips
+                    if (!handlePushDestinationDeepLink) {
+                        share();
+                    }
+                    onTripStart();
+
+                    // Reset handle pushDestination DeepLink Flag
+                    handlePushDestinationDeepLink = false;
+
+                    AnalyticsStore.getLogger().startedTrip(true, null);
+                    HTLog.i(TAG, "Trip started successfully.");
                 }
-                onTripStart();
 
-                // Reset handle pushDestination DeepLink Flag
-                handlePushDestinationDeepLink = false;
+                @Override
+                public void OnError() {
+                    mProgressDialog.dismiss();
+                    showStartTripError();
+                    HTLog.e(TAG, "Trip start failed.");
 
-                AnalyticsStore.getLogger().startedTrip(true, null);
-                HTLog.i(TAG, "Trip started successfully.");
-            }
+                    // Reset handle pushDestination DeepLink Flag
+                    handlePushDestinationDeepLink = false;
 
-            @Override
-            public void OnError() {
-                mProgressDialog.dismiss();
-                showStartTripError();
-                HTLog.e(TAG, "Trip start failed.");
+                    AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                }
+            });
 
-                // Reset handle pushDestination DeepLink Flag
-                handlePushDestinationDeepLink = false;
+            // Use startTrip for Pushed Destination DeepLink
+        } else {
+            TripManager.getSharedManager().startTrip(this.user.getSelectedMembershipAccountId(), new TripManagerCallback() {
+                @Override
+                public void OnSuccess() {
+                    mProgressDialog.dismiss();
 
-                AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
-            }
-        });
+                    onTripStart();
+
+                    AnalyticsStore.getLogger().startedTrip(true, null);
+                    HTLog.i(TAG, "Trip started successfully.");
+                }
+
+                @Override
+                public void OnError() {
+                    mProgressDialog.dismiss();
+                    showStartTripError();
+                    HTLog.e(TAG, "Trip start failed.");
+
+                    AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                }
+            });
+        }
     }
 
     private void updateDestinationLocationAddress() {
@@ -1889,9 +1916,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
-                            Log.d(TAG, "Registration Key pushed to server successfully");
+                            HTLog.d(TAG, "Registration Key pushed to server successfully");
                         } else {
-                            Log.e(TAG, "Registration Key push to server failed: " + response.raw().networkResponse().code()
+                            HTLog.e(TAG, "Registration Key push to server failed: " + response.raw().networkResponse().code()
                                     + ", " + response.raw().networkResponse().message() + ", "
                                     + response.raw().networkResponse().request().url());
                         }
@@ -1899,13 +1926,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Log.e(TAG, "Registration Key push to server failed: " + t.getMessage());
+                        HTLog.e(TAG, "Registration Key push to server failed: " + t.getMessage());
                     }
                 });
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e(TAG, "Registration Key push to server failed: " + e.getMessage());
+            HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());
         }
     }
 

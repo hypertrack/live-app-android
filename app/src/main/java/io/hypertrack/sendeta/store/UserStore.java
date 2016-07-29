@@ -19,6 +19,7 @@ import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
+import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
@@ -651,9 +652,10 @@ public class UserStore {
         });
     }
 
-    public void deleteMembership(final Membership membership, final UserStoreMembershipCallback callback) {
+    public void deleteMembership(final Membership membership, final UserStoreDeleteMembershipCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         MembershipDTO membershipDTO = new MembershipDTO(membership);
+        final String accountName = new String(membership.getAccountName());
 
         Call<ResponseBody> call = sendETAService.deleteMembership(this.user.getId(), membershipDTO);
         call.enqueue(new Callback<ResponseBody>() {
@@ -664,7 +666,7 @@ public class UserStore {
                     removeMembership(membership);
 
                     if (callback != null) {
-                        callback.OnSuccess(membership);
+                        callback.OnSuccess(new String (accountName));
                     }
                 } else {
                     if (callback != null) {

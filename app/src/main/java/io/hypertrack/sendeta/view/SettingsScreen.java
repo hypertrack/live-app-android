@@ -11,6 +11,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -28,8 +29,8 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
@@ -342,14 +343,17 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.show();
 
-                UserStore.sharedStore.deleteMembership(membership, new UserStoreMembershipCallback() {
+                UserStore.sharedStore.deleteMembership(membership, new UserStoreDeleteMembershipCallback() {
                     @Override
-                    public void OnSuccess(Membership membership) {
+                    public void OnSuccess(String accountName) {
                         if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
                             mProgressDialog.dismiss();
 
+                        if (TextUtils.isEmpty(accountName))
+                            accountName = "Business";
+
                         Toast.makeText(SettingsScreen.this,
-                                getString(R.string.business_profile_deleted_success_msg, membership.getAccountName()),
+                                getString(R.string.business_profile_deleted_success_msg, accountName),
                                 Toast.LENGTH_SHORT).show();
 
                         updateMembershipsAdapter();

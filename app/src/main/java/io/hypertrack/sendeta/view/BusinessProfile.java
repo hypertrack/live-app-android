@@ -33,8 +33,11 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     private TextView businessProfileSecondaryBtn;
     private TextView businessProfileLoaderText;
     private LinearLayout businessProfileLoaderLayout;
+    private LinearLayout businessProfilePrimaryBtnLoader;
+    private LinearLayout businessProfileSecondaryBtnLoader;
 
     private IBusinessProfilePresenter<BusinessProfileView> presenter = new BusinessProfilePresenter();
+    private boolean businessProfilePrimaryBtnClicked = false, businessProfileSecondaryBtnClicked = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,6 +56,9 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
         businessProfileLoaderText = (TextView) findViewById(R.id.business_profile_loader_text);
         businessProfileLoaderLayout = (LinearLayout) findViewById(R.id.business_profile_loader_layout);
+
+        businessProfilePrimaryBtnLoader = (LinearLayout) findViewById(R.id.business_profile_primary_btn_loader);
+        businessProfileSecondaryBtnLoader = (LinearLayout) findViewById(R.id.business_profile_secondary_btn_loader);
 
         // Attach View Presenter to View
         presenter.attachView(this);
@@ -97,7 +103,12 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
     @Override
     public void showMembershipActionSuccess(boolean acceptInvite, String accountName) {
+
+        // Hide the Loaders on screen if visible
         businessProfileLoaderLayout.setVisibility(View.GONE);
+        businessProfilePrimaryBtnLoader.setVisibility(View.GONE);
+        businessProfileSecondaryBtnLoader.setVisibility(View.GONE);
+
         if (acceptInvite) {
             Toast.makeText(BusinessProfile.this, getString(R.string.business_profile_accepted_success_msg, accountName),
                     Toast.LENGTH_SHORT).show();
@@ -123,7 +134,12 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
     @Override
     public void showMembershipActionError(boolean acceptInvite, String accountName) {
+
+        // Hide the Loaders on screen if visible
         businessProfileLoaderLayout.setVisibility(View.GONE);
+        businessProfilePrimaryBtnLoader.setVisibility(View.GONE);
+        businessProfileSecondaryBtnLoader.setVisibility(View.GONE);
+
         if (acceptInvite) {
             Toast.makeText(BusinessProfile.this, R.string.business_profile_accepted_error_msg,
                     Toast.LENGTH_SHORT).show();
@@ -151,6 +167,10 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 @Override
                 public void onClick(View v) {
                     //Handle Business Profile "Accept" CTA here
+
+                    // Show Loader on Primary Button
+                    businessProfilePrimaryBtnLoader.setVisibility(View.VISIBLE);
+
                     presenter.attemptAcceptPendingBusinessProfile(membership);
                 }
             });
@@ -160,6 +180,10 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 @Override
                 public void onClick(View v) {
                     //Handle Business Profile "Reject" CTA here
+
+                    // Show Loader on Secondary Button
+                    businessProfileSecondaryBtnLoader.setVisibility(View.VISIBLE);
+
                     presenter.attemptRejectPendingBusinessProfile(membership);
                 }
             });
@@ -178,23 +202,31 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         businessProfilePrimaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Handle Business Profile "Set-Up Now" CTA here
-                String url = getString(R.string.business_profile_setup_url);
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                startActivity(i);
+                if (!businessProfilePrimaryBtnClicked) {
+                    businessProfilePrimaryBtnClicked = true;
+                    //Handle Business Profile "Set-Up Now" CTA here
+                    String url = getString(R.string.business_profile_setup_url);
+                    Intent i = new Intent(Intent.ACTION_VIEW);
+                    i.setData(Uri.parse(url));
+                    startActivity(i);
+                }
+                businessProfilePrimaryBtnClicked = false;
             }
         });
 
         businessProfileSecondaryBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Handle Business Profile "Share" CTA here
-                String shareMessage = getString(R.string.business_profile_share_msg);
-                Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
-                sharingIntent.setType("text/plain");
-                sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
-                startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), Constants.SHARE_REQUEST_CODE);
+                if (!businessProfileSecondaryBtnClicked) {
+                    businessProfileSecondaryBtnClicked = true;
+                    //Handle Business Profile "Share" CTA here
+                    String shareMessage = getString(R.string.business_profile_share_msg);
+                    Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                    sharingIntent.setType("text/plain");
+                    sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+                    startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), Constants.SHARE_REQUEST_CODE);
+                }
+                businessProfileSecondaryBtnClicked = false;
             }
         });
 

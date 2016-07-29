@@ -35,7 +35,6 @@ import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
-import io.hypertrack.lib.transmitter.model.callback.HTTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.MetaApplication;
@@ -46,7 +45,6 @@ import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
-import io.hypertrack.sendeta.store.callback.TaskManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripETACallback;
 import io.hypertrack.sendeta.store.callback.TripManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripManagerListener;
@@ -322,7 +320,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    public void startTaskForTaskID(int selectedAccountId, Task task, final TaskManagerCallback callback) {
+    public void startTripWithTaskID(int selectedAccountId, Task task, final TripManagerCallback callback) {
         if (selectedAccountId <= 0) {
             if (callback != null) {
                 callback.OnError();
@@ -336,34 +334,39 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         // Set PublishableKey fetched for the selectedAccountId
         HyperTrack.setPublishableApiKey(task.getPublishableKey(), MetaApplication.getInstance().getApplicationContext());
 
-        HTTaskParams taskParams = getTaskParams(task);
-        transmitter.startTask(taskParams, new HTTaskStatusCallback() {
+        HTTripParams tripParams = getTripParams(task.getId(), task.getDriverId());
+        transmitter.startTrip(tripParams, new HTTripStatusCallback() {
             @Override
-            public void onSuccess(io.hypertrack.lib.common.model.HTTask htTask) {
-//                hyperTrackTrip = htTrip;
-//
-//                addTrip(new TripManagerCallback() {
-//                    @Override
-//                    public void OnSuccess() {
-//                        if (place == null) {
-//                            place = SharedPreferenceManager.getPlace();
-//                        }
-//
-//                        onTripStart();
-//                        if (callback != null) {
-//                            callback.OnSuccess();
-//                        }
-//                  }
+            public void onSuccess(HTTrip htTrip) {
+                hyperTrackTrip = htTrip;
 
-                if (callback != null)
-                    callback.OnError();
+                addTrip(new TripManagerCallback() {
+                    @Override
+                    public void OnSuccess() {
+                        if (place == null) {
+                            place = SharedPreferenceManager.getPlace();
+                        }
+
+                        onTripStart();
+                        if (callback != null) {
+                            callback.OnSuccess();
+                        }
+                    }
+
+                    @Override
+                    public void OnError() {
+                        transmitter.clearCurrentTrip();
+                        hyperTrackTrip = null;
+
+                        if (callback != null) {
+                            callback.OnError();
+                        }
+                    }
+                });
             }
 
             @Override
             public void onError(Exception e) {
-//                transmitter.clearCurrentTrip();
-//                hyperTrackTrip = null;
-
                 if (callback != null) {
                     callback.OnError();
                 }

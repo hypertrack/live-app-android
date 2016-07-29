@@ -66,6 +66,13 @@ public class Membership extends RealmObject implements Serializable {
     public Membership() {
     }
 
+    public Membership (Membership membership) {
+        this.accountId = membership.getAccountId();
+        this.isAccepted = membership.isAccepted();
+        this.isRejected = membership.isRejected();
+        this.accountName = membership.getAccountName();
+    }
+
     @Override
     public String toString() {
         return "Membership{" +

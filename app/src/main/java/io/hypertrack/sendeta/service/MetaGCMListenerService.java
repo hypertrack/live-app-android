@@ -14,6 +14,7 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 
+import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.view.BusinessProfile;
@@ -56,7 +57,8 @@ public class MetaGCMListenerService extends GcmListenerService {
     public void onMessageReceived(String from, Bundle data) {
         String title = data.getString(NOTIFICATION_KEY_TITLE);
         String message = data.getString(NOTIFICATION_KEY_MESSAGE);
-        Log.d(TAG, message != null ? message : "Message key not present or value is NULL.");
+        HTLog.i(TAG, "GCM Notification Received");
+        HTLog.d(TAG, message != null ? message : "Message key not present or value is NULL.");
         Log.d(TAG, data != null ? data.toString() : "Message key not present or value is NULL.");
 
         String notificationType = getNotificationType(data);
@@ -171,5 +173,7 @@ public class MetaGCMListenerService extends GcmListenerService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(mNotificationId /* ID of notification */, builder.build());
+
+        HTLog.i(TAG, "Notification Generated for id: " + notificationId);
     }
 }
