@@ -294,7 +294,6 @@ public class User extends RealmObject {
         for (Membership candidate: this.getMemberships()) {
             if (candidate.isAccepted() || (!candidate.isAccepted() && !candidate.isRejected())){
                 activeMemberships.add(candidate);
-                break;
             }
         }
 
@@ -308,7 +307,6 @@ public class User extends RealmObject {
             if (!candidate.isPersonal() && candidate.isAccepted()
                     || (!candidate.isAccepted() && !candidate.isRejected())){
                 activeMemberships.add(candidate);
-                break;
             }
         }
 
@@ -325,7 +323,6 @@ public class User extends RealmObject {
         for (Membership candidate: this.getMemberships()) {
             if (!candidate.isAccepted() && !candidate.isRejected()) {
                 membershipsList.add(candidate);
-                break;
             }
         }
 
