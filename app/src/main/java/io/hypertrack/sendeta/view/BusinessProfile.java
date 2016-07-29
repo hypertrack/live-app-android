@@ -33,8 +33,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     private TextView businessProfileSecondaryBtn;
     private TextView businessProfileLoaderText;
     private LinearLayout businessProfileLoaderLayout;
-    private LinearLayout businessProfilePrimaryBtnLoader;
-    private LinearLayout businessProfileSecondaryBtnLoader;
+    private LinearLayout businessProfileBtnLoader;
 
     private IBusinessProfilePresenter<BusinessProfileView> presenter = new BusinessProfilePresenter();
     private boolean businessProfilePrimaryBtnClicked = false, businessProfileSecondaryBtnClicked = false;
@@ -57,8 +56,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         businessProfileLoaderText = (TextView) findViewById(R.id.business_profile_loader_text);
         businessProfileLoaderLayout = (LinearLayout) findViewById(R.id.business_profile_loader_layout);
 
-        businessProfilePrimaryBtnLoader = (LinearLayout) findViewById(R.id.business_profile_primary_btn_loader);
-        businessProfileSecondaryBtnLoader = (LinearLayout) findViewById(R.id.business_profile_secondary_btn_loader);
+        businessProfileBtnLoader = (LinearLayout) findViewById(R.id.business_profile_btn_loader);
 
         // Attach View Presenter to View
         presenter.attachView(this);
@@ -106,8 +104,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
         // Hide the Loaders on screen if visible
         businessProfileLoaderLayout.setVisibility(View.GONE);
-        businessProfilePrimaryBtnLoader.setVisibility(View.GONE);
-        businessProfileSecondaryBtnLoader.setVisibility(View.GONE);
+        businessProfileBtnLoader.setVisibility(View.GONE);
 
         if (acceptInvite) {
             Toast.makeText(BusinessProfile.this, getString(R.string.business_profile_accepted_success_msg, accountName),
@@ -137,8 +134,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
 
         // Hide the Loaders on screen if visible
         businessProfileLoaderLayout.setVisibility(View.GONE);
-        businessProfilePrimaryBtnLoader.setVisibility(View.GONE);
-        businessProfileSecondaryBtnLoader.setVisibility(View.GONE);
+        businessProfileBtnLoader.setVisibility(View.GONE);
 
         if (acceptInvite) {
             Toast.makeText(BusinessProfile.this, R.string.business_profile_accepted_error_msg,
@@ -168,8 +164,8 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 public void onClick(View v) {
                     //Handle Business Profile "Accept" CTA here
 
-                    // Show Loader on Primary Button
-                    businessProfilePrimaryBtnLoader.setVisibility(View.VISIBLE);
+                    // Show Loader on Buttons
+                    businessProfileBtnLoader.setVisibility(View.VISIBLE);
 
                     presenter.attemptAcceptPendingBusinessProfile(membership);
                 }
@@ -181,8 +177,8 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
                 public void onClick(View v) {
                     //Handle Business Profile "Reject" CTA here
 
-                    // Show Loader on Secondary Button
-                    businessProfileSecondaryBtnLoader.setVisibility(View.VISIBLE);
+                    // Show Loader on Buttons
+                    businessProfileBtnLoader.setVisibility(View.VISIBLE);
 
                     presenter.attemptRejectPendingBusinessProfile(membership);
                 }

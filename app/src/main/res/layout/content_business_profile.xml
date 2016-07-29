@@ -60,72 +60,53 @@
             android:layout_marginLeft="@dimen/margin_high"
             android:layout_marginRight="@dimen/margin_high"
             android:layout_marginTop="@dimen/margin_base"
-            android:background="@color/colorAccent"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/business_profile.primary_btn"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:padding="@dimen/padding_medium"
-                android:textAllCaps="true"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_large" />
+                android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/business_profile.primary_btn_loader"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="#33FFFFFF"
-                android:clickable="true"
-                android:gravity="center"
-                android:visibility="gone">
-
-                <ProgressBar
-                    style="?android:attr/progressBarStyleSmall"
+                <TextView
+                    android:id="@+id/business_profile.primary_btn"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:indeterminate="true"
-                    android:paddingBottom="4dp"
-                    android:paddingTop="4dp"
-                    android:progressTint="#FFFFFF"
-                    android:visibility="visible" />
+                    android:layout_height="wrap_content"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:background="@color/colorAccent"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_medium"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_large" />
+
+                <TextView
+                    android:id="@+id/business_profile.secondary_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/margin_high"
+                    android:layout_marginLeft="@dimen/margin_high"
+                    android:layout_marginRight="@dimen/margin_high"
+                    android:foreground="?attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_medium"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="@dimen/text_large" />
             </LinearLayout>
-        </FrameLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/business_profile.secondary_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_high"
-                android:layout_marginLeft="@dimen/margin_high"
-                android:layout_marginRight="@dimen/margin_high"
-                android:background="?attr/selectableItemBackground"
-                android:gravity="center"
-                android:padding="@dimen/padding_medium"
-                android:textColor="@color/text_tertiary"
-                android:textSize="@dimen/text_large" />
-
 
             <LinearLayout
-                android:id="@+id/business_profile.secondary_btn_loader"
+                android:id="@+id/business_profile.btn_loader"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#33FFFFFF"
+                android:background="#55FFFFFF"
                 android:clickable="true"
                 android:gravity="center"
                 android:visibility="gone">
 
                 <ProgressBar
-                    style="?android:attr/progressBarStyleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:indeterminate="true"
                     android:paddingBottom="4dp"
                     android:paddingTop="4dp"
