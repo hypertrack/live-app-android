@@ -492,6 +492,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        // Initialize UserStore
+        UserStore.sharedStore.initializeUser();
+
         // Start GCM Registration
         startGcmRegistration();
 
@@ -1041,9 +1044,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     mProgressDialog.dismiss();
 
                     // Dont show Share Card by default for Business Account Trips
-                    if (!handlePushDestinationDeepLink) {
-                        share();
-                    }
                     onTripStart();
 
                     // Reset handle pushDestination DeepLink Flag
@@ -1073,6 +1073,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 public void OnSuccess() {
                     mProgressDialog.dismiss();
 
+                    // Show Share Card by default for Business Account Trips
+                    share();
                     onTripStart();
 
                     AnalyticsStore.getLogger().startedTrip(true, null);
