@@ -320,7 +320,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
         if (membershipAccountId != 0) {
             businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
-//        businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_ID, membershipAccountId);
+            businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_ACCOUNT_ID, membershipAccountId);
         } else {
             businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, false);
         }

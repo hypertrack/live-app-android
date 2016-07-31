@@ -24,7 +24,7 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
     public static final String TAG = BusinessProfile.class.getSimpleName();
     public static final String KEY_MEMBERSHIP = "membership";
     public static final String KEY_MEMBERSHIP_INVITE = "membership_invite";
-    public static final String KEY_MEMBERSHIP_ID = "membership_id";
+    public static final String KEY_MEMBERSHIP_ACCOUNT_ID = "membership_id";
 
     private TextView businessProfileTitle;
     private TextView businessProfileMessage;
@@ -66,8 +66,13 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
             if (intent.hasExtra(KEY_MEMBERSHIP_INVITE) && intent.getBooleanExtra(KEY_MEMBERSHIP_INVITE, false)) {
                 businessProfileLoaderLayout.setVisibility(View.VISIBLE);
 
+                int membershipAccountId = 0;
+                if (intent.hasExtra(KEY_MEMBERSHIP_ACCOUNT_ID)) {
+                    membershipAccountId = intent.getIntExtra(KEY_MEMBERSHIP_ACCOUNT_ID, 0);
+                }
+
                 // Get Membership from Network Call
-                presenter.getMembershipsForUser();
+                presenter.getMembershipsForUser(membershipAccountId);
 
             } else if (intent.hasExtra(KEY_MEMBERSHIP)) {
                 Membership membership = (Membership) intent.getSerializableExtra(KEY_MEMBERSHIP);

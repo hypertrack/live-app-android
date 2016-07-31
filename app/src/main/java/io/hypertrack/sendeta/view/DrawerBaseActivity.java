@@ -132,13 +132,14 @@ public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.Dra
 
             if (drawerMembershipsSpinner != null) {
                 // Fetch Memberships saved in DB
-                drawerMembershipsList = user.getAcceptedMemberships();
                 setupDrawerMembershipsSpinner();
             }
         }
     }
 
     private void setupDrawerMembershipsSpinner() {
+        drawerMembershipsList = user.getAcceptedMemberships();
+
         if (drawerMembershipsList != null) {
             MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_drawer_spinner,
                     R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.drawerMembershipsList);
@@ -201,5 +202,13 @@ public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.Dra
 
     @Override
     public void onDrawerStateChanged(int newState) {
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Setup Membership Spinner for Drawer
+        setupDrawerMembershipsSpinner();
     }
 }

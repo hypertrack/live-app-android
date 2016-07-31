@@ -448,6 +448,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i(TAG,"broadcast received");
             sendGCMRegistrationToServer();
         }
     };
@@ -1872,6 +1873,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
 
         registerGCMReceiver(true);
+
+        // Setup Membership Spinner
+        setupMembershipsSpinner();
 
         AppEventsLogger.activateApp(getApplication());
     }

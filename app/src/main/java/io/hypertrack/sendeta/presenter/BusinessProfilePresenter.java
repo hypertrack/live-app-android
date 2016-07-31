@@ -35,7 +35,7 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
 
             @Override
             public void OnError() {
-                if(view != null)
+                if (view != null)
                     view.showMembershipActionError(true, membership.getAccountName());
             }
         });
@@ -52,23 +52,35 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
 
             @Override
             public void OnError() {
-                if(view != null)
+                if (view != null)
                     view.showMembershipActionError(false, membership.getAccountName());
             }
         });
     }
 
-    public void getMembershipsForUser() {
+    public void getMembershipsForUser(final int membershipAccountId) {
         UserStore.sharedStore.getUserData(new UserStoreGetUserDataCallback() {
             @Override
             public void OnSuccess(User user) {
 
                 User updatedUser = UserStore.sharedStore.getUser();
 
-                if (updatedUser != null && updatedUser.getPendingMemberships() != null) {
-                    if (updatedUser.getPendingMemberships().size() > 0 && updatedUser.getPendingMemberships().get(0) != null) {
-                        view.handleGetMembershipSuccess(updatedUser.getPendingMemberships().get(0));
-                        return;
+                if (updatedUser != null && updatedUser.getPendingMemberships() != null
+                        && updatedUser.getPendingMemberships().size() > 0) {
+
+                    if (membershipAccountId == 0) {
+                        if (updatedUser.getPendingMemberships().get(0) != null) {
+                            view.handleGetMembershipSuccess(updatedUser.getPendingMemberships().get(0));
+                            return;
+                        }
+                    } else {
+                        // Check if the selected MembershipAccount Id exists in the PendingList
+                        for (Membership membership : updatedUser.getPendingMemberships()) {
+                            if (membership.getAccountId() == membershipAccountId) {
+                                view.handleGetMembershipSuccess(membership);
+                                return;
+                            }
+                        }
                     }
                 }
 
