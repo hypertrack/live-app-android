@@ -20,6 +20,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
@@ -1844,8 +1845,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Unregister BroadcastReceiver for Location_Change & Network_Change
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
-        isReceiverRegistered = false;
+
+        registerGCMReceiver(false);
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -1869,7 +1870,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
         LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
-        registerGCMReceiver();
+
+        registerGCMReceiver(true);
 
         AppEventsLogger.activateApp(getApplication());
     }
@@ -1938,11 +1940,20 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private void registerGCMReceiver() {
-        if (!isReceiverRegistered) {
-            LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                    new IntentFilter(RegistrationIntentService.REGISTRATION_COMPLETE));
-            isReceiverRegistered = true;
+    private void registerGCMReceiver(boolean register) {
+        if (register) {
+            if (!isReceiverRegistered) {
+                LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
+                        new IntentFilter(RegistrationIntentService.REGISTRATION_COMPLETE));
+                isReceiverRegistered = true;
+            }
+        } else {
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+
+            if (!powerManager.isScreenOn()){
+                LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+                isReceiverRegistered = false;
+            }
         }
     }
 
