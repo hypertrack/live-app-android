@@ -121,11 +121,11 @@
     <!-- Business Profile Screen Strings -->
     <string name="business_profile_add_profile">Add profile</string>
     <string name="business_profile_invite_msg">wants to track your business trips using SendETA</string>
-    <string name="business_profile_invite_tnc">By clicking ACCEPT, you agree to sharing your location data with %1$s</string>
+    <string name="business_profile_invite_tnc">By clicking ACCEPT, you agree to share your location data with %1$s</string>
     <string name="business_profile_invite_primary_btn">Accept</string>
     <string name="business_profile_invite_secondary_btn">Reject</string>
 
-    <string name="business_profile_setup_title">SendETA with Hypertrack</string>
+    <string name="business_profile_setup_title">Hypertrack with SendETA</string>
     <string name="business_profile_setup_msg">Monitor your operations and power a great customer experience</string>
     <string name="business_profile_setup_primary_btn">set-up now</string>
     <string name="business_profile_setup_secondary_btn">Share</string>
