@@ -792,6 +792,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         //Check if there is any existing trip to be restored
         if (tripManager.shouldRestoreState()) {
+
+            // Make EnterDestinationLayout NOT clickable till the Trip is restored.
+            enterDestinationLayout.setClickable(false);
+
             Log.v(TAG, "Trip is active");
             HTLog.i(TAG, "Trip restored successfully.");
 
@@ -985,6 +989,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 // Check if Trip has to be Restored & Update Map for that trip
                 if (shouldRestoreTrip && restoreTripMetaPlace != null) {
                     tripRestoreFinished = true;
+
+                    // Make EnterDestinationLayout clickable now.
+                    enterDestinationLayout.setClickable(true);
+
                     updateViewForETASuccess(null, restoreTripMetaPlace.getLatLng());
                     onTripStart();
                 }
@@ -1225,6 +1233,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
         favoriteButton.setVisibility(View.GONE);
+
+        // Make EnterDestinationLayout not clickable till the Trip is restored.
+        enterDestinationLayout.setClickable(true);
 
         // Reset the Destination Text View
         destinationText.setGravity(Gravity.CENTER);
