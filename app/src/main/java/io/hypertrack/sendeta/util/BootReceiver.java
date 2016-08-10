@@ -20,7 +20,7 @@ public class BootReceiver extends BroadcastReceiver {
 
         if (SharedPreferenceManager.getGeofencingRequest() != null) {
             // Add Geofencing Request
-            TripManager.getSharedManager().geofencingRequest = SharedPreferenceManager.getGeofencingRequest();
+            TripManager.getSharedManager().setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
             TripManager.getSharedManager().addGeofencingRequest();
         }
     }

@@ -80,7 +80,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
 
     private GoogleApiClient mGoogleAPIClient;
-    public GeofencingRequest geofencingRequest;
+    private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
 
@@ -486,15 +486,21 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         }
     }
 
+    public void setGeofencingRequest(GeofencingRequest request) {
+        this.geofencingRequest = request;
+    }
+
     public void setupGeofencing() {
         try {
             geofencingRequest = this.getGeofencingRequest();
 
-            // Save this request to SharedPreferences (to be restored later if removed)
-            SharedPreferenceManager.setGeofencingRequest(geofencingRequest);
+            if (geofencingRequest != null) {
+                // Save this request to SharedPreferences (to be restored later if removed)
+                SharedPreferenceManager.setGeofencingRequest(geofencingRequest);
 
-            // Add Geofencing Request
-            addGeofencingRequest();
+                // Add Geofencing Request
+                addGeofencingRequest();
+            }
         } catch (Exception exception) {
             Crashlytics.logException(exception);
             HTLog.e(TAG, "Exception while adding geofence request");
@@ -571,6 +577,11 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private GeofencingRequest getGeofencingRequest() {
+
+        if (this.place == null || this.place.getLatitude() == null || this.place.getLongitude() == null) {
+            HTLog.e(TAG, "Adding Geofence failed: Either place or Lat,Lng is null");
+            return null;
+        }
 
         // called when the transition associated with the Geofence is triggered)
         List<Geofence> geoFenceList = new ArrayList<Geofence>();

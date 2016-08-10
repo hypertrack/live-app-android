@@ -22,7 +22,7 @@ public class GpsLocationReceiver extends BroadcastReceiver {
 
             if (isLocationEnabled(context) && SharedPreferenceManager.getGeofencingRequest() != null) {
                 // Add Geofencing Request
-                TripManager.getSharedManager().geofencingRequest = SharedPreferenceManager.getGeofencingRequest();
+                TripManager.getSharedManager().setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
                 TripManager.getSharedManager().addGeofencingRequest();
             }
 
