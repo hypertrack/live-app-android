@@ -696,19 +696,38 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     public String getShareMessage() {
 
         if (this.trip == null) {
+            HTLog.e(TAG, "Trip is null. Not able to get shareMessage");
             return null;
         }
+
+        StringBuilder builder = new StringBuilder("I'm on my way. ");
 
         String formattedETA = this.getFormattedETA();
-        if (formattedETA == null) {
-            return null;
-        }
-
         String shareURL = this.trip.getShareUrl();
-        if (shareURL == null) {
-            return null;
+
+        // Add ETA in ShareMessage if ETA is not null
+        if (formattedETA != null) {
+            builder.append("Will be there by " + formattedETA + ". ");
+
+            // Add ShareURL in ShareMessage if ShareURL is not null
+            if (shareURL != null) {
+                builder.append("Track me live " + shareURL);
+
+            } else {
+                HTLog.e(TAG, "shareURL is null. Removing ShareURL from shareMessage");
+            }
+
+            return builder.toString();
         }
 
-        return "I'm on my way. Will be there by " + formattedETA + ". Track me live " + shareURL;
+        HTLog.e(TAG, "formattedETA is null. Removing ETA from shareMessage");
+
+        // FormattedETA is null. So, Add ShareURL in ShareMessage if ShareURL is not null
+        if (shareURL != null) {
+            builder.append("Track me live " + shareURL);
+            return builder.toString();
+        }
+
+        return null;
     }
 }

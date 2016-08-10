@@ -1265,23 +1265,36 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateTextViewForMinutes(TextView etaTimeTextView, TextView etaTimeTypeTextView, Integer etaInMinutes) {
+        // Set empty view if etaInMinutes is null
         if (etaInMinutes == null) {
             etaTimeTextView.setText("");
             etaTimeTypeTextView.setText("");
+
+            // Set ETA to 0 if etaInMinutes is 0 or below
         } else if (etaInMinutes <= 0) {
-            etaTimeTextView.setText("0");
-            etaTimeTypeTextView.setText("min");
+            etaInMinutes = 0;
+            etaTimeTextView.setText(String.valueOf(etaInMinutes));
+            etaTimeTypeTextView.setText(this.getResources().getQuantityString(R.plurals.eta_in_minute_text, etaInMinutes));
+
         } else {
+
+            // Set ETA in minutes if etaInMinutes is equal or below MINUTES_ON_ETA_MARKER_LIMIT
             if (etaInMinutes <= Constants.MINUTES_ON_ETA_MARKER_LIMIT) {
                 etaTimeTextView.setText(String.valueOf(etaInMinutes));
-                etaTimeTypeTextView.setText("mins");
+                etaTimeTypeTextView.setText(this.getResources().getQuantityString(R.plurals.eta_in_minute_text, etaInMinutes));
+
+                // Set ETA in hours if etaInMinutes is above MINUTES_ON_ETA_MARKER_LIMIT
             } else {
+                int hours = etaInMinutes / Constants.MINUTES_IN_AN_HOUR;
+
+                // Round off ETA to nearest hour
                 if (etaInMinutes % Constants.MINUTES_IN_AN_HOUR < Constants.MINUTES_TO_ROUND_OFF_TO_HOUR) {
-                    etaTimeTextView.setText(String.valueOf(etaInMinutes / Constants.MINUTES_IN_AN_HOUR));
+                    etaTimeTextView.setText(String.valueOf(hours));
                 } else {
-                    etaTimeTextView.setText(String.valueOf(etaInMinutes / Constants.MINUTES_IN_AN_HOUR + 1));
+                    hours = hours + 1;
+                    etaTimeTextView.setText(String.valueOf(hours));
                 }
-                etaTimeTypeTextView.setText("hrs");
+                etaTimeTypeTextView.setText(this.getResources().getQuantityString(R.plurals.eta_in_hour_text, hours));
             }
         }
     }
@@ -1594,6 +1607,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void share() {
         String shareMessage = TripManager.getSharedManager().getShareMessage();
         if (shareMessage == null) {
+            Toast.makeText(Home.this, R.string.share_message_error, Toast.LENGTH_SHORT).show();
             return;
         }
 
