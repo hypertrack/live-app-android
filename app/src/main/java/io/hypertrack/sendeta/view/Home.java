@@ -1278,9 +1278,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         View markerView = getDestinationMarkerView(etaInMinutes);
 
-        destinationLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(destinationLocation)
-                .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, markerView))));
+        if (getBitMapForView(this, markerView) != null) {
+            destinationLocationMarker = mMap.addMarker(new MarkerOptions()
+                    .position(destinationLocation)
+                    .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, markerView))));
+        }
     }
 
     private View getDestinationMarkerView(Integer etaInMinutes) {
@@ -1537,9 +1539,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void addMarkerToCurrentLocation(LatLng latLng) {
-        currentLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, customMarkerView))));
+        if (getBitMapForView(this, customMarkerView) != null) {
+            currentLocationMarker = mMap.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, customMarkerView))));
+        }
 
         // Handle pushDestination DeepLink
         if (selectPushDestinationPlace && isLocationEnabled()) {
@@ -1548,17 +1552,23 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private Bitmap getBitMapForView(Context context, View view) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
+        Bitmap bitmap = null;
+        try {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
 
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
-        view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-        view.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+            ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+            view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+            view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+            view.buildDrawingCache();
+            bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
 
-        Canvas canvas = new Canvas(bitmap);
-        view.draw(canvas);
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
 
         return bitmap;
     }
