@@ -385,15 +385,27 @@ public class PlaceAutocompleteAdapter
     private void itemClickedAtPosition(int position) {
 
         if (!this.isSearching) {
-            MetaPlace place = this.favorites.get(position);
-            if (this.listener != null) {
-                this.listener.OnSuccess(new MetaPlace(place));
+            if (this.favorites.size() > 0 && this.favorites.size() > position) {
+                MetaPlace place = this.favorites.get(position);
+                if (this.listener != null) {
+                    this.listener.OnSuccess(new MetaPlace(place));
+                }
+            } else {
+                if (this.listener != null) {
+                    this.listener.OnError();
+                }
             }
         } else {
             if (this.isFilteredPlace(position)) {
-                MetaPlace place = this.filteredFavorites.get(position);
-                if (this.listener != null) {
-                    this.listener.OnSuccess(new MetaPlace(place));
+                if (this.filteredFavorites.size() > 0 && this.filteredFavorites.size() > position) {
+                    MetaPlace place = this.filteredFavorites.get(position);
+                    if (this.listener != null) {
+                        this.listener.OnSuccess(new MetaPlace(place));
+                    }
+                } else {
+                    if (this.listener != null){
+                        this.listener.OnError();
+                    }
                 }
             } else {
                 final AutocompletePrediction item = getItem(position - this.filteredPlacesCount());
