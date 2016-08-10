@@ -448,7 +448,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(TAG,"broadcast received");
+            Log.i(TAG, "broadcast received");
             sendGCMRegistrationToServer();
         }
     };
@@ -793,9 +793,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         //Check if there is any existing trip to be restored
         if (tripManager.shouldRestoreState()) {
 
-            // Make EnterDestinationLayout NOT clickable till the Trip is restored.
-            enterDestinationLayout.setClickable(false);
-
             Log.v(TAG, "Trip is active");
             HTLog.i(TAG, "Trip restored successfully.");
 
@@ -808,6 +805,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 destinationDescription.setText(restoreTripMetaPlace.getAddress());
                 destinationDescription.setVisibility(View.VISIBLE);
             }
+
+            // Start the Trip
+            updateViewForETASuccess(null, restoreTripMetaPlace.getLatLng());
+            onTripStart();
 
             shouldRestoreTrip = true;
 
@@ -990,8 +991,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 if (shouldRestoreTrip && restoreTripMetaPlace != null) {
                     tripRestoreFinished = true;
 
-                    // Make EnterDestinationLayout clickable now.
-                    enterDestinationLayout.setClickable(true);
+                    if (TripManager.getSharedManager().getTrip() == null) {
+                        return;
+                    }
 
                     updateViewForETASuccess(null, restoreTripMetaPlace.getLatLng());
                     onTripStart();
@@ -1049,32 +1051,32 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             TripManager.getSharedManager().startTripWithTaskID(this.user.getSelectedMembershipAccountId(),
                     pushDestinationTask, new TripManagerCallback() {
-                @Override
-                public void OnSuccess() {
-                    mProgressDialog.dismiss();
+                        @Override
+                        public void OnSuccess() {
+                            mProgressDialog.dismiss();
 
-                    // Dont show Share Card by default for Business Account Trips
-                    onTripStart();
+                            // Dont show Share Card by default for Business Account Trips
+                            onTripStart();
 
-                    // Reset handle pushDestination DeepLink Flag
-                    handlePushDestinationDeepLink = false;
+                            // Reset handle pushDestination DeepLink Flag
+                            handlePushDestinationDeepLink = false;
 
-                    AnalyticsStore.getLogger().startedTrip(true, null);
-                    HTLog.i(TAG, "Trip started successfully.");
-                }
+                            AnalyticsStore.getLogger().startedTrip(true, null);
+                            HTLog.i(TAG, "Trip started successfully.");
+                        }
 
-                @Override
-                public void OnError() {
-                    mProgressDialog.dismiss();
-                    showStartTripError();
-                    HTLog.e(TAG, "Trip start failed.");
+                        @Override
+                        public void OnError() {
+                            mProgressDialog.dismiss();
+                            showStartTripError();
+                            HTLog.e(TAG, "Trip start failed.");
 
-                    // Reset handle pushDestination DeepLink Flag
-                    handlePushDestinationDeepLink = false;
+                            // Reset handle pushDestination DeepLink Flag
+                            handlePushDestinationDeepLink = false;
 
-                    AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
-                }
-            });
+                            AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                        }
+                    });
 
             // Use startTrip for Pushed Destination DeepLink
         } else {
@@ -1129,7 +1131,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to Initiate END TRIP
      */
     private void endTrip() {
-
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
         mProgressDialog.setMessage(getString(R.string.ending_trip_message));
@@ -1138,7 +1139,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         TripManager.getSharedManager().endTrip(new TripManagerCallback() {
             @Override
             public void OnSuccess() {
-                mProgressDialog.dismiss();
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
+
                 OnTripEnd();
 
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
@@ -1147,7 +1151,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             @Override
             public void OnError() {
-                mProgressDialog.dismiss();
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
+
                 showEndTripError();
 
                 AnalyticsStore.getLogger().tappedEndTrip(false, ErrorMessages.END_TRIP_FAILED);
@@ -1157,6 +1164,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void showEndTripError() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
+
         Toast.makeText(this, getString(R.string.end_trip_failed), Toast.LENGTH_SHORT).show();
     }
 
@@ -1224,6 +1235,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to update State Variables & UI to reflect Trip Ended
      */
     private void OnTripEnd() {
+        if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
+        }
+
         sendETAButton.setVisibility(View.GONE);
         membershipsSpinnerLayout.setVisibility(View.GONE);
         bottomButtonLayout.setVisibility(View.GONE);
@@ -1233,9 +1248,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
         favoriteButton.setVisibility(View.GONE);
-
-        // Make EnterDestinationLayout not clickable till the Trip is restored.
-        enterDestinationLayout.setClickable(true);
 
         // Reset the Destination Text View
         destinationText.setGravity(Gravity.CENTER);
@@ -1255,6 +1267,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
+        if (mMap == null) {
+            return;
+        }
+
         if (destinationLocationMarker != null) {
             destinationLocationMarker.remove();
             destinationLocationMarker = null;
@@ -1569,6 +1585,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateMapView() {
+        if (mMap == null) {
+            return;
+        }
+
         if (currentLocationMarker == null && destinationLocationMarker == null) {
             return;
         }
@@ -1882,6 +1902,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     protected void onResume() {
         super.onResume();
 
+        // Start Refreshing Trip, if one exists
+        if (TripManager.getSharedManager().getTrip() != null) {
+            TripManager.getSharedManager().startRefreshingTrip(0);
+        }
+
         // Check if Location & Network are Enabled
         updateInfoMessageView();
 
@@ -1928,7 +1953,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */
@@ -1979,7 +2004,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         } else {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
 
-            if (!powerManager.isScreenOn()){
+            if (!powerManager.isScreenOn()) {
                 LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
                 isReceiverRegistered = false;
             }
