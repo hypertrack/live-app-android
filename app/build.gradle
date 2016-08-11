@@ -114,16 +114,16 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
-    debugCompile('io.hypertrack:transmitter:1.1.6:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:1.1.8:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:1.1.6:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:1.1.8:release@aar') {
         transitive = true;
     }
-    debugCompile('io.hypertrack:consumer:1.1.6:debug@aar') {
+    debugCompile('io.hypertrack:consumer:1.1.8:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:consumer:1.1.6:release@aar') {
+    releaseCompile('io.hypertrack:consumer:1.1.8:release@aar') {
         transitive = true;
     }
     //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
