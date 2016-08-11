@@ -67,6 +67,7 @@
             android:name=".view.Home"
             android:label="${applicationLabel}"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
