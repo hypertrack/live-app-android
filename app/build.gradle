@@ -132,4 +132,6 @@ dependencies {
         transitive = true;
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.4-beta2'
 }

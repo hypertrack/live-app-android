@@ -14,6 +14,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -118,6 +120,7 @@ import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
+import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.NetworkUtils;
@@ -775,16 +778,44 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateProfileImage() {
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic);
-        user = UserStore.sharedStore.getUser();
-        if (user != null) {
-            Bitmap userImageBitmap = user.getImageBitmap();
-            if (userImageBitmap != null) {
-                bitmap = userImageBitmap;
-            }
-        }
 
-        profileViewProfileImage.setImageBitmap(bitmap);
+        try {
+            if (profileViewProfileImage != null) {
+                Drawable d = profileViewProfileImage.getDrawable();
+                if (d instanceof BitmapDrawable) {
+                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
+                    if (bitmap != null) {
+                        bitmap.recycle();
+                    }
+                }
+            }
+
+            // First decode with inJustDecodeBounds=true to check dimensions
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            Bitmap bitmap = null;
+
+            user = UserStore.sharedStore.getUser();
+            if (user != null) {
+                bitmap = user.getImageBitmap();
+            }
+
+            if (bitmap == null) {
+                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic, options);
+                // Calculate inSampleSize
+                options.inSampleSize = ImageUtils.calculateInSampleSize(options, 48, 48);
+
+                // Decode bitmap with inSampleSize set
+                options.inJustDecodeBounds = false;
+                profileViewProfileImage.setImageBitmap(BitmapFactory.decodeResource(getResources(),
+                        R.drawable.default_profile_pic, options));
+            } else {
+                profileViewProfileImage.setImageBitmap(bitmap);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
     private void restoreTripStateIfNeeded() {
@@ -1278,10 +1309,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         View markerView = getDestinationMarkerView(etaInMinutes);
 
-        if (getBitMapForView(this, markerView) != null) {
+        Bitmap bitmap = getBitMapForView(this, markerView);
+        if (bitmap != null) {
             destinationLocationMarker = mMap.addMarker(new MarkerOptions()
                     .position(destinationLocation)
-                    .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, markerView))));
+                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+            bitmap.recycle();
         }
     }
 
@@ -1407,8 +1440,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void startLocationPolling() {
         try {
-            LocationServices.FusedLocationApi.requestLocationUpdates(
-                    mGoogleApiClient, mLocationRequest, this);
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            }
         } catch (SecurityException exception) {
             Crashlytics.logException(exception);
             if (currentLocationDialog != null) {
@@ -1539,10 +1573,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void addMarkerToCurrentLocation(LatLng latLng) {
-        if (getBitMapForView(this, customMarkerView) != null) {
+        Bitmap bitmap = getBitMapForView(this, customMarkerView);
+        if (bitmap != null) {
             currentLocationMarker = mMap.addMarker(new MarkerOptions()
                     .position(latLng)
-                    .icon(BitmapDescriptorFactory.fromBitmap(getBitMapForView(this, customMarkerView))));
+                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+            bitmap.recycle();
         }
 
         // Handle pushDestination DeepLink

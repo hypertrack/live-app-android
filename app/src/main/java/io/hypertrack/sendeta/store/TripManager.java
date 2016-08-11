@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.crashlytics.android.Crashlytics;
@@ -33,11 +34,14 @@ import io.hypertrack.lib.transmitter.model.HTTaskParamsBuilder;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
+import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
+import io.hypertrack.lib.transmitter.model.ServiceNotificationParamsBuilder;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.MetaApplication;
+import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.Trip;
@@ -51,6 +55,7 @@ import io.hypertrack.sendeta.store.callback.TripManagerListener;
 import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.view.SplashScreen;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -101,6 +106,17 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManager() {
         this.setupGoogleAPIClient();
+
+        if (transmitter != null) {
+            //Customize Notification Settings
+            ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
+            ServiceNotificationParams notificationParams = builder
+                    .setSmallIconBGColor(ContextCompat.getColor(MetaApplication.getInstance().getApplicationContext(),
+                            R.color.colorAccent))
+                    .setContentIntentActivityClass(SplashScreen.class)
+                    .build();
+            transmitter.setServiceNotificationParams(notificationParams);
+        }
     }
 
     private void setupGoogleAPIClient() {
