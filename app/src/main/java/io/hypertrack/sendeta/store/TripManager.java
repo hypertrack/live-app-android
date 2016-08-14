@@ -465,13 +465,16 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void startRefreshingTrip(final long delay) {
-        handler = new Handler();
+        if (handler == null) {
+            handler = new Handler();
+        }
+
         handler.postDelayed(refreshTask, delay);
     }
 
     public void stopRefreshingTrip() {
         if (this.handler != null) {
-            this.handler.removeCallbacks(refreshTask);
+            this.handler.removeCallbacksAndMessages(refreshTask);
             this.handler = null;
         }
     }

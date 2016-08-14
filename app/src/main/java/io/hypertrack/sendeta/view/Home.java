@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,7 +21,6 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
@@ -73,7 +71,6 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -90,7 +87,6 @@ import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.consumer.utils.HTCircleImageView;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
@@ -120,13 +116,13 @@ import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
-import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.util.images.RoundedImageView;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -159,7 +155,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private LinearLayout bottomButtonLayout;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
-    private HTCircleImageView profileViewProfileImage;
+    private RoundedImageView heroMarkerProfileImageView;
     private ProgressBar mAutocompleteLoader;
     private ImageView infoMessageViewIcon;
 
@@ -171,21 +167,22 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private MetaPlace restoreTripMetaPlace;
 
-    private ProgressDialog mProgressDialog, currentLocationDialog;
+    private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTrip = false, locationPermissionChecked = false,
             tripRestoreFinished = false, animateDelayForRestoredTrip = false, locationFrequencyIncreased = true;
 
     private boolean selectPushDestinationPlace = false, handlePushDestinationDeepLink = false,
-            destinationAddressGeocoded = false;
+            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false;
     private MetaPlace pushDestinationPlace;
     private int pushDestinationAccountId;
     private Task pushDestinationTask;
 
     private boolean isReceiverRegistered;
-    private Handler mHandler;
-    private Runnable mRunnable;
 
     private float zoomLevel = 1.0f;
+
+    private Bitmap userBitmap;
+    private Call<ResponseBody> sendGCMToServerCall;
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -452,7 +449,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.i(TAG, "broadcast received");
+            mRegistrationBroadcastReceived = true;
             sendGCMRegistrationToServer();
+            registerGCMReceiver(false);
         }
     };
 
@@ -510,9 +509,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         setupMembershipsSpinner();
 
         // Initialize Maps
-        MapsInitializer.initialize(getApplicationContext());
-
-        // Get Map Object
         mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
 
@@ -773,45 +769,36 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void initCustomMarkerView() {
         // Initialize Custom Marker (Hero Marker) UI View
         customMarkerView = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.custom_hero_marker, null);
-        profileViewProfileImage = (HTCircleImageView) customMarkerView.findViewById(R.id.profile_image);
+        heroMarkerProfileImageView = (RoundedImageView) customMarkerView.findViewById(R.id.profile_image);
         updateProfileImage();
     }
 
     private void updateProfileImage() {
 
         try {
-            if (profileViewProfileImage != null) {
-                Drawable d = profileViewProfileImage.getDrawable();
-                if (d instanceof BitmapDrawable) {
-                    Bitmap bitmap = ((BitmapDrawable) d).getBitmap();
-                    if (bitmap != null) {
-                        bitmap.recycle();
-                    }
+            Drawable d = heroMarkerProfileImageView.getDrawable();
+            if (d != null && d instanceof BitmapDrawable) {
+                ((BitmapDrawable) d).getBitmap().recycle();
+            }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (userBitmap == null) {
+                user = UserStore.sharedStore.getUser();
+                if (user != null) {
+                    userBitmap = user.getImageBitmap();
                 }
             }
 
-            // First decode with inJustDecodeBounds=true to check dimensions
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            Bitmap bitmap = null;
+            if (userBitmap != null)
+                heroMarkerProfileImageView.setImageBitmap(userBitmap);
 
-            user = UserStore.sharedStore.getUser();
-            if (user != null) {
-                bitmap = user.getImageBitmap();
-            }
-
-            if (bitmap == null) {
-                bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.default_profile_pic, options);
-                // Calculate inSampleSize
-                options.inSampleSize = ImageUtils.calculateInSampleSize(options, 48, 48);
-
-                // Decode bitmap with inSampleSize set
-                options.inJustDecodeBounds = false;
-                profileViewProfileImage.setImageBitmap(BitmapFactory.decodeResource(getResources(),
-                        R.drawable.default_profile_pic, options));
-            } else {
-                profileViewProfileImage.setImageBitmap(bitmap);
-            }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
             Crashlytics.logException(e);
@@ -1412,29 +1399,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void requestLocationUpdates() {
-
-        if (currentLocationDialog == null) {
-            // Show currentLocationDialog while Location is being fetched
-            currentLocationDialog = new ProgressDialog(this);
-            currentLocationDialog.setMessage(getString(R.string.fetching_current_location));
-            currentLocationDialog.setCancelable(false);
-        }
-
-        if (currentLocationDialog != null && currentLocationDialog.isShowing()) {
-            currentLocationDialog.show();
-        }
-
-        // Set Timeout Handler to reset currentLocationDialog
-        mRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (currentLocationDialog != null)
-                    currentLocationDialog.dismiss();
-            }
-        };
-        mHandler = new Handler();
-        mHandler.postDelayed(mRunnable, TIMEOUT_LOCATION_LOADER);
-
         startLocationPolling();
     }
 
@@ -1445,9 +1409,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         } catch (SecurityException exception) {
             Crashlytics.logException(exception);
-            if (currentLocationDialog != null) {
-                currentLocationDialog.dismiss();
-            }
         }
     }
 
@@ -1536,17 +1497,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             updateMapView();
-        }
-
-        //Dismiss currentLocationDialog on successful Location Fetch
-        if (currentLocationDialog != null && currentLocationDialog.isShowing())
-            currentLocationDialog.dismiss();
-
-        // Remove handler to dismiss currentLocationDialog
-        if (mHandler != null && mRunnable != null) {
-            mHandler.removeCallbacks(mRunnable);
-            mHandler = null;
-            mRunnable = null;
         }
 
         mAdapter.setBounds(getBounds(latLng, 10000));
@@ -1942,6 +1892,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+        TripManager.getSharedManager().stopRefreshingTrip();
     }
 
     @Override
@@ -1968,7 +1920,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
 
-        registerGCMReceiver(true);
+        if (!mRegistrationBroadcastReceived)
+            registerGCMReceiver(true);
 
         // Setup Membership Spinner
         setupMembershipsSpinner();
@@ -2015,8 +1968,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
                         SharedPreferenceManager.getUserAuthToken());
 
-                Call<ResponseBody> call = sendETAService.addGCMToken(user.getId(), gcmAddDeviceDTO);
-                call.enqueue(new Callback<ResponseBody>() {
+                sendGCMToServerCall = sendETAService.addGCMToken(user.getId(), gcmAddDeviceDTO);
+                sendGCMToServerCall.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
@@ -2034,6 +1987,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     }
                 });
             }
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
             HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());
@@ -2048,12 +2003,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 isReceiverRegistered = true;
             }
         } else {
-            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-
-            if (!powerManager.isScreenOn()) {
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
-                isReceiverRegistered = false;
-            }
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
+            isReceiverRegistered = false;
         }
     }
 
@@ -2108,6 +2059,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             onEnterDestinationBackClick(null);
         } else {
             super.onBackPressed();
+
+            if (userBitmap != null) {
+                userBitmap.recycle();
+                userBitmap = null;
+            }
+
+            if (sendGCMToServerCall != null)
+                sendGCMToServerCall.cancel();
         }
     }
 

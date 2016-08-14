@@ -58,4 +58,7 @@
 
     <dimen name="drawer_header_subtitle_height">56dp</dimen>
 
+    <dimen name="hero_marker_image">48dp</dimen>
+    <dimen name="profile_image_size">100dp</dimen>
+
 </resources>

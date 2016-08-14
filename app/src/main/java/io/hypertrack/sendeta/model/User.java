@@ -256,6 +256,14 @@ public class User extends RealmObject {
         return BitmapFactory.decodeByteArray(this.photoData, 0, this.photoData.length);
     }
 
+    public byte[] getImageByteArray() {
+        if (this.photoData == null) {
+            return null;
+        }
+
+        return this.photoData;
+    }
+
     public void saveFileAsBitmap(File file) {
         int size = (int) file.length();
         byte[] bytes = new byte[size];
