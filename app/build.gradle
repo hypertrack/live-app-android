@@ -127,7 +127,7 @@ dependencies {
     }
     //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
     compile 'com.google.android.gms:play-services-gcm:8.3.0'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
