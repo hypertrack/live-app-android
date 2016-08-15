@@ -373,7 +373,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             } else {
                 // Reset Current State when user chooses to edit destination
                 TaskManager.getSharedManager(Home.this).clearState();
-                OnTaskCompleted();
+                OnCompleteTask();
 
                 // Reset the Destination Text View
                 destinationText.setGravity(Gravity.CENTER);
@@ -1065,44 +1065,75 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             if (destinationAddressGeocoded) {
                 updateDestinationLocationAddress();
             }
+
+            // Call startTaskWithTaskID to start the task
+            TaskManager.getSharedManager(this).startTaskWithTaskID(this.user.getSelectedMembershipAccountId(),
+                    pushDestinationTask, new TaskManagerCallback() {
+                        @Override
+                        public void OnSuccess() {
+                            if (mProgressDialog != null) {
+                                mProgressDialog.dismiss();
+                            }
+
+                            // Don't show ShareCard by default for Business Account Tasks
+                            onTaskStart();
+                            // Reset handle pushDestination DeepLink Flag
+                            handlePushDestinationDeepLink = false;
+
+                            AnalyticsStore.getLogger().startedTrip(true, null);
+                            HTLog.i(TAG, "Task started successfully.");
+                        }
+
+                        @Override
+                        public void OnError() {
+                            if (mProgressDialog != null) {
+                                mProgressDialog.dismiss();
+                            }
+
+                            showStartTaskError();
+                            HTLog.e(TAG, "Task start failed.");
+
+                            // Reset handle pushDestination DeepLink Flag
+                            handlePushDestinationDeepLink = false;
+
+                            AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                        }
+                    });
+        } else {
+            // Call startTask to start the task
+            TaskManager.getSharedManager(this).startTask(this.user.getSelectedMembershipAccountId(),
+                    new TaskManagerCallback() {
+                        @Override
+                        public void OnSuccess() {
+                            if (mProgressDialog != null) {
+                                mProgressDialog.dismiss();
+                            }
+
+                            // Don't show ShareCard by default for Business Account Tasks
+                            onTaskStart();
+                            // Reset handle pushDestination DeepLink Flag
+                            handlePushDestinationDeepLink = false;
+
+                            AnalyticsStore.getLogger().startedTrip(true, null);
+                            HTLog.i(TAG, "Task started successfully.");
+                        }
+
+                        @Override
+                        public void OnError() {
+                            if (mProgressDialog != null) {
+                                mProgressDialog.dismiss();
+                            }
+
+                            showStartTaskError();
+                            HTLog.e(TAG, "Task start failed.");
+
+                            // Reset handle pushDestination DeepLink Flag
+                            handlePushDestinationDeepLink = false;
+
+                            AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                        }
+                    });
         }
-
-        // Call startTask to start the task
-        TaskManager.getSharedManager(this).startTask(this.user.getSelectedMembershipAccountId(),
-                pushDestinationTask, new TaskManagerCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (mProgressDialog != null) {
-                            mProgressDialog.dismiss();
-                        }
-
-                        // Don't show ShareCard by default for Business Account Tasks
-                        if (!handlePushDestinationDeepLink)
-                            share();
-
-                        onTaskStart();
-                        // Reset handle pushDestination DeepLink Flag
-                        handlePushDestinationDeepLink = false;
-
-                        AnalyticsStore.getLogger().startedTrip(true, null);
-                        HTLog.i(TAG, "Task started successfully.");
-                    }
-
-                    @Override
-                    public void OnError() {
-                        if (mProgressDialog != null) {
-                            mProgressDialog.dismiss();
-                        }
-
-                        showStartTaskError();
-                        HTLog.e(TAG, "Task start failed.");
-
-                        // Reset handle pushDestination DeepLink Flag
-                        handlePushDestinationDeepLink = false;
-
-                        AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
-                    }
-                });
     }
 
     private void updateDestinationLocationAddress() {
@@ -1143,7 +1174,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     mProgressDialog.dismiss();
                 }
 
-                OnTaskCompleted();
+                OnCompleteTask();
 
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
                 HTLog.i(TAG, "Complete Task (CTA) happened successfully.");
@@ -1189,12 +1220,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             @Override
             public void OnCallback() {
                 updateETAForOnGoingTask();
+                updateDisplayStatusForOngoingTask();
             }
         });
         taskManager.setTaskCompletedListener(new TaskManagerListener() {
             @Override
             public void OnCallback() {
-                OnTaskCompleted();
+                OnCompleteTask();
             }
         });
 
@@ -1231,10 +1263,30 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateDestinationMarker(destinationLocation, new Integer(etaInMinutes));
     }
 
+    private void updateDisplayStatusForOngoingTask() {
+        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+
+        HTTask task = taskManager.getHyperTrackTask();
+        if (task == null) {
+            return;
+        }
+
+        // Get Display Status for currently active task
+        String taskDisplayStatus = task.getTaskDisplay() != null ? task.getTaskDisplay().getStatus() : null;
+
+        // Set Toolbar Title as DisplayStatus for currently active task
+        if (TextUtils.isEmpty(taskDisplayStatus)) {
+            this.setTitle(taskDisplayStatus);
+        } else {
+            // Set Toolbar Title as AppName
+            this.setTitle(getResources().getString(R.string.app_name));
+        }
+    }
+
     /**
      * Method to update State Variables & UI to reflect Task Ended
      */
-    private void OnTaskCompleted() {
+    private void OnCompleteTask() {
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
@@ -1264,6 +1316,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
         updateMapPadding(false);
+
+        // Reset Toolbar Title on EndTrip
+        this.setTitle(getResources().getString(R.string.app_name));
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {

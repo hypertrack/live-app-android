@@ -57,7 +57,7 @@ public interface SendETAService {
     @POST("/api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
 
-    @POST("/api/v1/tasks/")
+    @POST("/api/v1/trips/")
     Call<HTTask> addTask(@Body Map<String, String> taskDetails);
 
     @POST("/api/v1/users/{id}/create_task/")

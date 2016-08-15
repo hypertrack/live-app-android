@@ -1,19 +1,15 @@
 package io.hypertrack.sendeta.view;
 
-import android.graphics.Color;
-import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+```import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.util.HashMap;
 
 import io.hypertrack.sendeta.R;
 
@@ -71,15 +67,6 @@ public class BaseActivity extends AppCompatActivity {
         setupToolbar(title, null, homeButtonEnabled);
     }
 
-    /**
-     * default toolbar with app's logo as title and app's primary color as background
-     */
-//    public void initToolbarWithLogo() {
-//        setupToolbar(null, null, TOOLBAR_BG_DEFAULT);
-//        getSupportActionBar().setDisplayShowTitleEnabled(false);
-//        toolbar.findViewById(R.id.toolbar_logo).setVisibility(View.VISIBLE);
-//    }
-
     private void setupToolbar(String title, String subTitle, boolean homeButtonEnabled) {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -89,18 +76,17 @@ public class BaseActivity extends AppCompatActivity {
 
 //        retryContainer = (LinearLayout) findViewById(R.id.retry_container);
 
-        if (title != null && title.length() > 0) {
+        if (!TextUtils.isEmpty(title)) {
             toolbar.setTitle(title);
         }
 
-        if (subTitle != null && subTitle.length() > 0) {
+        if (!TextUtils.isEmpty(subTitle)) {
             toolbar.setSubtitle(subTitle);
         }
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(homeButtonEnabled);
         getSupportActionBar().setHomeButtonEnabled(homeButtonEnabled);
-//        toolbar.findViewById(R.id.toolbar_logo).setVisibility(View.GONE);
     }
 
     /**
@@ -110,7 +96,7 @@ public class BaseActivity extends AppCompatActivity {
      * @param title
      */
     public void setTitle(String title) {
-        if (title != null && title.length() > 0 && toolbar != null) {
+        if (!TextUtils.isEmpty(title) && toolbar != null) {
             toolbar.setTitle(title);
         }
     }
@@ -122,7 +108,7 @@ public class BaseActivity extends AppCompatActivity {
      * @param subTitle
      */
     public void setSubTitle(String subTitle) {
-        if (subTitle != null && subTitle.length() > 0 && toolbar != null) {
+        if (!TextUtils.isEmpty(subTitle) && toolbar != null) {
             toolbar.setSubtitle(subTitle);
         }
     }
