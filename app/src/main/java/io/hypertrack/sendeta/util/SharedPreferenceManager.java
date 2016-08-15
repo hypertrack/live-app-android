@@ -10,6 +10,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
+import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
@@ -25,6 +26,7 @@ public class SharedPreferenceManager {
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
+    private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
     private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
@@ -100,19 +102,48 @@ public class SharedPreferenceManager {
         return gson.fromJson(tripJson, type);
     }
 
-    public static void deleteTrip() {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_TRIP);
-        editor.apply();
-    }
-
     public static void setTrip(Trip trip) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
         String tripJSON = gson.toJson(trip);
 
-        editor.putString(CURRENT_TRIP, tripJSON);
+        editor.putString(CURRENT_TASK, tripJSON);
+        editor.apply();
+    }
+
+    public static void deleteTrip() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_TRIP);
+        editor.apply();
+    }
+
+    public static HTTask getTask(Context context) {
+        String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
+        if (taskJson == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<HTTask>(){}.getType();
+
+        return gson.fromJson(taskJson, type);
+    }
+
+    public static void setTask(HTTask task) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String tripJSON = gson.toJson(task);
+
+        editor.putString(CURRENT_TASK, tripJSON);
+        editor.apply();
+    }
+
+
+    public static void deleteTask(Context context) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_TASK);
         editor.apply();
     }
 

@@ -3,12 +3,14 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
+import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.TaskDTO;
+import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.Trip;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
@@ -49,8 +51,14 @@ public interface SendETAService {
     @GET("/api/v1/eta/")
     Call<List<TripETAResponse>> getETA(@Query("origin") String origin, @Query("destination") String destination);
 
+    @GET("/api/v1/eta/")
+    Call<List<TaskETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination);
+
     @POST("/api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
+
+    @POST("/api/v1/tasks/")
+    Call<HTTask> addTask(@Body Map<String, String> taskDetails);
 
     @POST("/api/v1/users/{id}/create_task/")
     Call<Map<String, Object>> createTask(@Path("id") int id, @Body TaskDTO placeDTO);
