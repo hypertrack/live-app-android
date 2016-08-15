@@ -62,8 +62,8 @@
     <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
     <string name="fetching_current_location">Please wait while we fetch your current location</string>
     <string name="getting_eta_message">Getting your destination</string>
-    <string name="starting_trip_message">Preparing your trip</string>
-    <string name="ending_trip_message">Ending your trip</string>
+    <string name="starting_task_message">Preparing your trip</string>
+    <string name="completing_task_message">Ending your trip</string>
 
     <string name="saving_favorite_addresses_message">Saving your favorite address</string>
     <string name="editing_favorite_addresses_message">Saving your edits</string>
@@ -88,7 +88,7 @@
 
     <string name="start_trip_failed">Error starting your trip. Please try again</string>
     <string name="push_destination_incorrect_account_id">Error starting your trip. Please select the correct Account and try again.</string>
-    <string name="end_trip_failed">Error ending your trip. Please try again</string>
+    <string name="complete_task_failed">Error ending your trip. Please try again</string>
     <string name="eta_fetching_error">Sorry, we could not calculate an ETA. Please try again later</string>
     <string name="share_message_error">We had a problem sharing your trip. Please try again in some time.</string>
 
@@ -152,7 +152,7 @@
     <!-- Notification Strings -->
     <string name="notification_fallback_message">Send your real-time ETA to your friends &amp; family and let them track you on a map when you are on the way.</string>
 
-    <string name="notification_deeplink_active_trip_error">To accept this task, you need to first complete the ongoing task</string>
+    <string name="notification_deeplink_active_task_error">To accept this task, you need to first complete the ongoing task</string>
     
     <!-- ETA Marker Strings -->
     <plurals name="eta_in_minute_text">

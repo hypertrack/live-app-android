@@ -39,7 +39,6 @@ import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTaskStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
-import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.Task;
@@ -112,7 +111,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     // Method to setup GoogleApiClient to add geofence request
     private void setupGoogleAPIClient() {
         if (this.mGoogleAPIClient == null) {
-            this.mGoogleAPIClient = new GoogleApiClient.Builder(MetaApplication.getInstance().getApplicationContext())
+            this.mGoogleAPIClient = new GoogleApiClient.Builder(mContext)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
                     .build();
@@ -126,8 +125,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         //Customize Notification Settings
         ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
         ServiceNotificationParams notificationParams = builder
-                .setSmallIconBGColor(ContextCompat.getColor(MetaApplication.getInstance().getApplicationContext(),
-                        R.color.colorAccent))
+                .setSmallIconBGColor(ContextCompat.getColor(mContext, R.color.colorAccent))
                 .setContentIntentActivityClass(SplashScreen.class)
                 .build();
         transmitter.setServiceNotificationParams(notificationParams);
@@ -221,6 +219,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
     }
 
+    public boolean isTaskActive() {
+        return (this.hyperTrackTask != null);
+    }
+
     public void getETA(LatLng origin, LatLng destination, final TaskETACallback callback) {
         String originQueryParam = origin.latitude + "," + origin.longitude;
         String destinationQueryParam = destination.latitude + "," + destination.longitude;
@@ -253,12 +255,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    // TODO: 15/08/16 Make Call to addTask before transmitter.startTask()
+    // TODO: 15/08/16 Check for Meta API Call to addTask
     private void addTask(final TaskManagerCallback callback) {
         HashMap<String, String> tripDetails = new HashMap<>();
         tripDetails.put("hypertrack_task_id", this.hyperTrackTask.getId());
 
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                SharedPreferenceManager.getUserAuthToken());
 
         Call<HTTask> call = sendETAService.addTask(tripDetails);
         call.enqueue(new Callback<HTTask>() {
@@ -285,7 +288,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    public void startTask(int selectedAccountId, Task task, final TaskManagerCallback callback) {
+    public void startTask(final int selectedAccountId, final Task task, final TaskManagerCallback callback) {
         if (selectedAccountId <= 0) {
             if (callback != null) {
                 callback.OnError();
@@ -294,22 +297,19 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             return;
         }
 
-        this.selectedAccountId = selectedAccountId;
-
         // Set PublishableKey fetched for the selectedAccountId
+        this.selectedAccountId = selectedAccountId;
         HyperTrack.setPublishableApiKey(task.getPublishableKey(), mContext);
 
-        HTTaskParams taskParams = getTaskParams(task.getId(), task.getDriverId());
-        transmitter.startTask(taskParams, new HTTaskStatusCallback() {
+        TaskManager.this.addTask(new TaskManagerCallback() {
             @Override
-            public void onSuccess(boolean isOffline, HTTask htTask) {
-
-                // TODO: 15/08/16 Check in case of startTask being offline
-                hyperTrackTask = htTask;
-
-                addTask(new TaskManagerCallback() {
+            public void OnSuccess() {
+                // Start Task in TransmitterSDK
+                HTTaskParams taskParams = getTaskParams(task.getId(), task.getDriverId());
+                transmitter.startTask(taskParams, new HTTaskStatusCallback() {
                     @Override
-                    public void OnSuccess() {
+                    public void onSuccess(boolean isOffline, HTTask htTask) {
+
                         if (place == null) {
                             place = SharedPreferenceManager.getPlace();
                         }
@@ -321,7 +321,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                     }
 
                     @Override
-                    public void OnError() {
+                    public void onError(Exception e) {
                         hyperTrackTask = null;
 
                         if (callback != null) {
@@ -332,12 +332,16 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             }
 
             @Override
-            public void onError(Exception e) {
+            public void OnError() {
+                hyperTrackTask = null;
+
                 if (callback != null) {
                     callback.OnError();
                 }
             }
         });
+
+
     }
 
     public void completeTask(final TaskManagerCallback callback) {
@@ -369,19 +373,19 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void clearState() {
-        // TODO: 15/08/16 Check what to do for clearCurrentTrip()
 //        this.transmitter.clearCurrentTrip();
-        this.transmitter.completeTask(this.hyperTrackTask.getId(), new HTCompleteTaskStatusCallback() {
-            @Override
-            public void onSuccess(String s) {
-                HTLog.i(TAG, "Task completed successfully");
-            }
-
-            @Override
-            public void onError(Exception e) {
-                HTLog.e(TAG, "Error in Task completion: " + e.getMessage());
-            }
-        });
+        // TODO: 15/08/16 Check what to do for Task similar to clearCurrentTrip()
+//        this.transmitter.completeTask(this.hyperTrackTask.getId(), new HTCompleteTaskStatusCallback() {
+//            @Override
+//            public void onSuccess(String s) {
+//                HTLog.i(TAG, "Task completed successfully");
+//            }
+//
+//            @Override
+//            public void onError(Exception e) {
+//                HTLog.e(TAG, "Error in Task completion: " + e.getMessage());
+//            }
+//        });
 
         this.hyperTrackTask = null;
         this.vehicleType = HTDriverVehicleType.CAR;
@@ -491,9 +495,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         try {
-            Context context = MetaApplication.getInstance().getAppContext();
-            Intent geofencingIntent = new Intent(context, GeofenceTransitionsIntentService.class);
-            mGeofencePendingIntent = PendingIntent.getService(context, 0, geofencingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent geofencingIntent = new Intent(mContext, GeofenceTransitionsIntentService.class);
+            mGeofencePendingIntent = PendingIntent.getService(mContext, 0, geofencingIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             LocationServices.GeofencingApi.addGeofences(mGoogleAPIClient, geofencingRequest, mGeofencePendingIntent).setResultCallback(new ResultCallback<Status>() {
                 @Override
