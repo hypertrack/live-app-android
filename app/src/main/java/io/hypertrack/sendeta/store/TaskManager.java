@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -24,13 +25,15 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
+import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.util.HTLog;
+import io.hypertrack.lib.transmitter.model.HTStartDriverStatusCallback;
 import io.hypertrack.lib.transmitter.model.HTTaskParams;
 import io.hypertrack.lib.transmitter.model.HTTaskParamsBuilder;
 import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
@@ -256,40 +259,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    // TODO: 15/08/16 Check for Meta API Call to addTask
-    private void addTask(final String taskID, final TaskManagerCallback callback) {
-        HashMap<String, String> taskDetails = new HashMap<>();
-        taskDetails.put("hypertrack_task_id", taskID);
-
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
-                SharedPreferenceManager.getUserAuthToken());
-
-        Call<HTTask> call = sendETAService.addTask(taskDetails);
-        call.enqueue(new Callback<HTTask>() {
-            @Override
-            public void onResponse(Call<HTTask> call, Response<HTTask> response) {
-                if (response.isSuccessful()) {
-                    setTask(response.body());
-                    if (callback != null) {
-                        callback.OnSuccess();
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<HTTask> call, Throwable t) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
-    public void startTask(int selectedAccountId, final TaskManagerCallback callback) {
+    public void startTask(final Task task, LatLng location, int selectedAccountId, HTDriverVehicleType vehicleType,
+                          final TaskManagerCallback callback) {
         if (this.place == null || selectedAccountId <= 0) {
             if (callback != null) {
                 callback.OnError();
@@ -300,22 +271,37 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         this.selectedAccountId = selectedAccountId;
 
-        // Fetch Task Details for selectedPlace & selectedAccountId
-        UserStore.sharedStore.getTask(this.place, this.selectedAccountId, new UserStoreGetTaskCallback() {
-            @Override
-            public void OnSuccess(final String taskID, final String hypertrackDriverID, String publishableKey) {
+        final HTLocation startLocation = new HTLocation(location.latitude, location.longitude);
+        this.startTaskOnServer(task, startLocation, vehicleType, callback);
+    }
 
-                // Set PublishableKey fetched for the selectedAccountId
-                HyperTrack.setPublishableApiKey(publishableKey, mContext);
+    private void startTaskOnServer(final Task task, final HTLocation startLocation, final HTDriverVehicleType vehicleType,
+                                   final TaskManagerCallback callback) {
+        String taskID = null;
+        if (task != null) {
+            taskID = task.getId();
+        }
 
-                TaskManager.this.addTask(taskID, new TaskManagerCallback() {
+        UserStore.sharedStore.startTaskOnServer(taskID, this.place, this.selectedAccountId, startLocation,
+                vehicleType, new UserStoreGetTaskCallback() {
                     @Override
-                    public void OnSuccess() {
+                    public void OnSuccess(Map<String, Object> response) {
+
+                        String taskID = (String) response.get("id");
+                        String publishableKey = (String) response.get("publishable_key");
+                        String hypertrackDriverID = (String) response.get("hypertrack_driver_id");
+
+                        // Parse Response to fetch Task Data
+                        setTask(response);
+
+                        // Set PublishableKey fetched for the selectedAccountId
+                        HyperTrack.setPublishableApiKey(publishableKey, mContext);
+
                         // Start Task in TransmitterSDK for fetched taskID & hypertrackDriverID
                         HTTaskParams taskParams = getTaskParams(taskID, hypertrackDriverID);
-                        transmitter.startTask(taskParams, new HTTaskStatusCallback() {
+                        transmitter.startDriverForTask(taskParams, new HTStartDriverStatusCallback() {
                             @Override
-                            public void onSuccess(boolean isOffline, HTTask htTask) {
+                            public void onSuccess() {
 
                                 if (place == null) {
                                     place = SharedPreferenceManager.getPlace();
@@ -347,71 +333,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                         }
                     }
                 });
-            }
-
-            @Override
-            public void OnError() {
-                hyperTrackTask = null;
-
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
-    public void startTaskWithTaskID(final int selectedAccountId, final Task task, final TaskManagerCallback callback) {
-        if (selectedAccountId <= 0) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        // Set PublishableKey fetched for the selectedAccountId
-        this.selectedAccountId = selectedAccountId;
-        HyperTrack.setPublishableApiKey(task.getPublishableKey(), mContext);
-
-        TaskManager.this.addTask(task.getId(), new TaskManagerCallback() {
-            @Override
-            public void OnSuccess() {
-                // Start Task in TransmitterSDK
-                HTTaskParams taskParams = getTaskParams(task.getId(), task.getDriverId());
-                transmitter.startTask(taskParams, new HTTaskStatusCallback() {
-                    @Override
-                    public void onSuccess(boolean isOffline, HTTask htTask) {
-
-                        if (place == null) {
-                            place = SharedPreferenceManager.getPlace();
-                        }
-
-                        onTaskStart();
-                        if (callback != null) {
-                            callback.OnSuccess();
-                        }
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        hyperTrackTask = null;
-
-                        if (callback != null) {
-                            callback.OnError();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void OnError() {
-                hyperTrackTask = null;
-
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
     }
 
     public void completeTask(final TaskManagerCallback callback) {
@@ -443,7 +364,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void clearState() {
-//        this.transmitter.clearCurrentTrip();
         // TODO: 15/08/16 Check what to do for Task similar to clearCurrentTrip()
 //        this.transmitter.completeTask(this.hyperTrackTask.getId(), new HTCompleteTaskStatusCallback() {
 //            @Override
@@ -698,9 +618,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.hyperTrackTask = null;
     }
 
-    private void setTask(final HTTask taskToSave) {
-        SharedPreferenceManager.setTask(taskToSave);
-        this.hyperTrackTask = taskToSave;
+    private void setTask(final Map<String, Object> taskData) {
+        Log.d(TAG, "Response for Task: " + taskData);
+//        SharedPreferenceManager.setTask(taskToSave);
+//        this.hyperTrackTask = taskToSave;
     }
 
 

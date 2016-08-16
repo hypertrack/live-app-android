@@ -3,7 +3,6 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
-import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
@@ -57,8 +56,8 @@ public interface SendETAService {
     @POST("/api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
 
-    @POST("/api/v1/trips/")
-    Call<HTTask> addTask(@Body Map<String, String> taskDetails);
+    @POST("/api/v1/users/{id}/start_task")
+    Call<Map<String, Object>> startTask(@Path("id") int id, @Body TaskDTO taskDTO);
 
     @POST("/api/v1/users/{id}/create_task/")
     Call<Map<String, Object>> createTask(@Path("id") int id, @Body TaskDTO placeDTO);

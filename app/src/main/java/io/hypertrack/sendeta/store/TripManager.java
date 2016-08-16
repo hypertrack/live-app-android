@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.model.HTTaskParams;
@@ -52,7 +51,6 @@ import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.sendeta.store.callback.TripETACallback;
 import io.hypertrack.sendeta.store.callback.TripManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripManagerListener;
-import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.SplashScreen;
@@ -267,127 +265,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void sendETA(List<String> phoneNumbers, final TripManagerCallback callback) {
-    }
-
-    public void startTrip(int selectedAccountId, final TripManagerCallback callback) {
-        if (this.place == null || selectedAccountId <= 0) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        this.selectedAccountId = selectedAccountId;
-
-        UserStore.sharedStore.getTask(this.place, this.selectedAccountId, new UserStoreGetTaskCallback() {
-            @Override
-            public void OnSuccess(String taskID, String hypertrackDriverID, String publishableKey) {
-
-                // Set PublishableKey fetched for the selectedAccountId
-                HyperTrack.setPublishableApiKey(publishableKey, MetaApplication.getInstance().getApplicationContext());
-
-                HTTripParams tripParams = getTripParams(taskID, hypertrackDriverID);
-                transmitter.startTrip(tripParams, new HTTripStatusCallback() {
-                    @Override
-                    public void onSuccess(HTTrip htTrip) {
-                        hyperTrackTrip = htTrip;
-
-                        addTrip(new TripManagerCallback() {
-                            @Override
-                            public void OnSuccess() {
-                                if (place == null) {
-                                    place = SharedPreferenceManager.getPlace();
-                                }
-
-                                onTripStart();
-                                if (callback != null) {
-                                    callback.OnSuccess();
-                                }
-                            }
-
-                            @Override
-                            public void OnError() {
-                                transmitter.clearCurrentTrip();
-                                hyperTrackTrip = null;
-
-                                if (callback != null) {
-                                    callback.OnError();
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        if (callback != null) {
-                            callback.OnError();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void OnError() {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
-    public void startTripWithTaskID(int selectedAccountId, Task task, final TripManagerCallback callback) {
-        if (selectedAccountId <= 0) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        this.selectedAccountId = selectedAccountId;
-
-        // Set PublishableKey fetched for the selectedAccountId
-        HyperTrack.setPublishableApiKey(task.getPublishableKey(), MetaApplication.getInstance().getApplicationContext());
-
-        HTTripParams tripParams = getTripParams(task.getId(), task.getDriverId());
-        transmitter.startTrip(tripParams, new HTTripStatusCallback() {
-            @Override
-            public void onSuccess(HTTrip htTrip) {
-                hyperTrackTrip = htTrip;
-
-                addTrip(new TripManagerCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (place == null) {
-                            place = SharedPreferenceManager.getPlace();
-                        }
-
-                        onTripStart();
-                        if (callback != null) {
-                            callback.OnSuccess();
-                        }
-                    }
-
-                    @Override
-                    public void OnError() {
-                        transmitter.clearCurrentTrip();
-                        hyperTrackTrip = null;
-
-                        if (callback != null) {
-                            callback.OnError();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onError(Exception e) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
     }
 
     public void endTrip(final TripManagerCallback callback) {

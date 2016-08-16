@@ -1061,79 +1061,56 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
+        if (currentLocationMarker == null || currentLocationMarker.getPosition() == null) {
+            Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (handlePushDestinationDeepLink) {
             if (destinationAddressGeocoded) {
                 updateDestinationLocationAddress();
             }
-
-            // Call startTaskWithTaskID to start the task
-            TaskManager.getSharedManager(this).startTaskWithTaskID(this.user.getSelectedMembershipAccountId(),
-                    pushDestinationTask, new TaskManagerCallback() {
-                        @Override
-                        public void OnSuccess() {
-                            if (mProgressDialog != null) {
-                                mProgressDialog.dismiss();
-                            }
-
-                            // Don't show ShareCard by default for Business Account Tasks
-                            onTaskStart();
-                            // Reset handle pushDestination DeepLink Flag
-                            handlePushDestinationDeepLink = false;
-
-                            AnalyticsStore.getLogger().startedTrip(true, null);
-                            HTLog.i(TAG, "Task started successfully.");
-                        }
-
-                        @Override
-                        public void OnError() {
-                            if (mProgressDialog != null) {
-                                mProgressDialog.dismiss();
-                            }
-
-                            showStartTaskError();
-                            HTLog.e(TAG, "Task start failed.");
-
-                            // Reset handle pushDestination DeepLink Flag
-                            handlePushDestinationDeepLink = false;
-
-                            AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
-                        }
-                    });
-        } else {
-            // Call startTask to start the task
-            TaskManager.getSharedManager(this).startTask(this.user.getSelectedMembershipAccountId(),
-                    new TaskManagerCallback() {
-                        @Override
-                        public void OnSuccess() {
-                            if (mProgressDialog != null) {
-                                mProgressDialog.dismiss();
-                            }
-
-                            // Don't show ShareCard by default for Business Account Tasks
-                            onTaskStart();
-                            // Reset handle pushDestination DeepLink Flag
-                            handlePushDestinationDeepLink = false;
-
-                            AnalyticsStore.getLogger().startedTrip(true, null);
-                            HTLog.i(TAG, "Task started successfully.");
-                        }
-
-                        @Override
-                        public void OnError() {
-                            if (mProgressDialog != null) {
-                                mProgressDialog.dismiss();
-                            }
-
-                            showStartTaskError();
-                            HTLog.e(TAG, "Task start failed.");
-
-                            // Reset handle pushDestination DeepLink Flag
-                            handlePushDestinationDeepLink = false;
-
-                            AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
-                        }
-                    });
         }
+
+        LatLng currentLocation = currentLocationMarker.getPosition();
+
+        // Call startTask to start the task
+        TaskManager.getSharedManager(this).startTask(pushDestinationTask, currentLocation,
+                this.user.getSelectedMembershipAccountId(), HTDriverVehicleType.CAR, new TaskManagerCallback() {
+                    @Override
+                    public void OnSuccess() {
+                        if (mProgressDialog != null) {
+                            mProgressDialog.dismiss();
+                        }
+
+                        // Don't show ShareCard by default for Business Account Tasks
+                        if (!handlePushDestinationDeepLink)
+                            share();
+
+                        onTaskStart();
+
+                        // Reset handle pushDestination DeepLink Flag
+                        handlePushDestinationDeepLink = false;
+
+                        AnalyticsStore.getLogger().startedTrip(true, null);
+                        HTLog.i(TAG, "Task started successfully.");
+                    }
+
+                    @Override
+                    public void OnError() {
+                        if (mProgressDialog != null) {
+                            mProgressDialog.dismiss();
+                        }
+
+                        showStartTaskError();
+                        HTLog.e(TAG, "Task start failed.");
+
+                        // Reset handle pushDestination DeepLink Flag
+                        handlePushDestinationDeepLink = false;
+
+                        AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                    }
+                });
     }
 
     private void updateDestinationLocationAddress() {
@@ -1990,7 +1967,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */
