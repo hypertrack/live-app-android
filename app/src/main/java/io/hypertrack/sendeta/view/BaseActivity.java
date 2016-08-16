@@ -96,7 +96,7 @@ public class BaseActivity extends AppCompatActivity {
      * @param title
      */
     public void setTitle(String title) {
-        if (!TextUtils.isEmpty(title) && toolbar != null) {
+        if (toolbar != null) {
             toolbar.setTitle(title);
         }
     }
@@ -108,7 +108,7 @@ public class BaseActivity extends AppCompatActivity {
      * @param subTitle
      */
     public void setSubTitle(String subTitle) {
-        if (!TextUtils.isEmpty(subTitle) && toolbar != null) {
+        if (toolbar != null) {
             toolbar.setSubtitle(subTitle);
         }
     }

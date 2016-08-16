@@ -56,11 +56,8 @@ public interface SendETAService {
     @POST("/api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
 
-    @POST("/api/v1/users/{id}/start_task")
+    @POST("/api/v1/users/{id}/start_task/")
     Call<Map<String, Object>> startTask(@Path("id") int id, @Body TaskDTO taskDTO);
-
-    @POST("/api/v1/users/{id}/create_task/")
-    Call<Map<String, Object>> createTask(@Path("id") int id, @Body TaskDTO placeDTO);
 
     @POST("/api/v1/places/")
     Call<MetaPlace> addPlace(@Body PlaceDTO place);

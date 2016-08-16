@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -281,6 +282,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         if (task != null) {
             taskID = task.getId();
         }
+
+        this.vehicleType = vehicleType;
 
         UserStore.sharedStore.startTaskOnServer(taskID, this.place, this.selectedAccountId, startLocation,
                 vehicleType, new UserStoreGetTaskCallback() {
@@ -619,9 +622,34 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void setTask(final Map<String, Object> taskData) {
-        Log.d(TAG, "Response for Task: " + taskData);
-//        SharedPreferenceManager.setTask(taskToSave);
-//        this.hyperTrackTask = taskToSave;
+        try {
+
+            String taskID = (String) taskData.get("id");
+            String status = (String) taskData.get("status");
+            String action = (String) taskData.get("action");
+            String trackingURL = (String) taskData.get("tracking_url");
+            String encodedPolyline = (String) taskData.get("encoded_polyline");
+
+            Date ETA = null;
+            try {
+                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                ETA = simpleDateFormat.parse((String) taskData.get("eta"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                Crashlytics.logException(e);
+            }
+
+            HTTask taskToSave = new HTTask(taskID, status, action, ETA, trackingURL, vehicleType, encodedPolyline);
+            taskToSave.setDriverID((String) taskData.get("hypertrack_driver_id"));
+
+            SharedPreferenceManager.setTask(taskToSave);
+            this.hyperTrackTask = taskToSave;
+
+            Log.d(TAG, "Task started: " + taskToSave);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
 

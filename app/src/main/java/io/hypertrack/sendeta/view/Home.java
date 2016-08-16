@@ -82,11 +82,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.Date;
 import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTTask;
+import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
@@ -849,7 +849,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         String taskData = intent.getStringExtra(Constants.KEY_TASK);
         if (!TextUtils.isEmpty(taskData)) {
             Gson gson = new Gson();
-            Type type = new TypeToken<Task>() {}.getType();
+            Type type = new TypeToken<Task>() {
+            }.getType();
             pushDestinationTask = gson.fromJson(taskData, type);
         }
 
@@ -1226,18 +1227,26 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
-        Date ETA = task.getETA();
-        if (ETA == null) {
-            return;
+        // Get ETA Value to display from TaskDisplay field
+        etaInMinutes = getTaskDisplayETA(task.getTaskDisplay());
+        updateDestinationMarker(destinationLocation, new Integer(etaInMinutes));
+    }
+
+    private Integer getTaskDisplayETA(HTTaskDisplay taskDisplay) {
+        if (taskDisplay != null && !TextUtils.isEmpty(taskDisplay.getDurationRemaining())) {
+            Double etaInSeconds = Double.valueOf(taskDisplay.getDurationRemaining());
+
+            if (etaInSeconds != null) {
+                double etaInMinutes = Math.ceil((etaInSeconds / (float) 60));
+                if (etaInMinutes < 1) {
+                    etaInMinutes = 1;
+                }
+
+                return (int) etaInMinutes;
+            }
         }
 
-        Date now = new Date();
-        long etaInSecond = ETA.getTime() - now.getTime();
-        etaInMinutes = (int) etaInSecond / (60 * 1000);
-
-        etaInMinutes = Math.max(etaInMinutes, 1);
-
-        updateDestinationMarker(destinationLocation, new Integer(etaInMinutes));
+        return null;
     }
 
     private void updateDisplayStatusForOngoingTask() {
@@ -1248,16 +1257,106 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
-        // Get Display Status for currently active task
-        String taskDisplayStatus = task.getTaskDisplay() != null ? task.getTaskDisplay().getStatus() : null;
+        HTTaskDisplay taskDisplay = task.getTaskDisplay();
 
         // Set Toolbar Title as DisplayStatus for currently active task
-        if (TextUtils.isEmpty(taskDisplayStatus)) {
-            this.setTitle(taskDisplayStatus);
+        Integer taskDisplayStatusResId = getTaskDisplayStatus(taskDisplay);
+        if (taskDisplayStatusResId != null) {
+            this.setTitle(getString(taskDisplayStatusResId));
         } else {
             // Set Toolbar Title as AppName
             this.setTitle(getResources().getString(R.string.app_name));
         }
+
+        // Set Toolbar SubTitle as DisplaySubStatus for currently active task
+        String taskDisplaySubStatus = getTaskDisplaySubStatus(taskDisplay);
+        if (!TextUtils.isEmpty(taskDisplaySubStatus)) {
+            this.setSubTitle(taskDisplaySubStatus);
+        } else {
+            this.setSubTitle("");
+        }
+    }
+
+    public Integer getTaskDisplayStatus(HTTaskDisplay taskDisplay) {
+        if (taskDisplay == null || TextUtils.isEmpty(taskDisplay.getStatus()))
+            return null;
+
+        String taskDisplayStatus = taskDisplay.getStatus();
+
+        switch (taskDisplayStatus) {
+            case HTTask.TASK_STATUS_NOT_STARTED:
+                return io.hypertrack.lib.consumer.R.string.task_status_not_started;
+            case HTTask.TASK_STATUS_DISPATCHING:
+                return io.hypertrack.lib.consumer.R.string.task_status_dispatching;
+            case HTTask.TASK_STATUS_DRIVER_ON_THE_WAY:
+                return io.hypertrack.lib.consumer.R.string.task_status_driver_on_the_way;
+            case HTTask.TASK_STATUS_DRIVER_ARRIVING:
+                return io.hypertrack.lib.consumer.R.string.task_status_driver_arriving;
+            case HTTask.TASK_STATUS_DRIVER_ARRIVED:
+                return io.hypertrack.lib.consumer.R.string.task_status_driver_arrived;
+            case HTTask.TASK_STATUS_COMPLETED:
+                return io.hypertrack.lib.consumer.R.string.task_status_completed;
+            case HTTask.TASK_STATUS_CANCELED:
+                return io.hypertrack.lib.consumer.R.string.task_status_canceled;
+            case HTTask.TASK_STATUS_ABORTED:
+                return io.hypertrack.lib.consumer.R.string.task_status_aborted;
+            case HTTask.TASK_STATUS_SUSPENDED:
+                return io.hypertrack.lib.consumer.R.string.task_status_suspended;
+            case HTTask.TASK_STATUS_NO_LOCATION:
+                return io.hypertrack.lib.consumer.R.string.task_status_no_location;
+            case HTTask.TASK_STATUS_CONNECTION_LOST:
+                return io.hypertrack.lib.consumer.R.string.task_status_connection_lost;
+            default:
+                return null;
+        }
+    }
+
+    private String getTaskDisplaySubStatus(HTTaskDisplay taskDisplay) {
+
+        if (taskDisplay != null && taskDisplay.getSubStatusDuration() != null) {
+
+            Double timeInSeconds = Double.valueOf(taskDisplay.getSubStatusDuration());
+            StringBuilder builder = (new StringBuilder(this.getFormattedTimeString(timeInSeconds))).append(" ");
+
+            if ("delayed".equalsIgnoreCase(taskDisplay.getSubStatus())) {
+                builder.append(this.getString(io.hypertrack.lib.consumer.R.string.task_sub_status_delayed_suffix_text));
+            } else {
+                builder.append(this.getString(io.hypertrack.lib.consumer.R.string.task_sub_status_default_suffix_text));
+            }
+
+            return builder.toString();
+        }
+
+        return null;
+    }
+
+    private String getFormattedTimeString(Double timeInSeconds) {
+        if (this == null || this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
+            return "1 min";
+
+        int hours = (int) (timeInSeconds / 3600);
+        int remainder = (int) (timeInSeconds - (hours * 3600));
+        int mins = remainder / 60;
+
+        StringBuilder builder = new StringBuilder();
+
+        if (hours > 0) {
+            builder.append(hours)
+                    .append(" ")
+                    .append(this.getResources().getQuantityString(io.hypertrack.lib.consumer.R.plurals.hour_text, hours))
+                    .append(" ");
+        }
+
+        if (mins > 1) {
+            builder.append(mins)
+                    .append(" ");
+        } else {
+            builder.append("1 ");
+        }
+
+        builder.append(this.getResources().getQuantityString(io.hypertrack.lib.consumer.R.plurals.minute_text, mins));
+
+        return builder.toString();
     }
 
     /**
@@ -1296,6 +1395,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Reset Toolbar Title on EndTrip
         this.setTitle(getResources().getString(R.string.app_name));
+        this.setSubTitle("");
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
@@ -1967,7 +2067,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p/>
+     * <p>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */
