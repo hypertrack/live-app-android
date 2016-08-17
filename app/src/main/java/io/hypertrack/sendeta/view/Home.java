@@ -2147,6 +2147,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
+            HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
             HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());

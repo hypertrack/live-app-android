@@ -24,6 +24,7 @@ import android.util.Log;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 
+import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 
 public class RegistrationIntentService extends IntentService {
@@ -40,11 +41,10 @@ public class RegistrationIntentService extends IntentService {
         try {
             // [START get_token]
             InstanceID instanceID = InstanceID.getInstance(this);
-            String token = instanceID.getToken("932617501442",
+            String token = instanceID.getToken(getResources().getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
             // [END get_token]
-            Log.i(TAG, "GCM Registration Token: " + token);
             SharedPreferenceManager.setGcmToken(token);
 
         } catch (Exception e) {
