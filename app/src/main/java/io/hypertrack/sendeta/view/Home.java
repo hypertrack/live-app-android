@@ -181,7 +181,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private float zoomLevel = 1.0f;
 
-    private int etaInMinutes = 0;
+    private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private Call<ResponseBody> sendGCMToServerCall;
 
@@ -1229,7 +1229,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Get ETA Value to display from TaskDisplay field
         etaInMinutes = getTaskDisplayETA(task.getTaskDisplay());
-        updateDestinationMarker(destinationLocation, new Integer(etaInMinutes));
+        updateDestinationMarker(destinationLocation, etaInMinutes);
     }
 
     private Integer getTaskDisplayETA(HTTaskDisplay taskDisplay) {
