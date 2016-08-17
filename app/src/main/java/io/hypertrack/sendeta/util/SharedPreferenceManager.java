@@ -6,6 +6,7 @@ import android.location.Location;
 
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
@@ -124,7 +125,10 @@ public class SharedPreferenceManager {
             return null;
         }
 
-        Gson gson = new Gson();
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
+        gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
+        Gson gson = gsonBuilder.create();
         Type type = new TypeToken<HTTask>(){}.getType();
 
         return gson.fromJson(taskJson, type);

@@ -163,7 +163,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         } else {
             // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
-            HTLog.e(TAG, "Error occurred while shouldRestoreState: HypertrackTask is NULL");
+            if (transmitter != null && transmitter.isDriverLive()) {
+                HTLog.e(TAG, "Error occurred while shouldRestoreState: HypertrackTask is NULL");
+            }
             this.clearState();
             return false;
         }

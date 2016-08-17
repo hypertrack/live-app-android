@@ -832,8 +832,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             shouldRestoreTask = true;
 
         } else {
-            Log.v(TAG, "Task is not active");
-            HTLog.e(TAG, "Task restore failed.");
+            HTLog.e(TAG, "No Task to restore.");
             shouldRestoreTask = false;
         }
     }
