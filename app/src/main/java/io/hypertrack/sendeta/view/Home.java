@@ -85,6 +85,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
+import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.common.util.HTLog;
@@ -1196,8 +1197,24 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         taskManager.setTaskRefreshedListener(new TaskManagerListener() {
             @Override
             public void OnCallback() {
-                updateETAForOnGoingTask();
-                updateDisplayStatusForOngoingTask();
+                // Get TaskManager Instance
+                TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+                if (taskManager == null)
+                    return;
+
+                // Fetch updated HypertrackTask Instance
+                HTTask task = taskManager.getHyperTrackTask();
+                if (task == null) {
+                    return;
+                }
+
+                // Update ETA & Display Statuses using Task's Display field
+                updateETAForOnGoingTask(task, taskManager.getPlace());
+                updateDisplayStatusForOngoingTask(task);
+
+                // Check if DestinationLocation has been updated
+                // NOTE: Call this method after updateETAForOnGoingTask()
+                checkForUpdatedDestinationLocation(task);
             }
         });
         taskManager.setTaskCompletedListener(new TaskManagerListener() {
@@ -1211,15 +1228,44 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateMapView();
     }
 
-    private void updateETAForOnGoingTask() {
-        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+    private void checkForUpdatedDestinationLocation(HTTask task) {
+        // Check if updatedDestination Location is not null
+        HTPlace destinationLocation = task.getDestination();
+        if (destinationLocation == null || destinationLocation.getLocation() == null)
+            return;
 
-        HTTask task = taskManager.getHyperTrackTask();
-        if (task == null) {
+        // Check if updatedDestination Location Coordinates are valid
+        LatLng updatedDestinationLatLng = new LatLng(destinationLocation.getLocation().getLatitude(),
+                destinationLocation.getLocation().getLongitude());
+        if (updatedDestinationLatLng.latitude == 0.0 || updatedDestinationLatLng.longitude == 0.0)
+            return;
+
+        // Check if destinationMarker's location has been changed
+        if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
+            if (!destinationLocationMarker.getPosition().equals(updatedDestinationLatLng)) {
+
+                // TODO: 18/08/16 Check how to update changed MetaPlace Id
+                MetaPlace place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
+                TaskManager.getSharedManager(Home.this).setPlace(place);
+
+                // Set the Enter Destination Layout to Selected Place
+                destinationText.setGravity(Gravity.LEFT);
+                destinationText.setText(place.getName());
+
+                // Hide the favorites button (because this place doesnt have a valid PlaceId)
+                favoriteButton.setVisibility(View.GONE);
+
+                updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
+                updateMapView();
+            }
             return;
         }
 
-        MetaPlace place = taskManager.getPlace();
+        // Add Destination Marker with fetched DestinationLatLng & ETA value
+        updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
+    }
+
+    private void updateETAForOnGoingTask(HTTask task, MetaPlace place) {
         if (place == null) {
             return;
         }
@@ -1248,14 +1294,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         return null;
     }
 
-    private void updateDisplayStatusForOngoingTask() {
-        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-
-        HTTask task = taskManager.getHyperTrackTask();
-        if (task == null) {
-            return;
-        }
-
+    private void updateDisplayStatusForOngoingTask(HTTask task) {
         HTTaskDisplay taskDisplay = task.getTaskDisplay();
 
         // Set Toolbar Title as DisplayStatus for currently active task
