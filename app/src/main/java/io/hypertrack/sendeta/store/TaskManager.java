@@ -146,15 +146,24 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.getSavedTaskData();
 
         // Check if current Task exists in Shared Preference or not
-        if (this.hyperTrackTask != null && this.place != null) {
+        if (this.hyperTrackTask != null) {
             // Restore the current task with locally cached data
             // Start Refreshing the task without any delay
 
             // Added a delay to initiate RestoreTaskStart Call (to account for delay in onMapLoadedCallback)
-            onTaskStart(4000);
-            return true;
+            if (this.place != null) {
+                onTaskStart(4000);
+                return true;
+            } else {
+                // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
+                HTLog.e(TAG, "Error occurred while shouldRestoreState: Place is NULL");
+                this.clearState();
+                return false;
+            }
 
         } else {
+            // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
+            HTLog.e(TAG, "Error occurred while shouldRestoreState: HypertrackTask is NULL");
             this.clearState();
             return false;
         }
@@ -175,11 +184,20 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 public void onSuccess(boolean isOffline, HTTask htTask) {
 
                     if (htTask != null && !isTaskLive(htTask)) {
-                        if (taskCompletedListener != null) {
-                            taskCompletedListener.OnCallback();
-                        }
 
-                        clearState();
+                        // Call completeTask when the HTTask object is null or task is not live
+                        TaskManager.this.completeTask(new TaskManagerCallback() {
+                            @Override
+                            public void OnSuccess() {
+                                if (taskCompletedListener != null) {
+                                    taskCompletedListener.OnCallback();
+                                }
+                            }
+
+                            @Override
+                            public void OnError() {
+                            }
+                        });
                         return;
                     }
 
@@ -202,10 +220,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     private boolean isTaskLive(HTTask task) {
 
-        if (task == null || TextUtils.isEmpty(task.getStatus()))
+        if (task == null || TextUtils.isEmpty(task.getId()) /*|| TextUtils.isEmpty(task.getStatus())*/)
             return false;
 
-        String taskStatus = task.getStatus();
+        /*String taskStatus = task.getStatus();
 
         if (HTTask.TASK_STATUS_DISPATCHING.equalsIgnoreCase(taskStatus)
                 || HTTask.TASK_STATUS_DRIVER_ON_THE_WAY.equalsIgnoreCase(taskStatus)
@@ -215,7 +233,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             return true;
         }
 
-        return false;
+        return false;*/
+
+        return true;
     }
 
     private void onTaskRefresh() {
@@ -347,6 +367,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 callback.OnSuccess();
             }
 
+            // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
+            HTLog.e(TAG, "Error occurred while completeTask: TaskID is NULL");
             clearState();
         }
 
@@ -368,20 +390,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
+    /**
+     * Call this method once the task has been completed successfully on the SDK.
+     */
     public void clearState() {
-        // TODO: 15/08/16 Check what to do for Task similar to clearCurrentTrip()
-//        this.transmitter.completeTask(this.hyperTrackTask.getId(), new HTCompleteTaskStatusCallback() {
-//            @Override
-//            public void onSuccess(String s) {
-//                HTLog.i(TAG, "Task completed successfully");
-//            }
-//
-//            @Override
-//            public void onError(Exception e) {
-//                HTLog.e(TAG, "Error in Task completion: " + e.getMessage());
-//            }
-//        });
-
+        HTLog.i(TAG, "Calling clearState to reset SendETA task state");
         this.hyperTrackTask = null;
         this.vehicleType = HTDriverVehicleType.CAR;
         this.stopRefreshingTask();
@@ -389,7 +402,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.clearListeners();
         this.clearPlace();
         this.clearTask();
-        this.unregisterForTaskCompletedBroadcast();
+        this.unregisterForDriverNotLiveBroadcast();
         // Remove GeoFencingRequest from SharedPreferences
         SharedPreferenceManager.removeGeofencingRequest();
     }
@@ -407,7 +420,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private void onTaskStart(final long delay) {
         this.setupGeofencing();
         this.startRefreshingTask(delay);
-        this.registerForTaskCompletedBroadcast();
+        this.registerForDriverNotLiveBroadcast();
     }
 
     // Refresh Task with a default delay of REFRESH_DELAY
@@ -518,6 +531,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 if (taskCompletedListener != null) {
                     taskCompletedListener.OnCallback();
                 }
+                // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
+                HTLog.e(TAG, "Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
                 clearState();
                 return;
             }
@@ -655,9 +670,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
 
-    private void registerForTaskCompletedBroadcast() {
+    private void registerForDriverNotLiveBroadcast() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(TransmitterConstants.HT_ON_TASK_COMPLETED_INTENT);
+        filter.addAction(TransmitterConstants.HT_ON_DRIVER_NOT_LIVE_INTENT);
 
         mTaskCompletedReceiver = new BroadcastReceiver() {
             @Override
@@ -672,7 +687,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         LocalBroadcastManager.getInstance(mContext).registerReceiver(mTaskCompletedReceiver, filter);
     }
 
-    private void unregisterForTaskCompletedBroadcast() {
+    private void unregisterForDriverNotLiveBroadcast() {
         if (this.mTaskCompletedReceiver != null) {
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mTaskCompletedReceiver);
             this.mTaskCompletedReceiver = null;
