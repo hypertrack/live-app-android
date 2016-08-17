@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.fabric.sdk.android.Fabric;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.store.AnalyticsStore;
@@ -37,6 +38,9 @@ public class MetaApplication extends Application {
         mInstance = this;
         this.mContext = getApplicationContext();
 
+        // Initialize Hypertrack TransmitterSDK
+        HTTransmitterService.initHTTransmitter(getApplicationContext());
+
         // Initialize Realm to maintain app databases
         this.setupRealm();
 
@@ -47,7 +51,7 @@ public class MetaApplication extends Application {
 //
 //        Realm.setDefaultConfiguration(config);
 
-// This will automatically trigger the migration if needed
+          // This will automatically trigger the migration if needed
 //        Realm realm = Realm.getDefaultInstance();
 
 //        this.migrateRealmDB();
