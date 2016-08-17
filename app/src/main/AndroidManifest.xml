@@ -45,29 +45,30 @@
             </intent-filter>
 
             <!-- Intent Filter to handle browsable deeplinks -->
-            <intent-filter android:label="@string/filter_title_viewaccept">
+            <intent-filter
+                android:autoVerify="true"
+                android:label="@string/filter_title_viewaccept">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="http" />
+                <data android:scheme="https" />
                 <data
                     android:host="www.sendeta.com"
-                    android:pathPrefix="/accept"
-                    android:scheme="http" />
-
+                    android:pathPrefix="/accept" />
                 <data
                     android:host="www.sendeta.com"
-                    android:pathPrefix="/request"
-                    android:scheme="http" />
+                    android:pathPrefix="/request" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".view.Home"
             android:label="${applicationLabel}"
-            android:screenOrientation="portrait"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
 
@@ -82,7 +83,8 @@
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize"></activity>
+            android:windowSoftInputMode="adjustResize">
+        </activity>
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -185,7 +187,8 @@
             android:name=".service.FetchLocationIntentService"
             android:exported="false" />
 
-        <service android:name=".service.RegistrationIntentService"
+        <service
+            android:name=".service.RegistrationIntentService"
             android:exported="false" />
 
         <service
@@ -198,7 +201,7 @@
 
         <service
             android:name=".service.MetaGCMListenerService"
-            android:exported="false" >
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
