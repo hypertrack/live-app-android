@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
@@ -319,7 +320,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                         String hypertrackDriverID = (String) response.get("hypertrack_driver_id");
 
                         // Parse Response to fetch Task Data
-                        setTask(response);
+                        TaskManager.this.setTask(response);
 
                         // Set PublishableKey fetched for the selectedAccountId
                         HyperTrack.setPublishableApiKey(publishableKey, mContext);
@@ -652,6 +653,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             Date ETA = null;
             try {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                 ETA = simpleDateFormat.parse((String) taskData.get("eta"));
             } catch (Exception e) {
                 e.printStackTrace();

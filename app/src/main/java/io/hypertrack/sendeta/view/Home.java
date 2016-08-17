@@ -1315,8 +1315,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (taskDisplay != null && taskDisplay.getSubStatusDuration() != null) {
 
             Double timeInSeconds = Double.valueOf(taskDisplay.getSubStatusDuration());
-            StringBuilder builder = (new StringBuilder(this.getFormattedTimeString(timeInSeconds))).append(" ");
+            String formattedTime = this.getFormattedTimeString(timeInSeconds);
+            if (TextUtils.isEmpty(formattedTime))
+                return null;
 
+            StringBuilder builder = (new StringBuilder(formattedTime));
             if ("delayed".equalsIgnoreCase(taskDisplay.getSubStatus())) {
                 builder.append(this.getString(io.hypertrack.lib.consumer.R.string.task_sub_status_delayed_suffix_text));
             } else {
@@ -1331,11 +1334,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private String getFormattedTimeString(Double timeInSeconds) {
         if (this == null || this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
-            return "1 min";
+            return null;
 
         int hours = (int) (timeInSeconds / 3600);
         int remainder = (int) (timeInSeconds - (hours * 3600));
         int mins = remainder / 60;
+
+        if (hours <= 0 && mins <= 0)
+            return null;
 
         StringBuilder builder = new StringBuilder();
 
@@ -1346,14 +1352,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     .append(" ");
         }
 
-        if (mins > 1) {
+        if (mins > 0) {
             builder.append(mins)
+                    .append(" ")
+                    .append(this.getResources().getQuantityString(
+                            io.hypertrack.lib.consumer.R.plurals.minute_text, mins))
                     .append(" ");
-        } else {
-            builder.append("1 ");
         }
-
-        builder.append(this.getResources().getQuantityString(io.hypertrack.lib.consumer.R.plurals.minute_text, mins));
 
         return builder.toString();
     }
@@ -2066,7 +2071,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */
