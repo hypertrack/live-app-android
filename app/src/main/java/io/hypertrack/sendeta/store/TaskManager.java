@@ -219,6 +219,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void onTaskRefresh() {
+        SharedPreferenceManager.setTask(hyperTrackTask);
+
         if (this.taskRefreshedListener != null) {
             this.taskRefreshedListener.OnCallback();
         }
