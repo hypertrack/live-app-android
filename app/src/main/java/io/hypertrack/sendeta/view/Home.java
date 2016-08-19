@@ -152,7 +152,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private FrameLayout mAutocompletePlacesLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
-    private Button sendETAButton;
+    private Button sendETAButton, retryButton;
     private LinearLayout bottomButtonLayout;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
@@ -242,11 +242,17 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         getEtaForDestination(place.getLatLng(), new TaskETACallback() {
             @Override
             public void OnSuccess(TaskETAResponse etaResponse) {
+                // Hide Retry Button
+                showRetryButton(false, null);
+
                 onETASuccess(etaResponse, place);
             }
 
             @Override
             public void OnError() {
+                // Show Retry button to fetch eta again
+                showRetryButton(true, place);
+
                 if (destinationLocationMarker != null) {
                     destinationLocationMarker.remove();
                     destinationLocationMarker = null;
@@ -255,6 +261,27 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 showETAError();
             }
         });
+    }
+
+    private void showRetryButton(boolean showRetryButton, final MetaPlace place) {
+
+        if (showRetryButton) {
+            // Initialize RetryButton on getETAForDestination failure
+            bottomButtonLayout.setVisibility(View.VISIBLE);
+            retryButton.setVisibility(View.VISIBLE);
+            retryButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Fetch ETA for selected place
+                    onSelectPlace(place);
+                }
+            });
+        } else {
+            // Reset Retry button
+            bottomButtonLayout.setVisibility(View.GONE);
+            retryButton.setVisibility(View.GONE);
+            retryButton.setOnClickListener(null);
+        }
     }
 
     private void getEtaForDestination(LatLng destinationLocation, final TaskETACallback callback) {
@@ -372,6 +399,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     checkIfLocationIsEnabled();
 
             } else {
+                // Reset Retry button
+                retryButton.setVisibility(View.GONE);
+                retryButton.setOnClickListener(null);
+
                 // Reset Current State when user chooses to edit destination
                 TaskManager.getSharedManager(Home.this).clearState();
                 OnCompleteTask();
@@ -380,7 +411,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 destinationText.setGravity(Gravity.CENTER);
                 destinationText.setText("");
 
-                // Reset the Destionation Description View
+                // Reset the Destination Description View
                 destinationDescription.setVisibility(View.GONE);
                 destinationDescription.setText("");
 
@@ -516,6 +547,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize UI Views
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
+        retryButton = (Button) findViewById(R.id.retryButton);
 
         // Get Default User Location from his CountryCode
         // SKIP: if Location Permission is Granted and Location is Enabled
@@ -1228,43 +1260,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateMapView();
     }
 
-    private void checkForUpdatedDestinationLocation(HTTask task) {
-        // Check if updatedDestination Location is not null
-        HTPlace destinationLocation = task.getDestination();
-        if (destinationLocation == null || destinationLocation.getLocation() == null)
-            return;
-
-        // Check if updatedDestination Location Coordinates are valid
-        LatLng updatedDestinationLatLng = new LatLng(destinationLocation.getLocation().getLatitude(),
-                destinationLocation.getLocation().getLongitude());
-        if (updatedDestinationLatLng.latitude == 0.0 || updatedDestinationLatLng.longitude == 0.0)
-            return;
-
-        // Check if destinationMarker's location has been changed
-        if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
-            if (!destinationLocationMarker.getPosition().equals(updatedDestinationLatLng)) {
-
-                // TODO: 18/08/16 Check how to update changed MetaPlace Id
-                MetaPlace place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
-                TaskManager.getSharedManager(Home.this).setPlace(place);
-
-                // Set the Enter Destination Layout to Selected Place
-                destinationText.setGravity(Gravity.LEFT);
-                destinationText.setText(place.getName());
-
-                // Hide the favorites button (because this place doesnt have a valid PlaceId)
-                favoriteButton.setVisibility(View.GONE);
-
-                updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
-                updateMapView();
-            }
-            return;
-        }
-
-        // Add Destination Marker with fetched DestinationLatLng & ETA value
-        updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
-    }
-
     private void updateETAForOnGoingTask(HTTask task, MetaPlace place) {
         if (place == null) {
             return;
@@ -1400,6 +1395,43 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         return builder.toString();
+    }
+
+    private void checkForUpdatedDestinationLocation(HTTask task) {
+        // Check if updatedDestination Location is not null
+        HTPlace destinationLocation = task.getDestination();
+        if (destinationLocation == null || destinationLocation.getLocation() == null)
+            return;
+
+        // Check if updatedDestination Location Coordinates are valid
+        LatLng updatedDestinationLatLng = new LatLng(destinationLocation.getLocation().getLatitude(),
+                destinationLocation.getLocation().getLongitude());
+        if (updatedDestinationLatLng.latitude == 0.0 || updatedDestinationLatLng.longitude == 0.0)
+            return;
+
+        // Check if destinationMarker's location has been changed
+        if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
+            if (!destinationLocationMarker.getPosition().equals(updatedDestinationLatLng)) {
+
+                // TODO: 18/08/16 Check how to update changed MetaPlace Id
+                MetaPlace place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
+                TaskManager.getSharedManager(Home.this).setPlace(place);
+
+                // Set the Enter Destination Layout to Selected Place
+                destinationText.setGravity(Gravity.LEFT);
+                destinationText.setText(place.getName());
+
+                // Hide the favorites button (because this place doesnt have a valid PlaceId)
+                favoriteButton.setVisibility(View.GONE);
+
+                updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
+                updateMapView();
+            }
+            return;
+        }
+
+        // Add Destination Marker with fetched DestinationLatLng & ETA value
+        updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
     }
 
     /**

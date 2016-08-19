@@ -286,18 +286,37 @@
 
                 </android.support.v7.widget.CardView>
 
-                <Button
-                    android:id="@+id/sendETAButton"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/cta_button_size"
-                    android:layout_margin="@dimen/margin_high"
-                    android:layout_alignParentBottom="true"
-                    android:background="@color/colorAccent"
+                    android:layout_height="wrap_content"
                     android:foreground="?android:attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:padding="@dimen/padding_high"
-                    android:textColor="#ffffff"
-                    android:visibility="gone" />
+                    android:layout_alignParentBottom="true">
+
+                    <Button
+                        android:id="@+id/sendETAButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cta_button_size"
+                        android:gravity="center"
+                        android:padding="@dimen/padding_high"
+                        android:background="@color/colorAccent"
+                        android:layout_margin="@dimen/margin_high"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:textColor="#ffffff"
+                        android:visibility="gone" />
+
+                    <Button
+                        android:id="@+id/retryButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cta_button_size"
+                        android:gravity="center"
+                        android:padding="@dimen/padding_high"
+                        android:background="@color/colorAccent"
+                        android:layout_margin="@dimen/margin_high"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:textColor="#ffffff"
+                        android:text="retry"
+                        android:visibility="gone" />
+                </FrameLayout>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
