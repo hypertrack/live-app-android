@@ -1202,7 +1202,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         if (handlePushDestinationDeepLink) {
             if (destinationAddressGeocoded) {
-                updateDestinationLocationAddress();
+                updatePushedDestinationAddress();
             }
         }
 
@@ -1247,7 +1247,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 });
     }
 
-    private void updateDestinationLocationAddress() {
+    private void updatePushedDestinationAddress() {
         final MetaPlace destinationPlace = pushDestinationPlace;
 
         // Update the selected place with updated destinationLocationAddress
@@ -1348,7 +1348,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                 // Check if DestinationLocation has been updated
                 // NOTE: Call this method after updateETAForOnGoingTask()
-                checkForUpdatedDestinationLocation(task);
+                updateDestinationLocationIfApplicable(task);
             }
         });
         taskManager.setTaskCompletedListener(new TaskManagerListener() {
@@ -1499,7 +1499,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         return builder.toString();
     }
 
-    private void checkForUpdatedDestinationLocation(HTTask task) {
+    private void updateDestinationLocationIfApplicable(HTTask task) {
         // Check if updatedDestination Location is not null
         HTPlace destinationLocation = task.getDestination();
         if (destinationLocation == null || destinationLocation.getLocation() == null)
@@ -1519,9 +1519,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 MetaPlace place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
                 TaskManager.getSharedManager(Home.this).setPlace(place);
 
-                // Set the Enter Destination Layout to Selected Place
+                // Update Geofencing Request for updatedDestinationLocation
+                TaskManager.getSharedManager(Home.this).setupGeofencing();
+
+                // Set the DestinationText as updatedDestination's address
                 destinationText.setGravity(Gravity.LEFT);
                 destinationText.setText(place.getName());
+
+                // Hide destinationDescription layout
+                destinationDescription.setText("");
+                destinationDescription.setVisibility(View.GONE);
 
                 // Hide the favorites button (because this place doesnt have a valid PlaceId)
                 favoriteButton.setVisibility(View.GONE);
@@ -2096,7 +2103,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     pushDestinationPlace.setName(geocodedAddress);
 
                     if (handlePushDestinationDeepLink) {
-                        updateDestinationLocationAddress();
+                        updatePushedDestinationAddress();
                     }
 
                     destinationAddressGeocoded = true;
