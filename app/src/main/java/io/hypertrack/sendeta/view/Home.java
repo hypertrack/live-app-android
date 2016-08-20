@@ -118,11 +118,14 @@ import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
 import io.hypertrack.sendeta.util.KeyboardUtils;
+import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.util.SlideButton;
+import io.hypertrack.sendeta.util.SlideButtonListener;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -153,7 +156,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Button sendETAButton, retryButton;
-    private LinearLayout bottomButtonLayout;
+    private SlideButton endTripSlideButton;
+    private LinearLayout bottomButtonLayout, endTripSlideButtonLayout;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private RoundedImageView heroMarkerProfileImageView;
@@ -524,6 +528,21 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     };
 
+    private SlideButtonListener endTripSlideButtonListener = new SlideButtonListener() {
+        @Override
+        public void onSlideButton() {
+            //Check if Location Permission has been granted & Location has been enabled
+            if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    && isLocationEnabled()) {
+
+                // Complete the Task
+                completeTask();
+            } else {
+                checkForLocationPermission();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -562,6 +581,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         setupAutoCompleteView();
         setupShareButton();
         setupSendETAButton();
+        setupEndTripSlideButton();
         setupNavigateButton();
         setupFavoriteButton();
         setupInfoMessageView();
@@ -771,6 +791,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 }
             }
         });
+    }
+
+
+    private void setupEndTripSlideButton() {
+        endTripSlideButtonLayout = (LinearLayout) findViewById(R.id.endTripSlideButtonLayout);
+        endTripSlideButton = (SlideButton) findViewById(R.id.endTripSlideButton);
+        endTripSlideButton.setSlideButtonListener(endTripSlideButtonListener);
     }
 
     private void setupNavigateButton() {
@@ -1216,7 +1243,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to update State Variables & UI to reflect Task Started
      */
     private void onTaskStart() {
-        sendETAButton.setText(getString(R.string.action_end_trip));
+        sendETAButton.setVisibility(View.GONE);
+        endTripSlideButtonLayout.setVisibility(View.VISIBLE);
         membershipsSpinnerLayout.setVisibility(View.GONE);
 
         shareButton.setVisibility(View.VISIBLE);
@@ -1411,7 +1439,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if destinationMarker's location has been changed
         if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
-            if (!destinationLocationMarker.getPosition().equals(updatedDestinationLatLng)) {
+            if (!LocationUtils.areLocationsSame(destinationLocationMarker.getPosition(), updatedDestinationLatLng)) {
 
                 // TODO: 18/08/16 Check how to update changed MetaPlace Id
                 MetaPlace place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
@@ -1443,6 +1471,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         sendETAButton.setVisibility(View.GONE);
+        endTripSlideButtonLayout.setVisibility(View.GONE);
         membershipsSpinnerLayout.setVisibility(View.GONE);
         bottomButtonLayout.setVisibility(View.GONE);
 

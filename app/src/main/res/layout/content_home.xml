@@ -289,32 +289,55 @@
                 <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:layout_alignParentBottom="true">
+                    android:layout_alignParentBottom="true"
+                    android:foreground="?android:attr/selectableItemBackground">
 
                     <Button
                         android:id="@+id/sendETAButton"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cta_button_size"
+                        android:layout_margin="@dimen/margin_high"
+                        android:background="@color/colorAccent"
+                        android:foreground="?android:attr/selectableItemBackground"
                         android:gravity="center"
                         android:padding="@dimen/padding_high"
-                        android:background="@color/colorAccent"
-                        android:layout_margin="@dimen/margin_high"
-                        android:foreground="?android:attr/selectableItemBackground"
                         android:textColor="#ffffff"
                         android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/endTripSlideButtonLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/margin_high"
+                        android:background="@color/colorAccent"
+                        android:clickable="true"
+                        android:visibility="gone">
+
+                        <io.hypertrack.sendeta.util.SlideButton
+                            android:id="@+id/endTripSlideButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@null"
+                            android:clickable="false"
+                            android:max="100"
+                            android:progress="50"
+                            android:progressDrawable="@android:color/transparent"
+                            android:thumb="@drawable/ic_slide_to_end"
+                            android:thumbOffset="24dp"
+                            android:visibility="visible" />
+                    </LinearLayout>
 
                     <Button
                         android:id="@+id/retryButton"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cta_button_size"
+                        android:layout_margin="@dimen/margin_high"
+                        android:background="@color/colorAccent"
+                        android:foreground="?android:attr/selectableItemBackground"
                         android:gravity="center"
                         android:padding="@dimen/padding_high"
-                        android:background="@color/colorAccent"
-                        android:layout_margin="@dimen/margin_high"
-                        android:foreground="?android:attr/selectableItemBackground"
-                        android:textColor="#ffffff"
                         android:text="retry"
+                        android:textColor="#ffffff"
                         android:visibility="gone" />
                 </FrameLayout>
             </LinearLayout>

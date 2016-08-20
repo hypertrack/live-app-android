@@ -364,15 +364,19 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void completeTask(final TaskManagerCallback callback) {
+        if (this.getHyperTrackTask() == null) {
+            if (callback != null) {
+                callback.OnError();
+            }
+            return;
+        }
+
         String taskID = this.hyperTrackTask.getId();
         if (taskID == null) {
             if (callback != null) {
-                callback.OnSuccess();
+                callback.OnError();
             }
-
-            // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
-            HTLog.e(TAG, "Error occurred while completeTask: TaskID is NULL");
-            clearState();
+            return;
         }
 
         transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
@@ -614,6 +618,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public HTTask getHyperTrackTask() {
+        if (this.hyperTrackTask == null) {
+            this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);;
+        }
+
         return this.hyperTrackTask;
     }
 
@@ -660,7 +668,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 Crashlytics.logException(e);
             }
 
-            HTTask taskToSave = new HTTask(taskID, status, action, ETA, trackingURL, vehicleType, encodedPolyline);
+            HTTask taskToSave = new HTTask(taskID, status, action, ETA, trackingURL, vehicleType,
+                    encodedPolyline, null);
             taskToSave.setDriverID((String) taskData.get("hypertrack_driver_id"));
 
             SharedPreferenceManager.setTask(taskToSave);
