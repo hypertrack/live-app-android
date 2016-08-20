@@ -13,6 +13,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
@@ -24,6 +25,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -150,6 +152,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private SupportMapFragment mMapFragment;
     private AppBarLayout appBarLayout;
+    private TabLayout vehicleTypeTabLayout;
     private TextView destinationText, destinationDescription, mAutocompletePlacesView, infoMessageViewText;
     private LinearLayout enterDestinationLayout, infoMessageView;
     private FrameLayout mAutocompletePlacesLayout;
@@ -190,9 +193,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Bitmap userBitmap;
     private Call<ResponseBody> sendGCMToServerCall;
 
+    private HTDriverVehicleType selectedVehicleType = HTDriverVehicleType.CAR;
+
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
+
+            // Hide VehicleType TabLayout
+            vehicleTypeTabLayout.setVisibility(View.GONE);
 
             // Set pushDestination Location Address received from ReverseGeocoding
             if (selectPushDestinationPlace && destinationAddressGeocoded) {
@@ -233,6 +241,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         @Override
         public void OnError() {
+            // Hide VehicleType TabLayout
+            vehicleTypeTabLayout.setVisibility(View.VISIBLE);
+
             destinationDescription.setVisibility(View.GONE);
             destinationDescription.setText("");
         }
@@ -557,6 +568,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
 
+        // Setup VehicleType TabLayout
+        setupVehicleTypeTabLayout();
+
         // Setup Membership Spinner
         setupMembershipsSpinner();
 
@@ -608,6 +622,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             } else {
                 Toast.makeText(Home.this, R.string.notification_deeplink_active_task_error, Toast.LENGTH_SHORT).show();
             }
+        }
+
+        // Make the VehicleTabLayout visible if no active task
+        if (!shouldRestoreTask) {
+            vehicleTypeTabLayout.setVisibility(View.VISIBLE);
         }
     }
 
@@ -1011,6 +1030,61 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
+    private void setupVehicleTypeTabLayout() {
+        //Initializing the vehicleTypeTabLayout
+        vehicleTypeTabLayout = (TabLayout) findViewById(R.id.tabLayout);
+
+        //Adding the tabs using addTab() method
+        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_car));
+        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bus));
+        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bike));
+        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
+        vehicleTypeTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_selected_item);
+                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+
+                switch (tab.getPosition()) {
+                    case 1:
+                        selectedVehicleType = HTDriverVehicleType.VAN;
+                        break;
+                    case 2:
+                        selectedVehicleType = HTDriverVehicleType.BICYCLE;
+                        break;
+                    case 3:
+                        selectedVehicleType = HTDriverVehicleType.WALK;
+                        break;
+                    case 0:
+                    default:
+                        selectedVehicleType = HTDriverVehicleType.CAR;
+                        break;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
+                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+
+        for (int i = 0; i < vehicleTypeTabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = vehicleTypeTabLayout.getTabAt(i);
+            if (tab != null) {
+                tab.setCustomView(R.layout.vehicle_type_tab_layout);
+                if (tab.getPosition() != 0) {
+                    int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
+                    tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+                }
+            }
+        }
+    }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -1136,7 +1210,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Call startTask to start the task
         TaskManager.getSharedManager(this).startTask(pushDestinationTask, currentLocation,
-                this.user.getSelectedMembershipAccountId(), HTDriverVehicleType.CAR, new TaskManagerCallback() {
+                this.user.getSelectedMembershipAccountId(), selectedVehicleType, new TaskManagerCallback() {
                     @Override
                     public void OnSuccess() {
                         if (mProgressDialog != null) {
@@ -1469,6 +1543,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
+
+        // Reset VehicleType TabLayout
+        vehicleTypeTabLayout.setVisibility(View.VISIBLE);
 
         sendETAButton.setVisibility(View.GONE);
         endTripSlideButtonLayout.setVisibility(View.GONE);
@@ -2171,7 +2248,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p/>
+     * <p>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */

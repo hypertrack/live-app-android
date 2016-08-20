@@ -32,7 +32,15 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:elevation="8dp"
-                app:popupTheme="@style/AppTheme.PopupOverlay"></android.support.v7.widget.Toolbar>
+                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                app:tabGravity="fill"
+                app:tabMode="fixed"
+                android:visibility="gone"/>
 
             <!-- info message container-->
             <LinearLayout
