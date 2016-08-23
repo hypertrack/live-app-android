@@ -331,7 +331,7 @@
                             android:progress="50"
                             android:progressDrawable="@android:color/transparent"
                             android:thumb="@drawable/ic_slide_to_end"
-                            android:thumbOffset="24dp"
+                            android:thumbOffset="36dp"
                             android:visibility="visible" />
                     </LinearLayout>
 
