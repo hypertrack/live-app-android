@@ -121,6 +121,9 @@
     <!-- Favorite Places Strings-->
     <string name="favorite_place_delete_dialog_message">Do you want to delete this favorite address?</string>
 
+    <!-- Updated Destination Location Strings-->
+    <string name="updated_destination_location_message">You destination has been updated. Send your new ETA.</string>
+
     <!-- Business Profile Screen Strings -->
     <string name="business_profile_add_profile">Add profile</string>
     <string name="business_profile_invite_msg">wants to track your business trips using SendETA</string>

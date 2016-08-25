@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -29,6 +30,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -180,9 +182,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
             taskRestoreFinished = false, animateDelayForRestoredTask = false, locationFrequencyIncreased = true;
-
     private boolean selectPushDestinationPlace = false, handlePushDestinationDeepLink = false,
-            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false;
+            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false, isMapLoaded = false;
     private MetaPlace pushDestinationPlace;
     private int pushDestinationAccountId;
     private Task pushDestinationTask;
@@ -195,7 +196,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Bitmap userBitmap;
     private Call<ResponseBody> sendGCMToServerCall;
 
-    private HTDriverVehicleType selectedVehicleType = HTDriverVehicleType.CAR;
+    private HTDriverVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -249,7 +250,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
-        getEtaForDestination(place.getLatLng(), new TaskETACallback() {
+        getEtaForDestination(place.getLatLng(), selectedVehicleType, new TaskETACallback() {
             @Override
             public void OnSuccess(TaskETAResponse etaResponse) {
                 // Hide Retry Button
@@ -294,7 +295,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private void getEtaForDestination(LatLng destinationLocation, final TaskETACallback callback) {
+    private void getEtaForDestination(LatLng destinationLocation, HTDriverVehicleType vehicleType, final TaskETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.calculating_eta_message));
         mProgressDialog.setCancelable(false);
@@ -306,7 +307,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
-        TaskManager.getSharedManager(Home.this).getETA(currentLocationMarker.getPosition(), destinationLocation, new TaskETACallback() {
+        TaskManager.getSharedManager(Home.this).getETA(currentLocationMarker.getPosition(), destinationLocation, vehicleType.toString(), new TaskETACallback() {
             @Override
             public void OnSuccess(TaskETAResponse etaResponse) {
                 if (mProgressDialog != null && !Home.this.isFinishing())
@@ -1041,7 +1042,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         //Adding the tabs using addTab() method
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_car));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bus));
-        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bike));
+        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
         vehicleTypeTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -1052,6 +1053,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
+                if (tab == null || tab.getIcon() == null)
+                    return;
+
                 int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
                 tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
             }
@@ -1064,34 +1068,30 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         for (int i = 0; i < vehicleTypeTabLayout.getTabCount(); i++) {
             TabLayout.Tab tab = vehicleTypeTabLayout.getTabAt(i);
             if (tab != null) {
-                tab.setCustomView(R.layout.vehicle_type_tab_layout);
-                if (tab.getPosition() != 0) {
-                    int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
-                    tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+                if (selectedVehicleType.equals(getVehicleTypeForTabPosition(tab.getPosition()))) {
+                    tab.select();
+                    continue;
                 }
+
+                tab.setCustomView(R.layout.vehicle_type_tab_layout);
+
+                if (tab.getIcon() == null)
+                    return;
+
+                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
+                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
             }
         }
     }
 
     private void onVehicleTypeTabChanged(TabLayout.Tab tab) {
+        if (tab == null || tab.getIcon() == null)
+            return;
+
         int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_selected_item);
         tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
 
-        switch (tab.getPosition()) {
-            case 1:
-                selectedVehicleType = HTDriverVehicleType.VAN;
-                break;
-            case 2:
-                selectedVehicleType = HTDriverVehicleType.BICYCLE;
-                break;
-            case 3:
-                selectedVehicleType = HTDriverVehicleType.WALK;
-                break;
-            case 0:
-            default:
-                selectedVehicleType = HTDriverVehicleType.CAR;
-                break;
-        }
+        selectedVehicleType = getVehicleTypeForTabPosition(tab.getPosition());
 
         // Check if a place has been selected or
         MetaPlace place = TaskManager.getSharedManager(Home.this).getPlace();
@@ -1100,6 +1100,21 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Call getETAForDestination with selected vehicleType
         Home.this.onSelectPlace(place);
+    }
+
+    private HTDriverVehicleType getVehicleTypeForTabPosition(int tabPosition) {
+
+        switch (tabPosition) {
+            case 1:
+                return HTDriverVehicleType.VAN;
+            case 2:
+                return HTDriverVehicleType.MOTORCYCLE;
+            case 3:
+                return HTDriverVehicleType.WALK;
+            case 0:
+            default:
+                return HTDriverVehicleType.CAR;
+        }
     }
 
     /**
@@ -1156,6 +1171,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
+                isMapLoaded = true;
+
                 // Check if Task has to be Restored & Update Map for that task
                 if (shouldRestoreTask && restoreTaskMetaPlace != null) {
                     taskRestoreFinished = true;
@@ -1338,6 +1355,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         enterDestinationLayout.setOnClickListener(null);
         favoriteButton.setVisibility(View.VISIBLE);
         updateFavoritesButton();
+
+        // Update SelectedVehicleType in persistentStorage
+        SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
         taskManager.setTaskRefreshedListener(new TaskManagerListener() {
@@ -1547,6 +1567,27 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                 updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
                 updateMapView();
+
+                // Generate popup to notify user about the updated destination
+                AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+                builder.setMessage(R.string.updated_destination_location_message)
+                        .setPositiveButton(R.string.action_send_eta, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int i) {
+                                dialog.dismiss();
+                                // Open Share Sheet
+                                share();
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setCancelable(true)
+                        .create()
+                        .show();
             }
             return;
         }
@@ -1561,6 +1602,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void OnCompleteTask() {
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
+        }
+
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.remove();
+            destinationLocationMarker = null;
         }
 
         sendETAButton.setVisibility(View.GONE);
@@ -1581,11 +1627,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Reset the Destionation Description View
         destinationDescription.setVisibility(View.GONE);
         destinationDescription.setText("");
-
-        if (destinationLocationMarker != null) {
-            destinationLocationMarker.remove();
-            destinationLocationMarker = null;
-        }
 
         enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
         updateMapPadding(false);
@@ -1893,7 +1934,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateMapView() {
-        if (mMap == null) {
+        if (mMap == null || !isMapLoaded) {
             return;
         }
 
@@ -2264,7 +2305,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p>
+     * <p/>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */

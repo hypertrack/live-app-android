@@ -51,7 +51,7 @@ public interface SendETAService {
     Call<List<TripETAResponse>> getETA(@Query("origin") String origin, @Query("destination") String destination);
 
     @GET("/api/v1/eta/")
-    Call<List<TaskETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination);
+    Call<List<TaskETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
 
     @POST("/api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);

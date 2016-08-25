@@ -253,13 +253,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         return (this.hyperTrackTask != null);
     }
 
-    public void getETA(LatLng origin, LatLng destination, final TaskETACallback callback) {
+    public void getETA(LatLng origin, LatLng destination, String vehicleType, final TaskETACallback callback) {
         String originQueryParam = origin.latitude + "," + origin.longitude;
         String destinationQueryParam = destination.latitude + "," + destination.longitude;
 
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<List<TaskETAResponse>> call = sendETAService.getTaskETA(originQueryParam, destinationQueryParam);
+        Call<List<TaskETAResponse>> call = sendETAService.getTaskETA(originQueryParam, destinationQueryParam, vehicleType);
         call.enqueue(new Callback<List<TaskETAResponse>>() {
             @Override
             public void onResponse(Call<List<TaskETAResponse>> call, Response<List<TaskETAResponse>> response) {

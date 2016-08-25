@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.util;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.text.TextUtils;
 
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
@@ -11,6 +12,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 
+import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -28,6 +30,7 @@ public class SharedPreferenceManager {
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
+    private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
     private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
@@ -59,7 +62,7 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<MetaPlace>(){}.getType();
+        Type type = new TypeToken<MetaPlace>() {}.getType();
 
         return gson.fromJson(placeJson, type);
     }
@@ -98,7 +101,7 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<Trip>(){}.getType();
+        Type type = new TypeToken<Trip>() {}.getType();
 
         return gson.fromJson(tripJson, type);
     }
@@ -129,7 +132,7 @@ public class SharedPreferenceManager {
         gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
         gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
         Gson gson = gsonBuilder.create();
-        Type type = new TypeToken<HTTask>(){}.getType();
+        Type type = new TypeToken<HTTask>() {}.getType();
 
         return gson.fromJson(taskJson, type);
     }
@@ -154,12 +157,12 @@ public class SharedPreferenceManager {
     public static OnboardingUser getOnboardingUser() {
         String userJSON = getSharedPreferences().getString(ONBOARDED_USER, null);
 
-        if(userJSON == null) {
+        if (userJSON == null) {
             return null;
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<OnboardingUser>(){}.getType();
+        Type type = new TypeToken<OnboardingUser>() {}.getType();
 
         return gson.fromJson(userJSON, type);
     }
@@ -181,12 +184,12 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<Location>(){}.getType();
+        Type type = new TypeToken<Location>() {}.getType();
 
         return gson.fromJson(lastKnownLocationJSON, type);
     }
 
-    public static void setLastKnownLocation (Location lastKnownLocation) {
+    public static void setLastKnownLocation(Location lastKnownLocation) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
@@ -203,12 +206,12 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<GeofencingRequest>(){}.getType();
+        Type type = new TypeToken<GeofencingRequest>() {}.getType();
 
         return gson.fromJson(geofencingRequestJSON, type);
     }
 
-    public static void setGeofencingRequest (GeofencingRequest request) {
+    public static void setGeofencingRequest(GeofencingRequest request) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
@@ -221,6 +224,31 @@ public class SharedPreferenceManager {
     public static void removeGeofencingRequest() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(GEOFENCING_REQUEST);
+        editor.apply();
+    }
+
+    public static HTDriverVehicleType getLastSelectedVehicleType(Context context) {
+        String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
+        if (TextUtils.isEmpty(vehicleTypeString)) {
+            return HTDriverVehicleType.CAR;
+        }
+
+        if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.CAR.toString())) {
+            return HTDriverVehicleType.CAR;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.MOTORCYCLE.toString())) {
+            return HTDriverVehicleType.MOTORCYCLE;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.WALK.toString())) {
+            return HTDriverVehicleType.WALK;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.VAN.toString())) {
+            return HTDriverVehicleType.VAN;
+        }
+
+        return HTDriverVehicleType.CAR;
+    }
+
+    public static void setLastSelectedVehicleType(HTDriverVehicleType vehicleType) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
         editor.apply();
     }
 }
