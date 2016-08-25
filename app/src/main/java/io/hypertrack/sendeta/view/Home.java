@@ -999,6 +999,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     public void onEnterDestinationBackClick(View view) {
+        // Hide VehicleType TabLayout onStartTask success
+        AnimationUtils.collapse(vehicleTypeTabLayout);
+
         enterDestinationLayoutClicked = false;
 
         // Show the AppBar
