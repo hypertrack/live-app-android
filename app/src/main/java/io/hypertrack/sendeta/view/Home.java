@@ -126,10 +126,11 @@ import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import io.hypertrack.sendeta.util.SlideButton;
-import io.hypertrack.sendeta.util.SlideButtonListener;
+import io.hypertrack.sendeta.util.SwipeButton;
+import io.hypertrack.sendeta.util.SwipeButtonCustomItems;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 import okhttp3.ResponseBody;
+import pl.tajchert.sample.DotsTextView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -159,8 +160,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Button sendETAButton, retryButton;
-    private SlideButton endTripSlideButton;
-    private LinearLayout bottomButtonLayout, endTripSlideButtonLayout;
+    private SwipeButton endTripSwipeButton;
+    private LinearLayout endTripLoaderAnimationLayout, bottomButtonLayout;
+    private DotsTextView endTripLoaderAnimationDots;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private RoundedImageView heroMarkerProfileImageView;
@@ -294,7 +296,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void getEtaForDestination(LatLng destinationLocation, final TaskETACallback callback) {
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.getting_eta_message));
+        mProgressDialog.setMessage(getString(R.string.calculating_eta_message));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
@@ -527,21 +529,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     };
 
-    private SlideButtonListener endTripSlideButtonListener = new SlideButtonListener() {
-        @Override
-        public void onSlideButton() {
-            //Check if Location Permission has been granted & Location has been enabled
-            if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    && isLocationEnabled()) {
-
-                // Complete the Task
-                completeTask();
-            } else {
-                checkForLocationPermission();
-            }
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -583,7 +570,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         setupAutoCompleteView();
         setupShareButton();
         setupSendETAButton();
-        setupEndTripSlideButton();
+        setupEndTripSwipeButton();
         setupNavigateButton();
         setupFavoriteButton();
         setupInfoMessageView();
@@ -797,10 +784,43 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
 
-    private void setupEndTripSlideButton() {
-        endTripSlideButtonLayout = (LinearLayout) findViewById(R.id.endTripSlideButtonLayout);
-        endTripSlideButton = (SlideButton) findViewById(R.id.endTripSlideButton);
-        endTripSlideButton.setSlideButtonListener(endTripSlideButtonListener);
+    private void setupEndTripSwipeButton() {
+        endTripSwipeButton = (SwipeButton) findViewById(R.id.endTripSwipeButton);
+        endTripLoaderAnimationLayout = (LinearLayout) findViewById(R.id.endTripLoaderAnimationLayout);
+        endTripLoaderAnimationDots = (DotsTextView) findViewById(R.id.endTripLoaderAnimationDots);
+
+        SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
+            @Override
+            public void onSwipeConfirm() {
+
+                showEndingTripAnimation(true);
+
+                //Check if Location Permission has been granted & Location has been enabled
+                if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                        && isLocationEnabled()) {
+
+                    // Complete the Task
+                    completeTask();
+                } else {
+                    checkForLocationPermission();
+                }
+            }
+        };
+
+        swipeButtonSettings.setButtonPressText(getString(R.string.action_slide_to_end_trip))
+                .setActionConfirmText(getString(R.string.action_slide_to_end_trip));
+
+        if (endTripSwipeButton != null) {
+            endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);
+        }
+    }
+
+    private void showEndingTripAnimation(boolean show) {
+        if (show) {
+            endTripLoaderAnimationLayout.setVisibility(View.VISIBLE);
+        } else {
+            endTripLoaderAnimationLayout.setVisibility(View.GONE);
+        }
     }
 
     private void setupNavigateButton() {
@@ -1270,34 +1290,25 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to Initiate COMPLETE TASK
      */
     private void completeTask() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage(getString(R.string.completing_task_message));
-        mProgressDialog.show();
-
         TaskManager.getSharedManager(this).completeTask(new TaskManagerCallback() {
             @Override
             public void OnSuccess() {
-                if (mProgressDialog != null) {
-                    mProgressDialog.dismiss();
-                }
-
                 OnCompleteTask();
 
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
                 HTLog.i(TAG, "Complete Task (CTA) happened successfully.");
+
+                showEndingTripAnimation(false);
             }
 
             @Override
             public void OnError() {
-                if (mProgressDialog != null) {
-                    mProgressDialog.dismiss();
-                }
-
                 showCompleteTaskError();
 
                 AnalyticsStore.getLogger().tappedEndTrip(false, ErrorMessages.END_TRIP_FAILED);
                 HTLog.e(TAG, "Complete Task (CTA) failed.");
+
+                showEndingTripAnimation(false);
             }
         });
     }
@@ -1318,7 +1329,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         AnimationUtils.collapse(vehicleTypeTabLayout);
 
         sendETAButton.setVisibility(View.GONE);
-        endTripSlideButtonLayout.setVisibility(View.VISIBLE);
+        endTripSwipeButton.setVisibility(View.VISIBLE);
+        endTripSwipeButton.setText(R.string.action_slide_to_end_trip);
         membershipsSpinnerLayout.setVisibility(View.GONE);
 
         shareButton.setVisibility(View.VISIBLE);
@@ -1552,7 +1564,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         sendETAButton.setVisibility(View.GONE);
-        endTripSlideButtonLayout.setVisibility(View.GONE);
+        endTripSwipeButton.setVisibility(View.GONE);
         membershipsSpinnerLayout.setVisibility(View.GONE);
         bottomButtonLayout.setVisibility(View.GONE);
 

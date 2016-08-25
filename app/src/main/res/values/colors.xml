@@ -2,13 +2,14 @@
 <resources>
     <color name="colorPrimary">@color/app_primary_light</color>
     <color name="colorPrimaryDark">@color/app_primary</color>
-    <color name="colorAccent">#008CEE</color>
+    <color name="colorAccent">#FF008CEE</color>
 
     <color name="app_primary">#909090</color>
     <color name="app_primary_light">#F4F4F4</color>
     <color name="app_primary_dark">#606060</color>
 
     <color name="appBackground">#F4F4F4</color>
+    <color name="app_background_gradient">#55F4F4F4</color>
 
     <!-- Default Text Colors -->
     <color name="text_base">#6a6a6a</color>
@@ -32,4 +33,6 @@
 
     <color name="tab_layout_selected_item">@color/colorAccent</color>
     <color name="tab_layout_unselected_item">#66008CEE</color>
+
+    <color name="slide_to_end_gradient">#FF58B8FC</color>
 </resources>
