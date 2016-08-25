@@ -685,7 +685,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     private void registerForDriverNotLiveBroadcast() {
         IntentFilter filter = new IntentFilter();
-        filter.addAction(TransmitterConstants.HT_ON_DRIVER_NOT_LIVE_INTENT);
+        filter.addAction(TransmitterConstants.HT_ON_DRIVER_NOT_ACTIVE_INTENT);
 
         mTaskCompletedReceiver = new BroadcastReceiver() {
             @Override
