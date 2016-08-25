@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:dots="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,7 +33,15 @@
                 android:layout_height="?attr/actionBarSize"
                 android:background="?attr/colorPrimary"
                 app:elevation="8dp"
-                app:popupTheme="@style/AppTheme.PopupOverlay"></android.support.v7.widget.Toolbar>
+                app:popupTheme="@style/AppTheme.PopupOverlay" />
+
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:visibility="gone"
+                app:tabGravity="fill"
+                app:tabMode="fixed" />
 
             <!-- info message container-->
             <LinearLayout
@@ -286,19 +295,96 @@
 
                 </android.support.v7.widget.CardView>
 
-                <Button
-                    android:id="@+id/sendETAButton"
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/cta_button_size"
-                    android:layout_margin="@dimen/margin_high"
+                    android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:background="@color/colorAccent"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:padding="@dimen/padding_high"
-                    android:textColor="#ffffff"
-                    android:visibility="gone" />
+                    android:foreground="?android:attr/selectableItemBackground">
+
+                    <Button
+                        android:id="@+id/sendETAButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cta_button_size"
+                        android:layout_margin="@dimen/margin_high"
+                        android:background="@color/colorAccent"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:padding="@dimen/padding_high"
+                        android:textColor="@color/text_dark_bg_base"
+                        android:visibility="gone" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <io.hypertrack.sendeta.util.SwipeButton
+                            android:id="@+id/endTripSwipeButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/cta_button_size"
+                            android:layout_margin="@dimen/margin_high"
+                            android:background="@color/colorAccent"
+                            android:clickable="true"
+                            android:elevation="@dimen/elevation_base"
+                            android:gravity="center"
+                            android:text="@string/action_slide_to_end_trip"
+                            android:textColor="@color/text_dark_bg_base"
+                            android:textSize="@dimen/text_base"
+                            android:visibility="gone" />
+                    </FrameLayout>
+
+                    <Button
+                        android:id="@+id/retryButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/cta_button_size"
+                        android:layout_margin="@dimen/margin_high"
+                        android:background="@color/colorAccent"
+                        android:foreground="?android:attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:padding="@dimen/padding_high"
+                        android:text="retry"
+                        android:textColor="#ffffff"
+                        android:visibility="gone" />
+                </FrameLayout>
             </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/endTripLoaderAnimationLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:clickable="true"
+        android:background="@color/app_background_gradient"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/cta_button_size"
+            android:layout_margin="@dimen/margin_high"
+            android:background="@color/slide_to_end_gradient"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/endTripLoaderAnimationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/action_ending_trip"
+                android:textColor="@color/text_dark_bg_base"
+                android:textSize="@dimen/text_base" />
+
+            <pl.tajchert.sample.DotsTextView
+                android:id="@+id/endTripLoaderAnimationDots"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="@dimen/padding_medium"
+                android:paddingLeft="@dimen/padding_low"
+                android:textColor="@color/text_dark_bg_base"
+                android:textSize="@dimen/text_extra_large"
+                dots:autoplay="true"
+                dots:period="1000" />
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>
