@@ -46,11 +46,9 @@ android {
         def versionMajor = 1
         def versionMinor = 1
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
-//        def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
         versionProps['VERSION_PATCH'] = versionPatch.toString()
-//        versionProps['VERSION_BUILD'] = versionBuild.toString()
         versionProps['VERSION_NUMBER'] = versionNumber.toString()
         versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
         versionProps.store(versionPropsFile.newWriter(), null)
@@ -114,16 +112,16 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.3.2'
-    debugCompile('io.hypertrack:transmitter:1.2.8:debug@aar') {
+    debugCompile('io.hypertrack:transmitter:1.2.9:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:1.2.8:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:1.2.9:release@aar') {
         transitive = true;
     }
-    debugCompile('io.hypertrack:consumer:1.2.8:debug@aar') {
+    debugCompile('io.hypertrack:consumer:1.2.9:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:consumer:1.2.8:release@aar') {
+    releaseCompile('io.hypertrack:consumer:1.2.9:release@aar') {
         transitive = true;
     }
     //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'

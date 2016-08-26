@@ -12,10 +12,13 @@ import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.gcm.GcmListenerService;
 
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.view.BusinessProfile;
 import io.hypertrack.sendeta.view.Home;
@@ -33,11 +36,13 @@ public class MetaGCMListenerService extends GcmListenerService {
     public static final String NOTIFICATION_TYPE_DEFAULT = "default";
     public static final String NOTIFICATION_TYPE_TASK_CREATED = "task.created";
     public static final String NOTIFICATION_TYPE_ACCEPT_INVITE = "accept";
+    public static final String NOTIFICATION_TYPE_DESTINATION_UPDATED = "task.destination_updated";
 
     // Notification Ids for NOTIFICATION_TYPE
     public static final int NOTIFICATION_TYPE_DEFAULT_ID = 1;
     public static final int NOTIFICATION_TYPE_TASK_CREATED_ID = 2;
     public static final int NOTIFICATION_TYPE_ACCEPT_INVITE_ID = 3;
+    public static final int NOTIFICATION_TYPE_DESTINATION_UPDATED_ID = 4;
 
     public static final String NOTIFICATION_KEY_MESSAGE = "body";
     public static final String NOTIFICATION_KEY_TITLE = "message";
@@ -45,6 +50,9 @@ public class MetaGCMListenerService extends GcmListenerService {
     // Notification keys for NOTIFICATION_TYPE_TASK_CREATED
     public static final String NOTIFICATION_KEY_ACCOUNT_ID = "account_id";
     public static final String NOTIFICATION_KEY_TASK = "task";
+
+    public static final String NOTIFICATION_KEY_META_PLACE_ID = "place_id";
+    public static final String NOTIFICATION_KEY_UPDATED_DESTINATION = "updated_location";
 
     /**
      * Called when message is received.
@@ -72,6 +80,8 @@ public class MetaGCMListenerService extends GcmListenerService {
                 notificationId = NOTIFICATION_TYPE_ACCEPT_INVITE_ID;
             } else if (NOTIFICATION_TYPE_TASK_CREATED.equals(notificationType)) {
                 notificationId = NOTIFICATION_TYPE_TASK_CREATED_ID;
+            } else if (NOTIFICATION_TYPE_DESTINATION_UPDATED.equals(notificationType)) {
+                notificationId = NOTIFICATION_TYPE_DESTINATION_UPDATED_ID;
             }
         }
 
@@ -91,6 +101,13 @@ public class MetaGCMListenerService extends GcmListenerService {
         if(NOTIFICATION_TYPE_ACCEPT_INVITE.equalsIgnoreCase(
                 data.getString(KEY_NOTIFICATION_TYPE)))
             return NOTIFICATION_TYPE_ACCEPT_INVITE;
+
+        if (NOTIFICATION_TYPE_DESTINATION_UPDATED.equalsIgnoreCase(
+                data.getString(KEY_NOTIFICATION_TYPE))) {
+
+            updateDestinationLocation(data);
+            return NOTIFICATION_TYPE_DESTINATION_UPDATED;
+        }
 
         return NOTIFICATION_TYPE_DEFAULT;
     }
@@ -175,5 +192,24 @@ public class MetaGCMListenerService extends GcmListenerService {
         notificationManager.notify(mNotificationId /* ID of notification */, builder.build());
 
         HTLog.i(TAG, "Notification Generated for id: " + notificationId);
+    }
+
+    private void updateDestinationLocation(Bundle data) {
+        try {
+            MetaPlace place = TaskManager.getSharedManager(getApplicationContext()).getPlace();
+            if (place != null && data != null) {
+
+                Integer metaPlaceId = Integer.valueOf(data.getString(NOTIFICATION_KEY_META_PLACE_ID));
+                String destination = data.getString(NOTIFICATION_KEY_UPDATED_DESTINATION);
+
+//            place.setLatLng();
+                // Update MetaPlace in RealmDB
+//            UserStore.sharedStore.editPlace(place);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 }

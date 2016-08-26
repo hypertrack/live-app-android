@@ -1131,8 +1131,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
-        updateMapPadding(false);
-
         // Check if Task has to be Restored & Update Map for that task
         if (shouldRestoreTask && restoreTaskMetaPlace != null) {
             if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() == null) {
@@ -1169,12 +1167,19 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
         }
 
-        updateMapView();
-
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && !locationPermissionChecked) {
             locationPermissionChecked = true;
             checkForLocationPermission();
         }
+
+        updateMapPadding(false);
+
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                updateMapView();
+            }
+        });
     }
 
     private void checkForLocationPermission() {
@@ -1352,6 +1357,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         taskManager.setTaskRefreshedListener(new TaskManagerListener() {
             @Override
             public void OnCallback() {
+                if (Home.this.isFinishing())
+                    return;
+
                 // Get TaskManager Instance
                 TaskManager taskManager = TaskManager.getSharedManager(Home.this);
                 if (taskManager == null)
