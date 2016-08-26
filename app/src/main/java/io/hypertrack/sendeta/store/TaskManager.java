@@ -155,7 +155,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
             // Added a delay to initiate RestoreTaskStart Call (to account for delay in onMapLoadedCallback)
             if (this.place != null) {
-                onTaskStart(4000);
+                onTaskStart(0);
                 return true;
             } else {
                 // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
@@ -445,6 +445,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     public void startRefreshingTask(final long delay) {
         if (handler == null) {
             handler = new Handler();
+        } else {
+            if (refreshTask != null)
+                handler.removeCallbacksAndMessages(refreshTask);
         }
 
         handler.postDelayed(refreshTask, delay);

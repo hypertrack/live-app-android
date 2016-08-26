@@ -178,9 +178,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
-            taskRestoreFinished = false, animateDelayForRestoredTask = false, locationFrequencyIncreased = true;
-    private boolean selectPushDestinationPlace = false, handlePushDestinationDeepLink = false,
-            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false, isMapLoaded = false;
+            locationFrequencyIncreased = true, selectPushDestinationPlace = false, handlePushDestinationDeepLink = false,
+            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false;
     private MetaPlace pushDestinationPlace;
     private int pushDestinationAccountId;
     private Task pushDestinationTask;
@@ -1134,6 +1133,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         updateMapPadding(false);
 
+        // Check if Task has to be Restored & Update Map for that task
+        if (shouldRestoreTask && restoreTaskMetaPlace != null) {
+            if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() == null) {
+                return;
+            }
+
+            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, restoreTaskMetaPlace.getLatLng());
+            onStartTask();
+        }
+
         // Set Default View for map according to User's LastKnownLocation
         Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
         if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
@@ -1153,8 +1162,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 currentLocationMarker.setPosition(latLng);
             }
 
-            updateMapView();
-
         } else {
             // Else Set Default View for map according to either User's Default Location
             // (If Country Info was available) or (0.0, 0.0)
@@ -1162,29 +1169,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
         }
 
+        updateMapView();
+
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && !locationPermissionChecked) {
             locationPermissionChecked = true;
             checkForLocationPermission();
         }
-
-        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                isMapLoaded = true;
-
-                // Check if Task has to be Restored & Update Map for that task
-                if (shouldRestoreTask && restoreTaskMetaPlace != null) {
-                    taskRestoreFinished = true;
-
-                    if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() == null) {
-                        return;
-                    }
-
-                    updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, restoreTaskMetaPlace.getLatLng());
-                    onStartTask();
-                }
-            }
-        });
     }
 
     private void checkForLocationPermission() {
@@ -1945,7 +1935,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateMapView() {
-        if (mMap == null || !isMapLoaded) {
+        if (mMap == null) {
             return;
         }
 
@@ -1967,19 +1957,19 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         LatLngBounds bounds = builder.build();
 
-        CameraUpdate cameraUpdate;
-        if (destinationLocationMarker != null && currentLocationMarker != null) {
-            cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0);
-        } else {
-            LatLng latLng = currentLocationMarker != null ? currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
-            cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
-        }
+        try {
+            CameraUpdate cameraUpdate;
+            if (destinationLocationMarker != null && currentLocationMarker != null) {
+                cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 0);
+            } else {
+                LatLng latLng = currentLocationMarker != null ? currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
+                cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
+            }
 
-        if (taskRestoreFinished && !animateDelayForRestoredTask) {
-            mMap.animateCamera(cameraUpdate, 2000, null);
-            animateDelayForRestoredTask = true;
-        } else {
             mMap.animateCamera(cameraUpdate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
         }
     }
 
@@ -2335,7 +2325,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     /**
      * Persist registration to third-party servers.
-     * <p/>
+     * <p>
      * Modify this method to associate the user's GCM registration token with any server-side account
      * maintained by your application.
      */
