@@ -302,7 +302,7 @@ public class UserStore {
         });
     }
 
-    private void editPlace(final MetaPlace place) {
+    public void editPlace(final MetaPlace place) {
         if (this.user == null) {
             return;
         }

@@ -132,7 +132,6 @@ import io.hypertrack.sendeta.util.SwipeButton;
 import io.hypertrack.sendeta.util.SwipeButtonCustomItems;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 import okhttp3.ResponseBody;
-import pl.tajchert.sample.DotsTextView;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -143,7 +142,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private static final String TAG = "Home";
     private static final long LOCATION_UPDATE_INTERVAL_TIME = 5000;
     private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
-    private static final long TIMEOUT_LOCATION_LOADER = 15000;
 
     private User user;
     private GoogleMap mMap;
@@ -164,7 +162,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
     private LinearLayout endTripLoaderAnimationLayout, bottomButtonLayout;
-    private DotsTextView endTripLoaderAnimationDots;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private RoundedImageView heroMarkerProfileImageView;
@@ -788,7 +785,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void setupEndTripSwipeButton() {
         endTripSwipeButton = (SwipeButton) findViewById(R.id.endTripSwipeButton);
         endTripLoaderAnimationLayout = (LinearLayout) findViewById(R.id.endTripLoaderAnimationLayout);
-        endTripLoaderAnimationDots = (DotsTextView) findViewById(R.id.endTripLoaderAnimationDots);
 
         SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
             @Override
@@ -1546,27 +1542,40 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (updatedDestinationLatLng.latitude == 0.0 || updatedDestinationLatLng.longitude == 0.0)
             return;
 
+
         // Check if destinationMarker's location has been changed
         if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
             if (!LocationUtils.areLocationsSame(destinationLocationMarker.getPosition(), updatedDestinationLatLng)) {
 
-                // TODO: 18/08/16 Check how to update changed MetaPlace Id
-                MetaPlace place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
+                MetaPlace place;
+                // Check if the DestinationLocationID has changed or only LatLng has changed
+                HTPlace lastUpdatedDestination = TaskManager.getSharedManager(Home.this).getLastUpdatedDestination();
+                if (lastUpdatedDestination != null && !TextUtils.isEmpty(lastUpdatedDestination.getId())
+                        && lastUpdatedDestination.getId().equalsIgnoreCase(destinationLocation.getId())) {
+
+                    place = TaskManager.getSharedManager(Home.this).getPlace();
+                    place.setLatLng(updatedDestinationLatLng);
+
+                    // Update MetaPlace in RealmDB
+                    UserStore.sharedStore.editPlace(place);
+                } else {
+
+                    place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
+
+                    // Set the DestinationText as updatedDestination's address
+                    destinationText.setGravity(Gravity.LEFT);
+                    destinationText.setText(place.getName());
+
+                    // Hide destinationDescription layout
+                    destinationDescription.setText("");
+                    destinationDescription.setVisibility(View.GONE);
+                }
+
                 TaskManager.getSharedManager(Home.this).setPlace(place);
+                Home.this.updateFavoritesButton();
 
                 // Update Geofencing Request for updatedDestinationLocation
                 TaskManager.getSharedManager(Home.this).setupGeofencing();
-
-                // Set the DestinationText as updatedDestination's address
-                destinationText.setGravity(Gravity.LEFT);
-                destinationText.setText(place.getName());
-
-                // Hide destinationDescription layout
-                destinationDescription.setText("");
-                destinationDescription.setVisibility(View.GONE);
-
-                // Hide the favorites button (because this place doesnt have a valid PlaceId)
-                favoriteButton.setVisibility(View.GONE);
 
                 updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
                 updateMapView();
@@ -1592,11 +1601,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         .create()
                         .show();
             }
-            return;
         }
 
-        // Add Destination Marker with fetched DestinationLatLng & ETA value
-        updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
+        // Update DestinationLocation
+        TaskManager.getSharedManager(Home.this).setLastUpdatedDestination(destinationLocation);
     }
 
     /**

@@ -33,6 +33,7 @@ import java.util.TimeZone;
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.model.HTStartDriverStatusCallback;
@@ -79,6 +80,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     private int selectedAccountId;
     private HTTask hyperTrackTask;
+    private HTPlace lastUpdatedDestination = null;
     private MetaPlace place;
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
 
@@ -321,6 +323,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
                         // Parse Response to fetch Task Data
                         TaskManager.this.setTask(response);
+
+                        // Set lastUpdatedDestination
+                        HTPlace destination = new HTPlace();
+                        destination.setId((String) response.get("destination_id"));
+                        TaskManager.this.setLastUpdatedDestination(destination);
 
                         // Set PublishableKey fetched for the selectedAccountId
                         HyperTrack.setPublishableApiKey(publishableKey, mContext);
@@ -623,6 +630,14 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         return this.hyperTrackTask;
+    }
+
+    public HTPlace getLastUpdatedDestination() {
+        return lastUpdatedDestination;
+    }
+
+    public void setLastUpdatedDestination(HTPlace lastUpdatedDestination) {
+        this.lastUpdatedDestination = lastUpdatedDestination;
     }
 
     @Override
