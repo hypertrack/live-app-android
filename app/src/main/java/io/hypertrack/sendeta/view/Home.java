@@ -544,9 +544,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(getResources().getString(R.string.app_name));
 
-        // Setup VehicleType TabLayout
-        setupVehicleTypeTabLayout();
-
         // Setup Membership Spinner
         setupMembershipsSpinner();
 
@@ -576,6 +573,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         setupFavoriteButton();
         setupInfoMessageView();
         initCustomMarkerView();
+
+        // Setup VehicleType TabLayout
+        setupVehicleTypeTabLayout();
 
         // Check & Prompt User if Internet is Not Connected
         if (!NetworkUtils.isConnectedToInternet(this)) {
