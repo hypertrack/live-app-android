@@ -164,12 +164,16 @@ public class UserStore {
         });
     }
 
-    public void addPlace(MetaPlace place, final SuccessErrorCallback callback) {
+    public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
-        placeManager.addPlace(place, new PlaceManagerCallback() {
+        placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
                 addPlace(place);
+
+                // Update PlaceID fetched from server
+                placeToBeAdded.setId(place.getId());
+
                 if (callback != null) {
                     callback.OnSuccess();
                 }

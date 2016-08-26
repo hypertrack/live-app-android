@@ -240,16 +240,23 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         // Clear Focus & Cursor from AddPlaceName View
         addPlaceNameView.clearFocus();
 
-        if (metaPlace.getName() != null && !metaPlace.getName().isEmpty()) {
-            addPlaceNameView.setText(metaPlace.getName());
-            placeNameClearIcon.setVisibility(View.VISIBLE);
-        }
-
         if (metaPlace.getAddress() != null && !metaPlace.getAddress().isEmpty()) {
             addPlaceAddressView.setText(metaPlace.getAddress());
             placeAddressClearIcon.setVisibility(View.VISIBLE);
+
+            if (metaPlace.getName() != null && !metaPlace.getName().isEmpty()) {
+                addPlaceNameView.setText(metaPlace.getName());
+                placeNameClearIcon.setVisibility(View.VISIBLE);
+            }
         } else {
-            reverseGeocode(metaPlace.getLatLng());
+
+            // If only Place Name is available, Update Name in Address field & Don't Reverse Geocode
+            if (metaPlace.getName() != null && !metaPlace.getName().isEmpty()) {
+                addPlaceAddressView.setText(metaPlace.getName());
+                placeAddressClearIcon.setVisibility(View.VISIBLE);
+            } else {
+                reverseGeocode(metaPlace.getLatLng());
+            }
         }
 
         addPlaceNameView.setOnFocusChangeListener(mPlaceNameFocusChangeListener);

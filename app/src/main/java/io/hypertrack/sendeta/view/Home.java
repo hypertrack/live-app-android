@@ -2071,7 +2071,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void showAddPlace(MetaPlace place) {
         MetaPlace newPlace = new MetaPlace(place);
-        newPlace.setName(null);
 
         Intent addPlace = new Intent(this, AddFavoritePlace.class);
         addPlace.putExtra("meta_place", newPlace);
@@ -2235,6 +2234,26 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
         } else if (requestCode == Constants.FAVORITE_PLACE_REQUEST_CODE) {
+
+            // Update the MetaPlace Data
+            if (data != null && data.hasExtra(AddFavoritePlace.KEY_UPDATED_PLACE)) {
+                MetaPlace updatedPlace = (MetaPlace) data.getSerializableExtra(AddFavoritePlace.KEY_UPDATED_PLACE);
+                if (updatedPlace != null) {
+                    TaskManager.getSharedManager(Home.this).setPlace(updatedPlace);
+
+                    if (!TextUtils.isEmpty(updatedPlace.getName())) {
+                        // Set the DestinationText as updatedDestination's Name
+                        destinationText.setGravity(Gravity.LEFT);
+                        destinationText.setText(updatedPlace.getName());
+                    }
+
+                    if (!TextUtils.isEmpty(updatedPlace.getAddress())) {
+                        // Set the DestinationDescription as updatedDestination's Address
+                        destinationDescription.setText(updatedPlace.getAddress());
+                        destinationDescription.setVisibility(View.VISIBLE);
+                    }
+                }
+            }
 
             updateFavoritesButton();
 
