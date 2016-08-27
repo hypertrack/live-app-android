@@ -61,6 +61,13 @@
                 <data
                     android:host="www.sendeta.com"
                     android:pathPrefix="/request" />
+
+                e<data android:host="webtracking-staging.herokuapp.com"
+                    android:pathPrefix="/"/>
+
+                <data android:host="eta.fyi"
+                    android:pathPrefix="/"/>
+
             </intent-filter>
         </activity>
 
@@ -69,8 +76,7 @@
             android:label="${applicationLabel}"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".view.Register"
@@ -83,8 +89,7 @@
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
-        </activity>
+            android:windowSoftInputMode="adjustResize" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -120,6 +125,11 @@
 
         <activity
             android:name=".view.BusinessProfile"
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.Track"
             android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 

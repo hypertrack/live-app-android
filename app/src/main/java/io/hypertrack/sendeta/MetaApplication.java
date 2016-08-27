@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.fabric.sdk.android.Fabric;
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
@@ -38,8 +39,9 @@ public class MetaApplication extends Application {
         mInstance = this;
         this.mContext = getApplicationContext();
 
-        // Initialize Hypertrack TransmitterSDK
+        // Initialize HyperTrack SDKs
         HTTransmitterService.initHTTransmitter(getApplicationContext());
+        HTConsumerClient.initHTConsumerClient(getApplicationContext());
 
         // Initialize Realm to maintain app databases
         this.setupRealm();

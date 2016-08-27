@@ -13,12 +13,15 @@ public class DeepLinkUtil {
     public static final int HOME = 1;
     public static final int MEMBERSHIP = 2;
     public static final int RECEIVE_ETA_FOR_DESTINATION = 3;
+    public static final int TRACK = 4;
     public static final int DEFAULT = HOME;
 
     //deeplink mapping keys
     public static final String KEY_ID = "id";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
+    public static final String KEY_URL = "url";
+    public static final String KEY_TASK_ID = "task";
 
     //private static AppDeepLink appDeepLink;
     public static AppDeepLink prepareAppDeepLink(String url) {
@@ -38,10 +41,26 @@ public class DeepLinkUtil {
                     appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA_FOR_DESTINATION;
                 }
 
+                if (url.contains("webtracking-staging.herokuapp.com") || url.contains("eta.fyi")) {
+                    appDeepLink.mId = DeepLinkUtil.TRACK;
+
+                    if (url.contains("/")) {
+                        String[] allData = url.split("/", 2);
+
+                        if (allData.length > 1) {
+
+                            String paramData = allData[1];
+                            if (!TextUtils.isEmpty(paramData)) {
+                                appDeepLink.trackingUrl = paramData;
+                            }
+                        }
+                    }
+                }
+
                 if (url.contains("?")) {
                     String[] allData = url.split("\\?", 2);
 
-                    if (allData != null && allData.length > 1) {
+                    if (allData.length > 1) {
 
                         String paramData = allData[1];
 
@@ -77,6 +96,13 @@ public class DeepLinkUtil {
                                         case KEY_LNG:
                                             try {
                                                 appDeepLink.lng = Double.valueOf(data[1]);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                            break;
+                                        case KEY_TASK_ID:
+                                            try {
+                                                appDeepLink.taskID = data[1];
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }
