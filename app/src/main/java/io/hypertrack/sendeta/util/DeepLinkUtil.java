@@ -20,7 +20,6 @@ public class DeepLinkUtil {
     public static final String KEY_ID = "id";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
-    public static final String KEY_URL = "url";
     public static final String KEY_TASK_ID = "task";
 
     //private static AppDeepLink appDeepLink;
@@ -54,6 +53,15 @@ public class DeepLinkUtil {
                                 appDeepLink.trackingUrl = paramData;
                             }
                         }
+                    }
+                }
+
+                if (url.contains("://")) {
+                    String data = url.split("://", 2)[1];
+
+                    if (data != null && data.contains("\\?")) {
+                        String paramData[] = data.split("\\?");
+                        appDeepLink.mId = Integer.valueOf(paramData[0].split(":")[1]);
                     }
                 }
 

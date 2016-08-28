@@ -46,18 +46,6 @@ public class MetaApplication extends Application {
         // Initialize Realm to maintain app databases
         this.setupRealm();
 
-//        RealmConfiguration config = new RealmConfiguration.Builder(context)
-//                .schemaVersion(2) // Must be bumped when the schema changes
-//                .migration(new MyMigration()) // Migration to run
-//                .build();
-//
-//        Realm.setDefaultConfiguration(config);
-
-          // This will automatically trigger the migration if needed
-//        Realm realm = Realm.getDefaultInstance();
-
-//        this.migrateRealmDB();
-
         // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
 
@@ -124,9 +112,13 @@ public class MetaApplication extends Application {
 
     private void setupRealm() {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
-                .schemaVersion(1)
-                .deleteRealmIfMigrationNeeded().build();
+                .schemaVersion(2)
+                .migration(new DBMigration())
+                .build();
         Realm.setDefaultConfiguration(realmConfiguration);
+
+        // This will automatically trigger the migration if needed
+        Realm realm = Realm.getDefaultInstance();
     }
 
     @Override

@@ -61,5 +61,21 @@ public class DBMigration implements RealmMigration {
 
             oldVersion++;
         }
+
+        /************************************************
+         // Version 2
+         ************************************************/
+        // Migrate from version 1 to version 2
+        if (oldVersion == 1) {
+
+            // Create a new class
+            RealmObjectSchema activitySchema = schema.create("Activity")
+                    .addField("id", int.class, FieldAttribute.PRIMARY_KEY);
+
+            schema.get("User")
+                    .addRealmListField("activities", activitySchema);
+
+            oldVersion++;
+        }
     }
 }

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.sendeta.model.Activity;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -692,6 +693,52 @@ public class UserStore {
             public void execute(Realm realm) {
                 managedMembershipToDelete.deleteFromRealm();
                 user.getPlaces().remove(membership);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    private void addActivity(final Activity activity) {
+        if (this.user == null || activity == null) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                Activity managedActivity = realm.copyToRealmOrUpdate(activity);
+                user.getActivities().add(managedActivity);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    private void editActivity(final Activity activity) {
+        if (this.user == null || activity == null) {
+            return;
+        }
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.copyToRealmOrUpdate(activity);
+                user = realm.copyToRealmOrUpdate(user);
+            }
+        });
+    }
+
+    private void removeActivity(final Activity activity) {
+        if (this.user == null || activity == null) {
+            return;
+        }
+
+        final Activity managedActivityToDelete = realm.where(Activity.class).equalTo("id", activity.getId()).findFirst();
+
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                managedActivityToDelete.deleteFromRealm();
+                user.getPlaces().remove(activity);
                 user = realm.copyToRealmOrUpdate(user);
             }
         });

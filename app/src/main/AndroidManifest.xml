@@ -68,6 +68,7 @@
                 <data android:host="eta.fyi"
                     android:pathPrefix="/"/>
 
+                <data android:scheme="com.sendeta" />
             </intent-filter>
         </activity>
 
