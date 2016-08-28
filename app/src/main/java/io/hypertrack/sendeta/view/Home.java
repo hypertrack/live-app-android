@@ -231,6 +231,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+
+            // Initialize VehicleTabLayout
+            initializeVehicleTypeTab();
+
             onSelectPlace(place);
         }
 
@@ -330,6 +334,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void onETASuccess(TaskETAResponse response, MetaPlace place) {
         // Make the VehicleTabLayout visible onETASuccess
+//        Home.this.initializeVehicleTypeTab();
         AnimationUtils.expand(vehicleTypeTabLayout);
 
         updateViewForETASuccess(new Integer((int) response.getDuration() / 60), place.getLatLng());
@@ -913,6 +918,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         } else {
             HTLog.e(TAG, "No Task to restore.");
             shouldRestoreTask = false;
+
+            // Initialize VehicleTabLayout
+            initializeVehicleTypeTab();
         }
     }
 
@@ -1042,6 +1050,33 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bus));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
+    }
+
+    private void initializeVehicleTypeTab() {
+        // Remove onTabSelectedListener
+        vehicleTypeTabLayout.setOnTabSelectedListener(null);
+
+        for (int i = 0; i < vehicleTypeTabLayout.getTabCount(); i++) {
+            TabLayout.Tab tab = vehicleTypeTabLayout.getTabAt(i);
+            if (tab != null) {
+                if (selectedVehicleType.equals(getVehicleTypeForTabPosition(tab.getPosition()))) {
+                    int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_selected_item);
+                    tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+                    tab.select();
+                    continue;
+                }
+
+                tab.setCustomView(R.layout.vehicle_type_tab_layout);
+
+                if (tab.getIcon() == null)
+                    return;
+
+                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
+                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+            }
+        }
+
+        // Set onTabSelectedListener
         vehicleTypeTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -1062,24 +1097,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onTabReselected(TabLayout.Tab tab) {
             }
         });
-
-        for (int i = 0; i < vehicleTypeTabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = vehicleTypeTabLayout.getTabAt(i);
-            if (tab != null) {
-                if (selectedVehicleType.equals(getVehicleTypeForTabPosition(tab.getPosition()))) {
-                    tab.select();
-                    continue;
-                }
-
-                tab.setCustomView(R.layout.vehicle_type_tab_layout);
-
-                if (tab.getIcon() == null)
-                    return;
-
-                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
-                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
-            }
-        }
     }
 
     private void onVehicleTypeTabChanged(TabLayout.Tab tab) {
