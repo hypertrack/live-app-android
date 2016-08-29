@@ -1,6 +1,7 @@
 package io.hypertrack.sendeta.store;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -10,6 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import io.hypertrack.lib.common.model.HTDriverVehicleType;
+import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -105,7 +108,9 @@ public class UserStore {
         return realm.where(User.class).findAll().size() > 0;
     }
 
-    public void getTask(MetaPlace place, int selectedAccountId, final UserStoreGetTaskCallback callback) {
+    public void startTaskOnServer(final String taskID, final MetaPlace place, final int selectedAccountId,
+                                  final HTLocation startLocation, final HTDriverVehicleType vehicleType,
+                                  final UserStoreGetTaskCallback callback) {
         if (this.user == null || place == null) {
             if (callback != null) {
                 callback.OnError();
@@ -114,19 +119,15 @@ public class UserStore {
             return;
         }
 
-        if (place.hasDestination()) {
-            this.getTaskForPlaceId(place.getId(), selectedAccountId, callback);
+        TaskDTO taskDTO;
+        if (!TextUtils.isEmpty(taskID)) {
+            taskDTO = new TaskDTO(taskID, selectedAccountId, startLocation, vehicleType);
         } else {
-            this.getTaskForPlace(place, selectedAccountId, callback);
+            taskDTO = new TaskDTO(place, selectedAccountId, startLocation, vehicleType);
         }
-    }
-
-    private void getTaskForPlaceId(int placeId, int accountId, final UserStoreGetTaskCallback callback) {
-        TaskDTO taskDTO = new TaskDTO(placeId, accountId);
 
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-
-        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
+        Call<Map<String, Object>> call = sendETAService.startTask(this.user.getId(), taskDTO);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -137,8 +138,7 @@ public class UserStore {
                     try {
                         if (callback != null) {
                             if (responseDTO != null) {
-                                callback.OnSuccess((String) responseDTO.get("id"),
-                                        (String) responseDTO.get("hypertrack_driver_id"), (String) responseDTO.get("publishable_key"));
+                                callback.OnSuccess(responseDTO);
                             } else {
                                 callback.OnError();
                             }
@@ -164,49 +164,16 @@ public class UserStore {
         });
     }
 
-    private void getTaskForPlace(MetaPlace place, int selectedAccountId, final UserStoreGetTaskCallback callback) {
-        TaskDTO taskDTO = new TaskDTO(place, selectedAccountId);
-
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-
-        Call<Map<String, Object>> call = sendETAService.createTask(this.user.getId(), taskDTO);
-        call.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-
-                if (response.isSuccessful()) {
-                    Map<String, Object> responseDTO = response.body();
-
-                    if (callback != null) {
-                        if (responseDTO != null) {
-                            callback.OnSuccess((String) responseDTO.get("id"),
-                                    (String) responseDTO.get("hypertrack_driver_id"), (String) responseDTO.get("publishable_key"));
-                        } else {
-                            callback.OnError();
-                        }
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
-    public void addPlace(MetaPlace place, final SuccessErrorCallback callback) {
+    public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
-        placeManager.addPlace(place, new PlaceManagerCallback() {
+        placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
                 addPlace(place);
+
+                // Update PlaceID fetched from server
+                placeToBeAdded.setId(place.getId());
+
                 if (callback != null) {
                     callback.OnSuccess();
                 }
@@ -339,7 +306,7 @@ public class UserStore {
         });
     }
 
-    private void editPlace(final MetaPlace place) {
+    public void editPlace(final MetaPlace place) {
         if (this.user == null) {
             return;
         }
@@ -666,7 +633,7 @@ public class UserStore {
                     removeMembership(membership);
 
                     if (callback != null) {
-                        callback.OnSuccess(new String (accountName));
+                        callback.OnSuccess(new String(accountName));
                     }
                 } else {
                     if (callback != null) {

@@ -4,21 +4,28 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.NotificationCompat;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
+import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.view.BusinessProfile;
 import io.hypertrack.sendeta.view.Home;
+import io.realm.Realm;
 
 /**
  * Created by piyush on 27/07/16.
@@ -33,11 +40,13 @@ public class MetaGCMListenerService extends GcmListenerService {
     public static final String NOTIFICATION_TYPE_DEFAULT = "default";
     public static final String NOTIFICATION_TYPE_TASK_CREATED = "task.created";
     public static final String NOTIFICATION_TYPE_ACCEPT_INVITE = "accept";
+    public static final String NOTIFICATION_TYPE_DESTINATION_UPDATED = "task.destination_updated";
 
     // Notification Ids for NOTIFICATION_TYPE
     public static final int NOTIFICATION_TYPE_DEFAULT_ID = 1;
     public static final int NOTIFICATION_TYPE_TASK_CREATED_ID = 2;
     public static final int NOTIFICATION_TYPE_ACCEPT_INVITE_ID = 3;
+    public static final int NOTIFICATION_TYPE_DESTINATION_UPDATED_ID = 4;
 
     public static final String NOTIFICATION_KEY_MESSAGE = "body";
     public static final String NOTIFICATION_KEY_TITLE = "message";
@@ -45,6 +54,9 @@ public class MetaGCMListenerService extends GcmListenerService {
     // Notification keys for NOTIFICATION_TYPE_TASK_CREATED
     public static final String NOTIFICATION_KEY_ACCOUNT_ID = "account_id";
     public static final String NOTIFICATION_KEY_TASK = "task";
+
+    public static final String NOTIFICATION_KEY_META_PLACE_ID = "place_id";
+    public static final String NOTIFICATION_KEY_UPDATED_DESTINATION = "destination";
 
     /**
      * Called when message is received.
@@ -72,6 +84,8 @@ public class MetaGCMListenerService extends GcmListenerService {
                 notificationId = NOTIFICATION_TYPE_ACCEPT_INVITE_ID;
             } else if (NOTIFICATION_TYPE_TASK_CREATED.equals(notificationType)) {
                 notificationId = NOTIFICATION_TYPE_TASK_CREATED_ID;
+            } else if (NOTIFICATION_TYPE_DESTINATION_UPDATED.equals(notificationType)) {
+                notificationId = NOTIFICATION_TYPE_DESTINATION_UPDATED_ID;
             }
         }
 
@@ -88,9 +102,16 @@ public class MetaGCMListenerService extends GcmListenerService {
                 data.getString(KEY_NOTIFICATION_TYPE)))
             return NOTIFICATION_TYPE_TASK_CREATED;
 
-        if(NOTIFICATION_TYPE_ACCEPT_INVITE.equalsIgnoreCase(
+        if (NOTIFICATION_TYPE_ACCEPT_INVITE.equalsIgnoreCase(
                 data.getString(KEY_NOTIFICATION_TYPE)))
             return NOTIFICATION_TYPE_ACCEPT_INVITE;
+
+        if (NOTIFICATION_TYPE_DESTINATION_UPDATED.equalsIgnoreCase(
+                data.getString(KEY_NOTIFICATION_TYPE))) {
+
+            updateDestinationLocation(data);
+            return NOTIFICATION_TYPE_DESTINATION_UPDATED;
+        }
 
         return NOTIFICATION_TYPE_DEFAULT;
     }
@@ -164,7 +185,7 @@ public class MetaGCMListenerService extends GcmListenerService {
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.drawable.ic_logo_notification_small)
-                .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.ic_logo_notification_large))
+                .setColor(ContextCompat.getColor(getApplicationContext(), R.color.colorAccent))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent);
@@ -175,5 +196,56 @@ public class MetaGCMListenerService extends GcmListenerService {
         notificationManager.notify(mNotificationId /* ID of notification */, builder.build());
 
         HTLog.i(TAG, "Notification Generated for id: " + notificationId);
+    }
+
+    private void updateDestinationLocation(Bundle data) {
+        try {
+
+            String placeIDString = data.getString(NOTIFICATION_KEY_META_PLACE_ID);
+            if (!TextUtils.isEmpty(placeIDString)) {
+                Integer placeID = Integer.valueOf(placeIDString);
+
+                String updatedDestinationJSON = data.getString(NOTIFICATION_KEY_UPDATED_DESTINATION);
+                HTPlace updatedDestination = new Gson().fromJson(updatedDestinationJSON, HTPlace.class);
+
+                if (placeID != null && updatedDestination != null) {
+                    HTLocation location = updatedDestination.getLocation();
+
+                    if (location != null) {
+                        double[] coordinates = location.getCoordinates();
+                        if (coordinates[0] != 0.0 && coordinates[1] != 0.0) {
+
+                            updatePlace(placeID, updatedDestination.getAddress(), coordinates);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
+    }
+
+    public void updatePlace(final int metaPlaceID, final String metaPlaceAddress, final double[] coordinates) {
+
+        Realm realm = Realm.getDefaultInstance();
+        final MetaPlace placeToUpdate = realm.where(MetaPlace.class).equalTo("id", metaPlaceID).findFirst();
+
+        if (placeToUpdate != null) {
+            try {
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        placeToUpdate.setLatLng(new LatLng(coordinates[1], coordinates[0]));
+                        placeToUpdate.setId(metaPlaceID);
+                        placeToUpdate.setAddress(metaPlaceAddress);
+
+                        realm.copyToRealmOrUpdate(placeToUpdate);
+                    }
+                });
+            } finally {
+                realm.close();
+            }
+        }
     }
 }

@@ -126,7 +126,6 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     }
 
     private void updateProfileImage() {
-
         if (user != null) {
             Bitmap bitmap = user.getImageBitmap();
 

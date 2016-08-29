@@ -2,6 +2,7 @@ package io.hypertrack.sendeta.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTLocation;
 
 /**
@@ -17,6 +18,15 @@ public class TaskDTO{
 
     @SerializedName("google_places_id")
     private String googlePlacesID;
+
+    @SerializedName("start_location")
+    private HTLocation startLocation;
+
+    @SerializedName("vehicle_type")
+    private HTDriverVehicleType vehicleType;
+
+    @SerializedName("task_id")
+    private String taskID;
 
     private String name;
 
@@ -46,6 +56,30 @@ public class TaskDTO{
 
     public void setGooglePlacesID(String googlePlacesID) {
         this.googlePlacesID = googlePlacesID;
+    }
+
+    public HTLocation getStartLocation() {
+        return startLocation;
+    }
+
+    public void setStartLocation(HTLocation startLocation) {
+        this.startLocation = startLocation;
+    }
+
+    public HTDriverVehicleType getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(HTDriverVehicleType vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public String getTaskID() {
+        return taskID;
+    }
+
+    public void setTaskID(String taskID) {
+        this.taskID = taskID;
     }
 
     public String getName() {
@@ -78,11 +112,23 @@ public class TaskDTO{
     }
 
     public TaskDTO(MetaPlace place, int accountId) {
-        this.accountId = accountId;
-        this.placeId = place.getId();
+        this(place.getId(), accountId);
         this.address = place.getAddress();
         this.googlePlacesID = place.getGooglePlacesID();
         this.name = place.getName();
         this.location = new HTLocation(place.getLatitude(), place.getLongitude());
+    }
+
+    public TaskDTO(MetaPlace place, int accountId, HTLocation startLocation, HTDriverVehicleType vehicleType) {
+        this(place, accountId);
+        this.startLocation = startLocation;
+        this.vehicleType = vehicleType;
+    }
+
+    public TaskDTO(String taskID, int accountId, HTLocation startLocation, HTDriverVehicleType vehicleType) {
+        this.taskID = taskID;
+        this.accountId = accountId;
+        this.startLocation = startLocation;
+        this.vehicleType = vehicleType;
     }
 }

@@ -9,6 +9,7 @@ import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.TaskDTO;
+import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.Trip;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
@@ -49,11 +50,14 @@ public interface SendETAService {
     @GET("/api/v1/eta/")
     Call<List<TripETAResponse>> getETA(@Query("origin") String origin, @Query("destination") String destination);
 
+    @GET("/api/v1/eta/")
+    Call<List<TaskETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
+
     @POST("/api/v1/trips/")
     Call<Trip> addTrip(@Body Map<String, String> tripDetails);
 
-    @POST("/api/v1/users/{id}/create_task/")
-    Call<Map<String, Object>> createTask(@Path("id") int id, @Body TaskDTO placeDTO);
+    @POST("/api/v1/users/{id}/start_task/")
+    Call<Map<String, Object>> startTask(@Path("id") int id, @Body TaskDTO taskDTO);
 
     @POST("/api/v1/places/")
     Call<MetaPlace> addPlace(@Body PlaceDTO place);

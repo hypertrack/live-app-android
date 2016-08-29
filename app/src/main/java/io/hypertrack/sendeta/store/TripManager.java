@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.crashlytics.android.Crashlytics;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.model.HTTaskParams;
@@ -33,11 +33,14 @@ import io.hypertrack.lib.transmitter.model.HTTaskParamsBuilder;
 import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.HTTripParams;
 import io.hypertrack.lib.transmitter.model.HTTripParamsBuilder;
+import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
+import io.hypertrack.lib.transmitter.model.ServiceNotificationParamsBuilder;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.MetaApplication;
+import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.Trip;
@@ -48,9 +51,9 @@ import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.sendeta.store.callback.TripETACallback;
 import io.hypertrack.sendeta.store.callback.TripManagerCallback;
 import io.hypertrack.sendeta.store.callback.TripManagerListener;
-import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.view.SplashScreen;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,7 +83,7 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     private HTDriverVehicleType vehicleType = HTDriverVehicleType.CAR;
 
     private GoogleApiClient mGoogleAPIClient;
-    public GeofencingRequest geofencingRequest;
+    private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
 
@@ -101,6 +104,17 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TripManager() {
         this.setupGoogleAPIClient();
+
+        if (transmitter != null) {
+            //Customize Notification Settings
+            ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
+            ServiceNotificationParams notificationParams = builder
+                    .setSmallIconBGColor(ContextCompat.getColor(MetaApplication.getInstance().getApplicationContext(),
+                            R.color.colorAccent))
+                    .setContentIntentActivityClass(SplashScreen.class)
+                    .build();
+            transmitter.setServiceNotificationParams(notificationParams);
+        }
     }
 
     private void setupGoogleAPIClient() {
@@ -253,127 +267,6 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     public void sendETA(List<String> phoneNumbers, final TripManagerCallback callback) {
     }
 
-    public void startTrip(int selectedAccountId, final TripManagerCallback callback) {
-        if (this.place == null || selectedAccountId <= 0) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        this.selectedAccountId = selectedAccountId;
-
-        UserStore.sharedStore.getTask(this.place, this.selectedAccountId, new UserStoreGetTaskCallback() {
-            @Override
-            public void OnSuccess(String taskID, String hypertrackDriverID, String publishableKey) {
-
-                // Set PublishableKey fetched for the selectedAccountId
-                HyperTrack.setPublishableApiKey(publishableKey, MetaApplication.getInstance().getApplicationContext());
-
-                HTTripParams tripParams = getTripParams(taskID, hypertrackDriverID);
-                transmitter.startTrip(tripParams, new HTTripStatusCallback() {
-                    @Override
-                    public void onSuccess(HTTrip htTrip) {
-                        hyperTrackTrip = htTrip;
-
-                        addTrip(new TripManagerCallback() {
-                            @Override
-                            public void OnSuccess() {
-                                if (place == null) {
-                                    place = SharedPreferenceManager.getPlace();
-                                }
-
-                                onTripStart();
-                                if (callback != null) {
-                                    callback.OnSuccess();
-                                }
-                            }
-
-                            @Override
-                            public void OnError() {
-                                transmitter.clearCurrentTrip();
-                                hyperTrackTrip = null;
-
-                                if (callback != null) {
-                                    callback.OnError();
-                                }
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        if (callback != null) {
-                            callback.OnError();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void OnError() {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
-    public void startTripWithTaskID(int selectedAccountId, Task task, final TripManagerCallback callback) {
-        if (selectedAccountId <= 0) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        this.selectedAccountId = selectedAccountId;
-
-        // Set PublishableKey fetched for the selectedAccountId
-        HyperTrack.setPublishableApiKey(task.getPublishableKey(), MetaApplication.getInstance().getApplicationContext());
-
-        HTTripParams tripParams = getTripParams(task.getId(), task.getDriverId());
-        transmitter.startTrip(tripParams, new HTTripStatusCallback() {
-            @Override
-            public void onSuccess(HTTrip htTrip) {
-                hyperTrackTrip = htTrip;
-
-                addTrip(new TripManagerCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (place == null) {
-                            place = SharedPreferenceManager.getPlace();
-                        }
-
-                        onTripStart();
-                        if (callback != null) {
-                            callback.OnSuccess();
-                        }
-                    }
-
-                    @Override
-                    public void OnError() {
-                        transmitter.clearCurrentTrip();
-                        hyperTrackTrip = null;
-
-                        if (callback != null) {
-                            callback.OnError();
-                        }
-                    }
-                });
-            }
-
-            @Override
-            public void onError(Exception e) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
     public void endTrip(final TripManagerCallback callback) {
         String taskID = this.trip.getHypertrackTaskID();
         if (taskID == null) {
@@ -449,13 +342,16 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void startRefreshingTrip(final long delay) {
-        handler = new Handler();
+        if (handler == null) {
+            handler = new Handler();
+        }
+
         handler.postDelayed(refreshTask, delay);
     }
 
     public void stopRefreshingTrip() {
         if (this.handler != null) {
-            this.handler.removeCallbacks(refreshTask);
+            this.handler.removeCallbacksAndMessages(refreshTask);
             this.handler = null;
         }
     }
@@ -486,15 +382,21 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
         }
     }
 
+    public void setGeofencingRequest(GeofencingRequest request) {
+        this.geofencingRequest = request;
+    }
+
     public void setupGeofencing() {
         try {
             geofencingRequest = this.getGeofencingRequest();
 
-            // Save this request to SharedPreferences (to be restored later if removed)
-            SharedPreferenceManager.setGeofencingRequest(geofencingRequest);
+            if (geofencingRequest != null) {
+                // Save this request to SharedPreferences (to be restored later if removed)
+                SharedPreferenceManager.setGeofencingRequest(geofencingRequest);
 
-            // Add Geofencing Request
-            addGeofencingRequest();
+                // Add Geofencing Request
+                addGeofencingRequest();
+            }
         } catch (Exception exception) {
             Crashlytics.logException(exception);
             HTLog.e(TAG, "Exception while adding geofence request");
@@ -571,6 +473,11 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private GeofencingRequest getGeofencingRequest() {
+
+        if (this.place == null || this.place.getLatitude() == null || this.place.getLongitude() == null) {
+            HTLog.e(TAG, "Adding Geofence failed: Either place or Lat,Lng is null");
+            return null;
+        }
 
         // called when the transition associated with the Geofence is triggered)
         List<Geofence> geoFenceList = new ArrayList<Geofence>();
@@ -696,19 +603,38 @@ public class TripManager implements GoogleApiClient.ConnectionCallbacks {
     public String getShareMessage() {
 
         if (this.trip == null) {
+            HTLog.e(TAG, "Trip is null. Not able to get shareMessage");
             return null;
         }
+
+        StringBuilder builder = new StringBuilder("I'm on my way. ");
 
         String formattedETA = this.getFormattedETA();
-        if (formattedETA == null) {
-            return null;
-        }
-
         String shareURL = this.trip.getShareUrl();
-        if (shareURL == null) {
-            return null;
+
+        // Add ETA in ShareMessage if ETA is not null
+        if (formattedETA != null) {
+            builder.append("Will be there by " + formattedETA + ". ");
+
+            // Add ShareURL in ShareMessage if ShareURL is not null
+            if (shareURL != null) {
+                builder.append("Track me live " + shareURL);
+
+            } else {
+                HTLog.e(TAG, "shareURL is null. Removing ShareURL from shareMessage");
+            }
+
+            return builder.toString();
         }
 
-        return "I'm on my way. Will be there by " + formattedETA + ". Track me live " + shareURL;
+        HTLog.e(TAG, "formattedETA is null. Removing ETA from shareMessage");
+
+        // FormattedETA is null. So, Add ShareURL in ShareMessage if ShareURL is not null
+        if (shareURL != null) {
+            builder.append("Track me live " + shareURL);
+            return builder.toString();
+        }
+
+        return null;
     }
 }

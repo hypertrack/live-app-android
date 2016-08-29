@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.sendeta.store.TripManager;
+import io.hypertrack.sendeta.store.TaskManager;
 
 /**
  * Created by piyush on 16/07/16.
@@ -20,8 +20,8 @@ public class BootReceiver extends BroadcastReceiver {
 
         if (SharedPreferenceManager.getGeofencingRequest() != null) {
             // Add Geofencing Request
-            TripManager.getSharedManager().geofencingRequest = SharedPreferenceManager.getGeofencingRequest();
-            TripManager.getSharedManager().addGeofencingRequest();
+            TaskManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
+            TaskManager.getSharedManager(context).addGeofencingRequest();
         }
     }
 }

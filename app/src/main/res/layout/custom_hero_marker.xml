@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="74dp"
+    android:layout_height="74dp">
 
     <ImageView
         android:id="@+id/cus"
@@ -11,14 +11,15 @@
         android:layout_alignParentTop="true"
         android:src="@drawable/ic_hero_marker" />
 
-    <io.hypertrack.lib.consumer.utils.HTCircleImageView
+    <io.hypertrack.sendeta.util.images.RoundedImageView
         android:id="@+id/profile_image"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/hero_marker_image"
+        android:layout_height="@dimen/hero_marker_image"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="13dp"
         android:layout_marginTop="@dimen/margin_very_low"
+        android:scaleType="centerCrop"
         android:background="@null"
         android:src="@drawable/default_profile_pic" />
 

@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 
-import io.hypertrack.sendeta.store.TripManager;
+import io.hypertrack.sendeta.store.TaskManager;
 
 /**
  * Created by piyush on 08/07/16.
@@ -22,8 +22,8 @@ public class GpsLocationReceiver extends BroadcastReceiver {
 
             if (isLocationEnabled(context) && SharedPreferenceManager.getGeofencingRequest() != null) {
                 // Add Geofencing Request
-                TripManager.getSharedManager().geofencingRequest = SharedPreferenceManager.getGeofencingRequest();
-                TripManager.getSharedManager().addGeofencingRequest();
+                TaskManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
+                TaskManager.getSharedManager(context).addGeofencingRequest();
             }
 
             Intent locationChangedIntent = new Intent(LOCATION_CHANGED);

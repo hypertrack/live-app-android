@@ -15,17 +15,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'com.mindera.gradle.slack'
 apply plugin: 'realm-android'
-apply plugin: 'com.google.gms.google-services'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
-}
-
-def getDate() {
-    def date = new Date()
-    def formattedDate = date.format('yyyy.MM.dd.HH.mm.ss')
-    return formattedDate
 }
 
 android {
@@ -52,11 +45,9 @@ android {
         def versionMajor = 1
         def versionMinor = 1
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
-//        def versionBuild = getDate()//versionProps['VERSION_BUILD'].toInteger() + 1
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
         versionProps['VERSION_PATCH'] = versionPatch.toString()
-//        versionProps['VERSION_BUILD'] = versionBuild.toString()
         versionProps['VERSION_NUMBER'] = versionNumber.toString()
         versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
         versionProps.store(versionPropsFile.newWriter(), null)
@@ -115,27 +106,29 @@ dependencies {
     compile 'com.android.support:design:23.3.0'
     compile 'com.android.support:cardview-v7:23.3.0'
     compile 'com.android.support:recyclerview-v7:23.3.0'
-    compile 'com.jakewharton:butterknife:7.0.1'
     compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
-    debugCompile('io.hypertrack:transmitter:1.0.7:debug@aar') {
+    compile 'com.github.tajchert:WaitingDots:0.3.2'
+    debugCompile('io.hypertrack:transmitter:1.2.10:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:transmitter:1.0.7:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:1.2.10:release@aar') {
         transitive = true;
     }
-    debugCompile('io.hypertrack:consumer:0.4.13:debug@aar') {
+    debugCompile('io.hypertrack:consumer:1.2.10:debug@aar') {
         transitive = true;
     }
-    releaseCompile('io.hypertrack:consumer:0.4.13:release@aar') {
+    releaseCompile('io.hypertrack:consumer:1.2.10:release@aar') {
         transitive = true;
     }
-//    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
-    compile 'com.google.android.gms:play-services-gcm:8.3.0'
-    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
+    //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
 }
+
+apply plugin: 'com.google.gms.google-services'

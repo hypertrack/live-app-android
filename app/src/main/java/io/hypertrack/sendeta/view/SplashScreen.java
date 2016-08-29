@@ -33,11 +33,12 @@ public class SplashScreen extends BaseActivity{
         handleDeepLink(getIntent());
 
         if (!isUserOnboard) {
-            startActivity(new Intent(this, Register.class));
+            Intent registerIntent = new Intent(this, Register.class);
+            registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(registerIntent);
             finish();
         } else {
             UserStore.sharedStore.initializeUser();
-
             proceedToNextScreen(appDeepLink);
         }
     }
@@ -80,7 +81,10 @@ public class SplashScreen extends BaseActivity{
 
             case DeepLinkUtil.DEFAULT:
             default:
-                startActivity(new Intent(this, Home.class));
+                TaskStackBuilder.create(this)
+                        .addNextIntentWithParentStack(new Intent(this, Home.class)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                        .startActivities();
                 finish();
                 break;
         }

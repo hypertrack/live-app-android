@@ -14,9 +14,9 @@ import java.util.List;
 
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
-import io.hypertrack.sendeta.store.TripManager;
-import io.hypertrack.sendeta.util.GeofenceErrorMessages;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.store.TaskManager;
+import io.hypertrack.sendeta.util.GeofenceErrorMessages;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -73,7 +73,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
                 Log.i(TAG, "User is dwelling in geo fence.");
                 HTLog.i(TAG, "User is dwelling in geo fence.");
-                TripManager.getSharedManager().OnGeoFenceSuccess();
+                TaskManager.getSharedManager(getApplicationContext()).OnGeoFenceSuccess();
 
             } else {
                 // Log the error.
