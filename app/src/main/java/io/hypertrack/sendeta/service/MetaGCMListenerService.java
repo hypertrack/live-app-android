@@ -22,7 +22,6 @@ import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.view.BusinessProfile;
 import io.hypertrack.sendeta.view.Home;
@@ -244,8 +243,6 @@ public class MetaGCMListenerService extends GcmListenerService {
                         realm.copyToRealmOrUpdate(placeToUpdate);
                     }
                 });
-
-                TaskManager.getSharedManager(getApplicationContext()).setPlace(new MetaPlace(placeToUpdate));
             } finally {
                 realm.close();
             }
