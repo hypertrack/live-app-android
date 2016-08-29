@@ -11,6 +11,10 @@
             <!--android:icon="@drawable/ic_receive"-->
             <!--android:title="Receive ETA" />-->
         <item
+            android:id="@+id/drawer_user_activities"
+            android:icon="@drawable/ic_send"
+            android:title="My Activities" />
+        <item
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_settings"
             android:title="Settings" />

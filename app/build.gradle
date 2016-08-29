@@ -15,7 +15,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 apply plugin: 'com.mindera.gradle.slack'
 apply plugin: 'realm-android'
-apply plugin: 'com.google.gms.google-services'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -125,9 +124,11 @@ dependencies {
         transitive = true;
     }
     //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
-    compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
 }
+
+apply plugin: 'com.google.gms.google-services'

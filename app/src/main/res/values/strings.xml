@@ -23,6 +23,10 @@
     <string name="title_activity_verify">Verify Phone</string>
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
+    <string name="title_activity_activities">Activities</string>
+
+    <string name="title_activities_tab_received">Received</string>
+    <string name="title_activities_tab_sent">Sent</string>
 
     <string name="filter_title_viewaccept">SendETA</string>
 

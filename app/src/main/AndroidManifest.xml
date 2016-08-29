@@ -134,6 +134,10 @@
             android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".view.Activities"
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
+
         <!-- Register Receivers here -->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
@@ -217,7 +221,6 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>
