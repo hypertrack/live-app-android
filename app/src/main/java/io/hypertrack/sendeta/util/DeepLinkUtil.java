@@ -1,7 +1,9 @@
 package io.hypertrack.sendeta.util;
 
+import android.content.Context;
 import android.text.TextUtils;
 
+import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
 
 /**
@@ -20,10 +22,10 @@ public class DeepLinkUtil {
     public static final String KEY_ID = "id";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
-    public static final String KEY_TASK_ID = "task";
+    public static final String KEY_SHORT_CODE = "short_code";
 
     //private static AppDeepLink appDeepLink;
-    public static AppDeepLink prepareAppDeepLink(String url) {
+    public static AppDeepLink prepareAppDeepLink(Context context, String url) {
 
         AppDeepLink appDeepLink = new AppDeepLink(DEFAULT);
 
@@ -40,28 +42,19 @@ public class DeepLinkUtil {
                     appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA_FOR_DESTINATION;
                 }
 
-                if (url.contains("webtracking-staging.herokuapp.com") || url.contains("eta.fyi")) {
+                if (url.contains(context.getString(R.string.eta_link_url))) {
                     appDeepLink.mId = DeepLinkUtil.TRACK;
 
                     if (url.contains("/")) {
-                        String[] allData = url.split("/", 2);
+                        String[] allData = url.split("/");
 
                         if (allData.length > 1) {
 
-                            String paramData = allData[1];
+                            String paramData = allData[allData.length - 1];
                             if (!TextUtils.isEmpty(paramData)) {
-                                appDeepLink.trackingUrl = paramData;
+                                appDeepLink.shortCode = paramData;
                             }
                         }
-                    }
-                }
-
-                if (url.contains("://")) {
-                    String data = url.split("://", 2)[1];
-
-                    if (data != null && data.contains("\\?")) {
-                        String paramData[] = data.split("\\?");
-                        appDeepLink.mId = Integer.valueOf(paramData[0].split(":")[1]);
                     }
                 }
 
@@ -104,13 +97,6 @@ public class DeepLinkUtil {
                                         case KEY_LNG:
                                             try {
                                                 appDeepLink.lng = Double.valueOf(data[1]);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
-                                            break;
-                                        case KEY_TASK_ID:
-                                            try {
-                                                appDeepLink.taskID = data[1];
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }

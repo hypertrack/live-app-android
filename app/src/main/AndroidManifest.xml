@@ -62,13 +62,9 @@
                     android:host="www.sendeta.com"
                     android:pathPrefix="/request" />
 
-                e<data android:host="webtracking-staging.herokuapp.com"
-                    android:pathPrefix="/"/>
-
-                <data android:host="eta.fyi"
-                    android:pathPrefix="/"/>
-
-                <data android:scheme="com.sendeta" />
+                <data
+                    android:host="@string/eta_link_url"
+                    android:pathPrefix="/" />
             </intent-filter>
         </activity>
 
@@ -130,12 +126,13 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.Track"
+            android:name=".view.Activities"
             android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".view.Activities"
-            android:parentActivityName=".view.Home"
+        <activity
+            android:name=".view.Track"
+            android:parentActivityName=".view.Activities"
             android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->

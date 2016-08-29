@@ -1515,7 +1515,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private String getFormattedTimeString(Double timeInSeconds) {
-        if (this == null || this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
+        if (this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
             return null;
 
         int hours = (int) (timeInSeconds / 3600);

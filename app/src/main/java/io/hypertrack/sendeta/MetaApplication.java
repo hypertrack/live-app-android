@@ -112,7 +112,7 @@ public class MetaApplication extends Application {
 
     private void setupRealm() {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
-                .schemaVersion(2)
+                .schemaVersion(1)
                 .migration(new DBMigration())
                 .build();
         Realm.setDefaultConfiguration(realmConfiguration);

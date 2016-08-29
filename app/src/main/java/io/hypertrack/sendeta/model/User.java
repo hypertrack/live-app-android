@@ -45,9 +45,6 @@ public class User extends RealmObject {
     @SerializedName("memberships")
     private RealmList<Membership> memberships;
 
-    @SerializedName("activities")
-    private RealmList<Activity> activities;
-
     @Expose(serialize = false, deserialize = false)
     private int selectedMembershipAccountId;
 
@@ -117,14 +114,6 @@ public class User extends RealmObject {
             this.selectedMembershipAccountId = selectedMembershipAccountId;
     }
 
-    public RealmList<Activity> getActivities() {
-        return activities;
-    }
-
-    public void setActivities(RealmList<Activity> activities) {
-        this.activities = activities;
-    }
-
     @Override
     public String toString() {
         return "User{" +
@@ -135,7 +124,6 @@ public class User extends RealmObject {
                 ", photo='" + photo + '\'' +
                 ", selectedMembershipAccountId='" + selectedMembershipAccountId + '\'' +
                 ", memberships='" + (memberships != null ? memberships.toString() : "null") + '\'' +
-                ", activities='" + (activities != null ? activities.toString() : "null") + '\'' +
                 '}';
     }
 

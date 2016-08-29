@@ -1,15 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <fragment
-        android:id="@+id/map_fragment"
-        android:name="io.hypertrack.lib.consumer.view.HTMapFragment"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_map"/>
+        android:layout_height="match_parent">
 
-</LinearLayout>
+        <fragment
+            android:id="@+id/map_fragment"
+            android:name="io.hypertrack.lib.consumer.view.HTMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_map" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/retryButton"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/cta_button_size"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/margin_high"
+        android:background="@color/colorAccent"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:gravity="center"
+        android:padding="@dimen/padding_high"
+        android:text="retry"
+        android:textColor="#ffffff"
+        android:visibility="gone" />
+</FrameLayout>

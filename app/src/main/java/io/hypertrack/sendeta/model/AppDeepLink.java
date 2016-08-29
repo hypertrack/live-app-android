@@ -16,8 +16,7 @@ public class AppDeepLink {
     public Double lng;
 
     // Used for Track feature
-    public String trackingUrl;
-    public String taskID;
+    public String shortCode;
 
     public AppDeepLink(int mId) {
         this.mId = mId;

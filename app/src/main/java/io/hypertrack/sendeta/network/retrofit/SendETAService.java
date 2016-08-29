@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
+import io.hypertrack.sendeta.model.AddTaskToTrackDTO;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
@@ -10,6 +11,7 @@ import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.TaskETAResponse;
+import io.hypertrack.sendeta.model.TrackTaskResponse;
 import io.hypertrack.sendeta.model.Trip;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
@@ -71,9 +73,6 @@ public interface SendETAService {
     @GET("/api/v1/places/")
     Call<List<MetaPlace>> getPlaces();
 
-    @GET("/api/v1/users/{id}/task/")
-    Call<Map <String, Object>> createTask(@Path("id") int id, @Query("destination_id") String destinationID);
-
     // Membership Calls
     @GET("/api/v1/users/{id}/")
     Call<User> getUserData(@Path("id") int id);
@@ -93,4 +92,8 @@ public interface SendETAService {
     //Add GCM Token Call
     @POST("/api/v1/users/{id}/add_device/")
     Call<ResponseBody> addGCMToken(@Path("id") int id, @Body GCMAddDeviceDTO gcmAddDeviceDTO);
+
+    // Activities Call
+    @POST("/api/v1/users/{id}/track/")
+    Call<TrackTaskResponse> addTaskForTracking(@Path("id") int id, @Body AddTaskToTrackDTO addTaskToTrackDTO);
 }
