@@ -3,9 +3,11 @@ package io.hypertrack.sendeta.view;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +21,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -28,6 +31,7 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
@@ -52,7 +56,8 @@ import io.realm.RealmList;
  * Created by piyush on 22/06/16.
  */
 public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, TouchableWrapper.TouchActionDown, TouchableWrapper.TouchActionUp {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
+        TouchableWrapper.TouchActionDown, TouchableWrapper.TouchActionUp {
 
     private final String TAG = "AddFavoritePlace";
 
@@ -76,7 +81,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private ProgressDialog mProgressDialog;
 
     private MetaPlace metaPlace;
-    private boolean addNewMetaPlace = false;
+    private boolean addNewMetaPlace = false, myLocationButtonClicked = false;
 
     private LatLng latlng;
 
@@ -228,6 +233,16 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     private void getMap() {
         TouchableSupportMapFragment mapFragment = (TouchableSupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        View locationButton = ((View) mapFragment.getView().findViewById(1).getParent()).findViewById(2);
+        RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
+        rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
+        rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+
+        int top = getResources().getDimensionPixelSize(R.dimen.add_favorite_place_map_top_padding);
+        int right = getResources().getDimensionPixelSize(R.dimen.add_favorite_place_map_right_padding);
+
+        rlp.setMargins(0, 0, right, top);
     }
 
     private void initNameAddressView() {
@@ -323,10 +338,15 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        if (ContextCompat.checkSelfPermission(AddFavoritePlace.this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+        }
+
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setIndoorLevelPickerEnabled(false);
         mMap.getUiSettings().setScrollGesturesEnabled(true);
@@ -338,6 +358,24 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         } else {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0.0, 0.0), 0.0f));
         }
+
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                myLocationButtonClicked = true;
+                return false;
+            }
+        });
+
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                if (myLocationButtonClicked) {
+                    onTouchUp(null);
+                    myLocationButtonClicked = false;
+                }
+            }
+        });
     }
 
     public void processPublishedResults(ArrayList<AutocompletePrediction> results) {

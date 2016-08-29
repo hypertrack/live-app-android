@@ -14,14 +14,18 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.gcm.GcmListenerService;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
+import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.view.BusinessProfile;
 import io.hypertrack.sendeta.view.Home;
+import io.realm.Realm;
 
 /**
  * Created by piyush on 27/07/16.
@@ -52,7 +56,7 @@ public class MetaGCMListenerService extends GcmListenerService {
     public static final String NOTIFICATION_KEY_TASK = "task";
 
     public static final String NOTIFICATION_KEY_META_PLACE_ID = "place_id";
-    public static final String NOTIFICATION_KEY_UPDATED_DESTINATION = "updated_location";
+    public static final String NOTIFICATION_KEY_UPDATED_DESTINATION = "destination";
 
     /**
      * Called when message is received.
@@ -98,7 +102,7 @@ public class MetaGCMListenerService extends GcmListenerService {
                 data.getString(KEY_NOTIFICATION_TYPE)))
             return NOTIFICATION_TYPE_TASK_CREATED;
 
-        if(NOTIFICATION_TYPE_ACCEPT_INVITE.equalsIgnoreCase(
+        if (NOTIFICATION_TYPE_ACCEPT_INVITE.equalsIgnoreCase(
                 data.getString(KEY_NOTIFICATION_TYPE)))
             return NOTIFICATION_TYPE_ACCEPT_INVITE;
 
@@ -196,20 +200,52 @@ public class MetaGCMListenerService extends GcmListenerService {
 
     private void updateDestinationLocation(Bundle data) {
         try {
-            MetaPlace place = TaskManager.getSharedManager(getApplicationContext()).getPlace();
-            if (place != null && data != null) {
 
-                Integer metaPlaceId = Integer.valueOf(data.getString(NOTIFICATION_KEY_META_PLACE_ID));
-                String destination = data.getString(NOTIFICATION_KEY_UPDATED_DESTINATION);
+            String placeIDString = data.getString(NOTIFICATION_KEY_META_PLACE_ID);
+            if (!TextUtils.isEmpty(placeIDString)) {
+                Integer placeID = Integer.valueOf(placeIDString);
 
-//            place.setLatLng();
-                // Update MetaPlace in RealmDB
-//            UserStore.sharedStore.editPlace(place);
+                String updatedDestinationJSON = data.getString(NOTIFICATION_KEY_UPDATED_DESTINATION);
+                HTPlace updatedDestination = new Gson().fromJson(updatedDestinationJSON, HTPlace.class);
+
+                if (placeID != null && updatedDestination != null) {
+                    HTLocation location = updatedDestination.getLocation();
+
+                    if (location != null) {
+                        double[] coordinates = location.getCoordinates();
+                        if (coordinates[0] != 0.0 && coordinates[1] != 0.0) {
+
+                            updatePlace(placeID, updatedDestination.getAddress(), coordinates);
+                        }
+                    }
+                }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             Crashlytics.logException(e);
+        }
+    }
+
+    public void updatePlace(final int metaPlaceID, final String metaPlaceAddress, final double[] coordinates) {
+
+        Realm realm = Realm.getDefaultInstance();
+        final MetaPlace placeToUpdate = realm.where(MetaPlace.class).equalTo("id", metaPlaceID).findFirst();
+
+        if (placeToUpdate != null) {
+            try {
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        placeToUpdate.setLatLng(new LatLng(coordinates[1], coordinates[0]));
+                        placeToUpdate.setId(metaPlaceID);
+                        placeToUpdate.setAddress(metaPlaceAddress);
+
+                        realm.copyToRealmOrUpdate(placeToUpdate);
+                    }
+                });
+            } finally {
+                realm.close();
+            }
         }
     }
 }

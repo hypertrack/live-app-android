@@ -53,6 +53,9 @@
     <dimen name="map_bottom_padding">120dp</dimen>
     <dimen name="map_active_task_bottom_padding">56dp</dimen>
 
+    <dimen name="add_favorite_place_map_top_padding">100dp</dimen>
+    <dimen name="add_favorite_place_map_right_padding">30dp</dimen>
+
     <dimen name="image_view_size">100dp</dimen>
     <dimen name="image_view_size_half">50dp</dimen>
 
