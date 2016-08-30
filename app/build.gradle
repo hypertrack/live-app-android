@@ -22,7 +22,6 @@ repositories {
 }
 
 android {
-
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
     lintOptions {
@@ -113,24 +112,27 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.3.2'
-    debugCompile('io.hypertrack:transmitter:1.2.12:debug@aar') {
-        transitive = true;
-    }
-    releaseCompile('io.hypertrack:transmitter:1.2.12:release@aar') {
-        transitive = true;
-    }
-    debugCompile('io.hypertrack:consumer:1.2.12:debug@aar') {
-        transitive = true;
-    }
-    releaseCompile('io.hypertrack:consumer:1.2.12:release@aar') {
-        transitive = true;
-    }
-    //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+
+    compile(project(path: ':common')) {
+        transitive = true
+    }
+    releaseCompile(project(path: ':consumer', configuration: 'release')) {
+        transitive = false
+    }
+    debugCompile(project(path: ':consumer', configuration: 'debug')) {
+        transitive = false
+    }
+    releaseCompile(project(path: ':transmitter', configuration: 'release')) {
+        transitive = false
+    }
+    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
+        transitive = false
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'

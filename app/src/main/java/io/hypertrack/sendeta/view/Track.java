@@ -136,10 +136,6 @@ public class Track extends BaseActivity {
                         TrackTaskResponse trackTaskResponse = response.body();
                         if (trackTaskResponse != null) {
 
-                            if (!TextUtils.isEmpty(trackTaskResponse.getTaskID())) {
-                                taskIDList.add(trackTaskResponse.getTaskID());
-                            }
-
                             ArrayList<String> groupTaskIDList = trackTaskResponse.getGroupTaskIDList();
                             if (groupTaskIDList != null && !groupTaskIDList.isEmpty()) {
                                 taskIDList.addAll(groupTaskIDList);
@@ -220,6 +216,11 @@ public class Track extends BaseActivity {
             }
 
             return super.getTaskIDsToTrack(mapFragment);
+        }
+
+        @Override
+        public String getOrderStatusToolbarDefaultTitle(HTMapFragment mapFragment) {
+            return getResources().getString(R.string.app_name);
         }
     }
 }

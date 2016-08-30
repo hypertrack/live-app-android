@@ -52,4 +52,5 @@
         <item name="android:paddingRight">0dp</item>
     </style>
 
+    <style name="HTOrderStatusToolbarTheme" parent="AppTheme.AppBarOverlay"/>
 </resources>
