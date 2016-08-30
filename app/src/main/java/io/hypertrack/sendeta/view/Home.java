@@ -1400,7 +1400,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         taskManager.setTaskCompletedListener(new TaskManagerListener() {
             @Override
             public void OnCallback() {
-                OnCompleteTask();
+
+                // Call OnCompleteTask method on UI thread
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Home.this.OnCompleteTask();
+                    }
+                });
             }
         });
 
