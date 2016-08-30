@@ -241,6 +241,8 @@ public class MetaGCMListenerService extends GcmListenerService {
                         placeToUpdate.setAddress(metaPlaceAddress);
 
                         realm.copyToRealmOrUpdate(placeToUpdate);
+
+                        HTLog.i(TAG, "Destination Location updated");
                     }
                 });
             } finally {

@@ -12,7 +12,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
-import java.util.Date;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTTask;
@@ -113,7 +112,7 @@ public class SharedPreferenceManager {
 
         try {
             GsonBuilder gsonBuilder = new GsonBuilder();
-            gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
+//            gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
             gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
             gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
             Gson gson = gsonBuilder.create();

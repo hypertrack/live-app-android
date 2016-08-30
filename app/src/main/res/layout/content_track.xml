@@ -29,4 +29,6 @@
         android:text="retry"
         android:textColor="#ffffff"
         android:visibility="gone" />
+
+    <include layout="@layout/layout_loading" />
 </FrameLayout>

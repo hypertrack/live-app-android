@@ -46,6 +46,10 @@
     <dimen name="elevation_medium">4dp</dimen>
     <dimen name="elevation_high">8dp</dimen>
 
+    <!-- CardView Dimensions -->
+    <dimen name="card_radius">4dp</dimen>
+    <dimen name="card_radius_low">2dp</dimen>
+
     <!-- Map Padding -->
     <dimen name="map_side_padding">48dp</dimen>
     <dimen name="map_active_task_side_padding">100dp</dimen>

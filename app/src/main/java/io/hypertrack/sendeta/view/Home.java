@@ -1580,6 +1580,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                     // Update MetaPlace in RealmDB
                     UserStore.sharedStore.editPlace(place);
+                    HTLog.i(TAG, "Destination Location updated");
                 } else {
 
                     place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
@@ -1591,6 +1592,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     // Hide destinationDescription layout
                     destinationDescription.setText("");
                     destinationDescription.setVisibility(View.GONE);
+
+                    HTLog.i(TAG, "Destination Location changed");
                 }
 
                 TaskManager.getSharedManager(Home.this).setPlace(place);
