@@ -55,13 +55,18 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+
+                <!-- Add sendeta.com/accept DeepLink URL -->
                 <data
                     android:host="www.sendeta.com"
                     android:pathPrefix="/accept" />
+
+                <!-- Add sendeta.com/request DeepLink URL -->
                 <data
                     android:host="www.sendeta.com"
                     android:pathPrefix="/request" />
 
+                <!-- Add eta.fyi DeepLink URL -->
                 <data
                     android:host="@string/eta_link_url"
                     android:pathPrefix="/" />
