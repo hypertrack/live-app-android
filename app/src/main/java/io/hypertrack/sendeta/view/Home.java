@@ -794,13 +794,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             @Override
             public void onSwipeConfirm() {
 
-                showEndingTripAnimation(true);
-
-                //Check if Location Permission has been granted & Location has been enabled
+                // Check if Location Permission has been granted & Location has been enabled
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
                         && isLocationEnabled()) {
 
                     // Complete the Task
+                    showEndingTripAnimation(true);
                     completeTask();
                 } else {
                     checkForLocationPermission();

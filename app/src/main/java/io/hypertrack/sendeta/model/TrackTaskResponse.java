@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class TrackTaskResponse {
 
     @SerializedName("group_task_ids")
-    private ArrayList<String> groupTaskIDList;
+    private ArrayList<String> activeTaskIDList;
 
     @SerializedName("task_id")
     private String taskID;
@@ -21,12 +21,12 @@ public class TrackTaskResponse {
     @SerializedName("publishable_key")
     private String publishableKey;
 
-    public ArrayList<String> getGroupTaskIDList() {
-        return groupTaskIDList;
+    public ArrayList<String> getActiveTaskIDList() {
+        return activeTaskIDList;
     }
 
-    public void setGroupTaskIDList(ArrayList<String> groupTaskIDList) {
-        this.groupTaskIDList = groupTaskIDList;
+    public void setActiveTaskIDList(ArrayList<String> activeTaskIDList) {
+        this.activeTaskIDList = activeTaskIDList;
     }
 
     public String getTaskID() {

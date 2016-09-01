@@ -2,6 +2,7 @@ package io.hypertrack.sendeta;
 
 import android.app.Application;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.fabric.sdk.android.Fabric;
+import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.DBMigration;
@@ -38,6 +40,11 @@ public class MetaApplication extends Application {
         Fabric.with(this, new Crashlytics());
         mInstance = this;
         this.mContext = getApplicationContext();
+
+        // Set Publishable Key, if not set yet
+        if (TextUtils.isEmpty(HyperTrack.getPublishableKey(getApplicationContext()))) {
+            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
+        }
 
         // Initialize HyperTrack SDKs
         HTTransmitterService.initHTTransmitter(getApplicationContext());

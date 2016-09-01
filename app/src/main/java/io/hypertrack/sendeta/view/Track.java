@@ -72,12 +72,13 @@ public class Track extends BaseActivity {
         retryButton = (Button) findViewById(R.id.retryButton);
 
         // Initialize HyperTrack MapFragment & ConsumerClient
+        htConsumerClient = HTConsumerClient.getInstance(Track.this);
+        htConsumerClient.clearTasks();
+
         HTMapFragment htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         htMapAdapter = new HyperTrackMapAdapter(this);
         htMapFragment.setHTMapAdapter(htMapAdapter);
         htMapFragment.setMapFragmentCallback(htMapFragmentCallback);
-
-        htConsumerClient = HTConsumerClient.getInstance(Track.this);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -156,17 +157,31 @@ public class Track extends BaseActivity {
                         TrackTaskResponse trackTaskResponse = response.body();
                         if (trackTaskResponse != null) {
 
-                            ArrayList<String> groupTaskIDList = trackTaskResponse.getGroupTaskIDList();
-                            if (groupTaskIDList != null && !groupTaskIDList.isEmpty()) {
-                                taskIDsToTrack.addAll(groupTaskIDList);
+                            String taskID = trackTaskResponse.getTaskID();
+                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
+
+                            // Check if clicked taskID exists in activeTaskIDList or not
+                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+                                taskIDsToTrack.add(taskID);
+
+                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
+                                taskIDsToTrack.addAll(activeTaskIDList);
                             }
 
                             if (!TextUtils.isEmpty(trackTaskResponse.getPublishableKey())) {
                                 // Set HyperTrack PublishableKey
                                 HyperTrack.setPublishableApiKey(trackTaskResponse.getPublishableKey(), getApplicationContext());
+                            } else {
+                                Toast.makeText(Track.this, "Publishable Key is not present", Toast.LENGTH_SHORT).show();
+
+                                // Show RetryButton
+                                showRetryButton(true);
+                                displayLoader(false);
+                                return;
                             }
                         }
 
+                        // Successful case where valid taskIDs were received
                         if (!taskIDsToTrack.isEmpty()) {
                             startTaskTracking();
 
