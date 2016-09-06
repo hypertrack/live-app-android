@@ -1,6 +1,7 @@
 package io.hypertrack.sendeta.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -12,16 +13,26 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
+import io.hypertrack.lib.consumer.utils.HTMapUtils;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
 import io.hypertrack.sendeta.model.UserActivity;
@@ -35,6 +46,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
     private Context mContext;
     private ArrayList<UserActivity> userActivities;
     private UserActivitiesOnClickListener listener;
+
+    protected HashSet<MapView> mMapViews = new HashSet<>();
 
     public SentActivitiesAdapter(Context mContext, ArrayList<UserActivity> userActivities, UserActivitiesOnClickListener listener) {
         this.mContext = mContext;
@@ -50,7 +63,11 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
     @Override
     public SentActivitiesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_user_activity, parent, false);
-        return new SentActivitiesViewHolder(view);
+        SentActivitiesViewHolder holder = new SentActivitiesViewHolder(view);
+
+        mMapViews.add(holder.mapSummaryView);
+
+        return holder;
     }
 
     @Override
@@ -132,23 +149,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
                 } else {
 
-                    if (holder.mapSummaryView != null) {
-                        holder.mapSummaryView.onCreate(null);
-                        holder.mapSummaryView.onResume();
-                        holder.mapSummaryView.getMapAsync(new OnMapReadyCallback() {
-                            @Override
-                            public void onMapReady(GoogleMap googleMap) {
-                                MapsInitializer.initialize(mContext);
-                                holder.map = googleMap;
-//                                if (currentFriend.getLatitude() != null && currentFriend.getLongitude() != null) {
-//                                    LatLng coordinates = new LatLng(currentFriend.getLatitude(), currentFriend.getLongitude());
-//                                    googleMap.addMarker(new MarkerOptions().position(coordinates)
-//                                            .title(currentFriend.getNickname()));
-//                                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, 15));
-//                                }
-                            }
-                        });
-                    }
+                    holder.setMapSummaryView();
 
                     String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(mContext, task);
                     if (!TextUtils.isEmpty(formattedSubtitle)) {
@@ -195,33 +196,13 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
         }
     }
 
-    /**
-     * Displays a {@link } on a
-     * {@link com.google.android.gms.maps.GoogleMap}.
-     * Adds a marker and centers the camera on the NamedLocation with the normal map type.
-     */
-    private static void setMapLocation(GoogleMap map, UserActivity activity) {
-        // Add a marker for this item and set the camera
-//        map.moveCamera(CameraUpdateFactory.newLatLngZoom(data.location, 13f));
-//        map.addMarker(new MarkerOptions().position(data.location));
-
-        // Set the map type back to normal.
-//        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-    }
-
     @Override
     public int getItemCount() {
         return userActivities.size();
     }
 
-    @Override
-    public void onViewRecycled(SentActivitiesViewHolder holder) {
-        super.onViewRecycled(holder);
-        // Cleanup MapView here?
-        if (holder.map != null) {
-            holder.map.clear();
-            holder.map.setMapType(GoogleMap.MAP_TYPE_NONE);
-        }
+    public HashSet<MapView> getMapViews() {
+        return mMapViews;
     }
 
     public class SentActivitiesViewHolder extends RecyclerView.ViewHolder implements OnMapReadyCallback {
@@ -237,8 +218,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
         public SentActivitiesViewHolder(View itemView) {
             super(itemView);
-//            mapSummaryView = (MapView) itemView.findViewById(R.id.item_user_activity_map_summary);
-//            initializeMapView();
+            mapSummaryView = (MapView) itemView.findViewById(R.id.item_user_activity_map_summary);
+            initializeMapView();
 
             activityTitle = (TextView) itemView.findViewById(R.id.item_user_activity_title);
             activitySubtitle = (TextView) itemView.findViewById(R.id.item_user_activity_subtitle_text);
@@ -279,14 +260,99 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
             });
         }
 
+        public void setMapSummaryView() {
+            if (map != null) {
+                updateMapContents(map);
+                mapSummaryView.setClickable(false);
+            }
+        }
+
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            MapsInitializer.initialize(mContext);
             map = googleMap;
-//            NamedLocation data = (NamedLocation) mapSummaryView.getTag();
-//            if (data != null) {
-//                setMapLocation(map, data);
-//            }
+
+            MapsInitializer.initialize(mContext);
+
+            map.getUiSettings().setMapToolbarEnabled(false);
+
+            if (map != null) {
+                updateMapContents(map);
+                mapSummaryView.setClickable(false);
+            }
+        }
+
+        protected void updateMapContents(GoogleMap map) {
+            int position = getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION) {
+
+                if (userActivities.size() > getAdapterPosition() && userActivities.get(position) != null) {
+                    UserActivity activity = userActivities.get(position);
+
+                    if (activity != null && activity.getTaskDetails() != null) {
+                        HTTask taskDetails = activity.getTaskDetails();
+
+                        // Since the mapView is re-used, need to remove pre-existing mapView features.
+                        map.clear();
+
+                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                        int points = 0;
+
+                        // Update the mapView feature data and camera position.
+                        if (taskDetails.getDestination() != null && taskDetails.getDestination().getLocation() != null) {
+                            double[] coordinates = taskDetails.getDestination().getLocation().getCoordinates();
+                            LatLng destination = new LatLng(coordinates[1], coordinates[0]);
+
+                            map.addMarker(new MarkerOptions().position(destination)
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_end_marker)));
+
+                            builder.include(destination);
+                            points++;
+                        }
+
+                        if (taskDetails.getStartLocation() != null) {
+                            double[] coordinates = taskDetails.getStartLocation().getCoordinates();
+                            LatLng source = new LatLng(coordinates[1], coordinates[0]);
+
+                            map.addMarker(new MarkerOptions().position(source)
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_start_marker)));
+
+                            builder.include(source);
+                            points++;
+                        }
+
+                        String encodedPolyline = taskDetails.getEncodedPolyline();
+
+                        if (!TextUtils.isEmpty(encodedPolyline)) {
+                            List<LatLng> polyline = HTMapUtils.decode(encodedPolyline);
+                            PolylineOptions options = new PolylineOptions().width(8).color(Color.parseColor("#0A61C2"));
+                            options.addAll(polyline);
+
+                            map.addPolyline(options);
+
+                            for (LatLng latLng : polyline) {
+                                builder.include(latLng);
+                                points++;
+                            }
+                        }
+
+                        mapSummaryView.setVisibility(View.VISIBLE);
+
+                        CameraUpdate cameraUpdate = null;
+                        if (points == 1) {
+                            cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 13f);
+                        } else if (points > 0){
+                            cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 10);
+                        }
+
+                        if (cameraUpdate != null) {
+                            map.moveCamera(cameraUpdate);
+                            return;
+                        }
+                    }
+                }
+            }
+
+            mapSummaryView.setVisibility(View.GONE);
         }
 
         /**

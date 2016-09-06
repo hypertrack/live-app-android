@@ -13,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.MapView;
+
 import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
@@ -107,6 +109,12 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         super.onResume();
 
         getSentActivities();
+
+        if (historyActivitiesAdapter != null) {
+            for (MapView m : historyActivitiesAdapter.getMapViews()) {
+                m.onResume();
+            }
+        }
     }
 
     private void getSentActivities() {
@@ -311,8 +319,34 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     }
 
     @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+
+        if (historyActivitiesAdapter != null) {
+            for (MapView m : historyActivitiesAdapter.getMapViews()) {
+                m.onLowMemory();
+            }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (historyActivitiesAdapter != null) {
+            for (MapView m : historyActivitiesAdapter.getMapViews()) {
+                m.onPause();
+            }
+        }
+    }
+
+    @Override
     public void onDestroy() {
-        super.onDestroy();
+        if (historyActivitiesAdapter != null) {
+            for (MapView m : historyActivitiesAdapter.getMapViews()) {
+                m.onDestroy();
+            }
+        }
 
         if (inProcessSentActivitiesCall != null) {
             inProcessSentActivitiesCall.cancel();
@@ -321,5 +355,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         if (historySentActivitiesCall != null) {
             historySentActivitiesCall.cancel();
         }
+
+        super.onDestroy();
     }
 }
