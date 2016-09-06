@@ -95,7 +95,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         // Initialize Adapters
         inProcessActivitiesAdapter = new SentActivitiesAdapter(getActivity(), inProcessActivities, this);
         inProcessRecyclerView.setAdapter(inProcessActivitiesAdapter);
-        historyActivitiesAdapter = new SentActivitiesAdapter(getActivity(), historyActivities, this);
+        historyActivitiesAdapter = new SentActivitiesAdapter(getActivity(), historyActivities, this, true);
         historyRecyclerView.setAdapter(historyActivitiesAdapter);
 
         inProcessActivities = new ArrayList<>();

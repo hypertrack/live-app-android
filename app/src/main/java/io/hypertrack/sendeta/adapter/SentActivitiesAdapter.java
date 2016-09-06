@@ -46,6 +46,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
     private Context mContext;
     private ArrayList<UserActivity> userActivities;
     private UserActivitiesOnClickListener listener;
+    private boolean showMapSummary = false;
 
     protected HashSet<MapView> mMapViews = new HashSet<>();
 
@@ -53,6 +54,13 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
         this.mContext = mContext;
         this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivity>();
         this.listener = listener;
+    }
+
+    public SentActivitiesAdapter(Context mContext, ArrayList<UserActivity> userActivities, UserActivitiesOnClickListener listener, boolean showMapSummary) {
+        this.mContext = mContext;
+        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivity>();
+        this.listener = listener;
+        this.showMapSummary = showMapSummary;
     }
 
     public void setUserActivities(ArrayList<UserActivity> userActivities) {
@@ -65,7 +73,9 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item_user_activity, parent, false);
         SentActivitiesViewHolder holder = new SentActivitiesViewHolder(view);
 
-        mMapViews.add(holder.mapSummaryView);
+        if (showMapSummary) {
+            mMapViews.add(holder.mapSummaryView);
+        }
 
         return holder;
     }
@@ -149,7 +159,9 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
                 } else {
 
-                    holder.setMapSummaryView();
+                    if (showMapSummary) {
+                        holder.setMapSummaryView();
+                    }
 
                     String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(mContext, task);
                     if (!TextUtils.isEmpty(formattedSubtitle)) {
@@ -218,8 +230,10 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
         public SentActivitiesViewHolder(View itemView) {
             super(itemView);
-            mapSummaryView = (MapView) itemView.findViewById(R.id.item_user_activity_map_summary);
-            initializeMapView();
+            if (showMapSummary) {
+                mapSummaryView = (MapView) itemView.findViewById(R.id.item_user_activity_map_summary);
+                initializeMapView();
+            }
 
             activityTitle = (TextView) itemView.findViewById(R.id.item_user_activity_title);
             activitySubtitle = (TextView) itemView.findViewById(R.id.item_user_activity_subtitle_text);
@@ -341,7 +355,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                         if (points == 1) {
                             cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 13f);
                         } else if (points > 0){
-                            cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 10);
+                            cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 9);
                         }
 
                         if (cameraUpdate != null) {
