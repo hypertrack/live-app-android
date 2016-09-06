@@ -137,8 +137,8 @@ public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActi
 
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-//                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_low);
-                    layoutParams.setMargins(0, 0, 0, 0);
+                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_very_low);
+                    layoutParams.setMargins(0, margin, 0, margin);
                     holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
                 }
             }

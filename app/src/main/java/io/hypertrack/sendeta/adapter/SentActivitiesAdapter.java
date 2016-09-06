@@ -72,6 +72,9 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                     if (resId != null) {
                         holder.activityTitle.setText(mContext.getString(resId));
                         holder.activityTitle.setVisibility(View.VISIBLE);
+                    } else if (!TextUtils.isEmpty(task.getTaskDisplay().getStatusText())) {
+                        holder.activityTitle.setText(task.getTaskDisplay().getStatusText());
+                        holder.activityTitle.setVisibility(View.VISIBLE);
                     }
                 }
 
@@ -84,8 +87,10 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                         case HTTask.TASK_STATUS_DRIVER_ARRIVING:
                         case HTTask.TASK_STATUS_DRIVER_ARRIVED:
                         case HTTask.TASK_STATUS_NO_LOCATION:
+                        case HTTask.TASK_STATUS_LOCATION_LOST:
                         case HTTask.TASK_STATUS_CONNECTION_LOST:
                         case HTTask.TASK_STATUS_COMPLETED:
+                        default:
                             holder.activityLayoutMainIcon.setImageResource(R.drawable.ic_sent_activity_icon);
                             holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme_light));
                             break;
@@ -93,7 +98,6 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                         case HTTask.TASK_STATUS_CANCELED:
                         case HTTask.TASK_STATUS_ABORTED:
                         case HTTask.TASK_STATUS_SUSPENDED:
-                        default:
                             holder.activityLayoutMainIcon.setImageResource(R.drawable.ic_sent_activity_icon);
                             holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme));
                             break;
@@ -183,7 +187,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
                     LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_low);
+                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_very_low);
                     layoutParams.setMargins(0, margin, 0, margin);
                     holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
                 }

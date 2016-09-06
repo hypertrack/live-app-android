@@ -1435,8 +1435,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (taskDisplayStatusResId != null) {
             this.setTitle(getString(taskDisplayStatusResId));
         } else {
-            // Set Toolbar Title as AppName
-            this.setTitle(getResources().getString(R.string.app_name));
+
+            if (!TextUtils.isEmpty(taskDisplay.getStatusText())) {
+                this.setTitle(taskDisplay.getStatusText());
+            } else {
+                // Set Toolbar Title as AppName
+                this.setTitle(getResources().getString(R.string.app_name));
+            }
         }
 
         // Set Toolbar SubTitle as DisplaySubStatus for currently active task

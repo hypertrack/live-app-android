@@ -133,6 +133,8 @@ public class HyperTrackTaskUtils {
                 return io.hypertrack.lib.consumer.R.string.task_status_suspended;
             case HTTask.TASK_STATUS_NO_LOCATION:
                 return io.hypertrack.lib.consumer.R.string.task_status_no_location;
+            case HTTask.TASK_STATUS_LOCATION_LOST:
+                return io.hypertrack.lib.consumer.R.string.task_status_location_lost;
             case HTTask.TASK_STATUS_CONNECTION_LOST:
                 return io.hypertrack.lib.consumer.R.string.task_status_connection_lost;
             default:
