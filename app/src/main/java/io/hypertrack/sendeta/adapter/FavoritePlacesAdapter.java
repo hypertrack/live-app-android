@@ -114,6 +114,9 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
             deleteIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (getAdapterPosition() == RecyclerView.NO_POSITION)
+                        return;
+
                     itemToBeDeletedAtPosition(getAdapterPosition());
                 }
             });
@@ -121,6 +124,9 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    if (getAdapterPosition() == RecyclerView.NO_POSITION)
+                        return;
+
                     itemClickedAtPosition(getAdapterPosition());
                 }
             });

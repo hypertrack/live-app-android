@@ -68,4 +68,6 @@
     <dimen name="hero_marker_image">48dp</dimen>
     <dimen name="profile_image_size">100dp</dimen>
 
+    <dimen name="icon_size">24dp</dimen>
+
 </resources>

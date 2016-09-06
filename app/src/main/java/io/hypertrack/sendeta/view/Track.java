@@ -103,7 +103,7 @@ public class Track extends BaseActivity {
 
                 // Check if a valid TASK_ID_LIST is available
                 if (!taskIDsToTrack.isEmpty()) {
-                    // Fetch TaskDetails for TaskIDList received from Activities Screen
+                    // Fetch TaskDetails for TaskIDList received from UserActivities Screen
                     startTaskTracking();
                     return;
                 }
@@ -236,7 +236,7 @@ public class Track extends BaseActivity {
                         retryButton.setEnabled(false);
 
                     } else if (!taskIDsToTrack.isEmpty()) {
-                        // Fetch TaskDetails for TaskIDList received from Activities Screen
+                        // Fetch TaskDetails for TaskIDList received from UserActivities Screen
                         startTaskTracking();
                         retryButton.setEnabled(false);
                     }

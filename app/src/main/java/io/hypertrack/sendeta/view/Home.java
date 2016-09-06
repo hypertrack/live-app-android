@@ -121,6 +121,7 @@ import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
+import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
@@ -1422,32 +1423,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        etaInMinutes = getTaskDisplayETA(task.getTaskDisplay());
+        etaInMinutes = HyperTrackTaskUtils.getTaskDisplayETA(task.getTaskDisplay());
         updateDestinationMarker(destinationLocation, etaInMinutes);
-    }
-
-    private Integer getTaskDisplayETA(HTTaskDisplay taskDisplay) {
-        if (taskDisplay != null && !TextUtils.isEmpty(taskDisplay.getDurationRemaining())) {
-            Double etaInSeconds = Double.valueOf(taskDisplay.getDurationRemaining());
-
-            if (etaInSeconds != null) {
-                double etaInMinutes = Math.ceil((etaInSeconds / (float) 60));
-                if (etaInMinutes < 1) {
-                    etaInMinutes = 1;
-                }
-
-                return (int) etaInMinutes;
-            }
-        }
-
-        return null;
     }
 
     private void updateDisplayStatusForOngoingTask(HTTask task) {
         HTTaskDisplay taskDisplay = task.getTaskDisplay();
 
         // Set Toolbar Title as DisplayStatus for currently active task
-        Integer taskDisplayStatusResId = getTaskDisplayStatus(taskDisplay);
+        Integer taskDisplayStatusResId = HyperTrackTaskUtils.getTaskDisplayStatus(taskDisplay);
         if (taskDisplayStatusResId != null) {
             this.setTitle(getString(taskDisplayStatusResId));
         } else {
@@ -1461,40 +1445,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             this.setSubTitle(taskDisplaySubStatus);
         } else {
             this.setSubTitle("");
-        }
-    }
-
-    public Integer getTaskDisplayStatus(HTTaskDisplay taskDisplay) {
-        if (taskDisplay == null || TextUtils.isEmpty(taskDisplay.getStatus()))
-            return null;
-
-        String taskDisplayStatus = taskDisplay.getStatus();
-
-        switch (taskDisplayStatus) {
-            case HTTask.TASK_STATUS_NOT_STARTED:
-                return io.hypertrack.lib.consumer.R.string.task_status_not_started;
-            case HTTask.TASK_STATUS_DISPATCHING:
-                return io.hypertrack.lib.consumer.R.string.task_status_dispatching;
-            case HTTask.TASK_STATUS_DRIVER_ON_THE_WAY:
-                return io.hypertrack.lib.consumer.R.string.task_status_driver_on_the_way;
-            case HTTask.TASK_STATUS_DRIVER_ARRIVING:
-                return io.hypertrack.lib.consumer.R.string.task_status_driver_arriving;
-            case HTTask.TASK_STATUS_DRIVER_ARRIVED:
-                return io.hypertrack.lib.consumer.R.string.task_status_driver_arrived;
-            case HTTask.TASK_STATUS_COMPLETED:
-                return io.hypertrack.lib.consumer.R.string.task_status_completed;
-            case HTTask.TASK_STATUS_CANCELED:
-                return io.hypertrack.lib.consumer.R.string.task_status_canceled;
-            case HTTask.TASK_STATUS_ABORTED:
-                return io.hypertrack.lib.consumer.R.string.task_status_aborted;
-            case HTTask.TASK_STATUS_SUSPENDED:
-                return io.hypertrack.lib.consumer.R.string.task_status_suspended;
-            case HTTask.TASK_STATUS_NO_LOCATION:
-                return io.hypertrack.lib.consumer.R.string.task_status_no_location;
-            case HTTask.TASK_STATUS_CONNECTION_LOST:
-                return io.hypertrack.lib.consumer.R.string.task_status_connection_lost;
-            default:
-                return null;
         }
     }
 

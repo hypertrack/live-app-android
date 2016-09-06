@@ -86,7 +86,7 @@ public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.Dra
 //                            }
 
                             case R.id.drawer_user_activities: {
-                                Intent activitiesIntent = new Intent(DrawerBaseActivity.this, Activities.class);
+                                Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
                                 startActivity(activitiesIntent);
                                 break;
                             }

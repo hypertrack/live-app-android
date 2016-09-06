@@ -176,4 +176,8 @@
         <item quantity="other">hrs</item>
     </plurals>
 
+    <!-- UserActivities Stings -->
+    <string name="received_activities_no_data_text">You don\'t have any received activities</string>
+    <string name="sent_activities_no_data_text">You don\'t have any sent activities</string>
+
 </resources>

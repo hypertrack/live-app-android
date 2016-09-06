@@ -6,6 +6,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
@@ -14,7 +15,7 @@ import io.hypertrack.sendeta.R;
 /**
  * Created by piyush on 29/08/16.
  */
-public class Activities extends BaseActivity {
+public class UserActivities extends BaseActivity {
 
     private ViewPager viewPager;
 
@@ -47,7 +48,7 @@ public class Activities extends BaseActivity {
         viewPager = (ViewPager) findViewById(R.id.activities_view_pager);
 
         if (tabLayout == null || viewPager == null) {
-            Toast.makeText(Activities.this, "Error occurred while opening Activities screen.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(UserActivities.this, "Error occurred while opening UserActivities screen.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -55,8 +56,10 @@ public class Activities extends BaseActivity {
         // Add Received & Sent Tabs
         tabLayout.addTab(tabLayout.newTab().setText(R.string.title_activities_tab_received));
         tabLayout.addTab(tabLayout.newTab().setText(R.string.title_activities_tab_sent));
+        tabLayout.setTabTextColors(ContextCompat.getColor(this, R.color.text_base),
+                ContextCompat.getColor(this, R.color.text_highlight));
 
-        // Add ViewPagerAdapter & TabLayout Listener for Activities Tabs
+        // Add ViewPagerAdapter & TabLayout Listener for UserActivities Tabs
         ActivitiesPagerAdapter adapter = new ActivitiesPagerAdapter(getSupportFragmentManager(), tabLayout.getTabCount());
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));

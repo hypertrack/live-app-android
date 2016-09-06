@@ -14,6 +14,7 @@ import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.TrackTaskResponse;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.model.UserActivitiesListResponse;
 import io.hypertrack.sendeta.store.VerifyResponse;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -89,7 +90,19 @@ public interface SendETAService {
     @POST("/api/v1/users/{id}/add_device/")
     Call<ResponseBody> addGCMToken(@Path("id") int id, @Body GCMAddDeviceDTO gcmAddDeviceDTO);
 
-    // Activities Call
+    // UserActivities Call
     @POST("/api/v1/users/{id}/track/")
     Call<TrackTaskResponse> addTaskForTracking(@Path("id") int id, @Body AddTaskToTrackDTO addTaskToTrackDTO);
+
+    @GET("/api/v1/trips/?is_live=True&is_pending=False")
+    Call<UserActivitiesListResponse> getInProcessSentUserActivities();
+
+    @GET("/api/v1/trips/?is_live=False&is_pending=False")
+    Call<UserActivitiesListResponse> getHistorySentUserActivities();
+
+    @GET("/api/v1/trips/observed/?is_live=True&is_pending=False")
+    Call<UserActivitiesListResponse> getInProcessReceivedUserActivities();
+
+    @GET("/api/v1/trips/observed/?is_live=False&is_pending=False")
+    Call<UserActivitiesListResponse> getHistoryReceivedUserActivities();
 }

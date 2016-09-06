@@ -29,7 +29,7 @@
         android:theme="@style/AppTheme"
         tools:replace="android:label">
 
-        <!-- Register Activities here -->
+        <!-- Register UserActivities here -->
         <activity
             android:name=".view.SplashScreen"
             android:allowTaskReparenting="false"
@@ -131,13 +131,13 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.Activities"
+            android:name=".view.UserActivities"
             android:parentActivityName=".view.Home"
             android:screenOrientation="portrait" />
 
         <activity
             android:name=".view.Track"
-            android:parentActivityName=".view.Activities"
+            android:parentActivityName=".view.UserActivities"
             android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->
