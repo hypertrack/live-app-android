@@ -90,7 +90,7 @@ public class HyperTrackTaskUtils {
             return null;
         }
 
-        DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("dd-MMM-yyyy");
         return dateFormat.format(task.getCompletionTime());
     }
 

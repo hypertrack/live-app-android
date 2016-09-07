@@ -40,10 +40,11 @@ import retrofit2.Response;
 /**
  * Created by piyush on 29/08/16.
  */
-public class ReceivedActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener{
+public class ReceivedActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
 
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
-    private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader;
+    private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader,
+            inProcessMoreLayout, historyMoreLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noDataText;
 
@@ -52,10 +53,14 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
     private Call<UserActivitiesListResponse> inProcessActivitiesCall, historyReceivedActivitiesCall;
 
     private boolean inProcessActivitiesCallCompleted = true, historyActivitiesCallCompleted = true;
+    int inProcessActivitiesPage = 1, historyActivitiesPage = 1;
 
     private View.OnClickListener retryListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            // Reset page for the data to be refreshed
+            resetActivitiesData();
+
             getReceivedActivities();
         }
     };
@@ -63,7 +68,39 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
     private SwipeRefreshLayout.OnRefreshListener swipeRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
+            // Reset page for the data to be refreshed
+            resetActivitiesData();
+
             getReceivedActivities();
+        }
+    };
+
+    private void resetActivitiesData() {
+        inProcessActivitiesPage = 1;
+        historyActivitiesPage = 1;
+        inProcessActivities.clear();
+        historyActivities.clear();
+    }
+
+    private View.OnClickListener onMoreInProcessActivitiesListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            displayLoader(true);
+
+            SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                    SharedPreferenceManager.getUserAuthToken());
+            getInProcessActivities(sendETAService);
+        }
+    };
+
+    private View.OnClickListener onMoreHistoryActivitiesListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            displayLoader(true);
+
+            SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                    SharedPreferenceManager.getUserAuthToken());
+            getHistoryActivities(sendETAService);
         }
     };
 
@@ -84,9 +121,15 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         swipeRefreshLayout.setOnRefreshListener(swipeRefreshListener);
 
-        // Initialize HeaderLayouts
+        // Initialize HeaderLayouts & FooterLayouts
         inProcessActivitiesHeader = (LinearLayout) rootView.findViewById(R.id.activities_in_process);
         historyActivitiesHeader = (LinearLayout) rootView.findViewById(R.id.activities_history);
+
+        inProcessMoreLayout = (LinearLayout) rootView.findViewById(R.id.activities_in_process_more_layout);
+        inProcessMoreLayout.setOnClickListener(onMoreInProcessActivitiesListener);
+
+        historyMoreLayout = (LinearLayout) rootView.findViewById(R.id.activities_history_more_layout);
+        historyMoreLayout.setOnClickListener(onMoreHistoryActivitiesListener);
 
         // Initialize RecyclerViews
         inProcessRecyclerView = (RecyclerView) rootView.findViewById(R.id.activities_in_process_list);
@@ -113,6 +156,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
     public void onResume() {
         super.onResume();
 
+        // Reset page for the data to be refreshed
+        resetActivitiesData();
+
         getReceivedActivities();
     }
 
@@ -129,10 +175,17 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                 SharedPreferenceManager.getUserAuthToken());
 
         // Initiate inProcessReceivedActivities Call
+        getInProcessActivities(sendETAService);
+
+        // Initiate historyReceivedActivities Call
+        getHistoryActivities(sendETAService);
+    }
+
+    private void getInProcessActivities(SendETAService sendETAService) {
         if (inProcessActivitiesCallCompleted) {
             inProcessActivitiesCallCompleted = false;
 
-            inProcessActivitiesCall = sendETAService.getInProcessReceivedUserActivities();
+            inProcessActivitiesCall = sendETAService.getInProcessReceivedUserActivities(inProcessActivitiesPage);
             inProcessActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
@@ -141,23 +194,32 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                     }
 
                     if (response.isSuccessful()) {
-
                         UserActivitiesListResponse activitiesListResponse = response.body();
-                        if (activitiesListResponse != null && activitiesListResponse.getUserActivities() != null
-                                && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
+                        if (activitiesListResponse != null) {
+                            if (!TextUtils.isEmpty(activitiesListResponse.getNext())) {
+                                inProcessActivitiesPage++;
+                                inProcessMoreLayout.setVisibility(View.VISIBLE);
+                            } else {
+                                inProcessMoreLayout.setVisibility(View.GONE);
+                            }
 
-                            inProcessActivitiesHeader.setVisibility(View.VISIBLE);
-                            inProcessRecyclerView.setVisibility(View.VISIBLE);
+                            if (activitiesListResponse.getUserActivities() != null
+                                    && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            swipeRefreshLayout.setVisibility(View.VISIBLE);
-                            noDataLayout.setVisibility(View.GONE);
+                                parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
 
-                            inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+                                inProcessActivitiesHeader.setVisibility(View.VISIBLE);
+                                inProcessRecyclerView.setVisibility(View.VISIBLE);
 
-                            inProcessActivitiesCallCompleted = true;
-                            return;
+                                swipeRefreshLayout.setVisibility(View.VISIBLE);
+                                noDataLayout.setVisibility(View.GONE);
+
+                                inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+
+                                inProcessActivitiesCallCompleted = true;
+                                return;
+                            }
                         }
 
                         // Hide InProcess List Views
@@ -165,7 +227,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                         inProcessActivitiesHeader.setVisibility(View.GONE);
                         inProcessRecyclerView.setVisibility(View.GONE);
 
-                         checkForNoData();
+                        checkForNoData();
 
                         inProcessActivitiesCallCompleted = true;
                         return;
@@ -205,12 +267,13 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                 }
             });
         }
+    }
 
-        // Initiate historyReceivedActivities Call
+    private void getHistoryActivities(SendETAService sendETAService) {
         if (historyActivitiesCallCompleted) {
             historyActivitiesCallCompleted = false;
 
-            historyReceivedActivitiesCall = sendETAService.getHistoryReceivedUserActivities();
+            historyReceivedActivitiesCall = sendETAService.getHistoryReceivedUserActivities(historyActivitiesPage);
             historyReceivedActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
@@ -219,23 +282,32 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                     }
 
                     if (response.isSuccessful()) {
-
                         UserActivitiesListResponse activitiesListResponse = response.body();
-                        if (activitiesListResponse != null && activitiesListResponse.getUserActivities() != null
-                                && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            parseUserActivityDetails(activitiesListResponse.getUserActivities(), false);
+                        if (activitiesListResponse != null) {
+                            if (!TextUtils.isEmpty(activitiesListResponse.getNext())) {
+                                historyActivitiesPage++;
+                                historyMoreLayout.setVisibility(View.VISIBLE);
+                            } else {
+                                historyMoreLayout.setVisibility(View.GONE);
+                            }
 
-                            historyActivitiesHeader.setVisibility(View.VISIBLE);
-                            historyRecyclerView.setVisibility(View.VISIBLE);
+                            if (activitiesListResponse.getUserActivities() != null
+                                    && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            swipeRefreshLayout.setVisibility(View.VISIBLE);
-                            noDataLayout.setVisibility(View.GONE);
+                                parseUserActivityDetails(activitiesListResponse.getUserActivities(), false);
 
-                            historyActivitiesAdapter.setUserActivities(historyActivities);
+                                historyActivitiesHeader.setVisibility(View.VISIBLE);
+                                historyRecyclerView.setVisibility(View.VISIBLE);
 
-                            historyActivitiesCallCompleted = true;
-                            return;
+                                swipeRefreshLayout.setVisibility(View.VISIBLE);
+                                noDataLayout.setVisibility(View.GONE);
+
+                                historyActivitiesAdapter.setUserActivities(historyActivities);
+
+                                historyActivitiesCallCompleted = true;
+                                return;
+                            }
                         }
 
                         // Hide InProcess List Views
@@ -297,12 +369,6 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         Activity context = getActivity();
 
         if (context != null && !context.isFinishing() && userActivityDetailsDetails != null) {
-
-            if (inProcess) {
-                inProcessActivities.clear();
-            } else {
-                historyActivities.clear();
-            }
 
             // Parse all UserActivityDetails fetched from server
             for (UserActivityDetails userActivityDetails : userActivityDetailsDetails) {

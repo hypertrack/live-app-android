@@ -46,7 +46,8 @@ import retrofit2.Response;
  */
 public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
-    private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader;
+    private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader,
+            inProcessMoreLayout, historyMoreLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noDataText;
 
@@ -55,10 +56,14 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     private Call<UserActivitiesListResponse> inProcessSentActivitiesCall, historySentActivitiesCall;
 
     private boolean inProcessActivitiesCallCompleted = true, historyActivitiesCallCompleted = true;
+    int inProcessActivitiesPage = 1, historyActivitiesPage = 1;
 
     private View.OnClickListener retryListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            // Reset page for the data to be refreshed
+            resetActivitiesData();
+
             getSentActivities();
         }
     };
@@ -66,7 +71,39 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     private SwipeRefreshLayout.OnRefreshListener swipeRefreshListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
+            // Reset page for the data to be refreshed
+            resetActivitiesData();
+
             getSentActivities();
+        }
+    };
+
+    private void resetActivitiesData(){
+        inProcessActivitiesPage = 1;
+        historyActivitiesPage = 1;
+        inProcessActivities.clear();
+        historyActivities.clear();
+    }
+
+    private View.OnClickListener onMoreInProcessActivitiesListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            displayLoader(true);
+
+            SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                    SharedPreferenceManager.getUserAuthToken());
+            getInProcessActivities(sendETAService);
+        }
+    };
+
+    private View.OnClickListener onMoreHistoryActivitiesListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            displayLoader(true);
+
+            SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                    SharedPreferenceManager.getUserAuthToken());
+            getHistoryActivities(sendETAService);
         }
     };
 
@@ -87,9 +124,15 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent);
         swipeRefreshLayout.setOnRefreshListener(swipeRefreshListener);
 
-        // Initialize HeaderLayouts
+        // Initialize HeaderLayouts & FooterLayouts
         inProcessActivitiesHeader = (LinearLayout) rootView.findViewById(R.id.activities_in_process);
         historyActivitiesHeader = (LinearLayout) rootView.findViewById(R.id.activities_history);
+
+        inProcessMoreLayout = (LinearLayout) rootView.findViewById(R.id.activities_in_process_more_layout);
+        inProcessMoreLayout.setOnClickListener(onMoreInProcessActivitiesListener);
+
+        historyMoreLayout = (LinearLayout) rootView.findViewById(R.id.activities_history_more_layout);
+        historyMoreLayout.setOnClickListener(onMoreHistoryActivitiesListener);
 
         // Initialize RecyclerViews
         inProcessRecyclerView = (RecyclerView) rootView.findViewById(R.id.activities_in_process_list);
@@ -116,6 +159,9 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     public void onResume() {
         super.onResume();
 
+        // Reset page for the data to be refreshed
+        resetActivitiesData();
+
         getSentActivities();
 
         if (historyActivitiesAdapter != null) {
@@ -137,12 +183,18 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
                 SharedPreferenceManager.getUserAuthToken());
 
-
         // Initiate inProcessReceivedActivities Call
+        getInProcessActivities(sendETAService);
+
+        // Initiate historySentActivities Call
+        getHistoryActivities(sendETAService);
+    }
+
+    private void getInProcessActivities(SendETAService sendETAService) {
         if (inProcessActivitiesCallCompleted) {
             inProcessActivitiesCallCompleted = false;
 
-            inProcessSentActivitiesCall = sendETAService.getInProcessSentUserActivities();
+            inProcessSentActivitiesCall = sendETAService.getInProcessSentUserActivities(inProcessActivitiesPage);
             inProcessSentActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
@@ -151,29 +203,39 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                     }
 
                     if (response.isSuccessful()) {
-
                         UserActivitiesListResponse activitiesListResponse = response.body();
-                        if (activitiesListResponse != null && activitiesListResponse.getUserActivities() != null
-                                && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
+                        if (activitiesListResponse != null) {
+                            if (!TextUtils.isEmpty(activitiesListResponse.getNext())) {
+                                inProcessActivitiesPage++;
+                                inProcessMoreLayout.setVisibility(View.VISIBLE);
+                            } else {
+                                inProcessMoreLayout.setVisibility(View.GONE);
+                            }
 
-                            inProcessActivitiesHeader.setVisibility(View.VISIBLE);
-                            inProcessRecyclerView.setVisibility(View.VISIBLE);
+                            if (activitiesListResponse.getUserActivities() != null
+                                    && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            swipeRefreshLayout.setVisibility(View.VISIBLE);
-                            noDataLayout.setVisibility(View.GONE);
+                                parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
 
-                            inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+                                inProcessActivitiesHeader.setVisibility(View.VISIBLE);
+                                inProcessRecyclerView.setVisibility(View.VISIBLE);
 
-                            inProcessActivitiesCallCompleted = true;
-                            return;
+                                swipeRefreshLayout.setVisibility(View.VISIBLE);
+                                noDataLayout.setVisibility(View.GONE);
+
+                                inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+
+                                inProcessActivitiesCallCompleted = true;
+                                return;
+                            }
                         }
 
                         // Hide InProcess List Views
                         inProcessActivities.clear();
                         inProcessActivitiesHeader.setVisibility(View.GONE);
                         inProcessRecyclerView.setVisibility(View.GONE);
+                        inProcessMoreLayout.setVisibility(View.GONE);
 
                         checkForNoData();
 
@@ -215,12 +277,13 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                 }
             });
         }
+    }
 
-        // Initiate historySentActivities Call
+    private void getHistoryActivities(SendETAService sendETAService) {
         if (historyActivitiesCallCompleted) {
             historyActivitiesCallCompleted = false;
 
-            historySentActivitiesCall = sendETAService.getHistorySentUserActivities();
+            historySentActivitiesCall = sendETAService.getHistorySentUserActivities(historyActivitiesPage);
             historySentActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
@@ -229,29 +292,39 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                     }
 
                     if (response.isSuccessful()) {
-
                         UserActivitiesListResponse activitiesListResponse = response.body();
-                        if (activitiesListResponse != null && activitiesListResponse.getUserActivities() != null
-                                && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            parseUserActivityDetails(activitiesListResponse.getUserActivities(), false);
+                        if (activitiesListResponse != null) {
+                            if (!TextUtils.isEmpty(activitiesListResponse.getNext())) {
+                                historyActivitiesPage++;
+                                historyMoreLayout.setVisibility(View.VISIBLE);
+                            } else {
+                                historyMoreLayout.setVisibility(View.GONE);
+                            }
 
-                            historyActivitiesHeader.setVisibility(View.VISIBLE);
-                            historyRecyclerView.setVisibility(View.VISIBLE);
+                            if (activitiesListResponse.getUserActivities() != null
+                                    && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            swipeRefreshLayout.setVisibility(View.VISIBLE);
-                            noDataLayout.setVisibility(View.GONE);
+                                parseUserActivityDetails(activitiesListResponse.getUserActivities(), false);
 
-                            historyActivitiesAdapter.setUserActivities(historyActivities);
+                                historyActivitiesHeader.setVisibility(View.VISIBLE);
+                                historyRecyclerView.setVisibility(View.VISIBLE);
 
-                            historyActivitiesCallCompleted = true;
-                            return;
+                                swipeRefreshLayout.setVisibility(View.VISIBLE);
+                                noDataLayout.setVisibility(View.GONE);
+
+                                historyActivitiesAdapter.setUserActivities(historyActivities);
+
+                                historyActivitiesCallCompleted = true;
+                                return;
+                            }
                         }
 
                         // Hide InProcess List Views
                         historyActivities.clear();
                         historyActivitiesHeader.setVisibility(View.GONE);
                         historyRecyclerView.setVisibility(View.GONE);
+                        historyMoreLayout.setVisibility(View.GONE);
 
                         checkForNoData();
 
@@ -307,13 +380,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         Activity context = getActivity();
 
         if (context != null && !context.isFinishing() && userActivityDetailsDetails != null) {
-
-            if (inProcess) {
-                inProcessActivities.clear();
-            } else {
-                historyActivities.clear();
-            }
-
             // Parse all UserActivityDetails fetched from server
             for (UserActivityDetails userActivityDetails : userActivityDetailsDetails) {
 
