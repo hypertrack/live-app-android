@@ -97,6 +97,15 @@ public class UserActivityDetails {
         this.taskDetails = taskDetails;
     }
 
+    public UserActivityDetails() {
+    }
+
+    public UserActivityDetails(String taskID, boolean inProcess, HTTask taskDetails) {
+        this.taskID = taskID;
+        this.inProcess = inProcess;
+        this.taskDetails = taskDetails;
+    }
+
     @Override
     public String toString() {
         return "UserActivityDetails{" +

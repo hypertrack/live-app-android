@@ -34,6 +34,8 @@ import io.hypertrack.sendeta.model.UserActivityModel;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
+import io.hypertrack.sendeta.store.TaskManager;
+import io.hypertrack.sendeta.store.callback.TaskManagerListener;
 import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
@@ -46,17 +48,16 @@ import retrofit2.Response;
  */
 public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
-    private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader,
-            inProcessMoreLayout, historyMoreLayout;
+    private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader, historyMoreLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noDataText;
 
     private SentActivitiesAdapter inProcessActivitiesAdapter, historyActivitiesAdapter;
     private ArrayList<UserActivityModel> inProcessActivities, historyActivities;
-    private Call<UserActivitiesListResponse> inProcessSentActivitiesCall, historySentActivitiesCall;
+    private Call<UserActivitiesListResponse> historySentActivitiesCall;
 
     private boolean inProcessActivitiesCallCompleted = true, historyActivitiesCallCompleted = true;
-    int inProcessActivitiesPage = 1, historyActivitiesPage = 1;
+    int historyActivitiesPage = 1;
 
     private View.OnClickListener retryListener = new View.OnClickListener() {
         @Override
@@ -79,22 +80,10 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     };
 
     private void resetActivitiesData(){
-        inProcessActivitiesPage = 1;
         historyActivitiesPage = 1;
         inProcessActivities.clear();
         historyActivities.clear();
     }
-
-    private View.OnClickListener onMoreInProcessActivitiesListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            displayLoader(true);
-
-            SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
-                    SharedPreferenceManager.getUserAuthToken());
-            getInProcessActivities(sendETAService);
-        }
-    };
 
     private View.OnClickListener onMoreHistoryActivitiesListener = new View.OnClickListener() {
         @Override
@@ -128,9 +117,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         inProcessActivitiesHeader = (LinearLayout) rootView.findViewById(R.id.activities_in_process);
         historyActivitiesHeader = (LinearLayout) rootView.findViewById(R.id.activities_history);
 
-        inProcessMoreLayout = (LinearLayout) rootView.findViewById(R.id.activities_in_process_more_layout);
-        inProcessMoreLayout.setOnClickListener(onMoreInProcessActivitiesListener);
-
         historyMoreLayout = (LinearLayout) rootView.findViewById(R.id.activities_history_more_layout);
         historyMoreLayout.setOnClickListener(onMoreHistoryActivitiesListener);
 
@@ -156,19 +142,13 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         // Reset page for the data to be refreshed
         resetActivitiesData();
 
         getSentActivities();
-
-        if (historyActivitiesAdapter != null) {
-            for (MapView m : historyActivitiesAdapter.getMapViews()) {
-                m.onResume();
-            }
-        }
     }
 
     private void getSentActivities() {
@@ -183,100 +163,78 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
                 SharedPreferenceManager.getUserAuthToken());
 
-        // Initiate inProcessReceivedActivities Call
-        getInProcessActivities(sendETAService);
-
         // Initiate historySentActivities Call
         getHistoryActivities(sendETAService);
+
+        // Initiate inProcessReceivedActivities Call
+        getInProcessActivity();
     }
 
-    private void getInProcessActivities(SendETAService sendETAService) {
-        if (inProcessActivitiesCallCompleted) {
-            inProcessActivitiesCallCompleted = false;
+    private void getInProcessActivity() {
+        inProcessActivities.clear();
 
-            inProcessSentActivitiesCall = sendETAService.getInProcessSentUserActivities(inProcessActivitiesPage);
-            inProcessSentActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
+        TaskManager taskManager = TaskManager.getSharedManager(getActivity());
+
+        HTTask activeTask = taskManager.getHyperTrackTask();
+        if (activeTask != null && !HTTask.TASK_STATUS_COMPLETED.equalsIgnoreCase(activeTask.getStatus())) {
+
+            ArrayList<UserActivityDetails> inProcessSentActivities = new ArrayList<>();
+            inProcessSentActivities.add(new UserActivityDetails(activeTask.getId(), true, activeTask));
+
+            parseUserActivityDetails(inProcessSentActivities, true);
+
+            inProcessActivitiesHeader.setVisibility(View.VISIBLE);
+            inProcessRecyclerView.setVisibility(View.VISIBLE);
+            swipeRefreshLayout.setVisibility(View.VISIBLE);
+            noDataLayout.setVisibility(View.GONE);
+
+            inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+
+            taskManager.setTaskRefreshedListener(new TaskManagerListener() {
                 @Override
-                public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
-                    if (historyActivitiesCallCompleted) {
-                        displayLoader(false);
-                    }
-
-                    if (response.isSuccessful()) {
-                        UserActivitiesListResponse activitiesListResponse = response.body();
-
-                        if (activitiesListResponse != null) {
-                            if (!TextUtils.isEmpty(activitiesListResponse.getNext())) {
-                                inProcessActivitiesPage++;
-                                inProcessMoreLayout.setVisibility(View.VISIBLE);
-                            } else {
-                                inProcessMoreLayout.setVisibility(View.GONE);
-                            }
-
-                            if (activitiesListResponse.getUserActivities() != null
-                                    && !activitiesListResponse.getUserActivities().isEmpty()) {
-
-                                parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
-
-                                inProcessActivitiesHeader.setVisibility(View.VISIBLE);
-                                inProcessRecyclerView.setVisibility(View.VISIBLE);
-
-                                swipeRefreshLayout.setVisibility(View.VISIBLE);
-                                noDataLayout.setVisibility(View.GONE);
-
-                                inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
-
-                                inProcessActivitiesCallCompleted = true;
-                                return;
-                            }
-                        }
-
-                        // Hide InProcess List Views
-                        inProcessActivities.clear();
-                        inProcessActivitiesHeader.setVisibility(View.GONE);
-                        inProcessRecyclerView.setVisibility(View.GONE);
-                        inProcessMoreLayout.setVisibility(View.GONE);
-
-                        checkForNoData();
-
-                        inProcessActivitiesCallCompleted = true;
-                        return;
-                    }
-
-                    showRetryLayout(getString(R.string.generic_error_message), retryListener);
-                    inProcessActivitiesCallCompleted = true;
-                }
-
-                @Override
-                public void onFailure(Call<UserActivitiesListResponse> call, Throwable t) {
-                    inProcessActivitiesCallCompleted = true;
-                    if (historyActivitiesCallCompleted) {
-                        displayLoader(false);
-                    }
-
-                    ErrorData errorData = new ErrorData();
-                    try {
-                        errorData = NetworkUtils.processFailure(t);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    showErrorMessage(errorData);
-                }
-
-                private void showErrorMessage(ErrorData errorData) {
+                public void OnCallback() {
                     if (getActivity() == null || getActivity().isFinishing())
                         return;
 
-                    if (ErrorCodes.NO_INTERNET.equalsIgnoreCase(errorData.getCode()) ||
-                            ErrorCodes.REQUEST_TIMED_OUT.equalsIgnoreCase(errorData.getCode())) {
-                        showRetryLayout(getString(R.string.network_issue), retryListener);
-
-                    } else {
-                        showRetryLayout(getString(R.string.generic_error_message), retryListener);
-                    }
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Update InProcessActivity
+                            getInProcessActivity();
+                        }
+                    });
                 }
             });
+
+            taskManager.setTaskCompletedListener(new TaskManagerListener() {
+                @Override
+                public void OnCallback() {
+                    if (getActivity() == null || getActivity().isFinishing())
+                        return;
+
+                    // Call OnCompleteTask method on UI thread
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Update InProcessActivity
+                            getInProcessActivity();
+                        }
+                    });
+                }
+            });
+
+            inProcessActivitiesCallCompleted = true;
+            return;
         }
+
+        // Hide InProcess List Views
+        inProcessActivities.clear();
+        inProcessActivitiesHeader.setVisibility(View.GONE);
+        inProcessRecyclerView.setVisibility(View.GONE);
+
+        checkForNoData();
+
+        inProcessActivitiesCallCompleted = true;
     }
 
     private void getHistoryActivities(SendETAService sendETAService) {
@@ -375,13 +333,13 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         }
     }
 
-    private void parseUserActivityDetails(ArrayList<UserActivityDetails> userActivityDetailsDetails, boolean inProcess) {
+    private void parseUserActivityDetails(ArrayList<UserActivityDetails> userActivityDetailsList, boolean inProcess) {
 
         Activity context = getActivity();
 
-        if (context != null && !context.isFinishing() && userActivityDetailsDetails != null) {
+        if (context != null && !context.isFinishing() && userActivityDetailsList != null) {
             // Parse all UserActivityDetails fetched from server
-            for (UserActivityDetails userActivityDetails : userActivityDetailsDetails) {
+            for (UserActivityDetails userActivityDetails : userActivityDetailsList) {
 
                 UserActivityModel userActivity = new UserActivityModel();
                 userActivity.setInProcess(inProcess);
@@ -536,8 +494,26 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        // Start Refreshing Task, if one exists
+        if (TaskManager.getSharedManager(getActivity()).getHyperTrackTask() != null) {
+            TaskManager.getSharedManager(getActivity()).startRefreshingTask(0);
+        }
+
+        if (historyActivitiesAdapter != null) {
+            for (MapView m : historyActivitiesAdapter.getMapViews()) {
+                m.onResume();
+            }
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
+
+        TaskManager.getSharedManager(getActivity()).stopRefreshingTask();
 
         if (historyActivitiesAdapter != null) {
             for (MapView m : historyActivitiesAdapter.getMapViews()) {
@@ -552,10 +528,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
             for (MapView m : historyActivitiesAdapter.getMapViews()) {
                 m.onDestroy();
             }
-        }
-
-        if (inProcessSentActivitiesCall != null) {
-            inProcessSentActivitiesCall.cancel();
         }
 
         if (historySentActivitiesCall != null) {

@@ -1434,10 +1434,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         Integer taskDisplayStatusResId = HyperTrackTaskUtils.getTaskDisplayStatus(taskDisplay);
         if (taskDisplayStatusResId != null) {
             this.setTitle(getString(taskDisplayStatusResId));
-        } else {
 
+        } else {
             if (!TextUtils.isEmpty(taskDisplay.getStatusText())) {
                 this.setTitle(taskDisplay.getStatusText());
+
             } else {
                 // Set Toolbar Title as AppName
                 this.setTitle(getResources().getString(R.string.app_name));
@@ -1448,6 +1449,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         String taskDisplaySubStatus = getTaskDisplaySubStatus(taskDisplay);
         if (!TextUtils.isEmpty(taskDisplaySubStatus)) {
             this.setSubTitle(taskDisplaySubStatus);
+
+        }  if (!TextUtils.isEmpty(taskDisplay.getSubStatusText())) {
+            this.setTitle(taskDisplay.getSubStatusText());
+
         } else {
             this.setSubTitle("");
         }
