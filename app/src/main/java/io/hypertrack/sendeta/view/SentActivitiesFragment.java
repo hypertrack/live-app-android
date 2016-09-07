@@ -1,5 +1,6 @@
 package io.hypertrack.sendeta.view;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -14,18 +15,26 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.List;
 
+import io.hypertrack.lib.common.model.HTPlace;
+import io.hypertrack.lib.common.model.HTTask;
+import io.hypertrack.lib.common.model.HTTaskDisplay;
+import io.hypertrack.lib.consumer.utils.HTMapUtils;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.SentActivitiesAdapter;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
 import io.hypertrack.sendeta.model.ErrorData;
 import io.hypertrack.sendeta.model.UserActivitiesListResponse;
-import io.hypertrack.sendeta.model.UserActivity;
+import io.hypertrack.sendeta.model.UserActivityDetails;
+import io.hypertrack.sendeta.model.UserActivityModel;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
+import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import retrofit2.Call;
@@ -35,19 +44,15 @@ import retrofit2.Response;
 /**
  * Created by piyush on 29/08/16.
  */
-public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener{
+public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
     private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader;
     private SwipeRefreshLayout swipeRefreshLayout;
     private TextView noDataText;
 
     private SentActivitiesAdapter inProcessActivitiesAdapter, historyActivitiesAdapter;
-
-    private ArrayList<UserActivity> inProcessActivities;
-    private ArrayList<UserActivity> historyActivities;
-
-    private Call<UserActivitiesListResponse> inProcessSentActivitiesCall;
-    private Call<UserActivitiesListResponse> historySentActivitiesCall;
+    private ArrayList<UserActivityModel> inProcessActivities, historyActivities;
+    private Call<UserActivitiesListResponse> inProcessSentActivitiesCall, historySentActivitiesCall;
 
     private boolean inProcessActivitiesCallCompleted = true, historyActivitiesCallCompleted = true;
 
@@ -89,8 +94,11 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         // Initialize RecyclerViews
         inProcessRecyclerView = (RecyclerView) rootView.findViewById(R.id.activities_in_process_list);
         inProcessRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        inProcessRecyclerView.setNestedScrollingEnabled(false);
+
         historyRecyclerView = (RecyclerView) rootView.findViewById(R.id.activities_history_list);
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        historyRecyclerView.setNestedScrollingEnabled(false);
 
         // Initialize Adapters
         inProcessActivitiesAdapter = new SentActivitiesAdapter(getActivity(), inProcessActivities, this);
@@ -148,7 +156,8 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                         if (activitiesListResponse != null && activitiesListResponse.getUserActivities() != null
                                 && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            inProcessActivities = activitiesListResponse.getUserActivities();
+                            parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
+
                             inProcessActivitiesHeader.setVisibility(View.VISIBLE);
                             inProcessRecyclerView.setVisibility(View.VISIBLE);
 
@@ -225,7 +234,8 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                         if (activitiesListResponse != null && activitiesListResponse.getUserActivities() != null
                                 && !activitiesListResponse.getUserActivities().isEmpty()) {
 
-                            historyActivities = activitiesListResponse.getUserActivities();
+                            parseUserActivityDetails(activitiesListResponse.getUserActivities(), false);
+
                             historyActivitiesHeader.setVisibility(View.VISIBLE);
                             historyRecyclerView.setVisibility(View.VISIBLE);
 
@@ -292,8 +302,138 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         }
     }
 
+    private void parseUserActivityDetails(ArrayList<UserActivityDetails> userActivityDetailsDetails, boolean inProcess) {
+
+        Activity context = getActivity();
+
+        if (context != null && !context.isFinishing() && userActivityDetailsDetails != null) {
+
+            if (inProcess) {
+                inProcessActivities.clear();
+            } else {
+                historyActivities.clear();
+            }
+
+            // Parse all UserActivityDetails fetched from server
+            for (UserActivityDetails userActivityDetails : userActivityDetailsDetails) {
+
+                UserActivityModel userActivity = new UserActivityModel();
+                userActivity.setInProcess(inProcess);
+
+                // Get TaskDetails from UserActivityDetails
+                HTTask task = userActivityDetails.getTaskDetails();
+                if (task != null) {
+
+                    // Get TaskID
+                    userActivity.setTaskID(task.getId());
+
+                    // Get Activity Title
+                    if (task.getTaskDisplay() != null) {
+                        Integer resId = HyperTrackTaskUtils.getTaskDisplayStatus(task.getTaskDisplay());
+                        if (resId != null) {
+                            userActivity.setTitle(context.getString(resId));
+                        } else if (!TextUtils.isEmpty(task.getTaskDisplay().getStatusText())) {
+                            userActivity.setTitle(task.getTaskDisplay().getStatusText());
+                        }
+                    }
+
+                    // Get Activity MainIcon
+                    if (!TextUtils.isEmpty(task.getStatus())) {
+                        String taskStatus = task.getStatus();
+                        switch (taskStatus) {
+                            case HTTask.TASK_STATUS_CANCELED:
+                            case HTTask.TASK_STATUS_ABORTED:
+                            case HTTask.TASK_STATUS_SUSPENDED:
+                                userActivity.setDisabledMainIcon(false);
+                                break;
+                        }
+                    }
+
+                    // Get Activity EndAddress
+                    HTPlace destination = task.getDestination();
+                    if (destination != null && !TextUtils.isEmpty(destination.getAddress())) {
+                        userActivity.setEndAddress(destination.getAddress());
+                    }
+
+                    if (inProcess) {
+                        // Get Activity Subtitle
+                        HTTaskDisplay taskDisplay = task.getTaskDisplay();
+                        if (taskDisplay != null) {
+                            String formattedTime = HyperTrackTaskUtils.getFormattedTimeString(context,
+                                    HyperTrackTaskUtils.getTaskDisplayETA(taskDisplay));
+                            if (!TextUtils.isEmpty(formattedTime)) {
+                                userActivity.setSubtitle(formattedTime + " away");
+                            }
+                        }
+                    } else {
+
+                        // Get Activity Subtitle
+                        String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(context, task);
+                        if (!TextUtils.isEmpty(formattedSubtitle)) {
+                            userActivity.setSubtitle(formattedSubtitle);
+                        }
+
+                        // Get Activity Date
+                        String formattedDate = HyperTrackTaskUtils.getTaskDateString(task);
+                        if (!TextUtils.isEmpty(formattedDate)) {
+                            userActivity.setDate(formattedDate);
+                        }
+
+                        // Get Activity StartAddress
+                        String startLocationString =
+                                task.getStartLocation() != null ? task.getStartLocation().getDisplayString() : null;
+                        if (!TextUtils.isEmpty(startLocationString)) {
+                            userActivity.setStartAddress(startLocationString);
+                        }
+
+                        // Get Activity StartTime
+                        if (!TextUtils.isEmpty(task.getTaskStartTimeDisplayString())) {
+                            userActivity.setStartTime(task.getTaskStartTimeDisplayString());
+                        }
+
+                        // Get Activity EndTime
+                        if (!TextUtils.isEmpty(task.getTaskEndTimeDisplayString())) {
+                            userActivity.setEndTime(task.getTaskEndTimeDisplayString());
+                        }
+
+                        // Get Completion Location
+                        if (destination != null && destination.getLocation() != null) {
+                            double[] coordinates = task.getDestination().getLocation().getCoordinates();
+                            if (coordinates[0] != 0.0 && coordinates[1] != 0.0) {
+                                userActivity.setEndLocation(new LatLng(coordinates[1], coordinates[0]));
+                            }
+                        }
+
+                        // Get Start Location
+                        if (task.getStartLocation() != null) {
+                            double[] coordinates = task.getStartLocation().getCoordinates();
+                            if (coordinates[0] != 0.0 && coordinates[1] != 0.0) {
+                                userActivity.setStartLocation(new LatLng(coordinates[1], coordinates[0]));
+                            }
+                        }
+
+                        // Get Polyline
+                        String encodedPolyline = task.getEncodedPolyline();
+                        if (!TextUtils.isEmpty(encodedPolyline)) {
+                            List<LatLng> polyline = HTMapUtils.decode(encodedPolyline);
+                            if (polyline != null && !polyline.isEmpty()) {
+                                userActivity.setPolyline(polyline);
+                            }
+                        }
+                    }
+
+                    if (inProcess) {
+                        inProcessActivities.add(userActivity);
+                    } else {
+                        historyActivities.add(userActivity);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
-    public void OnInProcessActivityClicked(UserActivity inProcessActivity) {
+    public void OnInProcessActivityClicked(int position, UserActivityModel inProcessActivity) {
         if (inProcessActivity == null || TextUtils.isEmpty(inProcessActivity.getTaskID()))
             return;
 
@@ -306,7 +446,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     }
 
     @Override
-    public void OnHistoryActivityClicked(UserActivity historyActivity) {
+    public void OnHistoryActivityClicked(int position, UserActivityModel historyActivity) {
         if (historyActivity == null || TextUtils.isEmpty(historyActivity.getTaskID()))
             return;
 

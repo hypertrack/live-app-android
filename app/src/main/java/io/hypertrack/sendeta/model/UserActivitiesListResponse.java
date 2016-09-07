@@ -10,16 +10,16 @@ import java.util.ArrayList;
 public class UserActivitiesListResponse {
 
     @SerializedName("results")
-    private ArrayList<UserActivity> userActivities;
+    private ArrayList<UserActivityDetails> userActivities;
 
     @SerializedName("next")
     private String next;
 
-    public ArrayList<UserActivity> getUserActivities() {
+    public ArrayList<UserActivityDetails> getUserActivities() {
         return userActivities;
     }
 
-    public void setUserActivities(ArrayList<UserActivity> userActivities) {
+    public void setUserActivities(ArrayList<UserActivityDetails> userActivities) {
         this.userActivities = userActivities;
     }
 

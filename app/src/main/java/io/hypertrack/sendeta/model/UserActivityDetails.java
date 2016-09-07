@@ -7,7 +7,7 @@ import io.hypertrack.lib.common.model.HTTask;
 /**
  * Created by piyush on 02/09/16.
  */
-public class UserActivity {
+public class UserActivityDetails {
 
     @SerializedName("id")
     private int id;
@@ -99,7 +99,7 @@ public class UserActivity {
 
     @Override
     public String toString() {
-        return "UserActivity{" +
+        return "UserActivityDetails{" +
                 "id=" + id +
                 ", userID=" + userID +
                 ", taskID=" + taskID +

@@ -29,14 +29,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
-import io.hypertrack.lib.consumer.utils.HTMapUtils;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
-import io.hypertrack.sendeta.model.UserActivity;
-import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
+import io.hypertrack.sendeta.model.UserActivityModel;
 
 /**
  * Created by piyush on 03/09/16.
@@ -44,26 +39,26 @@ import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAdapter.SentActivitiesViewHolder> {
 
     private Context mContext;
-    private ArrayList<UserActivity> userActivities;
+    private ArrayList<UserActivityModel> userActivities;
     private UserActivitiesOnClickListener listener;
     private boolean showMapSummary = false;
 
     protected HashSet<MapView> mMapViews = new HashSet<>();
 
-    public SentActivitiesAdapter(Context mContext, ArrayList<UserActivity> userActivities, UserActivitiesOnClickListener listener) {
+    public SentActivitiesAdapter(Context mContext, ArrayList<UserActivityModel> userActivities, UserActivitiesOnClickListener listener) {
         this.mContext = mContext;
-        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivity>();
+        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivityModel>();
         this.listener = listener;
     }
 
-    public SentActivitiesAdapter(Context mContext, ArrayList<UserActivity> userActivities, UserActivitiesOnClickListener listener, boolean showMapSummary) {
+    public SentActivitiesAdapter(Context mContext, ArrayList<UserActivityModel> userActivities, UserActivitiesOnClickListener listener, boolean showMapSummary) {
         this.mContext = mContext;
-        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivity>();
+        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivityModel>();
         this.listener = listener;
         this.showMapSummary = showMapSummary;
     }
 
-    public void setUserActivities(ArrayList<UserActivity> userActivities) {
+    public void setUserActivities(ArrayList<UserActivityModel> userActivities) {
         this.userActivities = userActivities;
         notifyDataSetChanged();
     }
@@ -88,122 +83,74 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                 mContext.getResources().getDimensionPixelSize(R.dimen.margin_low), 0, 0);
         holder.activityLayoutMainIcon.setLayoutParams(params);
 
-        UserActivity activity = userActivities.get(position);
+        UserActivityModel activity = userActivities.get(position);
         if (activity != null) {
 
-            HTTask task = activity.getTaskDetails();
-            if (task != null) {
+            if (!TextUtils.isEmpty(activity.getTitle())) {
+                holder.activityTitle.setText(activity.getTitle());
+                holder.activityTitle.setVisibility(View.VISIBLE);
+            }
 
-                if (task.getTaskDisplay() != null) {
-                    Integer resId = HyperTrackTaskUtils.getTaskDisplayStatus(task.getTaskDisplay());
-                    if (resId != null) {
-                        holder.activityTitle.setText(mContext.getString(resId));
-                        holder.activityTitle.setVisibility(View.VISIBLE);
-                    } else if (!TextUtils.isEmpty(task.getTaskDisplay().getStatusText())) {
-                        holder.activityTitle.setText(task.getTaskDisplay().getStatusText());
-                        holder.activityTitle.setVisibility(View.VISIBLE);
-                    }
+            if (!TextUtils.isEmpty(activity.getSubtitle())) {
+                holder.activitySubtitle.setText(activity.getSubtitle());
+                holder.activitySubtitleLayout.setVisibility(View.VISIBLE);
+            }
+
+            if (!TextUtils.isEmpty(activity.getDate())) {
+                holder.activityDate.setText(activity.getDate());
+                holder.activityDate.setVisibility(View.VISIBLE);
+            }
+
+            holder.activityLayoutMainIcon.setImageResource(R.drawable.ic_sent_activity_icon);
+            if (activity.isDisabledMainIcon()) {
+                holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme_light));
+            } else {
+                holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme));
+            }
+
+            if (!TextUtils.isEmpty(activity.getEndAddress())) {
+                holder.activityEndAddress.setText(activity.getEndAddress());
+                holder.endAddressLayoutIcon.setVisibility(View.VISIBLE);
+                holder.activityEndAddressLayout.setVisibility(View.VISIBLE);
+            }
+
+            if (!TextUtils.isEmpty(activity.getEndTime())) {
+                holder.activityEndTime.setText(activity.getEndTime());
+                holder.activityEndTime.setVisibility(View.VISIBLE);
+            }
+
+            if (!TextUtils.isEmpty(activity.getStartAddress())) {
+                holder.activityStartAddress.setText(activity.getStartAddress());
+                holder.startAddressLayoutIcon.setVisibility(View.VISIBLE);
+                holder.activityStartAddressLayout.setVisibility(View.VISIBLE);
+
+                if (holder.activityEndAddressLayout.getVisibility() == View.VISIBLE) {
+                    holder.startEndIconVerticalSeparator.setVisibility(View.VISIBLE);
+                    holder.startEndAddressHorizontalSeparator.setVisibility(View.VISIBLE);
+                }
+            }
+
+            if (!TextUtils.isEmpty(activity.getStartTime())) {
+                holder.activityStartTime.setText(activity.getStartTime());
+                holder.activityStartTime.setVisibility(View.VISIBLE);
+            }
+
+            if (activity.isInProcess()) {
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                layoutParams.setMargins(0, 0, 0, 0);
+                holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
+
+            } else {
+                if (showMapSummary) {
+                    holder.setMapSummaryView();
                 }
 
-                if (!TextUtils.isEmpty(task.getStatus())) {
-                    String taskStatus = task.getStatus();
-                    switch (taskStatus) {
-                        case HTTask.TASK_STATUS_NOT_STARTED:
-                        case HTTask.TASK_STATUS_DISPATCHING:
-                        case HTTask.TASK_STATUS_DRIVER_ON_THE_WAY:
-                        case HTTask.TASK_STATUS_DRIVER_ARRIVING:
-                        case HTTask.TASK_STATUS_DRIVER_ARRIVED:
-                        case HTTask.TASK_STATUS_NO_LOCATION:
-                        case HTTask.TASK_STATUS_LOCATION_LOST:
-                        case HTTask.TASK_STATUS_CONNECTION_LOST:
-                        case HTTask.TASK_STATUS_COMPLETED:
-                        default:
-                            holder.activityLayoutMainIcon.setImageResource(R.drawable.ic_sent_activity_icon);
-                            holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme_light));
-                            break;
-
-                        case HTTask.TASK_STATUS_CANCELED:
-                        case HTTask.TASK_STATUS_ABORTED:
-                        case HTTask.TASK_STATUS_SUSPENDED:
-                            holder.activityLayoutMainIcon.setImageResource(R.drawable.ic_sent_activity_icon);
-                            holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme));
-                            break;
-                    }
-                }
-
-                HTPlace destination = task.getDestination();
-                if (destination != null) {
-                    if (!TextUtils.isEmpty(destination.getAddress())) {
-                        holder.activityEndAddress.setText(destination.getAddress());
-                        holder.endAddressLayoutIcon.setVisibility(View.VISIBLE);
-                        holder.activityEndAddressLayout.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                if (activity.isInProcess()) {
-                    HTTaskDisplay taskDisplay = task.getTaskDisplay();
-
-                    if (taskDisplay != null) {
-                        String formattedTime = HyperTrackTaskUtils.getFormattedTimeString(mContext,
-                                HyperTrackTaskUtils.getTaskDisplayETA(taskDisplay));
-                        if (!TextUtils.isEmpty(formattedTime)) {
-                            holder.activitySubtitle.setText(formattedTime + " away");
-                            holder.activitySubtitleLayout.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    layoutParams.setMargins(0, 0, 0, 0);
-                    holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
-
-                } else {
-
-                    if (showMapSummary) {
-                        holder.setMapSummaryView();
-                    }
-
-                    String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(mContext, task);
-                    if (!TextUtils.isEmpty(formattedSubtitle)) {
-                        holder.activitySubtitle.setText(formattedSubtitle);
-                        holder.activitySubtitleLayout.setVisibility(View.VISIBLE);
-                    }
-
-                    String formattedDate = HyperTrackTaskUtils.getTaskDateString(task);
-                    if (!TextUtils.isEmpty(formattedDate)) {
-                        holder.activityDate.setText(formattedDate);
-                        holder.activityDate.setVisibility(View.VISIBLE);
-                    }
-
-                    String startLocationString =
-                            task.getStartLocation() != null ? task.getStartLocation().getDisplayString() : null;
-                    if (!TextUtils.isEmpty(startLocationString)) {
-                        holder.activityStartAddress.setText(startLocationString);
-                        holder.startAddressLayoutIcon.setVisibility(View.VISIBLE);
-                        holder.activityStartAddressLayout.setVisibility(View.VISIBLE);
-
-                        if (holder.activityEndAddressLayout.getVisibility() == View.VISIBLE) {
-                            holder.startEndIconVerticalSeparator.setVisibility(View.VISIBLE);
-                            holder.startEndAddressHorizontalSeparator.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    if (!TextUtils.isEmpty(task.getTaskStartTimeDisplayString())) {
-                        holder.activityStartTime.setText(task.getTaskStartTimeDisplayString());
-                        holder.activityStartTime.setVisibility(View.VISIBLE);
-                    }
-
-                    if (!TextUtils.isEmpty(task.getTaskEndTimeDisplayString())) {
-                        holder.activityEndTime.setText(task.getTaskEndTimeDisplayString());
-                        holder.activityEndTime.setVisibility(View.VISIBLE);
-                    }
-
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_very_low);
-                    layoutParams.setMargins(0, margin, 0, margin);
-                    holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
-                }
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_very_low);
+                layoutParams.setMargins(0, margin, 0, margin);
+                holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
             }
         }
     }
@@ -227,6 +174,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                 activityStartAddressLayout, activityEndAddressLayout;
         private MapView mapSummaryView;
         private GoogleMap map;
+
+        private FrameLayout activityParentLayout;
 
         public SentActivitiesViewHolder(View itemView) {
             super(itemView);
@@ -255,6 +204,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
             activityStartAddressLayout = (LinearLayout) itemView.findViewById(R.id.item_user_activity_start_address_layout);
             activityEndAddressLayout = (LinearLayout) itemView.findViewById(R.id.item_user_activity_end_address_layout);
 
+            activityParentLayout = (FrameLayout) itemView.findViewById(R.id.item_user_activity_parent);
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -265,9 +216,9 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
                         // Check if the clicked activity is InProcess or not
                         if (userActivities.get(position).isInProcess()) {
-                            listener.OnInProcessActivityClicked(userActivities.get(position));
+                            listener.OnInProcessActivityClicked(position, userActivities.get(position));
                         } else {
-                            listener.OnHistoryActivityClicked(userActivities.get(position));
+                            listener.OnHistoryActivityClicked(position, userActivities.get(position));
                         }
                     }
                 }
@@ -300,11 +251,9 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
             if (position != RecyclerView.NO_POSITION) {
 
                 if (userActivities.size() > getAdapterPosition() && userActivities.get(position) != null) {
-                    UserActivity activity = userActivities.get(position);
+                    UserActivityModel activity = userActivities.get(position);
 
-                    if (activity != null && activity.getTaskDetails() != null) {
-                        HTTask taskDetails = activity.getTaskDetails();
-
+                    if (activity != null) {
                         // Since the mapView is re-used, need to remove pre-existing mapView features.
                         map.clear();
 
@@ -312,32 +261,24 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                         int points = 0;
 
                         // Update the mapView feature data and camera position.
-                        if (taskDetails.getDestination() != null && taskDetails.getDestination().getLocation() != null) {
-                            double[] coordinates = taskDetails.getDestination().getLocation().getCoordinates();
-                            LatLng destination = new LatLng(coordinates[1], coordinates[0]);
-
-                            map.addMarker(new MarkerOptions().position(destination)
+                        if (activity.getEndLocation() != null) {
+                            map.addMarker(new MarkerOptions().position(activity.getEndLocation())
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_end_marker)));
 
-                            builder.include(destination);
+                            builder.include(activity.getEndLocation());
                             points++;
                         }
 
-                        if (taskDetails.getStartLocation() != null) {
-                            double[] coordinates = taskDetails.getStartLocation().getCoordinates();
-                            LatLng source = new LatLng(coordinates[1], coordinates[0]);
-
-                            map.addMarker(new MarkerOptions().position(source)
+                        if (activity.getStartLocation() != null) {
+                            map.addMarker(new MarkerOptions().position(activity.getStartLocation())
                                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_start_marker)));
 
-                            builder.include(source);
+                            builder.include(activity.getStartLocation());
                             points++;
                         }
 
-                        String encodedPolyline = taskDetails.getEncodedPolyline();
-
-                        if (!TextUtils.isEmpty(encodedPolyline)) {
-                            List<LatLng> polyline = HTMapUtils.decode(encodedPolyline);
+                        List<LatLng> polyline = activity.getPolyline();
+                        if (polyline != null && !polyline.isEmpty()) {
                             PolylineOptions options = new PolylineOptions().width(8).color(Color.parseColor("#0A61C2"));
                             options.addAll(polyline);
 
@@ -354,7 +295,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                         CameraUpdate cameraUpdate = null;
                         if (points == 1) {
                             cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 13f);
-                        } else if (points > 0){
+                        } else if (points > 0) {
                             cameraUpdate = CameraUpdateFactory.newLatLngZoom(builder.build().getCenter(), 9);
                         }
 

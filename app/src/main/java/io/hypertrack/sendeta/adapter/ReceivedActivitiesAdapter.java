@@ -14,14 +14,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-import io.hypertrack.lib.common.model.HTDriver;
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
-import io.hypertrack.sendeta.model.UserActivity;
-import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
+import io.hypertrack.sendeta.model.UserActivityModel;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 
 /**
@@ -30,16 +25,16 @@ import io.hypertrack.sendeta.util.images.RoundedImageView;
 public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActivitiesAdapter.ReceivedActivitiesViewHolder> {
 
     private Context mContext;
-    private ArrayList<UserActivity> userActivities;
+    private ArrayList<UserActivityModel> userActivities;
     private UserActivitiesOnClickListener listener;
 
-    public ReceivedActivitiesAdapter(Context mContext, ArrayList<UserActivity> userActivities, UserActivitiesOnClickListener listener) {
+    public ReceivedActivitiesAdapter(Context mContext, ArrayList<UserActivityModel> userActivities, UserActivitiesOnClickListener listener) {
         this.mContext = mContext;
-        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivity>();
+        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivityModel>();
         this.listener = listener;
     }
 
-    public void setUserActivities(ArrayList<UserActivity> userActivities) {
+    public void setUserActivities(ArrayList<UserActivityModel> userActivities) {
         this.userActivities = userActivities;
         notifyDataSetChanged();
     }
@@ -52,95 +47,71 @@ public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActi
 
     @Override
     public void onBindViewHolder(ReceivedActivitiesViewHolder holder, int position) {
-        UserActivity activity = userActivities.get(position);
+        UserActivityModel activity = userActivities.get(position);
         if (activity != null) {
 
-            HTTask task = activity.getTaskDetails();
-            if (task != null) {
+            if (!TextUtils.isEmpty(activity.getTitle())) {
+                holder.activityTitle.setText(activity.getTitle());
+                holder.activityTitle.setVisibility(View.VISIBLE);
+            }
 
-                HTDriver driver = task.getDriver();
-                if (task.getDriver() != null) {
-                    if (!TextUtils.isEmpty(driver.getName())) {
-                        holder.activityTitle.setText(task.getDriver().getName());
-                        holder.activityTitle.setVisibility(View.VISIBLE);
-                    }
+            if (!TextUtils.isEmpty(activity.getSubtitle())) {
+                holder.activitySubtitle.setText(activity.getSubtitle());
+                holder.activitySubtitleLayout.setVisibility(View.VISIBLE);
+            }
 
-                    Picasso.with(mContext)
-                            .load(driver.getPhotoURL())
-                            .placeholder(R.drawable.default_profile_pic)
-                            .error(R.drawable.default_profile_pic)
-                            .into(holder.activityLayoutMainIcon);
+            if (!TextUtils.isEmpty(activity.getDate())) {
+                holder.activityDate.setText(activity.getDate());
+                holder.activityDate.setVisibility(View.VISIBLE);
+            }
+
+            if (!TextUtils.isEmpty(activity.getDriverImageURL())) {
+                Picasso.with(mContext)
+                        .load(activity.getDriverImageURL())
+                        .placeholder(R.drawable.default_profile_pic)
+                        .error(R.drawable.default_profile_pic)
+                        .into(holder.activityLayoutMainIcon);
+            }
+
+            if (!TextUtils.isEmpty(activity.getEndAddress())) {
+                holder.activityEndAddress.setText(activity.getEndAddress());
+                holder.endAddressLayoutIcon.setVisibility(View.VISIBLE);
+                holder.activityEndAddressLayout.setVisibility(View.VISIBLE);
+            }
+
+            if (!TextUtils.isEmpty(activity.getEndTime())) {
+                holder.activityEndTime.setText(activity.getEndTime());
+                holder.activityEndTime.setVisibility(View.VISIBLE);
+            }
+
+            if (!TextUtils.isEmpty(activity.getStartAddress())) {
+                holder.activityStartAddress.setText(activity.getStartAddress());
+                holder.startAddressLayoutIcon.setVisibility(View.VISIBLE);
+                holder.activityStartAddressLayout.setVisibility(View.VISIBLE);
+
+                if (holder.activityEndAddressLayout.getVisibility() == View.VISIBLE) {
+                    holder.startEndIconVerticalSeparator.setVisibility(View.VISIBLE);
+                    holder.startEndAddressHorizontalSeparator.setVisibility(View.VISIBLE);
                 }
+            }
 
-                HTPlace destination = task.getDestination();
-                if (destination != null) {
-                    if (!TextUtils.isEmpty(destination.getAddress())) {
-                        holder.activityEndAddress.setText(destination.getAddress());
-                        holder.endAddressLayoutIcon.setVisibility(View.VISIBLE);
-                        holder.activityEndAddressLayout.setVisibility(View.VISIBLE);
-                    }
-                }
+            if (!TextUtils.isEmpty(activity.getStartTime())) {
+                holder.activityStartTime.setText(activity.getStartTime());
+                holder.activityStartTime.setVisibility(View.VISIBLE);
+            }
 
-                if (activity.isInProcess()) {
-                    HTTaskDisplay taskDisplay = task.getTaskDisplay();
+            if (activity.isInProcess()) {
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                layoutParams.setMargins(0, 0, 0, 0);
+                holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
 
-                    if (taskDisplay != null) {
-                        String formattedTime = HyperTrackTaskUtils.getFormattedTimeString(mContext,
-                                HyperTrackTaskUtils.getTaskDisplayETA(taskDisplay));
-                        if (!TextUtils.isEmpty(formattedTime)) {
-                            holder.activitySubtitle.setText(formattedTime + " away");
-                            holder.activitySubtitleLayout.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    layoutParams.setMargins(0, 0, 0, 0);
-                    holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
-
-                } else {
-
-                    String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(mContext, task);
-                    if (!TextUtils.isEmpty(formattedSubtitle)) {
-                        holder.activitySubtitle.setText(formattedSubtitle);
-                        holder.activitySubtitleLayout.setVisibility(View.VISIBLE);
-                    }
-
-                    String formattedDate = HyperTrackTaskUtils.getTaskDateString(task);
-                    if (!TextUtils.isEmpty(formattedDate)) {
-                        holder.activityDate.setText(formattedDate);
-                        holder.activityDate.setVisibility(View.VISIBLE);
-                    }
-
-                    String startLocationString =
-                            task.getStartLocation() != null ? task.getStartLocation().getDisplayString() : null;
-                    if (!TextUtils.isEmpty(startLocationString)) {
-                        holder.activityStartAddress.setText(startLocationString);
-                        holder.startAddressLayoutIcon.setVisibility(View.VISIBLE);
-                        holder.activityStartAddressLayout.setVisibility(View.VISIBLE);
-
-                        if (holder.activityEndAddressLayout.getVisibility() == View.VISIBLE) {
-                            holder.startEndIconVerticalSeparator.setVisibility(View.VISIBLE);
-                            holder.startEndAddressHorizontalSeparator.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                    if (!TextUtils.isEmpty(task.getTaskStartTimeDisplayString())) {
-                        holder.activityStartTime.setText(task.getTaskStartTimeDisplayString());
-                        holder.activityStartTime.setVisibility(View.VISIBLE);
-                    }
-
-                    if (!TextUtils.isEmpty(task.getTaskEndTimeDisplayString())) {
-                        holder.activityEndTime.setText(task.getTaskEndTimeDisplayString());
-                        holder.activityEndTime.setVisibility(View.VISIBLE);
-                    }
-
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
-                    int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_very_low);
-                    layoutParams.setMargins(0, margin, 0, margin);
-                    holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
-                }
+            } else {
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT);
+                int margin = mContext.getResources().getDimensionPixelSize(R.dimen.margin_very_low);
+                layoutParams.setMargins(0, margin, 0, margin);
+                holder.activityAddressIconsLayout.setLayoutParams(layoutParams);
             }
         }
     }
@@ -192,9 +163,9 @@ public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActi
 
                         // Check if the clicked activity is InProcess or not
                         if (userActivities.get(position).isInProcess()) {
-                            listener.OnInProcessActivityClicked(userActivities.get(position));
+                            listener.OnInProcessActivityClicked(position, userActivities.get(position));
                         } else {
-                            listener.OnHistoryActivityClicked(userActivities.get(position));
+                            listener.OnHistoryActivityClicked(position, userActivities.get(position));
                         }
                     }
                 }
