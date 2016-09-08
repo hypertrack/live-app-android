@@ -94,9 +94,6 @@ public interface SendETAService {
     @POST("/api/v1/users/{id}/track/")
     Call<TrackTaskResponse> addTaskForTracking(@Path("id") int id, @Body AddTaskToTrackDTO addTaskToTrackDTO);
 
-    @GET("/api/v1/trips/?is_live=True&is_pending=False")
-    Call<UserActivitiesListResponse> getInProcessSentUserActivities(@Query("page") int page);
-
     @GET("/api/v1/trips/?is_live=False&is_pending=False")
     Call<UserActivitiesListResponse> getHistorySentUserActivities(@Query("page") int page);
 

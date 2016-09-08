@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -42,6 +43,7 @@ import retrofit2.Response;
  */
 public class ReceivedActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
 
+    private NestedScrollView mScrollView;
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
     private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader,
             inProcessMoreLayout, historyMoreLayout;
@@ -62,6 +64,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             resetActivitiesData();
 
             getReceivedActivities();
+
+            // Scroll User's Received Activities to top by default
+            mScrollView.smoothScrollTo(0, 0);
         }
     };
 
@@ -72,6 +77,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             resetActivitiesData();
 
             getReceivedActivities();
+
+            // Scroll User's Received Activities to top by default
+            mScrollView.smoothScrollTo(0, 0);
         }
     };
 
@@ -140,6 +148,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         historyRecyclerView.setNestedScrollingEnabled(false);
 
+        // Initialize Scroll View
+        mScrollView = (NestedScrollView) rootView.findViewById(R.id.fragment_activities_scroll_view);
+
         // Initialize Adapters
         inProcessActivitiesAdapter = new ReceivedActivitiesAdapter(getActivity(), inProcessActivities, this);
         inProcessRecyclerView.setAdapter(inProcessActivitiesAdapter);
@@ -160,6 +171,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         resetActivitiesData();
 
         getReceivedActivities();
+
+        // Scroll User's Received Activities to top by default
+        mScrollView.smoothScrollTo(0, 0);
     }
 
     private void getReceivedActivities() {
