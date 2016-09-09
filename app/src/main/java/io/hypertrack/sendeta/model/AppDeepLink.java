@@ -15,6 +15,9 @@ public class AppDeepLink {
     public Double lat;
     public Double lng;
 
+    // Used for Track feature
+    public String shortCode;
+
     public AppDeepLink(int mId) {
         this.mId = mId;
     }

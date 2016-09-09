@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.text.TextUtils;
 
+import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,7 +29,6 @@ public class SharedPreferenceManager {
     private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
-    private static final String CURRENT_TRIP = "io.hypertrack.meta:CurrentTrip";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
     private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
@@ -94,18 +94,6 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static Trip getTrip() {
-        String tripJson = getSharedPreferences().getString(CURRENT_TRIP, null);
-        if (tripJson == null) {
-            return null;
-        }
-
-        Gson gson = new Gson();
-        Type type = new TypeToken<Trip>() {}.getType();
-
-        return gson.fromJson(tripJson, type);
-    }
-
     public static void setTrip(Trip trip) {
         SharedPreferences.Editor editor = getEditor();
 
@@ -116,34 +104,36 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void deleteTrip() {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_TRIP);
-        editor.apply();
-    }
-
     public static HTTask getTask(Context context) {
         String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
         if (taskJson == null) {
             return null;
         }
 
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
-        gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
-        Gson gson = gsonBuilder.create();
-        Type type = new TypeToken<HTTask>() {}.getType();
+        try {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+//            gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
+            gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
+            gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
+            Gson gson = gsonBuilder.create();
+            Type type = new TypeToken<HTTask>() {}.getType();
 
-        return gson.fromJson(taskJson, type);
+            return gson.fromJson(taskJson, type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
+
+        return null;
     }
 
     public static void setTask(HTTask task) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
-        String tripJSON = gson.toJson(task);
+        String taskJSON = gson.toJson(task);
 
-        editor.putString(CURRENT_TASK, tripJSON);
+        editor.putString(CURRENT_TASK, taskJSON);
         editor.apply();
     }
 

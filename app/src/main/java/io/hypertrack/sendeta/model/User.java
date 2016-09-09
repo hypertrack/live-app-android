@@ -123,7 +123,7 @@ public class User extends RealmObject {
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", photo='" + photo + '\'' +
                 ", selectedMembershipAccountId='" + selectedMembershipAccountId + '\'' +
-                ", memberships='" + memberships.toString() + '\'' +
+                ", memberships='" + (memberships != null ? memberships.toString() : "null") + '\'' +
                 '}';
     }
 

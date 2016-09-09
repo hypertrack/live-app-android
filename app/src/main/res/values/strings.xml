@@ -23,6 +23,10 @@
     <string name="title_activity_verify">Verify Phone</string>
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
+    <string name="title_activity_activities">My Activities</string>
+
+    <string name="title_activities_tab_received">Received</string>
+    <string name="title_activities_tab_sent">Sent</string>
 
     <string name="filter_title_viewaccept">SendETA</string>
 
@@ -73,6 +77,7 @@
     <string name="profile_upload_success">Profile pic uploaded successfully</string>
 
     <!-- Error Strings -->
+    <string name="generic_error_message">Something went wrong! Please try again</string>
     <string name="network_issue">Bad connection. Try again later</string>
     <string name="invalid_current_location">Unable to get location. Please check Location settings</string>
 
@@ -170,5 +175,16 @@
         <item quantity="one">hr</item>
         <item quantity="other">hrs</item>
     </plurals>
+
+    <!-- UserActivities Stings -->
+    <string name="received_activities_no_data_text">You don\'t have any received activities</string>
+    <string name="sent_activities_no_data_text">You don\'t have any sent activities</string>
+
+    <!-- Track tasks Strings -->
+    <string name="fetching_trip_info_message">Fetching trip info. Please wait</string>
+
+    <string name="error_tracking_while_on_business_trip">Cannot track others while on a Business Trip. Please try again after your trip completes.</string>
+    <string name="error_tracking_trip_message">Error tracking the trip. Please try again</string>
+    <string name="error_fetching_trip_info_message">Error fetching the trip info. Please try again in sometime</string>
 
 </resources>

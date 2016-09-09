@@ -498,6 +498,10 @@ public class UserStore {
     }
 
     public void getUserData(final UserStoreGetUserDataCallback callback) {
+        if (user == null) {
+            initializeUser();
+        }
+
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
         Call<User> call = sendETAService.getUserData(this.user.getId());
@@ -527,37 +531,11 @@ public class UserStore {
         });
     }
 
-    public void getMembershipForAccountId(int accountId, final UserStoreMembershipCallback callback) {
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-
-        Call<Membership> call = sendETAService.getMembershipForAccountId(this.user.getId(), accountId);
-        call.enqueue(new Callback<Membership>() {
-            @Override
-            public void onResponse(Call<Membership> call, Response<Membership> response) {
-                if (response.isSuccessful()) {
-
-                    addMembership(response.body());
-
-                    if (callback != null) {
-                        callback.OnSuccess(response.body());
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Membership> call, Throwable t) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
     public void acceptMembership(Membership membership, final UserStoreMembershipCallback callback) {
+        if (user == null) {
+            initializeUser();
+        }
+
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         MembershipDTO membershipDTO = new MembershipDTO(membership);
 
@@ -589,6 +567,10 @@ public class UserStore {
     }
 
     public void rejectMembership(Membership membership, final UserStoreMembershipCallback callback) {
+        if (user == null) {
+            initializeUser();
+        }
+
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         MembershipDTO membershipDTO = new MembershipDTO(membership);
 
@@ -620,6 +602,10 @@ public class UserStore {
     }
 
     public void deleteMembership(final Membership membership, final UserStoreDeleteMembershipCallback callback) {
+        if (user == null) {
+            initializeUser();
+        }
+
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         MembershipDTO membershipDTO = new MembershipDTO(membership);
         final String accountName = new String(membership.getAccountName());

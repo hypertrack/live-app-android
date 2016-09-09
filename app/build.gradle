@@ -22,7 +22,6 @@ repositories {
 }
 
 android {
-
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
     lintOptions {
@@ -80,6 +79,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
+            resValue "string", "eta_link_url", "eta.fyi"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -91,6 +91,7 @@ android {
             manifestPlaceholders = [applicationLabel: "SendETA Debug"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
+            resValue "string", "eta_link_url", "webtracking-staging.herokuapp.com"
             resValue "string", "facebook_app_id", "1548496698792614"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -111,24 +112,27 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.3.2'
-    debugCompile('io.hypertrack:transmitter:1.2.10:debug@aar') {
-        transitive = true;
-    }
-    releaseCompile('io.hypertrack:transmitter:1.2.10:release@aar') {
-        transitive = true;
-    }
-    debugCompile('io.hypertrack:consumer:1.2.10:debug@aar') {
-        transitive = true;
-    }
-    releaseCompile('io.hypertrack:consumer:1.2.10:release@aar') {
-        transitive = true;
-    }
-    //    compile 'com.google.maps.android:android-maps-utils:0.5.0-beta'
     compile 'com.google.android.gms:play-services-gcm:8.4.0'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+
+    compile(project(path: ':common')) {
+        transitive = true
+    }
+    releaseCompile(project(path: ':consumer', configuration: 'release')) {
+        transitive = false
+    }
+    debugCompile(project(path: ':consumer', configuration: 'debug')) {
+        transitive = false
+    }
+    releaseCompile(project(path: ':transmitter', configuration: 'release')) {
+        transitive = false
+    }
+    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
+        transitive = false
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'

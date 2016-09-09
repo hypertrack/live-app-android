@@ -2,6 +2,7 @@ package io.hypertrack.sendeta;
 
 import android.app.Application;
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -13,6 +14,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import io.fabric.sdk.android.Fabric;
+import io.hypertrack.lib.common.HyperTrack;
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
@@ -38,23 +41,17 @@ public class MetaApplication extends Application {
         mInstance = this;
         this.mContext = getApplicationContext();
 
-        // Initialize Hypertrack TransmitterSDK
+        // Set Publishable Key, if not set yet
+        if (TextUtils.isEmpty(HyperTrack.getPublishableKey(getApplicationContext()))) {
+            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
+        }
+
+        // Initialize HyperTrack SDKs
         HTTransmitterService.initHTTransmitter(getApplicationContext());
+        HTConsumerClient.initHTConsumerClient(getApplicationContext());
 
         // Initialize Realm to maintain app databases
         this.setupRealm();
-
-//        RealmConfiguration config = new RealmConfiguration.Builder(context)
-//                .schemaVersion(2) // Must be bumped when the schema changes
-//                .migration(new MyMigration()) // Migration to run
-//                .build();
-//
-//        Realm.setDefaultConfiguration(config);
-
-          // This will automatically trigger the migration if needed
-//        Realm realm = Realm.getDefaultInstance();
-
-//        this.migrateRealmDB();
 
         // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
@@ -123,8 +120,12 @@ public class MetaApplication extends Application {
     private void setupRealm() {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
                 .schemaVersion(1)
-                .deleteRealmIfMigrationNeeded().build();
+                .migration(new DBMigration())
+                .build();
         Realm.setDefaultConfiguration(realmConfiguration);
+
+        // This will automatically trigger the migration if needed
+        Realm realm = Realm.getDefaultInstance();
     }
 
     @Override

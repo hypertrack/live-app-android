@@ -461,6 +461,9 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         // Remove the Text Watcher Again
         // Text Changed Listener will be added again in OnFocusChangeListener
         addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
+        if (addPlaceAddressView.hasFocus()) {
+            addPlaceAddressView.addTextChangedListener(mPlaceAddressTextWatcher);
+        }
 
         mAutocompleteResults.setVisibility(View.GONE);
     }

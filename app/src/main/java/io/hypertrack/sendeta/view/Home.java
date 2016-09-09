@@ -121,6 +121,7 @@ import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
+import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
@@ -531,6 +532,47 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     };
 
+    private TaskManagerListener onTaskRefreshedListener = new TaskManagerListener() {
+        @Override
+        public void OnCallback() {
+            if (Home.this.isFinishing())
+                return;
+
+            // Get TaskManager Instance
+            TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+            if (taskManager == null)
+                return;
+
+            // Fetch updated HypertrackTask Instance
+            HTTask task = taskManager.getHyperTrackTask();
+            if (task == null) {
+                return;
+            }
+
+            // Update ETA & Display Statuses using Task's Display field
+            updateETAForOnGoingTask(task, taskManager.getPlace());
+            updateDisplayStatusForOngoingTask(task);
+
+            // Check if DestinationLocation has been updated
+            // NOTE: Call this method after updateETAForOnGoingTask()
+            updateDestinationLocationIfApplicable(task);
+        }
+    };
+
+    private TaskManagerListener onTaskCompletedListener = new TaskManagerListener() {
+        @Override
+        public void OnCallback() {
+
+            // Call OnCompleteTask method on UI thread
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Home.this.OnCompleteTask();
+                }
+            });
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -794,13 +836,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             @Override
             public void onSwipeConfirm() {
 
-                showEndingTripAnimation(true);
-
-                //Check if Location Permission has been granted & Location has been enabled
+                // Check if Location Permission has been granted & Location has been enabled
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
                         && isLocationEnabled()) {
 
                     // Complete the Task
+                    showEndingTripAnimation(true);
                     completeTask();
                 } else {
                     checkForLocationPermission();
@@ -1371,38 +1412,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        taskManager.setTaskRefreshedListener(new TaskManagerListener() {
-            @Override
-            public void OnCallback() {
-                if (Home.this.isFinishing())
-                    return;
-
-                // Get TaskManager Instance
-                TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-                if (taskManager == null)
-                    return;
-
-                // Fetch updated HypertrackTask Instance
-                HTTask task = taskManager.getHyperTrackTask();
-                if (task == null) {
-                    return;
-                }
-
-                // Update ETA & Display Statuses using Task's Display field
-                updateETAForOnGoingTask(task, taskManager.getPlace());
-                updateDisplayStatusForOngoingTask(task);
-
-                // Check if DestinationLocation has been updated
-                // NOTE: Call this method after updateETAForOnGoingTask()
-                updateDestinationLocationIfApplicable(task);
-            }
-        });
-        taskManager.setTaskCompletedListener(new TaskManagerListener() {
-            @Override
-            public void OnCallback() {
-                OnCompleteTask();
-            }
-        });
+        taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
+        taskManager.setTaskCompletedListener(onTaskCompletedListener);
 
         updateMapPadding(true);
         updateMapView();
@@ -1416,79 +1427,38 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        etaInMinutes = getTaskDisplayETA(task.getTaskDisplay());
+        etaInMinutes = HyperTrackTaskUtils.getTaskDisplayETA(task.getTaskDisplay());
         updateDestinationMarker(destinationLocation, etaInMinutes);
-    }
-
-    private Integer getTaskDisplayETA(HTTaskDisplay taskDisplay) {
-        if (taskDisplay != null && !TextUtils.isEmpty(taskDisplay.getDurationRemaining())) {
-            Double etaInSeconds = Double.valueOf(taskDisplay.getDurationRemaining());
-
-            if (etaInSeconds != null) {
-                double etaInMinutes = Math.ceil((etaInSeconds / (float) 60));
-                if (etaInMinutes < 1) {
-                    etaInMinutes = 1;
-                }
-
-                return (int) etaInMinutes;
-            }
-        }
-
-        return null;
     }
 
     private void updateDisplayStatusForOngoingTask(HTTask task) {
         HTTaskDisplay taskDisplay = task.getTaskDisplay();
 
         // Set Toolbar Title as DisplayStatus for currently active task
-        Integer taskDisplayStatusResId = getTaskDisplayStatus(taskDisplay);
+        Integer taskDisplayStatusResId = HyperTrackTaskUtils.getTaskDisplayStatus(taskDisplay);
         if (taskDisplayStatusResId != null) {
             this.setTitle(getString(taskDisplayStatusResId));
+
         } else {
-            // Set Toolbar Title as AppName
-            this.setTitle(getResources().getString(R.string.app_name));
+            if (!TextUtils.isEmpty(taskDisplay.getStatusText())) {
+                this.setTitle(taskDisplay.getStatusText());
+
+            } else {
+                // Set Toolbar Title as AppName
+                this.setTitle(getResources().getString(R.string.app_name));
+            }
         }
 
         // Set Toolbar SubTitle as DisplaySubStatus for currently active task
         String taskDisplaySubStatus = getTaskDisplaySubStatus(taskDisplay);
         if (!TextUtils.isEmpty(taskDisplaySubStatus)) {
             this.setSubTitle(taskDisplaySubStatus);
+
+        }  if (!TextUtils.isEmpty(taskDisplay.getSubStatusText())) {
+            this.setSubTitle(taskDisplay.getSubStatusText());
+
         } else {
             this.setSubTitle("");
-        }
-    }
-
-    public Integer getTaskDisplayStatus(HTTaskDisplay taskDisplay) {
-        if (taskDisplay == null || TextUtils.isEmpty(taskDisplay.getStatus()))
-            return null;
-
-        String taskDisplayStatus = taskDisplay.getStatus();
-
-        switch (taskDisplayStatus) {
-            case HTTask.TASK_STATUS_NOT_STARTED:
-                return io.hypertrack.lib.consumer.R.string.task_status_not_started;
-            case HTTask.TASK_STATUS_DISPATCHING:
-                return io.hypertrack.lib.consumer.R.string.task_status_dispatching;
-            case HTTask.TASK_STATUS_DRIVER_ON_THE_WAY:
-                return io.hypertrack.lib.consumer.R.string.task_status_driver_on_the_way;
-            case HTTask.TASK_STATUS_DRIVER_ARRIVING:
-                return io.hypertrack.lib.consumer.R.string.task_status_driver_arriving;
-            case HTTask.TASK_STATUS_DRIVER_ARRIVED:
-                return io.hypertrack.lib.consumer.R.string.task_status_driver_arrived;
-            case HTTask.TASK_STATUS_COMPLETED:
-                return io.hypertrack.lib.consumer.R.string.task_status_completed;
-            case HTTask.TASK_STATUS_CANCELED:
-                return io.hypertrack.lib.consumer.R.string.task_status_canceled;
-            case HTTask.TASK_STATUS_ABORTED:
-                return io.hypertrack.lib.consumer.R.string.task_status_aborted;
-            case HTTask.TASK_STATUS_SUSPENDED:
-                return io.hypertrack.lib.consumer.R.string.task_status_suspended;
-            case HTTask.TASK_STATUS_NO_LOCATION:
-                return io.hypertrack.lib.consumer.R.string.task_status_no_location;
-            case HTTask.TASK_STATUS_CONNECTION_LOST:
-                return io.hypertrack.lib.consumer.R.string.task_status_connection_lost;
-            default:
-                return null;
         }
     }
 
@@ -1515,7 +1485,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private String getFormattedTimeString(Double timeInSeconds) {
-        if (this == null || this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
+        if (this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
             return null;
 
         int hours = (int) (timeInSeconds / 3600);
@@ -1573,6 +1543,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                     // Update MetaPlace in RealmDB
                     UserStore.sharedStore.editPlace(place);
+                    HTLog.i(TAG, "Destination Location updated");
                 } else {
 
                     place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
@@ -1584,6 +1555,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     // Hide destinationDescription layout
                     destinationDescription.setText("");
                     destinationDescription.setVisibility(View.GONE);
+
+                    HTLog.i(TAG, "Destination Location changed");
                 }
 
                 TaskManager.getSharedManager(Home.this).setPlace(place);
@@ -2299,8 +2272,17 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onResume();
 
         // Start Refreshing Task, if one exists
-        if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() != null) {
-            TaskManager.getSharedManager(Home.this).startRefreshingTask(0);
+        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+        if (taskManager.getHyperTrackTask() != null) {
+            taskManager.startRefreshingTask(0);
+
+            // Set Task Manager Listeners
+            taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
+            taskManager.setTaskCompletedListener(onTaskCompletedListener);
+        } else {
+            // Reset Toolbar Title as AppName in case no existing trip
+            this.setTitle(getResources().getString(R.string.app_name));
+            this.setSubTitle("");
         }
 
         // Check if Location & Network are Enabled

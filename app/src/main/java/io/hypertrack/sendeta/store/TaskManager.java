@@ -189,6 +189,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 public void onSuccess(boolean isOffline, HTTask htTask) {
 
                     if (htTask != null && !isTaskLive(htTask)) {
+                        HTLog.i(TAG, "SendETA Task Not Live, Calling completeTask() to complete the task");
 
                         // Call completeTask when the HTTask object is null or task is not live
                         TaskManager.this.completeTask(new TaskManagerCallback() {

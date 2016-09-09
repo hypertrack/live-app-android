@@ -159,9 +159,9 @@ public class BaseActivity extends AppCompatActivity {
      *
      * @param isEnabled true to enable/show loader, false to disable/hide
      */
-//    public void displayLoader(boolean isEnabled) {
-//        displayLoader(isEnabled, null);
-//    }
+    public void displayLoader(boolean isEnabled) {
+        displayLoader(isEnabled, null);
+    }
 
     /**
      * used to display a loader within content section
@@ -170,32 +170,32 @@ public class BaseActivity extends AppCompatActivity {
      * @param isEnabled true to enable/show loader, false to disable/hide
      * @param message   any message if applicable, will be shown above loader icon
      */
-//    public void displayLoader(boolean isEnabled, String message) {
-//
-//        //check if view are inflated or not
-//        if (loadingLayout == null && loadingLayoutMessage == null) {
-//            loadingLayout = (FrameLayout) findViewById(R.id.loading_container);
-//            loadingLayoutMessage = (TextView) findViewById(R.id.loading_message);
-//            loadingLayoutMessageContainer = (CardView) findViewById(R.id.loading_message_container);
-//        }
-//
-//        //check if layouts available or not
-//        if (loadingLayout != null && loadingLayoutMessage != null) {
-//            loadingLayoutMessageContainer.setVisibility(View.GONE);
-//
-//            if (isEnabled) {
-//
-//                //if any message to be shown
-//                if (message != null && message.trim().length() > 0) {
-//                    loadingLayoutMessage.setText(message);
-//                    loadingLayoutMessageContainer.setVisibility(View.VISIBLE);
-//                }
-//                loadingLayout.setVisibility(View.VISIBLE);
-//            } else {
-//                loadingLayout.setVisibility(View.GONE);
-//            }
-//        }
-//    }
+    public void displayLoader(boolean isEnabled, String message) {
+
+        //check if view are inflated or not
+        if (loadingLayout == null && loadingLayoutMessage == null) {
+            loadingLayout = (FrameLayout) findViewById(R.id.loading_container);
+            loadingLayoutMessage = (TextView) findViewById(R.id.loading_message);
+            loadingLayoutMessageContainer = (CardView) findViewById(R.id.loading_message_container);
+        }
+
+        //check if layouts available or not
+        if (loadingLayout != null && loadingLayoutMessage != null) {
+            loadingLayoutMessageContainer.setVisibility(View.GONE);
+
+            if (isEnabled) {
+
+                //if any message to be shown
+                if (message != null && message.trim().length() > 0) {
+                    loadingLayoutMessage.setText(message);
+                    loadingLayoutMessageContainer.setVisibility(View.VISIBLE);
+                }
+                loadingLayout.setVisibility(View.VISIBLE);
+            } else {
+                loadingLayout.setVisibility(View.GONE);
+            }
+        }
+    }
 
     /**
      * Show retry layout within a container, width and height will be adjusted according to parent

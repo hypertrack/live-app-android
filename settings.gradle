@@ -1,1 +1,10 @@
 include ':app'
+
+include ':common'
+project(':common').projectDir = new File(settingsDir, '../hypertrack-android/common')
+
+include ':consumer'
+project(':consumer').projectDir = new File(settingsDir, '../hypertrack-android/consumer')
+
+include ':transmitter'
+project(':transmitter').projectDir = new File(settingsDir, '../hypertrack-android/transmitter')

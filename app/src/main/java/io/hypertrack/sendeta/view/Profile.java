@@ -211,7 +211,7 @@ public class Profile extends BaseActivity implements ProfileView {
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
-        SharedPreferenceManager.deleteTrip();
+        SharedPreferenceManager.deleteTask(Profile.this);
         SharedPreferenceManager.deletePlace();
         HTLog.i("Profile", "User Registration successful: Clearing Active Trip, if any");
 

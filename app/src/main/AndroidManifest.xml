@@ -29,7 +29,7 @@
         android:theme="@style/AppTheme"
         tools:replace="android:label">
 
-        <!-- Register Activities here -->
+        <!-- Register UserActivities here -->
         <activity
             android:name=".view.SplashScreen"
             android:allowTaskReparenting="false"
@@ -55,12 +55,21 @@
 
                 <data android:scheme="http" />
                 <data android:scheme="https" />
+
+                <!-- Add sendeta.com/accept DeepLink URL -->
                 <data
                     android:host="www.sendeta.com"
                     android:pathPrefix="/accept" />
+
+                <!-- Add sendeta.com/request DeepLink URL -->
                 <data
                     android:host="www.sendeta.com"
                     android:pathPrefix="/request" />
+
+                <!-- Add eta.fyi DeepLink URL -->
+                <data
+                    android:host="@string/eta_link_url"
+                    android:pathPrefix="/" />
             </intent-filter>
         </activity>
 
@@ -69,8 +78,7 @@
             android:label="${applicationLabel}"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
             android:name=".view.Register"
@@ -83,8 +91,7 @@
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize">
-        </activity>
+            android:windowSoftInputMode="adjustResize" />
 
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -121,6 +128,16 @@
         <activity
             android:name=".view.BusinessProfile"
             android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.UserActivities"
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.Track"
+            android:parentActivityName=".view.UserActivities"
             android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->
@@ -206,7 +223,6 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>

@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 import java.util.Map;
 
+import io.hypertrack.sendeta.model.AddTaskToTrackDTO;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
@@ -10,9 +11,10 @@ import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.TaskETAResponse;
-import io.hypertrack.sendeta.model.Trip;
+import io.hypertrack.sendeta.model.TrackTaskResponse;
 import io.hypertrack.sendeta.model.TripETAResponse;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.model.UserActivitiesListResponse;
 import io.hypertrack.sendeta.store.VerifyResponse;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -53,9 +55,6 @@ public interface SendETAService {
     @GET("/api/v1/eta/")
     Call<List<TaskETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
 
-    @POST("/api/v1/trips/")
-    Call<Trip> addTrip(@Body Map<String, String> tripDetails);
-
     @POST("/api/v1/users/{id}/start_task/")
     Call<Map<String, Object>> startTask(@Path("id") int id, @Body TaskDTO taskDTO);
 
@@ -70,9 +69,6 @@ public interface SendETAService {
 
     @GET("/api/v1/places/")
     Call<List<MetaPlace>> getPlaces();
-
-    @GET("/api/v1/users/{id}/task/")
-    Call<Map <String, Object>> createTask(@Path("id") int id, @Query("destination_id") String destinationID);
 
     // Membership Calls
     @GET("/api/v1/users/{id}/")
@@ -93,4 +89,17 @@ public interface SendETAService {
     //Add GCM Token Call
     @POST("/api/v1/users/{id}/add_device/")
     Call<ResponseBody> addGCMToken(@Path("id") int id, @Body GCMAddDeviceDTO gcmAddDeviceDTO);
+
+    // UserActivities Call
+    @POST("/api/v1/users/{id}/track/")
+    Call<TrackTaskResponse> addTaskForTracking(@Path("id") int id, @Body AddTaskToTrackDTO addTaskToTrackDTO);
+
+    @GET("/api/v1/trips/?is_live=False&is_pending=False&is_default=True")
+    Call<UserActivitiesListResponse> getHistorySentUserActivities(@Query("page") int page);
+
+    @GET("/api/v1/trips/observed/?is_live=True&is_pending=False&is_default=True")
+    Call<UserActivitiesListResponse> getInProcessReceivedUserActivities(@Query("page") int page);
+
+    @GET("/api/v1/trips/observed/?is_live=False&is_pending=False&is_default=True")
+    Call<UserActivitiesListResponse> getHistoryReceivedUserActivities(@Query("page") int page);
 }

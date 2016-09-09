@@ -16,11 +16,10 @@ import io.hypertrack.sendeta.util.DeepLinkUtil;
 /**
  * Created by piyush on 23/07/16.
  */
-public class SplashScreen extends BaseActivity{
+public class SplashScreen extends BaseActivity {
 
     private static final String TAG = SplashScreen.class.getSimpleName();
 
-    private boolean isUserOnboard = false;
     private AppDeepLink appDeepLink;
 
     @Override
@@ -28,9 +27,9 @@ public class SplashScreen extends BaseActivity{
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        isUserOnboard = UserStore.isUserLoggedIn();
+        boolean isUserOnboard = UserStore.isUserLoggedIn();
 
-        handleDeepLink(getIntent());
+        handleDeepLink();
 
         if (!isUserOnboard) {
             Intent registerIntent = new Intent(this, Register.class);
@@ -44,26 +43,26 @@ public class SplashScreen extends BaseActivity{
     }
 
     // Method to handle DeepLink Params
-    private void handleDeepLink(Intent intent) {
+    private void handleDeepLink() {
         appDeepLink = new AppDeepLink(DeepLinkUtil.DEFAULT);
-        intent = getIntent();
+        Intent intent = getIntent();
 
         // if started through deep link
         if (intent != null && !TextUtils.isEmpty(intent.getDataString())) {
             Log.d(TAG, "deeplink " + intent.getDataString());
-            appDeepLink = DeepLinkUtil.prepareAppDeepLink(intent.getDataString());
+            appDeepLink = DeepLinkUtil.prepareAppDeepLink(SplashScreen.this, intent.getDataString());
         }
     }
 
     // Method to proceed to next screen with deepLink params
-    private void proceedToNextScreen(AppDeepLink appDeepLink) {
+    private void proceedToNextScreen(final AppDeepLink appDeepLink) {
         switch (appDeepLink.mId) {
             case DeepLinkUtil.MEMBERSHIP:
-                    TaskStackBuilder.create(this)
-                            .addNextIntentWithParentStack(new Intent(this, BusinessProfile.class)
-                                    .putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true)
-                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                            .startActivities();
+                TaskStackBuilder.create(this)
+                        .addNextIntentWithParentStack(new Intent(this, BusinessProfile.class)
+                                .putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                        .startActivities();
                 finish();
                 break;
 
@@ -77,6 +76,14 @@ public class SplashScreen extends BaseActivity{
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 finish();
+                break;
+
+            case DeepLinkUtil.TRACK:
+                TaskStackBuilder.create(this)
+                        .addNextIntentWithParentStack(new Intent(this, Track.class)
+                                .putExtra(Track.KEY_SHORT_CODE, appDeepLink.shortCode)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                        .startActivities();
                 break;
 
             case DeepLinkUtil.DEFAULT:
