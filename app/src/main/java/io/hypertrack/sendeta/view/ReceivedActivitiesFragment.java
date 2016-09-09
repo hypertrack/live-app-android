@@ -240,9 +240,8 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                         inProcessActivitiesHeader.setVisibility(View.GONE);
                         inProcessRecyclerView.setVisibility(View.GONE);
 
-                        checkForNoData();
-
                         inProcessActivitiesCallCompleted = true;
+                        checkForNoData();
                         return;
                     }
 
@@ -328,9 +327,8 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                         historyActivitiesHeader.setVisibility(View.GONE);
                         historyRecyclerView.setVisibility(View.GONE);
 
-                        checkForNoData();
-
                         historyActivitiesCallCompleted = true;
+                        checkForNoData();
                         return;
                     }
 

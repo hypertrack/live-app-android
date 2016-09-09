@@ -241,9 +241,8 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         inProcessActivitiesHeader.setVisibility(View.GONE);
         inProcessRecyclerView.setVisibility(View.GONE);
 
-        checkForNoData();
-
         inProcessActivitiesCallCompleted = true;
+        checkForNoData();
     }
 
     private void getHistoryActivities(SendETAService sendETAService) {
@@ -293,9 +292,8 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                         historyRecyclerView.setVisibility(View.GONE);
                         historyMoreLayout.setVisibility(View.GONE);
 
-                        checkForNoData();
-
                         historyActivitiesCallCompleted = true;
+                        checkForNoData();
                         return;
                     }
 
