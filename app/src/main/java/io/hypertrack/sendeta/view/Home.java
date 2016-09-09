@@ -2279,6 +2279,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             // Set Task Manager Listeners
             taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
             taskManager.setTaskCompletedListener(onTaskCompletedListener);
+        } else {
+            // Reset Toolbar Title as AppName in case no existing trip
+            this.setTitle(getResources().getString(R.string.app_name));
+            this.setSubTitle("");
         }
 
         // Check if Location & Network are Enabled
