@@ -5,7 +5,7 @@
         <item
             android:id="@+id/drawer_send_eta"
             android:icon="@drawable/ic_send"
-            android:title="Send ETA" />
+            android:title="Home" />
         <!--<item-->
             <!--android:id="@+id/drawer_receive_eta"-->
             <!--android:icon="@drawable/ic_receive"-->
