@@ -1,10 +1,11 @@
 package io.hypertrack.sendeta.view;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,10 +22,12 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.consumer.utils.HTMapUtils;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.SentActivitiesAdapter;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
@@ -49,7 +52,6 @@ import retrofit2.Response;
  */
 public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
 
-    private NestedScrollView mScrollView;
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
     private LinearLayout noDataLayout, inProcessActivitiesHeader, historyActivitiesHeader, historyMoreLayout;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -69,9 +71,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
             resetActivitiesData();
 
             getSentActivities();
-
-            // Scroll User's Received Activities to top by default
-            mScrollView.smoothScrollTo(0, 0);
         }
     };
 
@@ -82,13 +81,10 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
             resetActivitiesData();
 
             getSentActivities();
-
-            // Scroll User's Received Activities to top by default
-            mScrollView.smoothScrollTo(0, 0);
         }
     };
 
-    private void resetActivitiesData(){
+    private void resetActivitiesData() {
         historyActivitiesPage = 1;
         inProcessActivities.clear();
         historyActivities.clear();
@@ -138,9 +134,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         historyRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         historyRecyclerView.setNestedScrollingEnabled(false);
 
-        // Initialize Scroll View
-        mScrollView = (NestedScrollView) rootView.findViewById(R.id.fragment_activities_scroll_view);
-
         // Initialize Adapters
         inProcessActivitiesAdapter = new SentActivitiesAdapter(getActivity(), inProcessActivities, this);
         inProcessRecyclerView.setAdapter(inProcessActivitiesAdapter);
@@ -161,9 +154,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         resetActivitiesData();
 
         getSentActivities();
-
-        // Scroll User's Received Activities to top by default
-        mScrollView.smoothScrollTo(0, 0);
     }
 
     private void getSentActivities() {
@@ -190,56 +180,60 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
         TaskManager taskManager = TaskManager.getSharedManager(getActivity());
 
-        HTTask activeTask = taskManager.getHyperTrackTask();
-        if (activeTask != null && !HTTask.TASK_STATUS_COMPLETED.equalsIgnoreCase(activeTask.getStatus())) {
+        // Check if current trip is a Personal Trip
+        if ((BuildConfig.API_KEY).equalsIgnoreCase(HyperTrack.getPublishableKey(getActivity()))) {
 
-            ArrayList<UserActivityDetails> inProcessSentActivities = new ArrayList<>();
-            inProcessSentActivities.add(new UserActivityDetails(activeTask.getId(), true, activeTask));
+            HTTask activeTask = taskManager.getHyperTrackTask();
+            if (activeTask != null && !HTTask.TASK_STATUS_COMPLETED.equalsIgnoreCase(activeTask.getStatus())) {
 
-            parseUserActivityDetails(inProcessSentActivities, true);
+                ArrayList<UserActivityDetails> inProcessSentActivities = new ArrayList<>();
+                inProcessSentActivities.add(new UserActivityDetails(activeTask.getId(), true, activeTask));
 
-            inProcessActivitiesHeader.setVisibility(View.VISIBLE);
-            inProcessRecyclerView.setVisibility(View.VISIBLE);
-            swipeRefreshLayout.setVisibility(View.VISIBLE);
-            noDataLayout.setVisibility(View.GONE);
+                parseUserActivityDetails(inProcessSentActivities, true);
 
-            inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+                inProcessActivitiesHeader.setVisibility(View.VISIBLE);
+                inProcessRecyclerView.setVisibility(View.VISIBLE);
+                swipeRefreshLayout.setVisibility(View.VISIBLE);
+                noDataLayout.setVisibility(View.GONE);
 
-            taskManager.setTaskRefreshedListener(new TaskManagerListener() {
-                @Override
-                public void OnCallback() {
-                    if (getActivity() == null || getActivity().isFinishing())
-                        return;
+                inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
 
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Update InProcessActivity
-                            getInProcessActivity();
-                        }
-                    });
-                }
-            });
+                taskManager.setTaskRefreshedListener(new TaskManagerListener() {
+                    @Override
+                    public void OnCallback() {
+                        if (getActivity() == null || getActivity().isFinishing())
+                            return;
 
-            taskManager.setTaskCompletedListener(new TaskManagerListener() {
-                @Override
-                public void OnCallback() {
-                    if (getActivity() == null || getActivity().isFinishing())
-                        return;
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Update InProcessActivity
+                                getInProcessActivity();
+                            }
+                        });
+                    }
+                });
 
-                    // Call OnCompleteTask method on UI thread
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            // Update InProcessActivity
-                            getInProcessActivity();
-                        }
-                    });
-                }
-            });
+                taskManager.setTaskCompletedListener(new TaskManagerListener() {
+                    @Override
+                    public void OnCallback() {
+                        if (getActivity() == null || getActivity().isFinishing())
+                            return;
 
-            inProcessActivitiesCallCompleted = true;
-            return;
+                        // Call OnCompleteTask method on UI thread
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // Update InProcessActivity
+                                getInProcessActivity();
+                            }
+                        });
+                    }
+                });
+
+                inProcessActivitiesCallCompleted = true;
+                return;
+            }
         }
 
         // Hide InProcess List Views
@@ -376,18 +370,6 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                         }
                     }
 
-                    // Get Activity MainIcon
-                    if (!TextUtils.isEmpty(task.getStatus())) {
-                        String taskStatus = task.getStatus();
-                        switch (taskStatus) {
-                            case HTTask.TASK_STATUS_CANCELED:
-                            case HTTask.TASK_STATUS_ABORTED:
-                            case HTTask.TASK_STATUS_SUSPENDED:
-                                userActivity.setDisabledMainIcon(false);
-                                break;
-                        }
-                    }
-
                     // Get Activity EndAddress
                     HTPlace destination = task.getDestination();
                     if (destination != null && !TextUtils.isEmpty(destination.getAddress())) {
@@ -471,8 +453,35 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         }
     }
 
+    private boolean isBusinessTripActive() {
+        String currentPublishableKey = HyperTrack.getPublishableKey(getActivity());
+        // Check if Current Selected key is for a Business Account
+        if (!currentPublishableKey.equalsIgnoreCase(BuildConfig.API_KEY)) {
+
+            // Check if a business trip is active and show an error
+            if (TaskManager.getSharedManager(getActivity()).isTaskActive()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(R.string.error_tracking_while_on_business_trip);
+                builder.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public void OnInProcessActivityClicked(int position, UserActivityModel inProcessActivity) {
+
+        if (getActivity() == null || getActivity().isFinishing() || isBusinessTripActive())
+            return;
+
         if (inProcessActivity == null || TextUtils.isEmpty(inProcessActivity.getTaskID()))
             return;
 
@@ -486,7 +495,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
     @Override
     public void OnHistoryActivityClicked(int position, UserActivityModel historyActivity) {
-        if (historyActivity == null || TextUtils.isEmpty(historyActivity.getTaskID()))
+        if (historyActivity == null || TextUtils.isEmpty(historyActivity.getTaskID()) || isBusinessTripActive())
             return;
 
         ArrayList<String> taskIDList = new ArrayList<>();

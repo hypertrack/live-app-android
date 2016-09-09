@@ -13,7 +13,6 @@ public class UserActivityModel {
 
     private boolean inProcess;
     private String driverImageURL;
-    private boolean disabledMainIcon = true;
     private String title;
     private String subtitle;
     private String date;
@@ -47,14 +46,6 @@ public class UserActivityModel {
 
     public void setDriverImageURL(String driverImageURL) {
         this.driverImageURL = driverImageURL;
-    }
-
-    public boolean isDisabledMainIcon() {
-        return disabledMainIcon;
-    }
-
-    public void setDisabledMainIcon(boolean disabledMainIcon) {
-        this.disabledMainIcon = disabledMainIcon;
     }
 
     public String getTitle() {

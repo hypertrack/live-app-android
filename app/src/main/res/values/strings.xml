@@ -180,4 +180,11 @@
     <string name="received_activities_no_data_text">You don\'t have any received activities</string>
     <string name="sent_activities_no_data_text">You don\'t have any sent activities</string>
 
+    <!-- Track tasks Strings -->
+    <string name="fetching_trip_info_message">Fetching trip info. Please wait</string>
+
+    <string name="error_tracking_while_on_business_trip">Cannot track others while on a Business Trip. Please try again after your trip completes.</string>
+    <string name="error_tracking_trip_message">Error tracking the trip. Please try again</string>
+    <string name="error_fetching_trip_info_message">Error fetching the trip info. Please try again in sometime</string>
+
 </resources>

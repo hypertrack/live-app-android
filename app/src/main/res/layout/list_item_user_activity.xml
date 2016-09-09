@@ -6,7 +6,6 @@
     android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/item_user_activity.parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/margin_high"
@@ -23,6 +22,7 @@
             android:src="@drawable/default_profile_pic" />
 
         <LinearLayout
+            android:id="@+id/item_user_activity.parent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_max"

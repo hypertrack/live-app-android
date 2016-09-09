@@ -532,6 +532,47 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     };
 
+    private TaskManagerListener onTaskRefreshedListener = new TaskManagerListener() {
+        @Override
+        public void OnCallback() {
+            if (Home.this.isFinishing())
+                return;
+
+            // Get TaskManager Instance
+            TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+            if (taskManager == null)
+                return;
+
+            // Fetch updated HypertrackTask Instance
+            HTTask task = taskManager.getHyperTrackTask();
+            if (task == null) {
+                return;
+            }
+
+            // Update ETA & Display Statuses using Task's Display field
+            updateETAForOnGoingTask(task, taskManager.getPlace());
+            updateDisplayStatusForOngoingTask(task);
+
+            // Check if DestinationLocation has been updated
+            // NOTE: Call this method after updateETAForOnGoingTask()
+            updateDestinationLocationIfApplicable(task);
+        }
+    };
+
+    private TaskManagerListener onTaskCompletedListener = new TaskManagerListener() {
+        @Override
+        public void OnCallback() {
+
+            // Call OnCompleteTask method on UI thread
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Home.this.OnCompleteTask();
+                }
+            });
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1371,45 +1412,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        taskManager.setTaskRefreshedListener(new TaskManagerListener() {
-            @Override
-            public void OnCallback() {
-                if (Home.this.isFinishing())
-                    return;
-
-                // Get TaskManager Instance
-                TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-                if (taskManager == null)
-                    return;
-
-                // Fetch updated HypertrackTask Instance
-                HTTask task = taskManager.getHyperTrackTask();
-                if (task == null) {
-                    return;
-                }
-
-                // Update ETA & Display Statuses using Task's Display field
-                updateETAForOnGoingTask(task, taskManager.getPlace());
-                updateDisplayStatusForOngoingTask(task);
-
-                // Check if DestinationLocation has been updated
-                // NOTE: Call this method after updateETAForOnGoingTask()
-                updateDestinationLocationIfApplicable(task);
-            }
-        });
-        taskManager.setTaskCompletedListener(new TaskManagerListener() {
-            @Override
-            public void OnCallback() {
-
-                // Call OnCompleteTask method on UI thread
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Home.this.OnCompleteTask();
-                    }
-                });
-            }
-        });
+        taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
+        taskManager.setTaskCompletedListener(onTaskCompletedListener);
 
         updateMapPadding(true);
         updateMapView();
@@ -2268,8 +2272,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onResume();
 
         // Start Refreshing Task, if one exists
-        if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() != null) {
-            TaskManager.getSharedManager(Home.this).startRefreshingTask(0);
+        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+        if (taskManager.getHyperTrackTask() != null) {
+            taskManager.startRefreshingTask(0);
+
+            // Set Task Manager Listeners
+            taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
+            taskManager.setTaskCompletedListener(onTaskCompletedListener);
         }
 
         // Check if Location & Network are Enabled

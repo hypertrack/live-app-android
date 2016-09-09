@@ -1,6 +1,8 @@
 package io.hypertrack.sendeta.view;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -27,6 +29,7 @@ import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.consumer.view.HTMapAdapter;
 import io.hypertrack.lib.consumer.view.HTMapFragment;
 import io.hypertrack.lib.consumer.view.HTMapFragmentCallback;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AddTaskToTrackDTO;
 import io.hypertrack.sendeta.model.ErrorData;
@@ -36,6 +39,7 @@ import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.LocationStore;
+import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
@@ -60,11 +64,38 @@ public class Track extends BaseActivity {
     private Set<String> taskIDsToTrack = new HashSet<>();
     private Call<TrackTaskResponse> addTaskForTrackingCall;
 
+    private String currentPublishableKey;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_track);
+
+        currentPublishableKey = HyperTrack.getPublishableKey(this);
+        // Check if Current Selected key is for a Business Account
+        if (!currentPublishableKey.equalsIgnoreCase(BuildConfig.API_KEY)) {
+
+            // Check if a business trip is active and show an error
+            if (TaskManager.getSharedManager(this).isTaskActive()) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.error_tracking_while_on_business_trip);
+                builder.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                });
+                builder.show();
+                return;
+
+            } else {
+
+                // Change Publishable Key to SendETA Personal Account
+                HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
+            }
+        }
 
         displayLoader(true);
 
@@ -112,7 +143,7 @@ public class Track extends BaseActivity {
 
         displayLoader(false);
 
-        Toast.makeText(Track.this, "ERROR: No Tasks to be tracked", Toast.LENGTH_SHORT).show();
+        Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
         finish();
     }
 
@@ -120,22 +151,28 @@ public class Track extends BaseActivity {
         htConsumerClient.trackTask(new ArrayList<>(taskIDsToTrack), this, new TaskListCallBack() {
             @Override
             public void onSuccess(List<HTTask> list) {
+                if (Track.this.isFinishing()) {
+                    return;
+                }
+
                 // Hide RetryButton & Loader
                 showRetryButton(false);
                 displayLoader(false);
-
-                Toast.makeText(Track.this, "Tasks tracking initiated", Toast.LENGTH_SHORT).show();
 
                 htMapAdapter.notifyDataSetChanged();
             }
 
             @Override
             public void onError(Exception e) {
+                if (Track.this.isFinishing()) {
+                    return;
+                }
+
                 // Show RetryButton
                 showRetryButton(true);
                 displayLoader(false);
 
-                Toast.makeText(Track.this, "Error while tracking the task. Please try again.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -158,31 +195,35 @@ public class Track extends BaseActivity {
                         if (trackTaskResponse != null) {
 
                             String taskID = trackTaskResponse.getTaskID();
-                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
-
-                            // Check if clicked taskID exists in activeTaskIDList or not
-                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+                            if (!TextUtils.isEmpty(taskID)) {
                                 taskIDsToTrack.add(taskID);
-
-                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
-                                taskIDsToTrack.addAll(activeTaskIDList);
                             }
 
-                            if (!TextUtils.isEmpty(trackTaskResponse.getPublishableKey())) {
-                                // Set HyperTrack PublishableKey
-                                HyperTrack.setPublishableApiKey(trackTaskResponse.getPublishableKey(), getApplicationContext());
-                            } else {
-                                Toast.makeText(Track.this, "Publishable Key is not present", Toast.LENGTH_SHORT).show();
+//                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
+                            // Check if clicked taskID exists in activeTaskIDList or not
+//                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+//                                taskIDsToTrack.add(taskID);
+//                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
+//                                taskIDsToTrack.addAll(activeTaskIDList);
+//                            }
 
-                                // Show RetryButton
-                                showRetryButton(true);
-                                displayLoader(false);
-                                return;
-                            }
+//                            if (!TextUtils.isEmpty(trackTaskResponse.getPublishableKey())) {
+//                                // Set HyperTrack PublishableKey
+//                                HyperTrack.setPublishableApiKey(trackTaskResponse.getPublishableKey(), getApplicationContext());
+//                            } else {
+//                                Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
+//
+//                                // Show RetryButton
+//                                showRetryButton(true);
+//                                displayLoader(false);
+//                                return;
+//                            }
                         }
 
                         // Successful case where valid taskIDs were received
                         if (!taskIDsToTrack.isEmpty()) {
+                            Toast.makeText(Track.this, R.string.fetching_trip_info_message, Toast.LENGTH_SHORT).show();
+
                             startTaskTracking();
 
                             // Hide RetryButton
@@ -191,11 +232,15 @@ public class Track extends BaseActivity {
                         }
                     }
 
+                    if (Track.this.isFinishing()) {
+                        return;
+                    }
+
                     // Show RetryButton
                     showRetryButton(true);
                     displayLoader(false);
 
-                    Toast.makeText(Track.this, "There was an error fetching task info. Please try again.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Track.this, R.string.error_fetching_trip_info_message, Toast.LENGTH_SHORT).show();
                 }
 
                 @Override
@@ -210,6 +255,10 @@ public class Track extends BaseActivity {
                 }
 
                 private void showErrorMessage(ErrorData errorData) {
+                    if (Track.this.isFinishing()) {
+                        return;
+                    }
+
                     // Show RetryButton
                     showRetryButton(true);
                     displayLoader(false);
@@ -371,26 +420,31 @@ public class Track extends BaseActivity {
         }
     };
 
-    @Override
-    protected void onDestroy() {
+    private void resetTrackState() {
         // Clear HyperTrack Tasks being tracked currently
         HTConsumerClient.getInstance(Track.this).clearTasks();
+
+        // Reset Publishable Key if applicable
+        String publishableKey = HyperTrack.getPublishableKey(getApplicationContext());
+        if (!publishableKey.equalsIgnoreCase(currentPublishableKey)) {
+            HyperTrack.setPublishableApiKey(currentPublishableKey, getApplicationContext());
+        }
 
         if (addTaskForTrackingCall != null) {
             addTaskForTrackingCall.cancel();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        resetTrackState();
 
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
-        // Clear HyperTrack Tasks being tracked currently
-        HTConsumerClient.getInstance(Track.this).clearTasks();
-
-        if (addTaskForTrackingCall != null) {
-            addTaskForTrackingCall.cancel();
-        }
+        resetTrackState();
 
         super.onBackPressed();
     }

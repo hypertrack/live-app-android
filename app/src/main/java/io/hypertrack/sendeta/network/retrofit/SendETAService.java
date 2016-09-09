@@ -94,12 +94,12 @@ public interface SendETAService {
     @POST("/api/v1/users/{id}/track/")
     Call<TrackTaskResponse> addTaskForTracking(@Path("id") int id, @Body AddTaskToTrackDTO addTaskToTrackDTO);
 
-    @GET("/api/v1/trips/?is_live=False&is_pending=False")
+    @GET("/api/v1/trips/?is_live=False&is_pending=False&is_default=True")
     Call<UserActivitiesListResponse> getHistorySentUserActivities(@Query("page") int page);
 
-    @GET("/api/v1/trips/observed/?is_live=True&is_pending=False")
+    @GET("/api/v1/trips/observed/?is_live=True&is_pending=False&is_default=True")
     Call<UserActivitiesListResponse> getInProcessReceivedUserActivities(@Query("page") int page);
 
-    @GET("/api/v1/trips/observed/?is_live=False&is_pending=False")
+    @GET("/api/v1/trips/observed/?is_live=False&is_pending=False&is_default=True")
     Call<UserActivitiesListResponse> getHistoryReceivedUserActivities(@Query("page") int page);
 }

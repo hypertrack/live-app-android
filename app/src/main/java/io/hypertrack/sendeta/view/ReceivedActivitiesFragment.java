@@ -1,6 +1,8 @@
 package io.hypertrack.sendeta.view;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,10 +19,12 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriver;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.ReceivedActivitiesAdapter;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
@@ -31,6 +35,7 @@ import io.hypertrack.sendeta.model.UserActivityModel;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
+import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
@@ -64,9 +69,6 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             resetActivitiesData();
 
             getReceivedActivities();
-
-            // Scroll User's Received Activities to top by default
-            mScrollView.smoothScrollTo(0, 0);
         }
     };
 
@@ -77,9 +79,6 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             resetActivitiesData();
 
             getReceivedActivities();
-
-            // Scroll User's Received Activities to top by default
-            mScrollView.smoothScrollTo(0, 0);
         }
     };
 
@@ -468,10 +467,32 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         }
     }
 
+    private boolean isBusinessTripActive() {
+        String currentPublishableKey = HyperTrack.getPublishableKey(getActivity());
+        // Check if Current Selected key is for a Business Account
+        if (!currentPublishableKey.equalsIgnoreCase(BuildConfig.API_KEY)) {
+
+            // Check if a business trip is active and show an error
+            if (TaskManager.getSharedManager(getActivity()).isTaskActive()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(R.string.error_tracking_while_on_business_trip);
+                builder.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     @Override
     public void OnInProcessActivityClicked(int position, UserActivityModel inProcessActivity) {
-        if (inProcessActivity == null || TextUtils.isEmpty(inProcessActivity.getTaskID()))
+        if (inProcessActivity == null || TextUtils.isEmpty(inProcessActivity.getTaskID()) || isBusinessTripActive())
             return;
 
         ArrayList<String> taskIDList = new ArrayList<>();
@@ -484,7 +505,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
 
     @Override
     public void OnHistoryActivityClicked(int position, UserActivityModel historyActivity) {
-        if (historyActivity == null || TextUtils.isEmpty(historyActivity.getTaskID()))
+        if (historyActivity == null || TextUtils.isEmpty(historyActivity.getTaskID()) || isBusinessTripActive())
             return;
 
         ArrayList<String> taskIDList = new ArrayList<>();

@@ -2,7 +2,6 @@ package io.hypertrack.sendeta.adapter;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -77,11 +76,11 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
     @Override
     public void onBindViewHolder(final SentActivitiesViewHolder holder, int position) {
-        int size = mContext.getResources().getDimensionPixelSize(R.dimen.icon_size);
-        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
-        params.setMargins(mContext.getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh),
-                mContext.getResources().getDimensionPixelSize(R.dimen.margin_low), 0, 0);
-        holder.activityLayoutMainIcon.setLayoutParams(params);
+        FrameLayout.LayoutParams parentLayoutParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        parentLayoutParams.setMargins(mContext.getResources().getDimensionPixelSize(R.dimen.margin_high), 0,
+                mContext.getResources().getDimensionPixelSize(R.dimen.margin_high), 0);
+        holder.activityParentLayout.setLayoutParams(parentLayoutParams);
 
         UserActivityModel activity = userActivities.get(position);
         if (activity != null) {
@@ -101,12 +100,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                 holder.activityDate.setVisibility(View.VISIBLE);
             }
 
-            holder.activityLayoutMainIcon.setImageResource(R.drawable.ic_sent_activity_icon);
-            if (activity.isDisabledMainIcon()) {
-                holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme_light));
-            } else {
-                holder.activityLayoutMainIcon.setColorFilter(ContextCompat.getColor(mContext, R.color.app_background_theme));
-            }
+            holder.activityLayoutMainIcon.setVisibility(View.GONE);
 
             if (!TextUtils.isEmpty(activity.getEndAddress())) {
                 holder.activityEndAddress.setText(activity.getEndAddress());
@@ -172,10 +166,9 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
         private View startEndIconVerticalSeparator, startEndAddressHorizontalSeparator;
         private LinearLayout activitySubtitleLayout, activityAddressIconsLayout,
                 activityStartAddressLayout, activityEndAddressLayout;
+        private LinearLayout activityParentLayout;
         private MapView mapSummaryView;
         private GoogleMap map;
-
-        private FrameLayout activityParentLayout;
 
         public SentActivitiesViewHolder(View itemView) {
             super(itemView);
@@ -204,7 +197,7 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
             activityStartAddressLayout = (LinearLayout) itemView.findViewById(R.id.item_user_activity_start_address_layout);
             activityEndAddressLayout = (LinearLayout) itemView.findViewById(R.id.item_user_activity_end_address_layout);
 
-            activityParentLayout = (FrameLayout) itemView.findViewById(R.id.item_user_activity_parent);
+            activityParentLayout = (LinearLayout) itemView.findViewById(R.id.item_user_activity_parent);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -263,7 +256,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
                         // Update the mapView feature data and camera position.
                         if (activity.getEndLocation() != null) {
                             map.addMarker(new MarkerOptions().position(activity.getEndLocation())
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_end_marker)));
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_end_marker)))
+                                    .setAnchor(0.5f, 0.5f);
 
                             builder.include(activity.getEndLocation());
                             points++;
@@ -271,7 +265,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
                         if (activity.getStartLocation() != null) {
                             map.addMarker(new MarkerOptions().position(activity.getStartLocation())
-                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_start_marker)));
+                                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_task_summary_start_marker)))
+                                    .setAnchor(0.5f, 0.5f);
 
                             builder.include(activity.getStartLocation());
                             points++;
