@@ -12,6 +12,7 @@ import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
+import io.hypertrack.sendeta.util.Utils;
 
 /**
  * Created by piyush on 23/07/16.
@@ -38,6 +39,7 @@ public class SplashScreen extends BaseActivity {
             finish();
         } else {
             UserStore.sharedStore.initializeUser();
+            Utils.setCrashlyticsKeys(this);
             proceedToNextScreen(appDeepLink);
         }
     }
