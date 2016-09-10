@@ -180,7 +180,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
             locationFrequencyIncreased = true, selectPushDestinationPlace = false, handlePushDestinationDeepLink = false,
-            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false;
+            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false, isMapLoaded = false;
     private MetaPlace pushDestinationPlace;
     private int pushDestinationAccountId;
     private Task pushDestinationTask;
@@ -1235,6 +1235,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
+                isMapLoaded = true;
                 updateMapView();
             }
         });
@@ -1933,7 +1934,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateMapView() {
-        if (mMap == null) {
+        if (mMap == null || !isMapLoaded) {
             return;
         }
 

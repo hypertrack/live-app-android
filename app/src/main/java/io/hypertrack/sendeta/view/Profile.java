@@ -40,6 +40,7 @@ import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
@@ -208,6 +209,7 @@ public class Profile extends BaseActivity implements ProfileView {
     public void navigateToHomeScreen() {
 
         UserStore.sharedStore.initializeUser();
+        Utils.setCrashlyticsKeys(this);
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful

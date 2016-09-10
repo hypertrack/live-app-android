@@ -1,29 +1,20 @@
 package io.hypertrack.sendeta;
 
 import android.app.Application;
-import android.content.Context;
 import android.text.TextUtils;
-import android.util.Log;
-import android.widget.Toast;
 
 import com.crashlytics.android.Crashlytics;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.DBMigration;
-import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.store.AnalyticsStore;
-import io.hypertrack.sendeta.store.RealmStore;
 import io.hypertrack.sendeta.util.DevDebugUtils;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.exceptions.RealmMigrationNeededException;
 
 /**
  * Created by suhas on 11/11/15.
@@ -31,7 +22,6 @@ import io.realm.RealmConfiguration;
 public class MetaApplication extends Application {
 
     private static MetaApplication mInstance;
-    private Context mContext;
     private static final String TAG = MetaApplication.class.getSimpleName();
 
     @Override
@@ -39,7 +29,6 @@ public class MetaApplication extends Application {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         mInstance = this;
-        this.mContext = getApplicationContext();
 
         // Set Publishable Key, if not set yet
         if (TextUtils.isEmpty(HyperTrack.getPublishableKey(getApplicationContext()))) {
@@ -61,60 +50,8 @@ public class MetaApplication extends Application {
         DevDebugUtils.installStetho(this);
     }
 
-    public Context getAppContext() {
-        return this.mContext;
-    }
-
     public static synchronized MetaApplication getInstance() {
         return mInstance;
-    }
-
-    private void migrateRealmDB() {
-        // Or you can add the migration code to the configuration. This will run the migration code without throwing
-        // a RealmMigrationNeededException.
-        RealmConfiguration config = new RealmConfiguration.Builder(this)
-                .name("default1")
-                .schemaVersion(2)
-                .migration(new DBMigration())
-                .build();
-
-        RealmStore.getShareStore().setConfig(config);
-        RealmStore.getShareStore().setRealm(Realm.getInstance(config)); // Automatically run migration if needed
-
-        Toast.makeText(this, "Default1", Toast.LENGTH_SHORT).show();
-        showStatus(RealmStore.getShareStore().getRealm());
-    }
-
-    private void showStatus(Realm realm) {
-        String txt = realmString(realm);
-        Log.i(TAG, txt);
-        Toast.makeText(this, txt, Toast.LENGTH_SHORT).show();
-    }
-
-    private String realmString(Realm realm) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Membership membership : realm.where(Membership.class).findAll()) {
-            stringBuilder.append(membership.toString()).append("\n");
-        }
-
-        return (stringBuilder.length() == 0) ? "<data was deleted>" : stringBuilder.toString();
-    }
-
-    private String copyBundledRealmFile(InputStream inputStream, String outFileName) {
-        try {
-            File file = new File(this.getFilesDir(), outFileName);
-            FileOutputStream outputStream = new FileOutputStream(file);
-            byte[] buf = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buf)) > 0) {
-                outputStream.write(buf, 0, bytesRead);
-            }
-            outputStream.close();
-            return file.getAbsolutePath();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
     }
 
     private void setupRealm() {
@@ -122,10 +59,23 @@ public class MetaApplication extends Application {
                 .schemaVersion(1)
                 .migration(new DBMigration())
                 .build();
-        Realm.setDefaultConfiguration(realmConfiguration);
 
-        // This will automatically trigger the migration if needed
-        Realm realm = Realm.getDefaultInstance();
+        try {
+            Realm.setDefaultConfiguration(realmConfiguration);
+
+            // This will automatically trigger the migration if needed
+            Realm realm = Realm.getDefaultInstance();
+        } catch (RealmMigrationNeededException e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+
+            // Delete Realm Data in order to prevent further crashes
+            Realm.deleteRealm(realmConfiguration);
+            Realm realm = Realm.getDefaultInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
     }
 
     @Override

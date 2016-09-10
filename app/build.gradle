@@ -66,9 +66,9 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
-            output.outputFile = new File(
-                    output.outputFile.parent,
-                    output.outputFile.name.replace("app-debug.apk", "SendETA-${variant.versionName}.apk"))
+            def newFileName = "SendETA-${variant.versionName}.apk";
+            def apk = output.outputFile;
+            output.outputFile = new File(apk.parentFile, newFileName);
         }
     }
 
