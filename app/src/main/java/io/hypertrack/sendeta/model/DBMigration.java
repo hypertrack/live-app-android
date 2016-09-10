@@ -46,9 +46,9 @@ public class DBMigration implements RealmMigration {
                 // Create a new class
                 RealmObjectSchema membershipSchema = schema.create("Membership")
                         .addField("accountId", int.class, FieldAttribute.PRIMARY_KEY)
-                        .addField("isAccepted", boolean.class, FieldAttribute.REQUIRED)
-                        .addField("isRejected", boolean.class, FieldAttribute.REQUIRED)
-                        .addField("accountName", String.class, FieldAttribute.REQUIRED);
+                        .addField("isAccepted", boolean.class)
+                        .addField("isRejected", boolean.class)
+                        .addField("accountName", String.class);
 
                 RealmObjectSchema userSchema = schema.get("User");
                 if (userSchema != null) {

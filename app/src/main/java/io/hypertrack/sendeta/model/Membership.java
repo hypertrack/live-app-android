@@ -6,7 +6,6 @@ import java.io.Serializable;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
-import io.realm.annotations.Required;
 
 /**
  * Created by piyush on 22/07/16.
@@ -25,7 +24,6 @@ public class Membership extends RealmObject implements Serializable {
     @SerializedName("is_rejected")
     private boolean isRejected;
 
-    @Required
     @SerializedName("account_name")
     private String accountName;
 
