@@ -62,6 +62,10 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         public void onClick(View v) {
             profileImageClickedCount++;
 
+            if (profileImageClickedCount == 4) {
+                Toast.makeText(SettingsScreen.this, "Click one more time to see Shift screen", Toast.LENGTH_SHORT).show();
+            }
+
             if (profileImageClickedCount >= 5) {
                 Intent shiftScreenIntent = new Intent(SettingsScreen.this, ShiftsScreen.class);
                 startActivity(shiftScreenIntent);

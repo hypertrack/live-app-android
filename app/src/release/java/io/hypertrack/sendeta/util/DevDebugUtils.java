@@ -10,4 +10,8 @@ public class DevDebugUtils {
     public static void installStetho(Application application) {
         //do nothing
     }
+
+    public static void setHTLogLevel(int logLevel) {
+        //do nothing
+    }
 }

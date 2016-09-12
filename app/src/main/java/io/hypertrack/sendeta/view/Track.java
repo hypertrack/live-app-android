@@ -195,29 +195,17 @@ public class Track extends BaseActivity {
                         if (trackTaskResponse != null) {
 
                             String taskID = trackTaskResponse.getTaskID();
-                            if (!TextUtils.isEmpty(taskID)) {
-                                taskIDsToTrack.add(taskID);
-                            }
-
-//                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
-                            // Check if clicked taskID exists in activeTaskIDList or not
-//                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+//                            if (!TextUtils.isEmpty(taskID)) {
 //                                taskIDsToTrack.add(taskID);
-//                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
-//                                taskIDsToTrack.addAll(activeTaskIDList);
 //                            }
 
-//                            if (!TextUtils.isEmpty(trackTaskResponse.getPublishableKey())) {
-//                                // Set HyperTrack PublishableKey
-//                                HyperTrack.setPublishableApiKey(trackTaskResponse.getPublishableKey(), getApplicationContext());
-//                            } else {
-//                                Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
-//
-//                                // Show RetryButton
-//                                showRetryButton(true);
-//                                displayLoader(false);
-//                                return;
-//                            }
+                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
+                            // Check if clicked taskID exists in activeTaskIDList or not
+                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+                                taskIDsToTrack.add(taskID);
+                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
+                                taskIDsToTrack.addAll(activeTaskIDList);
+                            }
                         }
 
                         // Successful case where valid taskIDs were received

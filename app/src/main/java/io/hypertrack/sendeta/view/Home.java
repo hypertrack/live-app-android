@@ -2252,7 +2252,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Start Refreshing Task, if one exists
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        if (taskManager.getHyperTrackTask() != null) {
+        if (taskManager.getHyperTrackTask() != null && !taskManager.getHyperTrackTask().isCompleted()) {
             taskManager.startRefreshingTask(0);
 
             // Set Task Manager Listeners

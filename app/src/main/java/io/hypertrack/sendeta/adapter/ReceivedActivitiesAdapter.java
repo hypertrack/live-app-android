@@ -71,6 +71,7 @@ public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActi
                         .placeholder(R.drawable.default_profile_pic)
                         .error(R.drawable.default_profile_pic)
                         .into(holder.activityLayoutMainIcon);
+                holder.activityLayoutMainIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
 
             if (!TextUtils.isEmpty(activity.getEndAddress())) {
