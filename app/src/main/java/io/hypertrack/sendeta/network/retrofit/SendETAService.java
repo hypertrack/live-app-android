@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.hypertrack.sendeta.model.AddTaskToTrackDTO;
+import io.hypertrack.sendeta.model.FetchDriverIDForUserResponse;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
@@ -102,4 +103,8 @@ public interface SendETAService {
 
     @GET("/api/v1/trips/observed/?is_live=False&is_pending=False&is_default=True")
     Call<UserActivitiesListResponse> getHistoryReceivedUserActivities(@Query("page") int page);
+
+    // Fetch DriverID for a user
+    @GET("/api/v1/users/{id}/default_driver/")
+    Call<FetchDriverIDForUserResponse> getDriverIDForUser(@Path("id") int id);
 }

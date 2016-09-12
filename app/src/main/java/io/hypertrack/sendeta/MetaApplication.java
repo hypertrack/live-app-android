@@ -2,6 +2,7 @@ package io.hypertrack.sendeta;
 
 import android.app.Application;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
@@ -48,6 +49,8 @@ public class MetaApplication extends Application {
         // Initialize Stetho to debug Databases
         // (NOTE: IFF current Build Variant is DEBUG)
         DevDebugUtils.installStetho(this);
+        // Set HyperTrack LogLevel to VERBOSE
+        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
     }
 
     public static synchronized MetaApplication getInstance() {

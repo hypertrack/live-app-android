@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.facebook.stetho.Stetho;
 
+import io.hypertrack.lib.common.HyperTrack;
+
 /**
  * Created by piyush on 03/07/16.
  */
@@ -16,5 +18,9 @@ public class DevDebugUtils {
                         .enableDumpapp(Stetho.defaultDumperPluginsProvider(application))
                         .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(application))
                         .build());
+    }
+
+    public static void setHTLogLevel(int logLevel) {
+        HyperTrack.setLogLevel(logLevel);
     }
 }

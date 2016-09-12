@@ -15,6 +15,7 @@ import java.lang.reflect.Type;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTTask;
+import io.hypertrack.lib.transmitter.model.HTShift;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
@@ -30,6 +31,8 @@ public class SharedPreferenceManager {
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
+    private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
+    private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
     private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
@@ -62,7 +65,8 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<MetaPlace>() {}.getType();
+        Type type = new TypeToken<MetaPlace>() {
+        }.getType();
 
         return gson.fromJson(placeJson, type);
     }
@@ -116,7 +120,8 @@ public class SharedPreferenceManager {
             gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
             gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
             Gson gson = gsonBuilder.create();
-            Type type = new TypeToken<HTTask>() {}.getType();
+            Type type = new TypeToken<HTTask>() {
+            }.getType();
 
             return gson.fromJson(taskJson, type);
         } catch (Exception e) {
@@ -152,7 +157,8 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<OnboardingUser>() {}.getType();
+        Type type = new TypeToken<OnboardingUser>() {
+        }.getType();
 
         return gson.fromJson(userJSON, type);
     }
@@ -174,7 +180,8 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<Location>() {}.getType();
+        Type type = new TypeToken<Location>() {
+        }.getType();
 
         return gson.fromJson(lastKnownLocationJSON, type);
     }
@@ -196,7 +203,8 @@ public class SharedPreferenceManager {
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<GeofencingRequest>() {}.getType();
+        Type type = new TypeToken<GeofencingRequest>() {
+        }.getType();
 
         return gson.fromJson(geofencingRequestJSON, type);
     }
@@ -239,6 +247,63 @@ public class SharedPreferenceManager {
     public static void setLastSelectedVehicleType(HTDriverVehicleType vehicleType) {
         SharedPreferences.Editor editor = getEditor();
         editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
+        editor.apply();
+    }
+
+    public static HTShift getShift(Context context) {
+        String taskJson = getSharedPreferences().getString(CURRENT_SHIFT, null);
+        if (taskJson == null) {
+            return null;
+        }
+
+        try {
+            GsonBuilder gsonBuilder = new GsonBuilder();
+//            gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
+            gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
+            gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
+            Gson gson = gsonBuilder.create();
+            Type type = new TypeToken<HTShift>() {
+            }.getType();
+
+            return gson.fromJson(taskJson, type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
+
+        return null;
+    }
+
+    public static void setShift(HTShift shift) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String taskJSON = gson.toJson(shift);
+
+        editor.putString(CURRENT_SHIFT, taskJSON);
+        editor.apply();
+    }
+
+
+    public static void deleteShift(Context context) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_SHIFT);
+        editor.apply();
+    }
+
+    public static String getShiftDriverID(Context context) {
+        return getSharedPreferences().getString(CURRENT_SHIFT_DRIVER_ID, null);
+    }
+
+    public static void setShiftDriverID(Context context, String driverID) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(CURRENT_SHIFT_DRIVER_ID, driverID);
+        editor.apply();
+    }
+
+    public static void clearShiftDriverID(Context context) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_SHIFT_DRIVER_ID);
         editor.apply();
     }
 }
