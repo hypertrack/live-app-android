@@ -33,6 +33,7 @@ public class SharedPreferenceManager {
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
     private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
     private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
+    private static final String CURRENT_HYPERTRACK_DRIVER_ID = "io.hypertrack.meta:HyperTrackDriverID";
     private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
@@ -288,6 +289,22 @@ public class SharedPreferenceManager {
     public static void deleteShift(Context context) {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_SHIFT);
+        editor.apply();
+    }
+
+    public static String getHyperTrackDriverID(Context context) {
+        return getSharedPreferences().getString(CURRENT_HYPERTRACK_DRIVER_ID, null);
+    }
+
+    public static void setHyperTrackDriverID(Context context, String driverID) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(CURRENT_HYPERTRACK_DRIVER_ID, driverID);
+        editor.apply();
+    }
+
+    public static void clearHyperTrackDriverID(Context context) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_HYPERTRACK_DRIVER_ID);
         editor.apply();
     }
 

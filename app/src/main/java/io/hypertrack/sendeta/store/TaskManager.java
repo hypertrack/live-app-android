@@ -42,6 +42,7 @@ import io.hypertrack.lib.transmitter.model.HTTaskParamsBuilder;
 import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
 import io.hypertrack.lib.transmitter.model.ServiceNotificationParamsBuilder;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
+import io.hypertrack.lib.transmitter.model.callback.HTCompleteAllTasksStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTaskStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
@@ -148,6 +149,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     public boolean shouldRestoreState() {
         this.getSavedTaskData();
 
+        if (transmitter == null)
+            transmitter = HTTransmitterService.getInstance(mContext);
+
         // Check if current Task exists in Shared Preference or not
         if (this.hyperTrackTask != null) {
             // Restore the current task with locally cached data
@@ -157,21 +161,81 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             if (this.place != null) {
                 onTaskStart(0);
                 return true;
+
             } else {
-                // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
-                HTLog.e(TAG, "Error occurred while shouldRestoreState: Place is NULL");
-                this.clearState();
+                HTLog.e(TAG, "SendETA: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
+                completeAllTasks();
                 return false;
             }
 
         } else {
-            // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
-            if (transmitter != null && transmitter.isDriverLive()) {
-                HTLog.e(TAG, "Error occurred while shouldRestoreState: HypertrackTask is NULL");
+            if (transmitter.isDriverLive()) {
+                if (!TextUtils.isEmpty(transmitter.getActiveDriverID()) &&
+                        !transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()).isEmpty()) {
+                    HTLog.e(TAG, "SendETA: Error occurred while shouldRestoreState: Driver is Active & HypertrackTask is NULL");
+                }
             }
-            this.clearState();
+
+            completeAllTasks();
             return false;
         }
+    }
+
+    private void completeAllTasks() {
+        if (transmitter == null)
+            transmitter = HTTransmitterService.getInstance(mContext);
+
+        if (!transmitter.isDriverLive() || transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()).isEmpty()) {
+            HTLog.i(TAG, "Driver is not live. Clearing state");
+            clearState();
+            return;
+        }
+
+        String hyperTrackDriverID;
+        // Override driverID to the one active in DriverSDK currently
+        if (!TextUtils.isEmpty(transmitter.getActiveDriverID())) {
+            hyperTrackDriverID = transmitter.getActiveDriverID();
+            SharedPreferenceManager.setHyperTrackDriverID(mContext, hyperTrackDriverID);
+
+        } else {
+            // Get DriverID from SharedPreferences if not available already
+            hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(mContext);
+        }
+
+        if (TextUtils.isEmpty(hyperTrackDriverID)) {
+            HTLog.e(TAG, "Error occurred while completeAllTasks: Driver is Active & Driver is NULL");
+            clearState();
+            return;
+        }
+
+        HTLog.e(TAG, "ActiveTask on Driver SDK. Calling completeAllActiveTasks() to complete tasks");
+
+        // Complete all active tasks in DriverSDK
+        transmitter.completeAllActiveTasks(new HTCompleteAllTasksStatusCallback() {
+            @Override
+            public void onSuccess(List<String> completedTaskIDs) {
+                HTLog.i(TAG, "All tasks completed. completeAllTasks call successful.");
+                clearState();
+            }
+
+            @Override
+            public void onError(Map<String, Exception> completeTaskErrors) {
+                clearState();
+
+                // Log errors on completeAllTasks()
+                try {
+                    for (String taskID : completeTaskErrors.keySet()) {
+                        if (completeTaskErrors.get(taskID) != null) {
+                            HTLog.e(TAG, "SendETA: Error occurred while completeAllActiveTasks for taskID "
+                                    + taskID + ": " + completeTaskErrors.get(taskID));
+                        }
+                    }
+                } catch (Exception e) {
+                    Crashlytics.logException(e);
+                    HTLog.e(TAG, "Exception occurred while completeAllTasks: " + e);
+                }
+            }
+        });
     }
 
     final Runnable refreshTask = new Runnable() {
@@ -321,6 +385,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                         String taskID = (String) response.get("id");
                         String publishableKey = (String) response.get("publishable_key");
                         String hypertrackDriverID = (String) response.get("hypertrack_driver_id");
+
+                        // Set HyperTrack DriverID
+                        if (!TextUtils.isEmpty(hypertrackDriverID)) {
+                            SharedPreferenceManager.setHyperTrackDriverID(mContext, hypertrackDriverID);
+                        }
 
                         // Parse Response to fetch Task Data
                         TaskManager.this.setTask(response);
@@ -549,9 +618,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 if (taskCompletedListener != null) {
                     taskCompletedListener.OnCallback();
                 }
-                // TODO: 17/08/16 Check what to do for this as the Task might not have completed on SDK
-                HTLog.e(TAG, "Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
-                clearState();
+
+                HTLog.e(TAG, "SendETA: Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
+                completeAllTasks();
                 return;
             }
         }
@@ -630,7 +699,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     public HTTask getHyperTrackTask() {
         if (this.hyperTrackTask == null) {
-            this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);;
+            this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);
         }
 
         return this.hyperTrackTask;
