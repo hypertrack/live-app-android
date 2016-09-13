@@ -171,6 +171,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         } else {
             if (transmitter.isDriverLive()) {
                 if (!TextUtils.isEmpty(transmitter.getActiveDriverID()) &&
+                        transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()) != null &&
                         !transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()).isEmpty()) {
                     HTLog.e(TAG, "SendETA: Error occurred while shouldRestoreState: Driver is Active & HypertrackTask is NULL");
                 }
@@ -185,7 +186,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         if (transmitter == null)
             transmitter = HTTransmitterService.getInstance(mContext);
 
-        if (!transmitter.isDriverLive() || transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()).isEmpty()) {
+        if (!transmitter.isDriverLive() || transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()) == null
+                || transmitter.getActiveTaskIDs(transmitter.getActiveDriverID()).isEmpty()) {
             HTLog.i(TAG, "Driver is not live. Clearing state");
             clearState();
             return;
