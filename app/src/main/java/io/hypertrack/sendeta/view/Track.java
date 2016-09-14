@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -348,102 +347,6 @@ public class Track extends BaseActivity {
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastKnownCachedLocation.getLatitude(),
                         lastKnownCachedLocation.getLongitude()), 13.0f));
             }
-        }
-
-        @Override
-        public void onMapLoadedCallback(HTMapFragment mapFragment, GoogleMap map) {
-        }
-
-        @Override
-        public void onMapWillClear(HTMapFragment mapFragment, GoogleMap map) {
-        }
-
-        @Override
-        public void onHeroMarkerClicked(HTMapFragment mapFragment, String taskID, Marker heroMarker) {
-        }
-
-        @Override
-        public void onHeroMarkerWillMove(HTMapFragment mapFragment, String taskID, Marker heroMarker, LatLng toLocation) {
-        }
-
-        @Override
-        public void onHeroMarkerAdded(HTMapFragment mapFragment, String taskID, Marker heroMarker) {
-        }
-
-        @Override
-        public void onHeroMarkerRemoved(HTMapFragment mapFragment, String taskID, Marker heroMarker) {
-        }
-
-        @Override
-        public void onSourceMarkerClicked(HTMapFragment mapFragment, String taskID, Marker sourceMarker) {
-        }
-
-        @Override
-        public void onSourceMarkerAdded(HTMapFragment mapFragment, String taskID, Marker sourceMarker) {
-        }
-
-        @Override
-        public void onSourceMarkerRemoved(HTMapFragment mapFragment, String taskID, Marker sourceMarker) {
-        }
-
-        @Override
-        public void onDestinationMarkerClicked(HTMapFragment mapFragment, String taskID, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onDestinationMarkerAdded(HTMapFragment mapFragment, String taskID, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onDestinationMarkerRemoved(HTMapFragment mapFragment, String taskID, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onMultipleTasksDestinationMarkerClicked(HTMapFragment mapFragment, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onMultipleTasksDestinationMarkerAdded(HTMapFragment mapFragment, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onMultipleTasksDestinationMarkerRemoved(HTMapFragment mapFragment, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onCallButtonClicked(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onOrderDetailsButtonClicked(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onMapFragmentSucceed(HTMapFragment mapFragment, List<String> taskID) {
-        }
-
-        @Override
-        public void onMapFragmentFailed(HTMapFragment mapFragment, List<String> taskID, String errorMessage) {
-        }
-
-        @Override
-        public void onBeginEditingDestination(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onCanceledEditingDestination(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onEndEditingDestination(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onReceiveUserLocationMissingError(HTMapFragment mapFragment, String taskID, String errorMessage) {
-        }
-
-        @Override
-        public void onReceiveEditDestinationError(HTMapFragment mapFragment, String taskID, String errorMessage) {
         }
     };
 
