@@ -392,21 +392,18 @@ public class Track extends BaseActivity {
     @Override
     protected void onPause() {
         super.onPause();
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mTaskStatusChangedReceiver);
     }
 
     @Override
     protected void onDestroy() {
         resetTrackState();
-
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
         resetTrackState();
-
         super.onBackPressed();
     }
 }
