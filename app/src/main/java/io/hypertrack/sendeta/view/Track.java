@@ -1,12 +1,15 @@
 package io.hypertrack.sendeta.view;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -65,6 +68,30 @@ public class Track extends BaseActivity {
     private Call<TrackTaskResponse> addTaskForTrackingCall;
 
     private String currentPublishableKey;
+
+    private BroadcastReceiver mTaskStatusChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent != null && intent.hasExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST)) {
+                ArrayList<String> taskIDList = intent.getStringArrayListExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST);
+
+                if (taskIDList != null) {
+
+                    for (String taskID : taskIDList) {
+                        if (htConsumerClient != null && htConsumerClient.taskForTaskID(taskID) != null
+                                && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
+
+                            htConsumerClient.removeTaskID(taskID);
+                            if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
+                                taskIDsToTrack.remove(taskID);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -433,6 +460,37 @@ public class Track extends BaseActivity {
         if (addTaskForTrackingCall != null) {
             addTaskForTrackingCall.cancel();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(HTConsumerClient.TASK_STATUS_CHANGED_NOTIFICATION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mTaskStatusChangedReceiver, filter);
+
+        if (htConsumerClient != null) {
+
+            ArrayList<String> taskIDList = htConsumerClient.getTaskIDList();
+            if (taskIDList != null && !taskIDList.isEmpty()) {
+
+                for (String taskID : taskIDList) {
+                    if (htConsumerClient.taskForTaskID(taskID) != null && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
+                        htConsumerClient.removeTaskID(taskID);
+                        if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
+                            taskIDsToTrack.remove(taskID);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mTaskStatusChangedReceiver);
     }
 
     @Override
