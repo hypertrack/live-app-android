@@ -83,7 +83,7 @@ public class ShiftsScreen extends BaseActivity {
         driverIDTextView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
                     android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     clipboard.setText(driverIDTextView.getText());
                 } else {
@@ -104,7 +104,7 @@ public class ShiftsScreen extends BaseActivity {
                 if (TextUtils.isEmpty(shiftIDTextView.getText()))
                     return true;
 
-                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
                     android.text.ClipboardManager clipboard = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                     clipboard.setText(shiftIDTextView.getText());
                 } else {
@@ -286,13 +286,13 @@ public class ShiftsScreen extends BaseActivity {
             }
         });
 
+        shiftBtn.setText("End Shift");
+
         HTShift shift = shiftManager.getHyperTrackShift();
 
         if (shift != null) {
             driverIDTextView.setText(shift.getDriverID());
             shiftIDTextView.setText(shift.getId());
-
-            shiftBtn.setText("End Shift");
         }
     }
 

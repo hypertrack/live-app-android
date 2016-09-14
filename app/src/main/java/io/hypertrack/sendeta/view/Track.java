@@ -372,6 +372,18 @@ public class Track extends BaseActivity {
         }
 
         @Override
+        public void onMultipleTasksDestinationMarkerClicked(HTMapFragment mapFragment, Marker destinationMarker) {
+        }
+
+        @Override
+        public void onMultipleTasksDestinationMarkerAdded(HTMapFragment mapFragment, Marker destinationMarker) {
+        }
+
+        @Override
+        public void onMultipleTasksDestinationMarkerRemoved(HTMapFragment mapFragment, Marker destinationMarker) {
+        }
+
+        @Override
         public void onCallButtonClicked(HTMapFragment mapFragment, String taskID) {
         }
 

@@ -140,13 +140,6 @@ public class ShiftManager {
     }
 
     public void endShift(final HTShiftStatusCallback callback) {
-        if (this.getHyperTrackShift() == null) {
-            if (callback != null) {
-                callback.onError(new RuntimeException("Shift is NULL"));
-            }
-            return;
-        }
-
         transmitter.endShift(new HTShiftStatusCallback() {
             @Override
             public void onSuccess(HTShift shift) {
