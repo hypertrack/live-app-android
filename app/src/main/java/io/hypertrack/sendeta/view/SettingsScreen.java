@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -53,6 +54,38 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     private User user;
     private boolean isRefreshFavoritesCompleted, isRefreshUserDataCompleted;
 
+    private int profileImageClickedCount = 0;
+    private Handler profileImageClickedHandler;
+
+    private View.OnClickListener onProfileImageClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            profileImageClickedCount++;
+
+            if (profileImageClickedCount == 4) {
+                Toast.makeText(SettingsScreen.this, "Click one more time to see Shift screen", Toast.LENGTH_SHORT).show();
+            }
+
+            if (profileImageClickedCount >= 5) {
+                Intent shiftScreenIntent = new Intent(SettingsScreen.this, ShiftsScreen.class);
+                startActivity(shiftScreenIntent);
+                return;
+            }
+
+            if (profileImageClickedHandler == null) {
+                profileImageClickedHandler = new Handler();
+
+                profileImageClickedHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        profileImageClickedCount = 0;
+                        profileImageClickedHandler = null;
+                    }
+                }, 3000);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +101,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
         // Initialize UI Views
         profileImageView = (ImageView) findViewById(R.id.settings_image);
+        profileImageView.setOnClickListener(onProfileImageClickListener);
         mFavoritePlacesRecyclerView = (RecyclerView) findViewById(R.id.settings_saved_places);
         mMembershipsRecyclerView = (RecyclerView) findViewById(R.id.settings_business_profiles);
 

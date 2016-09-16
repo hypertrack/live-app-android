@@ -5,7 +5,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -24,7 +23,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
-import android.provider.Settings;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -410,7 +408,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             // Check if Location was enabled & if valid location was received
-            if (!isLocationEnabled()) {
+            if (!LocationUtils.isLocationEnabled(Home.this)) {
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
                     checkIfLocationIsEnabled();
 
@@ -464,7 +462,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             Log.d(TAG, "Location Changed");
 
             // Initiate FusedLocation Updates on Location Changed
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && isLocationEnabled()) {
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && LocationUtils.isLocationEnabled(Home.this)) {
                 // Remove location updates so that it resets
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
 
@@ -497,7 +495,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     };
 
     private void updateInfoMessageView() {
-        if (!isLocationEnabled()) {
+        if (!LocationUtils.isLocationEnabled(Home.this)) {
             infoMessageView.setVisibility(View.VISIBLE);
 
             if (!isInternetEnabled()) {
@@ -600,7 +598,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Get Default User Location from his CountryCode
         // SKIP: if Location Permission is Granted and Location is Enabled
-        if (!isLocationEnabled() || !PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (!LocationUtils.isLocationEnabled(Home.this) || !PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
             geocodeUserCountryName();
         }
 
@@ -796,7 +794,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onClick(View v) {
                 //Check if Location Permission has been granted & Location has been enabled
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        && isLocationEnabled()) {
+                        && LocationUtils.isLocationEnabled(Home.this)) {
                     if (!TaskManager.getSharedManager(Home.this).isTaskActive()) {
 
                         // Check if the selectedAccountId is different from pushDestinationAccountId
@@ -838,7 +836,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                 // Check if Location Permission has been granted & Location has been enabled
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        && isLocationEnabled()) {
+                        && LocationUtils.isLocationEnabled(Home.this)) {
 
                     // Complete the Task
                     showEndingTripAnimation(true);
@@ -1712,29 +1710,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initiate location updates if permission granted
         if (PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-                isLocationEnabled()) {
+                LocationUtils.isLocationEnabled(Home.this)) {
             requestLocationUpdates();
         }
-    }
-
-    private boolean isLocationEnabled() {
-        try {
-            ContentResolver contentResolver = this.getContentResolver();
-            // Find out what the settings say about which providers are enabled
-            int mode = Settings.Secure.getInt(
-                    contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
-            if (mode == Settings.Secure.LOCATION_MODE_OFF) {
-                // Location is turned OFF!
-                return false;
-            } else {
-                // Location is turned ON!
-                return true;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return false;
     }
 
     private boolean isInternetEnabled() {
@@ -1885,7 +1863,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Handle pushDestination DeepLink
-        if (selectPushDestinationPlace && isLocationEnabled()) {
+        if (selectPushDestinationPlace && LocationUtils.isLocationEnabled(Home.this)) {
             mPlaceAutoCompleteListener.OnSuccess(pushDestinationPlace);
         }
     }
@@ -2274,7 +2252,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Start Refreshing Task, if one exists
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        if (taskManager.getHyperTrackTask() != null) {
+        if (taskManager.getHyperTrackTask() != null && !taskManager.getHyperTrackTask().isCompleted()) {
             taskManager.startRefreshingTask(0);
 
             // Set Task Manager Listeners
@@ -2415,7 +2393,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if Location is Enabled & Resume LocationUpdates
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            if (isLocationEnabled()) {
+            if (LocationUtils.isLocationEnabled(Home.this)) {
                 requestLocationUpdates();
             }
         } else {

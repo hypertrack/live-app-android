@@ -38,7 +38,7 @@ import io.hypertrack.sendeta.model.UserActivityModel;
 public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAdapter.SentActivitiesViewHolder> {
 
     private Context mContext;
-    private ArrayList<UserActivityModel> userActivities;
+    private ArrayList<UserActivityModel> userActivities = new ArrayList<>();
     private UserActivitiesOnClickListener listener;
     private boolean showMapSummary = false;
 

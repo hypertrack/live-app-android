@@ -253,6 +253,9 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
             historySentActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
+                    if (getActivity() == null || getActivity().isFinishing())
+                        return;
+
                     if (inProcessActivitiesCallCompleted) {
                         displayLoader(false);
                     }

@@ -1,5 +1,9 @@
 package io.hypertrack.sendeta.util;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.provider.Settings;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -30,6 +34,26 @@ public class LocationUtils {
         if (lat1 == lat2 && lng1 == lng2) {
             return true;
         }
+        return false;
+    }
+
+    public static boolean isLocationEnabled(Context context) {
+        try {
+            ContentResolver contentResolver = context.getContentResolver();
+            // Find out what the settings say about which providers are enabled
+            int mode = Settings.Secure.getInt(
+                    contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
+            if (mode == Settings.Secure.LOCATION_MODE_OFF) {
+                // Location is turned OFF!
+                return false;
+            } else {
+                // Location is turned ON!
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return false;
     }
 }

@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
@@ -25,17 +26,23 @@ import io.hypertrack.sendeta.util.images.RoundedImageView;
 public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActivitiesAdapter.ReceivedActivitiesViewHolder> {
 
     private Context mContext;
-    private ArrayList<UserActivityModel> userActivities;
+    private ArrayList<UserActivityModel> userActivities = new ArrayList<>();
     private UserActivitiesOnClickListener listener;
 
-    public ReceivedActivitiesAdapter(Context mContext, ArrayList<UserActivityModel> userActivities, UserActivitiesOnClickListener listener) {
+    public ReceivedActivitiesAdapter(Context mContext, Collection<UserActivityModel> userActivities, UserActivitiesOnClickListener listener) {
         this.mContext = mContext;
-        this.userActivities = userActivities != null ? userActivities : new ArrayList<UserActivityModel>();
+        this.userActivities.addAll(userActivities != null ? userActivities : new ArrayList<UserActivityModel>());
         this.listener = listener;
     }
 
-    public void setUserActivities(ArrayList<UserActivityModel> userActivities) {
-        this.userActivities = userActivities;
+    public void setUserActivities(Collection<UserActivityModel> userActivities) {
+        if (this.userActivities == null) {
+            this.userActivities = new ArrayList<>();
+        } else {
+            this.userActivities.clear();
+        }
+
+        this.userActivities.addAll(userActivities);
         notifyDataSetChanged();
     }
 
@@ -71,6 +78,7 @@ public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActi
                         .placeholder(R.drawable.default_profile_pic)
                         .error(R.drawable.default_profile_pic)
                         .into(holder.activityLayoutMainIcon);
+                holder.activityLayoutMainIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
 
             if (!TextUtils.isEmpty(activity.getEndAddress())) {

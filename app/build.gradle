@@ -63,7 +63,6 @@ android {
     } else {
         throw new GradleException("Could not read version.properties!")
     }
-
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def newFileName = "SendETA-${variant.versionName}.apk";
@@ -71,7 +70,6 @@ android {
             output.outputFile = new File(apk.parentFile, newFileName);
         }
     }
-
     buildTypes {
         release {
             debuggable false
@@ -79,7 +77,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
-            resValue "string", "eta_link_url", "eta.fyi"
+            resValue "string", "eta_link_url", "www.eta.fyi"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"

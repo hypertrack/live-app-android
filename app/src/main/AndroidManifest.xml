@@ -140,6 +140,10 @@
             android:parentActivityName=".view.UserActivities"
             android:screenOrientation="portrait" />
 
+        <activity android:name=".view.ShiftsScreen"
+            android:parentActivityName=".view.SettingsScreen"
+            android:screenOrientation="portrait" />
+
         <!-- Register Receivers here -->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"

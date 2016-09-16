@@ -2,10 +2,14 @@ package io.hypertrack.sendeta.view;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,12 +22,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriver;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
+import io.hypertrack.lib.consumer.model.TaskListCallBack;
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.ReceivedActivitiesAdapter;
@@ -56,7 +65,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
     private TextView noDataText;
 
     private ReceivedActivitiesAdapter inProcessActivitiesAdapter, historyActivitiesAdapter;
-    private ArrayList<UserActivityModel> inProcessActivities, historyActivities;
+    private HashMap<String, UserActivityModel> inProcessActivities, historyActivities;
     private Call<UserActivitiesListResponse> inProcessActivitiesCall, historyReceivedActivitiesCall;
 
     private boolean inProcessActivitiesCallCompleted = true, historyActivitiesCallCompleted = true;
@@ -150,29 +159,17 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         // Initialize Scroll View
         mScrollView = (NestedScrollView) rootView.findViewById(R.id.fragment_activities_scroll_view);
 
+        // Initialize Activities Lists
+        inProcessActivities = new HashMap<>();
+        historyActivities = new HashMap<>();
+
         // Initialize Adapters
-        inProcessActivitiesAdapter = new ReceivedActivitiesAdapter(getActivity(), inProcessActivities, this);
+        inProcessActivitiesAdapter = new ReceivedActivitiesAdapter(getActivity(), inProcessActivities.values(), this);
         inProcessRecyclerView.setAdapter(inProcessActivitiesAdapter);
-        historyActivitiesAdapter = new ReceivedActivitiesAdapter(getActivity(), historyActivities, this);
+        historyActivitiesAdapter = new ReceivedActivitiesAdapter(getActivity(), historyActivities.values(), this);
         historyRecyclerView.setAdapter(historyActivitiesAdapter);
 
-        inProcessActivities = new ArrayList<>();
-        historyActivities = new ArrayList<>();
-
         return rootView;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        // Reset page for the data to be refreshed
-        resetActivitiesData();
-
-        getReceivedActivities();
-
-        // Scroll User's Received Activities to top by default
-        mScrollView.smoothScrollTo(0, 0);
     }
 
     private void getReceivedActivities() {
@@ -202,6 +199,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             inProcessActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
+                    if (getActivity() == null || getActivity().isFinishing())
+                        return;
+
                     if (historyActivitiesCallCompleted) {
                         displayLoader(false);
                     }
@@ -222,13 +222,15 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
 
                                 parseUserActivityDetails(activitiesListResponse.getUserActivities(), true);
 
+                                registerForActiveTaskUpdates();
+
                                 inProcessActivitiesHeader.setVisibility(View.VISIBLE);
                                 inProcessRecyclerView.setVisibility(View.VISIBLE);
 
                                 swipeRefreshLayout.setVisibility(View.VISIBLE);
                                 noDataLayout.setVisibility(View.GONE);
 
-                                inProcessActivitiesAdapter.setUserActivities(inProcessActivities);
+                                inProcessActivitiesAdapter.setUserActivities(inProcessActivities.values());
 
                                 inProcessActivitiesCallCompleted = true;
                                 return;
@@ -289,6 +291,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             historyReceivedActivitiesCall.enqueue(new Callback<UserActivitiesListResponse>() {
                 @Override
                 public void onResponse(Call<UserActivitiesListResponse> call, Response<UserActivitiesListResponse> response) {
+                    if (getActivity() == null || getActivity().isFinishing())
+                        return;
+
                     if (inProcessActivitiesCallCompleted) {
                         displayLoader(false);
                     }
@@ -315,7 +320,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                                 swipeRefreshLayout.setVisibility(View.VISIBLE);
                                 noDataLayout.setVisibility(View.GONE);
 
-                                historyActivitiesAdapter.setUserActivities(historyActivities);
+                                historyActivitiesAdapter.setUserActivities(historyActivities.values());
 
                                 historyActivitiesCallCompleted = true;
                                 return;
@@ -375,7 +380,126 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         }
     }
 
-    private void parseUserActivityDetails(ArrayList<UserActivityDetails> userActivityDetailsDetails, boolean inProcess) {
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Reset page for the data to be refreshed
+        resetActivitiesData();
+
+        getReceivedActivities();
+
+        // Scroll User's Received Activities to top by default
+        mScrollView.smoothScrollTo(0, 0);
+
+        // Register HTConsumerClient updates broadcast receivers
+        IntentFilter orderStatusChangedFilter = new IntentFilter(HTConsumerClient.TASK_STATUS_CHANGED_NOTIFICATION);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mTaskStatusChangedReceiver, orderStatusChangedFilter);
+
+        IntentFilter taskRefreshedFilter = new IntentFilter(HTConsumerClient.TASK_DETAIL_REFRESHED_NOTIFICATION);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(mTaskDetailRefreshedReceiver, taskRefreshedFilter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Unregister HTConsumerClient updates broadcast receivers
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mTaskStatusChangedReceiver);
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(mTaskDetailRefreshedReceiver);
+    }
+
+    private BroadcastReceiver mTaskDetailRefreshedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.hasExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST)) {
+                ArrayList<String> taskIDList = intent.getStringArrayListExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST);
+
+                if (taskIDList != null) {
+                    ArrayList<UserActivityDetails> refreshedInProcessReceivedActivities = new ArrayList<>();
+
+                    // Create UserActivityDetails list from refreshed tasks
+                    for (String taskID : taskIDList) {
+                        refreshedInProcessReceivedActivities.add(new UserActivityDetails(taskID, true,
+                                HTConsumerClient.getInstance(context).taskForTaskID(taskID)));
+                    }
+
+                    // Parse UserActivityDetails List and update InProcess Received Activity items
+                    if (!refreshedInProcessReceivedActivities.isEmpty()) {
+                        parseUserActivityDetails(refreshedInProcessReceivedActivities, true);
+                        inProcessActivitiesAdapter.setUserActivities(inProcessActivities.values());
+                    }
+                }
+            }
+        }
+    };
+
+    private BroadcastReceiver mTaskStatusChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.hasExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST)) {
+                ArrayList<String> taskIDList = intent.getStringArrayListExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST);
+
+                if (taskIDList != null) {
+                    ArrayList<UserActivityDetails> refreshedInProcessReceivedActivities = new ArrayList<>();
+
+                    // Create UserActivityDetails list from refreshed tasks
+                    for (String taskID : taskIDList) {
+
+                        // Refresh Received Activities even if one task got completed
+                        HTTask task = HTConsumerClient.getInstance(context).taskForTaskID(taskID);
+                        if (task != null && task.isCompleted()) {
+
+                            // Reset page for the data to be refreshed
+                            resetActivitiesData();
+                            getReceivedActivities();
+                            // Scroll User's Received Activities to top by default
+                            mScrollView.smoothScrollTo(0, 0);
+
+                            return;
+                        }
+
+                        refreshedInProcessReceivedActivities.add(new UserActivityDetails(taskID, true, task));
+                    }
+
+                    // Parse UserActivityDetails List and update InProcess Received Activity items
+                    if (!refreshedInProcessReceivedActivities.isEmpty()) {
+                        parseUserActivityDetails(refreshedInProcessReceivedActivities, true);
+                        inProcessActivitiesAdapter.setUserActivities(inProcessActivities.values());
+                    }
+                }
+            }
+        }
+    };
+
+    private void registerForActiveTaskUpdates() {
+        HTConsumerClient.getInstance(getActivity()).clearTasks();
+
+        if (inProcessActivities == null || inProcessActivities.isEmpty()) {
+            return;
+        }
+
+        List<String> tasksToBeTracked = new ArrayList<>();
+        for (Map.Entry<String, UserActivityModel> entry: inProcessActivities.entrySet()) {
+            if (!TextUtils.isEmpty(entry.getKey())) {
+                tasksToBeTracked.add(entry.getKey());
+            }
+        }
+
+        if (!tasksToBeTracked.isEmpty()) {
+            HTConsumerClient.getInstance(getActivity()).trackTask(tasksToBeTracked, getActivity(), new TaskListCallBack() {
+                @Override
+                public void onSuccess(List<HTTask> taskList) {
+                }
+
+                @Override
+                public void onError(Exception exception) {
+                }
+            });
+        }
+    }
+
+    private synchronized void parseUserActivityDetails(ArrayList<UserActivityDetails> userActivityDetailsDetails, boolean inProcess) {
 
         Activity context = getActivity();
 
@@ -456,9 +580,9 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                     }
 
                     if (inProcess) {
-                        inProcessActivities.add(userActivity);
+                        inProcessActivities.put(userActivity.getTaskID(), userActivity);
                     } else {
-                        historyActivities.add(userActivity);
+                        historyActivities.put(userActivity.getTaskID(), userActivity);
                     }
                 }
             }

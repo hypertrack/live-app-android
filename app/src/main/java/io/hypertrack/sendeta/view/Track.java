@@ -1,12 +1,15 @@
 package io.hypertrack.sendeta.view;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -15,7 +18,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -65,6 +67,33 @@ public class Track extends BaseActivity {
     private Call<TrackTaskResponse> addTaskForTrackingCall;
 
     private String currentPublishableKey;
+
+    private BroadcastReceiver mTaskStatusChangedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            if (intent != null && intent.hasExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST)) {
+                ArrayList<String> taskIDList = intent.getStringArrayListExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST);
+
+                if (taskIDList != null) {
+
+                    for (String taskID : taskIDList) {
+                        if (htConsumerClient != null && htConsumerClient.taskForTaskID(taskID) != null
+                                && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
+
+                            // Remove Completed Tasks except in the case of only one task being tracked
+                            if (taskIDsToTrack != null && taskIDsToTrack.size() > 1) {
+                                htConsumerClient.removeTaskID(taskID);
+                                if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
+                                    taskIDsToTrack.remove(taskID);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -195,29 +224,17 @@ public class Track extends BaseActivity {
                         if (trackTaskResponse != null) {
 
                             String taskID = trackTaskResponse.getTaskID();
-                            if (!TextUtils.isEmpty(taskID)) {
-                                taskIDsToTrack.add(taskID);
-                            }
-
-//                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
-                            // Check if clicked taskID exists in activeTaskIDList or not
-//                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+//                            if (!TextUtils.isEmpty(taskID)) {
 //                                taskIDsToTrack.add(taskID);
-//                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
-//                                taskIDsToTrack.addAll(activeTaskIDList);
 //                            }
 
-//                            if (!TextUtils.isEmpty(trackTaskResponse.getPublishableKey())) {
-//                                // Set HyperTrack PublishableKey
-//                                HyperTrack.setPublishableApiKey(trackTaskResponse.getPublishableKey(), getApplicationContext());
-//                            } else {
-//                                Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
-//
-//                                // Show RetryButton
-//                                showRetryButton(true);
-//                                displayLoader(false);
-//                                return;
-//                            }
+                            ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
+                            // Check if clicked taskID exists in activeTaskIDList or not
+                            if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
+                                taskIDsToTrack.add(taskID);
+                            } else if (activeTaskIDList != null && !activeTaskIDList.isEmpty()) {
+                                taskIDsToTrack.addAll(activeTaskIDList);
+                            }
                         }
 
                         // Successful case where valid taskIDs were received
@@ -334,90 +351,6 @@ public class Track extends BaseActivity {
                         lastKnownCachedLocation.getLongitude()), 13.0f));
             }
         }
-
-        @Override
-        public void onMapLoadedCallback(HTMapFragment mapFragment, GoogleMap map) {
-        }
-
-        @Override
-        public void onMapWillClear(HTMapFragment mapFragment, GoogleMap map) {
-        }
-
-        @Override
-        public void onHeroMarkerClicked(HTMapFragment mapFragment, String taskID, Marker heroMarker) {
-        }
-
-        @Override
-        public void onHeroMarkerWillMove(HTMapFragment mapFragment, String taskID, Marker heroMarker, LatLng toLocation) {
-        }
-
-        @Override
-        public void onHeroMarkerAdded(HTMapFragment mapFragment, String taskID, Marker heroMarker) {
-        }
-
-        @Override
-        public void onHeroMarkerRemoved(HTMapFragment mapFragment, String taskID, Marker heroMarker) {
-        }
-
-        @Override
-        public void onSourceMarkerClicked(HTMapFragment mapFragment, String taskID, Marker sourceMarker) {
-        }
-
-        @Override
-        public void onSourceMarkerAdded(HTMapFragment mapFragment, String taskID, Marker sourceMarker) {
-        }
-
-        @Override
-        public void onSourceMarkerRemoved(HTMapFragment mapFragment, String taskID, Marker sourceMarker) {
-        }
-
-        @Override
-        public void onDestinationMarkerClicked(HTMapFragment mapFragment, String taskID, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onDestinationMarkerAdded(HTMapFragment mapFragment, String taskID, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onDestinationMarkerRemoved(HTMapFragment mapFragment, String taskID, Marker destinationMarker) {
-        }
-
-        @Override
-        public void onCallButtonClicked(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onOrderDetailsButtonClicked(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onMapFragmentSucceed(HTMapFragment mapFragment, List<String> taskID) {
-        }
-
-        @Override
-        public void onMapFragmentFailed(HTMapFragment mapFragment, List<String> taskID, String errorMessage) {
-        }
-
-        @Override
-        public void onBeginEditingDestination(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onCanceledEditingDestination(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onEndEditingDestination(HTMapFragment mapFragment, String taskID) {
-        }
-
-        @Override
-        public void onReceiveUserLocationMissingError(HTMapFragment mapFragment, String taskID, String errorMessage) {
-        }
-
-        @Override
-        public void onReceiveEditDestinationError(HTMapFragment mapFragment, String taskID, String errorMessage) {
-        }
     };
 
     private void resetTrackState() {
@@ -436,16 +369,44 @@ public class Track extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+
+        IntentFilter filter = new IntentFilter(HTConsumerClient.TASK_STATUS_CHANGED_NOTIFICATION);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mTaskStatusChangedReceiver, filter);
+
+        if (htConsumerClient != null) {
+
+            ArrayList<String> taskIDList = htConsumerClient.getTaskIDList();
+            if (taskIDList != null && !taskIDList.isEmpty()) {
+
+                for (String taskID : taskIDList) {
+                    if (htConsumerClient.taskForTaskID(taskID) != null && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
+                        htConsumerClient.removeTaskID(taskID);
+                        if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
+                            taskIDsToTrack.remove(taskID);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mTaskStatusChangedReceiver);
+    }
+
+    @Override
     protected void onDestroy() {
         resetTrackState();
-
         super.onDestroy();
     }
 
     @Override
     public void onBackPressed() {
         resetTrackState();
-
         super.onBackPressed();
     }
 }
