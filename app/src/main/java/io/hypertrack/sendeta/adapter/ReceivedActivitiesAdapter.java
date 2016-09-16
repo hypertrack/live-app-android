@@ -36,6 +36,12 @@ public class ReceivedActivitiesAdapter extends RecyclerView.Adapter<ReceivedActi
     }
 
     public void setUserActivities(Collection<UserActivityModel> userActivities) {
+        if (this.userActivities == null) {
+            this.userActivities = new ArrayList<>();
+        } else {
+            this.userActivities.clear();
+        }
+
         this.userActivities.addAll(userActivities);
         notifyDataSetChanged();
     }
