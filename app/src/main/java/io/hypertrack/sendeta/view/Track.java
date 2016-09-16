@@ -81,9 +81,12 @@ public class Track extends BaseActivity {
                         if (htConsumerClient != null && htConsumerClient.taskForTaskID(taskID) != null
                                 && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
 
-                            htConsumerClient.removeTaskID(taskID);
-                            if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
-                                taskIDsToTrack.remove(taskID);
+                            // Remove Completed Tasks except in the case of only one task being tracked
+                            if (taskIDsToTrack != null && taskIDsToTrack.size() > 1) {
+                                htConsumerClient.removeTaskID(taskID);
+                                if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
+                                    taskIDsToTrack.remove(taskID);
+                                }
                             }
                         }
                     }
