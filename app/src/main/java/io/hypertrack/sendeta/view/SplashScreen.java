@@ -28,24 +28,20 @@ public class SplashScreen extends BaseActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        boolean isUserOnboard = UserStore.isUserLoggedIn();
+        prepareAppDeepLink();
+        proceedToNextScreen();
+    }
 
-        handleDeepLink();
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
 
-        if (!isUserOnboard) {
-            Intent registerIntent = new Intent(this, Register.class);
-            registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(registerIntent);
-            finish();
-        } else {
-            UserStore.sharedStore.initializeUser();
-            Utils.setCrashlyticsKeys(this);
-            proceedToNextScreen(appDeepLink);
-        }
+        prepareAppDeepLink();
+        proceedToNextScreen();
     }
 
     // Method to handle DeepLink Params
-    private void handleDeepLink() {
+    private void prepareAppDeepLink() {
         appDeepLink = new AppDeepLink(DeepLinkUtil.DEFAULT);
         Intent intent = getIntent();
 
@@ -56,8 +52,22 @@ public class SplashScreen extends BaseActivity {
         }
     }
 
+    private void proceedToNextScreen() {
+        boolean isUserOnboard = UserStore.isUserLoggedIn();
+        if (!isUserOnboard) {
+            Intent registerIntent = new Intent(this, Register.class);
+            registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(registerIntent);
+            finish();
+        } else {
+            UserStore.sharedStore.initializeUser();
+            Utils.setCrashlyticsKeys(this);
+            processAppDeepLink(appDeepLink);
+        }
+    }
+
     // Method to proceed to next screen with deepLink params
-    private void proceedToNextScreen(final AppDeepLink appDeepLink) {
+    private void processAppDeepLink(final AppDeepLink appDeepLink) {
         switch (appDeepLink.mId) {
             case DeepLinkUtil.MEMBERSHIP:
                 TaskStackBuilder.create(this)
