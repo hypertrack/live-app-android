@@ -91,6 +91,7 @@ import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.common.util.HTLog;
+import io.hypertrack.lib.common.util.HTTaskUtils;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
@@ -119,7 +120,6 @@ import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
-import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
@@ -1426,7 +1426,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        etaInMinutes = HyperTrackTaskUtils.getTaskDisplayETA(task.getTaskDisplay());
+        etaInMinutes = HTTaskUtils.getTaskDisplayETA(task.getTaskDisplay());
         updateDestinationMarker(destinationLocation, etaInMinutes);
     }
 
@@ -1434,7 +1434,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         HTTaskDisplay taskDisplay = task.getTaskDisplay();
 
         // Set Toolbar Title as DisplayStatus for currently active task
-        Integer taskDisplayStatusResId = HyperTrackTaskUtils.getTaskDisplayStatus(taskDisplay);
+        Integer taskDisplayStatusResId = HTTaskUtils.getTaskDisplayStatus(taskDisplay);
         if (taskDisplayStatusResId != null) {
             this.setTitle(getString(taskDisplayStatusResId));
 

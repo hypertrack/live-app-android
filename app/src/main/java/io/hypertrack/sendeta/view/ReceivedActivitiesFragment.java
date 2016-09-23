@@ -31,6 +31,7 @@ import io.hypertrack.lib.common.model.HTDriver;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
+import io.hypertrack.lib.common.util.HTTaskUtils;
 import io.hypertrack.lib.consumer.model.TaskListCallBack;
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.sendeta.BuildConfig;
@@ -45,7 +46,6 @@ import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.TaskManager;
-import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import retrofit2.Call;
@@ -473,8 +473,6 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
     };
 
     private void registerForActiveTaskUpdates() {
-        HTConsumerClient.getInstance(getActivity()).clearTasks();
-
         if (inProcessActivities == null || inProcessActivities.isEmpty()) {
             return;
         }
@@ -538,11 +536,13 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                     }
 
                     if (inProcess) {
+
                         // Get Activity Subtitle
                         HTTaskDisplay taskDisplay = task.getTaskDisplay();
-                        if (taskDisplay != null) {
-                            String formattedTime = HyperTrackTaskUtils.getFormattedTimeString(context,
-                                    HyperTrackTaskUtils.getTaskDisplayETA(taskDisplay));
+                        if (taskDisplay != null && HTTaskUtils.getTaskDisplayETA(taskDisplay) != null) {
+
+                            String formattedTime = HTTaskUtils.getFormattedTimeString(context,
+                                    HTTaskUtils.getTaskDisplayETA(taskDisplay).doubleValue());
                             if (!TextUtils.isEmpty(formattedTime)) {
                                 userActivity.setSubtitle(formattedTime + " away");
                             }
@@ -550,20 +550,19 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
                     } else {
 
                         // Get Activity Subtitle
-                        String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(context, task);
+                        String formattedSubtitle = HTTaskUtils.getTaskMeteringString(context, task);
                         if (!TextUtils.isEmpty(formattedSubtitle)) {
                             userActivity.setSubtitle(formattedSubtitle);
                         }
 
                         // Get Activity Date
-                        String formattedDate = HyperTrackTaskUtils.getTaskDateString(task);
+                        String formattedDate = task.getTaskDateDisplayString();
                         if (!TextUtils.isEmpty(formattedDate)) {
                             userActivity.setDate(formattedDate);
                         }
 
                         // Get Activity StartAddress
-                        String startLocationString =
-                                task.getStartLocation() != null ? task.getStartLocation().getDisplayString() : null;
+                        String startLocationString = HTTaskUtils.getStartAddress(task);
                         if (!TextUtils.isEmpty(startLocationString)) {
                             userActivity.setStartAddress(startLocationString);
                         }

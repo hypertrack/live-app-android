@@ -274,7 +274,8 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
 
                         List<LatLng> polyline = activity.getPolyline();
                         if (polyline != null && !polyline.isEmpty()) {
-                            PolylineOptions options = new PolylineOptions().width(8).color(Color.parseColor("#0A61C2"));
+                            PolylineOptions options = new PolylineOptions().width(6)
+                                    .color(Color.parseColor("#0A61C2"));
                             options.addAll(polyline);
 
                             map.addPolyline(options);

@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
+import io.hypertrack.lib.common.util.HTTaskUtils;
 import io.hypertrack.lib.consumer.utils.HTMapUtils;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
@@ -40,7 +40,6 @@ import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.store.callback.TaskManagerListener;
-import io.hypertrack.sendeta.util.HyperTrackTaskUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import retrofit2.Call;
@@ -363,7 +362,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
                     // Get Activity Title
                     if (task.getTaskDisplay() != null) {
-                        Integer resId = HyperTrackTaskUtils.getTaskDisplayStatus(task.getTaskDisplay());
+                        Integer resId = HTTaskUtils.getTaskDisplayStatus(task.getTaskDisplay());
                         if (resId != null) {
                             userActivity.setTitle(context.getString(resId));
                         } else if (!TextUtils.isEmpty(task.getTaskDisplay().getStatusText())) {
@@ -371,18 +370,20 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                         }
                     }
 
-                    // Get Activity EndAddress
-                    HTPlace destination = task.getDestination();
-                    if (destination != null && !TextUtils.isEmpty(destination.getAddress())) {
-                        userActivity.setEndAddress(destination.getAddress());
+                    // Get Activity CompletionAddress
+                    String completionLocationAddress = HTTaskUtils.getCompletionAddress(task);
+                    if (!TextUtils.isEmpty(completionLocationAddress)) {
+                        userActivity.setEndAddress(completionLocationAddress);
                     }
 
                     if (inProcess) {
+
                         // Get Activity Subtitle
                         HTTaskDisplay taskDisplay = task.getTaskDisplay();
-                        if (taskDisplay != null) {
-                            String formattedTime = HyperTrackTaskUtils.getFormattedTimeString(context,
-                                    HyperTrackTaskUtils.getTaskDisplayETA(taskDisplay));
+                        if (taskDisplay != null && HTTaskUtils.getTaskDisplayETA(taskDisplay) != null) {
+
+                            String formattedTime = HTTaskUtils.getFormattedTimeString(context,
+                                    HTTaskUtils.getTaskDisplayETA(taskDisplay).doubleValue());
                             if (!TextUtils.isEmpty(formattedTime)) {
                                 userActivity.setSubtitle(formattedTime + " away");
                             }
@@ -390,20 +391,19 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                     } else {
 
                         // Get Activity Subtitle
-                        String formattedSubtitle = HyperTrackTaskUtils.getFormattedTaskDurationAndDistance(context, task);
+                        String formattedSubtitle = HTTaskUtils.getTaskMeteringString(context, task);
                         if (!TextUtils.isEmpty(formattedSubtitle)) {
                             userActivity.setSubtitle(formattedSubtitle);
                         }
 
                         // Get Activity Date
-                        String formattedDate = HyperTrackTaskUtils.getTaskDateString(task);
+                        String formattedDate = task.getTaskDateDisplayString();
                         if (!TextUtils.isEmpty(formattedDate)) {
                             userActivity.setDate(formattedDate);
                         }
 
                         // Get Activity StartAddress
-                        String startLocationString =
-                                task.getStartLocation() != null ? task.getStartLocation().getDisplayString() : null;
+                        String startLocationString = HTTaskUtils.getStartAddress(task);
                         if (!TextUtils.isEmpty(startLocationString)) {
                             userActivity.setStartAddress(startLocationString);
                         }
@@ -419,18 +419,18 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
                         }
 
                         // Get Completion Location
-                        if (destination != null && destination.getLocation() != null) {
-                            double[] coordinates = task.getDestination().getLocation().getCoordinates();
-                            if (coordinates[0] != 0.0 && coordinates[1] != 0.0) {
-                                userActivity.setEndLocation(new LatLng(coordinates[1], coordinates[0]));
+                        LatLng completionLatLng = HTTaskUtils.getCompletionLatLng(task);
+                        if (completionLatLng != null) {
+                            if (completionLatLng.latitude != 0.0 && completionLatLng.longitude != 0.0) {
+                                userActivity.setEndLocation(completionLatLng);
                             }
                         }
 
                         // Get Start Location
-                        if (task.getStartLocation() != null) {
-                            double[] coordinates = task.getStartLocation().getCoordinates();
-                            if (coordinates[0] != 0.0 && coordinates[1] != 0.0) {
-                                userActivity.setStartLocation(new LatLng(coordinates[1], coordinates[0]));
+                        LatLng startLatLng = HTTaskUtils.getStartLatLng(task);
+                        if (startLatLng != null) {
+                            if (startLatLng.latitude != 0.0 && startLatLng.longitude != 0.0) {
+                                userActivity.setStartLocation(startLatLng);
                             }
                         }
 
