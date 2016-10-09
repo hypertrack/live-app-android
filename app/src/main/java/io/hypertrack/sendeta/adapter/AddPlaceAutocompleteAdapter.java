@@ -268,7 +268,10 @@ public class AddPlaceAutocompleteAdapter extends
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    itemClickedAtPosition(getAdapterPosition());
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        itemClickedAtPosition(position);
+                    }
                 }
             });
         }
