@@ -740,8 +740,12 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void setTask(final Map<String, Object> taskData) {
-        try {
+        if (taskData == null) {
+            HTLog.e(TAG, "SendETA Error occurred while setTask: taskData is null");
+            return;
+        }
 
+        try {
             String taskID = (String) taskData.get("id");
             String status = (String) taskData.get("status");
             String action = (String) taskData.get("action");
@@ -752,7 +756,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             try {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                ETA = simpleDateFormat.parse((String) taskData.get("eta"));
+                if (taskData.get("eta") != null) {
+                    ETA = simpleDateFormat.parse((String) taskData.get("eta"));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 Crashlytics.logException(e);
