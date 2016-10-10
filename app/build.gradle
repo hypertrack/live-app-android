@@ -19,6 +19,7 @@ apply plugin: 'realm-android'
 repositories {
     maven { url 'https://maven.fabric.io/public' }
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
+    maven { url "https://repo.eclipse.org/content/repositories/paho-releases/" }
 }
 
 android {
@@ -42,7 +43,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 1
+        def versionMinor = 2
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -116,20 +117,18 @@ dependencies {
     }
     compile 'com.facebook.android:facebook-android-sdk:[4,5)'
 
-    compile(project(path: ':common')) {
+    debugCompile(project(path: ':consumer', configuration: 'debug')) {
         transitive = true
     }
-    releaseCompile(project(path: ':consumer', configuration: 'release')) {
-        transitive = false
+    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
+        transitive = true
     }
-    debugCompile(project(path: ':consumer', configuration: 'debug')) {
-        transitive = false
+
+    releaseCompile(project(path: ':consumer', configuration: 'release')) {
+        transitive = true
     }
     releaseCompile(project(path: ':transmitter', configuration: 'release')) {
-        transitive = false
-    }
-    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
-        transitive = false
+        transitive = true
     }
 }
 
