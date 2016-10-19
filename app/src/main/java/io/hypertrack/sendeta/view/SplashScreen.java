@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
 
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
@@ -27,6 +29,10 @@ public class SplashScreen extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        // Initialize HyperTrack SDKs
+        HTTransmitterService.initHTTransmitter(getApplicationContext());
+        HTConsumerClient.initHTConsumerClient(getApplicationContext());
 
         prepareAppDeepLink();
         proceedToNextScreen();

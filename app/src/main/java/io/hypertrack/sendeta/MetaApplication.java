@@ -8,8 +8,6 @@ import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.util.DevDebugUtils;
@@ -35,10 +33,6 @@ public class MetaApplication extends Application {
         if (TextUtils.isEmpty(HyperTrack.getPublishableKey(getApplicationContext()))) {
             HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
         }
-
-        // Initialize HyperTrack SDKs
-        HTTransmitterService.initHTTransmitter(getApplicationContext());
-        HTConsumerClient.initHTConsumerClient(getApplicationContext());
 
         // Initialize Realm to maintain app databases
         this.setupRealm();
