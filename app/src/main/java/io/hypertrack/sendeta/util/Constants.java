@@ -34,4 +34,8 @@ public class Constants {
     public static final String KEY_TASK = "task";
     public static final String KEY_PUSH_DESTINATION_LAT = "lat";
     public static final String KEY_PUSH_DESTINATION_LNG = "lng";
+
+    public static final String KEY_PUSH_TASK = "push_task";
+    public static final String KEY_TASK_ID = "task_id";
+    public static final String KEY_ADDRESS = "address";
 }

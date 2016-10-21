@@ -14,14 +14,16 @@ public class DeepLinkUtil {
     //DeepLink Ids
     public static final int HOME = 1;
     public static final int MEMBERSHIP = 2;
-    public static final int RECEIVE_ETA_FOR_DESTINATION = 3;
+    public static final int RECEIVE_ETA = 3;
     public static final int TRACK = 4;
     public static final int DEFAULT = HOME;
 
     //deeplink mapping keys
     public static final String KEY_ID = "id";
+    public static final String KEY_UUID = "uuid";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
+    public static final String KEY_ADDRESS = "add";
     public static final String KEY_SHORT_CODE = "short_code";
 
     //private static AppDeepLink appDeepLink;
@@ -39,7 +41,7 @@ public class DeepLinkUtil {
                 }
 
                 if (url.contains("/request")) {
-                    appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA_FOR_DESTINATION;
+                    appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA;
                 }
 
                 if (url.contains(context.getString(R.string.eta_link_url))) {
@@ -86,6 +88,14 @@ public class DeepLinkUtil {
                                             break;
                                         }
 
+                                        case KEY_UUID:
+                                            try {
+                                                appDeepLink.uuid = String.valueOf(data[1]);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                            break;
+
                                         case KEY_LAT:
                                             try {
                                                 appDeepLink.lat = Double.valueOf(data[1]);
@@ -97,6 +107,14 @@ public class DeepLinkUtil {
                                         case KEY_LNG:
                                             try {
                                                 appDeepLink.lng = Double.valueOf(data[1]);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                            break;
+
+                                        case KEY_ADDRESS:
+                                            try {
+                                                appDeepLink.address = String.valueOf(data[1]);
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }
