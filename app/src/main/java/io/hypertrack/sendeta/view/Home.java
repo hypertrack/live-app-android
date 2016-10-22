@@ -757,7 +757,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void setupSendETAButton() {
         // Initialize SendETA Button UI View
-        sendETAButton = (Button) findViewById(R.id.sendETAButton);
+        sendETAButton = (Button) findViewById(R.id.requestETAButton);
         bottomButtonLayout = (LinearLayout) findViewById(R.id.home_bottomButtonLayout);
 
         // Set Click Listener for SendETA Button
@@ -1231,6 +1231,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         if (mProgressDialog != null) {
                             mProgressDialog.dismiss();
                         }
+
+                        // Show ShareCard
+                        share();
 
                         onStartTask();
 

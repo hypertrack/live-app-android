@@ -21,7 +21,7 @@
         android:layout_width="56dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingBottom="40dp"
+        android:paddingBottom="72dp"
         android:src="@drawable/ic_hero_marker" />
 
     <FrameLayout
@@ -39,7 +39,7 @@
             android:visibility="visible">
 
             <Button
-                android:id="@+id/sendETAButton"
+                android:id="@+id/requestETAButton"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/cta_button_size"
                 android:layout_margin="@dimen/margin_high"
@@ -47,6 +47,7 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:gravity="center"
                 android:text="@string/action_request_eta"
+                android:onClick="onRequestETAClick"
                 android:padding="@dimen/padding_high"
                 android:textColor="@color/text_dark_bg_base"
                 android:visibility="visible" />
@@ -250,4 +251,6 @@
         <!--</LinearLayout>-->
         <!--</LinearLayout>-->
     </FrameLayout>
+
+    <include layout="@layout/layout_loading" />
 </FrameLayout>

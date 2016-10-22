@@ -49,17 +49,27 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.CharacterIterator;
 import java.util.List;
 
+import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HTTask;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
+import io.hypertrack.sendeta.model.CreateDestinationDTO;
+import io.hypertrack.sendeta.model.CreateTaskDTO;
+import io.hypertrack.sendeta.model.Destination;
+import io.hypertrack.sendeta.model.ErrorData;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
@@ -69,6 +79,9 @@ import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 import static com.facebook.messenger.MessengerUtils.finishShareToMessenger;
 import static com.facebook.messenger.MessengerUtils.shareToMessenger;
@@ -104,6 +117,8 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     private CardView mAutocompleteResultsLayout;
     private ProgressBar mAutocompleteLoader;
     private PlaceAutocompleteAdapter mAdapter;
+
+    private Call<HTTask> createTaskCall;
 
     private boolean myLocationButtonClicked = false;
 
@@ -225,18 +240,14 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
         setupEnterDestinationView();
         setupAutoCompleteView();
-        setupSendETAButton();
+        setuprequestETAButton();
 
         // Check & Prompt User if Internet is Not Connected
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
-        // Handle REQUEST_ETA Deeplink
-        Intent intent = getIntent();
-        if (intent != null) {
-
-        }
+        // TODO: 22/10/16 Handle REQUEST_ETA Deeplink
     }
 
     private void getMap() {
@@ -362,16 +373,73 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         mAutocompleteResults.setAdapter(mAdapter);
     }
 
-    private void setupSendETAButton() {
-        // Initialize SendETA Button UI View
-        requestETAButton = (Button) findViewById(R.id.sendETAButton);
+    private void setuprequestETAButton() {
+        // Initialize RequestETA Button UI View
+        requestETAButton = (Button) findViewById(R.id.requestETAButton);
         bottomButtonLayout = (LinearLayout) findViewById(R.id.home_bottomButtonLayout);
+    }
 
-        // Set Click Listener for SendETA Button
-        requestETAButton.setOnClickListener(new View.OnClickListener() {
+    public void onRequestETAClick(View view) {
+        displayLoader(true);
+
+        String address = destinationText.getText().toString() + destinationDescription.getText().toString();
+
+        CreateDestinationDTO destination = null;
+        if (currentLatLng != null && currentLatLng.longitude != 0.0 && currentLatLng.latitude != 0.0)
+            destination = new CreateDestinationDTO(address,
+                    new HTLocation(currentLatLng.latitude, currentLatLng.longitude));
+
+        HyperTrackService hyperTrackService = HyperTrackServiceGenerator.createService(
+                HyperTrackService.class, BuildConfig.HYPERTRACK_API_KEY);
+
+        createTaskCall = hyperTrackService.createTask(new CreateTaskDTO(destination));
+        createTaskCall.enqueue(new Callback<HTTask>() {
             @Override
-            public void onClick(View v) {
+            public void onResponse(Call<HTTask> call, Response<HTTask> response) {
+                if (response != null && response.isSuccessful()) {
 
+                    HTTask task = response.body();
+                    if (task != null && !TextUtils.isEmpty(task.getId())) {
+
+                        String requestETAUrl = "www.sendeta.com/request/?uuid=" + task.getId() + "*lat=" +
+                                task.getDestination().getLocation().getLatitude() + "*lng=" + task.getDestination().getLocation().getLongitude();
+
+                        String shareMessage = "Hey there! Click on the link to send me your ETA. " + requestETAUrl;
+
+                        Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                        sharingIntent.setType("text/plain");
+                        sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
+                        startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), Constants.SHARE_REQUEST_CODE);
+                    }
+                }
+
+                displayLoader(false);
+            }
+
+            @Override
+            public void onFailure(Call<HTTask> call, Throwable t) {
+                displayLoader(false);
+
+                ErrorData errorData = new ErrorData();
+                try {
+                    errorData = NetworkUtils.processFailure(t);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                showErrorMessage(errorData);
+            }
+
+            private void showErrorMessage(ErrorData errorData) {
+                if (RequestETA.this.isFinishing())
+                    return;
+
+                if (ErrorCodes.NO_INTERNET.equalsIgnoreCase(errorData.getCode()) ||
+                        ErrorCodes.REQUEST_TIMED_OUT.equalsIgnoreCase(errorData.getCode())) {
+                    Toast.makeText(RequestETA.this, R.string.network_issue, Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Toast.makeText(RequestETA.this, R.string.generic_error_message, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

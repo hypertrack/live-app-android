@@ -82,8 +82,7 @@
         <activity
             android:name=".view.RequestETA"
             android:screenOrientation="portrait"
-            android:parentActivityName=".view.Home"
-            android:windowSoftInputMode="adjustResize" />
+            android:parentActivityName=".view.Home" />
 
         <activity
             android:name=".view.Register"
