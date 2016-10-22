@@ -99,7 +99,6 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
     private User user;
     private boolean mPicking = false;
-    private CallbackManager callbackManager;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -223,9 +222,6 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         UserStore.sharedStore.initializeUser();
 
         // Initialize FB SDK
-        FacebookSdk.sdkInitialize(this);
-        callbackManager = CallbackManager.Factory.create();
-
         setContentView(R.layout.activity_request_eta);
 
         initToolbar(getString(R.string.title_activity_request_eta));
@@ -401,7 +397,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
                     HTTask task = response.body();
                     if (task != null && !TextUtils.isEmpty(task.getId())) {
 
-                        String requestETAUrl = "www.sendeta.com/request/?uuid=" + task.getId() + "*lat=" +
+                        String requestETAUrl = "http://www.sendeta.com/request/?uuid=" + task.getId() + "*lat=" +
                                 task.getDestination().getLocation().getLatitude() + "*lng=" + task.getDestination().getLocation().getLongitude();
 
                         String shareMessage = "Hey there! Click on the link to send me your ETA. " + requestETAUrl;
