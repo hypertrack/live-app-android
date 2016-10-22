@@ -4,6 +4,8 @@
     <string name="action_slide_to_end_trip">SLIDE TO END TRIP ></string>
     <string name="action_ending_trip">ENDING TRIP</string>
     <string name="action_send_eta">Send ETA</string>
+    <string name="action_request_eta">Request ETA</string>
+    <string name="action_retry">Retry</string>
     <string name="autocomplete_hint">Enter your destination</string>
     <string name="favorite_place_name_hint">Name your favorite (eg. Dave\'s Home)</string>
     <string name="favorite_place_address_hint">Search for an address</string>
@@ -24,6 +26,7 @@
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
     <string name="title_activity_activities">My Activities</string>
+    <string name="title_activity_request_eta">Request ETA</string>
 
     <string name="title_activities_tab_received">Received</string>
     <string name="title_activities_tab_sent">Sent</string>

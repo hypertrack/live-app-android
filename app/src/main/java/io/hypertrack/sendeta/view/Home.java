@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -22,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -33,7 +33,6 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -46,7 +45,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -64,7 +62,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
@@ -112,6 +109,7 @@ import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
+import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
@@ -130,9 +128,7 @@ import retrofit2.Response;
 public class Home extends DrawerBaseActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
-    private static final String TAG = "Home";
-    private static final long LOCATION_UPDATE_INTERVAL_TIME = 5000;
-    private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
+    private static final String TAG = Home.class.getSimpleName();
 
     private User user;
     private GoogleMap mMap;
@@ -142,7 +138,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private Location defaultLocation = new Location("default");
 
-    private SupportMapFragment mMapFragment;
     private AppBarLayout appBarLayout;
     private TabLayout vehicleTypeTabLayout;
     private TextView destinationText, destinationDescription, mAutocompletePlacesView, infoMessageViewText;
@@ -330,10 +325,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void onETASuccess(TaskETAResponse response, MetaPlace place) {
         // Make the VehicleTabLayout visible onETASuccess
-//        Home.this.initializeVehicleTypeTab();
         AnimationUtils.expand(vehicleTypeTabLayout);
 
-        updateViewForETASuccess(new Integer((int) response.getDuration() / 60), place.getLatLng());
+        updateViewForETASuccess((int) response.getDuration() / 60, place.getLatLng());
         TaskManager.getSharedManager(this).setPlace(place);
     }
 
@@ -449,7 +443,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
 
                 //change the time of location updates
-                createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+                createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
 
                 //restart location updates with the new interval
                 resumeLocationUpdates();
@@ -571,7 +565,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         setupMembershipsSpinner();
 
         // Initialize Maps
-        mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
 
         // Initialize UI Views
@@ -586,7 +580,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         initGoogleClient();
 
-        createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+        createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
         setupEnterDestinationView();
         setupAutoCompleteView();
         setupShareButton();
@@ -667,8 +661,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             membershipsList = user.getAcceptedMemberships();
         }
 
-        Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
-        if (selectedMembershipAccId != null && user.isAcceptedMembership(selectedMembershipAccId)) {
+        int selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
+        if (user.isAcceptedMembership(selectedMembershipAccId)) {
 
             // Set Default selection to the last selected Membership
             Membership selectedMembership = user.getMembershipForAccountId(selectedMembershipAccId);
@@ -722,7 +716,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         enterDestinationLayout = (LinearLayout) findViewById(R.id.enter_destination_layout);
 
         // Set Click Listener for Enter Destination Layout
-        enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
+        if (enterDestinationLayout != null)
+            enterDestinationLayout.setOnClickListener(enterDestinationClickListener);
     }
 
     private void setupAutoCompleteView() {
@@ -801,7 +796,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         });
     }
-
 
     private void setupEndTripSwipeButton() {
         endTripSwipeButton = (SwipeButton) findViewById(R.id.endTripSwipeButton);
@@ -961,7 +955,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                 // Reverse Geocode the Destination Location Coordinates to an Address
                 reverseGeocode(new LatLng(coords[0], coords[1]));
-                return;
             }
         } else {
             handlePushedTaskDeepLink = false;
@@ -1036,7 +1029,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             if (tab != null) {
                 if (selectedVehicleType.equals(getVehicleTypeForTabPosition(tab.getPosition()))) {
                     int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_selected_item);
-                    tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
+                    if (tab.getIcon() != null)
+                        tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
                     tab.select();
                     continue;
                 }
@@ -1481,7 +1475,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
 
                     // Set the DestinationText as updatedDestination's address
-                    destinationText.setGravity(Gravity.LEFT);
+                    destinationText.setGravity(Gravity.START);
                     destinationText.setText(place.getName());
 
                     // Hide destinationDescription layout
@@ -1558,7 +1552,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         View markerView = getDestinationMarkerView(etaInMinutes);
 
-        Bitmap bitmap = getBitMapForView(this, markerView);
+        Bitmap bitmap = ImageUtils.getBitMapForView(this, markerView);
         if (bitmap != null) {
             destinationLocationMarker = mMap.addMarker(new MarkerOptions()
                     .position(destinationLocation)
@@ -1666,9 +1660,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
         pendingResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
             @Override
-            public void onResult(LocationSettingsResult locationSettingsResult) {
+            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
                 final Status status = locationSettingsResult.getStatus();
-                final LocationSettingsStates states = locationSettingsResult.getLocationSettingsStates();
                 switch (status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
                         // All location settings are satisfied. The client can
@@ -1717,7 +1710,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                         break;
                 }
-
             }
         });
     }
@@ -1742,7 +1734,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             updateMapView();
         }
 
-        mAdapter.setBounds(getBounds(latLng, 10000));
+        mAdapter.setBounds(LocationUtils.getBounds(latLng, 10000));
 
         // Check if Location Frequency was decreased to (INITIAL_LOCATION_UPDATE_INTERVAL_TIME)
         // Remove the existing FusedLocationUpdates, and resume it with
@@ -1756,7 +1748,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             // Change the time of location updates
-            createLocationRequest(LOCATION_UPDATE_INTERVAL_TIME);
+            createLocationRequest(LocationUtils.LOCATION_UPDATE_INTERVAL_TIME);
 
             // Restart location updates with the new interval
             startLocationPolling();
@@ -1766,7 +1758,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void addMarkerToCurrentLocation(LatLng latLng) {
-        Bitmap bitmap = getBitMapForView(this, customMarkerView);
+        Bitmap bitmap = ImageUtils.getBitMapForView(this, customMarkerView);
         if (bitmap != null) {
             currentLocationMarker = mMap.addMarker(new MarkerOptions()
                     .position(latLng)
@@ -1778,49 +1770,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (selectPushedTaskMetaPlace && LocationUtils.isLocationEnabled(Home.this)) {
             mPlaceAutoCompleteListener.OnSuccess(pushedTaskMetaPlace);
         }
-    }
-
-    private Bitmap getBitMapForView(Context context, View view) {
-        Bitmap bitmap = null;
-        try {
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-
-            ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
-            view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-            view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-            view.buildDrawingCache();
-            bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-
-            Canvas canvas = new Canvas(bitmap);
-            view.draw(canvas);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-
-        return bitmap;
-    }
-
-    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters) {
-        double latRadian = Math.toRadians(latLng.latitude);
-
-        double degLatKm = 110.574235;
-        double degLongKm = 110.572833 * Math.cos(latRadian);
-        double deltaLat = mDistanceInMeters / 1000.0 / degLatKm;
-        double deltaLong = mDistanceInMeters / 1000.0 / degLongKm;
-
-        double minLat = latLng.latitude - deltaLat;
-        double minLong = latLng.longitude - deltaLong;
-        double maxLat = latLng.latitude + deltaLat;
-        double maxLong = latLng.longitude + deltaLong;
-
-        LatLngBounds.Builder b = new LatLngBounds.Builder();
-        b.include(new LatLng(minLat, minLong));
-        b.include(new LatLng(maxLat, maxLong));
-        LatLngBounds bounds = b.build();
-
-        return bounds;
     }
 
     private void updateMapView() {
@@ -1863,7 +1812,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     @Override
-    public void onResult(Status status) {
+    public void onResult(@NonNull Status status) {
         if (status.isSuccess()) {
             Log.v(TAG, "Geofencing added successfully");
         } else {
@@ -1933,7 +1882,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to add current selected destination as a Favorite
      * (NOTE: Only Applicable for Live Task)
      *
-     * @param view
      */
     public void OnFavoriteClick(View view) {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
@@ -2003,6 +1951,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
                 LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
+                if (latLng == null)
+                    return;
+
                 defaultLocation.setLatitude(latLng.latitude);
                 defaultLocation.setLongitude(latLng.longitude);
                 Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
@@ -2053,7 +2004,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -2122,7 +2073,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                     if (!TextUtils.isEmpty(updatedPlace.getName())) {
                         // Set the DestinationText as updatedDestination's Name
-                        destinationText.setGravity(Gravity.LEFT);
+                        destinationText.setGravity(Gravity.START);
                         destinationText.setText(updatedPlace.getName());
                     }
 
@@ -2258,10 +2209,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     }
                 });
             }
-        } catch (OutOfMemoryError e) {
-            e.printStackTrace();
-            HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());
-        } catch (Exception e) {
+        } catch (OutOfMemoryError | Exception e) {
             e.printStackTrace();
             HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());
         }
@@ -2318,9 +2266,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         Log.e(TAG, "GoogleApiClient onConnectionSuspended: " + i);
     }
 
-
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
                 + connectionResult.getErrorCode());
     }

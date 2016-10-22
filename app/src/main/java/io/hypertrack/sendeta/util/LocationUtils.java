@@ -5,11 +5,16 @@ import android.content.Context;
 import android.provider.Settings;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 /**
  * Created by piyush on 20/08/16.
  */
 public class LocationUtils {
+
+    public static final int DISTANCE_IN_METERS = 10000;
+    public static final long LOCATION_UPDATE_INTERVAL_TIME = 5000;
+    public static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
 
     /**
      * Utility to decide if two locations are same.
@@ -55,5 +60,25 @@ public class LocationUtils {
         }
 
         return false;
+    }
+
+    public static LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters) {
+        double latRadian = Math.toRadians(latLng.latitude);
+
+        double degLatKm = 110.574235;
+        double degLongKm = 110.572833 * Math.cos(latRadian);
+        double deltaLat = mDistanceInMeters / 1000.0 / degLatKm;
+        double deltaLong = mDistanceInMeters / 1000.0 / degLongKm;
+
+        double minLat = latLng.latitude - deltaLat;
+        double minLong = latLng.longitude - deltaLong;
+        double maxLat = latLng.latitude + deltaLat;
+        double maxLong = latLng.longitude + deltaLong;
+
+        LatLngBounds.Builder b = new LatLngBounds.Builder();
+        b.include(new LatLng(minLat, minLong));
+        b.include(new LatLng(maxLat, maxLong));
+
+        return b.build();
     }
 }

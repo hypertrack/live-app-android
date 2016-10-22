@@ -77,20 +77,23 @@
             android:name=".view.Home"
             android:label="${applicationLabel}"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.RequestETA"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:parentActivityName=".view.Home"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".view.Register"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
 
         <activity
             android:name=".view.Verify"
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
         <!--

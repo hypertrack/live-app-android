@@ -1,10 +1,17 @@
 package io.hypertrack.sendeta.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.widget.RelativeLayout;
+
+import com.crashlytics.android.Crashlytics;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -129,5 +136,27 @@ public class ImageUtils {
         }
 
         return rotatedBitmap;
+    }
+
+    public static Bitmap getBitMapForView(Context context, View view) {
+        Bitmap bitmap = null;
+        try {
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+
+            ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+            view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+            view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+            view.buildDrawingCache();
+            bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+
+            Canvas canvas = new Canvas(bitmap);
+            view.draw(canvas);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
+
+        return bitmap;
     }
 }

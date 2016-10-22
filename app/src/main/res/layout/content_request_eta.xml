@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:dots="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".view.RequestETA"
+    tools:showIn="@layout/activity_request_eta">
+
+    <fragment
+        android:id="@+id/map"
+        android:name="io.hypertrack.sendeta.view.TouchableSupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".view.RequestETA" />
+
+    <ImageView
+        android:id="@+id/add_fav_place.marker"
+        android:layout_width="56dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingBottom="40dp"
+        android:src="@drawable/ic_hero_marker" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/request_eta.bottomButtonLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@drawable/drawable_background_gradient_home"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <Button
+                android:id="@+id/sendETAButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_margin="@dimen/margin_high"
+                android:background="@color/colorAccent"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:text="@string/action_request_eta"
+                android:padding="@dimen/padding_high"
+                android:textColor="@color/text_dark_bg_base"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/retryButton"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_margin="@dimen/margin_high"
+                android:background="@color/colorAccent"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:padding="@dimen/padding_high"
+                android:text="@string/action_retry"
+                android:textColor="#ffffff"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_base"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:layout_marginRight="@dimen/margin_high"
+                android:layout_marginTop="@dimen/margin_high"
+                android:background="@android:color/white"
+                android:elevation="@dimen/elevation_high"
+                app:cardCornerRadius="2dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <LinearLayout
+                        android:id="@+id/enter_destination_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="visible">
+
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:paddingLeft="@dimen/padding_medium"
+                            android:paddingRight="@dimen/padding_medium"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/icon_end_map" />
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:paddingBottom="@dimen/padding_medium"
+                            android:paddingRight="@dimen/padding_high"
+                            android:paddingTop="@dimen/padding_medium">
+
+                            <TextView
+                                android:id="@+id/destination_text"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:background="@null"
+                                android:ellipsize="end"
+                                android:gravity="center"
+                                android:hint="@string/autocomplete_hint"
+                                android:singleLine="true"
+                                android:textColor="@color/text_base"
+                                android:textSize="@dimen/text_medium" />
+
+                            <TextView
+                                android:id="@+id/destination_desc"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:singleLine="true"
+                                android:textColor="@color/text_disabled"
+                                android:textSize="@dimen/text_base"
+                                android:visibility="gone" />
+                        </LinearLayout>
+
+                        <ImageButton
+                            android:id="@+id/favorite_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:background="@null"
+                            android:onClick="OnFavoriteClick"
+                            android:padding="@dimen/padding_low"
+                            android:src="@drawable/ic_favorite"
+                            android:visibility="gone" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/autocomplete_places_layout"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/autocomplete_places"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginEnd="@dimen/margin_xxxhigh"
+                            android:layout_marginStart="@dimen/margin_max"
+                            android:background="@null"
+                            android:ellipsize="end"
+                            android:hint="@string/autocomplete_hint"
+                            android:paddingBottom="@dimen/padding_high"
+                            android:paddingTop="@dimen/padding_high"
+                            android:singleLine="true"
+                            android:textColor="@color/text_base"
+                            android:textSize="@dimen/text_medium" />
+
+                        <ImageView
+                            android:id="@+id/autocomplete_places_back_icon"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center_vertical"
+                            android:onClick="onEnterDestinationBackClick"
+                            android:paddingLeft="@dimen/padding_xhigh"
+                            android:paddingRight="@dimen/padding_xhigh"
+                            android:scaleType="centerInside"
+                            android:src="@drawable/ic_navigation_arrow_back" />
+
+                        <ProgressBar
+                            android:id="@+id/autocomplete_progress"
+                            style="?android:attr/progressBarStyle"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center_vertical|end"
+                            android:layout_marginEnd="@dimen/margin_base"
+                            android:indeterminate="true"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
+                    </FrameLayout>
+                </FrameLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                android:id="@+id/autocomplete_places_results_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/margin_high"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:layout_marginRight="@dimen/margin_high"
+                android:layout_marginTop="@dimen/margin_base"
+                android:visibility="gone">
+
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/autocomplete_places_results"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+
+        <!--<LinearLayout-->
+        <!--android:id="@+id/requestETALoaderAnimationLayout"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:background="@color/app_background_gradient"-->
+        <!--android:clickable="true"-->
+        <!--android:gravity="bottom"-->
+        <!--android:orientation="vertical"-->
+        <!--android:visibility="gone">-->
+
+        <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/cta_button_size"-->
+        <!--android:layout_margin="@dimen/margin_high"-->
+        <!--android:background="@color/slide_to_end_gradient"-->
+        <!--android:gravity="center"-->
+        <!--android:orientation="horizontal">-->
+
+        <!--<TextView-->
+        <!--android:id="@+id/requestETALoaderAnimationText"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="@string/action_ending_trip"-->
+        <!--android:textColor="@color/text_dark_bg_base"-->
+        <!--android:textSize="@dimen/text_base" />-->
+
+        <!--<pl.tajchert.sample.DotsTextView-->
+        <!--android:id="@+id/requestETALoaderAnimationDots"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:paddingBottom="@dimen/padding_medium"-->
+        <!--android:paddingEnd="@dimen/padding_low"-->
+        <!--android:paddingStart="@dimen/padding_low"-->
+        <!--android:textColor="@color/text_dark_bg_base"-->
+        <!--android:textSize="@dimen/text_extra_large"-->
+        <!--dots:autoplay="true"-->
+        <!--dots:period="1000" />-->
+        <!--</LinearLayout>-->
+        <!--</LinearLayout>-->
+    </FrameLayout>
+</FrameLayout>

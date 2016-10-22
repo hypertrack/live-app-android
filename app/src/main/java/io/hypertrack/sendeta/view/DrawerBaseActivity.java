@@ -79,11 +79,11 @@ public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.Dra
                                 break;
                             }
 
-//                            case R.id.drawer_receive_eta: {
-//                                Intent receiveETAIntent = new Intent(DrawerBaseActivity.this, MyBookingsActivity.class);
-//                                startActivity(receiveETAIntent);
-//                                break;
-//                            }
+                            case R.id.drawer_receive_eta: {
+                                Intent receiveETAIntent = new Intent(DrawerBaseActivity.this, RequestETA.class);
+                                startActivity(receiveETAIntent);
+                                break;
+                            }
 
                             case R.id.drawer_user_activities: {
                                 Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
