@@ -32,6 +32,7 @@ public class DeepLinkUtil {
         AppDeepLink appDeepLink = new AppDeepLink(DEFAULT);
 
         if (url != null && url.length() > 0) {
+            url = url.replace("%2A", "*").replace("%3D", "=");
 
             try {
 
