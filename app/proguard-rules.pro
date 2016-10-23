@@ -15,3 +15,49 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-keepattributes *Annotation*
+
+-keep public class com.google.** {*;}
+-keep class com.crashlytics.** { *; }
+-keep class com.crashlytics.android.**
+-keep class com.facebook.** { *; }
+-keep class com.squareup.okhttp.** { *; }
+-keep class retrofit2.** { *; }
+-keep class io.hypertrack.sendeta.model.** { *; }
+-keep class io.hypertrack.sendeta.network.** { *; }
+-keep class io.hypertrack.sendeta.store.** { *; }
+-keep class maps.** { *; }
+-keep class io.hypertrack.lib.** { *; }
+
+-keep interface com.squareup.okhttp.** { *; }
+
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
+
+-keepattributes JavascriptInterface
+
+-dontwarn com.squareup.okhttp.**
+-dontwarn retrofit2.**
+-dontwarn okio.**
+-dontwarn com.google.android.gms.**
+-dontwarn io.hypertrack.lib.**
+
+-keepclasseswithmembers class * {
+    @retrofit.http.* <methods>;
+}
+
+-keepattributes Signature
+-keepattributes Exceptions
+
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
+
+-keepattributes *Annotation*
+
+## For Retrofit
+-keepattributes Signature
+
+## Other
+-dontwarn com.google.common.**
