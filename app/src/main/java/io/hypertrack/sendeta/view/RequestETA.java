@@ -32,9 +32,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.CallbackManager;
-import com.facebook.FacebookSdk;
-import com.facebook.messenger.ShareToMessengerParams;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -52,7 +49,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.text.CharacterIterator;
 import java.util.List;
 
 import io.hypertrack.lib.common.model.HTLocation;
@@ -63,7 +59,6 @@ import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.CreateDestinationDTO;
 import io.hypertrack.sendeta.model.CreateTaskDTO;
-import io.hypertrack.sendeta.model.Destination;
 import io.hypertrack.sendeta.model.ErrorData;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.User;
@@ -83,9 +78,6 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static com.facebook.messenger.MessengerUtils.finishShareToMessenger;
-import static com.facebook.messenger.MessengerUtils.shareToMessenger;
-
 /**
  * Created by piyush on 21/10/16.
  */
@@ -93,22 +85,18 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         GoogleApiClient.ConnectionCallbacks, TouchableWrapper.TouchActionDown, TouchableWrapper.TouchActionUp {
 
     private final String TAG = RequestETA.class.getSimpleName();
-    private float zoomLevel = 1.0f;
-    private static final long INITIAL_LOCATION_UPDATE_INTERVAL_TIME = 500;
     private Location defaultLocation = new Location("default");
 
     private User user;
-    private boolean mPicking = false;
-
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
     private GoogleMap mMap;
     private LatLng currentLatLng;
 
-    private Button retryButton, requestETAButton;
+    private Button retryButton;
     private TextView destinationText, destinationDescription;
-    private LinearLayout enterDestinationLayout, bottomButtonLayout;
+    private LinearLayout enterDestinationLayout;
 
     private AutoCompleteTextView mAutocompletePlacesView;
     private FrameLayout mAutocompletePlacesLayout;
@@ -233,17 +221,14 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         retryButton = (Button) findViewById(R.id.retryButton);
 
         initGoogleClient();
-        createLocationRequest(INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+        createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
         setupEnterDestinationView();
         setupAutoCompleteView();
-        setuprequestETAButton();
 
         // Check & Prompt User if Internet is Not Connected
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
-
-        // TODO: 22/10/16 Handle REQUEST_ETA Deeplink
     }
 
     private void getMap() {
@@ -295,7 +280,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
             // Else Set Default View for map according to either User's Default Location
             // (If Country Info was available) or (0.0, 0.0)
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), 1.0f));
         }
 
         int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
@@ -367,12 +352,6 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
         mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mPlaceAutoCompleteListener);
         mAutocompleteResults.setAdapter(mAdapter);
-    }
-
-    private void setuprequestETAButton() {
-        // Initialize RequestETA Button UI View
-        requestETAButton = (Button) findViewById(R.id.requestETAButton);
-        bottomButtonLayout = (LinearLayout) findViewById(R.id.home_bottomButtonLayout);
     }
 
     public void onRequestETAClick(View view) {
@@ -448,6 +427,9 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         enterDestinationLayout.setVisibility(View.VISIBLE);
         mAutocompletePlacesLayout.setVisibility(View.GONE);
 
+        if (mMap != null)
+            reverseGeocode(mMap.getCameraPosition().target);
+
         KeyboardUtils.hideKeyboard(RequestETA.this, mAutocompletePlacesView);
     }
 
@@ -485,22 +467,6 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
         mAdapter.refreshFavorites(places);
         mAdapter.notifyDataSetChanged();
-    }
-
-    private void sendToMessenger() {
-        ShareToMessengerParams shareToMessengerParams =
-                ShareToMessengerParams.newBuilder(null, "image/jpeg")
-                        .setMetaData("{ \"image\" : \"trees\" }")
-                        .build();
-
-        if (mPicking) {
-            finishShareToMessenger(this, shareToMessengerParams);
-        } else {
-            shareToMessenger(
-                    this,
-                    Constants.SHARE_TO_MESSENGER_REQUEST_CODE,
-                    shareToMessengerParams);
-        }
     }
 
     @Override
@@ -628,6 +594,19 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
                 }
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mAutocompleteResults.getVisibility() == View.VISIBLE) {
+            onEnterDestinationBackClick(null);
+            return;
+        }
+
+        if (createTaskCall != null)
+            createTaskCall.cancel();
+
+        super.onBackPressed();
     }
 
     @Override
