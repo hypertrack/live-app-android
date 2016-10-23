@@ -120,7 +120,7 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
-    compile 'com.facebook.android:facebook-android-sdk:[4,5)'
+    compile 'com.facebook.android:facebook-android-sdk:4.16.1'
 
     debugCompile(project(path: ':consumer', configuration: 'debug')) {
         transitive = true
