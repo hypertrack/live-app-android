@@ -107,12 +107,11 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
     private Call<HTTask> createTaskCall;
 
-    private boolean myLocationButtonClicked = false;
+    private boolean myLocationButtonClicked = false, autoCompletePlaceSelected = false;
 
     private View.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
             // Reset Retry button
             retryButton.setVisibility(View.GONE);
             retryButton.setOnClickListener(null);
@@ -142,6 +141,8 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
+            autoCompletePlaceSelected = true;
+
             // On Click Disable handling/showing any more results
             mAdapter.setSearching(false);
 
@@ -171,8 +172,11 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
             KeyboardUtils.hideKeyboard(RequestETA.this, mAutocompletePlacesView);
 
             if (mMap != null && place != null) {
+                currentLatLng = new LatLng(place.getLatitude(), place.getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
             }
+
+            autoCompletePlaceSelected = false;
         }
 
         @Override
@@ -427,10 +431,10 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         enterDestinationLayout.setVisibility(View.VISIBLE);
         mAutocompletePlacesLayout.setVisibility(View.GONE);
 
-        if (mMap != null)
-            reverseGeocode(mMap.getCameraPosition().target);
-
         KeyboardUtils.hideKeyboard(RequestETA.this, mAutocompletePlacesView);
+
+        if (mMap != null && !autoCompletePlaceSelected)
+            reverseGeocode(mMap.getCameraPosition().target);
     }
 
     /**
@@ -475,6 +479,11 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
     @Override
     public void onTouchUp(MotionEvent event) {
+        if (autoCompletePlaceSelected) {
+            autoCompletePlaceSelected = false;
+            return;
+        }
+
         if (mMap != null) {
             mAdapter.setBounds(LocationUtils.getBounds(mMap.getCameraPosition().target, LocationUtils.DISTANCE_IN_METERS));
             reverseGeocode(mMap.getCameraPosition().target);
