@@ -361,11 +361,9 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     public void onRequestETAClick(View view) {
         displayLoader(true);
 
-        String address = destinationText.getText().toString() + destinationDescription.getText().toString();
-
         CreateDestinationDTO destination = null;
         if (currentLatLng != null && currentLatLng.longitude != 0.0 && currentLatLng.latitude != 0.0)
-            destination = new CreateDestinationDTO(address,
+            destination = new CreateDestinationDTO(fetchCurrentAddress(),
                     new HTLocation(currentLatLng.latitude, currentLatLng.longitude));
 
         HyperTrackService hyperTrackService = HyperTrackServiceGenerator.createService(
@@ -380,11 +378,12 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
                     HTTask task = response.body();
                     if (task != null && !TextUtils.isEmpty(task.getId())) {
 
-                        String requestETAUrl = "http://" + RequestETA.this.getString(R.string.request_eta_base_url)
-                                + "/request/?uuid=" + task.getId() + "*lat=" +
-                                task.getDestination().getLocation().getLatitude() + "*lng=" + task.getDestination().getLocation().getLongitude();
+                        String requestETAUrl = getString(R.string.request_eta_url,
+                                getString(R.string.request_eta_base_url), task.getId(),
+                                String.valueOf(task.getDestination().getLocation().getLatitude()),
+                                String.valueOf(task.getDestination().getLocation().getLongitude()));
 
-                        String shareMessage = "Hey there! Click on the link to send me your ETA. " + requestETAUrl;
+                        String shareMessage = getString(R.string.request_eta_message) + " " + requestETAUrl;
 
                         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                         sharingIntent.setType("text/plain");
@@ -422,6 +421,24 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
                 }
             }
         });
+    }
+
+    private String fetchCurrentAddress() {
+        StringBuilder address = new StringBuilder();
+
+        String title = destinationText.getText().toString();
+        if (!TextUtils.isEmpty(title) && !title.contains(getString(R.string.favorite_place_home))
+                && !title.contains(getString(R.string.favorite_place_work))) {
+            address.append(title);
+        }
+
+        if (address.length() != 0) {
+            address.append(", ");
+        }
+
+        address.append(destinationDescription.getText());
+
+        return address.toString();
     }
 
     public void onEnterDestinationBackClick(View view) {
