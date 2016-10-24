@@ -380,7 +380,8 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
                     HTTask task = response.body();
                     if (task != null && !TextUtils.isEmpty(task.getId())) {
 
-                        String requestETAUrl = "http://www.sendeta.com/request/?uuid=" + task.getId() + "*lat=" +
+                        String requestETAUrl = "http://" + RequestETA.this.getString(R.string.request_eta_base_url)
+                                + "/request/?uuid=" + task.getId() + "*lat=" +
                                 task.getDestination().getLocation().getLatitude() + "*lng=" + task.getDestination().getLocation().getLongitude();
 
                         String shareMessage = "Hey there! Click on the link to send me your ETA. " + requestETAUrl;

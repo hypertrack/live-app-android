@@ -41,7 +41,7 @@ public class DeepLinkUtil {
                     appDeepLink.mId = DeepLinkUtil.MEMBERSHIP;
                 }
 
-                if (url.contains("/request")) {
+                if (url.contains(context.getString(R.string.request_eta_base_url) + "/request")) {
                     appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA;
                 }
 

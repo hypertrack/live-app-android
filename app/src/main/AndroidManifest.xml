@@ -63,7 +63,7 @@
 
                 <!-- Add sendeta.com/request DeepLink URL -->
                 <data
-                    android:host="www.sendeta.com"
+                    android:host="@string/request_eta_base_url"
                     android:pathPrefix="/request" />
 
                 <!-- Add eta.fyi DeepLink URL -->

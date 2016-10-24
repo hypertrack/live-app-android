@@ -81,6 +81,7 @@ android {
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
             buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_35b9d87cba7ca206bcb7a06d5c94b24a58cdaac3"'
             resValue "string", "eta_link_url", "www.eta.fyi"
+            resValue "string", "request_eta_base_url", "www.sendeta.com"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -95,6 +96,7 @@ android {
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_c98f8d3026a97c4a130161240dd886616959d9e8"'
             resValue "string", "eta_link_url", "webtracking-staging.herokuapp.com"
+            resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
             resValue "string", "facebook_app_id", "1548496698792614"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
