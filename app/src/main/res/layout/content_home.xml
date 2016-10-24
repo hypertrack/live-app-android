@@ -302,7 +302,7 @@
                     android:foreground="?android:attr/selectableItemBackground">
 
                     <Button
-                        android:id="@+id/sendETAButton"
+                        android:id="@+id/requestETAButton"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cta_button_size"
                         android:layout_margin="@dimen/margin_high"

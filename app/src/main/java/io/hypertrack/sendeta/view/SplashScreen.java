@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
 
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
@@ -28,24 +30,24 @@ public class SplashScreen extends BaseActivity {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        boolean isUserOnboard = UserStore.isUserLoggedIn();
+        // Initialize HyperTrack SDKs
+        HTTransmitterService.initHTTransmitter(getApplicationContext());
+        HTConsumerClient.initHTConsumerClient(getApplicationContext());
 
-        handleDeepLink();
+        prepareAppDeepLink();
+        proceedToNextScreen();
+    }
 
-        if (!isUserOnboard) {
-            Intent registerIntent = new Intent(this, Register.class);
-            registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(registerIntent);
-            finish();
-        } else {
-            UserStore.sharedStore.initializeUser();
-            Utils.setCrashlyticsKeys(this);
-            proceedToNextScreen(appDeepLink);
-        }
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        prepareAppDeepLink();
+        proceedToNextScreen();
     }
 
     // Method to handle DeepLink Params
-    private void handleDeepLink() {
+    private void prepareAppDeepLink() {
         appDeepLink = new AppDeepLink(DeepLinkUtil.DEFAULT);
         Intent intent = getIntent();
 
@@ -56,25 +58,31 @@ public class SplashScreen extends BaseActivity {
         }
     }
 
-    // Method to proceed to next screen with deepLink params
-    private void proceedToNextScreen(final AppDeepLink appDeepLink) {
-        switch (appDeepLink.mId) {
-            case DeepLinkUtil.MEMBERSHIP:
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, BusinessProfile.class)
-                                .putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                        .startActivities();
-                finish();
-                break;
+    private void proceedToNextScreen() {
+        boolean isUserOnboard = UserStore.isUserLoggedIn();
+        if (!isUserOnboard) {
+            Intent registerIntent = new Intent(this, Register.class);
+            registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(registerIntent);
+            finish();
+        } else {
+            UserStore.sharedStore.initializeUser();
+            Utils.setCrashlyticsKeys(this);
+            processAppDeepLink(appDeepLink);
+        }
+    }
 
-            case DeepLinkUtil.RECEIVE_ETA_FOR_DESTINATION:
+    // Method to proceed to next screen with deepLink params
+    private void processAppDeepLink(final AppDeepLink appDeepLink) {
+        switch (appDeepLink.mId) {
+            case DeepLinkUtil.RECEIVE_ETA:
                 TaskStackBuilder.create(this)
                         .addNextIntentWithParentStack(new Intent(this, Home.class)
-                                .putExtra(Constants.KEY_PUSH_DESTINATION, true)
-                                .putExtra(Constants.KEY_ACCOUNT_ID, appDeepLink.id)
+                                .putExtra(Constants.KEY_PUSH_TASK, true)
+                                .putExtra(Constants.KEY_TASK_ID, appDeepLink.uuid)
                                 .putExtra(Constants.KEY_PUSH_DESTINATION_LAT, appDeepLink.lat)
                                 .putExtra(Constants.KEY_PUSH_DESTINATION_LNG, appDeepLink.lng)
+                                .putExtra(Constants.KEY_ADDRESS, appDeepLink.address)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 finish();

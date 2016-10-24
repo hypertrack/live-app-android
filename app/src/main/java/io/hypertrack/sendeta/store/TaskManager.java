@@ -354,7 +354,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    public void startTask(final Task task, LatLng location, int selectedAccountId, HTDriverVehicleType vehicleType,
+    public void startTask(final String taskID, LatLng location, int selectedAccountId, HTDriverVehicleType vehicleType,
                           final TaskManagerCallback callback) {
         if (this.place == null || selectedAccountId <= 0) {
             if (callback != null) {
@@ -367,15 +367,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.selectedAccountId = selectedAccountId;
 
         final HTLocation startLocation = new HTLocation(location.latitude, location.longitude);
-        this.startTaskOnServer(task, startLocation, vehicleType, callback);
+        this.startTaskOnServer(taskID, startLocation, vehicleType, callback);
     }
 
-    private void startTaskOnServer(final Task task, final HTLocation startLocation, final HTDriverVehicleType vehicleType,
+    private void startTaskOnServer(final String taskID, final HTLocation startLocation, final HTDriverVehicleType vehicleType,
                                    final TaskManagerCallback callback) {
-        String taskID = null;
-        if (task != null) {
-            taskID = task.getId();
-        }
 
         this.vehicleType = vehicleType;
 
@@ -740,8 +736,12 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void setTask(final Map<String, Object> taskData) {
-        try {
+        if (taskData == null) {
+            HTLog.e(TAG, "SendETA Error occurred while setTask: taskData is null");
+            return;
+        }
 
+        try {
             String taskID = (String) taskData.get("id");
             String status = (String) taskData.get("status");
             String action = (String) taskData.get("action");
@@ -752,7 +752,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             try {
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                ETA = simpleDateFormat.parse((String) taskData.get("eta"));
+                if (taskData.get("eta") != null) {
+                    ETA = simpleDateFormat.parse((String) taskData.get("eta"));
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 Crashlytics.logException(e);

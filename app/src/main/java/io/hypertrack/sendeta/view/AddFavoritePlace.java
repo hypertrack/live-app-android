@@ -1,12 +1,18 @@
 package io.hypertrack.sendeta.view;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,6 +32,14 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -48,7 +62,9 @@ import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.KeyboardUtils;
+import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
+import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.RealmList;
 
@@ -64,9 +80,8 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     public static final String KEY_UPDATED_PLACE = "updated_place";
     public static final String KEY_ADDED_OR_EDITED = "added_or_edited";
 
-    private static final int DISTANCE_IN_METERS = 10000;
-
     private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
     private GoogleMap mMap;
 
     private EditText addPlaceNameView, addPlaceAddressView;
@@ -171,7 +186,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
             addPlaceAddressView.removeTextChangedListener(mPlaceAddressTextWatcher);
 
             addPlaceAddressView.setText(place.getAddress());
-            mAdapter.setBounds(getBounds(place.getLatLng(), DISTANCE_IN_METERS));
+            mAdapter.setBounds(LocationUtils.getBounds(place.getLatLng(), LocationUtils.DISTANCE_IN_METERS));
 
             KeyboardUtils.hideKeyboard(AddFavoritePlace.this, addPlaceAddressView);
             addFavPlaceParentLayout.requestFocus();
@@ -205,6 +220,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
         // Initialize GoogleApiClient & UI Views
         initGoogleClient();
+        createLocationRequest();
         getMap();
         initNameAddressView();
         initAutocompleteResultsView();
@@ -224,10 +240,18 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, 0 /* clientId */, this)
                 .addApi(Places.GEO_DATA_API)
+                .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
 
         mGoogleApiClient.connect();
+    }
+
+    private void createLocationRequest() {
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setInterval(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME)
+                .setFastestInterval(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
     }
 
     private void getMap() {
@@ -310,28 +334,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         mAutocompleteResults.setLayoutManager(layoutManager);
         mAutocompleteResults.setAdapter(mAdapter);
 
-        mAdapter.setBounds(getBounds(metaPlace.getLatLng(), DISTANCE_IN_METERS));
-    }
-
-    private LatLngBounds getBounds(LatLng latLng, int mDistanceInMeters) {
-        double latRadian = Math.toRadians(latLng.latitude);
-
-        double degLatKm = 110.574235;
-        double degLngKm = 110.572833 * Math.cos(latRadian);
-        double deltaLat = mDistanceInMeters / 1000.0 / degLatKm;
-        double deltaLong = mDistanceInMeters / 1000.0 / degLngKm;
-
-        double minLat = latLng.latitude - deltaLat;
-        double minLong = latLng.longitude - deltaLong;
-        double maxLat = latLng.latitude + deltaLat;
-        double maxLong = latLng.longitude + deltaLong;
-
-        com.google.android.gms.maps.model.LatLngBounds.Builder b = new LatLngBounds.Builder();
-        b.include(new LatLng(minLat, minLong));
-        b.include(new LatLng(maxLat, maxLong));
-        LatLngBounds bounds = b.build();
-
-        return bounds;
+        mAdapter.setBounds(LocationUtils.getBounds(metaPlace.getLatLng(), LocationUtils.DISTANCE_IN_METERS));
     }
 
     @Override
@@ -362,6 +365,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
+                checkForLocationPermission();
                 myLocationButtonClicked = true;
                 return false;
             }
@@ -597,6 +601,82 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         placeAddressClearIcon.setVisibility(View.VISIBLE);
     }
 
+    private void checkForLocationPermission() {
+        // Check If LOCATION Permission is available & then if Location is enabled
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            checkIfLocationIsEnabled();
+        } else {
+            // Show Rationale & Request for LOCATION permission
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                PermissionUtils.showRationaleMessageAsDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                        getString(R.string.location_permission_rationale_msg));
+            } else {
+                PermissionUtils.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+                        checkIfLocationIsEnabled();
+
+                } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                            getString(R.string.location_permission_never_allow));
+                }
+                break;
+        }
+    }
+
+    /**
+     * Method to check if the Location Services are enabled and in case not, request user to
+     * enable them.
+     */
+    private void checkIfLocationIsEnabled() {
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(mLocationRequest).setAlwaysShow(true);
+        PendingResult<LocationSettingsResult> pendingResult =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+        pendingResult.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
+                final Status status = locationSettingsResult.getStatus();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can
+                        // initialize location requests here.
+                        //Start Location Service here if not already active
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied, but this can be fixed
+                        // by showing the user a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(AddFavoritePlace.this, Constants.REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            // Ignore the error.
+                            e.printStackTrace();
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way
+                        // to fix the settings so we won't show the dialog.
+                        // This happens when phone is in Airplane/Flight Mode
+                        // Uncomment ErrorMessage to prevent this from popping up on AirplaneMode
+                        // Toast.makeText(Home.this, R.string.invalid_current_location, Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            }
+        });
+    }
+
     @Override
     public void onTouchDown(MotionEvent event) {
     }
@@ -605,7 +685,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     public void onTouchUp(MotionEvent event) {
         if (mMap != null) {
             metaPlace.setGooglePlacesID(null);
-            mAdapter.setBounds(getBounds(mMap.getCameraPosition().target, DISTANCE_IN_METERS));
+            mAdapter.setBounds(LocationUtils.getBounds(mMap.getCameraPosition().target, LocationUtils.DISTANCE_IN_METERS));
             reverseGeocode(mMap.getCameraPosition().target);
 
             latlng = mMap.getCameraPosition().target;

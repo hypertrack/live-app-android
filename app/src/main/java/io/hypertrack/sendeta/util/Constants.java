@@ -23,6 +23,7 @@ public class Constants {
     public static final int BUSINESS_PROFILE_REQUEST_CODE = 102;
     public static final int SHARE_REQUEST_CODE = 200;
     public static final int PLAY_SERVICES_RESOLUTION_REQUEST = 300;
+    public static final int SHARE_TO_MESSENGER_REQUEST_CODE = 400;
 
     //Enums for Location Settings
     public static final double MAP_DEFAULT_LATITUDE_DELHI = 28.614092;
@@ -34,4 +35,8 @@ public class Constants {
     public static final String KEY_TASK = "task";
     public static final String KEY_PUSH_DESTINATION_LAT = "lat";
     public static final String KEY_PUSH_DESTINATION_LNG = "lng";
+
+    public static final String KEY_PUSH_TASK = "push_task";
+    public static final String KEY_TASK_ID = "task_id";
+    public static final String KEY_ADDRESS = "address";
 }

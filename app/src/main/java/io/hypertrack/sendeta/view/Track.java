@@ -75,18 +75,14 @@ public class Track extends BaseActivity {
             if (intent != null && intent.hasExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST)) {
                 ArrayList<String> taskIDList = intent.getStringArrayListExtra(HTConsumerClient.INTENT_EXTRA_TASK_ID_LIST);
 
-                if (taskIDList != null) {
-
+                // Remove Completed Tasks from the map view except in the case of only one task being tracked
+                if (taskIDList != null && htConsumerClient != null) {
                     for (String taskID : taskIDList) {
-                        if (htConsumerClient != null && htConsumerClient.taskForTaskID(taskID) != null
-                                && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
 
-                            // Remove Completed Tasks except in the case of only one task being tracked
+                        HTTask task = htConsumerClient.taskForTaskID(taskID);
+                        if (task != null && task.isCompleted()) {
                             if (taskIDsToTrack != null && taskIDsToTrack.size() > 1) {
-                                htConsumerClient.removeTaskID(taskID);
-                                if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
-                                    taskIDsToTrack.remove(taskID);
-                                }
+                                taskIDsToTrack.remove(taskID);
                             }
                         }
                     }
@@ -133,7 +129,6 @@ public class Track extends BaseActivity {
 
         // Initialize HyperTrack MapFragment & ConsumerClient
         htConsumerClient = HTConsumerClient.getInstance(Track.this);
-        htConsumerClient.clearTasks();
 
         HTMapFragment htMapFragment = (HTMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
         htMapAdapter = new HyperTrackMapAdapter(this);
@@ -177,6 +172,17 @@ public class Track extends BaseActivity {
     }
 
     private void startTaskTracking() {
+
+        ArrayList<String> taskIDsBeingTracked = htConsumerClient.getTaskIDList();
+        if (taskIDsBeingTracked != null && taskIDsBeingTracked.containsAll(taskIDsToTrack)) {
+            // Hide RetryButton & Loader
+            showRetryButton(false);
+            displayLoader(false);
+
+            htMapAdapter.notifyDataSetChanged();
+            return;
+        }
+
         htConsumerClient.trackTask(new ArrayList<>(taskIDsToTrack), this, new TaskListCallBack() {
             @Override
             public void onSuccess(List<HTTask> list) {
@@ -224,10 +230,6 @@ public class Track extends BaseActivity {
                         if (trackTaskResponse != null) {
 
                             String taskID = trackTaskResponse.getTaskID();
-//                            if (!TextUtils.isEmpty(taskID)) {
-//                                taskIDsToTrack.add(taskID);
-//                            }
-
                             ArrayList<String> activeTaskIDList = trackTaskResponse.getActiveTaskIDList();
                             // Check if clicked taskID exists in activeTaskIDList or not
                             if (!TextUtils.isEmpty(taskID) && (activeTaskIDList == null || activeTaskIDList.isEmpty() || !activeTaskIDList.contains(taskID))) {
@@ -354,9 +356,6 @@ public class Track extends BaseActivity {
     };
 
     private void resetTrackState() {
-        // Clear HyperTrack Tasks being tracked currently
-        HTConsumerClient.getInstance(Track.this).clearTasks();
-
         // Reset Publishable Key if applicable
         String publishableKey = HyperTrack.getPublishableKey(getApplicationContext());
         if (!publishableKey.equalsIgnoreCase(currentPublishableKey)) {
@@ -375,17 +374,15 @@ public class Track extends BaseActivity {
         IntentFilter filter = new IntentFilter(HTConsumerClient.TASK_STATUS_CHANGED_NOTIFICATION);
         LocalBroadcastManager.getInstance(this).registerReceiver(mTaskStatusChangedReceiver, filter);
 
-        if (htConsumerClient != null) {
+        // Remove Completed Tasks from the map view except in the case of only one task being tracked
+        if (htConsumerClient != null && taskIDsToTrack != null) {
+            for (String taskID : taskIDsToTrack) {
 
-            ArrayList<String> taskIDList = htConsumerClient.getTaskIDList();
-            if (taskIDList != null && !taskIDList.isEmpty()) {
+                HTTask task = htConsumerClient.taskForTaskID(taskID);
+                if (task != null && task.isCompleted()) {
 
-                for (String taskID : taskIDList) {
-                    if (htConsumerClient.taskForTaskID(taskID) != null && htConsumerClient.taskForTaskID(taskID).isCompleted()) {
-                        htConsumerClient.removeTaskID(taskID);
-                        if (taskIDsToTrack != null && taskIDsToTrack.contains(taskID)) {
-                            taskIDsToTrack.remove(taskID);
-                        }
+                    if (taskIDsToTrack != null && taskIDsToTrack.size() > 1) {
+                        taskIDsToTrack.remove(taskID);
                     }
                 }
             }

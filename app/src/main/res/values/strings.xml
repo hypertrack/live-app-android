@@ -4,6 +4,8 @@
     <string name="action_slide_to_end_trip">SLIDE TO END TRIP ></string>
     <string name="action_ending_trip">ENDING TRIP</string>
     <string name="action_send_eta">Send ETA</string>
+    <string name="action_request_eta">Request ETA</string>
+    <string name="action_retry">Retry</string>
     <string name="autocomplete_hint">Enter your destination</string>
     <string name="favorite_place_name_hint">Name your favorite (eg. Dave\'s Home)</string>
     <string name="favorite_place_address_hint">Search for an address</string>
@@ -24,6 +26,7 @@
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
     <string name="title_activity_activities">My Activities</string>
+    <string name="title_activity_request_eta">Request ETA</string>
 
     <string name="title_activities_tab_received">Received</string>
     <string name="title_activities_tab_sent">Sent</string>
@@ -124,6 +127,8 @@
         \n\nGo to Settings, tap on Permissions, and turn on Storage.</string>
 
     <!-- Favorite Places Strings-->
+    <string name="favorite_place_home">Home</string>
+    <string name="favorite_place_work">Work</string>
     <string name="favorite_place_delete_dialog_message">Do you want to delete this favorite address?</string>
 
     <!-- Updated Destination Location Strings-->
@@ -186,5 +191,9 @@
     <string name="error_tracking_while_on_business_trip">Cannot track others while on a Business Trip. Please try again after your trip completes.</string>
     <string name="error_tracking_trip_message">Error tracking the trip. Please try again</string>
     <string name="error_fetching_trip_info_message">Error fetching the trip info. Please try again in sometime</string>
+
+    <!-- Request ETA strings -->
+    <string name="request_eta_message">Hey! Can you send me your ETA using</string>
+    <string name="request_eta_url">http://%1$s/request/?uuid=%2$s*lat=%3$s*lng=%4$s</string>
 
 </resources>

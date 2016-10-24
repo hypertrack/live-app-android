@@ -34,7 +34,7 @@
             android:name=".view.SplashScreen"
             android:allowTaskReparenting="false"
             android:label="${applicationLabel}"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Transparent">
 
@@ -56,14 +56,9 @@
                 <data android:scheme="http" />
                 <data android:scheme="https" />
 
-                <!-- Add sendeta.com/accept DeepLink URL -->
-                <data
-                    android:host="www.sendeta.com"
-                    android:pathPrefix="/accept" />
-
                 <!-- Add sendeta.com/request DeepLink URL -->
                 <data
-                    android:host="www.sendeta.com"
+                    android:host="@string/request_eta_base_url"
                     android:pathPrefix="/request" />
 
                 <!-- Add eta.fyi DeepLink URL -->
@@ -71,26 +66,35 @@
                     android:host="@string/eta_link_url"
                     android:pathPrefix="/" />
             </intent-filter>
+
+            <!-- Intent Filter to handle FB Messenger messages -->
+            <intent-filter>
+                <action android:name="android.intent.action.PICK"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
+            </intent-filter>
         </activity>
 
         <activity
             android:name=".view.Home"
             android:label="${applicationLabel}"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.RequestETA"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:parentActivityName=".view.Home" />
 
         <activity
             android:name=".view.Register"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
 
         <activity
             android:name=".view.Verify"
             android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize" />
 
         <!--

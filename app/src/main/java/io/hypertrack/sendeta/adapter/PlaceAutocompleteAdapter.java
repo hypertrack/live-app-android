@@ -53,6 +53,7 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.view.Home;
+import io.hypertrack.sendeta.view.RequestETA;
 
 /**
  * Adapter that handles Autocomplete requests from the Places Geo Data API.
@@ -283,7 +284,11 @@ public class PlaceAutocompleteAdapter
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
                 if (!isSearching) {
-                    ((Home) context).processPublishedResults(favorites != null && favorites.size() > 0);
+                    if (context instanceof Home) {
+                        ((Home) context).processPublishedResults(favorites != null && favorites.size() > 0);
+                    } else if (context instanceof RequestETA) {
+                        ((RequestETA) context).processPublishedResults(favorites != null && favorites.size() > 0);
+                    }
                     return;
                 }
 
@@ -301,7 +306,11 @@ public class PlaceAutocompleteAdapter
                     notifyItemRangeRemoved(0, 0);
                 }
 
-                ((Home) context).processPublishedResults(mResultList != null && mResultList.size() > 0);
+                if (context instanceof Home) {
+                    ((Home) context).processPublishedResults(mResultList != null && mResultList.size() > 0);
+                } else if (context instanceof RequestETA) {
+                    ((RequestETA) context).processPublishedResults(favorites != null && favorites.size() > 0);
+                }
             }
 
             @Override

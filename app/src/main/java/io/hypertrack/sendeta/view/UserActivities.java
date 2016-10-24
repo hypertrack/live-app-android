@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
+import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.sendeta.R;
 
 /**
@@ -87,5 +88,21 @@ public class UserActivities extends BaseActivity {
         public int getCount() {
             return tabCount;
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        // Clear HyperTrack Tasks being tracked currently
+        HTConsumerClient.getInstance(this).clearTasks();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Clear HyperTrack Tasks being tracked currently
+        HTConsumerClient.getInstance(this).clearTasks();
     }
 }
