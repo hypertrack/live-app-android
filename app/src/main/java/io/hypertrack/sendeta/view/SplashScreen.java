@@ -75,15 +75,6 @@ public class SplashScreen extends BaseActivity {
     // Method to proceed to next screen with deepLink params
     private void processAppDeepLink(final AppDeepLink appDeepLink) {
         switch (appDeepLink.mId) {
-            case DeepLinkUtil.MEMBERSHIP:
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, BusinessProfile.class)
-                                .putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                        .startActivities();
-                finish();
-                break;
-
             case DeepLinkUtil.RECEIVE_ETA:
                 TaskStackBuilder.create(this)
                         .addNextIntentWithParentStack(new Intent(this, Home.class)

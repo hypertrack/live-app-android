@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.util;
 import android.content.Context;
 import android.text.TextUtils;
 
+import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
 
@@ -35,12 +36,6 @@ public class DeepLinkUtil {
             url = url.replace("%2A", "*").replace("%3D", "=");
 
             try {
-
-                // Add Business Profile Screen mId
-                if (url.contains("/accept")) {
-                    appDeepLink.mId = DeepLinkUtil.MEMBERSHIP;
-                }
-
                 if (url.contains(context.getString(R.string.request_eta_base_url) + "/request")) {
                     appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA;
                 }

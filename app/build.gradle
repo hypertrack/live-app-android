@@ -28,6 +28,7 @@ android {
     lintOptions {
         abortOnError false
     }
+
     def versionPropsFile = file('gradle.properties')
     if (versionPropsFile.canRead()) {
         def Properties versionProps = new Properties()
@@ -64,6 +65,7 @@ android {
     } else {
         throw new GradleException("Could not read version.properties!")
     }
+
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def newFileName = "SendETA-${variant.versionName}.apk";
@@ -71,6 +73,7 @@ android {
             output.outputFile = new File(apk.parentFile, newFileName);
         }
     }
+
     buildTypes {
         release {
             debuggable false
@@ -120,10 +123,10 @@ dependencies {
     compile 'com.google.android.gms:play-services-gcm:9.6.1'
     compile 'com.google.android.gms:play-services-places:9.6.1'
     compile 'com.google.android.gms:play-services-location:9.6.1'
+    compile 'com.facebook.android:facebook-android-sdk:4.16.1'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
-    compile 'com.facebook.android:facebook-android-sdk:4.16.1'
 
     debugCompile(project(path: ':consumer', configuration: 'debug')) {
         transitive = true
