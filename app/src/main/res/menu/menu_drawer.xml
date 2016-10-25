@@ -5,18 +5,18 @@
         <item
             android:id="@+id/drawer_send_eta"
             android:icon="@drawable/ic_send"
-            android:title="Home" />
+            android:title="@string/action_send_eta" />
         <item
             android:id="@+id/drawer_receive_eta"
             android:icon="@drawable/ic_receive"
-            android:title="Request ETA" />
+            android:title="@string/title_activity_request_eta" />
         <item
             android:id="@+id/drawer_user_activities"
             android:icon="@drawable/ic_my_activities"
-            android:title="My Activities" />
+            android:title="@string/title_activity_activities" />
         <item
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_settings"
-            android:title="Settings" />
+            android:title="@string/title_activity_favorites" />
     </group>
 </menu>

@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">SendETA</string>
+    <string name="app_name">HyperTrack Live</string>
     <string name="action_settings">Settings</string>
     <string name="action_slide_to_end_trip">SLIDE TO END TRIP ></string>
     <string name="action_ending_trip">ENDING TRIP</string>
-    <string name="action_send_eta">Send ETA</string>
-    <string name="action_request_eta">Request ETA</string>
+    <string name="action_send_eta">Send</string>
+    <string name="action_request_eta">Request</string>
     <string name="action_retry">Retry</string>
     <string name="autocomplete_hint">Enter your destination</string>
     <string name="favorite_place_name_hint">Name your favorite (eg. Dave\'s Home)</string>
@@ -25,13 +25,15 @@
     <string name="title_activity_verify">Verify Phone</string>
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
-    <string name="title_activity_activities">My Activities</string>
-    <string name="title_activity_request_eta">Request ETA</string>
+    <string name="title_activity_activities">History</string>
+    <string name="title_activity_send_eta">Send</string>
+    <string name="title_activity_request_eta">Request</string>
+    <string name="title_activity_favorites">Favorites</string>
 
     <string name="title_activities_tab_received">Received</string>
     <string name="title_activities_tab_sent">Sent</string>
 
-    <string name="filter_title_viewaccept">SendETA</string>
+    <string name="filter_title_viewaccept">HyperTrack Live</string>
 
     <string name="error_field_required">This field is required</string>
 
@@ -118,12 +120,12 @@
     <!-- Permission Error Strings -->
     <string name="permission_declined_default_msg">Permission was denied</string>
 
-    <string name="location_permission_rationale_msg">To let your friends and family track you live, you need to allow SendETA to access this device’s location</string>
-    <string name="location_permission_never_allow">To let your friends and family track you live, you need to allow SendETA to access this device’s location.
+    <string name="location_permission_rationale_msg">To let your friends and family track you live, you need to allow HyperTrack Live to access this device’s location</string>
+    <string name="location_permission_never_allow">To let your friends and family track you live, you need to allow HyperTrack Live to access this device’s location.
         \n\nGo to Settings, tap on Permissions, and turn on Location.</string>
 
-    <string name="read_external_storage_permission_msg">To upload and change a profile photo, you need to allow SendETA to access photos on your device</string>
-    <string name="read_external_storage_permission_never_allow">To upload and change a profile photo, you need to allow SendETA to access photos on your device.
+    <string name="read_external_storage_permission_msg">To upload and change a profile photo, you need to allow HyperTrack Live to access photos on your device</string>
+    <string name="read_external_storage_permission_never_allow">To upload and change a profile photo, you need to allow HyperTrack Live to access photos on your device.
         \n\nGo to Settings, tap on Permissions, and turn on Storage.</string>
 
     <!-- Favorite Places Strings-->
@@ -136,7 +138,7 @@
 
     <!-- Business Profile Screen Strings -->
     <string name="business_profile_add_profile">Add profile</string>
-    <string name="business_profile_invite_msg">wants to track your business trips using SendETA</string>
+    <string name="business_profile_invite_msg">wants to track your business trips using HyperTrack Live</string>
     <string name="business_profile_invite_tnc">By clicking ACCEPT, you agree to share your location data with %1$s</string>
     <string name="business_profile_invite_primary_btn">Accept</string>
     <string name="business_profile_invite_secondary_btn">Reject</string>
