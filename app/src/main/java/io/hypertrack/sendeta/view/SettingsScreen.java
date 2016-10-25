@@ -127,12 +127,14 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         mFavoritePlacesRecyclerView.setNestedScrollingEnabled(false);
         setupFavoritePlacesAdapter();
 
+        /*
         // Initialize Business Profiles RecyclerView & Set Adapter
         LinearLayoutManager membershipsLayoutManager = new LinearLayoutManager(this);
         membershipsLayoutManager.setAutoMeasureEnabled(true);
         mMembershipsRecyclerView.setLayoutManager(membershipsLayoutManager);
         mMembershipsRecyclerView.setNestedScrollingEnabled(false);
         setupMembershipsAdapter();
+        */
 
         // Set up User's Profile Image
         updateProfileImage();
