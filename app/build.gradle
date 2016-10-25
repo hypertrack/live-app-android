@@ -68,7 +68,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
-            def newFileName = "SendETA-${variant.versionName}.apk";
+            def newFileName = "HyperTrackLive-${variant.versionName}.apk";
             def apk = output.outputFile;
             output.outputFile = new File(apk.parentFile, newFileName);
         }
@@ -93,7 +93,7 @@ android {
             debuggable true
             versionNameSuffix '-debug'
             applicationIdSuffix ".debug"
-            manifestPlaceholders = [applicationLabel: "SendETA Debug"]
+            manifestPlaceholders = [applicationLabel: "HyperTrack Live Debug"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
