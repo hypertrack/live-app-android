@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
 
+import java.util.ArrayList;
+
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.model.AppDeepLink;
@@ -49,12 +51,12 @@ public class SplashScreen extends BaseActivity {
     // Method to handle DeepLink Params
     private void prepareAppDeepLink() {
         appDeepLink = new AppDeepLink(DeepLinkUtil.DEFAULT);
-        Intent intent = getIntent();
 
+        Intent intent = getIntent();
         // if started through deep link
         if (intent != null && !TextUtils.isEmpty(intent.getDataString())) {
             Log.d(TAG, "deeplink " + intent.getDataString());
-            appDeepLink = DeepLinkUtil.prepareAppDeepLink(SplashScreen.this, intent.getDataString());
+            appDeepLink = DeepLinkUtil.prepareAppDeepLink(SplashScreen.this, intent.getData());
         }
     }
 
@@ -89,9 +91,13 @@ public class SplashScreen extends BaseActivity {
                 break;
 
             case DeepLinkUtil.TRACK:
+
+                ArrayList<String> taskIDList = new ArrayList<>();
+                taskIDList.add(appDeepLink.taskID);
+
                 TaskStackBuilder.create(this)
                         .addNextIntentWithParentStack(new Intent(this, Track.class)
-                                .putExtra(Track.KEY_SHORT_CODE, appDeepLink.shortCode)
+                                .putExtra(Track.KEY_TASK_ID_LIST, taskIDList)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 break;

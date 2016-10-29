@@ -20,6 +20,7 @@ public class AppDeepLink {
     public String address;
 
     // Used for Track feature
+    public String taskID;
     public String shortCode;
 
     public AppDeepLink(int mId) {

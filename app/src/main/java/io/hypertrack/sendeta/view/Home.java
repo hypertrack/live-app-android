@@ -77,6 +77,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
+import io.hypertrack.lib.common.BuildConfig;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
@@ -129,6 +130,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = Home.class.getSimpleName();
+    private String defaultToolbarTitle;
 
     private User user;
     private GoogleMap mMap;
@@ -555,11 +557,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Initialize UserStore
         UserStore.sharedStore.initializeUser();
 
+        defaultToolbarTitle = getResources().getString(R.string.app_name);
+        if (BuildConfig.DEBUG) {
+            defaultToolbarTitle += " (" + BuildConfig.VERSION_NAME + ")";
+        }
+
         // Start GCM Registration
         startGcmRegistration();
 
         // Initialize Toolbar without Home Button
-        initToolbarWithDrawer(getResources().getString(R.string.app_name));
+        initToolbarWithDrawer(defaultToolbarTitle);
 
         // Setup Membership Spinner
         setupMembershipsSpinner();
@@ -1373,7 +1380,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             } else {
                 // Set Toolbar Title as AppName
-                this.setTitle(getResources().getString(R.string.app_name));
+                this.setTitle(defaultToolbarTitle);
             }
         }
 
@@ -1539,7 +1546,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateMapPadding(false);
 
         // Reset Toolbar Title on EndTrip
-        this.setTitle(getResources().getString(R.string.app_name));
+        this.setTitle(defaultToolbarTitle);
         this.setSubTitle("");
     }
 
@@ -2126,7 +2133,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             taskManager.setTaskCompletedListener(onTaskCompletedListener);
         } else {
             // Reset Toolbar Title as AppName in case no existing trip
-            this.setTitle(getResources().getString(R.string.app_name));
+            this.setTitle(defaultToolbarTitle);
             this.setSubTitle("");
         }
 

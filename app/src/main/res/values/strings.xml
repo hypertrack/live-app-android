@@ -3,8 +3,8 @@
     <string name="action_settings">Settings</string>
     <string name="action_slide_to_end_trip">SLIDE TO END TRIP ></string>
     <string name="action_ending_trip">ENDING TRIP</string>
-    <string name="action_send_eta">Send</string>
-    <string name="action_request_eta">Request</string>
+    <string name="action_send_eta">Send Tracking Link</string>
+    <string name="action_request_eta">Request Tracking Link</string>
     <string name="action_retry">Retry</string>
     <string name="autocomplete_hint">Enter your destination</string>
     <string name="favorite_place_name_hint">Name your favorite (eg. Dave\'s Home)</string>
@@ -25,15 +25,16 @@
     <string name="title_activity_verify">Verify Phone</string>
     <string name="title_activity_add_fav_place">Add Favorite</string>
     <string name="title_activity_business_profile">Business Profile</string>
-    <string name="title_activity_activities">History</string>
+    <string name="title_activity_activities">My History</string>
     <string name="title_activity_send_eta">Send</string>
     <string name="title_activity_request_eta">Request</string>
-    <string name="title_activity_favorites">Favorites</string>
+    <string name="title_activity_favorites">My Favorites</string>
 
     <string name="title_activities_tab_received">Received</string>
     <string name="title_activities_tab_sent">Sent</string>
 
-    <string name="filter_title_viewaccept">HyperTrack Live</string>
+    <string name="filter_title_request_eta">RequestETA</string>
+    <string name="filter_title_track">Track</string>
 
     <string name="error_field_required">This field is required</string>
 
