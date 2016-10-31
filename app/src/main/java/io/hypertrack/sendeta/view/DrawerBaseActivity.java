@@ -8,15 +8,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.Spinner;
-
-import java.util.List;
+import android.widget.TextView;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
-import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
@@ -24,25 +19,12 @@ import io.hypertrack.sendeta.store.UserStore;
 /**
  * Created by piyush on 22/07/16.
  */
-public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.DrawerListener {
+public class DrawerBaseActivity extends BaseActivity {
 
     private User user;
     private ImageView profileImageView;
-    private Spinner drawerMembershipsSpinner;
-    private ImageView addBusinessProfileIcon;
-
-    private NavigationView navigationView;
+    private TextView profileName;
     private DrawerLayout drawerLayout;
-
-    private List<Membership> drawerMembershipsList;
-
-    private View.OnClickListener mOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent addBusinessProfileIntent = new Intent(DrawerBaseActivity.this, BusinessProfile.class);
-            startActivity(addBusinessProfileIntent);
-        }
-    };
 
     public void initToolbarWithDrawer() {
         initToolbarWithDrawer(null);
@@ -54,69 +36,64 @@ public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.Dra
             initToolbar(title);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.home_drawer_layout);
-        navigationView = (NavigationView) findViewById(R.id.home_drawer);
-        View navigationHeaderView = navigationView.getHeaderView(0);
-
-        if (navigationHeaderView != null) {
-            profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
-            drawerMembershipsSpinner = (Spinner) navigationHeaderView.findViewById(R.id.drawer_header_memberships);
-            addBusinessProfileIcon = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_add_business_profile);
-            addBusinessProfileIcon.setOnClickListener(mOnClickListener);
-        }
-
-        // Update User Data in Navigation Drawer Header
-        updateUserData();
-
-        navigationView.setNavigationItemSelectedListener(
-                new NavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(MenuItem item) {
-
-                        drawerLayout.closeDrawers();
-
-                        switch (item.getItemId()) {
-                            case R.id.drawer_send_eta: {
-                                break;
-                            }
-
-                            case R.id.drawer_receive_eta: {
-                                Intent receiveETAIntent = new Intent(DrawerBaseActivity.this, RequestETA.class);
-                                startActivity(receiveETAIntent);
-                                break;
-                            }
-
-                            case R.id.drawer_user_activities: {
-                                Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
-                                startActivity(activitiesIntent);
-                                break;
-                            }
-
-                            case R.id.drawer_settings: {
-                                AnalyticsStore.getLogger().tappedProfile();
-
-                                Intent settingsIntent = new Intent(DrawerBaseActivity.this, SettingsScreen.class);
-                                startActivity(settingsIntent);
-                                break;
-                            }
-                        }
-
-                        return true;
-                    }
-                }
-        );
+        NavigationView navigationView = (NavigationView) findViewById(R.id.home_drawer);
 
         if (navigationView != null) {
+            View navigationHeaderView = navigationView.getHeaderView(0);
+            if (navigationHeaderView != null) {
+                profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
+                profileName = (TextView) navigationHeaderView.findViewById(R.id.drawer_header_profile_name);
+            }
+
+            navigationView.setNavigationItemSelectedListener(
+                    new NavigationView.OnNavigationItemSelectedListener() {
+                        @Override
+                        public boolean onNavigationItemSelected(MenuItem item) {
+
+                            drawerLayout.closeDrawers();
+
+                            switch (item.getItemId()) {
+                                case R.id.drawer_send_eta: {
+                                    break;
+                                }
+
+                                case R.id.drawer_receive_eta: {
+                                    Intent receiveETAIntent = new Intent(DrawerBaseActivity.this, RequestETA.class);
+                                    startActivity(receiveETAIntent);
+                                    break;
+                                }
+
+                                case R.id.drawer_user_activities: {
+                                    Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
+                                    startActivity(activitiesIntent);
+                                    break;
+                                }
+
+                                case R.id.drawer_settings: {
+                                    AnalyticsStore.getLogger().tappedProfile();
+
+                                    Intent settingsIntent = new Intent(DrawerBaseActivity.this, SettingsScreen.class);
+                                    startActivity(settingsIntent);
+                                    break;
+                                }
+                            }
+
+                            return true;
+                        }
+                    }
+            );
+
             NavigationMenuView navigationMenuView = (NavigationMenuView) navigationView.getChildAt(0);
             if (navigationMenuView != null) {
                 navigationMenuView.setVerticalScrollBarEnabled(false);
             }
         }
 
+        // Update User Data in Navigation Drawer Header
+        updateUserData();
+
         ActionBarDrawerToggle actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout,
                 getToolbar(), R.string.drawer_open, R.string.drawer_close);
-
-        //Setting the actionbarToggle to drawer layout
-        drawerLayout.addDrawerListener(this);
 
         //calling sync state is necessary or else your hamburger icon wont show up
         actionBarDrawerToggle.syncState();
@@ -138,85 +115,9 @@ public class DrawerBaseActivity extends BaseActivity implements DrawerLayout.Dra
                 }
             }
 
-            if (drawerMembershipsSpinner != null) {
-                // Fetch Memberships saved in DB
-                setupDrawerMembershipsSpinner();
+            if (profileName != null) {
+                profileName.setText(user.getFullName());
             }
         }
-    }
-
-    private void setupDrawerMembershipsSpinner() {
-        drawerMembershipsList = user.getAcceptedMemberships();
-
-        if (drawerMembershipsList != null) {
-            MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_drawer_spinner,
-                    R.layout.layout_drawer_spinner_dropdown_item, user.getFullName(), this.drawerMembershipsList);
-            drawerMembershipsSpinner.setAdapter(adapter);
-            drawerMembershipsSpinner.setOnItemSelectedListener(mOnDrawerMembershipSelectedListener);
-
-            // Set Previously Selected Membership in Spinner
-            setSelectedMembership();
-        } else {
-            drawerMembershipsSpinner.setVisibility(View.GONE);
-        }
-    }
-
-    private void setSelectedMembership(){
-        Integer selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
-
-        if (selectedMembershipAccId != null) {
-            // Set Default selection to the last selected Membership
-            Membership selectedMembership = user.getMembershipForAccountId(selectedMembershipAccId);
-
-            if (selectedMembership != null && selectedMembership.isAccepted() && drawerMembershipsList.contains(selectedMembership)) {
-                drawerMembershipsSpinner.setSelection(drawerMembershipsList.indexOf(selectedMembership));
-            }
-        }
-    }
-
-    private AdapterView.OnItemSelectedListener mOnDrawerMembershipSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-            if (drawerMembershipsList != null) {
-                // Update the selected Membership in UserStore
-                UserStore.sharedStore.updateSelectedMembership(drawerMembershipsList.get(position).getAccountId());
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-        }
-    };
-
-    @Override
-    public void onDrawerSlide(View drawerView, float slideOffset) {
-    }
-
-    @Override
-    public void onDrawerOpened(View drawerView) {
-        // Code here will be triggered once the drawer open as
-        // we dont want anything to happen so we leave this blank
-
-        if (drawerMembershipsList != null && drawerMembershipsSpinner != null)
-            setSelectedMembership();
-    }
-
-    @Override
-    public void onDrawerClosed(View drawerView) {
-        // Code here will be triggered once the drawer closes as
-        // we dont want anything to happen so we leave this blank
-    }
-
-    @Override
-    public void onDrawerStateChanged(int newState) {
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // Setup Membership Spinner for Drawer
-        setupDrawerMembershipsSpinner();
     }
 }

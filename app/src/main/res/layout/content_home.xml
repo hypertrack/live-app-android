@@ -263,89 +263,58 @@
                 android:src="@drawable/ic_share_nocircle"
                 android:visibility="gone" />
 
-            <LinearLayout
+            <FrameLayout
                 android:id="@+id/home.bottomButtonLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/drawable_background_gradient_home"
-                android:orientation="vertical"
+                android:foreground="?android:attr/selectableItemBackground"
                 android:visibility="gone">
 
-                <android.support.v7.widget.CardView
-                    android:id="@+id/home.membership_spinner_layout"
+                <Button
+                    android:id="@+id/requestETAButton"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/padding_high"
-                    android:layout_marginRight="@dimen/padding_high"
-                    android:background="@android:color/white"
-                    android:elevation="0dp"
-                    android:visibility="gone"
-                    app:cardCornerRadius="2dp">
-
-                    <Spinner
-                        android:id="@+id/home.membership_spinner"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:background="?android:attr/selectableItemBackground"
-                        android:foreground="?android:attr/selectableItemBackground"
-                        android:gravity="center"
-                        android:spinnerMode="dialog"
-                        android:visibility="visible" />
-
-                </android.support.v7.widget.CardView>
+                    android:layout_height="@dimen/cta_button_size"
+                    android:layout_margin="@dimen/margin_high"
+                    android:background="@color/colorAccent"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_high"
+                    android:textColor="@color/text_dark_bg_base"
+                    android:visibility="gone" />
 
                 <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
-                    android:foreground="?android:attr/selectableItemBackground">
+                    android:layout_height="wrap_content">
 
-                    <Button
-                        android:id="@+id/requestETAButton"
+                    <io.hypertrack.sendeta.util.SwipeButton
+                        android:id="@+id/endTripSwipeButton"
                         android:layout_width="match_parent"
                         android:layout_height="@dimen/cta_button_size"
                         android:layout_margin="@dimen/margin_high"
                         android:background="@color/colorAccent"
-                        android:foreground="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:elevation="@dimen/elevation_base"
                         android:gravity="center"
-                        android:padding="@dimen/padding_high"
+                        android:text="@string/action_slide_to_end_trip"
                         android:textColor="@color/text_dark_bg_base"
-                        android:visibility="gone" />
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <io.hypertrack.sendeta.util.SwipeButton
-                            android:id="@+id/endTripSwipeButton"
-                            android:layout_width="match_parent"
-                            android:layout_height="@dimen/cta_button_size"
-                            android:layout_margin="@dimen/margin_high"
-                            android:background="@color/colorAccent"
-                            android:clickable="true"
-                            android:elevation="@dimen/elevation_base"
-                            android:gravity="center"
-                            android:text="@string/action_slide_to_end_trip"
-                            android:textColor="@color/text_dark_bg_base"
-                            android:textSize="@dimen/text_base"
-                            android:visibility="gone" />
-                    </FrameLayout>
-
-                    <Button
-                        android:id="@+id/retryButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/cta_button_size"
-                        android:layout_margin="@dimen/margin_high"
-                        android:background="@color/colorAccent"
-                        android:foreground="?android:attr/selectableItemBackground"
-                        android:gravity="center"
-                        android:padding="@dimen/padding_high"
-                        android:text="retry"
-                        android:textColor="#ffffff"
+                        android:textSize="@dimen/text_base"
                         android:visibility="gone" />
                 </FrameLayout>
-            </LinearLayout>
+
+                <Button
+                    android:id="@+id/retryButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/cta_button_size"
+                    android:layout_margin="@dimen/margin_high"
+                    android:background="@color/colorAccent"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:padding="@dimen/padding_high"
+                    android:text="retry"
+                    android:textColor="#ffffff"
+                    android:visibility="gone" />
+            </FrameLayout>
         </LinearLayout>
     </LinearLayout>
 
@@ -353,9 +322,9 @@
         android:id="@+id/endTripLoaderAnimationLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="bottom"
-        android:clickable="true"
         android:background="@color/app_background_gradient"
+        android:clickable="true"
+        android:gravity="bottom"
         android:orientation="vertical"
         android:visibility="gone">
 

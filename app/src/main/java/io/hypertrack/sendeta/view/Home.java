@@ -36,7 +36,6 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -45,7 +44,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -85,11 +83,9 @@ import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.common.util.HTTaskUtils;
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.adapter.MembershipSpinnerAdapter;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
-import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.User;
@@ -143,21 +139,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private AppBarLayout appBarLayout;
     private TabLayout vehicleTypeTabLayout;
     private TextView destinationText, destinationDescription, mAutocompletePlacesView, infoMessageViewText;
-    private LinearLayout enterDestinationLayout, infoMessageView;
-    private FrameLayout mAutocompletePlacesLayout;
+    private LinearLayout enterDestinationLayout, infoMessageView, endTripLoaderAnimationLayout;
+    private FrameLayout mAutocompletePlacesLayout, bottomButtonLayout;
     public CardView mAutocompleteResultsLayout;
     public RecyclerView mAutocompleteResults;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
-    private LinearLayout endTripLoaderAnimationLayout, bottomButtonLayout;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private RoundedImageView heroMarkerProfileImageView;
     private ProgressBar mAutocompleteLoader;
-
-    private Spinner membershipsSpinner;
-    private CardView membershipsSpinnerLayout;
-    private List<Membership> membershipsList;
 
     private PlaceAutocompleteAdapter mAdapter;
 
@@ -344,7 +335,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         sendETAButton.setText(getString(R.string.action_send_eta));
         sendETAButton.setVisibility(View.VISIBLE);
         bottomButtonLayout.setVisibility(View.VISIBLE);
-        membershipsSpinnerLayout.setVisibility(View.VISIBLE);
     }
 
     private TextWatcher mTextWatcher = new TextWatcher() {
@@ -493,21 +483,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private AdapterView.OnItemSelectedListener mOnMembershipSelectedListener = new AdapterView.OnItemSelectedListener() {
-        @Override
-        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
-            if (membershipsList != null) {
-                // Update the selected Membership in UserStore
-                UserStore.sharedStore.updateSelectedMembership(membershipsList.get(position).getAccountId());
-            }
-        }
-
-        @Override
-        public void onNothingSelected(AdapterView<?> parent) {
-        }
-    };
-
     private TaskManagerListener onTaskRefreshedListener = new TaskManagerListener() {
         @Override
         public void OnCallback() {
@@ -556,6 +531,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize UserStore
         UserStore.sharedStore.initializeUser();
+        UserStore.sharedStore.updateSelectedMembership(0);
 
         defaultToolbarTitle = getResources().getString(R.string.app_name);
         if (BuildConfig.DEBUG) {
@@ -567,9 +543,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize Toolbar without Home Button
         initToolbarWithDrawer(defaultToolbarTitle);
-
-        // Setup Membership Spinner
-        setupMembershipsSpinner();
 
         // Initialize Maps
         SupportMapFragment mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -625,57 +598,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (user != null && user.getId() != null && checkPlayServices()) {
             Intent intent = new Intent(this, RegistrationIntentService.class);
             startService(intent);
-        }
-    }
-
-    private void setupMembershipsSpinner() {
-        membershipsSpinner = (Spinner) findViewById(R.id.home_membership_spinner);
-        membershipsSpinnerLayout = (CardView) findViewById(R.id.home_membership_spinner_layout);
-
-        user = UserStore.sharedStore.getUser();
-
-        if (user != null) {
-            membershipsList = user.getAcceptedMemberships();
-        }
-
-        if (membershipsList != null && membershipsList.size() > 1) {
-            MembershipSpinnerAdapter adapter = new MembershipSpinnerAdapter(this, R.layout.layout_home_spinner,
-                    R.layout.layout_home_spinner_dropdown_item, user.getFullName(), membershipsList);
-            membershipsSpinner.setAdapter(adapter);
-            membershipsSpinner.setOnItemSelectedListener(mOnMembershipSelectedListener);
-            membershipsSpinner.setPrompt("Select Profile");
-
-            // Set Previously Selected Membership in Spinner
-            setPreviouslySelectedMembership();
-
-            membershipsSpinner.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    if (membershipsList.size() > 1) {
-                        membershipsSpinner.performClick();
-                    }
-                    return false;
-                }
-            });
-        } else {
-            membershipsSpinnerLayout.setVisibility(View.GONE);
-        }
-    }
-
-    private void setPreviouslySelectedMembership() {
-        if (membershipsList == null) {
-            user = UserStore.sharedStore.getUser();
-            membershipsList = user.getAcceptedMemberships();
-        }
-
-        int selectedMembershipAccId = UserStore.sharedStore.getSelectedMembershipAccountId();
-        if (user.isAcceptedMembership(selectedMembershipAccId)) {
-
-            // Set Default selection to the last selected Membership
-            Membership selectedMembership = user.getMembershipForAccountId(selectedMembershipAccId);
-            if (selectedMembership != null && membershipsList.contains(selectedMembership)) {
-                membershipsSpinner.setSelection(membershipsList.indexOf(selectedMembership));
-            }
         }
     }
 
@@ -765,7 +687,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void setupSendETAButton() {
         // Initialize SendETA Button UI View
         sendETAButton = (Button) findViewById(R.id.requestETAButton);
-        bottomButtonLayout = (LinearLayout) findViewById(R.id.home_bottomButtonLayout);
+        bottomButtonLayout = (FrameLayout) findViewById(R.id.home_bottomButtonLayout);
 
         // Set Click Listener for SendETA Button
         sendETAButton.setOnClickListener(new View.OnClickListener() {
@@ -943,7 +865,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         pushedTaskAccountId = 0;
 
         UserStore.sharedStore.updateSelectedMembership(pushedTaskAccountId);
-        setPreviouslySelectedMembership();
 
         // Fetch Task from Intent Params, if available
         pushedTaskID = intent.getStringExtra(Constants.KEY_TASK_ID);
@@ -1335,7 +1256,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         sendETAButton.setVisibility(View.GONE);
         endTripSwipeButton.setVisibility(View.VISIBLE);
         endTripSwipeButton.setText(R.string.action_slide_to_end_trip);
-        membershipsSpinnerLayout.setVisibility(View.GONE);
 
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
@@ -1525,7 +1445,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         sendETAButton.setVisibility(View.GONE);
         endTripSwipeButton.setVisibility(View.GONE);
-        membershipsSpinnerLayout.setVisibility(View.GONE);
         bottomButtonLayout.setVisibility(View.GONE);
 
         shareButton.setVisibility(View.GONE);
@@ -2155,9 +2074,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (!mRegistrationBroadcastReceived)
             registerGCMReceiver(true);
 
-        // Setup Membership Spinner
-        setupMembershipsSpinner();
-
         AppEventsLogger.activateApp(getApplication());
     }
 
@@ -2236,14 +2152,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
             isReceiverRegistered = false;
         }
-    }
-
-    @Override
-    public void onDrawerClosed(View drawerView) {
-        super.onDrawerClosed(drawerView);
-
-        if (membershipsList != null)
-            setPreviouslySelectedMembership();
     }
 
     private void updateCurrentLocationMarker() {
