@@ -1,13 +1,11 @@
 package io.hypertrack.sendeta;
 
 import android.app.Application;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 
 import io.fabric.sdk.android.Fabric;
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.util.DevDebugUtils;
@@ -28,11 +26,6 @@ public class MetaApplication extends Application {
         super.onCreate();
         Fabric.with(this, new Crashlytics());
         mInstance = this;
-
-        // Set Publishable Key, if not set yet
-        if (TextUtils.isEmpty(HyperTrack.getPublishableKey(getApplicationContext()))) {
-            HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
-        }
 
         // Initialize Realm to maintain app databases
         this.setupRealm();

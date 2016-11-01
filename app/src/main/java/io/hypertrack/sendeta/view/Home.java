@@ -531,7 +531,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initialize UserStore
         UserStore.sharedStore.initializeUser();
-        UserStore.sharedStore.updateSelectedMembership(0);
 
         defaultToolbarTitle = getResources().getString(R.string.app_name);
         if (BuildConfig.DEBUG) {
@@ -699,9 +698,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     if (!TaskManager.getSharedManager(Home.this).isTaskActive()) {
 
                         // Check if the selectedAccountId is different from pushedTaskAccountId
-                        if (handlePushedTaskDeepLink && pushedTaskAccountId != 0) {
+                        if (handlePushedTaskDeepLink) {
                             User user = UserStore.sharedStore.getUser();
-                            if (user != null && pushedTaskAccountId != user.getSelectedMembershipAccountId()) {
+                            if (user != null) {
 
                                 Toast.makeText(Home.this, R.string.push_destination_incorrect_account_id,
                                         Toast.LENGTH_SHORT).show();
@@ -862,10 +861,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void handlePushedTaskIntent(Intent intent) {
-        pushedTaskAccountId = 0;
-
-        UserStore.sharedStore.updateSelectedMembership(pushedTaskAccountId);
-
+        pushedTaskAccountId = 1;
         // Fetch Task from Intent Params, if available
         pushedTaskID = intent.getStringExtra(Constants.KEY_TASK_ID);
 

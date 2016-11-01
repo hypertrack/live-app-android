@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.lib.common.model.HTPlace;
@@ -396,9 +395,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                         HTPlace destination = new HTPlace();
                         destination.setId((String) response.get("destination_id"));
                         TaskManager.this.setLastUpdatedDestination(destination);
-
-                        // Set PublishableKey fetched for the selectedAccountId
-                        HyperTrack.setPublishableApiKey(publishableKey, mContext);
 
                         // Start Task in TransmitterSDK for fetched taskID & hypertrackDriverID
                         HTTaskParams taskParams = getTaskParams(taskID, hypertrackDriverID);
