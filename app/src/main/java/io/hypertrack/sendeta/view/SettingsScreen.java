@@ -212,7 +212,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                         && isRefreshFavoritesCompleted)
                     mProgressDialog.dismiss();
 
-                updateMembershipsAdapter();
+//                updateMembershipsAdapter();
             }
 
             @Override
@@ -393,7 +393,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                                 getString(R.string.business_profile_deleted_success_msg, accountName),
                                 Toast.LENGTH_SHORT).show();
 
-                        updateMembershipsAdapter();
+//                        updateMembershipsAdapter();
                     }
 
                     @Override
@@ -434,13 +434,13 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 setTitle(user.getFullName());
 
             updateProfileImage();
-        } else if (requestCode == Constants.BUSINESS_PROFILE_REQUEST_CODE) {
-            // Update the Business Profile List Data on successful addition of Business Profile
-            if (data != null && data.hasExtra("success")) {
-                if (data.getBooleanExtra("success", false)) {
-                    updateMembershipsAdapter();
-                }
-            }
+//        } else if (requestCode == Constants.BUSINESS_PROFILE_REQUEST_CODE) {
+//            // Update the Business Profile List Data on successful addition of Business Profile
+//            if (data != null && data.hasExtra("success")) {
+//                if (data.getBooleanExtra("success", false)) {
+//                    updateMembershipsAdapter();
+//                }
+//            }
         }
     }
 }
