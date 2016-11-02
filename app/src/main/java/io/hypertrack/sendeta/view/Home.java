@@ -688,20 +688,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
                         && LocationUtils.isLocationEnabled(Home.this)) {
                     if (!TaskManager.getSharedManager(Home.this).isTaskActive()) {
-
-                        // Check if the selectedAccountId is different from pushedTaskAccountId
-                        if (handlePushedTaskDeepLink) {
-                            User user = UserStore.sharedStore.getUser();
-                            if (user != null) {
-
-                                Toast.makeText(Home.this, R.string.push_destination_incorrect_account_id,
-                                        Toast.LENGTH_SHORT).show();
-
-                                AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_ERROR_INVALID_ACCOUNT_ID);
-                                return;
-                            }
-                        }
-
                         // Start the Task
                         startTask();
                     } else {
