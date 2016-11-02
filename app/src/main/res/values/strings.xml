@@ -197,6 +197,6 @@
 
     <!-- Request ETA strings -->
     <string name="request_eta_message">Hey! Can you send me your ETA using</string>
-    <string name="request_eta_url">http://%1$s/request/?uuid=%2$s*lat=%3$s*lng=%4$s</string>
+    <string name="request_eta_url">http://%1$s/request/?uuid=%2$s&amp;lat=%3$s&amp;lng=%4$s</string>
 
 </resources>
