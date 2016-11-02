@@ -46,10 +46,8 @@
 
             <!-- Intent Filter to handle browsable deeplinks -->
             <intent-filter
-                android:autoVerify="true"
-                android:label="@string/filter_title_viewaccept">
+                android:label="@string/filter_title_request_eta">
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -60,11 +58,14 @@
                 <data
                     android:host="@string/request_eta_base_url"
                     android:pathPrefix="/request" />
+            </intent-filter>
 
-                <!-- Add eta.fyi DeepLink URL -->
-                <data
-                    android:host="@string/eta_link_url"
-                    android:pathPrefix="/" />
+            <intent-filter android:label="@string/filter_title_track">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="@string/deeplink_scheme"/>
             </intent-filter>
 
             <!-- Intent Filter to handle FB Messenger messages -->

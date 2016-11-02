@@ -68,7 +68,7 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
-            def newFileName = "SendETA-${variant.versionName}.apk";
+            def newFileName = "HyperTrackLive-${variant.versionName}.apk";
             def apk = output.outputFile;
             output.outputFile = new File(apk.parentFile, newFileName);
         }
@@ -83,7 +83,7 @@ android {
             buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
             buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_35b9d87cba7ca206bcb7a06d5c94b24a58cdaac3"'
-            resValue "string", "eta_link_url", "www.eta.fyi"
+            resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "request_eta_base_url", "www.sendeta.com"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
@@ -93,12 +93,12 @@ android {
             debuggable true
             versionNameSuffix '-debug'
             applicationIdSuffix ".debug"
-            manifestPlaceholders = [applicationLabel: "SendETA Debug"]
+            manifestPlaceholders = [applicationLabel: "HyperTrack Live Debug"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_c98f8d3026a97c4a130161240dd886616959d9e8"'
-            resValue "string", "eta_link_url", "webtracking-staging.herokuapp.com"
+            resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
             resValue "string", "facebook_app_id", "1548496698792614"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"

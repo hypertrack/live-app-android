@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.lib.common.model.HTPlace;
@@ -378,33 +377,29 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         UserStore.sharedStore.startTaskOnServer(taskID, this.place, this.selectedAccountId, startLocation,
                 vehicleType, new UserStoreGetTaskCallback() {
                     @Override
-                    public void OnSuccess(Map<String, Object> response) {
+                    public void OnSuccess(final Map<String, Object> response) {
 
-                        String taskID = (String) response.get("id");
-                        String publishableKey = (String) response.get("publishable_key");
-                        String hypertrackDriverID = (String) response.get("hypertrack_driver_id");
-
-                        // Set HyperTrack DriverID
-                        if (!TextUtils.isEmpty(hypertrackDriverID)) {
-                            SharedPreferenceManager.setHyperTrackDriverID(mContext, hypertrackDriverID);
-                        }
-
-                        // Parse Response to fetch Task Data
-                        TaskManager.this.setTask(response);
-
-                        // Set lastUpdatedDestination
-                        HTPlace destination = new HTPlace();
-                        destination.setId((String) response.get("destination_id"));
-                        TaskManager.this.setLastUpdatedDestination(destination);
-
-                        // Set PublishableKey fetched for the selectedAccountId
-                        HyperTrack.setPublishableApiKey(publishableKey, mContext);
+                        final String taskID = (String) response.get("id");
+                        final String hypertrackDriverID = (String) response.get("hypertrack_driver_id");
 
                         // Start Task in TransmitterSDK for fetched taskID & hypertrackDriverID
                         HTTaskParams taskParams = getTaskParams(taskID, hypertrackDriverID);
                         transmitter.startDriverForTask(taskParams, new HTStartDriverStatusCallback() {
                             @Override
                             public void onSuccess() {
+
+                                // Set HyperTrack DriverID
+                                if (!TextUtils.isEmpty(hypertrackDriverID)) {
+                                    SharedPreferenceManager.setHyperTrackDriverID(mContext, hypertrackDriverID);
+                                }
+
+                                // Parse Response to fetch Task Data
+                                TaskManager.this.setTask(response);
+
+                                // Set lastUpdatedDestination
+                                HTPlace destination = new HTPlace();
+                                destination.setId((String) response.get("destination_id"));
+                                TaskManager.this.setLastUpdatedDestination(destination);
 
                                 if (place == null) {
                                     place = SharedPreferenceManager.getPlace();
