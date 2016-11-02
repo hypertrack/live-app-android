@@ -33,8 +33,8 @@
     <string name="title_activities_tab_received">Received</string>
     <string name="title_activities_tab_sent">Sent</string>
 
-    <string name="filter_title_request_eta">RequestETA</string>
-    <string name="filter_title_track">Track</string>
+    <string name="filter_title_request_eta">HyperTrack Live</string>
+    <string name="filter_title_track">HyperTrack Live</string>
 
     <string name="error_field_required">This field is required</string>
 
