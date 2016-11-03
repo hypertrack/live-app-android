@@ -101,7 +101,8 @@ public class ShiftManager {
     }
 
     public boolean isShiftActive() {
-        return (this.transmitter != null && this.transmitter.isShiftActive());
+        HTShift shift = getHyperTrackShift();
+        return shift != null;
     }
 
     public void startShift(final String hyperTrackDriverID, final HTShiftStatusCallback callback) {
