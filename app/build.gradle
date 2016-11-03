@@ -60,6 +60,7 @@ android {
             minSdkVersion 19
             targetSdkVersion 23
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            multiDexEnabled true
         }
 
     } else {
