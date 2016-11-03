@@ -81,6 +81,7 @@ import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.common.util.HTTaskUtils;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
@@ -2015,6 +2016,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Initiate MQTT Connection if DriverID is available
+        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(this);
+        if (!TextUtils.isEmpty(hyperTrackDriverID)) {
+            HTTransmitterService.connectDriver(getApplicationContext(), hyperTrackDriverID);
+        }
 
         // Start Refreshing Task, if one exists
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
