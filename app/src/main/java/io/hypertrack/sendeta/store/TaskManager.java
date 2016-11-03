@@ -534,7 +534,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 }
 
                 HTLog.e(TAG, "SendETA: Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
-                completeAllTasks();
                 return;
             }
         }
