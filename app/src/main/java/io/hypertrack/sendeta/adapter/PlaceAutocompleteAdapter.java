@@ -418,11 +418,13 @@ public class PlaceAutocompleteAdapter
                 }
             } else {
                 final AutocompletePrediction item = getItem(position - this.filteredPlacesCount());
-                final String placeId = item.getPlaceId();
+                if (item != null) {
+                    final String placeId = item.getPlaceId();
 
-                PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
-                        .getPlaceById(mGoogleApiClient, placeId);
-                placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+                    PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                            .getPlaceById(mGoogleApiClient, placeId);
+                    placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+                }
             }
         }
     }
