@@ -56,7 +56,9 @@ public class DeepLinkUtil {
             return;
         }
 
-        if (!TextUtils.isEmpty(uri.getHost())
+        if (uri.getScheme() != null
+                && uri.getScheme().equalsIgnoreCase(context.getString(R.string.deeplink_scheme))
+                && !TextUtils.isEmpty(uri.getHost())
                 && uri.getHost().contains("track")) {
             appDeepLink.mId = DeepLinkUtil.TRACK;
         }
