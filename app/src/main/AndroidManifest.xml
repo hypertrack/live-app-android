@@ -60,6 +60,21 @@
                     android:pathPrefix="/request" />
             </intent-filter>
 
+            <intent-filter
+                android:label="@string/filter_title_request_eta">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+
+                <!-- Add sendeta.com/request DeepLink URL -->
+                <data
+                    android:host="@string/hypertrack_live_request_eta_base_url"
+                    android:pathPrefix="/live/request" />
+            </intent-filter>
+
             <intent-filter android:label="@string/filter_title_track">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
