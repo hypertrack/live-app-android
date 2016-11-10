@@ -48,10 +48,12 @@ public class DeepLinkUtil {
 
     private static void parsePathParams(Context context, AppDeepLink appDeepLink, Uri uri) {
         if (!TextUtils.isEmpty(uri.getAuthority())
-                && uri.getAuthority().contains(context.getString(R.string.request_eta_base_url))
+                && (uri.getAuthority().contains(context.getString(R.string.request_eta_base_url)) ||
+                uri.getAuthority().contains(context.getString(R.string.hypertrack_live_request_eta_base_url)))
                 && !TextUtils.isEmpty(uri.getPath())
                 && uri.getPath().contains("request")) {
             appDeepLink.mId = DeepLinkUtil.RECEIVE_ETA;
+            return;
         }
 
         if (!TextUtils.isEmpty(uri.getHost())
