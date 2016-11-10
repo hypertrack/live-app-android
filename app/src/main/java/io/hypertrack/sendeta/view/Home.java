@@ -1039,7 +1039,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return;
             }
 
-            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, restoreTaskMetaPlace.getLatLng());
+            if (etaInMinutes != null && etaInMinutes != 0) {
+                updateViewForETASuccess(etaInMinutes, restoreTaskMetaPlace.getLatLng());
+            } else {
+                updateViewForETASuccess(null, restoreTaskMetaPlace.getLatLng());
+            }
             onStartTask();
         }
 
