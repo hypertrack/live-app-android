@@ -59,6 +59,7 @@ android {
             versionName "${versionMajor}.${versionMinor}.${versionPatch}"
             minSdkVersion 19
             targetSdkVersion 23
+            resValue "string", "app_name", "HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             multiDexEnabled true
         }
@@ -95,7 +96,8 @@ android {
             debuggable true
             versionNameSuffix '-debug'
             applicationIdSuffix ".debug"
-            manifestPlaceholders = [applicationLabel: "HyperTrack Live Debug"]
+            resValue "string", "app_name", "Debug HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
