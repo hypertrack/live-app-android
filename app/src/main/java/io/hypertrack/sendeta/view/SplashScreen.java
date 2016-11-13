@@ -104,6 +104,7 @@ public class SplashScreen extends BaseActivity {
                 TaskStackBuilder.create(this)
                         .addNextIntentWithParentStack(new Intent(this, Track.class)
                                 .putExtra(Track.KEY_TASK_ID_LIST, taskIDList)
+                                .putExtra(Track.KEY_TRACK_DEEPLINK, true)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 break;
