@@ -1,9 +1,7 @@
 package io.hypertrack.sendeta.view;
 
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
@@ -24,14 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.hypertrack.lib.common.HyperTrack;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.consumer.model.TaskListCallBack;
 import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.lib.consumer.view.HTMapAdapter;
 import io.hypertrack.lib.consumer.view.HTMapFragment;
 import io.hypertrack.lib.consumer.view.HTMapFragmentCallback;
-import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AddTaskToTrackDTO;
 import io.hypertrack.sendeta.model.ErrorData;
@@ -41,7 +37,6 @@ import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.LocationStore;
-import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
@@ -54,19 +49,16 @@ import retrofit2.Response;
  */
 public class Track extends BaseActivity {
 
+    public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
     public static final String KEY_TASK_ID_LIST = "task_id_list";
-    public static final String KEY_SHORT_CODE = "short_code";
-
-    private Button retryButton;
 
     private HTConsumerClient htConsumerClient;
     private HyperTrackMapAdapter htMapAdapter;
-
-    private String shortCode;
     private Set<String> taskIDsToTrack = new HashSet<>();
     private Call<TrackTaskResponse> addTaskForTrackingCall;
 
-    private String currentPublishableKey;
+    private Intent intent;
+    private Button retryButton;
 
     private BroadcastReceiver mTaskStatusChangedReceiver = new BroadcastReceiver() {
         @Override
@@ -94,33 +86,7 @@ public class Track extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_track);
-
-        currentPublishableKey = HyperTrack.getPublishableKey(this);
-        // Check if Current Selected key is for a Business Account
-        if (!currentPublishableKey.equalsIgnoreCase(BuildConfig.API_KEY)) {
-
-            // Check if a business trip is active and show an error
-            if (TaskManager.getSharedManager(this).isTaskActive()) {
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setMessage(R.string.error_tracking_while_on_business_trip);
-                builder.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                });
-                builder.show();
-                return;
-
-            } else {
-
-                // Change Publishable Key to SendETA Personal Account
-                HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
-            }
-        }
 
         displayLoader(true);
 
@@ -135,40 +101,41 @@ public class Track extends BaseActivity {
         htMapFragment.setHTMapAdapter(htMapAdapter);
         htMapFragment.setMapFragmentCallback(htMapFragmentCallback);
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            // Check if Intent has a valid SHORT_CODE extra
-            if (intent.hasExtra(KEY_SHORT_CODE)) {
-                shortCode = intent.getStringExtra(KEY_SHORT_CODE);
-
-                // Check if a valid SHORT_CODE is available
-                if (!TextUtils.isEmpty(shortCode)) {
-
-                    // Fetch TaskDetails for shortCode parsed from eta.fyi link
-                    addTaskForTracking();
-                    return;
-                }
-
-                // Check if Intent has a valid TASK_ID_LIST extra
-            } else if (intent.hasExtra(KEY_TASK_ID_LIST)) {
-
-                ArrayList<String> taskIDList = intent.getStringArrayListExtra(KEY_TASK_ID_LIST);
-                if (taskIDList != null && !taskIDList.isEmpty())
-                    taskIDsToTrack.addAll(taskIDList);
-
-                // Check if a valid TASK_ID_LIST is available
-                if (!taskIDsToTrack.isEmpty()) {
-                    // Fetch TaskDetails for TaskIDList received from UserActivities Screen
-                    startTaskTracking();
-                    return;
-                }
-            }
-        }
+        intent = getIntent();
+        if (processIntentParams())
+            return;
 
         displayLoader(false);
 
         Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private boolean processIntentParams() {
+        // Check if Intent has a valid TASK_ID_LIST extra
+        if (intent != null && intent.hasExtra(KEY_TASK_ID_LIST)) {
+
+            ArrayList<String> taskIDList = intent.getStringArrayListExtra(KEY_TASK_ID_LIST);
+
+            // Check if a valid TASK_ID_LIST is available
+            if (taskIDList != null && !taskIDList.isEmpty()) {
+
+                if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
+                    // Add TaskId being tracked by this user
+                    addTaskForTracking(taskIDList);
+                } else {
+
+                    // Add all tasks for tracking
+                    taskIDsToTrack.addAll(taskIDList);
+
+                    // Fetch TaskDetails for TaskIDList received from UserActivities Screen
+                    startTaskTracking();
+                }
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void startTaskTracking() {
@@ -212,11 +179,10 @@ public class Track extends BaseActivity {
         });
     }
 
-    private void addTaskForTracking() {
+    private void addTaskForTracking(List<String> taskIDList) {
         User user = UserStore.sharedStore.getUser();
         if (user != null) {
-
-            AddTaskToTrackDTO addTaskToTrackDTO = new AddTaskToTrackDTO(shortCode);
+            AddTaskToTrackDTO addTaskToTrackDTO = new AddTaskToTrackDTO(taskIDList.get(0));
 
             SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
                     SharedPreferenceManager.getUserAuthToken());
@@ -298,16 +264,8 @@ public class Track extends BaseActivity {
             retryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!TextUtils.isEmpty(shortCode)) {
-                        // Fetch TaskDetails for shortCode parsed from eta.fyi link
-                        addTaskForTracking();
-                        retryButton.setEnabled(false);
-
-                    } else if (!taskIDsToTrack.isEmpty()) {
-                        // Fetch TaskDetails for TaskIDList received from UserActivities Screen
-                        startTaskTracking();
-                        retryButton.setEnabled(false);
-                    }
+                    displayLoader(true);
+                    processIntentParams();
                 }
             });
             retryButton.setEnabled(true);
@@ -326,11 +284,15 @@ public class Track extends BaseActivity {
 
         @Override
         public List<String> getTaskIDsToTrack(HTMapFragment mapFragment) {
-            if (!taskIDsToTrack.isEmpty()) {
-                return new ArrayList<>(taskIDsToTrack);
+            if (retryButton.getVisibility() != View.VISIBLE) {
+                if (!taskIDsToTrack.isEmpty()) {
+                    return new ArrayList<>(taskIDsToTrack);
+                }
+
+                return super.getTaskIDsToTrack(mapFragment);
             }
 
-            return super.getTaskIDsToTrack(mapFragment);
+            return null;
         }
 
         @Override
@@ -354,18 +316,6 @@ public class Track extends BaseActivity {
             }
         }
     };
-
-    private void resetTrackState() {
-        // Reset Publishable Key if applicable
-        String publishableKey = HyperTrack.getPublishableKey(getApplicationContext());
-        if (!publishableKey.equalsIgnoreCase(currentPublishableKey)) {
-            HyperTrack.setPublishableApiKey(currentPublishableKey, getApplicationContext());
-        }
-
-        if (addTaskForTrackingCall != null) {
-            addTaskForTrackingCall.cancel();
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -393,6 +343,12 @@ public class Track extends BaseActivity {
     protected void onPause() {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mTaskStatusChangedReceiver);
+    }
+
+    private void resetTrackState() {
+        if (addTaskForTrackingCall != null) {
+            addTaskForTrackingCall.cancel();
+        }
     }
 
     @Override
