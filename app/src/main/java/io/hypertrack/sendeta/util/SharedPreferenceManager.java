@@ -31,6 +31,7 @@ public class SharedPreferenceManager {
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
+    private static final String CURRENT_TASK_ID = "io.hypertrack.meta:CurrentTaskID";
     private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
     private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
     private static final String CURRENT_HYPERTRACK_DRIVER_ID = "io.hypertrack.meta:HyperTrackDriverID";
@@ -109,6 +110,22 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
+    public static String getTaskID(Context context) {
+        return getSharedPreferences().getString(CURRENT_TASK_ID, null);
+    }
+
+    public static void setTaskID(String taskID) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(CURRENT_TASK_ID, taskID);
+        editor.apply();
+    }
+
+    public static void deleteTaskID() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_TASK_ID);
+        editor.apply();
+    }
+
     public static HTTask getTask(Context context) {
         String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
         if (taskJson == null) {
@@ -144,7 +161,7 @@ public class SharedPreferenceManager {
     }
 
 
-    public static void deleteTask(Context context) {
+    public static void deleteTask() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_TASK);
         editor.apply();
