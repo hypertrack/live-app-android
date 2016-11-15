@@ -212,7 +212,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     };
 
     private boolean isTaskLive(HTTask task) {
-        return task != null && TextUtils.isEmpty(task.getId());
+        return task != null && !TextUtils.isEmpty(task.getId());
     }
 
     private void onTaskRefresh() {
