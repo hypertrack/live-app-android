@@ -86,7 +86,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private boolean addGeofencingRequest;
 
     private TaskManagerListener taskRefreshedListener, taskCompletedListener;
-    private BroadcastReceiver mTaskCompletedReceiver;
+    private BroadcastReceiver mDriverNotLiveBroadcastReceiver;
     private Handler handler;
 
     private static TaskManager sharedManager;
@@ -175,7 +175,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 @Override
                 public void onSuccess(boolean isOffline, HTTask htTask) {
 
-                    if (htTask != null && !isTaskLive(htTask)) {
+                    if (!isTaskLive(htTask)) {
                         HTLog.i(TAG, "SendETA Task Not Live, Calling completeTask() to complete the task");
 
                         // Call completeTask when the HTTask object is null or task is not live
@@ -216,7 +216,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void onTaskRefresh() {
-        SharedPreferenceManager.setTask(hyperTrackTask);
+        SharedPreferenceManager.setTask(this.hyperTrackTask);
+
+        // Update TaskID if Task updated is not null
+        if (this.hyperTrackTask != null && !TextUtils.isEmpty(this.hyperTrackTask.getId())) {
+            this.hyperTrackTaskId = hyperTrackTask.getId();
+            SharedPreferenceManager.setTaskID(hyperTrackTask.getId());
+        }
 
         if (this.taskRefreshedListener != null) {
             this.taskRefreshedListener.OnCallback();
@@ -488,7 +494,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 if (taskCompletedListener != null) {
                     taskCompletedListener.OnCallback();
                 }
-                clearState();
 
                 AnalyticsStore.getLogger().autoTripEnded(true, null);
                 HTLog.i(TAG, "OnGeoFence success: Task ended (Auto) successfully.");
@@ -605,6 +610,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         SharedPreferenceManager.deleteTask();
         SharedPreferenceManager.deleteTaskID();
         this.hyperTrackTask = null;
+        this.hyperTrackTaskId = null;
     }
 
     private boolean setTask(final Map<String, Object> taskData) {
@@ -658,23 +664,24 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         IntentFilter filter = new IntentFilter();
         filter.addAction(TransmitterConstants.HT_ON_DRIVER_NOT_ACTIVE_INTENT);
 
-        mTaskCompletedReceiver = new BroadcastReceiver() {
+        mDriverNotLiveBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 if (taskCompletedListener != null) {
                     taskCompletedListener.OnCallback();
                 }
+                completeTask(null);
                 clearState();
             }
         };
 
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mTaskCompletedReceiver, filter);
+        LocalBroadcastManager.getInstance(mContext).registerReceiver(mDriverNotLiveBroadcastReceiver, filter);
     }
 
     private void unregisterForDriverNotLiveBroadcast() {
-        if (this.mTaskCompletedReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mTaskCompletedReceiver);
-            this.mTaskCompletedReceiver = null;
+        if (this.mDriverNotLiveBroadcastReceiver != null) {
+            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mDriverNotLiveBroadcastReceiver);
+            this.mDriverNotLiveBroadcastReceiver = null;
         }
     }
 
