@@ -7,18 +7,18 @@ import com.google.gson.annotations.SerializedName;
  */
 public class AddTaskToTrackDTO {
 
-    @SerializedName("short_code")
-    private String shortCode;
+    @SerializedName("task_id")
+    private String taskID;
 
-    public String getShortCode() {
-        return shortCode;
+    public String getTaskID() {
+        return taskID;
     }
 
-    public void setShortCode(String shortCode) {
-        this.shortCode = shortCode;
+    public void setTaskID(String taskID) {
+        this.taskID = taskID;
     }
 
-    public AddTaskToTrackDTO(String shortCode) {
-        this.shortCode = shortCode;
+    public AddTaskToTrackDTO(String taskID) {
+        this.taskID = taskID;
     }
 }

@@ -10,6 +10,8 @@ import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
+import io.hypertrack.sendeta.model.RequestTrackingDTO;
+import io.hypertrack.sendeta.model.RequestTrackingResponse;
 import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.TrackTaskResponse;
@@ -107,4 +109,8 @@ public interface SendETAService {
     // Fetch DriverID for a user
     @GET("/api/v1/users/{id}/default_driver/")
     Call<FetchDriverIDForUserResponse> getDriverIDForUser(@Path("id") int id);
+
+    // Create a Request Tracking url
+    @POST("/api/v1/users/{id}/request/")
+    Call<RequestTrackingResponse> getRequestTrackingURL(@Path("id") int id, @Body RequestTrackingDTO request);
 }

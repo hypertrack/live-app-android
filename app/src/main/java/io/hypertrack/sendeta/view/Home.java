@@ -81,6 +81,8 @@ import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.model.HTTaskDisplay;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.common.util.HTTaskUtils;
+import io.hypertrack.lib.transmitter.model.TransmitterConstants;
+import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
@@ -418,6 +420,19 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mAdapter.refreshFavorites(places);
         mAdapter.notifyDataSetChanged();
     }
+
+    BroadcastReceiver driverCurrentLocationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.getExtras() != null) {
+                Log.d(TAG, "Driver's Current Location Changed");
+
+                Bundle bundle = intent.getExtras();
+                Location location = bundle.getParcelable(TransmitterConstants.HT_DRIVER_CURRENT_LOCATION_KEY);
+                updateCurrentLocation(location);
+            }
+        }
+    };
 
     BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
         @Override
@@ -1024,7 +1039,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return;
             }
 
-            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, restoreTaskMetaPlace.getLatLng());
+            if (etaInMinutes != null && etaInMinutes != 0) {
+                updateViewForETASuccess(etaInMinutes, restoreTaskMetaPlace.getLatLng());
+            } else {
+                updateViewForETASuccess(null, restoreTaskMetaPlace.getLatLng());
+            }
             onStartTask();
         }
 
@@ -1441,6 +1460,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Reset Toolbar Title on EndTrip
         this.setTitle(getResources().getString(R.string.app_name));
         this.setSubTitle("");
+
+        // Resume LocationUpdates
+        resumeLocationUpdates();
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
@@ -1626,18 +1648,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         Log.d(TAG, "Location: " + latLng.latitude + ", " + latLng.longitude);
 
-        if (mMap != null) {
-            if (currentLocationMarker == null) {
-                addMarkerToCurrentLocation(latLng);
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
-            } else {
-                currentLocationMarker.setPosition(latLng);
-            }
-
-            updateMapView();
-        }
-
-        mAdapter.setBounds(LocationUtils.getBounds(latLng, 10000));
+        // Update Current Location on the map
+        updateCurrentLocation(location);
 
         // Check if Location Frequency was decreased to (INITIAL_LOCATION_UPDATE_INTERVAL_TIME)
         // Remove the existing FusedLocationUpdates, and resume it with
@@ -1654,8 +1666,33 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             createLocationRequest(LocationUtils.LOCATION_UPDATE_INTERVAL_TIME);
 
             // Restart location updates with the new interval
-            startLocationPolling();
+            requestLocationUpdates();
         }
+
+        HTTransmitterService transmitterService = HTTransmitterService.getInstance(this);
+        if (transmitterService.isDriverLive()) {
+            // Remove location updates
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            }
+        }
+    }
+
+    private void updateCurrentLocation(Location location) {
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+        if (mMap != null) {
+            if (currentLocationMarker == null) {
+                addMarkerToCurrentLocation(latLng);
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
+            } else {
+                currentLocationMarker.setPosition(latLng);
+            }
+
+            updateMapView();
+        }
+
+        mAdapter.setBounds(LocationUtils.getBounds(latLng, 10000));
 
         LocationStore.sharedStore().setCurrentLocation(location);
     }
@@ -2003,6 +2040,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Unregister BroadcastReceiver for Location_Change & Network_Change
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(driverCurrentLocationReceiver);
 
         registerGCMReceiver(false);
 
@@ -2015,6 +2053,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Initiate MQTT Connection if DriverID is available
+        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(this);
+        if (!TextUtils.isEmpty(hyperTrackDriverID)) {
+            HTTransmitterService.connectDriver(getApplicationContext(), hyperTrackDriverID);
+        }
 
         // Start Refreshing Task, if one exists
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
@@ -2033,8 +2077,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Check if Location & Network are Enabled
         updateInfoMessageView();
 
-        // Resume FusedLocation Updates
-        resumeLocationUpdates();
+        // Resume FusedLocation Updates, if driver is not active
+        if (!HTTransmitterService.getInstance(this).isDriverLive()) {
+            resumeLocationUpdates();
+        }
 
         updateFavoritesButton();
         updateCurrentLocationMarker();
@@ -2044,6 +2090,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
         LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(driverCurrentLocationReceiver,
+                new IntentFilter(TransmitterConstants.HT_DRIVER_CURRENT_LOCATION_INTENT));
 
         if (!mRegistrationBroadcastReceived)
             registerGCMReceiver(true);

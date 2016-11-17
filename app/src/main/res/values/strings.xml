@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">HyperTrack Live</string>
     <string name="action_settings">Settings</string>
     <string name="action_slide_to_end_trip">SLIDE TO END TRIP ></string>
     <string name="action_ending_trip">ENDING TRIP</string>

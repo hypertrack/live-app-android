@@ -59,7 +59,9 @@ android {
             versionName "${versionMajor}.${versionMinor}.${versionPatch}"
             minSdkVersion 19
             targetSdkVersion 23
+            resValue "string", "app_name", "HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            multiDexEnabled true
         }
 
     } else {
@@ -85,6 +87,7 @@ android {
             buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_35b9d87cba7ca206bcb7a06d5c94b24a58cdaac3"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "request_eta_base_url", "www.sendeta.com"
+            resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.io"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -93,13 +96,15 @@ android {
             debuggable true
             versionNameSuffix '-debug'
             applicationIdSuffix ".debug"
-            manifestPlaceholders = [applicationLabel: "HyperTrack Live Debug"]
+            resValue "string", "app_name", "Debug HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
             buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_c98f8d3026a97c4a130161240dd886616959d9e8"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
+            resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
             resValue "string", "facebook_app_id", "1548496698792614"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"

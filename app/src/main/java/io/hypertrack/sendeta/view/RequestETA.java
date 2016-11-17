@@ -52,19 +52,17 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.List;
 
 import io.hypertrack.lib.common.model.HTLocation;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
-import io.hypertrack.sendeta.model.CreateDestinationDTO;
-import io.hypertrack.sendeta.model.CreateTaskDTO;
 import io.hypertrack.sendeta.model.ErrorData;
 import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.RequestTrackingDTO;
+import io.hypertrack.sendeta.model.RequestTrackingResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.SendETAService;
+import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
@@ -74,6 +72,7 @@ import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -105,7 +104,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     private ProgressBar mAutocompleteLoader;
     private PlaceAutocompleteAdapter mAdapter;
 
-    private Call<HTTask> createTaskCall;
+    private Call<RequestTrackingResponse> requestTrackingLinkCall;
 
     private boolean myLocationButtonClicked = false, autoCompletePlaceSelected = false;
 
@@ -361,42 +360,39 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     public void onRequestETAClick(View view) {
         displayLoader(true);
 
-        CreateDestinationDTO destination = null;
-        if (currentLatLng != null && currentLatLng.longitude != 0.0 && currentLatLng.latitude != 0.0)
-            destination = new CreateDestinationDTO(fetchCurrentAddress(),
-                    new HTLocation(currentLatLng.latitude, currentLatLng.longitude));
+        RequestTrackingDTO request;
+        if (currentLatLng != null && currentLatLng.longitude != 0.0 && currentLatLng.latitude != 0.0) {
+            request = new RequestTrackingDTO(new HTLocation(currentLatLng.latitude, currentLatLng.longitude),
+                    fetchCurrentAddress(), destinationText.getText().toString());
+        } else {
+            request = new RequestTrackingDTO(fetchCurrentAddress());
+        }
 
-        HyperTrackService hyperTrackService = HyperTrackServiceGenerator.createService(
-                HyperTrackService.class, BuildConfig.HYPERTRACK_API_KEY);
-
-        createTaskCall = hyperTrackService.createTask(new CreateTaskDTO(destination));
-        createTaskCall.enqueue(new Callback<HTTask>() {
+        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+                SharedPreferenceManager.getUserAuthToken());
+        requestTrackingLinkCall = sendETAService.getRequestTrackingURL(UserStore.sharedStore.getUser().getId(),
+                request);
+        requestTrackingLinkCall.enqueue(new Callback<RequestTrackingResponse>() {
             @Override
-            public void onResponse(Call<HTTask> call, Response<HTTask> response) {
+            public void onResponse(Call<RequestTrackingResponse> call, Response<RequestTrackingResponse> response) {
+                displayLoader(false);
+
                 if (response != null && response.isSuccessful()) {
-
-                    HTTask task = response.body();
-                    if (task != null && !TextUtils.isEmpty(task.getId())) {
-
-                        String requestETAUrl = getString(R.string.request_eta_url,
-                                getString(R.string.request_eta_base_url), task.getId(),
-                                String.valueOf(task.getDestination().getLocation().getLatitude()),
-                                String.valueOf(task.getDestination().getLocation().getLongitude()));
-
-                        String shareMessage = getString(R.string.request_eta_message) + " " + requestETAUrl;
-
+                    RequestTrackingResponse requestTrackingResponse = response.body();
+                    if (requestTrackingResponse != null) {
+                        String shareMessage = getString(R.string.request_eta_message) + " " +
+                                requestTrackingResponse.getTrackingURL();
                         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                         sharingIntent.setType("text/plain");
                         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
-                        startActivityForResult(Intent.createChooser(sharingIntent, "Share via"), Constants.SHARE_REQUEST_CODE);
+                        startActivityForResult(Intent.createChooser(sharingIntent, "Share via"),
+                                Constants.SHARE_REQUEST_CODE);
                     }
                 }
-
-                displayLoader(false);
             }
 
             @Override
-            public void onFailure(Call<HTTask> call, Throwable t) {
+            public void onFailure(Call<RequestTrackingResponse> call, Throwable t) {
                 displayLoader(false);
 
                 ErrorData errorData = new ErrorData();
@@ -630,8 +626,8 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
             return;
         }
 
-        if (createTaskCall != null)
-            createTaskCall.cancel();
+        if (requestTrackingLinkCall != null)
+            requestTrackingLinkCall.cancel();
 
         super.onBackPressed();
     }

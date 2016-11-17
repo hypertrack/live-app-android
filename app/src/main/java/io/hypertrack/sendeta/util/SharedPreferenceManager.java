@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.Date;
 
 import io.hypertrack.lib.common.model.HTDriverVehicleType;
 import io.hypertrack.lib.common.model.HTTask;
@@ -19,7 +20,6 @@ import io.hypertrack.lib.transmitter.model.HTShift;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.model.Trip;
 
 /**
  * Created by suhas on 25/02/16.
@@ -31,6 +31,7 @@ public class SharedPreferenceManager {
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
+    private static final String CURRENT_TASK_ID = "io.hypertrack.meta:CurrentTaskID";
     private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
     private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
     private static final String CURRENT_HYPERTRACK_DRIVER_ID = "io.hypertrack.meta:HyperTrackDriverID";
@@ -46,6 +47,15 @@ public class SharedPreferenceManager {
 
     private static SharedPreferences.Editor getEditor() {
         return getSharedPreferences().edit();
+    }
+
+    private static Gson getGson() {
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Date.class, DateSerializer.getInstance());
+        gsonBuilder.registerTypeAdapter(Date.class, DateDeserializer.getInstance());
+        gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
+        gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
+        return gsonBuilder.create();
     }
 
     public static void setUserAuthToken(String userAuthToken) {
@@ -99,13 +109,19 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void setTrip(Trip trip) {
+    public static String getTaskID(Context context) {
+        return getSharedPreferences().getString(CURRENT_TASK_ID, null);
+    }
+
+    public static void setTaskID(String taskID) {
         SharedPreferences.Editor editor = getEditor();
+        editor.putString(CURRENT_TASK_ID, taskID);
+        editor.apply();
+    }
 
-        Gson gson = new Gson();
-        String tripJSON = gson.toJson(trip);
-
-        editor.putString(CURRENT_TASK, tripJSON);
+    public static void deleteTaskID() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_TASK_ID);
         editor.apply();
     }
 
@@ -116,11 +132,7 @@ public class SharedPreferenceManager {
         }
 
         try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-//            gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
-            gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
-            Gson gson = gsonBuilder.create();
+            Gson gson = getGson();
             Type type = new TypeToken<HTTask>() {
             }.getType();
 
@@ -136,7 +148,7 @@ public class SharedPreferenceManager {
     public static void setTask(HTTask task) {
         SharedPreferences.Editor editor = getEditor();
 
-        Gson gson = new Gson();
+        Gson gson = getGson();
         String taskJSON = gson.toJson(task);
 
         editor.putString(CURRENT_TASK, taskJSON);
@@ -144,7 +156,7 @@ public class SharedPreferenceManager {
     }
 
 
-    public static void deleteTask(Context context) {
+    public static void deleteTask() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_TASK);
         editor.apply();
@@ -258,11 +270,7 @@ public class SharedPreferenceManager {
         }
 
         try {
-            GsonBuilder gsonBuilder = new GsonBuilder();
-//            gsonBuilder.registerTypeAdapter(Date.class, new DateTypeAdapter());
-            gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
-            gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
-            Gson gson = gsonBuilder.create();
+            Gson gson = getGson();
             Type type = new TypeToken<HTShift>() {
             }.getType();
 
@@ -278,7 +286,7 @@ public class SharedPreferenceManager {
     public static void setShift(HTShift shift) {
         SharedPreferences.Editor editor = getEditor();
 
-        Gson gson = new Gson();
+        Gson gson = getGson();
         String taskJSON = gson.toJson(shift);
 
         editor.putString(CURRENT_SHIFT, taskJSON);
