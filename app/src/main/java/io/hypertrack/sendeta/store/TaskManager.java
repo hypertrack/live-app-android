@@ -467,7 +467,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                     }
                 }
             });
-        } catch (SecurityException exception) {
+        } catch (SecurityException | IllegalArgumentException exception) {
             Crashlytics.logException(exception);
             HTLog.e(TAG, "Exception for geofence");
         }
