@@ -140,10 +140,10 @@ dependencies {
         transitive = true
     }
 
-    releaseCompile('io.hypertrack:consumer:1.4.12:release@aar') {
+    releaseCompile('io.hypertrack:consumer:1.4.13:release@aar') {
         transitive = true
     }
-    releaseCompile('io.hypertrack:transmitter:1.4.12:release@aar') {
+    releaseCompile('io.hypertrack:transmitter:1.4.13:release@aar') {
         transitive = true
     }
 }
