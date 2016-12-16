@@ -467,7 +467,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.i(TAG, "broadcast received");
             mRegistrationBroadcastReceived = true;
             sendGCMRegistrationToServer();
             registerGCMReceiver(false);
