@@ -83,6 +83,7 @@ import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.common.util.HTTaskUtils;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
+import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
@@ -1461,7 +1462,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         this.setSubTitle("");
 
         // Resume LocationUpdates
-        resumeLocationUpdates();
+        if (MetaApplication.isActivityVisible()) {
+            resumeLocationUpdates();
+        }
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
