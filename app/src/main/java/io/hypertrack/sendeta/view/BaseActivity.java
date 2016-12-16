@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 
 /**
@@ -263,5 +264,12 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        MetaApplication.activityResumed();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MetaApplication.activityPaused();
     }
 }

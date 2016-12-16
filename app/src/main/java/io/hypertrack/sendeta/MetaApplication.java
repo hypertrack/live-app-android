@@ -19,6 +19,7 @@ import io.realm.exceptions.RealmMigrationNeededException;
 public class MetaApplication extends Application {
 
     private static MetaApplication mInstance;
+    private static boolean activityVisible;
     private static final String TAG = MetaApplication.class.getSimpleName();
 
     @Override
@@ -66,6 +67,18 @@ public class MetaApplication extends Application {
             e.printStackTrace();
             Crashlytics.logException(e);
         }
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;
     }
 
     @Override
