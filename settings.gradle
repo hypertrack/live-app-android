@@ -8,3 +8,6 @@ project(':consumer').projectDir = new File(settingsDir, '../hypertrack-android/c
 
 include ':transmitter'
 project(':transmitter').projectDir = new File(settingsDir, '../hypertrack-android/transmitter')
+
+include ':org.eclipse.paho.android.service'
+project(':org.eclipse.paho.android.service').projectDir = new File(settingsDir, '../paho.mqtt.android/org.eclipse.paho.android.service')
