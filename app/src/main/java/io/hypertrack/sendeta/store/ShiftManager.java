@@ -117,7 +117,6 @@ public class ShiftManager {
         transmitter.startShift(shiftParams, new HTShiftStatusCallback() {
             @Override
             public void onSuccess(HTShift shift) {
-
                 if (shift != null) {
                     SharedPreferenceManager.setShift(shift);
                 }
@@ -126,6 +125,15 @@ public class ShiftManager {
 
                 if (callback != null) {
                     callback.onSuccess(shift);
+                }
+            }
+
+            @Override
+            public void onOfflineSuccess() {
+                registerForDriverNotLiveBroadcast();
+
+                if (callback != null) {
+                    callback.onSuccess(null);
                 }
             }
 
@@ -146,6 +154,14 @@ public class ShiftManager {
             public void onSuccess(HTShift shift) {
                 if (callback != null)
                     callback.onSuccess(shift);
+
+                clearState();
+            }
+
+            @Override
+            public void onOfflineSuccess() {
+                if (callback != null)
+                    callback.onSuccess(null);
 
                 clearState();
             }

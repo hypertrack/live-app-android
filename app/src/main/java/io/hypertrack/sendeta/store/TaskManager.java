@@ -173,8 +173,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
             transmitter.refreshTask(task.getId(), new HTTaskStatusCallback() {
                 @Override
-                public void onSuccess(boolean isOffline, HTTask htTask) {
-
+                public void onSuccess(HTTask htTask) {
                     if (!isTaskLive(htTask)) {
                         HTLog.i(TAG, "SendETA Task Not Live, Calling completeTask() to complete the task");
 
@@ -196,6 +195,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
                     hyperTrackTask = htTask;
                     onTaskRefresh();
+                }
+
+                @Override
+                public void onOfflineSuccess() {
+                    // Do nothing
                 }
 
                 @Override
@@ -341,6 +345,14 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
             @Override
             public void onSuccess(String s) {
+                if (callback != null)
+                    callback.OnSuccess();
+
+                clearState();
+            }
+
+            @Override
+            public void onOfflineSuccess() {
                 if (callback != null)
                     callback.OnSuccess();
 

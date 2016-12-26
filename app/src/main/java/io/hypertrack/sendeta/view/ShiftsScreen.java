@@ -176,9 +176,16 @@ public class ShiftsScreen extends BaseActivity {
             }
 
             @Override
+            public void onOfflineSuccess() {
+                Toast.makeText(ShiftsScreen.this, "Shift started offline successfully", Toast.LENGTH_SHORT).show();
+                onShiftStart();
+
+                shiftBtnLoader.setVisibility(View.GONE);
+            }
+
+            @Override
             public void onError(Exception e) {
                 Toast.makeText(ShiftsScreen.this, "Shift start failed with error: " + e, Toast.LENGTH_SHORT).show();
-
                 shiftBtnLoader.setVisibility(View.GONE);
             }
         });
@@ -197,6 +204,14 @@ public class ShiftsScreen extends BaseActivity {
             @Override
             public void onSuccess(HTShift shift) {
                 Toast.makeText(ShiftsScreen.this, "Shift ended successfully", Toast.LENGTH_SHORT).show();
+                onEndShift();
+
+                shiftBtnLoader.setVisibility(View.GONE);
+            }
+
+            @Override
+            public void onOfflineSuccess() {
+                Toast.makeText(ShiftsScreen.this, "Shift ended offline successfully", Toast.LENGTH_SHORT).show();
                 onEndShift();
 
                 shiftBtnLoader.setVisibility(View.GONE);
