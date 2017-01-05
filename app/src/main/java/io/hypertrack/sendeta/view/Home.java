@@ -2029,9 +2029,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             updateFavoritesButton();
 
-        } else if (requestCode == Constants.SHARE_REQUEST_CODE) {
-
-            Log.d(TAG, resultCode + "");
         }
     }
 

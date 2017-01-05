@@ -17,11 +17,20 @@ public class Utils {
     public static void setCrashlyticsKeys(Context context){
         User user = UserStore.sharedStore.getUser();
         if (user != null) {
-            Crashlytics.setInt(CrashlyticsKeys.USER_ID, user.getId() != null ? user.getId() : -1);
-            Crashlytics.setString(CrashlyticsKeys.USER_NAME, !TextUtils.isEmpty(user.getFullName()) ? user.getFullName() : "null");
-            Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !TextUtils.isEmpty(user.getPhoneNumber()) ? user.getPhoneNumber() : "null");
+            // Set UserID
+            String userID = user.getId() != null ? user.getId().toString() : "NULL";
+            Crashlytics.setUserIdentifier(userID);
+            Crashlytics.setString(CrashlyticsKeys.USER_ID, userID);
+
+            // Set UserName
+            String userName = !TextUtils.isEmpty(user.getFullName()) ? user.getFullName() : "NULL";
+            Crashlytics.setUserName(userName);
+            Crashlytics.setString(CrashlyticsKeys.USER_NAME, userName);
+
+            // Set UserPhone & UserDeviceID
+            Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !TextUtils.isEmpty(user.getPhoneNumber()) ? user.getPhoneNumber() : "NULL");
             String deviceUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-            Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !TextUtils.isEmpty(deviceUUID) ? deviceUUID : "null");
+            Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !TextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
         }
     }
 
