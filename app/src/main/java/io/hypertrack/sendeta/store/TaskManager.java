@@ -156,9 +156,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 onTaskStart(0);
                 return true;
             }
+            HTLog.e(TAG, "SendETA: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
         }
 
-        HTLog.e(TAG, "SendETA: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
         completeTask(null);
         return false;
     }

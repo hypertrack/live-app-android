@@ -30,10 +30,10 @@ public class LocationDeserializer implements JsonDeserializer<Location> {
         Location location = new Location(jsonObject.getAsJsonPrimitive("mProvider").getAsString());
         location.setAccuracy(jsonObject.getAsJsonPrimitive("mAccuracy").getAsFloat());
         location.setLatitude(jsonObject.getAsJsonPrimitive("mLatitude").getAsDouble());
-        location.setLatitude(jsonObject.getAsJsonPrimitive("mLongitude").getAsDouble());
-        location.setLatitude(jsonObject.getAsJsonPrimitive("mTime").getAsLong());
-        location.setLatitude(jsonObject.getAsJsonPrimitive("mSpeed").getAsFloat());
-        location.setLatitude(jsonObject.getAsJsonPrimitive("mBearing").getAsFloat());
+        location.setLongitude(jsonObject.getAsJsonPrimitive("mLongitude").getAsDouble());
+        location.setTime(jsonObject.getAsJsonPrimitive("mTime").getAsLong());
+        location.setSpeed(jsonObject.getAsJsonPrimitive("mSpeed").getAsFloat());
+        location.setBearing(jsonObject.getAsJsonPrimitive("mBearing").getAsFloat());
         return location;
     }
 }

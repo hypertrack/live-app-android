@@ -1302,8 +1302,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (!TextUtils.isEmpty(taskDisplaySubStatus)) {
             this.setSubTitle(taskDisplaySubStatus);
 
-        }
-        if (!TextUtils.isEmpty(taskDisplay.getSubStatusText())) {
+        } else if (!TextUtils.isEmpty(taskDisplay.getSubStatusText())) {
             this.setSubTitle(taskDisplay.getSubStatusText());
 
         } else {
