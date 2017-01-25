@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.util.HTLog;
+import io.hypertrack.lib.transmitter.service.HTGcmListenerService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.util.Constants;
@@ -67,11 +68,17 @@ public class MetaGCMListenerService extends GcmListenerService {
      */
     @Override
     public void onMessageReceived(String from, Bundle data) {
+        String htSDKNotification = data.getString(HTGcmListenerService.HT_SDK_NOTIFICATION_KEY);
+        if (htSDKNotification != null && htSDKNotification.equalsIgnoreCase("true")) {
+            HTGcmListenerService.triggerHypertrackNotification(getApplicationContext(), data);
+            return;
+        }
+
         String title = data.getString(NOTIFICATION_KEY_TITLE);
         String message = data.getString(NOTIFICATION_KEY_MESSAGE);
         HTLog.i(TAG, "GCM Notification Received");
         HTLog.d(TAG, message != null ? message : "Message key not present or value is NULL.");
-        Log.d(TAG, data != null ? data.toString() : "Message key not present or value is NULL.");
+        Log.d(TAG, data.toString());
 
         String notificationType = getNotificationType(data);
 
