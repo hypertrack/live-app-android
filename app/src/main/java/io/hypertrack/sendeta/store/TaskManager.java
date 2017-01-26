@@ -35,11 +35,13 @@ import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.model.HTTask;
 import io.hypertrack.lib.common.util.HTLog;
+import io.hypertrack.lib.transmitter.model.HTTrip;
 import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
 import io.hypertrack.lib.transmitter.model.ServiceNotificationParamsBuilder;
 import io.hypertrack.lib.transmitter.model.TransmitterConstants;
 import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
 import io.hypertrack.lib.transmitter.model.callback.HTTaskStatusCallback;
+import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
 import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -357,6 +359,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                     callback.OnSuccess();
 
                 clearState();
+
+                // Call endTrip when Task was completed offline
+                // to end the service offline
+                endTrip();
             }
 
             @Override
@@ -364,6 +370,25 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 if (callback != null) {
                     callback.OnError();
                 }
+            }
+        });
+    }
+
+    public void endTrip() {
+        transmitter.endTrip(new HTTripStatusCallback() {
+            @Override
+            public void onSuccess(HTTrip trip) {
+                // do nothing
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                // do nothing
+            }
+
+            @Override
+            public void onOfflineSuccess() {
+                // do nothing
             }
         });
     }
