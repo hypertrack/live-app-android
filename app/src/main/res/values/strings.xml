@@ -13,8 +13,7 @@
     <string name="drawer_close">close</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_firstname">First Name</string>
-    <string name="prompt_lastname">Last Name</string>
+    <string name="prompt_name">Name</string>
 
     <string name="action_done">Done</string>
     <string name="action_save">Save</string>

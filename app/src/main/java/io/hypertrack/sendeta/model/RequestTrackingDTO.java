@@ -1,21 +1,21 @@
 package io.hypertrack.sendeta.model;
 
-import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HyperTrackLocation;
 
 /**
  * Created by piyush on 09/11/16.
  */
 public class RequestTrackingDTO {
 
-    private HTLocation location = null;
+    private HyperTrackLocation location = null;
     private String address = null;
     private String name = null;
 
-    public HTLocation getLocation() {
+    public HyperTrackLocation getLocation() {
         return location;
     }
 
-    public void setLocation(HTLocation location) {
+    public void setLocation(HyperTrackLocation location) {
         this.location = location;
     }
 
@@ -39,7 +39,7 @@ public class RequestTrackingDTO {
         this.address = address;
     }
 
-    public RequestTrackingDTO(HTLocation location, String address, String name) {
+    public RequestTrackingDTO(HyperTrackLocation location, String address, String name) {
         this.location = location;
         this.address = address;
         this.name = name;

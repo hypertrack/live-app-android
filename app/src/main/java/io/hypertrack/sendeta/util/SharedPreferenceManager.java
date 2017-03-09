@@ -10,13 +10,10 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.hypertrack.lib.internal.consumer.models.HTTask;
 
 import java.lang.reflect.Type;
 import java.util.Date;
-
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.transmitter.model.HTShift;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
@@ -238,67 +235,8 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static HTDriverVehicleType getLastSelectedVehicleType(Context context) {
-        String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
-        if (TextUtils.isEmpty(vehicleTypeString)) {
-            return HTDriverVehicleType.CAR;
-        }
-
-        if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.CAR.toString())) {
-            return HTDriverVehicleType.CAR;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.MOTORCYCLE.toString())) {
-            return HTDriverVehicleType.MOTORCYCLE;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.WALK.toString())) {
-            return HTDriverVehicleType.WALK;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.VAN.toString())) {
-            return HTDriverVehicleType.VAN;
-        }
-
-        return HTDriverVehicleType.CAR;
-    }
-
-    public static void setLastSelectedVehicleType(HTDriverVehicleType vehicleType) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
-        editor.apply();
-    }
-
-    public static HTShift getShift(Context context) {
-        String taskJson = getSharedPreferences().getString(CURRENT_SHIFT, null);
-        if (taskJson == null) {
-            return null;
-        }
-
-        try {
-            Gson gson = getGson();
-            Type type = new TypeToken<HTShift>() {
-            }.getType();
-
-            return gson.fromJson(taskJson, type);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-
-        return null;
-    }
-
-    public static void setShift(HTShift shift) {
-        SharedPreferences.Editor editor = getEditor();
-
-        Gson gson = getGson();
-        String taskJSON = gson.toJson(shift);
-
-        editor.putString(CURRENT_SHIFT, taskJSON);
-        editor.apply();
-    }
 
 
-    public static void deleteShift(Context context) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_SHIFT);
-        editor.apply();
-    }
 
     public static String getHyperTrackDriverID(Context context) {
         return getSharedPreferences().getString(CURRENT_HYPERTRACK_DRIVER_ID, null);

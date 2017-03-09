@@ -67,7 +67,7 @@ public class SplashScreen extends BaseActivity {
     private void proceedToNextScreen() {
         boolean isUserOnboard = UserStore.isUserLoggedIn();
         if (!isUserOnboard) {
-            Intent registerIntent = new Intent(this, Register.class);
+            Intent registerIntent = new Intent(this, CheckPermission.class);
             registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(registerIntent);
             finish();

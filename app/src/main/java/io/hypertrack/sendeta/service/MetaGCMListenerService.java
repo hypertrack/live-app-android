@@ -17,7 +17,7 @@ import com.google.android.gms.gcm.GcmListenerService;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
-import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HyperTrackLocation;
 import io.hypertrack.lib.common.model.HTPlace;
 import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.lib.transmitter.service.HTGcmListenerService;
@@ -216,7 +216,7 @@ public class MetaGCMListenerService extends GcmListenerService {
                 HTPlace updatedDestination = new Gson().fromJson(updatedDestinationJSON, HTPlace.class);
 
                 if (placeID != null && updatedDestination != null) {
-                    HTLocation location = updatedDestination.getLocation();
+                    HyperTrackLocation location = updatedDestination.getLocation();
 
                     if (location != null) {
                         double[] coordinates = location.getCoordinates();

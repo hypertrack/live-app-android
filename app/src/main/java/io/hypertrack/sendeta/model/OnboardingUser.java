@@ -1,9 +1,9 @@
 package io.hypertrack.sendeta.model;
 
-import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+import com.hypertrack.lib.internal.consumer.models.HTUser;
 
 import java.io.File;
 
@@ -13,31 +13,16 @@ import io.hypertrack.sendeta.util.SharedPreferenceManager;
 /**
  * Created by ulhas on 15/06/16.
  */
-public class OnboardingUser {
+public class OnboardingUser extends HTUser {
     private static String TAG = OnboardingManager.class.getSimpleName();
 
-    private Integer id;
     private String countryCode;
-    private String contactNumber;
-
-    @SerializedName("first_name")
-    private String firstName;
-
-    @SerializedName("last_name")
-    private String lastName;
-
-    @SerializedName("phone_number")
-    private String phoneNumber;
 
     private File photoImage;
-    private String token;
-
-    @SerializedName("photo")
-    private String photoURL;
 
     private boolean isExistingUser;
 
-    private OnboardingUser(){
+    private OnboardingUser() {
     }
 
     public static OnboardingUser onboardingUser;
@@ -69,25 +54,23 @@ public class OnboardingUser {
      * IMPORTANT: Call this method on every update to onBoardingUser data to get the changes
      * reflected in the SharedPreferences for future reference.
      */
-    public static void setOnboardingUser(){
+    public static void setOnboardingUser() {
         SharedPreferenceManager.setOnboardingUser(onboardingUser);
     }
 
     /**
      * Method to update OnboardingUser Data
      *
-     * @param user  User Object containing the updated OnboardingUser Data
+     * @param user User Object containing the updated OnboardingUser Data
      */
     public void update(OnboardingUser user) {
         this.setId(user.getId());
 
-        this.setFirstName(user.getFirstName());
-        this.setLastName(user.getLastName());
+        setName(user.getName());
 
-        this.setPhoneNumber(user.getPhoneNumber());
+        setPhone(user.getPhone());
 
         this.setPhotoImage(user.getPhotoImage());
-        this.setToken(user.getToken());
         this.setPhotoURL(user.getPhotoURL());
 
         this.setOnboardingUser();
@@ -102,13 +85,6 @@ public class OnboardingUser {
         // this.setContactNumber(user.getContactNumber());
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getCountryCode() {
         return countryCode;
@@ -118,13 +94,6 @@ public class OnboardingUser {
         this.countryCode = countryCode;
     }
 
-    public String getContactNumber() {
-        return contactNumber;
-    }
-
-    public void setContactNumber(String contactNumber) {
-        this.contactNumber = contactNumber;
-    }
 
     public File getPhotoImage() {
         return photoImage;
@@ -132,22 +101,6 @@ public class OnboardingUser {
 
     public void setPhotoImage(File photo) {
         this.photoImage = photo;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public String getPhotoURL() {
-        return photoURL;
-    }
-
-    public void setPhotoURL(String photoURL) {
-        this.photoURL = photoURL;
     }
 
     public boolean isExistingUser() {
@@ -161,45 +114,9 @@ public class OnboardingUser {
     public String getInternationalNumber() throws NumberParseException {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
 
-        Phonenumber.PhoneNumber number = phoneUtil.parse(getContactNumber(), getCountryCode());
+        Phonenumber.PhoneNumber number = phoneUtil.parse(getPhone(), getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
     }
 
-    public String getFirstName() {
-        return firstName;
-    }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    @Override
-    public String toString() {
-        return "OnboardingUser{" +
-                "id=" + id +
-                ", countryCode='" + countryCode + '\'' +
-                ", contactNumber='" + contactNumber + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", photoImage=" + photoImage +
-                ", token='" + token + '\'' +
-                ", photoURL='" + photoURL + '\'' +
-                '}';
-    }
 }

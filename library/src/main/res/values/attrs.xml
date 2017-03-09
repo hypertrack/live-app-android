@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HTCircleImageView">
+        <attr name="io_hypertrack_lib_consumer_circleimageview_border_width" format="dimension" />
+        <attr name="io_hypertrack_lib_consumer_circleimageview_border_color" format="color" />
+        <attr name="io_hypertrack_lib_consumer_circleimageview_border_overlay" format="boolean" />
+    </declare-styleable>
+</resources>

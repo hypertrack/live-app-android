@@ -47,6 +47,8 @@ public class EditProfile extends BaseActivity {
     private EasyImage.ImageSource imageUploadSource;
     private File updatedProfileImageFile;
 
+
+
     private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {

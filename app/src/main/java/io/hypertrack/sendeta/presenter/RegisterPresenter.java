@@ -32,7 +32,7 @@ public class RegisterPresenter implements IRegisterPresenter<RegisterView> {
     public void attemptRegistration(String number, String isoCode) {
 
         if(!TextUtils.isEmpty(number)) {
-            onboardingManager.getUser().setContactNumber(number);
+            onboardingManager.getUser().setPhone(number);
             onboardingManager.getUser().setCountryCode(isoCode);
             OnboardingUser.setOnboardingUser();
 

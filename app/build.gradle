@@ -84,10 +84,7 @@ android {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
-            buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
-            buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_35b9d87cba7ca206bcb7a06d5c94b24a58cdaac3"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_4d4fb6fd2e302602581a7bcebb62e8c4bce268d8"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "request_eta_base_url", "www.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.io"
@@ -101,10 +98,7 @@ android {
             applicationIdSuffix ".debug"
             resValue "string", "app_name", "Debug HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
-            buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
-            buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_c98f8d3026a97c4a130161240dd886616959d9e8"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_08a1da360efa582af25c255fa2b30675a16cdfa2"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
@@ -123,17 +117,7 @@ dependencies {
         transitive = true;
     }
 
-    debugCompile(project(path: ':consumer', configuration: 'debug')) {
-        transitive = true
-    }
-    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
-        transitive = true
-    }
-
-    releaseCompile('io.hypertrack:consumer:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
-    releaseCompile('io.hypertrack:transmitter:' + hypertrackSDKVersion + ':release@aar') {
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
 
@@ -150,6 +134,8 @@ dependencies {
     compile 'com.google.android.gms:play-services-places:10.0.1'
     compile 'com.google.android.gms:play-services-location:10.0.1'
     compile 'com.facebook.android:facebook-android-sdk:4.16.1'
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 }
 
 // Compute HyperTrack SDKVersion

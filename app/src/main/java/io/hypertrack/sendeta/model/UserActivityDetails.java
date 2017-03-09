@@ -1,8 +1,8 @@
 package io.hypertrack.sendeta.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.hypertrack.lib.internal.consumer.models.HTTask;
 
-import io.hypertrack.lib.common.model.HTTask;
 
 /**
  * Created by piyush on 02/09/16.

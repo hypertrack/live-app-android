@@ -22,6 +22,10 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.hypertrack.lib.internal.consumer.models.HTPlace;
+import com.hypertrack.lib.internal.consumer.models.HTTask;
+import com.hypertrack.lib.models.ServiceNotificationParams;
+import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,20 +33,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTLocation;
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.transmitter.model.HTTrip;
-import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
-import io.hypertrack.lib.transmitter.model.ServiceNotificationParamsBuilder;
-import io.hypertrack.lib.transmitter.model.TransmitterConstants;
-import io.hypertrack.lib.transmitter.model.callback.HTCompleteTaskStatusCallback;
-import io.hypertrack.lib.transmitter.model.callback.HTTaskStatusCallback;
-import io.hypertrack.lib.transmitter.model.callback.HTTripStatusCallback;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TaskETAResponse;
@@ -280,11 +270,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         this.selectedAccountId = selectedAccountId;
 
-        final HTLocation startLocation = new HTLocation(location.latitude, location.longitude);
+        final HyperTrackLocation startLocation = new HyperTrackLocation(location.latitude, location.longitude);
         this.startTaskOnServer(taskID, startLocation, vehicleType, callback);
     }
 
-    private void startTaskOnServer(final String taskID, final HTLocation startLocation, final HTDriverVehicleType vehicleType,
+    private void startTaskOnServer(final String taskID, final HyperTrackLocation startLocation, final HTDriverVehicleType vehicleType,
                                    final TaskManagerCallback callback) {
 
         this.vehicleType = vehicleType;

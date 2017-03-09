@@ -11,6 +11,7 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -45,9 +46,9 @@
             </intent-filter>
 
             <!-- Intent Filter to handle browsable deeplinks -->
-            <intent-filter
-                android:label="@string/filter_title_request_eta">
+            <intent-filter android:label="@string/filter_title_request_eta">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -60,9 +61,9 @@
                     android:pathPrefix="/request" />
             </intent-filter>
 
-            <intent-filter
-                android:label="@string/filter_title_request_eta">
+            <intent-filter android:label="@string/filter_title_request_eta">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
@@ -77,15 +78,17 @@
 
             <intent-filter android:label="@string/filter_title_track">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="@string/deeplink_scheme"/>
+                <data android:scheme="@string/deeplink_scheme" />
             </intent-filter>
 
             <!-- Intent Filter to handle FB Messenger messages -->
             <intent-filter>
-                <action android:name="android.intent.action.PICK"/>
+                <action android:name="android.intent.action.PICK" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
             </intent-filter>
@@ -99,17 +102,15 @@
 
         <activity
             android:name=".view.RequestETA"
-            android:screenOrientation="portrait"
-            android:parentActivityName=".view.Home" />
+            android:parentActivityName=".view.Home"
+            android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.Register"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateAlwaysVisible" />
+            android:name=".view.CheckPermission"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".view.Verify"
-            android:parentActivityName=".view.Register"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
 
@@ -160,7 +161,8 @@
             android:parentActivityName=".view.UserActivities"
             android:screenOrientation="portrait" />
 
-        <activity android:name=".view.ShiftsScreen"
+        <activity
+            android:name=".view.ShiftsScreen"
             android:parentActivityName=".view.SettingsScreen"
             android:screenOrientation="portrait" />
 

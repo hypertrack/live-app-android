@@ -51,7 +51,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.lib.common.model.HyperTrackLocation;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
@@ -362,7 +362,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
         RequestTrackingDTO request;
         if (currentLatLng != null && currentLatLng.longitude != 0.0 && currentLatLng.latitude != 0.0) {
-            request = new RequestTrackingDTO(new HTLocation(currentLatLng.latitude, currentLatLng.longitude),
+            request = new RequestTrackingDTO(new HyperTrackLocation(currentLatLng.latitude, currentLatLng.longitude),
                     fetchCurrentAddress(), destinationText.getText().toString());
         } else {
             request = new RequestTrackingDTO(fetchCurrentAddress());

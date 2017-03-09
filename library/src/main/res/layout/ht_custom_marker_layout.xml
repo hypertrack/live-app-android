@@ -1,0 +1,41 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="54dp"
+    android:layout_height="59dp">
+
+    <ImageView
+        android:id="@+id/eta_icon"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/ic_ht_destination_marker" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/eta_txt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/eta_txt_suffix"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/eta_txt"
+        android:layout_marginTop="-6dp"
+        android:layout_marginBottom="12dp"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:textColor="#ffffff"
+        android:textSize="12sp" />
+    </LinearLayout>
+</RelativeLayout>

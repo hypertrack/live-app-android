@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 
 import java.io.File;
 import java.util.HashMap;
@@ -11,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTLocation;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -108,8 +107,8 @@ public class UserStore {
         return realm.where(User.class).findAll().size() > 0;
     }
 
-    public void startTaskOnServer(final String taskID, final MetaPlace place, final int selectedAccountId,
-                                  final HTLocation startLocation, final HTDriverVehicleType vehicleType,
+    /*public void startTaskOnServer(final String taskID, final MetaPlace place, final int selectedAccountId,
+                                  final HyperTrackLocation startLocation, final HTDriverVehicleType vehicleType,
                                   final UserStoreGetTaskCallback callback) {
         if (this.user == null || place == null) {
             if (callback != null) {
@@ -162,7 +161,7 @@ public class UserStore {
                 }
             }
         });
-    }
+    }*/
 
     public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();

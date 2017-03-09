@@ -1,0 +1,115 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.hypertrack.lib">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION"
+        tools:ignore="MockLocation" />
+
+    <!-- Permissions required by Paho MQTT Client-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- REMOVE additional permissions required by other libraries-->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" tools:node="remove" />
+
+    <!--
+     Creates a custom permission so only this app can receive its messages.
+     NOTE: the permission *must* be called PACKAGE.permission.C2D_MESSAGE,
+           where PACKAGE is the application's package name.
+    -->
+    <permission
+        android:name="${applicationId}.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="${applicationId}.permission.C2D_MESSAGE" />
+
+    <!-- This app has permission to register and receive data message. -->
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <application>
+        <service android:name=".ActivityRecognitionService" />
+
+        <!-- Services -->
+        <service android:name="com.hypertrack.lib.HyperTrackService" />
+
+        <service
+            android:name="com.hypertrack.lib.BootReceiverService"
+            android:exported="false" />
+
+        <!-- Paho MQTT Service -->
+        <service android:name="org.eclipse.paho.android.service.MqttService" />
+
+        <!-- Gcm Service -->
+        <service
+            android:name=".RegistrationService"
+            android:exported="false" />
+
+        <!-- Called if InstanceID token is updated -->
+        <!-- This may occur if the security of the previous token had been compromised -->
+        <service
+            android:name="com.hypertrack.lib.GCMIIDListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.hypertrack.lib.FirebaseIIDListenerService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+            </intent-filter>
+        </service>
+
+        <service
+            android:name=".GeofenceTransitionService"
+            android:exported="false" />
+
+        <!-- Broadcast Receivers -->
+        <receiver
+            android:name="com.hypertrack.lib.HyperTrackReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
+                <action android:name="com.hypertrack.mqtt_connection_lost"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.location.PROVIDERS_CHANGED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.AIRPLANE_MODE"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+                <action android:name="android.intent.action.ACTION_SHUTDOWN"/>
+                <action android:name="android.intent.action.BATTERY_CHANGED"/>
+                <action android:name="android.intent.action.BATTERY_LOW"/>
+                <action android:name="android.intent.action.BATTERY_OKAY"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.os.action.DEVICE_IDLE_MODE_CHANGED"/>
+                <action android:name="android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED"/>
+                <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.LOCALE_CHANGED"/>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.TIMEZONE_CHANGED"/>
+                <action android:name="android.intent.action.DATE_CHANGED"/>
+                <action android:name="android.intent.action.TIME_SET"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".HyperTrackAlarmReceiver" />
+    </application>
+</manifest>

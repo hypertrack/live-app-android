@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- This will be automatically overridden if you use Google Services Gradle plugin -->
+    <!-- with google-services.json GCM configuration -->
+    <string name="gcm_defaultSenderId" translatable="false" />
+
+    <!-- This will be automatically overridden if you use Google Services Gradle plugin -->
+    <!-- with google-services.json FCM configuration -->
+    <string name="firebase_database_url" translatable="false" />
+</resources>

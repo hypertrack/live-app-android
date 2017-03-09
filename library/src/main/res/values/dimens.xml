@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="io_ht_lib_consumer_map_fragment_top_expanded_padding">160dp</dimen>
+    <dimen name="io_ht_lib_consumer_map_fragment_top_partial_expanded_padding">110dp</dimen>
+    <dimen name="io_ht_lib_consumer_map_fragment_bottom_expanded_padding">110dp</dimen>
+    <dimen name="io_ht_lib_consumer_map_fragment_default_top_bottom_padding">36dp</dimen>
+    <dimen name="io_ht_lib_consumer_map_fragment_default_padding">32dp</dimen>
+
+    <dimen name="io_ht_lib_consumer_map_fragment_no_side_padding">0dp</dimen>
+    <dimen name="io_ht_lib_consumer_map_fragment_bottom_medium_padding">48dp</dimen>
+</resources>

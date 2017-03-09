@@ -72,17 +72,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.hypertrack.lib.HyperTrack;
 
 import java.util.List;
 
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.common.util.HTTaskUtils;
-import io.hypertrack.lib.transmitter.model.TransmitterConstants;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
@@ -169,8 +162,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private Call<ResponseBody> sendGCMToServerCall;
-
-    private HTDriverVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -1029,6 +1020,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);

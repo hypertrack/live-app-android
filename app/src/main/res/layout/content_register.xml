@@ -13,6 +13,7 @@
     tools:context=".view.Register"
     tools:showIn="@layout/activity_register">
 
+
     <LinearLayout
         android:id="@+id/linearLayout"
         android:layout_width="match_parent"
@@ -72,7 +73,7 @@
                 android:textSize="@dimen/text_large"
                 android:textColorHint="@color/colorPrimaryDark" />
 
-            <requestFocus />
+
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
 
