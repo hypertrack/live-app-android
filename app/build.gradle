@@ -123,17 +123,11 @@ dependencies {
         transitive = true;
     }
 
-    debugCompile(project(path: ':consumer', configuration: 'debug')) {
-        transitive = true
-    }
-    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
+    debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
 
-    releaseCompile('io.hypertrack:consumer:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
-    releaseCompile('io.hypertrack:transmitter:' + hypertrackSDKVersion + ':release@aar') {
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
 
