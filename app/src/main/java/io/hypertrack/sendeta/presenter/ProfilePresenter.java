@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.google.i18n.phonenumbers.NumberParseException;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
@@ -62,18 +63,18 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             user.setPhotoImage(profileImage);
         }
         OnboardingUser.setOnboardingUser();
-        if (TextUtils.isEmpty(userName) && TextUtils.isEmpty(phone)) {
+       /* if (TextUtils.isEmpty(userName) && TextUtils.isEmpty(phone)) {
             if (view != null) {
                 view.navigateToHomeScreen();
                 return;
             }
-        }
+        }*/
 
         if (TextUtils.isEmpty(userName)) {
             HyperTrack.createUser(new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    HTUser user = (HTUser) successResponse.getResponseObject();
+                    User user = (User) successResponse.getResponseObject();
                     String userID = user.getId();
                     OnboardingUser onboardingUser = onboardingManager.getUser();
                     onboardingUser.setId(userID);
@@ -89,10 +90,55 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
-
+                    HTLog.i(TAG, "");
+                    if (view != null) {
+                        view.showErrorMessage();
+                    }
+                    AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
                 }
             });
-        } else {
+        } else if(!TextUtils.isEmpty(userName)&&!TextUtils.isEmpty(phone)) {
+            try {
+                HyperTrack.createUser(userName,user.getInternationalNumber(), new HyperTrackCallback() {
+                    @Override
+                    public void onSuccess(@NonNull SuccessResponse successResponse) {
+                        User user = (User) successResponse.getResponseObject();
+                        String userID = user.getId();
+                        OnboardingUser onboardingUser = onboardingManager.getUser();
+                        onboardingUser.setId(userID);
+                        OnboardingUser.setOnboardingUser();
+                        AnalyticsStore.getLogger().enteredName(true, null);
+                        AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
+                        AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+                        io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User( user.getName(), user.getPhone());
+                        onboardingManager.didOnboardUser(realmUser);
+                        if (view != null) {
+                            view.navigateToHomeScreen();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull ErrorResponse errorResponse) {
+                        HTLog.i(TAG, "");
+                        if (view != null) {
+                            view.showErrorMessage();
+                        }
+                        AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
+
+                    }
+                });
+            } catch (NumberParseException e) {
+                e.printStackTrace();
+                HTLog.i(TAG, "");
+                if (view != null) {
+                    view.showErrorMessage();
+                }
+                AnalyticsStore.getLogger().enteredName(false, ErrorMessages.INVALID_PHONE_NUMBER);
+            }
+
+
+        }
+        else {
             HyperTrack.createUser(userName, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {

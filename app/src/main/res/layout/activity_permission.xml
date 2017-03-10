@@ -3,6 +3,7 @@
     android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="@dimen/margin_high"
     android:background="@color/appBackground"
     android:orientation="vertical">
 
@@ -27,7 +28,7 @@
             android:id="@+id/hypertrack_logo"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/margin_low"
             android:src="@drawable/ic_ht_logo" />
 
         <TextView
