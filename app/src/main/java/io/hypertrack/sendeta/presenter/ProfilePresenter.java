@@ -8,7 +8,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.consumer.models.HTUser;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
@@ -83,7 +82,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     onboardingManager.didOnboardUser(realmUser);
 
                     if (view != null) {
-                        view.registrationSuccessful();
+                        view.navigateToHomeScreen();
 
                     }
                 }

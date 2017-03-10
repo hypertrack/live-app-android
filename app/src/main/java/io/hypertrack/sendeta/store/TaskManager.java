@@ -4,54 +4,39 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
-import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.common.models.ExpandedLocation;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
-
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
-import io.hypertrack.sendeta.network.retrofit.SendETAService;
-import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
 import io.hypertrack.sendeta.store.callback.TaskManagerCallback;
 import io.hypertrack.sendeta.store.callback.TaskManagerListener;
-import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.SplashScreen;
@@ -64,39 +49,31 @@ import retrofit2.Response;
  */
 public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
+    public static final int LOITERING_DELAY_MS = 30000;
     private static final String TAG = TaskManager.class.getSimpleName();
     private static final long REFRESH_DELAY = 30000;
-    public static final int LOITERING_DELAY_MS = 30000;
     private static final int NOTIFICATION_RESPONSIVENESS_MS = 5000;
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
-
-    private Context mContext;
+    private static TaskManager sharedManager;
     //private HTTransmitterService transmitter;
-
+    private Context mContext;
     private int selectedAccountId;
     private String hyperTrackTaskId;
     private Task hyperTrackTask;
-
     private String actionID;
     private Action action;
-
     private Place lastUpdatedDestination = null;
     private Place place;
     private HTUserVehicleType vehicleType = HTUserVehicleType.CAR;
-
     private GoogleApiClient mGoogleAPIClient;
     private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
-
     private TaskManagerListener taskRefreshedListener, taskCompletedListener;
     private BroadcastReceiver mDriverNotLiveBroadcastReceiver;
     private Handler handler;
 
-    private static TaskManager sharedManager;
-
-    private Action hyperTrackAction;
 
     private TaskManager(Context mContext) {
         this.mContext = mContext;
@@ -609,6 +586,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.taskCompletedListener = listener;
     }
 
+
     public Task getHyperTrackTask() {
         if (this.hyperTrackTask == null) {
             this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);
@@ -616,12 +594,18 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         return this.hyperTrackTask;
     }
+
     public Action getHyperTrackAction() {
-        if (this.hyperTrackAction == null) {
-            this.hyperTrackAction = SharedPreferenceManager.getAction(mContext);
+        if (this.action == null) {
+            this.action = SharedPreferenceManager.getAction(mContext);
         }
 
-        return this.hyperTrackAction;
+        return this.action;
+    }
+
+    public void setHyperTrackAction(Action action) {
+        this.action = action;
+        this.actionID = action.getId();
     }
 
     public String getHyperTrackTaskId() {
@@ -701,12 +685,12 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }*/
 
     private String getFormattedETA() {
-        if (this.hyperTrackAction == null || this.hyperTrackAction.getETA() == null) {
+        if (this.action == null || this.action.getETA() == null) {
             return null;
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
-        String formattedDate = dateFormat.format(this.hyperTrackAction.getETA());
+        String formattedDate = dateFormat.format(this.action.getETA());
 
         formattedDate = formattedDate.toLowerCase();
         formattedDate = formattedDate.replace("a", "A");
@@ -719,7 +703,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     public String getShareMessage() {
 
-        if (this.hyperTrackTask == null) {
+        if (this.action == null) {
             HTLog.e(TAG, "Task is null. Not able to get shareMessage");
             return null;
         }
