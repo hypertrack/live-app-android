@@ -587,20 +587,35 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (!NetworkUtils.isConnectedToInternet(this)) {
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
+
+        // Set HyperTrackCallback
+        setHyperTrackCallback();
+
+        // Check if there is any currently running task to be restored
+        restoreTaskStateIfNeeded();
+
+        // Handle RECEIVE_ETA DeepLink
+        Intent intent = getIntent();
+
+        // Check if there is no Active Task currently
+        if (!shouldRestoreTask && intent != null && intent.hasExtra(Constants.KEY_PUSH_TASK)) {
+            handlePushedTaskDeepLink = true;
+            selectPushedTaskMetaPlace = true;
+            handlePushedTaskIntent(intent);
+        }
+    }
+
+    private void setHyperTrackCallback() {
         HyperTrack.setCallback(new HyperTrackEventCallback() {
             @Override
             public void onEvent(@NonNull final HyperTrackEvent event) {
                 switch (event.getEventType()) {
-                    case HyperTrackEvent.EventType.TRACKING_STARTED_EVENT:
-                    case HyperTrackEvent.EventType.TRACKING_STOPPED_EVENT:
                     case HyperTrackEvent.EventType.STOP_ENDED_EVENT:
                         Home.this.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(Home.this, "Event logged: " + event.getEventType(),
-                                        Toast.LENGTH_SHORT).show();
                                 ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
-                                ArrayList<String> action = new ArrayList<String>();
+                                ArrayList<String> action = new ArrayList<>();
                                 action.add("Set Destination Address");
                                 ServiceNotificationParams notificationParams = builder
                                         .setSmallIcon(R.drawable.ic_ht_service_notification_small)
@@ -615,34 +630,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         });
                         break;
 
+                    // TODO: 10/03/17 Reset Notification once he shares tracking link or reaches a stop
                 }
             }
 
             @Override
             public void onError(@NonNull final ErrorResponse errorResponse) {
-                Home.this.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(Home.this, "Error occurred: " + errorResponse.getErrorMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
+                // do nothing
             }
         });
-
-        // Check if there is any currently running task to be restored
-        restoreTaskStateIfNeeded();
-
-        // Handle RECEIVE_ETA DeepLink
-        Intent intent = getIntent();
-
-        // Check if there is no Active Task currently
-        if (!shouldRestoreTask && intent != null && intent.hasExtra(Constants.KEY_PUSH_TASK)) {
-            handlePushedTaskDeepLink = true;
-            selectPushedTaskMetaPlace = true;
-            handlePushedTaskIntent(intent);
-        }
-
     }
 
     private void startGcmRegistration() {
