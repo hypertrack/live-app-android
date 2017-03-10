@@ -48,6 +48,15 @@ public class User extends RealmObject {
     @Expose(serialize = false, deserialize = false)
     private int selectedMembershipAccountId;
 
+    public User(){
+
+    }
+    public User( String firstName, String phoneNumber) {
+
+        this.firstName = firstName;
+        this.phoneNumber = phoneNumber;
+    }
+
     public Integer getId() {
         return id;
     }

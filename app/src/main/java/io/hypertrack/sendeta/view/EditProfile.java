@@ -10,27 +10,37 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.Country;
+import io.hypertrack.sendeta.model.CountryMaster;
+import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
+import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.SuccessErrorCallback;
+import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
@@ -41,19 +51,26 @@ public class EditProfile extends BaseActivity {
 
     private ProgressDialog mProgressDialog;
     private RoundedImageView mProfileImageView;
-    private AutoCompleteTextView mFirstNameView, mLastNameView;
+    private AutoCompleteTextView mNameView, mLastNameView;
 
     private Bitmap oldProfileImage = null, updatedProfileImage = null;
     private EasyImage.ImageSource imageUploadSource;
     private File updatedProfileImageFile;
 
+    private EditText phoneNumberView;
+    private TextView countryCodeTextView;
+    private Spinner countryCodeSpinner;
+    private LinearLayout countryCodeLayout;
+
+    private String isoCode;
+
+    private CountrySpinnerAdapter adapter;
 
 
     private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                mLastNameView.requestFocus();
                 return true;
             }
 
@@ -61,11 +78,11 @@ public class EditProfile extends BaseActivity {
         }
     };
 
-    private TextView.OnEditorActionListener mLastNameEditorActionListener = new TextView.OnEditorActionListener() {
+    private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                EditProfile.this.doneButtonClicked(null);
+                updateUserInfo();
                 return true;
             }
 
@@ -82,24 +99,70 @@ public class EditProfile extends BaseActivity {
         initToolbar("Profile");
 
         // Initialize UI Views
-        mFirstNameView = (AutoCompleteTextView) findViewById(R.id.profile_first_name);
-        mLastNameView = (AutoCompleteTextView) findViewById(R.id.profile_last_name);
+        mNameView = (AutoCompleteTextView) findViewById(R.id.profile_name);
+
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
 
         // Initialize UI Action Listeners
-        mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
-        mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
+        mNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
+        phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
+        countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
+        countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
+        countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
+        countryCodeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                countryCodeSpinner.performClick();
+            }
+        });
+        phoneNumberView.setOnEditorActionListener(mEditorActionListener);
+        // mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
 
         User user = UserStore.sharedStore.getUser();
         if (user != null) {
             oldProfileImage = user.getImageBitmap();
         }
 
+
         // Setup UI Views with User Data
         updateFirstName();
-        updateLastName();
+        //updateLastName();
         updateImage();
+        initCountryFlagSpinner();
     }
+
+    private void initCountryFlagSpinner() {
+        CountryMaster cm = CountryMaster.getInstance(this);
+        final ArrayList<Country> countries = cm.getCountries();
+
+        adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
+        countryCodeSpinner.setAdapter(adapter);
+
+        String isoCountryCode = PhoneUtils.getCountryRegionFromPhone(this);
+        Log.v(TAG, "Region ISO: " + isoCountryCode);
+
+        if (!TextUtils.isEmpty(isoCountryCode)) {
+            for (Country c : countries) {
+                if (c.mCountryIso.equalsIgnoreCase(isoCountryCode)) {
+                    countryCodeSpinner.setSelection(adapter.getPosition(c));
+                }
+            }
+        }
+
+        countryCodeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                isoCode = countries.get(position).mCountryIso;
+                countryCodeTextView.setText("+ " + countries.get(position).mDialPrefix);
+                countryCodeTextView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
 
     private void updateFirstName() {
         User user = UserStore.sharedStore.getUser();
@@ -112,7 +175,7 @@ public class EditProfile extends BaseActivity {
             return;
         }
 
-        mFirstNameView.setText(firstName);
+        mNameView.setText(firstName);
     }
 
     private void updateLastName() {
@@ -121,12 +184,12 @@ public class EditProfile extends BaseActivity {
             return;
         }
 
-        String lastName = user.getLastName();
+       /* String lastName = user.getLastName();
         if (lastName == null) {
             return;
         }
 
-        mLastNameView.setText(lastName);
+       // mLastNameView.setText(lastName);*/
     }
 
     private void updateImage() {
@@ -157,15 +220,15 @@ public class EditProfile extends BaseActivity {
     }
 
     public void doneButtonClicked(MenuItem menuItem) {
-        if (mFirstNameView.getText().length() == 0) {
-            mFirstNameView.setError("First Name cannot be blank");
+        if (mNameView.getText().length() == 0) {
+            mNameView.setError("First Name cannot be blank");
             return;
         }
 
-        if (mLastNameView.getText().length() == 0) {
+      /*  if (mLastNameView.getText().length() == 0) {
             mLastNameView.setError("Last Name cannot be blank");
             return;
-        }
+        }*/
 
         updateUserInfo();
     }
@@ -178,17 +241,22 @@ public class EditProfile extends BaseActivity {
             mProgressDialog.show();
         }
 
-        String firstName = mFirstNameView.getText().toString();
+        String firstName = mNameView.getText().toString();
         if (!TextUtils.isEmpty(firstName)) {
             firstName = firstName.trim();
         }
-
-        String lastName = mLastNameView.getText().toString();
+        OnboardingManager onboardingManager = OnboardingManager.sharedManager();
+        OnboardingUser user = onboardingManager.getUser();
+        user.setName(firstName);
+        if (!TextUtils.isEmpty(phoneNumberView.getText().toString()))
+            user.setPhone(phoneNumberView.getText().toString());
+        user.setOnboardingUser();
+      /*  String lastName = mLastNameView.getText().toString();
         if (!TextUtils.isEmpty(lastName)) {
             lastName = lastName.trim();
-        }
+        }*/
 
-        UserStore.sharedStore.updateInfo(firstName, lastName, new SuccessErrorCallback() {
+       /* UserStore.sharedStore.updateInfo(firstName, lastName, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
 
@@ -240,7 +308,7 @@ public class EditProfile extends BaseActivity {
                 mProgressDialog.dismiss();
                 Toast.makeText(EditProfile.this, R.string.profile_update_failed, Toast.LENGTH_SHORT).show();
             }
-        });
+        });*/
     }
 
     private void broadcastResultIntent() {
@@ -251,9 +319,9 @@ public class EditProfile extends BaseActivity {
     /**
      * Method to process uploaded User Profile Image to log Analytics Event
      *
-     * @param status            Flag to indicate status of FavoritePlace Deletion event
-     * @param errorMessage      ErrorMessage in case of Failure
-     * @param oldProfileImage   User's Existing Profile Image
+     * @param status          Flag to indicate status of FavoritePlace Deletion event
+     * @param errorMessage    ErrorMessage in case of Failure
+     * @param oldProfileImage User's Existing Profile Image
      */
     private void processImageDataForAnalytics(boolean status, String errorMessage, Bitmap oldProfileImage, EasyImage.ImageSource imageSource) {
 
@@ -320,7 +388,7 @@ public class EditProfile extends BaseActivity {
             case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     onProfileImageViewClicked(null);
-                }  else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                     PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
                             getString(R.string.read_external_storage_permission_never_allow));
                 }

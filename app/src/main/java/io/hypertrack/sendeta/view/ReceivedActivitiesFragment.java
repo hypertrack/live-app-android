@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.app.Activity;
@@ -44,9 +45,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+*/
 /**
  * Created by piyush on 29/08/16.
- */
+ *//*
+
 public class ReceivedActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
 
     private NestedScrollView mScrollView;
@@ -641,4 +644,4 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
             historyReceivedActivitiesCall.cancel();
         }
     }
-}
+}*/

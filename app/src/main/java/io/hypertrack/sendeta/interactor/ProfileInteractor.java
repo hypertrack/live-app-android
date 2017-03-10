@@ -13,7 +13,7 @@ public class ProfileInteractor {
 
     private static final String TAG = ProfileInteractor.class.getSimpleName();
 
-     public void updateUserProfile(final OnProfileUpdateCallback onProfileUpdateCallback) {
+    /* public void updateUserProfile(final OnProfileUpdateCallback onProfileUpdateCallback) {
 
          OnboardingManager.sharedManager().updateInfo(new OnOnboardingCallback() {
              @Override
@@ -55,8 +55,8 @@ public class ProfileInteractor {
                 }
             }
         });
-    }
-    public void registerPhoneNumber(final OnRegisterCallback onRegisterCallback) {
+    }*/
+   /* public void registerPhoneNumber(final OnRegisterCallback onRegisterCallback) {
         OnboardingManager.sharedManager().onboardUser(new OnOnboardingCallback() {
             @Override
             public void onSuccess() {
@@ -68,5 +68,5 @@ public class ProfileInteractor {
                 onRegisterCallback.OnError();
             }
         });
-    }
+    }*/
 }

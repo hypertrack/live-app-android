@@ -28,6 +28,7 @@ import com.hypertrack.lib.internal.common.models.ExpandedLocation;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
@@ -42,6 +43,8 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.TaskETAResponse;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
@@ -74,9 +77,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private int selectedAccountId;
     private String hyperTrackTaskId;
     private Task hyperTrackTask;
+
+    private String actionID;
+    private Action action;
+
     private Place lastUpdatedDestination = null;
-    private MetaPlace place;
-  //  private HTUserVehicleType vehicleType = HTUserVehicleType.CAR;
+    private Place place;
+    private HTUserVehicleType vehicleType = HTUserVehicleType.CAR;
 
     private GoogleApiClient mGoogleAPIClient;
     private GeofencingRequest geofencingRequest;
@@ -88,6 +95,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private Handler handler;
 
     private static TaskManager sharedManager;
+
+    private Action hyperTrackAction;
 
     private TaskManager(Context mContext) {
         this.mContext = mContext;
@@ -106,7 +115,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     // Method to initialize TaskManager instance
     private void initializeTaskManager() {
-        this.setupGoogleAPIClient();
+      //  this.setupGoogleAPIClient();
         this.setServiceNotification();
     }
 
@@ -137,12 +146,18 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private void getSavedTaskData() {
         this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);
         this.hyperTrackTaskId = SharedPreferenceManager.getTaskID(mContext);
-        this.place = SharedPreferenceManager.getPlace();
+      //  this.place = SharedPreferenceManager.getPlace();
     }
 
-    public boolean shouldRestoreState() {
-       /* if (transmitter == null)
-            transmitter = HTTransmitterService.getInstance(mContext);*/
+    private void getSavedActionData(){
+        this.action = SharedPreferenceManager.getAction(mContext);
+        this.actionID = SharedPreferenceManager.getActionID(mContext);
+        this.place = SharedPreferenceManager.getActionPlace();
+    }
+
+  /*  public boolean shouldRestoreState() {
+       *//* if (transmitter == null)
+            transmitter = HTTransmitterService.getInstance(mContext);*//*
 
         // Restore the current task with locally cached data
         this.getSavedTaskData();
@@ -159,7 +174,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         completeTask(null);
         return false;
-    }
+    }*/
 
   /*  final Runnable refreshTask = new Runnable() {
         @Override
@@ -235,13 +250,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         return isTaskLive(this.getHyperTrackTask());
     }
 
-    public void getETA(LatLng origin, LatLng destination, final TaskETACallback callback) {
+    public void getETA(LatLng origin, LatLng destination,String vehicleType, final TaskETACallback callback) {
         String originQueryParam = origin.latitude + "," + origin.longitude;
         String destinationQueryParam = destination.latitude + "," + destination.longitude;
 
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
+        HyperTrackService sendETAService = HyperTrackServiceGenerator.createService(HyperTrackService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<List<TaskETAResponse>> call = sendETAService.getTaskETA(originQueryParam, destinationQueryParam, HTUserVehicleType.CAR.toString());
+        Call<List<TaskETAResponse>> call = sendETAService.getTaskETA(originQueryParam, destinationQueryParam, vehicleType);
         call.enqueue(new Callback<List<TaskETAResponse>>() {
             @Override
             public void onResponse(Call<List<TaskETAResponse>> call, Response<List<TaskETAResponse>> response) {
@@ -267,7 +282,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    public void startTask(final String taskID, LatLng location, int selectedAccountId, HTUserVehicleType vehicleType,
+   /* public void startTask(final String taskID, LatLng location, int selectedAccountId, HTUserVehicleType vehicleType,
                           final TaskManagerCallback callback) {
         if (this.place == null || selectedAccountId <= 0) {
             callback.OnError();
@@ -323,7 +338,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                         callback.OnError();
                     }
                 });
-    }
+    }*/
 
     public void completeTask(final TaskManagerCallback callback) {
         if (TextUtils.isEmpty(this.getHyperTrackTaskId())) {
@@ -341,7 +356,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             return;
         }
 
-        transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
+       /* transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
             @Override
             public void onSuccess(String s) {
                 if (callback != null)
@@ -368,10 +383,12 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                     callback.OnError();
                 }
             }
-        });
+        });*/
     }
 
-    public void endTrip() {
+
+
+   /* public void endTrip() {
         transmitter.endTrip(new HTTripStatusCallback() {
             @Override
             public void onSuccess(HTTrip trip) {
@@ -389,19 +406,19 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             }
         });
     }
-
+*/
     /**
      * Call this method once the task has been completed successfully on the SDK.
      */
     public void clearState() {
         HTLog.i(TAG, "Calling clearState to reset SendETA task state");
         this.vehicleType = HTUserVehicleType.CAR;
-        this.stopRefreshingTask();
+       // this.stopRefreshingTask();
         this.stopGeofencing();
         this.clearListeners();
         this.clearPlace();
         this.clearTask();
-        this.unregisterForDriverNotLiveBroadcast();
+       // this.unregisterForDriverNotLiveBroadcast();
         // Remove GeoFencingRequest from SharedPreferences
         SharedPreferenceManager.removeGeofencingRequest();
     }
@@ -412,22 +429,22 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     // Start Task with a default delay of REFRESH_DELAY
-    private void onTaskStart() {
+  /*  private void onTaskStart() {
         onTaskStart(REFRESH_DELAY);
     }
-
-    private void onTaskStart(final long delay) {
-        this.setupGeofencing();
-        this.startRefreshingTask(delay);
+*/
+  /*  private void onTaskStart(final long delay) {
+      //  this.setupGeofencing();
+        this.startRefreshingTask();
         this.registerForDriverNotLiveBroadcast();
-    }
+    }*/
 
     // Refresh Task with a default delay of REFRESH_DELAY
-    public void startRefreshingTask() {
-        startRefreshingTask(REFRESH_DELAY);
-    }
+   /* public void startRefreshingTask() {
+        startRefreshingTask();
+    }*/
 
-    public void startRefreshingTask(final long delay) {
+   /* public void startRefreshingTask(final long delay) {
         if (handler == null) {
             handler = new Handler();
         } else {
@@ -437,13 +454,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         handler.postDelayed(refreshTask, delay);
     }
-
-    public void stopRefreshingTask() {
+*/
+    /*public void stopRefreshingTask() {
         if (this.handler != null) {
             this.handler.removeCallbacksAndMessages(refreshTask);
             this.handler = null;
         }
-    }
+    }*/
 
     private void stopGeofencing() {
         if (this.mGeofencePendingIntent != null) {
@@ -456,7 +473,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.geofencingRequest = request;
     }
 
-    public void setupGeofencing() {
+    /*public void setupGeofencing() {
         try {
             geofencingRequest = this.getGeofencingRequest();
 
@@ -472,7 +489,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             HTLog.e(TAG, "Exception while adding geofence request");
         }
     }
-
+*/
     public void addGeofencingRequest() {
         if (geofencingRequest == null) {
             HTLog.e(TAG, "Error while adding geofence request: geofencingRequest is null");
@@ -541,7 +558,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-    private GeofencingRequest getGeofencingRequest() {
+   /* private GeofencingRequest getGeofencingRequest() {
 
         if (this.place == null || this.place.getLatitude() == null || this.place.getLongitude() == null) {
             HTLog.e(TAG, "Adding Geofence failed: Either place or Lat,Lng is null");
@@ -567,16 +584,17 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_DWELL);
         builder.addGeofences(geoFenceList);
         return builder.build();
-    }
+    }*/
 
-    public MetaPlace getPlace() {
+    public Place getPlace() {
         return place;
     }
 
-    public void setPlace(MetaPlace place) {
+    public void setPlace(Place place) {
         this.place = place;
         this.savePlace();
     }
+
 
     private void clearPlace() {
         this.deletePlace();
@@ -597,6 +615,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         return this.hyperTrackTask;
+    }
+    public Action getHyperTrackAction() {
+        if (this.hyperTrackAction == null) {
+            this.hyperTrackAction = SharedPreferenceManager.getAction(mContext);
+        }
+
+        return this.hyperTrackAction;
     }
 
     public String getHyperTrackTaskId() {
@@ -647,54 +672,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.hyperTrackTaskId = null;
     }
 
-    private boolean setTask(final Map<String, Object> taskData) {
-        if (taskData == null) {
-            HTLog.e(TAG, "SendETA Error occurred while setTask: taskData is null");
-            return false;
-        }
-
-        try {
-            String taskID = (String) taskData.get("id");
-
-            // Set started TaskID
-            SharedPreferenceManager.setTaskID(taskID);
-
-            String status = (String) taskData.get("status");
-            String action = (String) taskData.get("action");
-            String trackingURL = (String) taskData.get("tracking_url");
-            String encodedPolyline = (String) taskData.get("encoded_polyline");
-
-            Date ETA = null;
-            try {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                if (taskData.get("eta") != null) {
-                    ETA = simpleDateFormat.parse((String) taskData.get("eta"));
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                Crashlytics.logException(e);
-            }
-
-            Task taskToSave = new Task(taskID, status, action, ETA, trackingURL, vehicleType,
-                    encodedPolyline, null);
-            taskToSave.setDriverID((String) taskData.get("hypertrack_driver_id"));
-
-            SharedPreferenceManager.setTask(taskToSave);
-            this.hyperTrackTask = taskToSave;
-
-            Log.d(TAG, "Task started: " + taskToSave);
-            return true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-        return false;
-    }
 
 
-    private void registerForDriverNotLiveBroadcast() {
+
+   /* private void registerForDriverNotLiveBroadcast() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(TransmitterConstants.HT_ON_DRIVER_NOT_ACTIVE_INTENT);
 
@@ -717,15 +698,15 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mDriverNotLiveBroadcastReceiver);
             this.mDriverNotLiveBroadcastReceiver = null;
         }
-    }
+    }*/
 
     private String getFormattedETA() {
-        if (this.hyperTrackTask == null || this.hyperTrackTask.getETA() == null) {
+        if (this.hyperTrackAction == null || this.hyperTrackAction.getETA() == null) {
             return null;
         }
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("h:mm a");
-        String formattedDate = dateFormat.format(this.hyperTrackTask.getETA());
+        String formattedDate = dateFormat.format(this.hyperTrackAction.getETA());
 
         formattedDate = formattedDate.toLowerCase();
         formattedDate = formattedDate.replace("a", "A");
@@ -746,7 +727,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         StringBuilder builder = new StringBuilder("I'm on my way. ");
 
         String formattedETA = this.getFormattedETA();
-        String shareURL = this.hyperTrackTask.getTrackingURL();
+        String shareURL = this.action.getTrackingURL();
 
         // Add ETA in ShareMessage if ETA is not null
         if (formattedETA != null) {

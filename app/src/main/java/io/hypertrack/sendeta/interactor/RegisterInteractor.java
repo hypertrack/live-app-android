@@ -7,7 +7,7 @@ import io.hypertrack.sendeta.store.OnboardingManager;
 public class RegisterInteractor {
 
     public void registerPhoneNumber(final OnRegisterCallback onRegisterCallback) {
-        OnboardingManager.sharedManager().onboardUser(new OnOnboardingCallback() {
+       /* OnboardingManager.sharedManager().onboardUser(new OnOnboardingCallback() {
             @Override
             public void onSuccess() {
                 onRegisterCallback.OnSuccess();
@@ -17,6 +17,6 @@ public class RegisterInteractor {
             public void onError() {
                 onRegisterCallback.OnError();
             }
-        });
+        });*/
     }
 }

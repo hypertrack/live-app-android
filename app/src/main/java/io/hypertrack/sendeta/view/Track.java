@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.content.BroadcastReceiver;
@@ -42,9 +43,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+*/
 /**
  * Created by piyush on 27/08/16.
- */
+ *//*
+
 public class Track extends BaseActivity {
 
     public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
@@ -361,3 +364,4 @@ public class Track extends BaseActivity {
         super.onBackPressed();
     }
 }
+*/

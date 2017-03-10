@@ -48,6 +48,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 
 import java.util.List;
 
@@ -362,7 +364,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
         RequestTrackingDTO request;
         if (currentLatLng != null && currentLatLng.longitude != 0.0 && currentLatLng.latitude != 0.0) {
-            request = new RequestTrackingDTO(new HyperTrackLocation(currentLatLng.latitude, currentLatLng.longitude),
+            request = new RequestTrackingDTO(new GeoJSONLocation(currentLatLng.latitude, currentLatLng.longitude),
                     fetchCurrentAddress(), destinationText.getText().toString());
         } else {
             request = new RequestTrackingDTO(fetchCurrentAddress());

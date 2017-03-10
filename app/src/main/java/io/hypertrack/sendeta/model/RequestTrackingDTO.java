@@ -1,6 +1,7 @@
 package io.hypertrack.sendeta.model;
 
 
+import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 
 /**
@@ -8,17 +9,11 @@ import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
  */
 public class RequestTrackingDTO {
 
-    private HyperTrackLocation location = null;
+    private GeoJSONLocation location = null;
     private String address = null;
     private String name = null;
 
-    public HyperTrackLocation getLocation() {
-        return location;
-    }
 
-    public void setLocation(HyperTrackLocation location) {
-        this.location = location;
-    }
 
     public String getAddress() {
         return address;
@@ -40,7 +35,15 @@ public class RequestTrackingDTO {
         this.address = address;
     }
 
-    public RequestTrackingDTO(HyperTrackLocation location, String address, String name) {
+    public GeoJSONLocation getLocation() {
+        return location;
+    }
+
+    public void setLocation(GeoJSONLocation location) {
+        this.location = location;
+    }
+
+    public RequestTrackingDTO(GeoJSONLocation location, String address, String name) {
         this.location = location;
         this.address = address;
         this.name = name;

@@ -63,11 +63,11 @@ public class DrawerBaseActivity extends BaseActivity {
                                     break;
                                 }
 
-                                case R.id.drawer_user_activities: {
+                               /* case R.id.drawer_user_activities: {
                                     Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
                                     startActivity(activitiesIntent);
                                     break;
-                                }
+                                }*/
 
                                 case R.id.drawer_settings: {
                                     AnalyticsStore.getLogger().tappedProfile();

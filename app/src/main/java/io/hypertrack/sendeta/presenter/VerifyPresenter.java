@@ -20,7 +20,7 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
         this.view = view;
         verificationInteractor = new VerificationInteractor();
 
-        this.view.updateHeaderText(OnboardingManager.sharedManager().getUser().getPhoneNumber());
+        this.view.updateHeaderText(OnboardingManager.sharedManager().getUser().getPhone());
     }
 
     @Override

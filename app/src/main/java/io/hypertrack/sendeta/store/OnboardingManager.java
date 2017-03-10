@@ -243,7 +243,7 @@ public class OnboardingManager {
 
     }
 
-    private void didOnbardUser(User user) {
+    public void didOnboardUser(User user) {
         UserStore.sharedStore.addUser(user);
     }
 

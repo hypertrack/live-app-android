@@ -49,4 +49,14 @@
         android:textColor="@android:color/white"
         android:textSize="18dp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/lets_go"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginRight="@dimen/margin_high"
+        android:gravity="center"
+        android:text="@string/location_permission_detail"
+        android:textSize="@dimen/text_medium" />
+
 </RelativeLayout>

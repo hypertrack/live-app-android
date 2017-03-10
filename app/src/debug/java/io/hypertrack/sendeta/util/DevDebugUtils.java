@@ -21,6 +21,7 @@ public class DevDebugUtils {
     }
 
     public static void setHTLogLevel(int logLevel) {
-        HyperTrack.setLogLevel(logLevel);
+
+        HyperTrack.enableDebugLogging(logLevel);
     }
 }

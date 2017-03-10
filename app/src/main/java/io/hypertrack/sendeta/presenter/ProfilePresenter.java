@@ -10,11 +10,11 @@ import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.consumer.models.HTUser;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
+import com.hypertrack.lib.models.User;
 
 import java.io.File;
 
 import io.hypertrack.sendeta.interactor.ProfileInteractor;
-import io.hypertrack.sendeta.interactor.callback.OnRegisterCallback;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
@@ -47,7 +47,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void attemptLogin(String userName, String phone, String ISOCode, final File profileImage,
+    public void attemptLogin(final String userName, String phone, String ISOCode, final File profileImage,
                              final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
 
 
@@ -78,6 +78,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     OnboardingUser onboardingUser = onboardingManager.getUser();
                     onboardingUser.setId(userID);
                     OnboardingUser.setOnboardingUser();
+                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User( user.getName(), user.getPhone());
+                    onboardingManager.didOnboardUser(realmUser);
+
                     if (view != null) {
                         view.registrationSuccessful();
 
@@ -93,7 +96,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             HyperTrack.createUser(userName, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    HTUser user = (HTUser) successResponse.getResponseObject();
+                    User user = (User) successResponse.getResponseObject();
                     String userID = user.getId();
                     OnboardingUser onboardingUser = onboardingManager.getUser();
                     onboardingUser.setId(userID);
@@ -101,6 +104,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     AnalyticsStore.getLogger().enteredName(true, null);
                     AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User( user.getName(), user.getPhone());
+                    onboardingManager.didOnboardUser(realmUser);
                     if (view != null) {
                         view.navigateToHomeScreen();
                     }
@@ -120,6 +125,11 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
+    public void attemptRegistration(String number, String ISOCode) {
+
+    }
+
+   /* @Override
     public void attemptRegistration(String number, String ISOCode) {
         if (!TextUtils.isEmpty(number)) {
             onboardingManager.getUser().setPhone(number);
@@ -147,6 +157,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         } else {
             AnalyticsStore.getLogger().enteredPhoneNumber(false, ErrorMessages.INVALID_PHONE_NUMBER);
         }
-    }
+    }*/
 }
 

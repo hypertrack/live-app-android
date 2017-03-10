@@ -11,6 +11,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.models.Place;
 
 
 import java.lang.reflect.Type;
@@ -29,8 +31,10 @@ public class SharedPreferenceManager {
     private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
+    private static final String CURRENT_ACTION_PLACE = "io.hypertrack.meta:CurrentActionPlace";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
     private static final String CURRENT_TASK_ID = "io.hypertrack.meta:CurrentTaskID";
+    
     private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
     private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
     private static final String CURRENT_HYPERTRACK_DRIVER_ID = "io.hypertrack.meta:HyperTrackDriverID";
@@ -38,6 +42,9 @@ public class SharedPreferenceManager {
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
     private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
+
+    private static final String CURRENT_ACTION = "io.hypertrack.meta:CurrentAction";
+    private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -81,6 +88,20 @@ public class SharedPreferenceManager {
         return gson.fromJson(placeJson, type);
     }
 
+    public static Place getActionPlace() {
+        String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
+        if (placeJson == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Place>() {
+        }.getType();
+
+        return gson.fromJson(placeJson, type);
+    }
+
+
     public static String getGCMToken() {
         return getSharedPreferences().getString(GCM_TOKEN, "");
     }
@@ -98,7 +119,7 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void setPlace(MetaPlace place) {
+    public static void setPlace(Place place) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
@@ -124,6 +145,22 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
+    public static String getActionID(Context context) {
+        return getSharedPreferences().getString(CURRENT_ACTION_ID, null);
+    }
+
+    public static void setActionID(String actionID) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(CURRENT_ACTION_ID, actionID);
+        editor.apply();
+    }
+
+    public static void deleteActionID() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_ACTION_ID);
+        editor.apply();
+    }
+
     public static Task getTask(Context context) {
         String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
         if (taskJson == null) {
@@ -143,6 +180,39 @@ public class SharedPreferenceManager {
 
         return null;
     }
+    public static Action getAction(Context context){
+        String actionJson = getSharedPreferences().getString(CURRENT_ACTION,null);
+        if(actionJson == null)
+            return null;
+        try{
+            Gson gson = getGson();
+            Type type = new TypeToken<Action>(){
+            }.getType();
+            
+            return gson.fromJson(actionJson,type);
+        }catch (Exception e){
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
+        return null;
+    }
+
+    public static void setAction(Action action) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = getGson();
+        String actionJSON = gson.toJson(action);
+
+        editor.putString(CURRENT_ACTION, actionJSON);
+        editor.apply();
+    }
+
+    public static void deleteAction() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_ACTION);
+        editor.apply();
+    }
+
 
     public static void setTask(Task task) {
         SharedPreferences.Editor editor = getEditor();
@@ -160,7 +230,8 @@ public class SharedPreferenceManager {
         editor.remove(CURRENT_TASK);
         editor.apply();
     }
-
+    
+   
     public static OnboardingUser getOnboardingUser() {
         String userJSON = getSharedPreferences().getString(ONBOARDED_USER, null);
 

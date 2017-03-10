@@ -84,7 +84,7 @@ android {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "HYPERTRACK_PK", '"pk_4d4fb6fd2e302602581a7bcebb62e8c4bce268d8"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
@@ -100,7 +100,7 @@ android {
             applicationIdSuffix ".debug"
             resValue "string", "app_name", "Debug HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "HYPERTRACK_PK", '"pk_08a1da360efa582af25c255fa2b30675a16cdfa2"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
@@ -139,9 +139,9 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.3.2'
-    compile 'com.google.android.gms:play-services-gcm:10.0.1'
-    compile 'com.google.android.gms:play-services-places:10.0.1'
-    compile 'com.google.android.gms:play-services-location:10.0.1'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-places:10.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
     compile 'com.facebook.android:facebook-android-sdk:4.16.1'
     compile 'com.jakewharton:butterknife:8.5.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'

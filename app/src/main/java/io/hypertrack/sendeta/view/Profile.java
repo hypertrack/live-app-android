@@ -90,10 +90,10 @@ public class Profile extends BaseActivity implements ProfileView {
         setContentView(R.layout.activity_profile);
 
         // Initialize Toolbar
-        initToolbar(getString(R.string.title_activity_signup_profile));
+        initToolbar(getString(R.string.title_activity_signup_profile),false);
 
         // Initialize UI Views before Attaching View Presenter
-        mNameView = (AutoCompleteTextView) findViewById(R.id.profile_name);
+        mNameView = (EditText) findViewById(R.id.profile_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
         profileParentLayout = (LinearLayout) findViewById(R.id.profile_parent_layout);
