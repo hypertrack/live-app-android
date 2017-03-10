@@ -117,7 +117,8 @@ public class UserStore {
         }
 
         // Configure UserId for v3 HyperTrack SDK
-        HyperTrack.setUserId(hyperTrackDriverID);
+        if (TextUtils.isEmpty(HyperTrack.getUserId()))
+            HyperTrack.setUserId(hyperTrackDriverID);
 
         Realm realm = Realm.getDefaultInstance();
         return realm.where(User.class).findAll().size() > 0;
