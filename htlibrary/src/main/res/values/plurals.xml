@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <plurals
-        name="io_hypertrack_lib_consumer_eta">
-        <!--<item quantity="zero">Nearly there</item>-->
-        <item quantity="one">MIN</item>
-        <item quantity="other">MINS</item>
-    </plurals>
-</resources>
