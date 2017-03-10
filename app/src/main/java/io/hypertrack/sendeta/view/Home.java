@@ -544,7 +544,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         UserStore.sharedStore.initializeUser();
 
         // Start GCM Registration
-        startGcmRegistration();
+//        startGcmRegistration();
 
         // Initialize Toolbar without Home Button
         initToolbar(getResources().getString(R.string.toolbar_title), false);
@@ -1648,6 +1648,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void requestLocationUpdates() {
+        // HACK: Check if user is tracking currently or not
+        if (!HyperTrack.isTracking())
+            HyperTrack.startTracking();
+
         startLocationPolling();
     }
 
@@ -2064,7 +2068,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         // LocalBroadcastManager.getInstance(this).unregisterReceiver(driverCurrentLocationReceiver);
 
-        registerGCMReceiver(false);
+//        registerGCMReceiver(false);
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
@@ -2102,8 +2106,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
        /* LocalBroadcastManager.getInstance(this).registerReceiver(driverCurrentLocationReceiver,
                 new IntentFilter(TransmitterConstants.HT_DRIVER_CURRENT_LOCATION_INTENT));*/
 
-        if (!mRegistrationBroadcastReceived)
-            registerGCMReceiver(true);
+//        if (!mRegistrationBroadcastReceived)
+//            registerGCMReceiver(true);
 
         AppEventsLogger.activateApp(getApplication());
     }
