@@ -10,13 +10,15 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.hypertrack.lib.internal.consumer.models.HTTask;
+import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+
 
 import java.lang.reflect.Type;
 import java.util.Date;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.model.Task;
 
 /**
  * Created by suhas on 25/02/16.
@@ -122,7 +124,7 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static HTTask getTask(Context context) {
+    public static Task getTask(Context context) {
         String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
         if (taskJson == null) {
             return null;
@@ -130,7 +132,7 @@ public class SharedPreferenceManager {
 
         try {
             Gson gson = getGson();
-            Type type = new TypeToken<HTTask>() {
+            Type type = new TypeToken<Task>() {
             }.getType();
 
             return gson.fromJson(taskJson, type);
@@ -142,7 +144,7 @@ public class SharedPreferenceManager {
         return null;
     }
 
-    public static void setTask(HTTask task) {
+    public static void setTask(Task task) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = getGson();
@@ -232,6 +234,31 @@ public class SharedPreferenceManager {
     public static void removeGeofencingRequest() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(GEOFENCING_REQUEST);
+        editor.apply();
+    }
+    
+    public static HTUserVehicleType getLastSelectedVehicleType(Context context) {
+        String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
+        if (TextUtils.isEmpty(vehicleTypeString)) {
+            return HTUserVehicleType.CAR;
+        }
+
+        if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.CAR.toString())) {
+            return HTUserVehicleType.CAR;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.MOTORCYCLE.toString())) {
+            return HTUserVehicleType.MOTORCYCLE;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.WALK.toString())) {
+            return HTUserVehicleType.WALK;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.VAN.toString())) {
+            return HTUserVehicleType.VAN;
+        }
+
+        return HTUserVehicleType.CAR;
+    }
+
+    public static void setLastSelectedVehicleType(HTUserVehicleType vehicleType) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
         editor.apply();
     }
 

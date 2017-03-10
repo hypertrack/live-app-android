@@ -1,10 +1,16 @@
 package io.hypertrack.sendeta.network.retrofit;
 
-import io.hypertrack.lib.common.model.HTTask;
+
+import java.util.List;
+
 import io.hypertrack.sendeta.model.CreateTaskDTO;
+import io.hypertrack.sendeta.model.Task;
+import io.hypertrack.sendeta.model.TaskETAResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 /**
  * Created by piyush on 22/10/16.
@@ -12,5 +18,8 @@ import retrofit2.http.POST;
 public interface HyperTrackService {
 
     @POST("tasks/")
-    Call<HTTask> createTask(@Body CreateTaskDTO createTaskDTO);
+    Call<Task> createTask(@Body CreateTaskDTO createTaskDTO);
+
+    @GET("/api/v1/eta/")
+    Call<List<TaskETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
 }

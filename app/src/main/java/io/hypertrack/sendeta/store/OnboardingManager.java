@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.hypertrack.lib.internal.consumer.models.HTUser;
-import com.hypertrack.lib.models.HyperTrackUser;
+
 
 import java.io.File;
 import java.util.HashMap;

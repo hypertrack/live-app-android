@@ -7,6 +7,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
+import com.hypertrack.lib.internal.common.util.DateTimeUtility;
 
 import java.lang.reflect.Type;
 import java.text.DateFormat;
@@ -16,7 +17,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import io.hypertrack.lib.common.util.DateTimeUtility;
+
 
 /**
  * Created by piyush on 30/08/16.

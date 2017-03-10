@@ -51,7 +51,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-import io.hypertrack.lib.common.model.HyperTrackLocation;
+
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;

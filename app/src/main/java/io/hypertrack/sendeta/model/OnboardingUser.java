@@ -20,6 +20,8 @@ public class OnboardingUser extends HTUser {
 
     private File photoImage;
 
+    private String actionID;
+
     private boolean isExistingUser;
 
     private OnboardingUser() {
@@ -48,6 +50,14 @@ public class OnboardingUser extends HTUser {
         }
 
         return onboardingUser;
+    }
+
+    public String getActionID() {
+        return actionID;
+    }
+
+    public void setActionID(String actionID) {
+        this.actionID = actionID;
     }
 
     /**

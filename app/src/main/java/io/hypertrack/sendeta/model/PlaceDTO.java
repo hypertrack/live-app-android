@@ -1,5 +1,8 @@
 package io.hypertrack.sendeta.model;
 
+import android.location.*;
+import android.location.Location;
+
 import com.google.gson.annotations.SerializedName;
 import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
@@ -66,7 +69,9 @@ public class PlaceDTO {
         this.address = place.getAddress();
         this.googlePlacesID = place.getGooglePlacesID();
         this.name = place.getName();
-        Location newLocation = place.get
-        this.location = new HyperTrackLocation(place.getLatitude(), place.getLongitude());
+        android.location.Location newLoc = new Location("");
+        newLoc.setLatitude(place.getLatitude());
+        newLoc.setLongitude(place.getLongitude());
+        this.location = new HyperTrackLocation(newLoc);
     }
 }

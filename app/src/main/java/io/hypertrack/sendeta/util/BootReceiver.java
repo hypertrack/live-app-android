@@ -4,7 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import io.hypertrack.lib.common.util.HTLog;
+import com.hypertrack.lib.internal.common.logging.HTLog;
+
 import io.hypertrack.sendeta.store.TaskManager;
 
 /**

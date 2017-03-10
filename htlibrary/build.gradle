@@ -1,0 +1,177 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+group = 'com.hypertrack'
+
+repositories {
+    maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
+}
+
+ext {
+    extVersionNumber = computeVersionNumber()
+    extVersionName = computeVersionName()
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    lintOptions {
+        abortOnError false
+    }
+
+    publishNonDefault true
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode extVersionNumber
+        versionName extVersionName
+        buildConfigField "String", "MQTT_BROKER_URL", '"tcp://broker.hypertrack.io"'
+        buildConfigField "String", "SDK_VERSION_NAME", '"' + ('SDK/' + extVersionName) + '"'
+    }
+
+    libraryVariants.all { variant ->
+        variant.outputs.each { output ->
+            def outputFile = output.outputFile
+            if (outputFile != null && outputFile.name.endsWith('.aar')) {
+                def newName = output.outputFile.name
+                newName = newName.replace("library", "android")
+                output.outputFile = new File(outputFile.parent, newName)
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            buildConfigField "String", "BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
+            buildConfigField "String", "CORE_API_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
+            buildConfigField "String", "MQTT_BASE_TOPIC", '"Staging/"'
+            buildConfigField "long", "POLL_TIMER_DURATION", '2000'
+        }
+        release {
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "BASE_URL", '"https://app.hypertrack.io/api/v1/"'
+            buildConfigField "String", "CORE_API_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
+            buildConfigField "String", "MQTT_BASE_TOPIC", '""'
+            buildConfigField "long", "POLL_TIMER_DURATION", '2000'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+
+    compile 'com.android.volley:volley:1.0.0'
+    compile 'com.google.code.gson:gson:2.4'
+
+    // Play Services Dependencies
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
+    compile 'com.google.android.gms:play-services-maps:10.2.0'
+
+    // Paho MQTT Dependencies
+    compile('io.hypertrack:paho:1.1.2:release@aar') {
+        transitive = true;
+    }
+    compile('io.hypertrack:mqttv3:1.1.2:release') {
+        transitive = true;
+    }
+
+    // Other Dependencies
+    compile 'io.hypertrack:smart-scheduler:0.0.6'
+    compile 'com.google.firebase:firebase-messaging:10.2.0'
+}
+
+// Compute Build VersionNumber & VersionName
+def computeVersionNumber() {
+    def versionPropsFile = file('gradle.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def versionNumber = versionProps['VERSION_NUMBER'].toInteger()
+        versionProps['VERSION_NUMBER'] = versionNumber.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        return versionNumber
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
+def computeVersionName() {
+    def versionPropsFile = file('gradle.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def versionMajor = 0
+        def versionMinor = 1
+        def versionPatch = versionProps['VERSION_PATCH']
+        def versionBuild = versionProps['VERSION_BUILD'].toInteger() + 1
+
+        versionProps['VERSION_PATCH'] = versionPatch.toString()
+        versionProps['VERSION_BUILD'] = versionBuild.toString()
+        versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        return versionMajor + "." + versionMinor + "." + versionPatch
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
+def homePath = System.properties['user.home']
+
+task androidJavadocs(type: Javadoc) {
+    failOnError = false
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.groupId = 'com.hypertrack'
+            pom.artifactId = 'android'
+            repository(url: "file://"+ homePath +"/.m2/repository")
+        }
+    }
+}
+
+task copyToS3(type: Exec) {
+    commandLine 'aws', 's3', 'cp', '--recursive',
+            homePath +'/.m2/repository/com/hypertrack/android/' + version + '/',
+            's3://hypertrack-android-sdk/com/hypertrack/android/'  + version + '/'
+}
+
+copyToS3.dependsOn uploadArchives
+
+task generateRelease << {
+    println "Release ${extVersionName} started"
+}
+
+generateRelease.dependsOn(copyToS3)
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}

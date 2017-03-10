@@ -32,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
@@ -290,7 +291,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void navigateToHomeScreen() {
-
+        HyperTrack.startTracking();
         UserStore.sharedStore.initializeUser();
         Utils.setCrashlyticsKeys(this);
         showProgress(false);

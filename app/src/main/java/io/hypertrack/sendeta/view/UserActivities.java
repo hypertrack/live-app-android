@@ -10,7 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
+
 import io.hypertrack.sendeta.R;
 
 /**

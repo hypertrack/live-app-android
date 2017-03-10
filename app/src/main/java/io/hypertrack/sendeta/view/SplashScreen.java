@@ -10,9 +10,6 @@ import android.view.Window;
 
 import java.util.ArrayList;
 
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.UserStore;
@@ -33,13 +30,6 @@ public class SplashScreen extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // Set Publishable Key
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
-        // Initialize HyperTrack SDKs
-        HTTransmitterService.initHTTransmitter(getApplicationContext());
-        HTConsumerClient.initHTConsumerClient(getApplicationContext());
-
         prepareAppDeepLink();
         proceedToNextScreen();
     }
@@ -74,7 +64,6 @@ public class SplashScreen extends BaseActivity {
         } else {
             UserStore.sharedStore.initializeUser();
             UserStore.sharedStore.updateSelectedMembership(1);
-
             Utils.setCrashlyticsKeys(this);
             processAppDeepLink(appDeepLink);
         }

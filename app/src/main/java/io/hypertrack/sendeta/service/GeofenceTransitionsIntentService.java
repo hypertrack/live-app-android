@@ -8,12 +8,11 @@ import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.hypertrack.lib.internal.common.logging.HTLog;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.util.GeofenceErrorMessages;
@@ -27,7 +26,7 @@ import io.hypertrack.sendeta.util.GeofenceErrorMessages;
 public class GeofenceTransitionsIntentService extends IntentService {
 
     protected static final String TAG = "GeofenceTransitionsIS";
-    private HTTransmitterService transmitterService;
+
 
     /**
      * This constructor is required, and calls the super IntentService(String)

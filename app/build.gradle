@@ -85,6 +85,8 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "HYPERTRACK_PK", '"pk_4d4fb6fd2e302602581a7bcebb62e8c4bce268d8"'
+            buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "request_eta_base_url", "www.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.io"
@@ -99,6 +101,8 @@ android {
             resValue "string", "app_name", "Debug HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             buildConfigField "String", "HYPERTRACK_PK", '"pk_08a1da360efa582af25c255fa2b30675a16cdfa2"'
+            buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
@@ -117,7 +121,7 @@ dependencies {
         transitive = true;
     }
 
-    debugCompile(project(path: ':library', configuration: 'debug')) {
+    debugCompile(project(path: ':htlibrary', configuration: 'debug')) {
         transitive = true
     }
 

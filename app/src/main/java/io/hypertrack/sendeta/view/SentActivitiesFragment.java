@@ -22,11 +22,6 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
-import io.hypertrack.lib.common.util.HTTaskUtils;
-import io.hypertrack.lib.consumer.utils.HTMapUtils;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.SentActivitiesAdapter;

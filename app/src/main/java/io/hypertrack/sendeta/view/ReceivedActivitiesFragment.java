@@ -26,14 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.common.model.HTDriver;
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
-import io.hypertrack.lib.common.util.HTTaskUtils;
-import io.hypertrack.lib.consumer.model.TaskListCallBack;
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.ReceivedActivitiesAdapter;

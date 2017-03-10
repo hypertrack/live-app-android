@@ -1,9 +1,10 @@
 package io.hypertrack.sendeta.model;
 
-import com.google.gson.annotations.SerializedName;
+import android.location.*;
 
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HyperTrackLocation;
+import com.google.gson.annotations.SerializedName;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+
 
 /**
  * Created by piyush on 26/07/16.
@@ -22,8 +23,7 @@ public class TaskDTO{
     @SerializedName("start_location")
     private HyperTrackLocation startLocation;
 
-    @SerializedName("vehicle_type")
-    private HTDriverVehicleType vehicleType;
+
 
     @SerializedName("task_id")
     private String taskID;
@@ -66,13 +66,7 @@ public class TaskDTO{
         this.startLocation = startLocation;
     }
 
-    public HTDriverVehicleType getVehicleType() {
-        return vehicleType;
-    }
 
-    public void setVehicleType(HTDriverVehicleType vehicleType) {
-        this.vehicleType = vehicleType;
-    }
 
     public String getTaskID() {
         return taskID;
@@ -116,19 +110,18 @@ public class TaskDTO{
         this.address = place.getAddress();
         this.googlePlacesID = place.getGooglePlacesID();
         this.name = place.getName();
-        this.location = new HyperTrackLocation(place.getLatitude(), place.getLongitude());
+
+        android.location.Location newLoc = new android.location.Location("");
+        newLoc.setLatitude(place.getLatitude());
+        newLoc.setLongitude(place.getLongitude());
+        this.location = new HyperTrackLocation(newLoc);
     }
 
-    public TaskDTO(MetaPlace place, int accountId, HyperTrackLocation startLocation, HTDriverVehicleType vehicleType) {
+    public TaskDTO(MetaPlace place, int accountId, HyperTrackLocation startLocation) {
         this(place, accountId);
         this.startLocation = startLocation;
-        this.vehicleType = vehicleType;
+
     }
 
-    public TaskDTO(String taskID, int accountId, HyperTrackLocation startLocation, HTDriverVehicleType vehicleType) {
-        this.taskID = taskID;
-        this.accountId = accountId;
-        this.startLocation = startLocation;
-        this.vehicleType = vehicleType;
-    }
+
 }

@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.store;
 
 import android.content.BroadcastReceiver;
@@ -9,25 +10,17 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.transmitter.model.HTShift;
-import io.hypertrack.lib.transmitter.model.HTShiftParams;
-import io.hypertrack.lib.transmitter.model.HTShiftParamsBuilder;
-import io.hypertrack.lib.transmitter.model.ServiceNotificationParams;
-import io.hypertrack.lib.transmitter.model.ServiceNotificationParamsBuilder;
-import io.hypertrack.lib.transmitter.model.TransmitterConstants;
-import io.hypertrack.lib.transmitter.model.callback.HTShiftStatusCallback;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.store.callback.ShiftManagerListener;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.SplashScreen;
 
+*/
 /**
  * Created by piyush on 12/09/16.
- */
+ *//*
+
 public class ShiftManager {
 
     private static final String TAG = TaskManager.class.getSimpleName();
@@ -175,9 +168,11 @@ public class ShiftManager {
         });
     }
 
-    /**
+    */
+/**
      * Call this method once the task has been completed successfully on the SDK.
-     */
+     *//*
+
     public void clearState() {
         HTLog.i(TAG, "Calling clearState to reset SendETA shift state");
         this.hyperTrackShift = null;
@@ -231,4 +226,4 @@ public class ShiftManager {
             this.mDriverNotLiveReceiver = null;
         }
     }
-}
+}*/

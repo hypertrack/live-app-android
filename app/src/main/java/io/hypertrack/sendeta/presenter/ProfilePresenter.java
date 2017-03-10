@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
+import com.hypertrack.lib.internal.consumer.models.HTUser;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
@@ -72,6 +73,11 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             HyperTrack.createUser(new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
+                    HTUser user = (HTUser) successResponse.getResponseObject();
+                    String userID = user.getId();
+                    OnboardingUser onboardingUser = onboardingManager.getUser();
+                    onboardingUser.setId(userID);
+                    OnboardingUser.setOnboardingUser();
                     if (view != null) {
                         view.registrationSuccessful();
 
@@ -87,8 +93,13 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             HyperTrack.createUser(userName, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
+                    HTUser user = (HTUser) successResponse.getResponseObject();
+                    String userID = user.getId();
+                    OnboardingUser onboardingUser = onboardingManager.getUser();
+                    onboardingUser.setId(userID);
+                    OnboardingUser.setOnboardingUser();
                     AnalyticsStore.getLogger().enteredName(true, null);
-                    AnalyticsStore.getLogger().completedProfileSetUp(user.isExistingUser());
+                    AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
                     if (view != null) {
                         view.navigateToHomeScreen();

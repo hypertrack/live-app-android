@@ -1,0 +1,160 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+        maven { url 'https://jitpack.io' }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.22.0'
+        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+apply plugin: 'com.mindera.gradle.slack'
+apply plugin: 'realm-android'
+
+repositories {
+    maven { url 'https://maven.fabric.io/public' }
+    maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
+}
+
+ext {
+    hypertrackSDKVersion = computeHyperTrackSDKVersion()
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.1"
+    lintOptions {
+        abortOnError false
+    }
+
+    def versionPropsFile = file('gradle.properties')
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def value = 0
+
+        def runTasks = gradle.startParameter.taskNames
+        if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks
+                || 'cUDR' in runTasks || 'crashlyticsUploadDistributionRelease' in runTasks) {
+            value = 1;
+        }
+
+        def versionMajor = 1
+        def versionMinor = 2
+        def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
+        def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
+
+        versionProps['VERSION_PATCH'] = versionPatch.toString()
+        versionProps['VERSION_NUMBER'] = versionNumber.toString()
+        versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        defaultConfig {
+            applicationId "com.example.hypertracklive"
+            versionCode versionNumber
+            versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+            minSdkVersion 19
+            targetSdkVersion 25
+            resValue "string", "app_name", "HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            multiDexEnabled true
+        }
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def newFileName = "HyperTrackLive-${variant.versionName}.apk";
+            def apk = output.outputFile;
+            output.outputFile = new File(apk.parentFile, newFileName);
+        }
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_4d4fb6fd2e302602581a7bcebb62e8c4bce268d8"'
+            resValue "string", "deeplink_scheme", "com.hypertracklive"
+            resValue "string", "request_eta_base_url", "www.sendeta.com"
+            resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.io"
+            resValue "string", "facebook_app_id", "1544357779206506"
+            ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
+            ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
+        }
+        debug {
+            debuggable true
+            versionNameSuffix '-debug'
+            applicationIdSuffix ".debug"
+            resValue "string", "app_name", "Debug HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_08a1da360efa582af25c255fa2b30675a16cdfa2"'
+            resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
+            resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
+            resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
+            resValue "string", "facebook_app_id", "1548496698792614"
+            ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
+            ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+    debugCompile 'com.facebook.stetho:stetho:1.2.0'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+        transitive = true;
+    }
+
+    debugCompile(project(path: ':library', configuration: 'debug')) {
+        transitive = true
+    }
+
+
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+        transitive = true
+    }
+
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    compile 'com.android.support:design:25.1.0'
+    compile 'com.android.support:cardview-v7:25.1.0'
+    compile 'com.android.support:recyclerview-v7:25.1.0'
+    compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.squareup.picasso:picasso:2.4.0'
+    compile 'com.github.tajchert:WaitingDots:0.3.2'
+    compile 'com.google.android.gms:play-services-gcm:10.0.1'
+    compile 'com.google.android.gms:play-services-places:10.0.1'
+    compile 'com.google.android.gms:play-services-location:10.0.1'
+    compile 'com.facebook.android:facebook-android-sdk:4.16.1'
+    compile 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+}
+
+// Compute HyperTrack SDKVersion
+def computeHyperTrackSDKVersion() {
+    def versionPropsFile = file('gradle.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        return versionProps['HYPERTRACK_SDK_VERSION']
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
+apply plugin: 'com.google.gms.google-services'
