@@ -179,8 +179,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         @Override
         public void onReceive(Context context, Intent intent) {
             mRegistrationBroadcastReceived = true;
-            sendGCMRegistrationToServer();
-            registerGCMReceiver(false);
+//            sendGCMRegistrationToServer();
+//            registerGCMReceiver(false);
         }
     };
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
