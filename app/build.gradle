@@ -121,7 +121,7 @@ dependencies {
         transitive = true;
     }
 
-    debugCompile(project(path: ':htlibrary', configuration: 'debug')) {
+    debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
 
