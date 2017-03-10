@@ -1,10 +1,10 @@
 package io.hypertrack.sendeta.store;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
-import com.crashlytics.android.Crashlytics;
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+import com.hypertrack.lib.HyperTrack;
 
 import java.io.File;
 import java.util.HashMap;
@@ -12,23 +12,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -102,7 +102,23 @@ public class UserStore {
         return this.user;
     }
 
-    public static boolean isUserLoggedIn() {
+    public static boolean isUserLoggedIn(Context context) {
+        // Check if DriverId exists for current user
+        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
+        if (TextUtils.isEmpty(hyperTrackDriverID)) {
+            // Delete Realm Data in order to prevent further crashes
+            RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context)
+                    .schemaVersion(1)
+                    .migration(new DBMigration())
+                    .build();
+            Realm.deleteRealm(realmConfiguration);
+            Realm realm = Realm.getDefaultInstance();
+            return false;
+        }
+
+        // Configure UserId for v3 HyperTrack SDK
+        HyperTrack.setUserId(hyperTrackDriverID);
+
         Realm realm = Realm.getDefaultInstance();
         return realm.where(User.class).findAll().size() > 0;
     }

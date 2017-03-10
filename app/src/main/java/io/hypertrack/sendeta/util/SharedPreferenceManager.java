@@ -333,9 +333,6 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-
-
-
     public static String getHyperTrackDriverID(Context context) {
         return getSharedPreferences().getString(CURRENT_HYPERTRACK_DRIVER_ID, null);
     }
