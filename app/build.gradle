@@ -32,6 +32,19 @@ android {
         abortOnError false
     }
 
+    def keystorePropertiesFile = rootProject.file("keystore.properties");
+    def keystoreProperties = new Properties()
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+
     def versionPropsFile = file('gradle.properties')
     if (versionPropsFile.canRead()) {
         def Properties versionProps = new Properties()
@@ -93,6 +106,7 @@ android {
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
@@ -125,9 +139,13 @@ dependencies {
         transitive = true
     }
 
-    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+    releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
+
+//    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+//        transitive = true
+//    }
 
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
