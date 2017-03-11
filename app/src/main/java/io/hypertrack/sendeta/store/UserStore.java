@@ -42,9 +42,8 @@ import retrofit2.Response;
  */
 public class UserStore {
 
-    private static String TAG = UserStore.class.getSimpleName();
     public static UserStore sharedStore = new UserStore();
-
+    private static String TAG = UserStore.class.getSimpleName();
     private User user;
     private Realm realm = Realm.getDefaultInstance();
 
@@ -102,7 +101,7 @@ public class UserStore {
         return this.user;
     }
 
-    public static boolean isUserLoggedIn(Context context) {
+    public boolean isUserLoggedIn(Context context) {
         // Check if DriverId exists for current user
         String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
         if (TextUtils.isEmpty(hyperTrackDriverID)) {
@@ -112,7 +111,6 @@ public class UserStore {
                     .migration(new DBMigration())
                     .build();
             Realm.deleteRealm(realmConfiguration);
-            Realm realm = Realm.getDefaultInstance();
             return false;
         }
 

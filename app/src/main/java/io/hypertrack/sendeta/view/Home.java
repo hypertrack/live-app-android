@@ -111,8 +111,8 @@ import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
-import io.hypertrack.sendeta.store.callback.TaskManagerListener;
 import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
@@ -146,6 +146,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             updateInfoMessageView();
         }
     };
+    BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            mRegistrationBroadcastReceived = true;
+//            sendGCMRegistrationToServer();
+//            registerGCMReceiver(false);
+        }
+    };
     private User user;
     private GoogleMap mMap;
     private Marker currentLocationMarker, destinationLocationMarker;
@@ -175,14 +183,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private Call<ResponseBody> sendGCMToServerCall;
-    BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mRegistrationBroadcastReceived = true;
-//            sendGCMRegistrationToServer();
-//            registerGCMReceiver(false);
-        }
-    };
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -304,7 +304,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         }
     };
-    private TaskManagerListener onTaskRefreshedListener = new TaskManagerListener() {
+    private ActionManagerListener onActionRefreshedListener = new ActionManagerListener() {
         @Override
         public void OnCallback() {
             if (Home.this.isFinishing())
@@ -330,7 +330,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             updateDestinationLocationIfApplicable(action);
         }
     };
-    private TaskManagerListener onTaskCompletedListener = new TaskManagerListener() {
+    private ActionManagerListener onActionCompletedListener = new ActionManagerListener() {
         @Override
         public void OnCallback() {
 
@@ -338,7 +338,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Home.this.OnCompleteTask();
+                    Home.this.completeTask();
+                    HyperTrack.clearServiceNotificationParams();
                 }
             });
         }
@@ -724,7 +725,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             @Override
             public void onClick(View v) {
                 share();
-
+                //On link share reset the notification
+                HyperTrack.clearServiceNotificationParams();
                 // TaskShared Flag is always false because couldn't find a way of knowing
                 // whether the user successfully shared the task details or not
                 AnalyticsStore.getLogger().tappedShareIcon(false);
@@ -777,19 +779,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         HyperTrack.requestLocationServices(Home.this, new HyperTrackCallback() {
                             @Override
                             public void onSuccess(@NonNull SuccessResponse response) {
-
+                                showEndingTripAnimation(true);
+                                completeTask();
                             }
 
                             @Override
                             public void onError(@NonNull ErrorResponse errorResponse) {
-
+                                Toast.makeText(Home.this, "Please enable location", Toast.LENGTH_SHORT).show();
                             }
                         });
                     } else {
                         HyperTrack.requestPermissions(Home.this);
                     }
-
-
                 }
 
             }
@@ -1220,6 +1221,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     Action action = (Action) response.getResponseObject();
                     TaskManager taskManager = TaskManager.getSharedManager(Home.this);
                     taskManager.setHyperTrackAction(action);
+                    taskManager.onActionStart();
                     if (mProgressDialog != null) {
                         mProgressDialog.dismiss();
                     }
@@ -1228,6 +1230,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     share();
 
                     onStartTask();
+
 
                     // Reset handle pushedTask DeepLink Flag
                     handlePushedTaskDeepLink = false;
@@ -1349,9 +1352,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Update SelectedVehicleType in persistentStorage
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
-        /*TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
-        taskManager.setTaskCompletedListener(onTaskCompletedListener);*/
+        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+        taskManager.setActionRefreshedListener(onActionRefreshedListener);
+        taskManager.setActionComletedListener(onActionCompletedListener);
 
         updateMapPadding(true);
         updateMapView();
@@ -1497,7 +1500,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 Home.this.updateFavoritesButton();
 
                 // Update Geofencing Request for updatedDestinationLocation
-                // TaskManager.getSharedManager(Home.this).setupGeofencing();
+                TaskManager.getSharedManager(Home.this).setupGeofencing();
 
                 updateDestinationMarker(updatedDestinationLatLng, etaInMinutes);
                 updateMapView();

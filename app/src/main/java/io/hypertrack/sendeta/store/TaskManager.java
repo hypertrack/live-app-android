@@ -15,6 +15,7 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
@@ -26,6 +27,7 @@ import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import io.hypertrack.sendeta.R;
@@ -34,9 +36,9 @@ import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
+import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
 import io.hypertrack.sendeta.store.callback.TaskManagerCallback;
-import io.hypertrack.sendeta.store.callback.TaskManagerListener;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.SplashScreen;
@@ -70,7 +72,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
-    private TaskManagerListener taskRefreshedListener, taskCompletedListener;
+    private ActionManagerListener actionRefreshedListener, actionComletedListener;
     private BroadcastReceiver mDriverNotLiveBroadcastReceiver;
     private Handler handler;
 
@@ -169,8 +171,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                         TaskManager.this.completeTask(new TaskManagerCallback() {
                             @Override
                             public void OnSuccess() {
-                                if (taskCompletedListener != null) {
-                                    taskCompletedListener.OnCallback();
+                                if (actionComletedListener != null) {
+                                    actionComletedListener.OnCallback();
                                 }
                             }
 
@@ -216,8 +218,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             SharedPreferenceManager.setTaskID(hyperTrackTask.getId());
         }
 
-        if (this.taskRefreshedListener != null) {
-            this.taskRefreshedListener.OnCallback();
+        if (this.actionRefreshedListener != null) {
+            this.actionRefreshedListener.OnCallback();
         }
     }
 
@@ -402,8 +404,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void clearListeners() {
-        this.taskCompletedListener = null;
-        this.taskRefreshedListener = null;
+        this.actionComletedListener = null;
+        this.actionRefreshedListener = null;
     }
 
     // Start Task with a default delay of REFRESH_DELAY
@@ -411,11 +413,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         onTaskStart(REFRESH_DELAY);
     }
 */
-  /*  private void onTaskStart(final long delay) {
-      //  this.setupGeofencing();
-        this.startRefreshingTask();
-        this.registerForDriverNotLiveBroadcast();
-    }*/
+    public void onActionStart() {
+        this.setupGeofencing();
+
+    }
 
     // Refresh Task with a default delay of REFRESH_DELAY
    /* public void startRefreshingTask() {
@@ -446,11 +447,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
     }
 
-    public void setGeofencingRequest(GeofencingRequest request) {
-        this.geofencingRequest = request;
-    }
-
-    /*public void setupGeofencing() {
+    public void setupGeofencing() {
         try {
             geofencingRequest = this.getGeofencingRequest();
 
@@ -466,7 +463,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             HTLog.e(TAG, "Exception while adding geofence request");
         }
     }
-*/
+
     public void addGeofencingRequest() {
         if (geofencingRequest == null) {
             HTLog.e(TAG, "Error while adding geofence request: geofencingRequest is null");
@@ -502,11 +499,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void OnGeoFenceSuccess() {
-        if (this.hyperTrackTask == null) {
-            this.getSavedTaskData();
-            if (this.hyperTrackTask == null) {
-                if (taskCompletedListener != null) {
-                    taskCompletedListener.OnCallback();
+        if (this.action == null) {
+            this.getSavedActionData();
+            if (this.action == null) {
+                if (actionComletedListener != null) {
+                    actionComletedListener.OnCallback();
                 }
 
                 HTLog.e(TAG, "SendETA: Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
@@ -519,8 +516,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.completeTask(new TaskManagerCallback() {
             @Override
             public void OnSuccess() {
-                if (taskCompletedListener != null) {
-                    taskCompletedListener.OnCallback();
+                if (actionComletedListener != null) {
+                    actionComletedListener.OnCallback();
                 }
 
                 AnalyticsStore.getLogger().autoTripEnded(true, null);
@@ -535,9 +532,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-   /* private GeofencingRequest getGeofencingRequest() {
+    private GeofencingRequest getGeofencingRequest() {
 
-        if (this.place == null || this.place.getLatitude() == null || this.place.getLongitude() == null) {
+        if (this.place == null || this.place.getLocation() == null) {
             HTLog.e(TAG, "Adding Geofence failed: Either place or Lat,Lng is null");
             return null;
         }
@@ -546,9 +543,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         List<Geofence> geoFenceList = new ArrayList<Geofence>();
         geoFenceList.add(new Geofence.Builder()
                 .setRequestId(GEOFENCE_REQUEST_ID)
-                .setCircularRegion(
-                        this.place.getLatitude(),
-                        this.place.getLongitude(),
+                .setCircularRegion(this.place.getLocation().getLatitude(),
+                        this.place.getLocation().getLongitude(),
                         GEOFENCE_RADIUS_IN_METERS
                 )
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_DWELL | Geofence.GEOFENCE_TRANSITION_ENTER)
@@ -561,7 +557,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_DWELL);
         builder.addGeofences(geoFenceList);
         return builder.build();
-    }*/
+    }
+
+    public void setGeofencingRequest(GeofencingRequest request) {
+        this.geofencingRequest = request;
+    }
 
     public Place getPlace() {
         return place;
@@ -578,12 +578,12 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.place = null;
     }
 
-    public void setTaskRefreshedListener(TaskManagerListener listener) {
-        this.taskRefreshedListener = listener;
+    public void setActionRefreshedListener(ActionManagerListener listener) {
+        this.actionRefreshedListener = listener;
     }
 
-    public void setTaskCompletedListener(TaskManagerListener listener) {
-        this.taskCompletedListener = listener;
+    public void setActionComletedListener(ActionManagerListener listener) {
+        this.actionComletedListener = listener;
     }
 
 
@@ -690,8 +690,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         mDriverNotLiveBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                if (taskCompletedListener != null) {
-                    taskCompletedListener.OnCallback();
+                if (actionComletedListener != null) {
+                    actionComletedListener.OnCallback();
                 }
                 completeTask(null);
                 clearState();
