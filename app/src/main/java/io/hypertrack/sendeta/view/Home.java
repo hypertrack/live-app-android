@@ -630,6 +630,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                             }
                         });
                         break;
+                    default:
+                        HyperTrack.clearServiceNotificationParams();
+                        break;
 
                     // TODO: 10/03/17 Reset Notification once he shares tracking link or reaches a stop
                 }

@@ -102,6 +102,12 @@ public class UserStore {
     }
 
     public boolean isUserLoggedIn(Context context) {
+
+        Realm realm = Realm.getDefaultInstance();
+        return realm.where(User.class).findAll().size() > 0;
+    }
+
+    public void checkIfDriverIDExist(Context context) {
         // Check if DriverId exists for current user
         String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
         if (TextUtils.isEmpty(hyperTrackDriverID)) {
@@ -111,15 +117,13 @@ public class UserStore {
                     .migration(new DBMigration())
                     .build();
             Realm.deleteRealm(realmConfiguration);
-            return false;
+            return;
         }
 
         // Configure UserId for v3 HyperTrack SDK
         if (TextUtils.isEmpty(HyperTrack.getUserId()))
             HyperTrack.setUserId(hyperTrackDriverID);
 
-        Realm realm = Realm.getDefaultInstance();
-        return realm.where(User.class).findAll().size() > 0;
     }
 
     /*public void startTaskOnServer(final String taskID, final MetaPlace place, final int selectedAccountId,
