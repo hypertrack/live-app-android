@@ -903,8 +903,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             // Start the Task
             LatLng latLng = new LatLng(restoreTaskMetaPlace.getLocation().getLatitude(), restoreTaskMetaPlace.getLocation().getLongitude());
 
-            if (etaInMinutes == null || etaInMinutes == 0)
-                etaInMinutes = Integer.valueOf(taskManager.getHyperTrackAction().getActionDisplay().getDurationRemaining()) / 60;
+            if (etaInMinutes == null || etaInMinutes == 0) {
+                Action action = taskManager.getHyperTrackAction();
+                if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining()))
+                    etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining()) / 60;
+            }
 
             updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
             onStartTask();
@@ -1243,7 +1246,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                     // Reset handle pushedTask DeepLink Flag
                     handlePushedTaskDeepLink = false;
-
+                    HyperTrack.clearServiceNotificationParams();
                     AnalyticsStore.getLogger().startedTrip(true, null);
                     HTLog.i(TAG, "Task started successfully.");
                 }
@@ -1377,7 +1380,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng destinationLocation = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining());
+        if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining()))
+            etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining());
         updateDestinationMarker(destinationLocation, etaInMinutes);
     }
 
@@ -2088,8 +2092,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
-        //  TaskManager.getSharedManager(Home.this).stopRefreshingTask();
+        TaskManager.getSharedManager(Home.this).stopRefreshingAction();
     }
 
     @Override
@@ -2101,6 +2104,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (!TextUtils.isEmpty(hyperTrackDriverID)) {
             HTTransmitterService.connectDriver(getApplicationContext(), hyperTrackDriverID);
         }*/
+
+        TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+        if (taskManager.getHyperTrackAction() != null && !taskManager.getHyperTrackAction().isCompleted()) {
+            taskManager.startRefreshingTask(0);
+            // Set Task Manager Listeners
+            taskManager.setActionRefreshedListener(onActionRefreshedListener);
+            taskManager.setActionComletedListener(onActionCompletedListener);
+        } else {
+            // Reset Toolbar Title as AppName in case no existing trip
+            this.setTitle(getResources().getString(R.string.app_name));
+            this.setSubTitle("");
+        }
 
 
         // Check if Location & Network are Enabled

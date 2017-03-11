@@ -19,6 +19,7 @@ package io.hypertrack.sendeta.adapter;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.text.style.CharacterStyle;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -104,6 +105,67 @@ public class PlaceAutocompleteAdapter
     private String filterString;
 
     private PlaceAutoCompleteOnClickListener listener;
+    /**
+     * Callback for results from a Places Geo Data API query that shows the first place result in
+     * the details view on screen.
+     */
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+
+            try {
+                if (!places.getStatus().isSuccess()) {
+                    // Request did not complete successfully
+                    Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
+                    places.release();
+                    if (listener != null) {
+                        listener.OnError();
+                    }
+                }
+
+                if (places.getCount() == 0) {
+                    Log.d(TAG, "Places is empty");
+                    places.release();
+                    if (listener != null) {
+                        listener.OnError();
+                    }
+                }
+
+                // Get the MetaPlace object from the buffer.
+                final Place place = places.get(0);
+
+                Log.i(TAG, "MetaPlace details received: " + place.getName());
+
+                if (listener != null) {
+                    listener.OnSuccess(new MetaPlace(place));
+                }
+                places.release();
+
+            } catch (Exception e) {
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
+        }
+    };
+
+    /**
+     * Initializes with a resource for text rows and autocomplete query bounds.
+     *
+     * @see ArrayAdapter#ArrayAdapter(Context, int)
+     */
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener) {
+        super();
+        this.context = context;
+        this.mGoogleApiClient = mGoogleApiClient;
+        this.favorites = new ArrayList<>();
+        this.listener = listener;
+    }
+
+    private PlaceAutocompleteAdapter() {
+
+    }
 
     public void setSearching(boolean isSearching) {
         this.isSearching = isSearching;
@@ -131,27 +193,11 @@ public class PlaceAutocompleteAdapter
         Iterator<MetaPlace> it = this.favorites.iterator();
         while (it.hasNext()) {
             MetaPlace place = it.next();
-            if (place.getName().toLowerCase().contains(this.filterString)) {
+
+            if (!TextUtils.isEmpty(place.getName()) && place.getName().toLowerCase().contains(this.filterString)) {
                 this.filteredFavorites.add(place);
             }
         }
-    }
-
-    /**
-     * Initializes with a resource for text rows and autocomplete query bounds.
-     *
-     * @see ArrayAdapter#ArrayAdapter(Context, int)
-     */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener) {
-        super();
-        this.context = context;
-        this.mGoogleApiClient = mGoogleApiClient;
-        this.favorites = new ArrayList<>();
-        this.listener = listener;
-    }
-
-    private PlaceAutocompleteAdapter() {
-
     }
 
     public void refreshFavorites(List<MetaPlace> favorites) {
@@ -371,26 +417,6 @@ public class PlaceAutocompleteAdapter
         return null;
     }
 
-    public class AutocompleteViewHolder extends RecyclerView.ViewHolder{
-        public TextView header;
-        public TextView description;
-        public ImageView icon;
-
-        public AutocompleteViewHolder(final View view) {
-            super(view);
-            header = (TextView) view.findViewById(R.id.item_place_title);
-            description = (TextView) view.findViewById(R.id.item_place_desc);
-            icon = (ImageView) view.findViewById(R.id.item_place_icon);
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    itemClickedAtPosition(getAdapterPosition());
-                }
-            });
-        }
-    }
-
     private void itemClickedAtPosition(int position) {
 
         if (!this.isSearching) {
@@ -412,7 +438,7 @@ public class PlaceAutocompleteAdapter
                         this.listener.OnSuccess(new MetaPlace(place));
                     }
                 } else {
-                    if (this.listener != null){
+                    if (this.listener != null) {
                         this.listener.OnError();
                     }
                 }
@@ -429,48 +455,23 @@ public class PlaceAutocompleteAdapter
         }
     }
 
-    /**
-     * Callback for results from a Places Geo Data API query that shows the first place result in
-     * the details view on screen.
-     */
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
-            = new ResultCallback<PlaceBuffer>() {
-        @Override
-        public void onResult(PlaceBuffer places) {
+    public class AutocompleteViewHolder extends RecyclerView.ViewHolder {
+        public TextView header;
+        public TextView description;
+        public ImageView icon;
 
-            try {
-                if (!places.getStatus().isSuccess()) {
-                    // Request did not complete successfully
-                    Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
-                    places.release();
-                    if (listener != null) {
-                        listener.OnError();
-                    }
+        public AutocompleteViewHolder(final View view) {
+            super(view);
+            header = (TextView) view.findViewById(R.id.item_place_title);
+            description = (TextView) view.findViewById(R.id.item_place_desc);
+            icon = (ImageView) view.findViewById(R.id.item_place_icon);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    itemClickedAtPosition(getAdapterPosition());
                 }
-
-                if (places.getCount() == 0) {
-                    Log.d(TAG, "Places is empty");
-                    places.release();
-                    if (listener != null) {
-                        listener.OnError();
-                    }
-                }
-
-                // Get the MetaPlace object from the buffer.
-                final Place place = places.get(0);
-
-                Log.i(TAG, "MetaPlace details received: " + place.getName());
-
-                if (listener != null) {
-                    listener.OnSuccess(new MetaPlace(place));
-                }
-                places.release();
-
-            } catch (Exception e) {
-                if (listener != null) {
-                    listener.OnError();
-                }
-            }
+            });
         }
-    };
+    }
 }

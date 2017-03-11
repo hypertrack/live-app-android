@@ -24,7 +24,6 @@ import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
@@ -184,7 +183,13 @@ public class UserStore {
 
     public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
-        placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
+
+        addPlace(placeToBeAdded);
+        if (callback != null) {
+            callback.OnSuccess();
+        }
+
+      /*  placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
                 addPlace(place);
@@ -203,11 +208,12 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });
+        });*/
     }
 
     public void updatePlaces(final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
+
         placeManager.getPlaces(new PlaceManagerGetPlacesCallback() {
             @Override
             public void OnSuccess(List<MetaPlace> places) {
@@ -340,7 +346,13 @@ public class UserStore {
 
     public void deletePlace(final MetaPlace place, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
-        placeManager.deletePlace(place, new PlaceManagerCallback() {
+        processDeletedMetaPlaceForAnalytics(true, null, place);
+        deletePlace(place);
+        if (callback != null) {
+            callback.OnSuccess();
+        }
+
+      /*  placeManager.deletePlace(place, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
 
@@ -362,7 +374,7 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });
+        });*/
     }
 
     /**
