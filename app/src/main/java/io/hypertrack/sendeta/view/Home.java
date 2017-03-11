@@ -356,7 +356,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void OnSuccess(TaskETAResponse etaResponse) {
                 // Hide Retry Button
                 showRetryButton(false, null);
-
+                etaInMinutes = (int) etaResponse.getDuration();
                 onETASuccess(etaResponse, place);
 
                 if (handlePushedTaskDeepLink) {
@@ -728,7 +728,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             @Override
             public void onClick(View v) {
                 share();
-                //On link share reset the notification
+
+                //On tracking link share reset the notification
                 HyperTrack.clearServiceNotificationParams();
                 // TaskShared Flag is always false because couldn't find a way of knowing
                 // whether the user successfully shared the task details or not
@@ -901,6 +902,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             // Start the Task
             LatLng latLng = new LatLng(restoreTaskMetaPlace.getLocation().getLatitude(), restoreTaskMetaPlace.getLocation().getLongitude());
+
+            if (etaInMinutes == null || etaInMinutes == 0)
+                etaInMinutes = Integer.valueOf(taskManager.getHyperTrackAction().getActionDisplay().getDurationRemaining()) / 60;
+
             updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
             onStartTask();
 
@@ -1100,7 +1105,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if Task has to be Restored & Update Map for that task
         if (shouldRestoreTask && restoreTaskMetaPlace != null) {
-            if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() == null) {
+            if (TaskManager.getSharedManager(Home.this).getHyperTrackAction() == null) {
                 return;
             }
 
@@ -1222,6 +1227,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
                     Action action = (Action) response.getResponseObject();
+                    action.getActionDisplay().setDurationRemaining(String.valueOf(etaInMinutes));
                     TaskManager taskManager = TaskManager.getSharedManager(Home.this);
                     taskManager.setHyperTrackAction(action);
                     taskManager.onActionStart();
