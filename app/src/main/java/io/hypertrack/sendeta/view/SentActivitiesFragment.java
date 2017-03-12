@@ -522,7 +522,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
         // Start Refreshing Task, if one exists
         if (TaskManager.getSharedManager(getActivity()).getHyperTrackTask() != null) {
-            TaskManager.getSharedManager(getActivity()).startRefreshingTask(0);
+            TaskManager.getSharedManager(getActivity()).startRefreshingAction(0);
         }
 
         if (historyActivitiesAdapter != null) {

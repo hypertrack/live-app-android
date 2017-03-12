@@ -43,7 +43,6 @@ import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
-import io.hypertrack.sendeta.store.callback.TaskManagerCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.SplashScreen;
@@ -88,33 +87,30 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             if (!isTaskLive(action))
                 return;
 
-
             HyperTrack.getAction(action.getId(), new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
-                    if (response != null) {
-                        Action actionResponse = (Action) response.getResponseObject();
-                        if (!isTaskLive(actionResponse)) {
-                            HTLog.i(TAG, "SendETA Action Not Live, Calling completeTask() to complete the task");
+                    Action actionResponse = (Action) response.getResponseObject();
+                    if (!isTaskLive(actionResponse)) {
+                        HTLog.i(TAG, "SendETA Action Not Live, Calling completeTask() to complete the task");
 
-                            // Call completeTask when the Task object is null or task is not live
-                            TaskManager.this.completeAction(new ActionManagerCallback() {
-                                @Override
-                                public void OnSuccess() {
-                                    if (actionComletedListener != null) {
-                                        actionComletedListener.OnCallback();
-                                    }
+                        // Call completeTask when the Task object is null or task is not live
+                        TaskManager.this.completeAction(new ActionManagerCallback() {
+                            @Override
+                            public void OnSuccess() {
+                                if (actionComletedListener != null) {
+                                    actionComletedListener.OnCallback();
                                 }
+                            }
 
-                                @Override
-                                public void OnError() {
-                                }
-                            });
-                            return;
-                        }
-                        hyperTrackAction = actionResponse;
-                        onActionRefresh();
+                            @Override
+                            public void OnError() {
+                            }
+                        });
+                        return;
                     }
+                    hyperTrackAction = actionResponse;
+                    onActionRefresh();
                 }
 
                 @Override
@@ -275,64 +271,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         });
     }
 
-   /* public void startTask(final String taskID, LatLng location, int selectedAccountId, HTUserVehicleType vehicleType,
-                          final TaskManagerCallback callback) {
-        if (this.place == null || selectedAccountId <= 0) {
-            callback.OnError();
-            return;
-        }
-
-        this.selectedAccountId = selectedAccountId;
-
-        final ExpandedLocation startLocation = new ExpandedLocation();
-
-        this.startTaskOnServer(taskID, startLocation, vehicleType, callback);
-    }
-
-    private void startTaskOnServer(final String taskID, final HyperTrackLocation startLocation, final HTUserVehicleType vehicleType,
-                                   final TaskManagerCallback callback) {
-
-        this.vehicleType = vehicleType;
-
-        UserStore.sharedStore.startTaskOnServer(taskID, this.place, this.selectedAccountId,
-                startLocation, vehicleType, new UserStoreGetTaskCallback() {
-                    @Override
-                    public void OnSuccess(final Map<String, Object> response) {
-                        final String hypertrackDriverID = (String) response.get("hypertrack_driver_id");
-
-                        // Set HyperTrack DriverID
-                        if (!TextUtils.isEmpty(hypertrackDriverID)) {
-                            SharedPreferenceManager.setHyperTrackDriverID(mContext, hypertrackDriverID);
-                        }
-
-                        // Parse Response to fetch Task Data
-                        if (TaskManager.this.setTask(response)) {
-
-                            // Set lastUpdatedDestination
-                            Place destination = new Place();
-                            destination.setId((String) response.get("destination_id"));
-                            TaskManager.this.setLastUpdatedDestination(destination);
-
-                            if (place == null) {
-                                place = SharedPreferenceManager.getPlace();
-                            }
-
-                            onTaskStart();
-                            callback.OnSuccess();
-                            return;
-                        }
-
-                        callback.OnError();
-                    }
-
-                    @Override
-                    public void OnError() {
-                        hyperTrackTask = null;
-                        callback.OnError();
-                    }
-                });
-    }*/
-
     public void completeAction(final ActionManagerCallback callback) {
         if (TextUtils.isEmpty(this.getHyperTrackActionId())) {
             if (callback != null) {
@@ -341,115 +279,19 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             return;
         }
 
-        String taskID = this.actionID;
-        if (taskID == null) {
+        if (this.actionID == null) {
             if (callback != null) {
                 callback.OnError();
             }
             return;
         }
+
+        HyperTrack.completeAction(actionID);
         clearState();
 
-
-       /* transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
-            @Override
-            public void onSuccess(String s) {
-                if (callback != null)
-                    callback.OnSuccess();
-
-                clearState();
-            }
-
-            @Override
-            public void onOfflineSuccess() {
-                if (callback != null)
-                    callback.OnSuccess();
-
-                clearState();
-
-                // Call endTrip when Task was completed offline
-                // to end the service offline
-                endTrip();
-            }
-
-            @Override
-            public void onError(Exception e) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });*/
+        if (callback != null)
+            callback.OnSuccess();
     }
-
-    public void completeTask(final TaskManagerCallback callback) {
-        if (TextUtils.isEmpty(this.getHyperTrackActionId())) {
-            if (callback != null) {
-                callback.OnError();
-            }
-            return;
-        }
-
-        String taskID = this.actionID;
-        if (taskID == null) {
-            if (callback != null) {
-                callback.OnError();
-            }
-            return;
-        }
-        clearState();
-
-
-       /* transmitter.completeTask(taskID, new HTCompleteTaskStatusCallback() {
-            @Override
-            public void onSuccess(String s) {
-                if (callback != null)
-                    callback.OnSuccess();
-
-                clearState();
-            }
-
-            @Override
-            public void onOfflineSuccess() {
-                if (callback != null)
-                    callback.OnSuccess();
-
-                clearState();
-
-                // Call endTrip when Task was completed offline
-                // to end the service offline
-                endTrip();
-            }
-
-            @Override
-            public void onError(Exception e) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });*/
-    }
-
-
-
-   /* public void endTrip() {
-        transmitter.endTrip(new HTTripStatusCallback() {
-            @Override
-            public void onSuccess(HTTrip trip) {
-                // do nothing
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                // do nothing
-            }
-
-            @Override
-            public void onOfflineSuccess() {
-                // do nothing
-            }
-        });
-    }
-*/
 
     /**
      * Call this method once the task has been completed successfully on the SDK.
@@ -462,7 +304,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.clearListeners();
         this.clearPlace();
         this.clearAction();
-        // this.unregisterForDriverNotLiveBroadcast();
         // Remove GeoFencingRequest from SharedPreferences
         SharedPreferenceManager.removeGeofencingRequest();
     }
@@ -472,22 +313,16 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.actionRefreshedListener = null;
     }
 
-    // Start Task with a default delay of REFRESH_DELAY
-  /*  private void onTaskStart() {
-        onTaskStart(REFRESH_DELAY);
-    }
-*/
     public void onActionStart() {
         this.setupGeofencing();
-
     }
 
     // Refresh Task with a default delay of REFRESH_DELAY
-    public void startRefreshingTask() {
-        startRefreshingTask(REFRESH_DELAY);
+    public void startRefreshingAction() {
+        startRefreshingAction(REFRESH_DELAY);
     }
 
-    public void startRefreshingTask(final long delay) {
+    public void startRefreshingAction(final long delay) {
         if (handler == null) {
             handler = new Handler();
         } else {
@@ -496,13 +331,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         handler.postDelayed(refreshAction, delay);
-    }
-
-    public void stopRefreshingTask() {
-        if (this.handler != null) {
-            this.handler.removeCallbacksAndMessages(refreshAction);
-            this.handler = null;
-        }
     }
 
     public void stopRefreshingAction() {
@@ -585,7 +413,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
         HTLog.i(TAG, "OnGeoFence success: Task end initiated.");
 
-        this.completeTask(new TaskManagerCallback() {
+        this.completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 if (actionComletedListener != null) {
@@ -658,15 +486,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.actionComletedListener = listener;
     }
 
-
-    public Task getHyperTrackTask() {
-        if (this.hyperTrackTask == null) {
-            this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);
-        }
-
-        return this.hyperTrackTask;
-    }
-
     public Action getHyperTrackAction() {
         if (this.hyperTrackAction == null) {
             this.hyperTrackAction = SharedPreferenceManager.getAction(mContext);
@@ -680,20 +499,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.actionID = action.getId();
         SharedPreferenceManager.setAction(action);
         SharedPreferenceManager.setActionID(actionID);
-    }
-
-    public String getHyperTrackTaskId() {
-        if (this.hyperTrackTaskId == null) {
-            this.hyperTrackTaskId = SharedPreferenceManager.getTaskID(mContext);
-        }
-
-        // For Backward compatibility of running trips on app-upgrade
-        if (this.hyperTrackTaskId == null && getHyperTrackTask() != null) {
-            this.hyperTrackTaskId = getHyperTrackTask().getId();
-            SharedPreferenceManager.setTaskID(this.hyperTrackTaskId);
-        }
-
-        return this.hyperTrackTaskId;
     }
 
     public String getHyperTrackActionId() {
@@ -738,47 +543,12 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         SharedPreferenceManager.deletePlace();
     }
 
-    private void clearTask() {
-        SharedPreferenceManager.deleteTask();
-        SharedPreferenceManager.deleteTaskID();
-        this.hyperTrackTask = null;
-        this.hyperTrackTaskId = null;
-    }
-
     private void clearAction() {
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deleteActionID();
         this.actionID = null;
         this.hyperTrackAction = null;
     }
-
-
-
-
-   /* private void registerForDriverNotLiveBroadcast() {
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(TransmitterConstants.HT_ON_DRIVER_NOT_ACTIVE_INTENT);
-
-        mDriverNotLiveBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (actionComletedListener != null) {
-                    actionComletedListener.OnCallback();
-                }
-                completeTask(null);
-                clearState();
-            }
-        };
-
-        LocalBroadcastManager.getInstance(mContext).registerReceiver(mDriverNotLiveBroadcastReceiver, filter);
-    }
-
-    private void unregisterForDriverNotLiveBroadcast() {
-        if (this.mDriverNotLiveBroadcastReceiver != null) {
-            LocalBroadcastManager.getInstance(mContext).unregisterReceiver(mDriverNotLiveBroadcastReceiver);
-            this.mDriverNotLiveBroadcastReceiver = null;
-        }
-    }*/
 
     private String getFormattedETA() {
         if (this.hyperTrackAction == null || this.hyperTrackAction.getETA() == null) {

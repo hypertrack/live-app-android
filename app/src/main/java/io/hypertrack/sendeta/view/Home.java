@@ -98,7 +98,6 @@ import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
@@ -111,6 +110,7 @@ import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
 import io.hypertrack.sendeta.util.AnimationUtils;
@@ -1303,17 +1303,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to Initiate COMPLETE TASK
      */
     private void completeTask() {
-        OnboardingManager onboardingManager = OnboardingManager.sharedManager();
-        OnboardingUser onboardingUser = onboardingManager.getUser();
-        String actionID = onboardingUser.getActionID();
-        HyperTrack.completeAction(actionID);
-        OnCompleteTask();
-        HTLog.i(TAG, "Complete Task (CTA) happened successfully.");
-        showEndingTripAnimation(false);
-        TaskManager taskManager = TaskManager.getSharedManager(this);
-        taskManager.clearState();
-
-       /* TaskManager.getSharedManager(this).completeTask(new TaskManagerCallback() {
+        TaskManager.getSharedManager(this).completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 OnCompleteTask();
@@ -1333,7 +1323,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                 showEndingTripAnimation(false);
             }
-        });*/
+        });
     }
 
     private void showCompleteTaskError() {
@@ -2107,7 +2097,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
         if (taskManager.getHyperTrackAction() != null && !taskManager.getHyperTrackAction().isCompleted()) {
-            taskManager.startRefreshingTask(0);
+            taskManager.startRefreshingAction(0);
             // Set Task Manager Listeners
             taskManager.setActionRefreshedListener(onActionRefreshedListener);
             taskManager.setActionComletedListener(onActionCompletedListener);
