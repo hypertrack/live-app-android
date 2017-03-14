@@ -143,6 +143,28 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private GoogleMap mMap;
     private Marker currentLocationMarker, destinationLocationMarker;
     private Location defaultLocation = new Location("default");
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+
+            Log.d(TAG, "Location Changed");
+
+            // Initiate FusedLocation Updates on Location Changed
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && LocationUtils.isLocationEnabled(Home.this)) {
+                // Remove location updates so that it resets
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
+
+                //change the time of location updates
+                createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+
+                //restart location updates with the new interval
+                resumeLocationUpdates();
+
+                locationFrequencyIncreased = true;
+            }
+        }
+    };
     private AppBarLayout appBarLayout;
     private TabLayout vehicleTypeTabLayout;
     private TextView destinationText, destinationDescription, mAutocompletePlacesView, infoMessageViewText;
@@ -304,7 +326,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return;
             }
 
-            // Update ETA & Display Statuses using Task's Display field
+            // Update ETA & Dihsplay Statuses using Task's Display field
             updateETAForOnGoingTask(action, taskManager.getPlace());
             updateDisplayStatusForOngoingTask(action);
 
@@ -417,29 +439,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void showETAError() {
         Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
     }
-
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-
-            Log.d(TAG, "Location Changed");
-
-            // Initiate FusedLocation Updates on Location Changed
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && LocationUtils.isLocationEnabled(Home.this)) {
-                // Remove location updates so that it resets
-                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
-
-                //change the time of location updates
-                createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
-
-                //restart location updates with the new interval
-                resumeLocationUpdates();
-
-                locationFrequencyIncreased = true;
-            }
-        }
-    };
 
     private void onETASuccess(TaskETAResponse response, MetaPlace place) {
         // Make the VehicleTabLayout visible onETASuccess
