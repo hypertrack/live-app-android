@@ -83,6 +83,7 @@ import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ActionParams;
 import com.hypertrack.lib.models.ActionParamsBuilder;
 import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
@@ -1209,7 +1210,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     mProgressDialog.dismiss();
                 }
 
-                showStartTaskError();
+                showStartTaskError(errorResponse);
                 HTLog.e(TAG, "Task start failed.");
 
                 // Reset handle pushedTask DeepLink Flag
@@ -1246,8 +1247,24 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         destinationAddressGeocoded = false;
     }
 
-    private void showStartTaskError() {
-        Toast.makeText(this, ErrorMessages.START_TRIP_FAILED, Toast.LENGTH_SHORT).show();
+    private void showStartTaskError(ErrorResponse errorResponse) {
+        switch (errorResponse.getErrorCode()) {
+
+            case HyperTrackError.Code.PUBLISHABLE_KEY_NOT_CONFIGURED:
+            case HyperTrackError.Code.SDK_NOT_INITIALIZED:
+            case HyperTrackError.Code.USER_ID_NOT_CONFIGURED:
+            case HyperTrackError.Code.PLAY_SERVICES_UNAVAILABLE:
+            case HyperTrackError.Code.PERMISSIONS_NOT_REQUESTED:
+            case HyperTrackError.Code.LOCATION_SETTINGS_DISABLED:
+            case HyperTrackError.Code.LOCATION_SETTINGS_LOW_ACCURACY:
+            case HyperTrackError.Code.NETWORK_CONNECTIVITY_ERROR:
+            case HyperTrackError.Code.LOCATION_SETTINGS_CHANGE_UNAVAILABLE:
+                Toast.makeText(this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            default:
+                Toast.makeText(this, ErrorMessages.START_TRIP_FAILED, Toast.LENGTH_SHORT).show();
+                return;
+        }
     }
 
     /**
