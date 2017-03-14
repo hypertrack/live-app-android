@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -27,6 +28,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,6 +38,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
@@ -436,6 +440,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         });
     }
 
+
     private void showETAError() {
         Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
     }
@@ -573,6 +578,30 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
+        menuItem.setChecked(SharedPreferenceManager.isTrackingON());
+        return TaskManager.getSharedManager(this).getHyperTrackAction() == null;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.tracking_toogle:
+                if (!item.isChecked()) {
+                    startHyperTrackTracking();
+                } else {
+                    stopHyperTrackTracking();
+                }
+                item.setChecked(!item.isChecked());
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void setHyperTrackCallback() {
         HyperTrack.setCallback(new HyperTrackEventCallback() {
             @Override
@@ -704,25 +733,47 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //Check if Location Permission has been granted & Location has been enabled
-                if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        && LocationUtils.isLocationEnabled(Home.this)) {
-                    if (!TaskManager.getSharedManager(Home.this).isActionLive(null)) {
-                        // Start the Task
 
-                        startAction();
-                    } else {
-
-                        // Reset Current State when user chooses to edit destination
-                        TaskManager.getSharedManager(Home.this).clearState();
-                        OnCompleteTask();
-                    }
+                if (SharedPreferenceManager.isTrackingON()) {
+                    createSharingLink();
                 } else {
-                    checkForLocationPermission();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+                    builder.setMessage("Enable the tracking.")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    startHyperTrackTracking();
+                                    createSharingLink();
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+
+                                }
+                            }).show();
                 }
             }
         });
     }
+
+    private void createSharingLink() {
+        //Check if Location Permission has been granted & Location has been enabled
+        if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
+                && LocationUtils.isLocationEnabled(Home.this)) {
+            if (!TaskManager.getSharedManager(Home.this).isActionLive(null)) {
+                // Start the Task
+                startAction();
+            } else {
+                // Reset Current State when user chooses to edit destination
+                TaskManager.getSharedManager(Home.this).clearState();
+                OnCompleteTask();
+            }
+        } else {
+            checkForLocationPermission();
+        }
+    }
+
 
     private void setupEndTripSwipeButton() {
         endTripSwipeButton = (SwipeButton) findViewById(R.id.endTripSwipeButton);
@@ -763,7 +814,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);
         }
     }
-
 
     private void showEndingTripAnimation(boolean show) {
         if (show) {
@@ -1334,6 +1384,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         updateMapPadding(true);
         updateMapView();
+        supportInvalidateOptionsMenu();
     }
 
     private void updateETAForOnGoingTask(Action action, Place place) {
@@ -1505,6 +1556,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             resumeLocationUpdates();
         }
 
+        supportInvalidateOptionsMenu();
+
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
@@ -1597,20 +1650,29 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return false;
     }
 
     private void requestLocationUpdates() {
-        startHyperTrackTracking();
+        if (SharedPreferenceManager.isTrackingON())
+            startHyperTrackTracking();
         startLocationPolling();
     }
 
     private void startHyperTrackTracking() {
         // HACK: Check if user is tracking currently or not
         // Only for exisitng users because Permission and Location Settings have been checked here
-        if (!HyperTrack.isTracking())
+        if (!HyperTrack.isTracking()) {
             HyperTrack.startTracking();
+            SharedPreferenceManager.setTrackingON();
+        }
+        supportInvalidateOptionsMenu();
+    }
+
+    private void stopHyperTrackTracking() {
+        HyperTrack.stopTracking();
+        SharedPreferenceManager.setTrackingOFF();
+        supportInvalidateOptionsMenu();
     }
 
     private void startLocationPolling() {

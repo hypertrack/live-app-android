@@ -284,6 +284,7 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void navigateToHomeScreen() {
         HyperTrack.startTracking();
+        SharedPreferenceManager.setTrackingON();
         UserStore.sharedStore.initializeUser();
         Utils.setCrashlyticsKeys(this);
         showProgress(false);

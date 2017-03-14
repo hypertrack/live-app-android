@@ -26,7 +26,7 @@
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <LinearLayout
                 android:id="@+id/settings.parent_layout"
@@ -85,7 +85,7 @@
                     android:text="Business Profiles"
                     android:textColor="@color/text_base"
                     android:textSize="@dimen/text_medium"
-                    android:visibility="gone"/>
+                    android:visibility="gone" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/settings.business_profiles"
@@ -94,7 +94,7 @@
                     android:layout_marginTop="@dimen/margin_low"
                     android:paddingTop="@dimen/padding_base"
                     android:scrollbars="vertical"
-                    android:visibility="gone"/>
+                    android:visibility="gone" />
 
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
