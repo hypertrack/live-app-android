@@ -63,131 +63,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             user.setPhotoImage(profileImage);
         }
         OnboardingUser.setOnboardingUser();
-       /* if (TextUtils.isEmpty(userName) && TextUtils.isEmpty(phone)) {
-            if (view != null) {
-                view.navigateToHomeScreen();
-                return;
-            }
-        }*/
 
-        if (TextUtils.isEmpty(userName)) {
-            HyperTrack.createUser(new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    User user = (User) successResponse.getResponseObject();
-                    String userID = user.getId();
-                    OnboardingUser onboardingUser = onboardingManager.getUser();
-                    onboardingUser.setId(userID);
-                    OnboardingUser.setOnboardingUser();
-                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User(user.getName(), user.getPhone());
-                    onboardingManager.didOnboardUser(realmUser);
-
-                    if (profileImage != null && profileImage.length() > 0) {
-                        onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
-                            @Override
-                            public void onSuccess() {
-                                if (view != null) {
-                                    view.showProfilePicUploadSuccess();
-                                    view.navigateToHomeScreen();
-                                }
-                            }
-
-                            @Override
-                            public void onError() {
-                                HTLog.i(TAG, "Profile Image not saved in local database");
-                                if (view != null) {
-                                    view.showProfilePicUploadError();
-                                }
-                            }
-
-                            @Override
-                            public void onImageUploadNotNeeded() {
-
-                            }
-                        });
-                    } else {
-                        if (view != null) {
-                            view.navigateToHomeScreen();
-                        }
-                    }
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    HTLog.i(TAG, "");
-                    if (view != null) {
-                        view.showErrorMessage();
-                    }
-                    AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
-                }
-            });
-        } else if (!TextUtils.isEmpty(userName) && !TextUtils.isEmpty(phone)) {
-            try {
-                HyperTrack.createUser(userName, user.getInternationalNumber(), new HyperTrackCallback() {
-                    @Override
-                    public void onSuccess(@NonNull SuccessResponse successResponse) {
-                        User user = (User) successResponse.getResponseObject();
-                        String userID = user.getId();
-                        OnboardingUser onboardingUser = onboardingManager.getUser();
-                        onboardingUser.setId(userID);
-                        OnboardingUser.setOnboardingUser();
-                        AnalyticsStore.getLogger().enteredName(true, null);
-                        AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
-                        AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
-                        io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User(user.getName(), user.getPhone());
-                        onboardingManager.didOnboardUser(realmUser);
-                        if (profileImage != null && profileImage.length() > 0) {
-                            onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
-                                @Override
-                                public void onSuccess() {
-                                    if (view != null) {
-                                        view.showProfilePicUploadSuccess();
-                                        view.navigateToHomeScreen();
-                                    }
-                                }
-
-                                @Override
-                                public void onError() {
-                                    HTLog.i(TAG, "Profile Image not saved in local database");
-                                    if (view != null) {
-                                        view.showProfilePicUploadError();
-                                    }
-                                }
-
-                                @Override
-                                public void onImageUploadNotNeeded() {
-
-                                }
-                            });
-                        } else {
-                            if (view != null) {
-                                view.navigateToHomeScreen();
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onError(@NonNull ErrorResponse errorResponse) {
-                        HTLog.i(TAG, "");
-                        if (view != null) {
-                            view.showErrorMessage();
-                        }
-                        AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
-
-                    }
-                });
-            } catch (NumberParseException e) {
-                e.printStackTrace();
-                HTLog.i(TAG, "");
-                if (view != null) {
-                    view.showErrorMessage();
-                }
-                AnalyticsStore.getLogger().enteredName(false, ErrorMessages.INVALID_PHONE_NUMBER);
-            }
-
-
-        } else {
-            HyperTrack.createUser(userName, new HyperTrackCallback() {
+        try {
+            HyperTrack.createUser(userName, user.getInternationalNumber(), new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     User user = (User) successResponse.getResponseObject();
@@ -240,7 +118,16 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                 }
             });
+        } catch (NumberParseException e) {
+            e.printStackTrace();
+            HTLog.i(TAG, "");
+            if (view != null) {
+                view.showErrorMessage();
+            }
+            AnalyticsStore.getLogger().enteredName(false, ErrorMessages.INVALID_PHONE_NUMBER);
         }
+
+
     }
 
     @Override

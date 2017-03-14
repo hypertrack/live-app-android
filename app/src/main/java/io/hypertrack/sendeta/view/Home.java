@@ -736,12 +736,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     showEndingTripAnimation(true);
                     completeTask();
                 } else {
-                    if (HyperTrack.checkLocationServices(Home.this)) {
+                    if (!HyperTrack.checkLocationServices(Home.this)) {
                         HyperTrack.requestLocationServices(Home.this, new HyperTrackCallback() {
                             @Override
                             public void onSuccess(@NonNull SuccessResponse response) {
-                                showEndingTripAnimation(true);
-                                completeTask();
+                                requestLocationUpdates();
                             }
 
                             @Override
@@ -757,8 +756,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         };
 
-        swipeButtonSettings.setButtonPressText(getString(R.string.action_slide_to_end_trip))
-                .setActionConfirmText(getString(R.string.action_slide_to_end_trip));
+        swipeButtonSettings.setButtonPressText(getString(R.string.action_slide_to_end_sharing))
+                .setActionConfirmText(getString(R.string.action_slide_to_end_sharing));
 
         if (endTripSwipeButton != null) {
             endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);
@@ -1318,7 +1317,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         sendETAButton.setVisibility(View.GONE);
         endTripSwipeButton.setVisibility(View.VISIBLE);
-        endTripSwipeButton.setText(R.string.action_slide_to_end_trip);
+        endTripSwipeButton.setText(R.string.action_slide_to_end_sharing);
 
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
@@ -1871,8 +1870,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void updateFavoritesButton() {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
         if (taskManager.isActionLive(null)) {
-            MetaPlace place = new MetaPlace(taskManager.getPlace().getLocation().getLatitude(),
-                    taskManager.getPlace().getLocation().getLongitude());
+            MetaPlace place = null;
+            if (taskManager.getPlace() != null && taskManager.getPlace().getLocation() != null) {
+                place = new MetaPlace(taskManager.getPlace().getLocation().getLatitude(), taskManager.getPlace().getLocation().getLongitude());
+            }
 
             user = UserStore.sharedStore.getUser();
             if (user == null) {
@@ -2015,7 +2016,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             taskManager.setActionComletedListener(onActionCompletedListener);
         } else {
             // Reset Toolbar Title as AppName in case no existing trip
-            this.setTitle(getResources().getString(R.string.app_name));
+            this.setTitle(getResources().getString(R.string.toolbar_title));
             this.setSubTitle("");
         }
 

@@ -290,7 +290,7 @@
                         android:clickable="true"
                         android:elevation="@dimen/elevation_base"
                         android:gravity="center"
-                        android:text="@string/action_slide_to_end_trip"
+                        android:text="@string/action_slide_to_end_sharing"
                         android:textColor="@color/text_dark_bg_base"
                         android:textSize="@dimen/text_base"
                         android:visibility="gone" />

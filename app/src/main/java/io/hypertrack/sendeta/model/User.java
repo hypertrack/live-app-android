@@ -48,10 +48,11 @@ public class User extends RealmObject {
     @Expose(serialize = false, deserialize = false)
     private int selectedMembershipAccountId;
 
-    public User(){
+    public User() {
 
     }
-    public User( String firstName, String phoneNumber) {
+
+    public User(String firstName, String phoneNumber) {
 
         this.firstName = firstName;
         this.phoneNumber = phoneNumber;
@@ -142,7 +143,7 @@ public class User extends RealmObject {
         }
 
         MetaPlace place = null;
-        for (MetaPlace candidate: this.getPlaces()) {
+        for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.isHome()) {
                 place = candidate;
                 break;
@@ -158,7 +159,7 @@ public class User extends RealmObject {
         }
 
         MetaPlace place = null;
-        for (MetaPlace candidate: this.getPlaces()) {
+        for (MetaPlace candidate : this.getPlaces()) {
             if (candidate.isWork()) {
                 place = candidate;
                 break;
@@ -219,6 +220,8 @@ public class User extends RealmObject {
     }
 
     public boolean isFavorite(MetaPlace place) {
+        if (place == null)
+            return false;
         if (this.getPlaces().size() == 0) {
             return false;
         }
@@ -254,7 +257,7 @@ public class User extends RealmObject {
     public void saveImageBitmap(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        this.photoData = byteArrayOutputStream .toByteArray();
+        this.photoData = byteArrayOutputStream.toByteArray();
     }
 
     public Bitmap getImageBitmap() {
@@ -295,7 +298,7 @@ public class User extends RealmObject {
         }
 
         Membership membership = null;
-        for (Membership candidate: this.getMemberships()) {
+        for (Membership candidate : this.getMemberships()) {
             if (candidate.getAccountId() == accountId) {
                 membership = candidate;
                 break;
@@ -308,8 +311,8 @@ public class User extends RealmObject {
     public List<Membership> getActiveMemberships() {
         List<Membership> activeMemberships = new ArrayList<>();
 
-        for (Membership candidate: this.getMemberships()) {
-            if (candidate.isAccepted() || (!candidate.isAccepted() && !candidate.isRejected())){
+        for (Membership candidate : this.getMemberships()) {
+            if (candidate.isAccepted() || (!candidate.isAccepted() && !candidate.isRejected())) {
                 activeMemberships.add(candidate);
             }
         }
@@ -320,9 +323,9 @@ public class User extends RealmObject {
     public List<Membership> getActiveBusinessMemberships() {
         List<Membership> activeMemberships = new ArrayList<>();
 
-        for (Membership candidate: this.getMemberships()) {
+        for (Membership candidate : this.getMemberships()) {
             if (!candidate.isPersonal() && candidate.isAccepted()
-                    || (!candidate.isAccepted() && !candidate.isRejected())){
+                    || (!candidate.isAccepted() && !candidate.isRejected())) {
                 activeMemberships.add(candidate);
             }
         }
@@ -337,7 +340,7 @@ public class User extends RealmObject {
 
         List<Membership> membershipsList = new ArrayList<>();
 
-        for (Membership candidate: this.getMemberships()) {
+        for (Membership candidate : this.getMemberships()) {
             if (!candidate.isAccepted() && !candidate.isRejected()) {
                 membershipsList.add(candidate);
             }
