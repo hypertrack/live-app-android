@@ -3,25 +3,15 @@ package io.hypertrack.sendeta.store;
 import android.graphics.Bitmap;
 import android.util.Log;
 
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.hypertrack.lib.internal.consumer.models.HTUser;
-
-
 import java.io.File;
 import java.util.HashMap;
-import java.util.Map;
 
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.network.retrofit.SendETAService;
-import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.OnOnboardingCallback;
 import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by ulhas on 18/06/16.
@@ -33,16 +23,16 @@ public class OnboardingManager {
     private static OnboardingManager sSharedManager = null;
     private OnboardingUser onboardingUser;
 
+    private OnboardingManager() {
+        this.onboardingUser = OnboardingUser.sharedOnboardingUser();
+    }
+
     public static OnboardingManager sharedManager() {
         if (sSharedManager == null) {
             sSharedManager = new OnboardingManager();
         }
 
         return sSharedManager;
-    }
-
-    private OnboardingManager() {
-        this.onboardingUser = OnboardingUser.sharedOnboardingUser();
     }
 
     public OnboardingUser getUser() {
@@ -200,12 +190,12 @@ public class OnboardingManager {
         });*/
     }
 
-   /* public void uploadPhoto(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
+    public void uploadPhoto(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
                             final OnOnboardingImageUploadCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
 
         if (profileImage != null && profileImage.length() > 0) {
-            UserStore.sharedStore.addImage(profileImage);
+            //UserStore.sharedStore.addImage(profileImage);
 
             // Check if the profile image has changed from the existing one
             if (updatedProfileImage != null && updatedProfileImage.getByteCount() > 0
@@ -237,7 +227,7 @@ public class OnboardingManager {
                 callback.onError();
             }
         }
-    }*/
+    }
 
     public void getUserImage(final OnOnboardingCallback callback) {
 

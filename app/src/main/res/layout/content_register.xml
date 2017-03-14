@@ -21,8 +21,8 @@
         android:layout_centerHorizontal="true"
         android:background="@drawable/theme"
         android:gravity="center_vertical"
-        android:weightSum="1"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:weightSum="1">
 
         <LinearLayout
             android:id="@+id/register.country_code_layout"
@@ -32,11 +32,11 @@
 
             <Spinner
                 android:id="@+id/register.country_codes_spinner"
+                style="@style/TextViewSpinnerItem"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:padding="0dp"
                 android:gravity="center"
-                style="@style/TextViewSpinnerItem"
+                android:padding="0dp"
                 android:spinnerMode="dialog"
                 android:visibility="visible" />
 
@@ -44,10 +44,10 @@
                 android:id="@+id/register.country_code"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:paddingBottom="@dimen/padding_base"
                 android:paddingRight="@dimen/padding_base"
                 android:paddingTop="@dimen/padding_base"
-                android:paddingBottom="@dimen/padding_base"
-                android:layout_gravity="center"
                 android:textColor="@color/text_base"
                 android:textSize="@dimen/text_large"
                 android:visibility="gone" />
@@ -67,11 +67,11 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/enter_phone_number"
                 android:imeActionId="@+id/login"
-                android:paddingBottom="20dp"
                 android:inputType="phone"
                 android:maxLength="10"
-                android:textSize="@dimen/text_large"
-                android:textColorHint="@color/colorPrimaryDark" />
+                android:paddingBottom="20dp"
+                android:textColorHint="@color/colorPrimaryDark"
+                android:textSize="@dimen/text_large" />
 
 
         </android.support.design.widget.TextInputLayout>
@@ -87,5 +87,6 @@
         android:layout_marginStart="@dimen/margin_high"
         android:layout_marginTop="@dimen/margin_high"
         android:text="@string/enter_phone_number_footer_note"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:visibility="gone" />
 </RelativeLayout>

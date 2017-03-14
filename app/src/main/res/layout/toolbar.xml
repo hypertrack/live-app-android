@@ -7,8 +7,8 @@
     android:background="?attr/colorPrimary"
     app:popupTheme="@style/AppTheme.PopupOverlay">
 
-    <ImageView
-        android:id="@+id/toolbar.logo"
+    <io.hypertrack.sendeta.util.images.RoundedImageView
+        android:id="@+id/toolbar.icon"
         android:layout_width="@dimen/toolbar_user_icon"
         android:layout_height="@dimen/toolbar_user_icon"
         android:layout_marginRight="@dimen/margin_high"
@@ -16,8 +16,8 @@
         android:visibility="visible" />
 
     <TextView
-        android:layout_width="wrap_content"
         android:id="@+id/toolbar.title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/colorAccent"
         android:textSize="@dimen/text_medium" />

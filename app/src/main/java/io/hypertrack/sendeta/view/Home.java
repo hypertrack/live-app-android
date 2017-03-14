@@ -515,6 +515,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Initialize Toolbar without Home Button
         initToolbar(getResources().getString(R.string.toolbar_title), false);
 
+        user = UserStore.sharedStore.getUser();
+        if (user.getImageBitmap() != null) {
+            Bitmap bitmap = UserStore.sharedStore.getUser().getImageBitmap();
+            setToolbarIcon(bitmap);
+        }
+
         // Initialize Maps
         SupportMapFragment mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);

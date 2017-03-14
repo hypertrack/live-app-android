@@ -22,7 +22,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -65,6 +64,7 @@ public class Profile extends BaseActivity implements ProfileView {
     public EditText mNameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
+    public Bitmap oldProfileImage = null, updatedProfileImage = null;
     private ProgressDialog mProgressDialog;
     private LinearLayout profileParentLayout;
     private EditText phoneNumberView;
@@ -72,17 +72,33 @@ public class Profile extends BaseActivity implements ProfileView {
     private Spinner countryCodeSpinner;
     private LinearLayout countryCodeLayout;
     private Button register;
-
     private String isoCode;
-
     private CountrySpinnerAdapter adapter;
-
     private Target profileImageDownloadTarget;
     private File profileImage;
-    public Bitmap oldProfileImage = null, updatedProfileImage = null;
-
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
+    private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                phoneNumberView.requestFocus();
+                return true;
+            }
 
+            return false;
+        }
+    };
+    private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                onSignInButtonClicked();
+                return true;
+            }
+
+            return false;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +106,7 @@ public class Profile extends BaseActivity implements ProfileView {
         setContentView(R.layout.activity_profile);
 
         // Initialize Toolbar
-        initToolbar(getString(R.string.title_activity_signup_profile),false);
+        initToolbar(getString(R.string.title_activity_signup_profile), false);
 
         // Initialize UI Views before Attaching View Presenter
         mNameView = (EditText) findViewById(R.id.profile_name);
@@ -157,32 +173,6 @@ public class Profile extends BaseActivity implements ProfileView {
         });
     }
 
-
-    private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                phoneNumberView.requestFocus();
-                return true;
-            }
-
-            return false;
-        }
-    };
-
-    private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                onSignInButtonClicked();
-                return true;
-            }
-
-            return false;
-        }
-    };
-
-
     public void onProfileImageViewClicked(View view) {
 
         // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
@@ -206,7 +196,7 @@ public class Profile extends BaseActivity implements ProfileView {
         String name = mNameView.getText().toString();
         String number = phoneNumberView.getText().toString();
 
-        presenter.attemptLogin(name, number,isoCode, profileImage, oldProfileImage, updatedProfileImage);
+        presenter.attemptLogin(name, number, isoCode, profileImage, oldProfileImage, updatedProfileImage);
     }
 
     public void onNextButtonClicked(MenuItem menuItem) {
@@ -214,10 +204,10 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void updateViews(String name,String phone,String ISOCode ,String profileURL) {
+    public void updateViews(String name, String phone, String ISOCode, String profileURL) {
         String nameFromAccount = getName();
         if (name != null) {
-           mNameView.setText(nameFromAccount);
+            mNameView.setText(nameFromAccount);
         }
         if (!TextUtils.isEmpty(name)) {
             mNameView.setText(name);
@@ -277,7 +267,9 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void showProfilePicUploadSuccess() {
         Toast.makeText(Profile.this, R.string.profile_upload_success, Toast.LENGTH_SHORT).show();
-
+        if (updatedProfileImage != null) {
+            setToolbarIcon(updatedProfileImage);
+        }
     }
 
     @Override
@@ -368,6 +360,7 @@ public class Profile extends BaseActivity implements ProfileView {
                     mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
             }
         });
     }

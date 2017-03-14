@@ -18,6 +18,7 @@ import io.hypertrack.sendeta.interactor.ProfileInteractor;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
+import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.view.Profile;
 import io.hypertrack.sendeta.view.ProfileView;
@@ -78,12 +79,36 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     OnboardingUser onboardingUser = onboardingManager.getUser();
                     onboardingUser.setId(userID);
                     OnboardingUser.setOnboardingUser();
-                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User( user.getName(), user.getPhone());
+                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User(user.getName(), user.getPhone());
                     onboardingManager.didOnboardUser(realmUser);
 
-                    if (view != null) {
-                        view.navigateToHomeScreen();
+                    if (profileImage != null && profileImage.length() > 0) {
+                        onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
+                            @Override
+                            public void onSuccess() {
+                                if (view != null) {
+                                    view.showProfilePicUploadSuccess();
+                                    view.navigateToHomeScreen();
+                                }
+                            }
 
+                            @Override
+                            public void onError() {
+                                HTLog.i(TAG, "Profile Image not saved in local database");
+                                if (view != null) {
+                                    view.showProfilePicUploadError();
+                                }
+                            }
+
+                            @Override
+                            public void onImageUploadNotNeeded() {
+
+                            }
+                        });
+                    } else {
+                        if (view != null) {
+                            view.navigateToHomeScreen();
+                        }
                     }
                 }
 
@@ -96,9 +121,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
                 }
             });
-        } else if(!TextUtils.isEmpty(userName)&&!TextUtils.isEmpty(phone)) {
+        } else if (!TextUtils.isEmpty(userName) && !TextUtils.isEmpty(phone)) {
             try {
-                HyperTrack.createUser(userName,user.getInternationalNumber(), new HyperTrackCallback() {
+                HyperTrack.createUser(userName, user.getInternationalNumber(), new HyperTrackCallback() {
                     @Override
                     public void onSuccess(@NonNull SuccessResponse successResponse) {
                         User user = (User) successResponse.getResponseObject();
@@ -109,10 +134,35 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                         AnalyticsStore.getLogger().enteredName(true, null);
                         AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
                         AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
-                        io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User( user.getName(), user.getPhone());
+                        io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User(user.getName(), user.getPhone());
                         onboardingManager.didOnboardUser(realmUser);
-                        if (view != null) {
-                            view.navigateToHomeScreen();
+                        if (profileImage != null && profileImage.length() > 0) {
+                            onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    if (view != null) {
+                                        view.showProfilePicUploadSuccess();
+                                        view.navigateToHomeScreen();
+                                    }
+                                }
+
+                                @Override
+                                public void onError() {
+                                    HTLog.i(TAG, "Profile Image not saved in local database");
+                                    if (view != null) {
+                                        view.showProfilePicUploadError();
+                                    }
+                                }
+
+                                @Override
+                                public void onImageUploadNotNeeded() {
+
+                                }
+                            });
+                        } else {
+                            if (view != null) {
+                                view.navigateToHomeScreen();
+                            }
                         }
                     }
 
@@ -136,8 +186,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             }
 
 
-        }
-        else {
+        } else {
             HyperTrack.createUser(userName, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -149,10 +198,35 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     AnalyticsStore.getLogger().enteredName(true, null);
                     AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
-                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User( user.getName(), user.getPhone());
+                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User(user.getName(), user.getPhone());
                     onboardingManager.didOnboardUser(realmUser);
-                    if (view != null) {
-                        view.navigateToHomeScreen();
+                    if (profileImage != null && profileImage.length() > 0) {
+                        onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
+                            @Override
+                            public void onSuccess() {
+                                if (view != null) {
+                                    view.showProfilePicUploadSuccess();
+                                    view.navigateToHomeScreen();
+                                }
+                            }
+
+                            @Override
+                            public void onError() {
+                                HTLog.i(TAG, "Profile Image not saved in local database");
+                                if (view != null) {
+                                    view.showProfilePicUploadError();
+                                }
+                            }
+
+                            @Override
+                            public void onImageUploadNotNeeded() {
+
+                            }
+                        });
+                    } else {
+                        if (view != null) {
+                            view.navigateToHomeScreen();
+                        }
                     }
                 }
 

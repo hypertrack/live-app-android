@@ -202,7 +202,7 @@
 
     <!--Toolbar Title-->
     <string name="toolbar_title">SHARE LIVE TRACKING</string>
-    <string name="location_permission_detail">HyperTrack needs location permission to let your friends and family track your</string>
+    <string name="location_permission_detail">HyperTrack needs location permission to let your friends and family track you</string>
 
 
 </resources>

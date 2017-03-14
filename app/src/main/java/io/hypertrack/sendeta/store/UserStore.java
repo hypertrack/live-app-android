@@ -9,8 +9,6 @@ import com.hypertrack.lib.HyperTrack;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
@@ -29,8 +27,6 @@ import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -426,15 +422,19 @@ public class UserStore {
             return;
         }
 
-        RequestBody requestBody = RequestBody.create(MediaType.parse("image*//*"), updatePhoto);
+        addImage(updatePhoto);
 
+        if (callback != null) {
+            callback.OnSuccess();
+        }
+
+
+        /*RequestBody requestBody = RequestBody.create(MediaType.parse("image*//**//*"), updatePhoto);
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
         String uuid = UUID.randomUUID().toString();
         String fileName = "photo\"; filename=\"" + uuid + ".jpg";
         requestBodyMap.put(fileName, requestBody);
-
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-
         Call<Map<String, Object>> call = sendETAService.updateUserProfilePic(this.user.getId(), requestBodyMap);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
@@ -457,7 +457,7 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });
+        });*/
     }
 
     public int getSelectedMembershipAccountId() {

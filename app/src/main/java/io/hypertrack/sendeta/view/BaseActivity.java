@@ -1,5 +1,6 @@
 package io.hypertrack.sendeta.view;
 
+import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.util.images.RoundedImageView;
 
 /**
  * Created by piyush on 30/06/16.
@@ -28,6 +30,7 @@ public class BaseActivity extends AppCompatActivity {
     private FrameLayout loadingLayout;
     private CardView loadingLayoutMessageContainer;
     private TextView textView;
+    private RoundedImageView toolbarIcon;
 
     public Toolbar getToolbar() {
         return toolbar;
@@ -75,6 +78,7 @@ public class BaseActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         textView = (TextView) toolbar.findViewById(R.id.toolbar_title);
         toolbar.setTitle("");
+        toolbarIcon = (RoundedImageView) toolbar.findViewById(R.id.toolbar_icon);
 //        toolbar.setTitleTextColor(getResources().getColor(R.color.colorAccent));
 //        toolbar.setSubtitleTextColor(Color.WHITE);
 
@@ -92,6 +96,14 @@ public class BaseActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(homeButtonEnabled);
         getSupportActionBar().setHomeButtonEnabled(homeButtonEnabled);
     }
+
+    public void setToolbarIcon(Bitmap profileImage) {
+        if (toolbarIcon != null && profileImage != null) {
+            toolbarIcon.setImageBitmap(profileImage);
+            toolbarIcon.setScaleType(ImageView.ScaleType.CENTER_CROP);
+        }
+    }
+
 
     /**
      * [IMPORTANT] use this method only after initToolbar
