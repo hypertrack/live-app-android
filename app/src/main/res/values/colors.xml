@@ -14,6 +14,8 @@
     <color name="appBackground">#F4F4F4</color>
     <color name="app_background_gradient">#55F4F4F4</color>
 
+    <color name="ic_ht_service_notification_icon_bg_color">@color/colorAccent</color>
+
     <!-- Default Text Colors -->
     <color name="text_base">#6a6a6a</color>
     <color name="text_secondary">#888888</color>

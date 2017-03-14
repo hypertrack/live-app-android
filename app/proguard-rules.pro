@@ -28,7 +28,7 @@
 -keep class io.hypertrack.sendeta.network.** { *; }
 -keep class io.hypertrack.sendeta.store.** { *; }
 -keep class maps.** { *; }
--keep class io.hypertrack.lib.** { *; }
+-keep class com.hypertrack.lib.** { *; }
 
 -keep interface com.squareup.okhttp.** { *; }
 
@@ -42,7 +42,7 @@
 -dontwarn retrofit2.**
 -dontwarn okio.**
 -dontwarn com.google.android.gms.**
--dontwarn io.hypertrack.lib.**
+-dontwarn com.hypertrack.lib.**
 
 -keepclasseswithmembers class * {
     @retrofit.http.* <methods>;
