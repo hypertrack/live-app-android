@@ -101,6 +101,12 @@ public class UserStore {
     }
 
     public boolean isUserLoggedIn(Context context) {
+        // Check if user has signed up
+        if (!TextUtils.isEmpty(HyperTrack.getUserId())) {
+            Realm realm = Realm.getDefaultInstance();
+            return realm.where(User.class).findAll().size() > 0;
+        }
+
         // Check if DriverId exists for current user
         String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
         if (TextUtils.isEmpty(hyperTrackDriverID)) {
@@ -121,11 +127,8 @@ public class UserStore {
         }
 
         // Configure UserId for v3 HyperTrack SDK, if not done already
-        if (TextUtils.isEmpty(HyperTrack.getUserId()))
-            HyperTrack.setUserId(hyperTrackDriverID);
-
-        Realm realm = Realm.getDefaultInstance();
-        return realm.where(User.class).findAll().size() > 0;
+        HyperTrack.setUserId(hyperTrackDriverID);
+        return true;
     }
 
     public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
