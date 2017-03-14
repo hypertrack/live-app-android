@@ -1,14 +1,12 @@
 package io.hypertrack.sendeta.store;
 
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
@@ -22,20 +20,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.Place;
-import com.hypertrack.lib.models.ServiceNotificationParams;
-import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 import com.hypertrack.lib.models.SuccessResponse;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
@@ -45,7 +38,6 @@ import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import io.hypertrack.sendeta.view.SplashScreen;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -62,39 +54,33 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
     private static TaskManager sharedManager;
-    //private HTTransmitterService transmitter;
     private Context mContext;
-    private int selectedAccountId;
-    private String hyperTrackTaskId;
-    private Task hyperTrackTask;
     private String actionID;
     private Action hyperTrackAction;
     private Place lastUpdatedDestination = null;
     private Place place;
-    private HTUserVehicleType vehicleType = HTUserVehicleType.CAR;
     private GoogleApiClient mGoogleAPIClient;
     private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
     private ActionManagerListener actionRefreshedListener, actionComletedListener;
-    private BroadcastReceiver mDriverNotLiveBroadcastReceiver;
     private Handler handler;
-    final Runnable refreshAction = new Runnable() {
+    private final Runnable refreshAction = new Runnable() {
         @Override
         public void run() {
 
             final Action action = TaskManager.getSharedManager(mContext).getHyperTrackAction();
-            if (!isTaskLive(action))
+            if (!isActionLive(action))
                 return;
 
             HyperTrack.getAction(action.getId(), new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
                     Action actionResponse = (Action) response.getResponseObject();
-                    if (!isTaskLive(actionResponse)) {
-                        HTLog.i(TAG, "SendETA Action Not Live, Calling completeTask() to complete the task");
+                    if (!isActionLive(actionResponse)) {
+                        HTLog.i(TAG, "SendETA Action Not Live, Calling completeAction() to complete the action");
 
-                        // Call completeTask when the Task object is null or task is not live
+                        // Call completeAction when the Action object is null or it is not live anymore
                         TaskManager.this.completeAction(new ActionManagerCallback() {
                             @Override
                             public void OnSuccess() {
@@ -128,9 +114,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     private TaskManager(Context mContext) {
         this.mContext = mContext;
-//        transmitter = HTTransmitterService.getInstance(mContext);
-
-        initializeTaskManager();
     }
 
     public static TaskManager getSharedManager(Context context) {
@@ -139,12 +122,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         return sharedManager;
-    }
-
-    // Method to initialize TaskManager instance
-    private void initializeTaskManager() {
-        //  this.setupGoogleAPIClient();
-        this.setServiceNotification();
     }
 
     // Method to setup GoogleApiClient to add geofence request
@@ -159,24 +136,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.mGoogleAPIClient.connect();
     }
 
-    // Method to set TransmitterSDK ServiceNotification
-    private void setServiceNotification() {
-        //Customize Notification Settings
-        ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
-        ServiceNotificationParams notificationParams = builder
-                .setSmallIconBGColor(ContextCompat.getColor(mContext, R.color.colorAccent))
-                .setContentIntentActivityClass(SplashScreen.class)
-                .build();
-        //   transmitter.setServiceNotificationParams(notificationParams);
-    }
-
-    // Method to get saved TaskData
-    private void getSavedTaskData() {
-        this.hyperTrackTask = SharedPreferenceManager.getTask(mContext);
-        this.hyperTrackTaskId = SharedPreferenceManager.getTaskID(mContext);
-        //  this.place = SharedPreferenceManager.getPlace();
-    }
-
+    // Method to get saved ActionData
     private void getSavedActionData() {
         this.hyperTrackAction = SharedPreferenceManager.getAction(mContext);
         this.actionID = SharedPreferenceManager.getActionID(mContext);
@@ -202,22 +162,11 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         return false;
     }
 
-    private boolean isTaskLive(Action task) {
-        return task != null && !TextUtils.isEmpty(task.getId());
-    }
+    public boolean isActionLive(Action action) {
+        if (action == null)
+            action = this.getHyperTrackAction();
 
-    private void onTaskRefresh() {
-        SharedPreferenceManager.setTask(this.hyperTrackTask);
-
-        // Update TaskID if Task updated is not null
-        if (this.hyperTrackTask != null && !TextUtils.isEmpty(this.hyperTrackTask.getId())) {
-            this.hyperTrackTaskId = hyperTrackTask.getId();
-            SharedPreferenceManager.setTaskID(hyperTrackTask.getId());
-        }
-
-        if (this.actionRefreshedListener != null) {
-            this.actionRefreshedListener.OnCallback();
-        }
+        return action != null && !TextUtils.isEmpty(action.getId());
     }
 
     private void onActionRefresh() {
@@ -232,11 +181,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.actionRefreshedListener != null) {
             this.actionRefreshedListener.OnCallback();
         }
-    }
-
-
-    public boolean isTaskActive() {
-        return isTaskLive(this.getHyperTrackAction());
     }
 
     public void getETA(LatLng origin, LatLng destination, String vehicleType, final TaskETACallback callback) {
@@ -298,7 +242,6 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
      */
     public void clearState() {
         HTLog.i(TAG, "Calling clearState to reset SendETA task state");
-        this.vehicleType = HTUserVehicleType.CAR;
         this.stopRefreshingAction();
         this.stopGeofencing();
         this.clearListeners();
@@ -326,8 +269,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         if (handler == null) {
             handler = new Handler();
         } else {
-            if (refreshAction != null)
-                handler.removeCallbacksAndMessages(refreshAction);
+            handler.removeCallbacksAndMessages(refreshAction);
         }
 
         handler.postDelayed(refreshAction, delay);
@@ -501,7 +443,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         SharedPreferenceManager.setActionID(actionID);
     }
 
-    public String getHyperTrackActionId() {
+    private String getHyperTrackActionId() {
         if (this.actionID == null) {
             this.actionID = SharedPreferenceManager.getActionID(mContext);
         }
