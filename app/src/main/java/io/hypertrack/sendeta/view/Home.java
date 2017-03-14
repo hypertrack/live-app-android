@@ -857,8 +857,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             if (etaInMinutes == null || etaInMinutes == 0) {
                 Action action = taskManager.getHyperTrackAction();
-                if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining()))
-                    etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining()) / 60;
+                if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+                    Double displayETA = Double.valueOf(action.getActionDisplay().getDurationRemaining()) / 60;
+                    etaInMinutes = displayETA.intValue();
+                }
             }
 
             updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
@@ -1339,7 +1341,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng destinationLocation = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining());
+        Double displayETA = Double.valueOf(action.getActionDisplay().getDurationRemaining()) / 60;
+        etaInMinutes = displayETA.intValue();
         updateDestinationMarker(destinationLocation, etaInMinutes);
     }
 
