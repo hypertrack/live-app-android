@@ -42,7 +42,7 @@
     <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
     <string name="geofence_transition_invalid_type">Geofence transition error: invalid transition type %1$d</string>
 
-    <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for SendETA</string>
+    <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for HyperTrack-Live</string>
     <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to \n%1$s</string>
 
     <!-- Action bar strings -->
@@ -142,7 +142,7 @@
     <string name="business_profile_invite_primary_btn">Accept</string>
     <string name="business_profile_invite_secondary_btn">Reject</string>
 
-    <string name="business_profile_setup_title">Hypertrack with SendETA</string>
+    <string name="business_profile_setup_title">Hypertrack with HyperTrack-Live</string>
     <string name="business_profile_setup_msg">Monitor your operations and power a great customer experience</string>
     <string name="business_profile_setup_primary_btn">set-up now</string>
     <string name="business_profile_setup_secondary_btn">Share</string>
@@ -161,7 +161,7 @@
     <string name="business_profile_rejected_error_msg">Error occurred while rejecting the invite. Please try again.</string>
     <string name="business_profile_delete_error_msg">Error occurred while deleting %1$s profile. Please try again.</string>
 
-    <string name="business_profile_share_msg">We can use HyperTrack with SendETA to monitor our operations and power a great customer experience. Read more at www.hypertrack.io/sendeta</string>
+    <string name="business_profile_share_msg">We can use HyperTrack with HyperTrack-Live to monitor our operations and power a great customer experience. Read more at www.hypertrack.io/sendeta</string>
     <string name="business_profile_setup_url">https://dashboard.hypertrack.io/signup/sendeta</string>
 
     <!-- Notification Strings -->

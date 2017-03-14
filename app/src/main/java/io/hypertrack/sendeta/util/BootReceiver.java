@@ -17,7 +17,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        HTLog.i(TAG, "SendETA Boot receiver onReceive");
+        HTLog.i(TAG, "HyperTrackLive Boot receiver onReceive");
 
         if (SharedPreferenceManager.getGeofencingRequest() != null) {
             // Add Geofencing Request
