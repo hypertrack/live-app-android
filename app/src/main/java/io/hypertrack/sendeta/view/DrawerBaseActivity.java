@@ -1,19 +1,13 @@
 package io.hypertrack.sendeta.view;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.design.internal.NavigationMenuView;
-import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.UserStore;
 
 /**
@@ -36,7 +30,7 @@ public class DrawerBaseActivity extends BaseActivity {
             initToolbar(title);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.home_drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.home_drawer);
+      /*  NavigationView navigationView = (NavigationView) findViewById(R.id.home_drawer);
 
         if (navigationView != null) {
             View navigationHeaderView = navigationView.getHeaderView(0);
@@ -63,11 +57,11 @@ public class DrawerBaseActivity extends BaseActivity {
                                     break;
                                 }
 
-                                case R.id.drawer_user_activities: {
+                               *//* case R.id.drawer_user_activities: {
                                     Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
                                     startActivity(activitiesIntent);
                                     break;
-                                }
+                                }*//*
 
                                 case R.id.drawer_settings: {
                                     AnalyticsStore.getLogger().tappedProfile();
@@ -87,7 +81,7 @@ public class DrawerBaseActivity extends BaseActivity {
             if (navigationMenuView != null) {
                 navigationMenuView.setVerticalScrollBarEnabled(false);
             }
-        }
+        }*/
 
         // Update User Data in Navigation Drawer Header
         updateUserData();

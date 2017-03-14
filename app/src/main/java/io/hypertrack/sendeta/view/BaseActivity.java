@@ -27,6 +27,7 @@ public class BaseActivity extends AppCompatActivity {
     private ImageView infoMessageIcon;
     private FrameLayout loadingLayout;
     private CardView loadingLayoutMessageContainer;
+    private TextView textView;
 
     public Toolbar getToolbar() {
         return toolbar;
@@ -68,9 +69,11 @@ public class BaseActivity extends AppCompatActivity {
         setupToolbar(title, null, homeButtonEnabled);
     }
 
+
     private void setupToolbar(String title, String subTitle, boolean homeButtonEnabled) {
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        textView = (TextView) toolbar.findViewById(R.id.toolbar_title);
         toolbar.setTitle("");
 //        toolbar.setTitleTextColor(getResources().getColor(R.color.colorAccent));
 //        toolbar.setSubtitleTextColor(Color.WHITE);
@@ -78,11 +81,11 @@ public class BaseActivity extends AppCompatActivity {
 //        retryContainer = (LinearLayout) findViewById(R.id.retry_container);
 
         if (!TextUtils.isEmpty(title)) {
-            toolbar.setTitle(title);
+            textView.setText(title);
         }
 
         if (!TextUtils.isEmpty(subTitle)) {
-            toolbar.setSubtitle(subTitle);
+            textView.setText(subTitle);
         }
 
         setSupportActionBar(toolbar);
@@ -98,7 +101,13 @@ public class BaseActivity extends AppCompatActivity {
      */
     public void setTitle(String title) {
         if (toolbar != null) {
-            toolbar.setTitle(title);
+            if (textView != null)
+                textView.setText(title);
+            else {
+                textView = (TextView) toolbar.findViewById(R.id.toolbar_title);
+                textView.setText(title);
+            }
+
         }
     }
 

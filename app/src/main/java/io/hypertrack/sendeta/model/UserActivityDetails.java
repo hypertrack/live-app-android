@@ -2,7 +2,6 @@ package io.hypertrack.sendeta.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import io.hypertrack.lib.common.model.HTTask;
 
 /**
  * Created by piyush on 02/09/16.
@@ -31,7 +30,7 @@ public class UserActivityDetails {
     private String shareUrl;
 
     @SerializedName("details")
-    private HTTask taskDetails;
+    private Task taskDetails;
 
     public int getId() {
         return id;
@@ -89,18 +88,18 @@ public class UserActivityDetails {
         this.shareUrl = shareUrl;
     }
 
-    public HTTask getTaskDetails() {
+    public Task getTaskDetails() {
         return taskDetails;
     }
 
-    public void setTaskDetails(HTTask taskDetails) {
+    public void setTaskDetails(Task taskDetails) {
         this.taskDetails = taskDetails;
     }
 
     public UserActivityDetails() {
     }
 
-    public UserActivityDetails(String taskID, boolean inProcess, HTTask taskDetails) {
+    public UserActivityDetails(String taskID, boolean inProcess, Task taskDetails) {
         this.taskID = taskID;
         this.inProcess = inProcess;
         this.taskDetails = taskDetails;

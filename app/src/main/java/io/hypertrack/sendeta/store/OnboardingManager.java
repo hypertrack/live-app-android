@@ -4,6 +4,8 @@ import android.graphics.Bitmap;
 import android.util.Log;
 
 import com.google.i18n.phonenumbers.NumberParseException;
+import com.hypertrack.lib.internal.consumer.models.HTUser;
+
 
 import java.io.File;
 import java.util.HashMap;
@@ -30,7 +32,6 @@ public class OnboardingManager {
 
     private static OnboardingManager sSharedManager = null;
     private OnboardingUser onboardingUser;
-    private SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class);
 
     public static OnboardingManager sharedManager() {
         if (sSharedManager == null) {
@@ -48,7 +49,7 @@ public class OnboardingManager {
         return onboardingUser;
     }
 
-    public void onboardUser(final OnOnboardingCallback callback) {
+    /*public void onboardUser(final OnOnboardingCallback callback) {
         final String phoneNumber;
         try {
             phoneNumber = this.onboardingUser.getInternationalNumber();
@@ -93,14 +94,14 @@ public class OnboardingManager {
                 callback.onError();
             }
         });
-    }
+    }*/
 
     public void verifyCode(String code, final OnOnboardingCallback callback) {
         HashMap<String, String> verificationParams = new HashMap<>();
         verificationParams.put("verification_code", code);
-        verificationParams.put("phone_number", onboardingUser.getPhoneNumber());
+        verificationParams.put("phone_number", onboardingUser.getPhone());
 
-        Call<VerifyResponse> call = sendETAService.verifyUser(verificationParams);
+       /* Call<VerifyResponse> call = sendETAService.verifyUser(verificationParams);
         call.enqueue(new Callback<VerifyResponse>() {
             @Override
             public void onResponse(Call<VerifyResponse> call, Response<VerifyResponse> response) {
@@ -123,10 +124,10 @@ public class OnboardingManager {
                     callback.onError();
                 }
             }
-        });
+        });*/
     }
 
-    public void updateInfo(final OnOnboardingCallback callback) {
+   /* public void updateInfo(final OnOnboardingCallback callback) {
         HashMap<String, String> user = new HashMap<>();
         user.put("first_name", this.onboardingUser.getFirstName());
         user.put("last_name", this.onboardingUser.getLastName());
@@ -169,13 +170,13 @@ public class OnboardingManager {
                 callback.onError();
             }
         });
-    }
+    }*/
 
     public void resendVerificationCode(final OnOnboardingCallback callback) {
         HashMap<String, String> phoneNumber = new HashMap<>();
-        phoneNumber.put("phone_number", this.onboardingUser.getPhoneNumber());
+        phoneNumber.put("phone_number", this.onboardingUser.getPhone());
 
-        Call<Map<String, Object>> call = sendETAService.resendCode(phoneNumber);
+      /*  Call<Map<String, Object>> call = sendETAService.resendCode(phoneNumber);
         call.enqueue(new Callback<Map<String, Object>>() {
             @Override
             public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
@@ -196,10 +197,10 @@ public class OnboardingManager {
                     callback.onError();
                 }
             }
-        });
+        });*/
     }
 
-    public void uploadPhoto(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
+   /* public void uploadPhoto(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
                             final OnOnboardingImageUploadCallback callback) {
         File profileImage = this.onboardingUser.getPhotoImage();
 
@@ -236,13 +237,13 @@ public class OnboardingManager {
                 callback.onError();
             }
         }
-    }
+    }*/
 
     public void getUserImage(final OnOnboardingCallback callback) {
 
     }
 
-    private void didOnbardUser(User user) {
+    public void didOnboardUser(User user) {
         UserStore.sharedStore.addUser(user);
     }
 

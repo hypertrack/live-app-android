@@ -28,7 +28,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return "HTLocation{" +
+        return "HyperTrackLocation{" +
                 "type='" + type + '\'' +
                 ", coordinates=" + Arrays.toString(coordinates) +
                 '}';

@@ -5,10 +5,21 @@ package io.hypertrack.sendeta.view;
  */
 public interface ProfileView {
     void showProfilePicUploadError();
+
     void showProfilePicUploadSuccess();
+
     void navigateToHomeScreen();
+
     void showErrorMessage();
-    void showFirstNameValidationError();
-    void showLastNameValidationError();
-    void updateViews(String firstName, String lastName, String profileURL);
+
+
+
+    void updateViews(String name,String phone,String ISOCode ,String profileURL);
+
+    void registrationFailed();
+
+    void registrationSuccessful();
+
+
+
 }

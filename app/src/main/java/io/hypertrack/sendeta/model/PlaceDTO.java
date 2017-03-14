@@ -1,8 +1,12 @@
 package io.hypertrack.sendeta.model;
 
-import com.google.gson.annotations.SerializedName;
+import android.location.*;
+import android.location.Location;
 
-import io.hypertrack.lib.common.model.HTLocation;
+import com.google.gson.annotations.SerializedName;
+import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+
 
 /**
  * Created by ulhas on 19/06/16.
@@ -18,7 +22,7 @@ public class PlaceDTO {
 
     private String address;
 
-    private HTLocation location;
+    private HyperTrackLocation location;
 
     public int getId() {
         return id;
@@ -52,11 +56,11 @@ public class PlaceDTO {
         this.address = address;
     }
 
-    public HTLocation getLocation() {
+    public HyperTrackLocation getLocation() {
         return location;
     }
 
-    public void setLocation(HTLocation location) {
+    public void setLocation(HyperTrackLocation location) {
         this.location = location;
     }
 
@@ -65,6 +69,9 @@ public class PlaceDTO {
         this.address = place.getAddress();
         this.googlePlacesID = place.getGooglePlacesID();
         this.name = place.getName();
-        this.location = new HTLocation(place.getLatitude(), place.getLongitude());
+        android.location.Location newLoc = new Location("");
+        newLoc.setLatitude(place.getLatitude());
+        newLoc.setLongitude(place.getLongitude());
+        this.location = new HyperTrackLocation(newLoc);
     }
 }

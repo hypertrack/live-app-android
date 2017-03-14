@@ -4,7 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import io.hypertrack.lib.common.util.HTLog;
+import com.hypertrack.lib.internal.common.logging.HTLog;
+
 import io.hypertrack.sendeta.store.TaskManager;
 
 /**
@@ -16,7 +17,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        HTLog.i(TAG, "SendETA Boot receiver onReceive");
+        HTLog.i(TAG, "HyperTrackLive Boot receiver onReceive");
 
         if (SharedPreferenceManager.getGeofencingRequest() != null) {
             // Add Geofencing Request

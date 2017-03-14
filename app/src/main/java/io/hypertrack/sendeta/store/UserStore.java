@@ -1,9 +1,10 @@
 package io.hypertrack.sendeta.store;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.text.TextUtils;
 
-import com.crashlytics.android.Crashlytics;
+import com.hypertrack.lib.HyperTrack;
 
 import java.io.File;
 import java.util.HashMap;
@@ -11,25 +12,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTLocation;
+import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.TaskDTO;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
 import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreGetTaskCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
+import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -43,9 +41,8 @@ import retrofit2.Response;
  */
 public class UserStore {
 
-    private static String TAG = UserStore.class.getSimpleName();
     public static UserStore sharedStore = new UserStore();
-
+    private static String TAG = UserStore.class.getSimpleName();
     private User user;
     private Realm realm = Realm.getDefaultInstance();
 
@@ -103,70 +100,43 @@ public class UserStore {
         return this.user;
     }
 
-    public static boolean isUserLoggedIn() {
+    public boolean isUserLoggedIn(Context context) {
+        // Check if DriverId exists for current user
+        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
+        if (TextUtils.isEmpty(hyperTrackDriverID)) {
+            try {
+                if (this.realm != null)
+                    this.realm.close();
+
+                // Delete Realm Data in order to prevent further crashes
+                RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context)
+                        .schemaVersion(1)
+                        .migration(new DBMigration())
+                        .build();
+                Realm.deleteRealm(realmConfiguration);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        // Configure UserId for v3 HyperTrack SDK, if not done already
+        if (TextUtils.isEmpty(HyperTrack.getUserId()))
+            HyperTrack.setUserId(hyperTrackDriverID);
+
         Realm realm = Realm.getDefaultInstance();
         return realm.where(User.class).findAll().size() > 0;
     }
 
-    public void startTaskOnServer(final String taskID, final MetaPlace place, final int selectedAccountId,
-                                  final HTLocation startLocation, final HTDriverVehicleType vehicleType,
-                                  final UserStoreGetTaskCallback callback) {
-        if (this.user == null || place == null) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        TaskDTO taskDTO;
-        if (!TextUtils.isEmpty(taskID)) {
-            taskDTO = new TaskDTO(taskID, selectedAccountId, startLocation, vehicleType);
-        } else {
-            taskDTO = new TaskDTO(place, selectedAccountId, startLocation, vehicleType);
-        }
-
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-        Call<Map<String, Object>> call = sendETAService.startTask(this.user.getId(), taskDTO);
-        call.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-
-                if (response.isSuccessful()) {
-                    Map<String, Object> responseDTO = response.body();
-
-                    try {
-                        if (callback != null) {
-                            if (responseDTO != null) {
-                                callback.OnSuccess(responseDTO);
-                            } else {
-                                callback.OnError();
-                            }
-                        }
-
-                    } catch (Exception e) {
-                        Crashlytics.logException(e);
-                        e.printStackTrace();
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
     public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
-        placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
+
+        addPlace(placeToBeAdded);
+        if (callback != null) {
+            callback.OnSuccess();
+        }
+
+      /*  placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
                 addPlace(place);
@@ -185,11 +155,12 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });
+        });*/
     }
 
     public void updatePlaces(final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
+
         placeManager.getPlaces(new PlaceManagerGetPlacesCallback() {
             @Override
             public void OnSuccess(List<MetaPlace> places) {
@@ -322,7 +293,13 @@ public class UserStore {
 
     public void deletePlace(final MetaPlace place, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
-        placeManager.deletePlace(place, new PlaceManagerCallback() {
+        processDeletedMetaPlaceForAnalytics(true, null, place);
+        deletePlace(place);
+        if (callback != null) {
+            callback.OnSuccess();
+        }
+
+      /*  placeManager.deletePlace(place, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(MetaPlace place) {
 
@@ -344,7 +321,7 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });
+        });*/
     }
 
     /**

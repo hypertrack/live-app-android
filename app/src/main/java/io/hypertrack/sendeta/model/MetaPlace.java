@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.model;
 
+import android.text.TextUtils;
+
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
@@ -29,6 +31,70 @@ public class MetaPlace extends RealmObject implements Serializable{
 
     private Double latitude = 0.0;
     private Double longitude = 0.0;
+
+    public MetaPlace() {
+
+    }
+
+    public MetaPlace(Double latitude, Double longitude) {
+        if (latitude == null || longitude == null)
+            return;
+
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public MetaPlace(LatLng latLng) {
+        if (latLng == null)
+            return;
+
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
+    }
+
+    public MetaPlace(String name, LatLng latLng) {
+        this.name = name;
+
+        if (latLng == null) {
+            return;
+        }
+
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
+    }
+
+    public MetaPlace(String name, Double latitude, Double longitude) {
+        this.name = name;
+
+        if (latitude == null || longitude == null)
+            return;
+
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public MetaPlace(MetaPlace place) {
+        this.name = place.getName();
+        this.googlePlacesID = place.getGooglePlacesID();
+        this.address = place.getAddress();
+        this.id = place.getId();
+        this.longitude = place.getLongitude();
+        this.latitude = place.getLatitude();
+    }
+
+    public MetaPlace(Place place) {
+        this.name = place.getName().toString();
+        this.googlePlacesID = place.getId();
+        this.address = place.getAddress().toString();
+
+        LatLng latLng = place.getLatLng();
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
+    }
+
+    public MetaPlace(String name) {
+        this.name = name;
+    }
 
     public int getId() {
         return id;
@@ -90,56 +156,6 @@ public class MetaPlace extends RealmObject implements Serializable{
                 '}';
     }
 
-    public MetaPlace() {
-
-    }
-
-    public MetaPlace(Double latitude, Double longitude) {
-        if (latitude == null || longitude == null)
-            return;
-
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public MetaPlace(LatLng latLng) {
-        if (latLng == null)
-            return;
-
-        this.latitude = latLng.latitude;
-        this.longitude = latLng.longitude;
-    }
-
-    public MetaPlace(String name, LatLng latLng) {
-        this.name = name;
-
-        if (latLng == null) {
-            return;
-        }
-
-        this.latitude = latLng.latitude;
-        this.longitude = latLng.longitude;
-    }
-
-    public MetaPlace(String name, Double latitude, Double longitude) {
-        this.name = name;
-
-        if (latitude == null || longitude == null)
-            return;
-
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public MetaPlace(MetaPlace place) {
-        this.name = place.getName();
-        this.googlePlacesID = place.getGooglePlacesID();
-        this.address = place.getAddress();
-        this.id = place.getId();
-        this.longitude = place.getLongitude();
-        this.latitude = place.getLatitude();
-    }
-
     public void update(MetaPlace place) {
         this.name = place.getName();
         this.googlePlacesID = place.getGooglePlacesID();
@@ -149,21 +165,15 @@ public class MetaPlace extends RealmObject implements Serializable{
         this.latitude = place.getLatitude();
     }
 
-    public MetaPlace(Place place) {
-        this.name = place.getName().toString();
-        this.googlePlacesID = place.getId();
-        this.address = place.getAddress().toString();
-
-        LatLng latLng = place.getLatLng();
-        this.latitude = latLng.latitude;
-        this.longitude = latLng.longitude;
-    }
-
     public boolean isHome() {
+        if (TextUtils.isEmpty(this.name))
+            return false;
         return this.name.equalsIgnoreCase(HOME);
     }
 
     public boolean isWork() {
+        if (TextUtils.isEmpty(this.name))
+            return false;
         return this.name.equalsIgnoreCase(WORK);
     }
 
@@ -177,10 +187,6 @@ public class MetaPlace extends RealmObject implements Serializable{
         }
 
         return (this.id == place.getId());
-    }
-
-    public MetaPlace(String name) {
-        this.name = name;
     }
 
     public LatLng getLatLng() {

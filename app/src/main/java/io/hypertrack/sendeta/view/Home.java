@@ -72,38 +72,43 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
+import com.hypertrack.lib.internal.common.logging.HTLog;
+import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
+import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
+import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.models.ActionParams;
+import com.hypertrack.lib.models.ActionParamsBuilder;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.HyperTrackError;
+import com.hypertrack.lib.models.Place;
+import com.hypertrack.lib.models.ServiceNotificationParams;
+import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
+import com.hypertrack.lib.models.SuccessResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.common.util.HTTaskUtils;
-import io.hypertrack.lib.transmitter.model.TransmitterConstants;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
-import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.TaskETAResponse;
 import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.network.retrofit.SendETAService;
-import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
-import io.hypertrack.sendeta.service.RegistrationIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.TaskManager;
 import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
+import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
-import io.hypertrack.sendeta.store.callback.TaskManagerCallback;
-import io.hypertrack.sendeta.store.callback.TaskManagerListener;
 import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
@@ -119,59 +124,71 @@ import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SwipeButton;
 import io.hypertrack.sendeta.util.SwipeButtonCustomItems;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class Home extends DrawerBaseActivity implements ResultCallback<Status>, LocationListener,
         OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = Home.class.getSimpleName();
-
-    private User user;
-    private GoogleMap mMap;
+    public CardView mAutocompleteResultsLayout;
+    public RecyclerView mAutocompleteResults;
     protected GoogleApiClient mGoogleApiClient;
     protected LocationRequest mLocationRequest;
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+    private User user;
+    private GoogleMap mMap;
     private Marker currentLocationMarker, destinationLocationMarker;
-
     private Location defaultLocation = new Location("default");
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
 
+            Log.d(TAG, "Location Changed");
+
+            // Initiate FusedLocation Updates on Location Changed
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && LocationUtils.isLocationEnabled(Home.this)) {
+                // Remove location updates so that it resets
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
+
+                //change the time of location updates
+                createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+
+                //restart location updates with the new interval
+                resumeLocationUpdates();
+
+                locationFrequencyIncreased = true;
+            }
+        }
+    };
     private AppBarLayout appBarLayout;
     private TabLayout vehicleTypeTabLayout;
     private TextView destinationText, destinationDescription, mAutocompletePlacesView, infoMessageViewText;
     private LinearLayout enterDestinationLayout, infoMessageView, endTripLoaderAnimationLayout;
     private FrameLayout mAutocompletePlacesLayout, bottomButtonLayout;
-    public CardView mAutocompleteResultsLayout;
-    public RecyclerView mAutocompleteResults;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
     private ImageButton shareButton, navigateButton, favoriteButton;
     private View customMarkerView;
     private RoundedImageView heroMarkerProfileImageView;
     private ProgressBar mAutocompleteLoader;
-
     private PlaceAutocompleteAdapter mAdapter;
-
-    private MetaPlace restoreTaskMetaPlace;
-
+    private Place restoreTaskMetaPlace;
+    private Place destinationPlace;
     private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
             locationFrequencyIncreased = true, selectPushedTaskMetaPlace = false, handlePushedTaskDeepLink = false,
-            destinationAddressGeocoded = false, mRegistrationBroadcastReceived = false, isMapLoaded = false;
+            destinationAddressGeocoded = false, isMapLoaded = false;
     private MetaPlace pushedTaskMetaPlace;
     private String pushedTaskID;
-
-    private boolean isReceiverRegistered;
-
     private float zoomLevel = 1.0f;
-
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
-    private Call<ResponseBody> sendGCMToServerCall;
-
-    private HTDriverVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
-
+    private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
@@ -224,119 +241,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             destinationDescription.setText("");
         }
     };
-
-    private void onSelectPlace(final MetaPlace place) {
-        if (place == null) {
-            return;
-        }
-
-        getEtaForDestination(place.getLatLng(), selectedVehicleType, new TaskETACallback() {
-            @Override
-            public void OnSuccess(TaskETAResponse etaResponse) {
-                // Hide Retry Button
-                showRetryButton(false, null);
-
-                onETASuccess(etaResponse, place);
-
-                if (handlePushedTaskDeepLink) {
-                    sendETAButton.performClick();
-                }
-            }
-
-            @Override
-            public void OnError() {
-                // Show Retry button to fetch eta again
-                showRetryButton(true, place);
-
-                if (destinationLocationMarker != null) {
-                    destinationLocationMarker.remove();
-                    destinationLocationMarker = null;
-                }
-
-                showETAError();
-            }
-        });
-    }
-
-    private void showRetryButton(boolean showRetryButton, final MetaPlace place) {
-
-        if (showRetryButton) {
-            // Initialize RetryButton on getETAForDestination failure
-            bottomButtonLayout.setVisibility(View.VISIBLE);
-            retryButton.setVisibility(View.VISIBLE);
-            retryButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // Fetch ETA for selected place
-                    onSelectPlace(place);
-                }
-            });
-        } else {
-            // Reset Retry button
-            bottomButtonLayout.setVisibility(View.GONE);
-            retryButton.setVisibility(View.GONE);
-            retryButton.setOnClickListener(null);
-        }
-    }
-
-    private void getEtaForDestination(LatLng destinationLocation, HTDriverVehicleType vehicleType, final TaskETACallback callback) {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.calculating_eta_message));
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
-
-        if (currentLocationMarker == null || currentLocationMarker.getPosition() == null || destinationLocation == null) {
-            mProgressDialog.dismiss();
-            callback.OnError();
-            return;
-        }
-
-        TaskManager.getSharedManager(Home.this).getETA(currentLocationMarker.getPosition(), destinationLocation, vehicleType.toString(), new TaskETACallback() {
-            @Override
-            public void OnSuccess(TaskETAResponse etaResponse) {
-                if (mProgressDialog != null && !Home.this.isFinishing())
-                    mProgressDialog.dismiss();
-
-                if (callback != null)
-                    callback.OnSuccess(etaResponse);
-            }
-
-            @Override
-            public void OnError() {
-                if (mProgressDialog != null && !Home.this.isFinishing())
-                    mProgressDialog.dismiss();
-
-                if (callback != null)
-                    callback.OnError();
-            }
-        });
-    }
-
-    private void showETAError() {
-        Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
-    }
-
-    private void onETASuccess(TaskETAResponse response, MetaPlace place) {
-        // Make the VehicleTabLayout visible onETASuccess
-        AnimationUtils.expand(vehicleTypeTabLayout);
-
-        updateViewForETASuccess((int) response.getDuration() / 60, place.getLatLng());
-        TaskManager.getSharedManager(this).setPlace(place);
-    }
-
-    private void updateViewForETASuccess(Integer etaInMinutes, LatLng latLng) {
-        showSendETAButton();
-        updateDestinationMarker(latLng, etaInMinutes);
-        updateMapView();
-    }
-
-    private void showSendETAButton() {
-        // Set SendETA Button Text
-        sendETAButton.setText(getString(R.string.action_send_eta));
-        sendETAButton.setVisibility(View.VISIBLE);
-        bottomButtonLayout.setVisibility(View.VISIBLE);
-    }
-
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -356,7 +260,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 mAutocompleteLoader.setVisibility(View.VISIBLE);
         }
     };
-
     private AdapterView.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -406,6 +309,164 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         }
     };
+    private ActionManagerListener onActionRefreshedListener = new ActionManagerListener() {
+        @Override
+        public void OnCallback() {
+            if (Home.this.isFinishing())
+                return;
+
+            // Get TaskManager Instance
+            TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+            if (taskManager == null)
+                return;
+
+            // Fetch updated HypertrackTask Instance
+            Action action = taskManager.getHyperTrackAction();
+            if (action == null) {
+                return;
+            }
+
+            // Update ETA & Dihsplay Statuses using Task's Display field
+            updateETAForOnGoingTask(action, taskManager.getPlace());
+            updateDisplayStatusForOngoingTask(action);
+
+            // Check if DestinationLocation has been updated
+            // NOTE: Call this method after updateETAForOnGoingTask()
+            updateDestinationLocationIfApplicable(action);
+        }
+    };
+    private ActionManagerListener onActionCompletedListener = new ActionManagerListener() {
+        @Override
+        public void OnCallback() {
+
+            // Call OnCompleteTask method on UI thread
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Home.this.completeTask();
+                    HyperTrack.clearServiceNotificationParams();
+                }
+            });
+        }
+    };
+
+    private void onSelectPlace(final MetaPlace place) {
+        if (place == null) {
+            return;
+        }
+
+        getEtaForDestination(place.getLatLng(), new TaskETACallback() {
+            @Override
+            public void OnSuccess(TaskETAResponse etaResponse) {
+                // Hide Retry Button
+                showRetryButton(false, null);
+                etaInMinutes = (int) etaResponse.getDuration();
+                onETASuccess(etaResponse, place);
+
+                if (handlePushedTaskDeepLink) {
+                    sendETAButton.performClick();
+                }
+            }
+
+            @Override
+            public void OnError() {
+                // Show Retry button to fetch eta again
+                showRetryButton(true, place);
+
+                if (destinationLocationMarker != null) {
+                    destinationLocationMarker.remove();
+                    destinationLocationMarker = null;
+                }
+
+                showETAError();
+            }
+        });
+    }
+
+    private void showRetryButton(boolean showRetryButton, final MetaPlace place) {
+
+        if (showRetryButton) {
+            // Initialize RetryButton on getETAForDestination failure
+            bottomButtonLayout.setVisibility(View.VISIBLE);
+            retryButton.setVisibility(View.VISIBLE);
+            retryButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Fetch ETA for selected place
+                    onSelectPlace(place);
+                }
+            });
+        } else {
+            // Reset Retry button
+            bottomButtonLayout.setVisibility(View.GONE);
+            retryButton.setVisibility(View.GONE);
+            retryButton.setOnClickListener(null);
+        }
+    }
+
+    private void getEtaForDestination(LatLng destinationLocation, final TaskETACallback callback) {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.calculating_eta_message));
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+
+        if (currentLocationMarker == null || currentLocationMarker.getPosition() == null || destinationLocation == null) {
+            mProgressDialog.dismiss();
+            callback.OnError();
+            return;
+        }
+        TaskManager.getSharedManager(Home.this).getETA(currentLocationMarker.getPosition(), destinationLocation, selectedVehicleType.toString(), new TaskETACallback() {
+            @Override
+            public void OnSuccess(TaskETAResponse etaResponse) {
+                if (mProgressDialog != null && !Home.this.isFinishing())
+                    mProgressDialog.dismiss();
+
+                if (callback != null)
+                    callback.OnSuccess(etaResponse);
+            }
+
+            @Override
+            public void OnError() {
+                if (mProgressDialog != null && !Home.this.isFinishing())
+                    mProgressDialog.dismiss();
+
+                if (callback != null)
+                    callback.OnError();
+            }
+        });
+    }
+
+    private void showETAError() {
+        Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
+    }
+
+    private void onETASuccess(TaskETAResponse response, MetaPlace place) {
+        // Make the VehicleTabLayout visible onETASuccess
+        AnimationUtils.expand(vehicleTypeTabLayout);
+
+        updateViewForETASuccess((int) response.getDuration() / 60, place.getLatLng());
+        if (destinationPlace == null)
+            destinationPlace = new Place();
+        destinationPlace.setLocation(new GeoJSONLocation(place.getLatitude(), place.getLongitude()));
+        if (!TextUtils.isEmpty(place.getName()))
+            destinationPlace.setName(place.getName());
+        if (!TextUtils.isEmpty(place.getAddress()))
+            destinationPlace.setAddress(place.getAddress());
+        TaskManager.getSharedManager(this).setPlace(destinationPlace);
+    }
+
+    private void updateViewForETASuccess(Integer etaInMinutes, LatLng latLng) {
+        showSendETAButton();
+        updateDestinationMarker(latLng, etaInMinutes);
+        updateMapView();
+    }
+
+    private void showSendETAButton() {
+        // Set SendETA Button Text
+        sendETAButton.setText(getString(R.string.action_send_eta));
+        sendETAButton.setVisibility(View.VISIBLE);
+        bottomButtonLayout.setVisibility(View.VISIBLE);
+    }
 
     private void updateAutoCompleteResults() {
         List<MetaPlace> places = null;
@@ -421,58 +482,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mAdapter.refreshFavorites(places);
         mAdapter.notifyDataSetChanged();
     }
-
-    BroadcastReceiver driverCurrentLocationReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getExtras() != null) {
-                Log.d(TAG, "Driver's Current Location Changed");
-
-                Bundle bundle = intent.getExtras();
-                Location location = bundle.getParcelable(TransmitterConstants.HT_DRIVER_CURRENT_LOCATION_KEY);
-                updateCurrentLocation(location);
-            }
-        }
-    };
-
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-
-            Log.d(TAG, "Location Changed");
-
-            // Initiate FusedLocation Updates on Location Changed
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && LocationUtils.isLocationEnabled(Home.this)) {
-                // Remove location updates so that it resets
-                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
-
-                //change the time of location updates
-                createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
-
-                //restart location updates with the new interval
-                resumeLocationUpdates();
-
-                locationFrequencyIncreased = true;
-            }
-        }
-    };
-
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
-    BroadcastReceiver mRegistrationBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mRegistrationBroadcastReceived = true;
-            sendGCMRegistrationToServer();
-            registerGCMReceiver(false);
-        }
-    };
 
     private void updateInfoMessageView() {
         if (!LocationUtils.isLocationEnabled(Home.this)) {
@@ -495,47 +504,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private TaskManagerListener onTaskRefreshedListener = new TaskManagerListener() {
-        @Override
-        public void OnCallback() {
-            if (Home.this.isFinishing())
-                return;
-
-            // Get TaskManager Instance
-            TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-            if (taskManager == null)
-                return;
-
-            // Fetch updated HypertrackTask Instance
-            HTTask task = taskManager.getHyperTrackTask();
-            if (task == null) {
-                return;
-            }
-
-            // Update ETA & Display Statuses using Task's Display field
-            updateETAForOnGoingTask(task, taskManager.getPlace());
-            updateDisplayStatusForOngoingTask(task);
-
-            // Check if DestinationLocation has been updated
-            // NOTE: Call this method after updateETAForOnGoingTask()
-            updateDestinationLocationIfApplicable(task);
-        }
-    };
-
-    private TaskManagerListener onTaskCompletedListener = new TaskManagerListener() {
-        @Override
-        public void OnCallback() {
-
-            // Call OnCompleteTask method on UI thread
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Home.this.OnCompleteTask();
-                }
-            });
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -544,11 +512,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Initialize UserStore
         UserStore.sharedStore.initializeUser();
 
-        // Start GCM Registration
-        startGcmRegistration();
-
         // Initialize Toolbar without Home Button
-        initToolbarWithDrawer(getResources().getString(R.string.app_name));
+        initToolbar(getResources().getString(R.string.toolbar_title), false);
 
         // Initialize Maps
         SupportMapFragment mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
@@ -560,7 +525,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Get Default User Location from his CountryCode
         // SKIP: if Location Permission is Granted and Location is Enabled
-        if (!LocationUtils.isLocationEnabled(Home.this) || !PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (!HyperTrack.checkLocationServices(this) || !HyperTrack.checkLocationPermission(this)) {
             geocodeUserCountryName();
         }
 
@@ -585,6 +550,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
+        // Set HyperTrackCallback
+        setHyperTrackCallback();
+
         // Check if there is any currently running task to be restored
         restoreTaskStateIfNeeded();
 
@@ -599,18 +567,47 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    private void startGcmRegistration() {
-        user = UserStore.sharedStore.getUser();
-        if (user != null && user.getId() != null && checkPlayServices()) {
-            Intent intent = new Intent(this, RegistrationIntentService.class);
-            startService(intent);
-        }
+    private void setHyperTrackCallback() {
+        HyperTrack.setCallback(new HyperTrackEventCallback() {
+            @Override
+            public void onEvent(@NonNull final HyperTrackEvent event) {
+                switch (event.getEventType()) {
+                    case HyperTrackEvent.EventType.STOP_ENDED_EVENT:
+                        Home.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
+                                ArrayList<String> action = new ArrayList<>();
+                                action.add("Set Destination Address");
+                                ServiceNotificationParams notificationParams = builder
+                                        .setSmallIcon(R.drawable.ic_ht_service_notification_small)
+                                        .setSmallIconBGColor(ContextCompat.getColor(Home.this, R.color.colorAccent))
+                                        .setContentTitle(getString(R.string.notification_share_tracking_link))
+                                        .setContextText(getString(R.string.notification_set_destination))
+                                        .setContentIntentActivityClass(SplashScreen.class)
+                                        .setContentIntentExtras(action)
+                                        .build();
+                                HyperTrack.setServiceNotificationParams(notificationParams);
+                            }
+                        });
+                        break;
+                    default:
+                        HyperTrack.clearServiceNotificationParams();
+                        break;
+                }
+            }
+
+            @Override
+            public void onError(@NonNull final ErrorResponse errorResponse) {
+                // do nothing
+            }
+        });
     }
 
     private void initGoogleClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .enableAutoManage(this, 0 /* clientId */, this)
+                    .enableAutoManage(this, 0  /*clientId */, this)
                     .addApi(Places.GEO_DATA_API)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
@@ -683,6 +680,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onClick(View v) {
                 share();
 
+                //On tracking link share reset the notification
+                HyperTrack.clearServiceNotificationParams();
                 // TaskShared Flag is always false because couldn't find a way of knowing
                 // whether the user successfully shared the task details or not
                 AnalyticsStore.getLogger().tappedShareIcon(false);
@@ -702,9 +701,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 //Check if Location Permission has been granted & Location has been enabled
                 if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
                         && LocationUtils.isLocationEnabled(Home.this)) {
-                    if (!TaskManager.getSharedManager(Home.this).isTaskActive()) {
+                    if (!TaskManager.getSharedManager(Home.this).isActionLive(null)) {
                         // Start the Task
-                        startTask();
+
+                        startAction();
                     } else {
 
                         // Reset Current State when user chooses to edit destination
@@ -725,17 +725,29 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
             @Override
             public void onSwipeConfirm() {
-
                 // Check if Location Permission has been granted & Location has been enabled
-                if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                        && LocationUtils.isLocationEnabled(Home.this)) {
-
-                    // Complete the Task
+                if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
                     showEndingTripAnimation(true);
                     completeTask();
                 } else {
-                    checkForLocationPermission();
+                    if (HyperTrack.checkLocationServices(Home.this)) {
+                        HyperTrack.requestLocationServices(Home.this, new HyperTrackCallback() {
+                            @Override
+                            public void onSuccess(@NonNull SuccessResponse response) {
+                                showEndingTripAnimation(true);
+                                completeTask();
+                            }
+
+                            @Override
+                            public void onError(@NonNull ErrorResponse errorResponse) {
+                                Toast.makeText(Home.this, "Please enable location", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        HyperTrack.requestPermissions(Home.this);
+                    }
                 }
+
             }
         };
 
@@ -746,6 +758,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);
         }
     }
+
 
     private void showEndingTripAnimation(boolean show) {
         if (show) {
@@ -839,7 +852,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             // Start the Task
-            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, restoreTaskMetaPlace.getLatLng());
+            LatLng latLng = new LatLng(restoreTaskMetaPlace.getLocation().getLatitude(), restoreTaskMetaPlace.getLocation().getLongitude());
+
+            if (etaInMinutes == null || etaInMinutes == 0) {
+                Action action = taskManager.getHyperTrackAction();
+                if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining()))
+                    etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining()) / 60;
+            }
+
+            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
             onStartTask();
 
             shouldRestoreTask = true;
@@ -994,26 +1015,28 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         selectedVehicleType = getVehicleTypeForTabPosition(tab.getPosition());
 
         // Check if a place has been selected or
-        MetaPlace place = TaskManager.getSharedManager(Home.this).getPlace();
+        Place place = TaskManager.getSharedManager(Home.this).getPlace();
         if (place == null)
             return;
 
+        MetaPlace metaPlace = new MetaPlace(place.getLocation().getLatitude(), place.getLocation().getLongitude());
+
         // Call getETAForDestination with selected vehicleType
-        Home.this.onSelectPlace(place);
+        Home.this.onSelectPlace(metaPlace);
     }
 
-    private HTDriverVehicleType getVehicleTypeForTabPosition(int tabPosition) {
+    private HTUserVehicleType getVehicleTypeForTabPosition(int tabPosition) {
 
         switch (tabPosition) {
             case 1:
-                return HTDriverVehicleType.VAN;
+                return HTUserVehicleType.VAN;
             case 2:
-                return HTDriverVehicleType.MOTORCYCLE;
+                return HTUserVehicleType.MOTORCYCLE;
             case 3:
-                return HTDriverVehicleType.WALK;
+                return HTUserVehicleType.WALK;
             case 0:
             default:
-                return HTDriverVehicleType.CAR;
+                return HTUserVehicleType.CAR;
         }
     }
 
@@ -1030,19 +1053,23 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
 
         // Check if Task has to be Restored & Update Map for that task
         if (shouldRestoreTask && restoreTaskMetaPlace != null) {
-            if (TaskManager.getSharedManager(Home.this).getHyperTrackTask() == null) {
+            if (TaskManager.getSharedManager(Home.this).getHyperTrackAction() == null) {
                 return;
             }
 
+            LatLng latLng = new LatLng(restoreTaskMetaPlace.getLocation().getLatitude(), restoreTaskMetaPlace.getLocation().getLongitude());
+
             if (etaInMinutes != null && etaInMinutes != 0) {
-                updateViewForETASuccess(etaInMinutes, restoreTaskMetaPlace.getLatLng());
+
+                updateViewForETASuccess(etaInMinutes, latLng);
             } else {
-                updateViewForETASuccess(null, restoreTaskMetaPlace.getLatLng());
+                updateViewForETASuccess(null, latLng);
             }
             onStartTask();
         }
@@ -1118,7 +1145,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     /**
      * Method to Initiate START TASK
      */
-    private void startTask() {
+    private void startAction() {
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setCancelable(false);
         mProgressDialog.setMessage(getString(R.string.starting_task_message));
@@ -1142,50 +1169,70 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         LatLng currentLocation = currentLocationMarker.getPosition();
+        ActionParamsBuilder builder = new ActionParamsBuilder();
+        ActionParams params = builder
+                .setExpectedPlace(destinationPlace)
+                .setType(Action.ACTION_TYPE_VISIT)
+                .build();
 
-        // Call startTask to start the task
-        TaskManager.getSharedManager(this).startTask(pushedTaskID, currentLocation,
-                this.user.getSelectedMembershipAccountId(), selectedVehicleType, new TaskManagerCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (mProgressDialog != null) {
-                            mProgressDialog.dismiss();
-                        }
-
-                        // Show ShareCard
-                        share();
-
-                        onStartTask();
-
-                        // Reset handle pushedTask DeepLink Flag
-                        handlePushedTaskDeepLink = false;
-
-                        AnalyticsStore.getLogger().startedTrip(true, null);
-                        HTLog.i(TAG, "Task started successfully.");
+        // Call assignAction to start the tracking action
+        HyperTrack.assignAction(params, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (response.getResponseObject() != null) {
+                    Action action = (Action) response.getResponseObject();
+                    action.getActionDisplay().setDurationRemaining(String.valueOf(etaInMinutes));
+                    TaskManager taskManager = TaskManager.getSharedManager(Home.this);
+                    taskManager.setHyperTrackAction(action);
+                    taskManager.onActionStart();
+                    if (mProgressDialog != null) {
+                        mProgressDialog.dismiss();
                     }
 
-                    @Override
-                    public void OnError() {
-                        if (mProgressDialog != null) {
-                            mProgressDialog.dismiss();
-                        }
+                    // Show ShareCard
+                    share();
 
-                        showStartTaskError();
-                        HTLog.e(TAG, "Task start failed.");
+                    onStartTask();
 
-                        // Reset handle pushedTask DeepLink Flag
-                        handlePushedTaskDeepLink = false;
 
-                        AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
-                    }
-                });
+                    // Reset handle pushedTask DeepLink Flag
+                    handlePushedTaskDeepLink = false;
+                    HyperTrack.clearServiceNotificationParams();
+                    AnalyticsStore.getLogger().startedTrip(true, null);
+                    HTLog.i(TAG, "Task started successfully.");
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
+
+                showStartTaskError(errorResponse);
+                HTLog.e(TAG, "Task start failed.");
+
+                // Reset handle pushedTask DeepLink Flag
+                handlePushedTaskDeepLink = false;
+
+                AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+            }
+        });
+
+
     }
 
     private void updatePushedDestinationAddress() {
         final MetaPlace destinationPlace = pushedTaskMetaPlace;
 
         // Update the selected place with updated destinationLocationAddress
-        TaskManager.getSharedManager(this).setPlace(destinationPlace);
+        Place place = new Place();
+        place.setLocation(new GeoJSONLocation(destinationPlace.getLatitude(), destinationPlace.getLongitude()));
+        if (!TextUtils.isEmpty(destinationPlace.getName()))
+            place.setName(destinationPlace.getName());
+        if (!TextUtils.isEmpty(destinationPlace.getAddress()))
+            place.setAddress(destinationPlace.getAddress());
+        TaskManager.getSharedManager(this).setPlace(place);
 
         // Set the Enter Destination Layout to Selected Place
         destinationText.setText(destinationPlace.getName());
@@ -1199,21 +1246,37 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         destinationAddressGeocoded = false;
     }
 
-    private void showStartTaskError() {
-        Toast.makeText(this, ErrorMessages.START_TRIP_FAILED, Toast.LENGTH_SHORT).show();
+    private void showStartTaskError(ErrorResponse errorResponse) {
+        switch (errorResponse.getErrorCode()) {
+
+            case HyperTrackError.Code.PUBLISHABLE_KEY_NOT_CONFIGURED:
+            case HyperTrackError.Code.SDK_NOT_INITIALIZED:
+            case HyperTrackError.Code.USER_ID_NOT_CONFIGURED:
+            case HyperTrackError.Code.PLAY_SERVICES_UNAVAILABLE:
+            case HyperTrackError.Code.PERMISSIONS_NOT_REQUESTED:
+            case HyperTrackError.Code.LOCATION_SETTINGS_DISABLED:
+            case HyperTrackError.Code.LOCATION_SETTINGS_LOW_ACCURACY:
+            case HyperTrackError.Code.NETWORK_CONNECTIVITY_ERROR:
+            case HyperTrackError.Code.LOCATION_SETTINGS_CHANGE_UNAVAILABLE:
+                Toast.makeText(this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            default:
+                Toast.makeText(this, ErrorMessages.START_TRIP_FAILED, Toast.LENGTH_SHORT).show();
+                return;
+        }
     }
 
     /**
      * Method to Initiate COMPLETE TASK
      */
     private void completeTask() {
-        TaskManager.getSharedManager(this).completeTask(new TaskManagerCallback() {
+        TaskManager.getSharedManager(this).completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 OnCompleteTask();
 
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
-                HTLog.i(TAG, "Complete Task (CTA) happened successfully.");
+                HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
 
                 showEndingTripAnimation(false);
             }
@@ -1223,7 +1286,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 showCompleteTaskError();
 
                 AnalyticsStore.getLogger().tappedEndTrip(false, ErrorMessages.END_TRIP_FAILED);
-                HTLog.e(TAG, "Complete Task (CTA) failed.");
+                HTLog.e(TAG, "Complete Action (CTA) failed.");
 
                 showEndingTripAnimation(false);
             }
@@ -1259,77 +1322,46 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
-        taskManager.setTaskCompletedListener(onTaskCompletedListener);
+        taskManager.setActionRefreshedListener(onActionRefreshedListener);
+        taskManager.setActionComletedListener(onActionCompletedListener);
 
         updateMapPadding(true);
         updateMapView();
     }
 
-    private void updateETAForOnGoingTask(HTTask task, MetaPlace place) {
-        if (place == null) {
+    private void updateETAForOnGoingTask(Action action, Place place) {
+        if (place == null || action.getActionDisplay() == null ||
+                TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
             return;
         }
 
-        LatLng destinationLocation = new LatLng(place.getLatitude(), place.getLongitude());
+        LatLng destinationLocation = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        etaInMinutes = HTTaskUtils.getTaskDisplayETA(task.getTaskDisplay());
-        updateDestinationMarker(destinationLocation, etaInMinutes);
+        if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+            etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining());
+            updateDestinationMarker(destinationLocation, etaInMinutes);
+        }
     }
 
-    private void updateDisplayStatusForOngoingTask(HTTask task) {
-        HTTaskDisplay taskDisplay = task.getTaskDisplay();
-
+    private void updateDisplayStatusForOngoingTask(Action action) {
         // Set Toolbar Title as DisplayStatus for currently active task
-        Integer taskDisplayStatusResId = HTTaskUtils.getTaskDisplayStatus(taskDisplay);
-        if (taskDisplayStatusResId != null) {
-            this.setTitle(getString(taskDisplayStatusResId));
-
+        if (action != null && action.getActionDisplay() != null) {
+            this.setTitle(action.getActionDisplay().getStatusText());
         } else {
-            if (!TextUtils.isEmpty(taskDisplay.getStatusText())) {
-                this.setTitle(taskDisplay.getStatusText());
 
-            } else {
-                // Set Toolbar Title as AppName
-                this.setTitle(getResources().getString(R.string.app_name));
-                this.setSubTitle("");
-            }
+            // Set Toolbar Title as AppName
+            this.setTitle(getResources().getString(R.string.toolbar_title));
+            this.setSubTitle("");
         }
 
         // Set Toolbar SubTitle as DisplaySubStatus for currently active task
-        String taskDisplaySubStatus = getTaskDisplaySubStatus(taskDisplay);
-        if (!TextUtils.isEmpty(taskDisplaySubStatus)) {
-            this.setSubTitle(taskDisplaySubStatus);
-
-        } else if (!TextUtils.isEmpty(taskDisplay.getSubStatusText())) {
-            this.setSubTitle(taskDisplay.getSubStatusText());
+        if (action != null && action.getActionDisplay() != null) {
+            this.setSubTitle(action.getActionDisplay().getSubStatusText());
 
         } else {
             this.setSubTitle("");
         }
-    }
-
-    private String getTaskDisplaySubStatus(HTTaskDisplay taskDisplay) {
-
-        if (taskDisplay != null && taskDisplay.getSubStatusDuration() != null) {
-
-            Double timeInSeconds = Double.valueOf(taskDisplay.getSubStatusDuration());
-            String formattedTime = this.getFormattedTimeString(timeInSeconds);
-            if (TextUtils.isEmpty(formattedTime))
-                return null;
-
-            StringBuilder builder = (new StringBuilder(formattedTime));
-            if ("delayed".equalsIgnoreCase(taskDisplay.getSubStatus())) {
-                builder.append(this.getString(io.hypertrack.lib.consumer.R.string.task_sub_status_delayed_suffix_text));
-            } else {
-                builder.append(this.getString(io.hypertrack.lib.consumer.R.string.task_sub_status_default_suffix_text));
-            }
-
-            return builder.toString();
-        }
-
-        return null;
     }
 
     private String getFormattedTimeString(Double timeInSeconds) {
@@ -1348,7 +1380,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (hours > 0) {
             builder.append(hours)
                     .append(" ")
-                    .append(this.getResources().getQuantityString(io.hypertrack.lib.consumer.R.plurals.hour_text, hours))
+                    .append(this.getResources().getQuantityString(R.plurals.hour_text, hours))
                     .append(" ");
         }
 
@@ -1356,16 +1388,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             builder.append(mins)
                     .append(" ")
                     .append(this.getResources().getQuantityString(
-                            io.hypertrack.lib.consumer.R.plurals.minute_text, mins))
+                            R.plurals.minute_text, mins))
                     .append(" ");
         }
 
         return builder.toString();
     }
 
-    private void updateDestinationLocationIfApplicable(HTTask task) {
+    private void updateDestinationLocationIfApplicable(Action action) {
         // Check if updatedDestination Location is not null
-        HTPlace destinationLocation = task.getDestination();
+        Place destinationLocation = action.getExpectedPlace();
         if (destinationLocation == null || destinationLocation.getLocation() == null)
             return;
 
@@ -1380,21 +1412,23 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
             if (!LocationUtils.areLocationsSame(destinationLocationMarker.getPosition(), updatedDestinationLatLng)) {
 
-                MetaPlace place;
+                Place place;
                 // Check if the DestinationLocationID has changed or only LatLng has changed
-                HTPlace lastUpdatedDestination = TaskManager.getSharedManager(Home.this).getLastUpdatedDestination();
+                Place lastUpdatedDestination = TaskManager.getSharedManager(Home.this).getLastUpdatedDestination();
                 if (lastUpdatedDestination != null && !TextUtils.isEmpty(lastUpdatedDestination.getId())
                         && lastUpdatedDestination.getId().equalsIgnoreCase(destinationLocation.getId())) {
 
                     place = TaskManager.getSharedManager(Home.this).getPlace();
-                    place.setLatLng(updatedDestinationLatLng);
+                    place.setLocation(new GeoJSONLocation(updatedDestinationLatLng.latitude, updatedDestinationLatLng.longitude));
 
                     // Update MetaPlace in RealmDB
-                    UserStore.sharedStore.editPlace(place);
+                    MetaPlace metaPlace = new MetaPlace(place.getLocation().getLatitude(), place.getLocation().getLongitude());
+                    UserStore.sharedStore.editPlace(metaPlace);
                     HTLog.i(TAG, "Destination Location updated");
                 } else {
 
-                    place = new MetaPlace(destinationLocation.getAddress(), updatedDestinationLatLng);
+                    place = new Place();
+                    place.setLocation(new GeoJSONLocation(updatedDestinationLatLng.latitude, updatedDestinationLatLng.longitude));
 
                     // Set the DestinationText as updatedDestination's address
                     destinationText.setGravity(Gravity.START);
@@ -1457,13 +1491,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateMapPadding(false);
 
         // Reset Toolbar Title on EndTrip
-        this.setTitle(getResources().getString(R.string.app_name));
+        this.setTitle(getResources().getString(R.string.toolbar_title));
         this.setSubTitle("");
 
         // Resume LocationUpdates
         if (MetaApplication.isActivityVisible()) {
             resumeLocationUpdates();
         }
+
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
@@ -1561,7 +1596,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void requestLocationUpdates() {
+        startHyperTrackTracking();
         startLocationPolling();
+    }
+
+    private void startHyperTrackTracking() {
+        // HACK: Check if user is tracking currently or not
+        // Only for exisitng users because Permission and Location Settings have been checked here
+        if (!HyperTrack.isTracking())
+            HyperTrack.startTracking();
     }
 
     private void startLocationPolling() {
@@ -1670,13 +1713,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             requestLocationUpdates();
         }
 
-        HTTransmitterService transmitterService = HTTransmitterService.getInstance(this);
-        if (transmitterService.isDriverLive()) {
-            // Remove location updates
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-            }
-        }
     }
 
     private void updateCurrentLocation(Location location) {
@@ -1781,37 +1817,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to Navigate current task in Google Navigation
      */
     private void navigate() {
+
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
 
-        MetaPlace place = taskManager.getPlace();
+        Place place = taskManager.getPlace();
         if (place == null) {
             return;
         }
 
-        Double latitude = place.getLatitude();
-        Double longitude = place.getLongitude();
-        if (latitude == null || longitude == null) {
-            return;
-        }
+        Double latitude = place.getLocation().getLatitude();
+        Double longitude = place.getLocation().getLongitude();
 
-        String mode = "d";
-        HTTask task = taskManager.getHyperTrackTask();
-        if (task != null && task.getVehicleType() != null) {
-            HTDriverVehicleType type = task.getVehicleType();
-            switch (type) {
-                case BICYCLE:
-                    mode = "b";
-                    break;
-                case WALK:
-                    mode = "w";
-                    break;
-                default:
-                    mode = "d";
-                    break;
-            }
-        }
-
-        String navigationString = latitude.toString() + "," + longitude.toString() + "&mode=" + mode;
+        String navigationString = latitude.toString() + "," + longitude.toString() + "&mode=d";
         Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
@@ -1822,15 +1839,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     /**
      * Method to add current selected destination as a Favorite
      * (NOTE: Only Applicable for Live Task)
-     *
      */
     public void OnFavoriteClick(View view) {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        MetaPlace place = taskManager.getPlace();
-
-        if (place == null) {
-            return;
-        }
+        MetaPlace place = new MetaPlace(taskManager.getPlace().getLocation().getLatitude(), taskManager.getPlace().getLocation().getLongitude());
 
         showAddPlace(place);
 
@@ -1851,11 +1863,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      */
     private void updateFavoritesButton() {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        if (taskManager.isTaskActive()) {
-            MetaPlace place = taskManager.getPlace();
-            if (place == null) {
-                return;
-            }
+        if (taskManager.isActionLive(null)) {
+            MetaPlace place = new MetaPlace(taskManager.getPlace().getLocation().getLatitude(),
+                    taskManager.getPlace().getLocation().getLongitude());
 
             user = UserStore.sharedStore.getUser();
             if (user == null) {
@@ -1880,68 +1890,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         favoriteButton.setSelected(false);
         favoriteButton.setImageResource(R.drawable.ic_favorite_hollow);
         favoriteButton.setClickable(true);
-    }
-
-    @SuppressLint("ParcelCreator")
-    private class GeocodingResultReceiver extends ResultReceiver {
-        public GeocodingResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
-                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
-                if (latLng == null)
-                    return;
-
-                defaultLocation.setLatitude(latLng.latitude);
-                defaultLocation.setLongitude(latLng.longitude);
-                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
-
-                if (mMap != null) {
-                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
-                        zoomLevel = 4.0f;
-
-                    // Check if any Location Data is available, meaning Country zoom level need not be used
-                    Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
-                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
-                            && lastKnownCachedLocation.getLongitude() != 0.0) {
-                        return;
-                    }
-
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-                }
-            }
-        }
-    }
-
-    @SuppressLint("ParcelCreator")
-    private class ReverseGeocodingResultReceiver extends ResultReceiver {
-        public ReverseGeocodingResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            //remove spinner from address text view
-
-            if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
-
-                String geocodedAddress = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
-
-                if (!TextUtils.isEmpty(geocodedAddress)) {
-                    pushedTaskMetaPlace.setName(geocodedAddress);
-
-                    if (handlePushedTaskDeepLink) {
-                        updatePushedDestinationAddress();
-                    }
-
-                    destinationAddressGeocoded = true;
-                    Log.d(TAG, "Reverse Geocoding for Destination Successful");
-                }
-            }
-        }
     }
 
     @Override
@@ -2010,7 +1958,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             if (data != null && data.hasExtra(AddFavoritePlace.KEY_UPDATED_PLACE)) {
                 MetaPlace updatedPlace = (MetaPlace) data.getSerializableExtra(AddFavoritePlace.KEY_UPDATED_PLACE);
                 if (updatedPlace != null) {
-                    TaskManager.getSharedManager(Home.this).setPlace(updatedPlace);
+                    Place place = new Place();
+                    place.setLocation(new GeoJSONLocation(updatedPlace.getLatitude(), updatedPlace.getLongitude()));
+                    if (!TextUtils.isEmpty(updatedPlace.getName()))
+                        place.setName(updatedPlace.getName());
+                    if (!TextUtils.isEmpty(updatedPlace.getAddress()))
+                        place.setAddress(updatedPlace.getAddress());
+                    TaskManager.getSharedManager(Home.this).setPlace(place);
 
                     if (!TextUtils.isEmpty(updatedPlace.getName())) {
                         // Set the DestinationText as updatedDestination's Name
@@ -2035,37 +1989,23 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     protected void onPause() {
         super.onPause();
 
-        // Unregister BroadcastReceiver for Location_Change & Network_Change
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(driverCurrentLocationReceiver);
-
-        registerGCMReceiver(false);
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
-        TaskManager.getSharedManager(Home.this).stopRefreshingTask();
+        TaskManager.getSharedManager(Home.this).stopRefreshingAction();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        // Initiate MQTT Connection if DriverID is available
-        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(this);
-        if (!TextUtils.isEmpty(hyperTrackDriverID)) {
-            HTTransmitterService.connectDriver(getApplicationContext(), hyperTrackDriverID);
-        }
-
-        // Start Refreshing Task, if one exists
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        if (taskManager.getHyperTrackTask() != null && !taskManager.getHyperTrackTask().isCompleted()) {
-            taskManager.startRefreshingTask(0);
-
+        if (taskManager.getHyperTrackAction() != null && !taskManager.getHyperTrackAction().isCompleted()) {
+            taskManager.startRefreshingAction(0);
             // Set Task Manager Listeners
-            taskManager.setTaskRefreshedListener(onTaskRefreshedListener);
-            taskManager.setTaskCompletedListener(onTaskCompletedListener);
+            taskManager.setActionRefreshedListener(onActionRefreshedListener);
+            taskManager.setActionComletedListener(onActionCompletedListener);
         } else {
             // Reset Toolbar Title as AppName in case no existing trip
             this.setTitle(getResources().getString(R.string.app_name));
@@ -2075,11 +2015,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Check if Location & Network are Enabled
         updateInfoMessageView();
 
-        // Resume FusedLocation Updates, if driver is not active
-        if (!HTTransmitterService.getInstance(this).isDriverLive()) {
-            resumeLocationUpdates();
-        }
-
         updateFavoritesButton();
         updateCurrentLocationMarker();
 
@@ -2088,11 +2023,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
         LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
-        LocalBroadcastManager.getInstance(this).registerReceiver(driverCurrentLocationReceiver,
-                new IntentFilter(TransmitterConstants.HT_DRIVER_CURRENT_LOCATION_INTENT));
-
-        if (!mRegistrationBroadcastReceived)
-            registerGCMReceiver(true);
 
         AppEventsLogger.activateApp(getApplication());
     }
@@ -2116,62 +2046,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return false;
         }
         return true;
-    }
-
-    /**
-     * Persist registration to third-party servers.
-     * <p/>
-     * Modify this method to associate the user's GCM registration token with any server-side account
-     * maintained by your application.
-     */
-    private void sendGCMRegistrationToServer() {
-        final String token = SharedPreferenceManager.getGCMToken();
-
-        try {
-            User user = UserStore.sharedStore.getUser();
-
-            if (user != null && token.length() > 0) {
-                GCMAddDeviceDTO gcmAddDeviceDTO = new GCMAddDeviceDTO(token);
-
-                SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
-                        SharedPreferenceManager.getUserAuthToken());
-
-                sendGCMToServerCall = sendETAService.addGCMToken(user.getId(), gcmAddDeviceDTO);
-                sendGCMToServerCall.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                        if (response.isSuccessful()) {
-                            HTLog.d(TAG, "Registration Key pushed to server successfully");
-                        } else {
-                            HTLog.e(TAG, "Registration Key push to server failed: " + response.raw().networkResponse().code()
-                                    + ", " + response.raw().networkResponse().message() + ", "
-                                    + response.raw().networkResponse().request().url());
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        HTLog.e(TAG, "Registration Key push to server failed: " + t.getMessage());
-                    }
-                });
-            }
-        } catch (OutOfMemoryError | Exception e) {
-            e.printStackTrace();
-            HTLog.e(TAG, "Registration Key push to server failed: " + e.getMessage());
-        }
-    }
-
-    private void registerGCMReceiver(boolean register) {
-        if (register) {
-            if (!isReceiverRegistered) {
-                LocalBroadcastManager.getInstance(this).registerReceiver(mRegistrationBroadcastReceiver,
-                        new IntentFilter(RegistrationIntentService.REGISTRATION_COMPLETE));
-                isReceiverRegistered = true;
-            }
-        } else {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mRegistrationBroadcastReceiver);
-            isReceiverRegistered = false;
-        }
     }
 
     private void updateCurrentLocationMarker() {
@@ -2221,9 +2095,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 userBitmap.recycle();
                 userBitmap = null;
             }
-
-            if (sendGCMToServerCall != null)
-                sendGCMToServerCall.cancel();
         }
     }
 
@@ -2232,5 +2103,67 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onStop();
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class GeocodingResultReceiver extends ResultReceiver {
+        GeocodingResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
+                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
+                if (latLng == null)
+                    return;
+
+                defaultLocation.setLatitude(latLng.latitude);
+                defaultLocation.setLongitude(latLng.longitude);
+                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
+
+                if (mMap != null) {
+                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
+                        zoomLevel = 4.0f;
+
+                    // Check if any Location Data is available, meaning Country zoom level need not be used
+                    Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
+                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
+                            && lastKnownCachedLocation.getLongitude() != 0.0) {
+                        return;
+                    }
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+                }
+            }
+        }
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class ReverseGeocodingResultReceiver extends ResultReceiver {
+        ReverseGeocodingResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            //remove spinner from address text view
+
+            if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
+
+                String geocodedAddress = resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY);
+
+                if (!TextUtils.isEmpty(geocodedAddress)) {
+                    pushedTaskMetaPlace.setName(geocodedAddress);
+
+                    if (handlePushedTaskDeepLink) {
+                        updatePushedDestinationAddress();
+                    }
+
+                    destinationAddressGeocoded = true;
+                    Log.d(TAG, "Reverse Geocoding for Destination Successful");
+                }
+            }
+        }
     }
 }

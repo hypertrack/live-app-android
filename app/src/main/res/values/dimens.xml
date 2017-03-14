@@ -69,5 +69,6 @@
     <dimen name="profile_image_size">100dp</dimen>
 
     <dimen name="icon_size">24dp</dimen>
+    <dimen name="toolbar_user_icon">30dp</dimen>
 
 </resources>

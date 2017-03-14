@@ -4,6 +4,7 @@ import android.app.Application;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypertrack.lib.HyperTrack;
 
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.sendeta.model.DBMigration;
@@ -39,6 +40,8 @@ public class MetaApplication extends Application {
         DevDebugUtils.installStetho(this);
         // Set HyperTrack LogLevel to VERBOSE
         DevDebugUtils.setHTLogLevel(Log.VERBOSE);
+        HyperTrack.enableDebugLogging(Log.VERBOSE);
+        HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
     }
 
     public static synchronized MetaApplication getInstance() {

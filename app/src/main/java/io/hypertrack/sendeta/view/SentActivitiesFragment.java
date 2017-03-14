@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.app.Activity;
@@ -22,11 +23,6 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.common.model.HTTaskDisplay;
-import io.hypertrack.lib.common.util.HTTaskUtils;
-import io.hypertrack.lib.consumer.utils.HTMapUtils;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.SentActivitiesAdapter;
@@ -46,9 +42,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+*/
 /**
  * Created by piyush on 29/08/16.
- */
+ *//*
+
 public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
 
     private RecyclerView inProcessRecyclerView, historyRecyclerView;
@@ -524,7 +522,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
         // Start Refreshing Task, if one exists
         if (TaskManager.getSharedManager(getActivity()).getHyperTrackTask() != null) {
-            TaskManager.getSharedManager(getActivity()).startRefreshingTask(0);
+            TaskManager.getSharedManager(getActivity()).startRefreshingAction(0);
         }
 
         if (historyActivitiesAdapter != null) {
@@ -561,4 +559,4 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
         super.onDestroy();
     }
-}
+}*/

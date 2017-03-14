@@ -10,16 +10,17 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.models.Place;
+
 
 import java.lang.reflect.Type;
 import java.util.Date;
-
-import io.hypertrack.lib.common.model.HTDriverVehicleType;
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.transmitter.model.HTShift;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.model.Task;
 
 /**
  * Created by suhas on 25/02/16.
@@ -30,8 +31,10 @@ public class SharedPreferenceManager {
     private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
+    private static final String CURRENT_ACTION_PLACE = "io.hypertrack.meta:CurrentActionPlace";
     private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
     private static final String CURRENT_TASK_ID = "io.hypertrack.meta:CurrentTaskID";
+    
     private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
     private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
     private static final String CURRENT_HYPERTRACK_DRIVER_ID = "io.hypertrack.meta:HyperTrackDriverID";
@@ -39,6 +42,9 @@ public class SharedPreferenceManager {
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
     private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
+
+    private static final String CURRENT_ACTION = "io.hypertrack.meta:CurrentAction";
+    private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -82,6 +88,20 @@ public class SharedPreferenceManager {
         return gson.fromJson(placeJson, type);
     }
 
+    public static Place getActionPlace() {
+        String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
+        if (placeJson == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Place>() {
+        }.getType();
+
+        return gson.fromJson(placeJson, type);
+    }
+
+
     public static String getGCMToken() {
         return getSharedPreferences().getString(GCM_TOKEN, "");
     }
@@ -99,7 +119,7 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void setPlace(MetaPlace place) {
+    public static void setPlace(Place place) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
@@ -125,7 +145,23 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static HTTask getTask(Context context) {
+    public static String getActionID(Context context) {
+        return getSharedPreferences().getString(CURRENT_ACTION_ID, null);
+    }
+
+    public static void setActionID(String actionID) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(CURRENT_ACTION_ID, actionID);
+        editor.apply();
+    }
+
+    public static void deleteActionID() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_ACTION_ID);
+        editor.apply();
+    }
+
+    public static Task getTask(Context context) {
         String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
         if (taskJson == null) {
             return null;
@@ -133,7 +169,7 @@ public class SharedPreferenceManager {
 
         try {
             Gson gson = getGson();
-            Type type = new TypeToken<HTTask>() {
+            Type type = new TypeToken<Task>() {
             }.getType();
 
             return gson.fromJson(taskJson, type);
@@ -144,8 +180,41 @@ public class SharedPreferenceManager {
 
         return null;
     }
+    public static Action getAction(Context context){
+        String actionJson = getSharedPreferences().getString(CURRENT_ACTION,null);
+        if(actionJson == null)
+            return null;
+        try{
+            Gson gson = getGson();
+            Type type = new TypeToken<Action>(){
+            }.getType();
+            
+            return gson.fromJson(actionJson,type);
+        }catch (Exception e){
+            e.printStackTrace();
+            Crashlytics.logException(e);
+        }
+        return null;
+    }
 
-    public static void setTask(HTTask task) {
+    public static void setAction(Action action) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = getGson();
+        String actionJSON = gson.toJson(action);
+
+        editor.putString(CURRENT_ACTION, actionJSON);
+        editor.apply();
+    }
+
+    public static void deleteAction() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(CURRENT_ACTION);
+        editor.apply();
+    }
+
+
+    public static void setTask(Task task) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = getGson();
@@ -161,7 +230,8 @@ public class SharedPreferenceManager {
         editor.remove(CURRENT_TASK);
         editor.apply();
     }
-
+    
+   
     public static OnboardingUser getOnboardingUser() {
         String userJSON = getSharedPreferences().getString(ONBOARDED_USER, null);
 
@@ -237,66 +307,29 @@ public class SharedPreferenceManager {
         editor.remove(GEOFENCING_REQUEST);
         editor.apply();
     }
-
-    public static HTDriverVehicleType getLastSelectedVehicleType(Context context) {
+    
+    public static HTUserVehicleType getLastSelectedVehicleType(Context context) {
         String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
         if (TextUtils.isEmpty(vehicleTypeString)) {
-            return HTDriverVehicleType.CAR;
+            return HTUserVehicleType.CAR;
         }
 
-        if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.CAR.toString())) {
-            return HTDriverVehicleType.CAR;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.MOTORCYCLE.toString())) {
-            return HTDriverVehicleType.MOTORCYCLE;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.WALK.toString())) {
-            return HTDriverVehicleType.WALK;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTDriverVehicleType.VAN.toString())) {
-            return HTDriverVehicleType.VAN;
+        if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.CAR.toString())) {
+            return HTUserVehicleType.CAR;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.MOTORCYCLE.toString())) {
+            return HTUserVehicleType.MOTORCYCLE;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.WALK.toString())) {
+            return HTUserVehicleType.WALK;
+        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.VAN.toString())) {
+            return HTUserVehicleType.VAN;
         }
 
-        return HTDriverVehicleType.CAR;
+        return HTUserVehicleType.CAR;
     }
 
-    public static void setLastSelectedVehicleType(HTDriverVehicleType vehicleType) {
+    public static void setLastSelectedVehicleType(HTUserVehicleType vehicleType) {
         SharedPreferences.Editor editor = getEditor();
         editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
-        editor.apply();
-    }
-
-    public static HTShift getShift(Context context) {
-        String taskJson = getSharedPreferences().getString(CURRENT_SHIFT, null);
-        if (taskJson == null) {
-            return null;
-        }
-
-        try {
-            Gson gson = getGson();
-            Type type = new TypeToken<HTShift>() {
-            }.getType();
-
-            return gson.fromJson(taskJson, type);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-
-        return null;
-    }
-
-    public static void setShift(HTShift shift) {
-        SharedPreferences.Editor editor = getEditor();
-
-        Gson gson = getGson();
-        String taskJSON = gson.toJson(shift);
-
-        editor.putString(CURRENT_SHIFT, taskJSON);
-        editor.apply();
-    }
-
-
-    public static void deleteShift(Context context) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_SHIFT);
         editor.apply();
     }
 

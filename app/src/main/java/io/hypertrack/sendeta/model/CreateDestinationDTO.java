@@ -1,20 +1,21 @@
 package io.hypertrack.sendeta.model;
 
-import io.hypertrack.lib.common.model.HTLocation;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+
 
 /**
  * Created by piyush on 22/10/16.
  */
 public class CreateDestinationDTO {
 
-    private HTLocation location;
+    private HyperTrackLocation location;
     private String address;
 
-    public CreateDestinationDTO(HTLocation location) {
+    public CreateDestinationDTO(HyperTrackLocation location) {
         this.location = location;
     }
 
-    public CreateDestinationDTO(String address, HTLocation location) {
+    public CreateDestinationDTO(String address, HyperTrackLocation location) {
         this.address = address;
         this.location = location;
     }

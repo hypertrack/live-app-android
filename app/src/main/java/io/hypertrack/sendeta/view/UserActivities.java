@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.os.Bundle;
@@ -10,12 +11,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
+
 import io.hypertrack.sendeta.R;
 
+*/
 /**
  * Created by piyush on 29/08/16.
- */
+ *//*
+
 public class UserActivities extends BaseActivity {
 
     private ViewPager viewPager;
@@ -106,3 +109,4 @@ public class UserActivities extends BaseActivity {
         HTConsumerClient.getInstance(this).clearTasks();
     }
 }
+*/

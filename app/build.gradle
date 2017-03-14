@@ -27,9 +27,22 @@ ext {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    buildToolsVersion '25.0.2'
     lintOptions {
         abortOnError false
+    }
+
+    def keystorePropertiesFile = rootProject.file("keystore.properties");
+    def keystoreProperties = new Properties()
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
     }
 
     def versionPropsFile = file('gradle.properties')
@@ -47,7 +60,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 2
+        def versionMinor = 3
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -84,16 +97,16 @@ android {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "API_KEY", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
-            buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_35b9d87cba7ca206bcb7a06d5c94b24a58cdaac3"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "request_eta_base_url", "www.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.io"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
+            signingConfig signingConfigs.release
         }
         debug {
             debuggable true
@@ -101,10 +114,9 @@ android {
             applicationIdSuffix ".debug"
             resValue "string", "app_name", "Debug HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "API_KEY", '"pk_03e3176a9831360e162093292049757b130c75cf"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
-            buildConfigField "String", "HYPERTRACK_API_KEY", '"sk_c98f8d3026a97c4a130161240dd886616959d9e8"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
@@ -123,19 +135,17 @@ dependencies {
         transitive = true;
     }
 
-    debugCompile(project(path: ':consumer', configuration: 'debug')) {
-        transitive = true
-    }
-    debugCompile(project(path: ':transmitter', configuration: 'debug')) {
+    debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
 
-    releaseCompile('io.hypertrack:consumer:' + hypertrackSDKVersion + ':release@aar') {
+    releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
-    releaseCompile('io.hypertrack:transmitter:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
+
+//    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+//        transitive = true
+//    }
 
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
@@ -146,10 +156,11 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.3.2'
-    compile 'com.google.android.gms:play-services-gcm:10.0.1'
-    compile 'com.google.android.gms:play-services-places:10.0.1'
-    compile 'com.google.android.gms:play-services-location:10.0.1'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-places:10.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
     compile 'com.facebook.android:facebook-android-sdk:4.16.1'
+
 }
 
 // Compute HyperTrack SDKVersion

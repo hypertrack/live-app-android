@@ -100,7 +100,7 @@
                             android:id="@+id/item_user_activity.start_icon"
                             android:layout_width="12dp"
                             android:layout_height="12dp"
-                            android:src="@drawable/ic_task_summary_start_marker"
+
                             android:visibility="gone" />
 
                         <View
@@ -115,7 +115,7 @@
                             android:id="@+id/item_user_activity.end_icon"
                             android:layout_width="12dp"
                             android:layout_height="12dp"
-                            android:src="@drawable/ic_task_summary_end_marker"
+
                             android:visibility="gone" />
                     </LinearLayout>
 

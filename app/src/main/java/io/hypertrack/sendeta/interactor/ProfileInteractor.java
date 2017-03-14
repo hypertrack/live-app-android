@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import io.hypertrack.sendeta.interactor.callback.OnProfilePicUploadCallback;
 import io.hypertrack.sendeta.interactor.callback.OnProfileUpdateCallback;
+import io.hypertrack.sendeta.interactor.callback.OnRegisterCallback;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.callback.OnOnboardingCallback;
 import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
@@ -12,7 +13,7 @@ public class ProfileInteractor {
 
     private static final String TAG = ProfileInteractor.class.getSimpleName();
 
-     public void updateUserProfile(final OnProfileUpdateCallback onProfileUpdateCallback) {
+    /* public void updateUserProfile(final OnProfileUpdateCallback onProfileUpdateCallback) {
 
          OnboardingManager.sharedManager().updateInfo(new OnOnboardingCallback() {
              @Override
@@ -54,5 +55,18 @@ public class ProfileInteractor {
                 }
             }
         });
-    }
+    }*/
+   /* public void registerPhoneNumber(final OnRegisterCallback onRegisterCallback) {
+        OnboardingManager.sharedManager().onboardUser(new OnOnboardingCallback() {
+            @Override
+            public void onSuccess() {
+                onRegisterCallback.OnSuccess();
+            }
+
+            @Override
+            public void onError() {
+                onRegisterCallback.OnError();
+            }
+        });
+    }*/
 }

@@ -8,12 +8,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
 
-import java.util.ArrayList;
-
-import io.hypertrack.lib.common.HyperTrack;
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
-import io.hypertrack.lib.transmitter.service.HTTransmitterService;
-import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
@@ -33,13 +27,6 @@ public class SplashScreen extends BaseActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        // Set Publishable Key
-        HyperTrack.setPublishableApiKey(BuildConfig.API_KEY, getApplicationContext());
-        // Initialize HyperTrack SDKs
-        HTTransmitterService.initHTTransmitter(getApplicationContext());
-        HTConsumerClient.initHTConsumerClient(getApplicationContext());
-
         prepareAppDeepLink();
         proceedToNextScreen();
     }
@@ -65,16 +52,16 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void proceedToNextScreen() {
-        boolean isUserOnboard = UserStore.isUserLoggedIn();
+        boolean isUserOnboard = UserStore.sharedStore.isUserLoggedIn(this);
         if (!isUserOnboard) {
-            Intent registerIntent = new Intent(this, Register.class);
+            Intent registerIntent = new Intent(this, CheckPermission.class);
             registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(registerIntent);
             finish();
         } else {
+            // UserStore.sharedStore.checkIfDriverIDExist(this);
             UserStore.sharedStore.initializeUser();
             UserStore.sharedStore.updateSelectedMembership(1);
-
             Utils.setCrashlyticsKeys(this);
             processAppDeepLink(appDeepLink);
         }
@@ -96,7 +83,7 @@ public class SplashScreen extends BaseActivity {
                 finish();
                 break;
 
-            case DeepLinkUtil.TRACK:
+           /* case DeepLinkUtil.TRACK:
 
                 ArrayList<String> taskIDList = new ArrayList<>();
                 taskIDList.add(appDeepLink.taskID);
@@ -107,7 +94,7 @@ public class SplashScreen extends BaseActivity {
                                 .putExtra(Track.KEY_TRACK_DEEPLINK, true)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
-                break;
+                break;*/
 
             case DeepLinkUtil.DEFAULT:
             default:

@@ -66,11 +66,11 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 Toast.makeText(SettingsScreen.this, "Click one more time to see Shift screen", Toast.LENGTH_SHORT).show();
             }
 
-            if (profileImageClickedCount >= 5) {
+           /* if (profileImageClickedCount >= 5) {
                 Intent shiftScreenIntent = new Intent(SettingsScreen.this, ShiftsScreen.class);
                 startActivity(shiftScreenIntent);
                 return;
-            }
+            }*/
 
             if (profileImageClickedHandler == null) {
                 profileImageClickedHandler = new Handler();

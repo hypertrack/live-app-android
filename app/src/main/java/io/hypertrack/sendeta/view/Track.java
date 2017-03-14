@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.content.BroadcastReceiver;
@@ -16,21 +17,19 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.hypertrack.lib.internal.consumer.view.HyperTrackMapFragment;
+import com.hypertrack.lib.internal.consumer.view.MapAdapter;
+import com.hypertrack.lib.internal.consumer.view.MapFragmentCallback;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import io.hypertrack.lib.common.model.HTTask;
-import io.hypertrack.lib.consumer.model.TaskListCallBack;
-import io.hypertrack.lib.consumer.network.HTConsumerClient;
-import io.hypertrack.lib.consumer.view.HTMapAdapter;
-import io.hypertrack.lib.consumer.view.HTMapFragment;
-import io.hypertrack.lib.consumer.view.HTMapFragmentCallback;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AddTaskToTrackDTO;
 import io.hypertrack.sendeta.model.ErrorData;
+import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.TrackTaskResponse;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
@@ -44,9 +43,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+*/
 /**
  * Created by piyush on 27/08/16.
- */
+ *//*
+
 public class Track extends BaseActivity {
 
     public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
@@ -71,7 +72,7 @@ public class Track extends BaseActivity {
                 if (taskIDList != null && htConsumerClient != null) {
                     for (String taskID : taskIDList) {
 
-                        HTTask task = htConsumerClient.taskForTaskID(taskID);
+                        Task task = htConsumerClient.taskForTaskID(taskID);
                         if (task != null && task.isCompleted()) {
                             if (taskIDsToTrack != null && taskIDsToTrack.size() > 1) {
                                 taskIDsToTrack.remove(taskID);
@@ -152,7 +153,7 @@ public class Track extends BaseActivity {
 
         htConsumerClient.trackTask(new ArrayList<>(taskIDsToTrack), this, new TaskListCallBack() {
             @Override
-            public void onSuccess(List<HTTask> list) {
+            public void onSuccess(List<Task> list) {
                 if (Track.this.isFinishing()) {
                     return;
                 }
@@ -276,14 +277,14 @@ public class Track extends BaseActivity {
         }
     }
 
-    private class HyperTrackMapAdapter extends HTMapAdapter {
+    private class HyperTrackMapAdapter extends MapAdapter {
 
         public HyperTrackMapAdapter(Context mContext) {
             super(mContext);
         }
 
         @Override
-        public List<String> getTaskIDsToTrack(HTMapFragment mapFragment) {
+        public List<String> getTaskIDsToTrack(HyperTrackMapFragment mapFragment) {
             if (retryButton.getVisibility() != View.VISIBLE) {
                 if (!taskIDsToTrack.isEmpty()) {
                     return new ArrayList<>(taskIDsToTrack);
@@ -296,14 +297,14 @@ public class Track extends BaseActivity {
         }
 
         @Override
-        public String getOrderStatusToolbarDefaultTitle(HTMapFragment mapFragment) {
+        public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment mapFragment) {
             return getResources().getString(R.string.app_name);
         }
     }
 
-    private HTMapFragmentCallback htMapFragmentCallback = new HTMapFragmentCallback() {
+    private MapFragmentCallback htMapFragmentCallback = new MapFragmentCallback() {
         @Override
-        public void onMapReadyCallback(HTMapFragment mapFragment, GoogleMap map) {
+        public void onMapReadyCallback(HyperTrackMapFragment mapFragment, GoogleMap map) {
             if (map == null)
                 return;
 
@@ -328,7 +329,7 @@ public class Track extends BaseActivity {
         if (htConsumerClient != null && taskIDsToTrack != null) {
             for (String taskID : taskIDsToTrack) {
 
-                HTTask task = htConsumerClient.taskForTaskID(taskID);
+                Task task = htConsumerClient.taskForTaskID(taskID);
                 if (task != null && task.isCompleted()) {
 
                     if (taskIDsToTrack != null && taskIDsToTrack.size() > 1) {
@@ -363,3 +364,4 @@ public class Track extends BaseActivity {
         super.onBackPressed();
     }
 }
+*/

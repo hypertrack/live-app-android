@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
@@ -12,9 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.transmitter.model.HTShift;
-import io.hypertrack.lib.transmitter.model.callback.HTShiftStatusCallback;
+
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.ErrorData;
 import io.hypertrack.sendeta.model.FetchDriverIDForUserResponse;
@@ -22,7 +21,7 @@ import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
-import io.hypertrack.sendeta.store.ShiftManager;
+
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.store.callback.ShiftManagerListener;
 import io.hypertrack.sendeta.util.LocationUtils;
@@ -33,9 +32,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+*/
 /**
  * Created by piyush on 12/09/16.
- */
+ *//*
+
 public class ShiftsScreen extends BaseActivity {
 
     private final String TAG = ShiftsScreen.class.getSimpleName();
@@ -325,3 +326,4 @@ public class ShiftsScreen extends BaseActivity {
         }
     }
 }
+*/

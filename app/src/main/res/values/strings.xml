@@ -13,8 +13,7 @@
     <string name="drawer_close">close</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_firstname">First Name</string>
-    <string name="prompt_lastname">Last Name</string>
+    <string name="prompt_name">Name</string>
 
     <string name="action_done">Done</string>
     <string name="action_save">Save</string>
@@ -43,7 +42,7 @@
     <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
     <string name="geofence_transition_invalid_type">Geofence transition error: invalid transition type %1$d</string>
 
-    <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for SendETA</string>
+    <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for HyperTrack-Live</string>
     <string name="verify_phone_number_hearder_note">Please enter your verification code that was sent to \n%1$s</string>
 
     <!-- Action bar strings -->
@@ -77,7 +76,7 @@
 
     <string name="saving_favorite_addresses_message">Saving your favorite address</string>
     <string name="editing_favorite_addresses_message">Saving your edits</string>
-    
+
     <!-- Success Strings -->
     <string name="profile_upload_success">Profile pic uploaded successfully</string>
 
@@ -112,7 +111,7 @@
     <string name="editing_already_saved_place_error">The address you are trying to add already exists in your favorites</string>
 
     <string name="deleting_favorite_place_failed">Error deleting this favorite. Please try again</string>
-    
+
     <string name="location_off_info_message">Please turn on your location</string>
     <string name="internet_off_info_message">Unable to connect to internet</string>
     <string name="internet_location_both_off_info_message">Internet &amp; Location OFF</string>
@@ -143,7 +142,7 @@
     <string name="business_profile_invite_primary_btn">Accept</string>
     <string name="business_profile_invite_secondary_btn">Reject</string>
 
-    <string name="business_profile_setup_title">Hypertrack with SendETA</string>
+    <string name="business_profile_setup_title">Hypertrack with HyperTrack-Live</string>
     <string name="business_profile_setup_msg">Monitor your operations and power a great customer experience</string>
     <string name="business_profile_setup_primary_btn">set-up now</string>
     <string name="business_profile_setup_secondary_btn">Share</string>
@@ -162,14 +161,17 @@
     <string name="business_profile_rejected_error_msg">Error occurred while rejecting the invite. Please try again.</string>
     <string name="business_profile_delete_error_msg">Error occurred while deleting %1$s profile. Please try again.</string>
 
-    <string name="business_profile_share_msg">We can use HyperTrack with SendETA to monitor our operations and power a great customer experience. Read more at www.hypertrack.io/sendeta</string>
+    <string name="business_profile_share_msg">We can use HyperTrack with HyperTrack-Live to monitor our operations and power a great customer experience. Read more at www.hypertrack.io/sendeta</string>
     <string name="business_profile_setup_url">https://dashboard.hypertrack.io/signup/sendeta</string>
 
     <!-- Notification Strings -->
     <string name="notification_fallback_message">Send your real-time ETA to your friends &amp; family and let them track you on a map when you are on the way.</string>
 
     <string name="notification_deeplink_active_task_error">To accept this task, you need to first complete the ongoing task</string>
-    
+
+    <string name="notification_share_tracking_link">Share your tracking link with your friends &amp; family.</string>
+    <string name="notification_set_destination">Set your destination</string>
+
     <!-- ETA Marker Strings -->
     <plurals name="eta_in_minute_text">
         <item quantity="zero">min</item>
@@ -197,5 +199,10 @@
     <!-- Request ETA strings -->
     <string name="request_eta_message">Hey! Can you send me your ETA using</string>
     <string name="request_eta_url">http://%1$s/request/?uuid=%2$s&amp;lat=%3$s&amp;lng=%4$s</string>
+
+    <!--Toolbar Title-->
+    <string name="toolbar_title">SHARE LIVE TRACKING</string>
+    <string name="location_permission_detail">HyperTrack needs location permission to let your friends and family track your</string>
+
 
 </resources>

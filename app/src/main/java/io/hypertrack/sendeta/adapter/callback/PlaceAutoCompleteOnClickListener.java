@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.adapter.callback;
 
+import com.hypertrack.lib.models.Place;
+
 import io.hypertrack.sendeta.model.MetaPlace;
 
 /**

@@ -41,7 +41,7 @@ public class ServiceGenerator {
 
                     // Request customization: add request headers
                     Request.Builder requestBuilder = original.newBuilder()
-                            .header("Authorization", "Token " + authToken)
+                            .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
                             .method(original.method(), original.body());
 
                     Request request = requestBuilder.build();

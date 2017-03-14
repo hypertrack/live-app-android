@@ -16,11 +16,12 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.gcm.GcmListenerService;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
+import com.hypertrack.lib.HyperTrackGcmListenerService;
+import com.hypertrack.lib.internal.common.logging.HTLog;
+import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
+import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+import com.hypertrack.lib.models.Place;
 
-import io.hypertrack.lib.common.model.HTLocation;
-import io.hypertrack.lib.common.model.HTPlace;
-import io.hypertrack.lib.common.util.HTLog;
-import io.hypertrack.lib.transmitter.service.HTGcmListenerService;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.util.Constants;
@@ -68,9 +69,9 @@ public class MetaGCMListenerService extends GcmListenerService {
      */
     @Override
     public void onMessageReceived(String from, Bundle data) {
-        String htSDKNotification = data.getString(HTGcmListenerService.HT_SDK_NOTIFICATION_KEY);
+        String htSDKNotification = data.getString(HyperTrackGcmListenerService.HT_SDK_NOTIFICATION_KEY);
         if (htSDKNotification != null && htSDKNotification.equalsIgnoreCase("true")) {
-            HTGcmListenerService.triggerHypertrackNotification(getApplicationContext(), data);
+            HyperTrackGcmListenerService.triggerHypertrackNotification(getApplicationContext(), data);
             return;
         }
 
@@ -213,10 +214,10 @@ public class MetaGCMListenerService extends GcmListenerService {
                 Integer placeID = Integer.valueOf(placeIDString);
 
                 String updatedDestinationJSON = data.getString(NOTIFICATION_KEY_UPDATED_DESTINATION);
-                HTPlace updatedDestination = new Gson().fromJson(updatedDestinationJSON, HTPlace.class);
+                Place updatedDestination = new Gson().fromJson(updatedDestinationJSON, Place.class);
 
                 if (placeID != null && updatedDestination != null) {
-                    HTLocation location = updatedDestination.getLocation();
+                    GeoJSONLocation location = updatedDestination.getLocation();
 
                     if (location != null) {
                         double[] coordinates = location.getCoordinates();

@@ -1,6 +1,8 @@
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -8,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
@@ -18,20 +21,29 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.File;
+import java.util.ArrayList;
 
-import io.hypertrack.lib.common.util.HTLog;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.Country;
+import io.hypertrack.sendeta.model.CountryMaster;
+import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
@@ -39,6 +51,7 @@ import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
+import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
@@ -47,11 +60,22 @@ import io.hypertrack.sendeta.util.images.RoundedImageView;
 
 public class Profile extends BaseActivity implements ProfileView {
 
-    public AutoCompleteTextView mFirstNameView, mLastNameView;
+    private final static String TAG = Profile.class.getSimpleName();
+
+    public EditText mNameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
     private ProgressDialog mProgressDialog;
     private LinearLayout profileParentLayout;
+    private EditText phoneNumberView;
+    private TextView countryCodeTextView;
+    private Spinner countryCodeSpinner;
+    private LinearLayout countryCodeLayout;
+    private Button register;
+
+    private String isoCode;
+
+    private CountrySpinnerAdapter adapter;
 
     private Target profileImageDownloadTarget;
     private File profileImage;
@@ -59,29 +83,6 @@ public class Profile extends BaseActivity implements ProfileView {
 
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
 
-    private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                mLastNameView.requestFocus();
-                return true;
-            }
-
-            return false;
-        }
-    };
-
-    private TextView.OnEditorActionListener mLastNameEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                Profile.this.onSignInButtonClicked();
-                return true;
-            }
-
-            return false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,22 +90,98 @@ public class Profile extends BaseActivity implements ProfileView {
         setContentView(R.layout.activity_profile);
 
         // Initialize Toolbar
-        initToolbar(getString(R.string.title_activity_signup_profile));
+        initToolbar(getString(R.string.title_activity_signup_profile),false);
 
         // Initialize UI Views before Attaching View Presenter
-        mFirstNameView = (AutoCompleteTextView) findViewById(R.id.profile_first_name);
-        mLastNameView = (AutoCompleteTextView) findViewById(R.id.profile_last_name);
+        mNameView = (EditText) findViewById(R.id.profile_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
         profileParentLayout = (LinearLayout) findViewById(R.id.profile_parent_layout);
+        register = (Button) findViewById(R.id.profile_register);
+        phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
+        countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
+        countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
+        countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
+        countryCodeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                countryCodeSpinner.performClick();
+            }
+        });
 
         // Attach View Presenter to View
         presenter.attachView(this);
 
         // Initialize UI Action Listeners
-        mFirstNameView.setOnEditorActionListener(mFirstNameEditorActionListener);
-        mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
+        mNameView.setOnEditorActionListener(mNameEditorActionListener);
+        phoneNumberView.setOnEditorActionListener(mEditorActionListener);
+        register.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSignInButtonClicked();
+            }
+        });
+        initCountryFlagSpinner();
+
     }
+
+    private void initCountryFlagSpinner() {
+        CountryMaster cm = CountryMaster.getInstance(this);
+        final ArrayList<Country> countries = cm.getCountries();
+
+        adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
+        countryCodeSpinner.setAdapter(adapter);
+
+        String isoCountryCode = PhoneUtils.getCountryRegionFromPhone(this);
+        Log.v(TAG, "Region ISO: " + isoCountryCode);
+
+        if (!TextUtils.isEmpty(isoCountryCode)) {
+            for (Country c : countries) {
+                if (c.mCountryIso.equalsIgnoreCase(isoCountryCode)) {
+                    countryCodeSpinner.setSelection(adapter.getPosition(c));
+                }
+            }
+        }
+
+        countryCodeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                isoCode = countries.get(position).mCountryIso;
+                countryCodeTextView.setText("+ " + countries.get(position).mDialPrefix);
+                countryCodeTextView.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+
+    private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                phoneNumberView.requestFocus();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                onSignInButtonClicked();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
 
     public void onProfileImageViewClicked(View view) {
 
@@ -126,10 +203,10 @@ public class Profile extends BaseActivity implements ProfileView {
     private void onSignInButtonClicked() {
         showProgress(true);
 
-        String firstName = mFirstNameView.getText().toString();
-        String lastName = mLastNameView.getText().toString();
+        String name = mNameView.getText().toString();
+        String number = phoneNumberView.getText().toString();
 
-        presenter.attemptLogin(firstName, lastName, profileImage, oldProfileImage, updatedProfileImage);
+        presenter.attemptLogin(name, number,isoCode, profileImage, oldProfileImage, updatedProfileImage);
     }
 
     public void onNextButtonClicked(MenuItem menuItem) {
@@ -137,19 +214,13 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void updateViews(String firstName, String lastName, String profileURL) {
-        if (!TextUtils.isEmpty(firstName)) {
-            mFirstNameView.setText(firstName);
+    public void updateViews(String name,String phone,String ISOCode ,String profileURL) {
+        String nameFromAccount = getName();
+        if (name != null) {
+           mNameView.setText(nameFromAccount);
         }
-
-        if (!TextUtils.isEmpty(lastName)) {
-            mLastNameView.setText(lastName);
-
-            if (!TextUtils.isEmpty(firstName)) {
-                profileParentLayout.requestFocus();
-            }
-        } else {
-            mLastNameView.requestFocus();
+        if (!TextUtils.isEmpty(name)) {
+            mNameView.setText(name);
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
@@ -189,11 +260,24 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
+    public void registrationFailed() {
+        mProgressDialog.dismiss();
+        Toast.makeText(Profile.this, ErrorMessages.PHONE_NO_REGISTRATION_FAILED, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void registrationSuccessful() {
+        mProgressDialog.dismiss();
+        // Navigate to Verification Screen for both Positive & Negative cases
+        Intent intent = new Intent(Profile.this, Verify.class);
+        startActivity(intent);
+    }
+
+
+    @Override
     public void showProfilePicUploadSuccess() {
         Toast.makeText(Profile.this, R.string.profile_upload_success, Toast.LENGTH_SHORT).show();
 
-        // Complete User Signup on Profile Pic Upload Success
-        navigateToHomeScreen();
     }
 
     @Override
@@ -202,12 +286,12 @@ public class Profile extends BaseActivity implements ProfileView {
         Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
 
         // Complete User SignUp on Profile Pic Upload Failure
-        navigateToHomeScreen();
+
     }
 
     @Override
     public void navigateToHomeScreen() {
-
+        HyperTrack.startTracking();
         UserStore.sharedStore.initializeUser();
         Utils.setCrashlyticsKeys(this);
         showProgress(false);
@@ -235,19 +319,6 @@ public class Profile extends BaseActivity implements ProfileView {
         finish();
     }
 
-    @Override
-    public void showFirstNameValidationError() {
-        showProgress(false);
-        mFirstNameView.setError(getString(R.string.error_field_required));
-        mFirstNameView.requestFocus();
-    }
-
-    @Override
-    public void showLastNameValidationError() {
-        showProgress(false);
-        mLastNameView.setError(getString(R.string.error_field_required));
-        mLastNameView.requestFocus();
-    }
 
     @Override
     public void showErrorMessage() {
@@ -319,6 +390,33 @@ public class Profile extends BaseActivity implements ProfileView {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private String getName() {
+        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
+        Account[] list = manager.getAccounts();
+
+        for (Account account : list) {
+            if (account.type.equalsIgnoreCase("com.google")) {
+                return account.name;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
+        super.onRestoreInstanceState(savedInstanceState, persistentState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override

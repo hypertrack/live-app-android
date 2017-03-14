@@ -3,8 +3,8 @@ package io.hypertrack.sendeta.util;
 import android.app.Application;
 
 import com.facebook.stetho.Stetho;
+import com.hypertrack.lib.HyperTrack;
 
-import io.hypertrack.lib.common.HyperTrack;
 
 /**
  * Created by piyush on 03/07/16.
@@ -21,6 +21,7 @@ public class DevDebugUtils {
     }
 
     public static void setHTLogLevel(int logLevel) {
-        HyperTrack.setLogLevel(logLevel);
+
+        HyperTrack.enableDebugLogging(logLevel);
     }
 }
