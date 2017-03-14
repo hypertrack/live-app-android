@@ -101,85 +101,32 @@ public class UserStore {
     }
 
     public boolean isUserLoggedIn(Context context) {
+        // Check if DriverId exists for current user
+        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
+        if (TextUtils.isEmpty(hyperTrackDriverID)) {
+            try {
+                if (this.realm != null)
+                    this.realm.close();
+
+                // Delete Realm Data in order to prevent further crashes
+                RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context)
+                        .schemaVersion(1)
+                        .migration(new DBMigration())
+                        .build();
+                Realm.deleteRealm(realmConfiguration);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        // Configure UserId for v3 HyperTrack SDK, if not done already
+        if (TextUtils.isEmpty(HyperTrack.getUserId()))
+            HyperTrack.setUserId(hyperTrackDriverID);
 
         Realm realm = Realm.getDefaultInstance();
         return realm.where(User.class).findAll().size() > 0;
     }
-
-    public void checkIfDriverIDExist(Context context) {
-        // Check if DriverId exists for current user
-        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
-        if (TextUtils.isEmpty(hyperTrackDriverID)) {
-            // Delete Realm Data in order to prevent further crashes
-            RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context)
-                    .schemaVersion(1)
-                    .migration(new DBMigration())
-                    .build();
-            Realm.deleteRealm(realmConfiguration);
-            return;
-        }
-
-        // Configure UserId for v3 HyperTrack SDK
-        if (TextUtils.isEmpty(HyperTrack.getUserId()))
-            HyperTrack.setUserId(hyperTrackDriverID);
-
-    }
-
-    /*public void startTaskOnServer(final String taskID, final MetaPlace place, final int selectedAccountId,
-                                  final HyperTrackLocation startLocation, final HTDriverVehicleType vehicleType,
-                                  final UserStoreGetTaskCallback callback) {
-        if (this.user == null || place == null) {
-            if (callback != null) {
-                callback.OnError();
-            }
-
-            return;
-        }
-
-        TaskDTO taskDTO;
-        if (!TextUtils.isEmpty(taskID)) {
-            taskDTO = new TaskDTO(taskID, selectedAccountId, startLocation, vehicleType);
-        } else {
-            taskDTO = new TaskDTO(place, selectedAccountId, startLocation, vehicleType);
-        }
-
-        SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
-        Call<Map<String, Object>> call = sendETAService.startTask(this.user.getId(), taskDTO);
-        call.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-
-                if (response.isSuccessful()) {
-                    Map<String, Object> responseDTO = response.body();
-
-                    try {
-                        if (callback != null) {
-                            if (responseDTO != null) {
-                                callback.OnSuccess(responseDTO);
-                            } else {
-                                callback.OnError();
-                            }
-                        }
-
-                    } catch (Exception e) {
-                        Crashlytics.logException(e);
-                        e.printStackTrace();
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }*/
 
     public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();

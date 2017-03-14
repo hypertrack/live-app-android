@@ -78,7 +78,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 public void onSuccess(@NonNull SuccessResponse response) {
                     Action actionResponse = (Action) response.getResponseObject();
                     if (!isActionLive(actionResponse)) {
-                        HTLog.i(TAG, "SendETA Action Not Live, Calling completeAction() to complete the action");
+                        HTLog.i(TAG, "HyperTrack-Live Action Not Live, Calling completeAction() to complete the action");
 
                         // Call completeAction when the Action object is null or it is not live anymore
                         TaskManager.this.completeAction(new ActionManagerCallback() {
@@ -155,7 +155,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
                 return true;
             }
-            HTLog.e(TAG, "SendETA: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
+            HTLog.e(TAG, "HyperTrack-Live: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
         }
 
         completeAction(null);
@@ -241,7 +241,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
      * Call this method once the task has been completed successfully on the SDK.
      */
     public void clearState() {
-        HTLog.i(TAG, "Calling clearState to reset SendETA task state");
+        HTLog.i(TAG, "Calling clearState to reset HyperTrack-Live task state");
         this.stopRefreshingAction();
         this.stopGeofencing();
         this.clearListeners();
@@ -348,7 +348,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                     actionComletedListener.OnCallback();
                 }
 
-                HTLog.e(TAG, "SendETA: Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
+                HTLog.e(TAG, "HyperTrack-Live: Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
                 return;
             }
         }
