@@ -321,7 +321,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return;
             }
 
-            // Update ETA & Display Statuses using Task's Display field
+            // Update ETA & Dihsplay Statuses using Task's Display field
             updateETAForOnGoingTask(action, taskManager.getPlace());
             updateDisplayStatusForOngoingTask(action);
 
@@ -1380,9 +1380,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         LatLng destinationLocation = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
 
         // Get ETA Value to display from TaskDisplay field
-        if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining()))
+        if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
             etaInMinutes = Integer.valueOf(action.getActionDisplay().getDurationRemaining());
-        updateDestinationMarker(destinationLocation, etaInMinutes);
+            updateDestinationMarker(destinationLocation, etaInMinutes);
+        }
     }
 
     private void updateDisplayStatusForOngoingTask(Action action) {
