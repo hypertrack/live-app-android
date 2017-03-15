@@ -1664,8 +1664,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Only for exisitng users because Permission and Location Settings have been checked here
         if (!HyperTrack.isTracking()) {
             HyperTrack.startTracking();
-            SharedPreferenceManager.setTrackingON();
         }
+        SharedPreferenceManager.setTrackingON();
         supportInvalidateOptionsMenu();
     }
 
