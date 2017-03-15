@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.model;
 
+import android.text.TextUtils;
+
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -123,6 +125,8 @@ public class OnboardingUser extends HTUser {
 
     public String getInternationalNumber() throws NumberParseException {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        if (TextUtils.isEmpty(getPhone()))
+            return null;
 
         Phonenumber.PhoneNumber number = phoneUtil.parse(getPhone(), getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);

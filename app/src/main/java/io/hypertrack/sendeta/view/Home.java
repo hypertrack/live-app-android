@@ -409,6 +409,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void getEtaForDestination(LatLng destinationLocation, final TaskETACallback callback) {
+        if (Home.this.isFinishing())
+            return;
+
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.calculating_eta_message));
         mProgressDialog.setCancelable(false);
@@ -1233,7 +1236,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 .build();
 
         // Call assignAction to start the tracking action
-        HyperTrack.assignAction(params, new HyperTrackCallback() {
+        HyperTrack.createAndAssignAction(params, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
