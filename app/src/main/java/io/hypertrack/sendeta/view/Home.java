@@ -191,6 +191,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
+
+    private Handler searchHandler = new Handler();
+    private Runnable searchRunnable;
+
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
@@ -254,8 +258,21 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         @Override
         public void afterTextChanged(Editable s) {
-            String constraint = s != null ? s.toString() : "";
-            mAdapter.setFilterString(constraint);
+            final String constraint = s != null ? s.toString() : "";
+
+
+            if (searchRunnable != null)
+                searchHandler.removeCallbacks(searchRunnable);
+
+            searchRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.setFilterString(constraint);
+                }
+            };
+
+            searchHandler.postDelayed(searchRunnable, 400);
+
 
             // Show Autocomplete Data Fetch Loader when user typed something
             if (constraint.length() > 0)
