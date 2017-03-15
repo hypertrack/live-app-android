@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.model;
 
+import android.text.TextUtils;
+
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
@@ -14,20 +16,15 @@ import io.hypertrack.sendeta.util.SharedPreferenceManager;
  * Created by ulhas on 15/06/16.
  */
 public class OnboardingUser extends HTUser {
+    public static OnboardingUser onboardingUser;
     private static String TAG = OnboardingManager.class.getSimpleName();
-
     private String countryCode;
-
     private File photoImage;
-
     private String actionID;
-
     private boolean isExistingUser;
 
     private OnboardingUser() {
     }
-
-    public static OnboardingUser onboardingUser;
 
     public static OnboardingUser sharedOnboardingUser() {
         if (onboardingUser == null) {
@@ -52,20 +49,20 @@ public class OnboardingUser extends HTUser {
         return onboardingUser;
     }
 
-    public String getActionID() {
-        return actionID;
-    }
-
-    public void setActionID(String actionID) {
-        this.actionID = actionID;
-    }
-
     /**
      * IMPORTANT: Call this method on every update to onBoardingUser data to get the changes
      * reflected in the SharedPreferences for future reference.
      */
     public static void setOnboardingUser() {
         SharedPreferenceManager.setOnboardingUser(onboardingUser);
+    }
+
+    public String getActionID() {
+        return actionID;
+    }
+
+    public void setActionID(String actionID) {
+        this.actionID = actionID;
     }
 
     /**
@@ -83,7 +80,7 @@ public class OnboardingUser extends HTUser {
         this.setPhotoImage(user.getPhotoImage());
         this.setPhotoURL(user.getPhotoURL());
 
-        this.setOnboardingUser();
+        setOnboardingUser();
 
         // IMPORTANT: Do not update isExistingUser Flag while updating OnboardingUser
         // isExistingUser Flag is received while User registers his number (Login)
@@ -122,8 +119,10 @@ public class OnboardingUser extends HTUser {
     }
 
     public String getInternationalNumber() throws NumberParseException {
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+        if (TextUtils.isEmpty(getPhone()))
+            return null;
 
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         Phonenumber.PhoneNumber number = phoneUtil.parse(getPhone(), getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
     }
