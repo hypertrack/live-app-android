@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -28,7 +27,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -193,6 +191,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
+
+    private Handler searchHandler = new Handler();
+    private Runnable searchRunnable;
+
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(MetaPlace place) {
@@ -256,8 +258,21 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         @Override
         public void afterTextChanged(Editable s) {
-            String constraint = s != null ? s.toString() : "";
-            mAdapter.setFilterString(constraint);
+            final String constraint = s != null ? s.toString() : "";
+
+
+            if (searchRunnable != null)
+                searchHandler.removeCallbacks(searchRunnable);
+
+            searchRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    mAdapter.setFilterString(constraint);
+                }
+            };
+
+            searchHandler.postDelayed(searchRunnable, 400);
+
 
             // Show Autocomplete Data Fetch Loader when user typed something
             if (constraint.length() > 0)
@@ -286,7 +301,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             if (!LocationUtils.isLocationEnabled(Home.this)) {
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
                     checkIfLocationIsEnabled();
-
             } else {
                 // Reset Retry button
                 retryButton.setVisibility(View.GONE);
@@ -567,6 +581,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Set HyperTrackCallback
         setHyperTrackCallback();
 
+        //Ask for tracking permission
+        checkForTrackingPermission();
+
         // Check if there is any currently running task to be restored
         restoreTaskStateIfNeeded();
 
@@ -585,7 +602,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_settings, menu);
         MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
-        menuItem.setChecked(SharedPreferenceManager.isTrackingON());
+        if (SharedPreferenceManager.isTrackingON()) {
+            menuItem.setTitle("Pause Tracking");
+        } else {
+            menuItem.setTitle("Resume Tracking");
+        }
         return TaskManager.getSharedManager(this).getHyperTrackAction() == null;
     }
 
@@ -593,12 +614,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.tracking_toogle:
-                if (!item.isChecked()) {
-                    startHyperTrackTracking();
-                } else {
-                    stopHyperTrackTracking();
+                if (!TextUtils.isEmpty(item.getTitle().toString())) {
+                    if (item.getTitle().toString().equalsIgnoreCase("Resume Tracking")) {
+                        startHyperTrackTracking(true);
+                        item.setTitle("Pause Tracking");
+                    } else {
+                        stopHyperTrackTracking();
+                        item.setTitle("Resume Tracking");
+                    }
                 }
-                item.setChecked(!item.isChecked());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -642,6 +666,28 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         });
     }
 
+    private void checkForTrackingPermission() {
+        if (!SharedPreferenceManager.isAskForTrackingDialog()) {
+            startHyperTrackTracking(true);
+           /* AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("We will enable the background tracking by default. Do you want to disable it ?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startHyperTrackTracking(true);
+                        }
+                    })
+                    .show();*/
+            SharedPreferenceManager.setAskedForTrackingDialog();
+        }
+    }
+
     private void initGoogleClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -675,6 +721,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void createLocationRequest(long locationUpdateIntervalTime) {
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setSmallestDisplacement(100)
                 .setInterval(locationUpdateIntervalTime)
                 .setFastestInterval(locationUpdateIntervalTime);
     }
@@ -740,21 +787,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 if (SharedPreferenceManager.isTrackingON()) {
                     createSharingLink();
                 } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
-                    builder.setMessage("Enable the tracking.")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    startHyperTrackTracking();
-                                    createSharingLink();
-                                }
-                            })
-                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-
-                                }
-                            }).show();
+                    startHyperTrackTracking(false);
+                    createSharingLink();
                 }
             }
         });
@@ -1558,7 +1592,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (MetaApplication.isActivityVisible()) {
             resumeLocationUpdates();
         }
-
+        if (SharedPreferenceManager.isTrackingON()) {
+            startHyperTrackTracking(true);
+        } else {
+            stopHyperTrackTracking();
+        }
         supportInvalidateOptionsMenu();
 
     }
@@ -1658,18 +1696,20 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void requestLocationUpdates() {
         if (SharedPreferenceManager.isTrackingON())
-            startHyperTrackTracking();
+            startHyperTrackTracking(false);
         startLocationPolling();
     }
 
-    private void startHyperTrackTracking() {
+    private void startHyperTrackTracking(boolean byUser) {
         // HACK: Check if user is tracking currently or not
         // Only for exisitng users because Permission and Location Settings have been checked here
         if (!HyperTrack.isTracking()) {
             HyperTrack.startTracking();
         }
-        SharedPreferenceManager.setTrackingON();
-        supportInvalidateOptionsMenu();
+        if (byUser) {
+            SharedPreferenceManager.setTrackingON();
+            supportInvalidateOptionsMenu();
+        }
     }
 
     private void stopHyperTrackTracking() {

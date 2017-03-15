@@ -2,7 +2,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/tracking_toogle"
-        android:checkable="true"
-        android:checked="true"
-        android:title="Start Tracking" />
+        android:title="Resume Tracking" />
 </menu>

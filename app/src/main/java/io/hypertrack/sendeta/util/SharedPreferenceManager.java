@@ -47,6 +47,8 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
 
+    private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
+
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
@@ -370,6 +372,16 @@ public class SharedPreferenceManager {
         SharedPreferences.Editor editor = getEditor();
         editor.putBoolean(TRACKING_SETTING, flag);
         editor.apply();
+    }
+
+    public static void setAskedForTrackingDialog() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putBoolean(TRACKING_DIALOG, true);
+        editor.apply();
+    }
+
+    public static boolean isAskForTrackingDialog() {
+        return getSharedPreferences().getBoolean(TRACKING_DIALOG, false);
     }
 
     public static void setTrackingON() {
