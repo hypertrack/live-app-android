@@ -301,7 +301,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             if (!LocationUtils.isLocationEnabled(Home.this)) {
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
                     checkIfLocationIsEnabled();
-
             } else {
                 // Reset Retry button
                 retryButton.setVisibility(View.GONE);
@@ -579,6 +578,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Set HyperTrackCallback
         setHyperTrackCallback();
 
+        //Ask for tracking permission
+        checkForTrackingPermission();
+
         // Check if there is any currently running task to be restored
         restoreTaskStateIfNeeded();
 
@@ -661,6 +663,28 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         });
     }
 
+    private void checkForTrackingPermission() {
+        if (!SharedPreferenceManager.isAskForTrackingDialog()) {
+            startHyperTrackTracking(true);
+           /* AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("We will enable the background tracking by default. Do you want to disable it ?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startHyperTrackTracking(true);
+                        }
+                    })
+                    .show();*/
+            SharedPreferenceManager.setAskedForTrackingDialog();
+        }
+    }
+
     private void initGoogleClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -694,6 +718,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void createLocationRequest(long locationUpdateIntervalTime) {
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setSmallestDisplacement(100)
                 .setInterval(locationUpdateIntervalTime)
                 .setFastestInterval(locationUpdateIntervalTime);
     }
