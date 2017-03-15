@@ -10,7 +10,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
-import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
 import io.hypertrack.sendeta.model.MetaPlace;
@@ -25,7 +24,6 @@ import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import io.realm.RealmList;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -106,19 +104,6 @@ public class UserStore {
         // Check if DriverId exists for current user
         String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
         if (TextUtils.isEmpty(hyperTrackDriverID)) {
-            try {
-                if (this.realm != null)
-                    this.realm.close();
-
-                // Delete Realm Data in order to prevent further crashes
-                RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context)
-                        .schemaVersion(1)
-                        .migration(new DBMigration())
-                        .build();
-                Realm.deleteRealm(realmConfiguration);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             return false;
         }
 
