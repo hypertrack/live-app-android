@@ -422,7 +422,7 @@ public class PlaceAutocompleteAdapter
             if (this.favorites.size() > 0 && this.favorites.size() > position) {
                 UserPlace place = this.favorites.get(position);
                 if (this.listener != null) {
-                    this.listener.OnSuccess(new UserPlace(place));
+                    this.listener.OnSuccess(place);
                 }
             } else {
                 if (this.listener != null) {
@@ -434,7 +434,7 @@ public class PlaceAutocompleteAdapter
                 if (this.filteredFavorites.size() > 0 && this.filteredFavorites.size() > position) {
                     UserPlace place = this.filteredFavorites.get(position);
                     if (this.listener != null) {
-                        this.listener.OnSuccess(new UserPlace(place));
+                        this.listener.OnSuccess(place);
                     }
                 } else {
                     if (this.listener != null) {
