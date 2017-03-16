@@ -1525,7 +1525,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Update DestinationLocation
-        TaskManager.getSharedManager(Home.this).setLastUpdatedDestination((UserPlace) destinationLocation);
+        TaskManager.getSharedManager(Home.this).setLastUpdatedDestination(new UserPlace(destinationLocation));
     }
 
     /**
