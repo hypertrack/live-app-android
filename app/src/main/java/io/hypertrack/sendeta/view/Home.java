@@ -1254,9 +1254,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         }
 
-        LatLng currentLocation = currentLocationMarker.getPosition();
-        ActionParamsBuilder builder = new ActionParamsBuilder();
-        ActionParams params = builder
+        ActionParams params = new ActionParamsBuilder()
                 .setExpectedPlace(destinationPlace)
                 .setType(Action.ACTION_TYPE_VISIT)
                 .build();
