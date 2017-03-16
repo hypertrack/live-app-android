@@ -3,16 +3,18 @@ package io.hypertrack.sendeta.view;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -31,6 +33,7 @@ public class CheckPermission extends BaseActivity {
 
     RelativeLayout parentLayout;
     Button letsGO;
+    ProgressBar progressBar;
 
 
     @Override
@@ -52,6 +55,19 @@ public class CheckPermission extends BaseActivity {
                 checkPermission();
             }
         });
+        progressBar = (ProgressBar) findViewById(R.id.permission_image_loader);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && HyperTrack.checkLocationServices(this)) {
+            letsGO.setVisibility(View.INVISIBLE);
+            letsGO.setOnClickListener(null);
+            progressBar.setVisibility(View.VISIBLE);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    proceedToProfileScreen();
+                }
+            }, 2000);
+        }
+
     }
 
     public void checkPermission() {
@@ -71,7 +87,7 @@ public class CheckPermission extends BaseActivity {
         HyperTrack.requestLocationServices(CheckPermission.this, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse successResponse) {
-                proceedToProfileScreen();
+
             }
 
             @Override
@@ -133,5 +149,6 @@ public class CheckPermission extends BaseActivity {
 
     private void proceedToProfileScreen() {
         startActivity(new Intent(CheckPermission.this, Profile.class));
+        finish();
     }
 }

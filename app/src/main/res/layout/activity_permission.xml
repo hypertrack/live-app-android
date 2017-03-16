@@ -3,9 +3,9 @@
     android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/margin_high"
     android:background="@color/appBackground"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/margin_high">
 
 
     <ImageView
@@ -48,7 +48,19 @@
         android:padding="@dimen/padding_high"
         android:text="Enable Location"
         android:textColor="@android:color/white"
-        android:textSize="18dp" />
+        android:textSize="18dp"
+        android:visibility="visible" />
+
+    <ProgressBar
+        android:id="@+id/permission.image_loader"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center"
+        android:layout_margin="@dimen/activity_horizontal_margin"
+        android:indeterminate="true"
+        android:visibility="gone" />
 
     <TextView
         android:layout_width="wrap_content"
