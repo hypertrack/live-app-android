@@ -468,12 +468,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         updateViewForETASuccess((int) response.getDuration() / 60, place.getLatLng());
         if (destinationPlace == null)
-            destinationPlace = new Place();
-        destinationPlace.setLocation(new GeoJSONLocation(place.getLatitude(), place.getLongitude()));
-        if (!TextUtils.isEmpty(place.getName()))
-            destinationPlace.setName(place.getName());
-        if (!TextUtils.isEmpty(place.getAddress()))
-            destinationPlace.setAddress(place.getAddress());
+            destinationPlace = new Place().setLocation(place.getLatitude(), place.getLongitude())
+                    .setAddress(place.getAddress())
+                    .setName(place.getName());
         TaskManager.getSharedManager(this).setPlace(destinationPlace);
     }
 
@@ -1262,9 +1259,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         }
 
-        LatLng currentLocation = currentLocationMarker.getPosition();
-        ActionParamsBuilder builder = new ActionParamsBuilder();
-        ActionParams params = builder
+        ActionParams params = new ActionParamsBuilder()
                 .setExpectedPlace(destinationPlace)
                 .setType(Action.ACTION_TYPE_VISIT)
                 .build();
