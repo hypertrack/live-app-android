@@ -33,7 +33,7 @@ public class DBMigration implements RealmMigration {
             // Migrate from version 0 to version 1
 
             if (oldVersion == 0) {
-                RealmObjectSchema metaPlaceSchema = schema.get("MetaPlace");
+                RealmObjectSchema metaPlaceSchema = schema.get("UserPlace");
                 if (metaPlaceSchema != null && metaPlaceSchema.hasField("hyperTrackDestinationID")) {
                     metaPlaceSchema.removeField("hyperTrackDestinationID");
                 }

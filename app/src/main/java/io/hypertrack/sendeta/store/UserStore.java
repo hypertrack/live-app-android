@@ -1,40 +1,16 @@
 package io.hypertrack.sendeta.store;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 import com.hypertrack.lib.HyperTrack;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-
 import io.hypertrack.sendeta.model.DBMigration;
-import io.hypertrack.sendeta.model.Membership;
-import io.hypertrack.sendeta.model.MembershipDTO;
-import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.network.retrofit.SendETAService;
-import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
-import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
-import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreDeleteMembershipCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
-import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import io.hypertrack.sendeta.util.SuccessErrorCallback;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmList;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-/**
- * Created by ulhas on 18/06/16.
- */
 public class UserStore {
 
     public static UserStore sharedStore = new UserStore();
@@ -53,7 +29,7 @@ public class UserStore {
         this.user = realm.where(User.class).findFirst();
     }
 
-    public void addUser(final User userToAdd) {
+   /* public void addUser(final User userToAdd) {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
@@ -91,18 +67,19 @@ public class UserStore {
             }
         });
     }
-
-    public User getUser() {
+*/
+   /* public User getUser() {
         return this.user;
-    }
+    }*/
 
     public boolean isUserLoggedIn(Context context) {
         // Check if user has signed up
         if (!TextUtils.isEmpty(HyperTrack.getUserId())) {
-            Realm realm = Realm.getDefaultInstance();
-            return realm.where(User.class).findAll().size() > 0;
+            if (TextUtils.isEmpty(OnboardingManager.sharedManager().getUser().getId())) {
+                OnboardingManager.sharedManager().getUser().setId(HyperTrack.getUserId());
+            }
+            return true;
         }
-
         // Check if DriverId exists for current user
         String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
         if (TextUtils.isEmpty(hyperTrackDriverID)) {
@@ -123,21 +100,23 @@ public class UserStore {
         }
 
         // Configure UserId for v3 HyperTrack SDK, if not done already
+        OnboardingManager.sharedManager().getUser().setId(hyperTrackDriverID);
         HyperTrack.setUserId(hyperTrackDriverID);
         return true;
     }
 
-    public void addPlace(final MetaPlace placeToBeAdded, final SuccessErrorCallback callback) {
+    /*public void addPlace(final UserPlace placeToBeAdded, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
 
-        addPlace(placeToBeAdded);
+        //addPlace(placeToBeAdded);
         if (callback != null) {
             callback.OnSuccess();
         }
 
-      /*  placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
+
+  placeManager.addPlace(placeToBeAdded, new PlaceManagerCallback() {
             @Override
-            public void OnSuccess(MetaPlace place) {
+            public void OnSuccess(UserPlace place) {
                 addPlace(place);
 
                 // Update PlaceID fetched from server
@@ -154,17 +133,19 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });*/
+        });
     }
 
-    public void updatePlaces(final SuccessErrorCallback callback) {
+
+ public void updatePlaces(final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
 
         placeManager.getPlaces(new PlaceManagerGetPlacesCallback() {
             @Override
-            public void OnSuccess(List<MetaPlace> places) {
+            public void OnSuccess(List<UserPlace> places) {
 
-                clearPlaces();
+
+  clearPlaces();
                 addPlaces(places);
 
                 if (callback != null) {
@@ -186,7 +167,7 @@ public class UserStore {
             return;
         }
 
-        final RealmList<MetaPlace> places = this.user.getPlaces();
+        final RealmList<UserPlace> places = this.user.getPlaces();
         if (places == null || places.isEmpty()) {
             return;
         }
@@ -221,7 +202,7 @@ public class UserStore {
         });
     }
 
-    private void addPlaces(final List<MetaPlace> places) {
+    private void addPlaces(final List<UserPlace> places) {
         if (this.user == null) {
             return;
         }
@@ -233,15 +214,16 @@ public class UserStore {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                List<MetaPlace> placesToAdd = realm.copyToRealmOrUpdate(places);
-                RealmList<MetaPlace> placesList = new RealmList<>(placesToAdd.toArray(new MetaPlace[placesToAdd.size()]));
+                List<UserPlace> placesToAdd = realm.copyToRealmOrUpdate(places);
+                RealmList<UserPlace> placesList = new RealmList<>(placesToAdd.toArray(new UserPlace[placesToAdd.size()]));
                 user.setPlaces(placesList);
                 user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
 
-    private void addPlace(final MetaPlace place) {
+
+private void addPlace(final UserPlace place) {
         if (this.user == null || place == null) {
             return;
         }
@@ -249,18 +231,18 @@ public class UserStore {
         realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                MetaPlace managedPlace = realm.copyToRealmOrUpdate(place);
+                UserPlace managedPlace = realm.copyToRealmOrUpdate(place);
                 user.getPlaces().add(managedPlace);
                 user = realm.copyToRealmOrUpdate(user);
             }
         });
     }
 
-    public void editPlace(MetaPlace place, final SuccessErrorCallback callback) {
+    public void editPlace(UserPlace place, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
         placeManager.editPlace(place, new PlaceManagerCallback() {
             @Override
-            public void OnSuccess(MetaPlace place) {
+            public void OnSuccess(UserPlace place) {
                 editPlace(place);
                 if (callback != null) {
                     callback.OnSuccess();
@@ -276,7 +258,8 @@ public class UserStore {
         });
     }
 
-    public void editPlace(final MetaPlace place) {
+
+  public void editPlace(final UserPlace place) {
         if (this.user == null) {
             return;
         }
@@ -290,7 +273,7 @@ public class UserStore {
         });
     }
 
-    public void deletePlace(final MetaPlace place, final SuccessErrorCallback callback) {
+    public void deletePlace(final UserPlace place, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
         processDeletedMetaPlaceForAnalytics(true, null, place);
         deletePlace(place);
@@ -298,9 +281,10 @@ public class UserStore {
             callback.OnSuccess();
         }
 
-      /*  placeManager.deletePlace(place, new PlaceManagerCallback() {
+
+  placeManager.deletePlace(place, new PlaceManagerCallback() {
             @Override
-            public void OnSuccess(MetaPlace place) {
+            public void OnSuccess(UserPlace place) {
 
                 processDeletedMetaPlaceForAnalytics(true, null, place);
 
@@ -320,28 +304,30 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });*/
+        });
     }
 
-    /**
+
+*
      * Method to process deleted User Favorite Data to log Analytics Event
      *
      * @param status       Flag to indicate status of FavoritePlace Deletion event
      * @param errorMessage ErrorMessage in case of Failure
      * @param metaPlace    The Place object which is being deleted
-     */
-    private void processDeletedMetaPlaceForAnalytics(boolean status, String errorMessage, MetaPlace metaPlace) {
+
+
+    private void processDeletedMetaPlaceForAnalytics(boolean status, String errorMessage, UserPlace metaPlace) {
 
         try {
-            // Check if MetaPlace to be deleted is User's Home
+            // Check if UserPlace to be deleted is User's Home
             if (metaPlace.isHome()) {
                 AnalyticsStore.getLogger().deletedHome(status, errorMessage);
 
-                // Check if MetaPlace to be deleted is User's Work
+                // Check if UserPlace to be deleted is User's Work
             } else if (metaPlace.isWork()) {
                 AnalyticsStore.getLogger().deletedWork(status, errorMessage);
 
-                // Check if MetaPlace to be deleted is User's Other Favorite
+                // Check if UserPlace to be deleted is User's Other Favorite
             } else {
                 AnalyticsStore.getLogger().deletedOtherFavorite(status, errorMessage);
             }
@@ -350,12 +336,12 @@ public class UserStore {
         }
     }
 
-    private void deletePlace(final MetaPlace place) {
+ private void deletePlace(final UserPlace place) {
         if (this.user == null) {
             return;
         }
 
-        final MetaPlace managedPlaceToDelete = realm.where(MetaPlace.class).equalTo("id", place.getId()).findFirst();
+        final UserPlace managedPlaceToDelete = realm.where(UserPlace.class).equalTo("id", place.getId()).findFirst();
 
         realm.executeTransaction(new Realm.Transaction() {
             @Override
@@ -367,7 +353,8 @@ public class UserStore {
         });
     }
 
-    public void updateInfo(final String updatedFirstName, final String updatedLastName, final SuccessErrorCallback callback) {
+
+   public void updateInfo(final String updatedFirstName, final String updatedLastName, final SuccessErrorCallback callback) {
         if (this.user == null) {
             if (callback != null) {
                 callback.OnError();
@@ -419,20 +406,23 @@ public class UserStore {
         });
     }
 
+
     public void updatePhoto(final File updatePhoto, final SuccessErrorCallback callback) {
         if (updatePhoto == null) {
             callback.OnError();
             return;
         }
 
-        addImage(updatePhoto);
+        //addImage(updatePhoto);
 
         if (callback != null) {
             callback.OnSuccess();
         }
 
 
-        /*RequestBody requestBody = RequestBody.create(MediaType.parse("image*//**//*"), updatePhoto);
+RequestBody requestBody = RequestBody.create(MediaType.parse("image
+
+"), updatePhoto);
         Map<String, RequestBody> requestBodyMap = new HashMap<>();
         String uuid = UUID.randomUUID().toString();
         String fileName = "photo\"; filename=\"" + uuid + ".jpg";
@@ -460,7 +450,8 @@ public class UserStore {
                     callback.OnError();
                 }
             }
-        });*/
+        });
+
     }
 
     public int getSelectedMembershipAccountId() {
@@ -661,5 +652,5 @@ public class UserStore {
                 user = realm.copyToRealmOrUpdate(user);
             }
         });
-    }
+    }*/
 }

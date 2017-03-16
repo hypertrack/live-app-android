@@ -1,30 +1,17 @@
 package io.hypertrack.sendeta.store;
 
-import java.util.List;
-
-import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.PlaceDTO;
-import io.hypertrack.sendeta.network.retrofit.SendETAService;
-import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
-import io.hypertrack.sendeta.store.callback.PlaceManagerCallback;
-import io.hypertrack.sendeta.store.callback.PlaceManagerGetPlacesCallback;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 /**
  * Created by ulhas on 21/06/16.
  */
 public class PlaceManager {
 
-    public void getPlaces(final PlaceManagerGetPlacesCallback callback) {
+   /* public void getPlaces(final PlaceManagerGetPlacesCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
 
-        Call<List<MetaPlace>> call = sendETAService.getPlaces();
-        call.enqueue(new Callback<List<MetaPlace>>() {
+        Call<List<UserPlace>> call = sendETAService.getPlaces();
+        call.enqueue(new Callback<List<UserPlace>>() {
             @Override
-            public void onResponse(Call<List<MetaPlace>> call, Response<List<MetaPlace>> response) {
+            public void onResponse(Call<List<UserPlace>> call, Response<List<UserPlace>> response) {
                 if (response.isSuccessful()) {
                     if (callback != null) {
                         callback.OnSuccess(response.body());
@@ -37,7 +24,7 @@ public class PlaceManager {
             }
 
             @Override
-            public void onFailure(Call<List<MetaPlace>> call, Throwable t) {
+            public void onFailure(Call<List<UserPlace>> call, Throwable t) {
                 if (callback != null) {
                     callback.OnError();
                 }
@@ -45,14 +32,14 @@ public class PlaceManager {
         });
     }
 
-    public void deletePlace(final MetaPlace place, final PlaceManagerCallback callback) {
+   *//* public void deletePlace(final UserPlace place, final PlaceManagerCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         PlaceDTO placeDTO = new PlaceDTO(place);
 
-        Call<MetaPlace> call = sendETAService.deletePlace(placeDTO.getId());
-        call.enqueue(new Callback<MetaPlace>() {
+        Call<UserPlace> call = sendETAService.deletePlace(placeDTO.getId());
+        call.enqueue(new Callback<UserPlace>() {
             @Override
-            public void onResponse(Call<MetaPlace> call, Response<MetaPlace> response) {
+            public void onResponse(Call<UserPlace> call, Response<UserPlace> response) {
                 if (response.isSuccessful()) {
                     if (callback != null) {
                         callback.OnSuccess(place);
@@ -65,22 +52,22 @@ public class PlaceManager {
             }
 
             @Override
-            public void onFailure(Call<MetaPlace> call, Throwable t) {
+            public void onFailure(Call<UserPlace> call, Throwable t) {
                 if (callback != null) {
                     callback.OnError();
                 }
             }
         });
-    }
+    }*//*
 
-    public void addPlace(MetaPlace place, final PlaceManagerCallback callback) {
+    public void addPlace(UserPlace place, final PlaceManagerCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         PlaceDTO placeDTO = new PlaceDTO(place);
 
-        Call<MetaPlace> call = sendETAService.addPlace(placeDTO);
-        call.enqueue(new Callback<MetaPlace>() {
+        Call<UserPlace> call = sendETAService.addPlace(placeDTO);
+        call.enqueue(new Callback<UserPlace>() {
             @Override
-            public void onResponse(Call<MetaPlace> call, Response<MetaPlace> response) {
+            public void onResponse(Call<UserPlace> call, Response<UserPlace> response) {
                 if (response.isSuccessful()) {
                     if (callback != null) {
                         callback.OnSuccess(response.body());
@@ -93,7 +80,7 @@ public class PlaceManager {
             }
 
             @Override
-            public void onFailure(Call<MetaPlace> call, Throwable t) {
+            public void onFailure(Call<UserPlace> call, Throwable t) {
                 if (callback != null) {
                     callback.OnError();
                 }
@@ -101,14 +88,14 @@ public class PlaceManager {
         });
     }
 
-    public void editPlace(MetaPlace place, final PlaceManagerCallback callback) {
+    public void editPlace(UserPlace place, final PlaceManagerCallback callback) {
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class, SharedPreferenceManager.getUserAuthToken());
         PlaceDTO placeDTO = new PlaceDTO(place);
 
-        Call<MetaPlace> call = sendETAService.editPlace(placeDTO.getId(), placeDTO);
-        call.enqueue(new Callback<MetaPlace>() {
+       *//* Call<UserPlace> call = sendETAService.editPlace(placeDTO.getId(), placeDTO);
+        call.enqueue(new Callback<UserPlace>() {
             @Override
-            public void onResponse(Call<MetaPlace> call, Response<MetaPlace> response) {
+            public void onResponse(Call<UserPlace> call, Response<UserPlace> response) {
                 if (response.isSuccessful()) {
                     if (callback != null) {
                         callback.OnSuccess(response.body());
@@ -121,11 +108,11 @@ public class PlaceManager {
             }
 
             @Override
-            public void onFailure(Call<MetaPlace> call, Throwable t) {
+            public void onFailure(Call<UserPlace> call, Throwable t) {
                 if (callback != null) {
                     callback.OnError();
                 }
             }
-        });
-    }
+        });*//*
+    }*/
 }

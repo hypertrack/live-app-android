@@ -12,15 +12,14 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 import com.hypertrack.lib.models.Action;
-import com.hypertrack.lib.models.Place;
 
 import java.lang.reflect.Type;
 import java.util.Date;
 
 import io.hypertrack.sendeta.MetaApplication;
-import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.Task;
+import io.hypertrack.sendeta.model.UserPlace;
 
 /**
  * Created by suhas on 25/02/16.
@@ -78,20 +77,20 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static MetaPlace getPlace() {
+    public static UserPlace getPlace() {
         String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
         if (placeJson == null) {
             return null;
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<MetaPlace>() {
+        Type type = new TypeToken<UserPlace>() {
         }.getType();
 
         return gson.fromJson(placeJson, type);
     }
 
-    public static void setPlace(Place place) {
+    public static void setPlace(UserPlace place) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
@@ -101,14 +100,14 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static Place getActionPlace() {
+    public static UserPlace getActionPlace() {
         String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
         if (placeJson == null) {
             return null;
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<Place>() {
+        Type type = new TypeToken<UserPlace>() {
         }.getType();
 
         return gson.fromJson(placeJson, type);

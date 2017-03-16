@@ -59,8 +59,6 @@ public class SplashScreen extends BaseActivity {
             startActivity(registerIntent);
             finish();
         } else {
-            UserStore.sharedStore.initializeUser();
-            UserStore.sharedStore.updateSelectedMembership(1);
             Utils.setCrashlyticsKeys(this);
             processAppDeepLink(appDeepLink);
         }

@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.network.retrofit;
 
 import java.util.List;
@@ -8,7 +9,7 @@ import io.hypertrack.sendeta.model.FetchDriverIDForUserResponse;
 import io.hypertrack.sendeta.model.GCMAddDeviceDTO;
 import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.MembershipDTO;
-import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.model.PlaceDTO;
 import io.hypertrack.sendeta.model.RequestTrackingDTO;
 import io.hypertrack.sendeta.model.RequestTrackingResponse;
@@ -31,9 +32,11 @@ import retrofit2.http.PartMap;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+*/
 /**
  * Created by suhas on 25/01/16.
- */
+ *//*
+
 public interface SendETAService {
 
     @POST("/api/v1/users/{id}/edit/")
@@ -62,16 +65,16 @@ public interface SendETAService {
     Call<Map<String, Object>> startTask(@Path("id") int id, @Body TaskDTO taskDTO);
 
     @POST("/api/v1/places/")
-    Call<MetaPlace> addPlace(@Body PlaceDTO place);
+    Call<UserPlace> addPlace(@Body PlaceDTO place);
 
     @POST("/api/v1/places/{id}/edit/")
-    Call<MetaPlace> editPlace(@Path("id") int id, @Body PlaceDTO place);
+    Call<UserPlace> editPlace(@Path("id") int id, @Body PlaceDTO place);
 
     @DELETE("/api/v1/places/{id}/")
-    Call<MetaPlace> deletePlace(@Path("id") int id);
+    Call<UserPlace> deletePlace(@Path("id") int id);
 
     @GET("/api/v1/places/")
-    Call<List<MetaPlace>> getPlaces();
+    Call<List<UserPlace>> getPlaces();
 
     // Membership Calls
     @GET("/api/v1/users/{id}/")
@@ -114,3 +117,4 @@ public interface SendETAService {
     @POST("/api/v1/users/{id}/request/")
     Call<RequestTrackingResponse> getRequestTrackingURL(@Path("id") int id, @Body RequestTrackingDTO request);
 }
+*/

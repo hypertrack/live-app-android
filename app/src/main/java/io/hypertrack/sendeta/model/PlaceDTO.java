@@ -1,10 +1,8 @@
 package io.hypertrack.sendeta.model;
 
-import android.location.*;
 import android.location.Location;
 
 import com.google.gson.annotations.SerializedName;
-import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 
 
@@ -13,7 +11,7 @@ import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
  */
 public class PlaceDTO {
 
-    private int id;
+    private String id;
 
     @SerializedName("google_places_id")
     private String googlePlacesID;
@@ -24,11 +22,22 @@ public class PlaceDTO {
 
     private HyperTrackLocation location;
 
-    public int getId() {
+    public PlaceDTO(UserPlace place) {
+        this.id = place.getId();
+        this.address = place.getAddress();
+        this.googlePlacesID = place.getGooglePlacesID();
+        this.name = place.getName();
+        android.location.Location newLoc = new Location("");
+        newLoc.setLatitude(place.getLocation().getLatitude());
+        newLoc.setLongitude(place.getLocation().getLongitude());
+        this.location = new HyperTrackLocation(newLoc);
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -62,16 +71,5 @@ public class PlaceDTO {
 
     public void setLocation(HyperTrackLocation location) {
         this.location = location;
-    }
-
-    public PlaceDTO(MetaPlace place) {
-        this.id = place.getId();
-        this.address = place.getAddress();
-        this.googlePlacesID = place.getGooglePlacesID();
-        this.name = place.getName();
-        android.location.Location newLoc = new Location("");
-        newLoc.setLatitude(place.getLatitude());
-        newLoc.setLongitude(place.getLongitude());
-        this.location = new HyperTrackLocation(newLoc);
     }
 }

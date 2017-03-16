@@ -42,10 +42,8 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.Country;
 import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
-import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
-import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
@@ -282,25 +280,26 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void navigateToHomeScreen() {
-        UserStore.sharedStore.initializeUser();
+        //  UserStore.sharedStore.initializeUser();
+        //   OnboardingManager.sharedManager().getUser();
         Utils.setCrashlyticsKeys(this);
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
-        SharedPreferenceManager.deleteTask();
+        SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
         HTLog.i("Profile", "User Registration successful: Clearing Active Trip, if any");
 
-        User user = UserStore.sharedStore.getUser();
+//        User user = UserStore.sharedStore.getUser();
         Intent intent;
-        if (user != null && user.getPendingMemberships() != null && user.getPendingMemberships().size() > 0) {
+       /* if (user != null && user.getPendingMemberships() != null && user.getPendingMemberships().size() > 0) {
             intent = new Intent(Profile.this, BusinessProfile.class);
             intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        } else {
+        } else {*/
             intent = new Intent(Profile.this, Home.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        }
+        /*}*/
 
         TaskStackBuilder.create(Profile.this)
                 .addNextIntentWithParentStack(intent)

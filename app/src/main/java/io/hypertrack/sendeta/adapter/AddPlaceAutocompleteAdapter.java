@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
-import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.view.AddFavoritePlace;
 
 /**
@@ -80,22 +80,42 @@ public class AddPlaceAutocompleteAdapter extends
     private boolean isSearching;
 
     private PlaceAutoCompleteOnClickListener listener;
+    /**
+     * Callback for results from a Places Geo Data API query that shows the first place result in
+     * the details view on screen.
+     */
+    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
+            = new ResultCallback<PlaceBuffer>() {
+        @Override
+        public void onResult(PlaceBuffer places) {
+            if (!places.getStatus().isSuccess()) {
+                // Request did not complete successfully
+                Log.d(TAG, "UserPlace query did not complete. Error: " + places.getStatus().toString());
+                places.release();
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
 
-    public void setSearching (boolean isSearching) {
-        this.isSearching = isSearching;
-    }
+            if (places.getCount() == 0) {
+                Log.d(TAG, "Places is empty");
+                places.release();
+                if (listener != null) {
+                    listener.OnError();
+                }
+            }
 
-    public void setFilterString(String filterString) {
-        if (!filterString.isEmpty()) {
-            getFilter().filter(filterString);
-            this.isSearching = true;
-        } else {
-            this.isSearching = false;
-            this.mResultList = null;
+            // Get the UserPlace object from the buffer.
+            final Place place = places.get(0);
+
+            Log.i(TAG, "UserPlace details received: " + place.getName());
+
+            if (listener != null) {
+                listener.OnSuccess(new UserPlace(place));
+            }
+            places.release();
         }
-
-        notifyDataSetChanged();
-    }
+    };
 
     /**
      * Initializes with a resource for text rows and autocomplete query bounds.
@@ -110,6 +130,22 @@ public class AddPlaceAutocompleteAdapter extends
     }
 
     private AddPlaceAutocompleteAdapter() {}
+
+    public void setSearching(boolean isSearching) {
+        this.isSearching = isSearching;
+    }
+
+    public void setFilterString(String filterString) {
+        if (!filterString.isEmpty()) {
+            getFilter().filter(filterString);
+            this.isSearching = true;
+        } else {
+            this.isSearching = false;
+            this.mResultList = null;
+        }
+
+        notifyDataSetChanged();
+    }
 
     /**
      * Sets the bounds for all subsequent queries.
@@ -212,7 +248,7 @@ public class AddPlaceAutocompleteAdapter extends
     /**
      * Submits an autocomplete query to the Places Geo Data Autocomplete API.
      * Results are returned as frozen AutocompletePrediction objects, ready to be cached.
-     * objects to store the MetaPlace ID and description that the API returns.
+     * objects to store the UserPlace ID and description that the API returns.
      * Returns an empty list if no results were found.
      * Returns null if the API client is not available or the query did not complete
      * successfully.
@@ -254,6 +290,16 @@ public class AddPlaceAutocompleteAdapter extends
         return null;
     }
 
+    private void itemClickedAtPosition(int position) {
+
+        final AutocompletePrediction item = getItem(position);
+        final String placeId = item.getPlaceId();
+
+        PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
+                .getPlaceById(mGoogleApiClient, placeId);
+        placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
+    }
+
     public class AutocompleteViewHolder extends RecyclerView.ViewHolder {
         public TextView header;
         public TextView description;
@@ -276,51 +322,4 @@ public class AddPlaceAutocompleteAdapter extends
             });
         }
     }
-
-    private void itemClickedAtPosition(int position) {
-
-        final AutocompletePrediction item = getItem(position);
-        final String placeId = item.getPlaceId();
-
-        PendingResult<PlaceBuffer> placeResult = Places.GeoDataApi
-                .getPlaceById(mGoogleApiClient, placeId);
-        placeResult.setResultCallback(mUpdatePlaceDetailsCallback);
-    }
-
-    /**
-     * Callback for results from a Places Geo Data API query that shows the first place result in
-     * the details view on screen.
-     */
-    private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsCallback
-            = new ResultCallback<PlaceBuffer>() {
-        @Override
-        public void onResult(PlaceBuffer places) {
-            if (!places.getStatus().isSuccess()) {
-                // Request did not complete successfully
-                Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
-                places.release();
-                if (listener != null) {
-                    listener.OnError();
-                }
-            }
-
-            if (places.getCount() == 0) {
-                Log.d(TAG, "Places is empty");
-                places.release();
-                if (listener != null) {
-                    listener.OnError();
-                }
-            }
-
-            // Get the MetaPlace object from the buffer.
-            final Place place = places.get(0);
-
-            Log.i(TAG, "MetaPlace details received: " + place.getName());
-
-            if (listener != null) {
-                listener.OnSuccess(new MetaPlace(place));
-            }
-            places.release();
-        }
-    };
 }

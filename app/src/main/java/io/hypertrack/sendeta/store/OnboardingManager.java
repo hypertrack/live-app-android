@@ -1,25 +1,24 @@
 package io.hypertrack.sendeta.store;
 
 import android.graphics.Bitmap;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.File;
 import java.util.HashMap;
 
 import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.callback.OnOnboardingCallback;
 import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
 /**
  * Created by ulhas on 18/06/16.
  */
 public class OnboardingManager {
 
+    private static final String LOGGED_USER = "io.hypertrack.meta:LoggedUser";
     private static String TAG = OnboardingManager.class.getSimpleName();
-
     private static OnboardingManager sSharedManager = null;
     private OnboardingUser onboardingUser;
 
@@ -33,6 +32,12 @@ public class OnboardingManager {
         }
 
         return sSharedManager;
+    }
+
+    public boolean isUserLoggedIN() {
+        if (onboardingUser == null || TextUtils.isEmpty(onboardingUser.getId()))
+            return false;
+        return !TextUtils.isEmpty(onboardingUser.getId());
     }
 
     public OnboardingUser getUser() {
@@ -200,22 +205,11 @@ public class OnboardingManager {
             // Check if the profile image has changed from the existing one
             if (updatedProfileImage != null && updatedProfileImage.getByteCount() > 0
                     && !updatedProfileImage.sameAs(oldProfileImage)) {
-
-                UserStore.sharedStore.updatePhoto(profileImage, new SuccessErrorCallback() {
-                    @Override
-                    public void OnSuccess() {
-                        if (callback != null) {
-                            callback.onSuccess();
-                        }
-                    }
-
-                    @Override
-                    public void OnError() {
-                        if (callback != null) {
-                            callback.onError();
-                        }
-                    }
-                });
+                this.onboardingUser.saveFileAsBitmap(profileImage);
+                OnboardingUser.setOnboardingUser();
+                if (callback != null) {
+                    callback.onSuccess();
+                }
             } else {
                 // No need to upload Profile Image since there was no change in it
                 if (callback != null) {
@@ -233,8 +227,8 @@ public class OnboardingManager {
 
     }
 
-    public void didOnboardUser(User user) {
-        UserStore.sharedStore.addUser(user);
+    public void didOnboardUser(OnboardingUser user) {
+        OnboardingUser.setOnboardingUser();
     }
 
     private void onVerifyCode(VerifyResponse response) {
@@ -244,4 +238,6 @@ public class OnboardingManager {
         // Update OnBoardingUser Data with the data fetched after code verification
         this.onboardingUser.update(response.getUser());
     }
+
+
 }

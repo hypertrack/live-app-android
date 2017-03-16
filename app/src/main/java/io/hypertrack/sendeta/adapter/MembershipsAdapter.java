@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.adapter;
 
 import android.content.Context;
@@ -19,9 +20,11 @@ import io.hypertrack.sendeta.model.Membership;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.UserStore;
 
+*/
 /**
  * Created by piyush on 22/07/16.
- */
+ *//*
+
 public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.MembershipViewHolder> {
 
     private Context context;
@@ -175,3 +178,4 @@ public class MembershipsAdapter extends RecyclerView.Adapter<MembershipsAdapter.
         }
     }
 }
+*/

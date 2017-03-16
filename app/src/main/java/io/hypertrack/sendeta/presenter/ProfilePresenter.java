@@ -72,12 +72,12 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     String userID = user.getId();
                     OnboardingUser onboardingUser = onboardingManager.getUser();
                     onboardingUser.setId(userID);
+                    onboardingUser.setName(user.getName());
+                    onboardingUser.setPhone(user.getPhone());
                     OnboardingUser.setOnboardingUser();
                     AnalyticsStore.getLogger().enteredName(true, null);
                     AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
-                    io.hypertrack.sendeta.model.User realmUser = new io.hypertrack.sendeta.model.User(user.getName(), user.getPhone());
-                    onboardingManager.didOnboardUser(realmUser);
                     if (profileImage != null && profileImage.length() > 0) {
                         onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
                             @Override

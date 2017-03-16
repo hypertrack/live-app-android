@@ -133,11 +133,11 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <activity
-            android:name=".view.SettingsScreen"
-            android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
-
+        <!--   <activity
+               android:name=".view.SettingsScreen"
+               android:parentActivityName=".view.Home"
+               android:screenOrientation="portrait" />
+   -->
         <activity
             android:name=".view.EditProfile"
             android:screenOrientation="portrait" />
@@ -146,26 +146,26 @@
             android:name=".view.AddFavoritePlace"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".view.BusinessProfile"
-            android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
+        <!-- <activity
+             android:name=".view.BusinessProfile"
+             android:parentActivityName=".view.Home"
+             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".view.UserActivities"
-            android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
+         <activity
+             android:name=".view.UserActivities"
+             android:parentActivityName=".view.Home"
+             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".view.Track"
-            android:parentActivityName=".view.UserActivities"
-            android:screenOrientation="portrait" />
+         <activity
+             android:name=".view.Track"
+             android:parentActivityName=".view.UserActivities"
+             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".view.ShiftsScreen"
-            android:parentActivityName=".view.SettingsScreen"
-            android:screenOrientation="portrait" />
-
+         <activity
+             android:name=".view.ShiftsScreen"
+             android:parentActivityName=".view.SettingsScreen"
+             android:screenOrientation="portrait" />
+ -->
         <!-- Register Receivers here -->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"

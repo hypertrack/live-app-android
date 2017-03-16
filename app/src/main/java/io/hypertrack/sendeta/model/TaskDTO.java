@@ -1,7 +1,5 @@
 package io.hypertrack.sendeta.model;
 
-import android.location.*;
-
 import com.google.gson.annotations.SerializedName;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 
@@ -100,12 +98,12 @@ public class TaskDTO{
         this.location = location;
     }
 
-    public TaskDTO(int placeId, int accountId) {
+    /*public TaskDTO(int placeId, int accountId) {
         this.placeId = placeId;
         this.accountId = accountId;
-    }
+    }*/
 
-    public TaskDTO(MetaPlace place, int accountId) {
+   /* public TaskDTO(UserPlace place, int accountId) {
         this(place.getId(), accountId);
         this.address = place.getAddress();
         this.googlePlacesID = place.getGooglePlacesID();
@@ -115,13 +113,13 @@ public class TaskDTO{
         newLoc.setLatitude(place.getLatitude());
         newLoc.setLongitude(place.getLongitude());
         this.location = new HyperTrackLocation(newLoc);
-    }
+    }*/
 
-    public TaskDTO(MetaPlace place, int accountId, HyperTrackLocation startLocation) {
+   /* public TaskDTO(UserPlace place, int accountId, HyperTrackLocation startLocation) {
         this(place, accountId);
         this.startLocation = startLocation;
 
-    }
+    }*/
 
 
 }

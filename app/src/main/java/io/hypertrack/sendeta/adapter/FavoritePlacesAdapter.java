@@ -11,40 +11,41 @@ import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
-import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.model.UserPlace;
+import io.hypertrack.sendeta.store.OnboardingManager;
 
 /**
  * Created by piyush on 10/06/16.
  */
 public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAdapter.PlacesViewHolder> {
 
-    private MetaPlace home;
-    private MetaPlace work;
-    private List<MetaPlace> otherPlaces;
+    private UserPlace home;
+    private UserPlace work;
+    private List<UserPlace> otherPlaces;
     private FavoritePlaceOnClickListener listener;
 
-    public void setHome(MetaPlace home) {
-        this.home = home;
-    }
-
-    public void setWork(MetaPlace work) {
-        this.work = work;
-    }
-
-    public void setOtherPlaces(List<MetaPlace> otherPlaces) {
-        this.otherPlaces = otherPlaces;
-    }
-
-    public FavoritePlacesAdapter(MetaPlace home, MetaPlace work, List<MetaPlace> otherPlaces, FavoritePlaceOnClickListener listener) {
+    public FavoritePlacesAdapter(UserPlace home, UserPlace work, List<UserPlace> otherPlaces, FavoritePlaceOnClickListener listener) {
         this.home = home;
         this.work = work;
         this.otherPlaces = otherPlaces;
         this.listener = listener;
     }
 
-    private FavoritePlacesAdapter() {}
+    private FavoritePlacesAdapter() {
+    }
+
+    public void setHome(UserPlace home) {
+        this.home = home;
+    }
+
+    public void setWork(UserPlace work) {
+        this.work = work;
+    }
+
+    public void setOtherPlaces(List<UserPlace> otherPlaces) {
+        this.otherPlaces = otherPlaces;
+    }
 
     @Override
     public PlacesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -84,7 +85,7 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
             holder.description.setVisibility(View.GONE);
             holder.deleteIcon.setVisibility(View.GONE);
         } else {
-            MetaPlace place = this.otherPlaces.get(position - 2);
+            UserPlace place = this.otherPlaces.get(position - 2);
             holder.icon.setImageResource(R.drawable.ic_favorite);
             holder.title.setText(place.getName());
             holder.description.setVisibility(View.VISIBLE);
@@ -98,43 +99,8 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
         return this.rowCount();
     }
 
-    public class PlacesViewHolder extends RecyclerView.ViewHolder {
-        protected ImageView icon;
-        protected TextView title;
-        protected TextView description;
-        protected ImageView deleteIcon;
-
-        public PlacesViewHolder(View view) {
-            super(view);
-            this.icon = (ImageView) view.findViewById(R.id.item_place_icon);
-            this.title = (TextView) view.findViewById(R.id.item_place_title);
-            this.description = (TextView) view.findViewById(R.id.item_place_desc);
-            this.deleteIcon = (ImageView) view.findViewById(R.id.item_place_delete);
-
-            deleteIcon.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getAdapterPosition() == RecyclerView.NO_POSITION)
-                        return;
-
-                    itemToBeDeletedAtPosition(getAdapterPosition());
-                }
-            });
-
-            view.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (getAdapterPosition() == RecyclerView.NO_POSITION)
-                        return;
-
-                    itemClickedAtPosition(getAdapterPosition());
-                }
-            });
-        }
-    }
-
     private int rowCount() {
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user == null) {
             return 0;
         }
@@ -205,6 +171,41 @@ public class FavoritePlacesAdapter extends RecyclerView.Adapter<FavoritePlacesAd
             if (this.listener != null) {
                 this.listener.OnDeletePlace(this.otherPlaces.get(position - 2));
             }
+        }
+    }
+
+    public class PlacesViewHolder extends RecyclerView.ViewHolder {
+        protected ImageView icon;
+        protected TextView title;
+        protected TextView description;
+        protected ImageView deleteIcon;
+
+        public PlacesViewHolder(View view) {
+            super(view);
+            this.icon = (ImageView) view.findViewById(R.id.item_place_icon);
+            this.title = (TextView) view.findViewById(R.id.item_place_title);
+            this.description = (TextView) view.findViewById(R.id.item_place_desc);
+            this.deleteIcon = (ImageView) view.findViewById(R.id.item_place_delete);
+
+            deleteIcon.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getAdapterPosition() == RecyclerView.NO_POSITION)
+                        return;
+
+                    itemToBeDeletedAtPosition(getAdapterPosition());
+                }
+            });
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (getAdapterPosition() == RecyclerView.NO_POSITION)
+                        return;
+
+                    itemClickedAtPosition(getAdapterPosition());
+                }
+            });
         }
     }
 }

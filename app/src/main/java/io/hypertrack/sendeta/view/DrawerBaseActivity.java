@@ -7,15 +7,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.store.OnboardingManager;
 
 /**
  * Created by piyush on 22/07/16.
  */
 public class DrawerBaseActivity extends BaseActivity {
 
-    private User user;
+    private OnboardingUser user;
     private ImageView profileImageView;
     private TextView profileName;
     private DrawerLayout drawerLayout;
@@ -95,7 +95,7 @@ public class DrawerBaseActivity extends BaseActivity {
 
     private void updateUserData() {
         // Set Toolbar Title as User Name
-        user = UserStore.sharedStore.getUser();
+        user = OnboardingManager.sharedManager().getUser();
 
         if (user != null) {
 
@@ -110,7 +110,7 @@ public class DrawerBaseActivity extends BaseActivity {
             }
 
             if (profileName != null) {
-                profileName.setText(user.getFullName());
+                profileName.setText(user.getName());
             }
         }
     }

@@ -78,7 +78,6 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
@@ -98,16 +97,15 @@ import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
-import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.TaskETAResponse;
-import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.TaskManager;
-import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
@@ -141,7 +139,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             updateInfoMessageView();
         }
     };
-    private User user;
+    private OnboardingUser user;
     private GoogleMap mMap;
     private Marker currentLocationMarker, destinationLocationMarker;
     private Location defaultLocation = new Location("default");
@@ -179,13 +177,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private RoundedImageView heroMarkerProfileImageView;
     private ProgressBar mAutocompleteLoader;
     private PlaceAutocompleteAdapter mAdapter;
-    private Place restoreTaskMetaPlace;
-    private Place destinationPlace;
+    private UserPlace restoreTaskMetaPlace;
+    private UserPlace destinationPlace;
     private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
             locationFrequencyIncreased = true, selectPushedTaskMetaPlace = false, handlePushedTaskDeepLink = false,
             destinationAddressGeocoded = false, isMapLoaded = false;
-    private MetaPlace pushedTaskMetaPlace;
+    private UserPlace pushedTaskMetaPlace;
     private String pushedTaskID;
     private float zoomLevel = 1.0f;
     private Integer etaInMinutes = 0;
@@ -197,7 +195,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
-        public void OnSuccess(MetaPlace place) {
+        public void OnSuccess(UserPlace place) {
             // Set pushedTask Location Address received from ReverseGeocoding
             if (selectPushedTaskMetaPlace && destinationAddressGeocoded) {
                 place = pushedTaskMetaPlace;
@@ -212,7 +210,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
             // Check if selected place is a User Favorite to log Analytics Event
             boolean isFavorite = false;
-            user = UserStore.sharedStore.getUser();
+            user = OnboardingManager.sharedManager().getUser();
             if (user != null && place != null) {
                 isFavorite = user.isSynced(place);
             }
@@ -368,12 +366,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     };
 
-    private void onSelectPlace(final MetaPlace place) {
+    private void onSelectPlace(final UserPlace place) {
         if (place == null) {
             return;
         }
 
-        getEtaForDestination(place.getLatLng(), new TaskETACallback() {
+
+        getEtaForDestination(new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude()), new TaskETACallback() {
             @Override
             public void OnSuccess(TaskETAResponse etaResponse) {
                 // Hide Retry Button
@@ -401,7 +400,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         });
     }
 
-    private void showRetryButton(boolean showRetryButton, final MetaPlace place) {
+    private void showRetryButton(boolean showRetryButton, final UserPlace place) {
 
         if (showRetryButton) {
             // Initialize RetryButton on getETAForDestination failure
@@ -459,18 +458,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
     }
 
-    private void onETASuccess(TaskETAResponse response, MetaPlace place) {
+    private void onETASuccess(TaskETAResponse response, UserPlace place) {
         // Make the VehicleTabLayout visible onETASuccess
         AnimationUtils.expand(vehicleTypeTabLayout);
-
-        updateViewForETASuccess((int) response.getDuration() / 60, place.getLatLng());
-        if (destinationPlace == null)
-            destinationPlace = new Place();
-        destinationPlace.setLocation(new GeoJSONLocation(place.getLatitude(), place.getLongitude()));
-        if (!TextUtils.isEmpty(place.getName()))
-            destinationPlace.setName(place.getName());
-        if (!TextUtils.isEmpty(place.getAddress()))
-            destinationPlace.setAddress(place.getAddress());
+        LatLng latLng = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
+        updateViewForETASuccess((int) response.getDuration() / 60, latLng);
+        destinationPlace = place;
         TaskManager.getSharedManager(this).setPlace(destinationPlace);
     }
 
@@ -488,8 +481,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateAutoCompleteResults() {
-        List<MetaPlace> places = null;
-        user = UserStore.sharedStore.getUser();
+        List<UserPlace> places = null;
+        user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             places = user.getPlaces();
         }
@@ -528,15 +521,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        // Initialize UserStore
-        UserStore.sharedStore.initializeUser();
+        /*// Initialize UserStore
+        OnboardingManager.sharedManager().initializeUser();*/
 
         // Initialize Toolbar without Home Button
         initToolbar(getResources().getString(R.string.toolbar_title), false);
 
-        user = UserStore.sharedStore.getUser();
+        user = OnboardingManager.sharedManager().getUser();
         if (user.getImageBitmap() != null) {
-            Bitmap bitmap = UserStore.sharedStore.getUser().getImageBitmap();
+            Bitmap bitmap = user.getImageBitmap();
             setToolbarIcon(bitmap);
         }
 
@@ -904,7 +897,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         try {
             if (userBitmap == null) {
-                user = UserStore.sharedStore.getUser();
+                user = OnboardingManager.sharedManager().getUser();
                 if (user != null) {
                     userBitmap = user.getImageBitmap();
                 }
@@ -978,7 +971,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             // Check if valid Destination Coordinates were provided or not
             if (coords[0] != 0.0 && coords[1] != 0.0) {
                 String destinationName = coords[0] + ", " + coords[1];
-                pushedTaskMetaPlace = new MetaPlace(destinationName,
+                pushedTaskMetaPlace = new UserPlace(destinationName,
                         coords[0], coords[1]);
 
                 // Reverse Geocode the Destination Location Coordinates to an Address
@@ -1106,14 +1099,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         selectedVehicleType = getVehicleTypeForTabPosition(tab.getPosition());
 
         // Check if a place has been selected or
-        Place place = TaskManager.getSharedManager(Home.this).getPlace();
+        UserPlace place = TaskManager.getSharedManager(Home.this).getPlace();
         if (place == null)
             return;
 
-        MetaPlace metaPlace = new MetaPlace(place.getLocation().getLatitude(), place.getLocation().getLongitude());
 
         // Call getETAForDestination with selected vehicleType
-        Home.this.onSelectPlace(metaPlace);
+        Home.this.onSelectPlace(place);
     }
 
     private HTUserVehicleType getVehicleTypeForTabPosition(int tabPosition) {
@@ -1242,7 +1234,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mProgressDialog.setMessage(getString(R.string.starting_task_message));
         mProgressDialog.show();
 
-        user = UserStore.sharedStore.getUser();
+        user = OnboardingManager.sharedManager().getUser();
         if (user == null) {
             mProgressDialog.dismiss();
             return;
@@ -1314,16 +1306,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updatePushedDestinationAddress() {
-        final MetaPlace destinationPlace = pushedTaskMetaPlace;
+
 
         // Update the selected place with updated destinationLocationAddress
-        Place place = new Place();
-        place.setLocation(new GeoJSONLocation(destinationPlace.getLatitude(), destinationPlace.getLongitude()));
-        if (!TextUtils.isEmpty(destinationPlace.getName()))
-            place.setName(destinationPlace.getName());
-        if (!TextUtils.isEmpty(destinationPlace.getAddress()))
-            place.setAddress(destinationPlace.getAddress());
-        TaskManager.getSharedManager(this).setPlace(place);
+
+        TaskManager.getSharedManager(this).setPlace(pushedTaskMetaPlace);
 
         // Set the Enter Destination Layout to Selected Place
         destinationText.setText(destinationPlace.getName());
@@ -1489,6 +1476,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void updateDestinationLocationIfApplicable(Action action) {
         // Check if updatedDestination Location is not null
         Place destinationLocation = action.getExpectedPlace();
+
         if (destinationLocation == null || destinationLocation.getLocation() == null)
             return;
 
@@ -1503,27 +1491,20 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
             if (!LocationUtils.areLocationsSame(destinationLocationMarker.getPosition(), updatedDestinationLatLng)) {
 
-                Place place;
                 // Check if the DestinationLocationID has changed or only LatLng has changed
-                Place lastUpdatedDestination = TaskManager.getSharedManager(Home.this).getLastUpdatedDestination();
+                UserPlace lastUpdatedDestination = TaskManager.getSharedManager(Home.this).getLastUpdatedDestination();
                 if (lastUpdatedDestination != null && !TextUtils.isEmpty(lastUpdatedDestination.getId())
                         && lastUpdatedDestination.getId().equalsIgnoreCase(destinationLocation.getId())) {
 
-                    place = TaskManager.getSharedManager(Home.this).getPlace();
-                    place.setLocation(new GeoJSONLocation(updatedDestinationLatLng.latitude, updatedDestinationLatLng.longitude));
-
-                    // Update MetaPlace in RealmDB
-                    MetaPlace metaPlace = new MetaPlace(place.getLocation().getLatitude(), place.getLocation().getLongitude());
-                    UserStore.sharedStore.editPlace(metaPlace);
+                    // Update Place
+                    TaskManager.getSharedManager(this).setPlace(lastUpdatedDestination);
                     HTLog.i(TAG, "Destination Location updated");
                 } else {
 
-                    place = new Place();
-                    place.setLocation(new GeoJSONLocation(updatedDestinationLatLng.latitude, updatedDestinationLatLng.longitude));
 
                     // Set the DestinationText as updatedDestination's address
                     destinationText.setGravity(Gravity.START);
-                    destinationText.setText(place.getName());
+                    destinationText.setText(lastUpdatedDestination.getName());
 
                     // Hide destinationDescription layout
                     destinationDescription.setText("");
@@ -1532,7 +1513,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     HTLog.i(TAG, "Destination Location changed");
                 }
 
-                TaskManager.getSharedManager(Home.this).setPlace(place);
+                TaskManager.getSharedManager(Home.this).setPlace(lastUpdatedDestination);
                 Home.this.updateFavoritesButton();
 
                 // Update Geofencing Request for updatedDestinationLocation
@@ -1544,7 +1525,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Update DestinationLocation
-        TaskManager.getSharedManager(Home.this).setLastUpdatedDestination(destinationLocation);
+        TaskManager.getSharedManager(Home.this).setLastUpdatedDestination((UserPlace) destinationLocation);
     }
 
     /**
@@ -1950,18 +1931,15 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      */
     public void OnFavoriteClick(View view) {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        MetaPlace place = new MetaPlace(taskManager.getPlace().getLocation().getLatitude(), taskManager.getPlace().getLocation().getLongitude());
-
-        showAddPlace(place);
+        showAddPlace(taskManager.getPlace());
 
         AnalyticsStore.getLogger().tappedFavorite();
     }
 
-    private void showAddPlace(MetaPlace place) {
-        MetaPlace newPlace = new MetaPlace(place);
+    private void showAddPlace(UserPlace place) {
 
         Intent addPlace = new Intent(this, AddFavoritePlace.class);
-        addPlace.putExtra("meta_place", newPlace);
+        addPlace.putExtra("meta_place", place);
         startActivityForResult(addPlace, Constants.FAVORITE_PLACE_REQUEST_CODE, null);
     }
 
@@ -1972,12 +1950,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void updateFavoritesButton() {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
         if (taskManager.isActionLive(null)) {
-            MetaPlace place = null;
+            UserPlace place = null;
             if (taskManager.getPlace() != null && taskManager.getPlace().getLocation() != null) {
-                place = new MetaPlace(taskManager.getPlace().getLocation().getLatitude(), taskManager.getPlace().getLocation().getLongitude());
+                place = taskManager.getPlace();
             }
 
-            user = UserStore.sharedStore.getUser();
+            user = OnboardingManager.sharedManager().getUser();
             if (user == null) {
                 return;
             }
@@ -2064,17 +2042,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         } else if (requestCode == Constants.FAVORITE_PLACE_REQUEST_CODE) {
 
-            // Update the MetaPlace Data
+            // Update the Place Data
             if (data != null && data.hasExtra(AddFavoritePlace.KEY_UPDATED_PLACE)) {
-                MetaPlace updatedPlace = (MetaPlace) data.getSerializableExtra(AddFavoritePlace.KEY_UPDATED_PLACE);
+                UserPlace updatedPlace = (UserPlace) data.getSerializableExtra(AddFavoritePlace.KEY_UPDATED_PLACE);
                 if (updatedPlace != null) {
-                    Place place = new Place();
-                    place.setLocation(new GeoJSONLocation(updatedPlace.getLatitude(), updatedPlace.getLongitude()));
-                    if (!TextUtils.isEmpty(updatedPlace.getName()))
-                        place.setName(updatedPlace.getName());
-                    if (!TextUtils.isEmpty(updatedPlace.getAddress()))
-                        place.setAddress(updatedPlace.getAddress());
-                    TaskManager.getSharedManager(Home.this).setPlace(place);
+                    TaskManager.getSharedManager(Home.this).setPlace(updatedPlace);
 
                     if (!TextUtils.isEmpty(updatedPlace.getName())) {
                         // Set the DestinationText as updatedDestination's Name

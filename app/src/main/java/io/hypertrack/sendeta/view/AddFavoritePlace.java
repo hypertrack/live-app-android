@@ -2,12 +2,10 @@ package io.hypertrack.sendeta.view;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -47,18 +45,18 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.AddPlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
-import io.hypertrack.sendeta.model.MetaPlace;
-import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
-import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.KeyboardUtils;
@@ -66,7 +64,7 @@ import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
-import io.realm.RealmList;
+
 
 /**
  * Created by piyush on 22/06/16.
@@ -75,33 +73,23 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks,
         TouchableWrapper.TouchActionDown, TouchableWrapper.TouchActionUp {
 
-    private final String TAG = "AddFavoritePlace";
-
     public static final String KEY_UPDATED_PLACE = "updated_place";
     public static final String KEY_ADDED_OR_EDITED = "added_or_edited";
-
+    private final String TAG = "AddFavoritePlace";
+    int top, bottom, left, right;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private GoogleMap mMap;
-
     private EditText addPlaceNameView, addPlaceAddressView;
-
     private ImageView placeNameClearIcon, placeAddressClearIcon;
-
     private RecyclerView mAutocompleteResults;
     private CardView mAutocompleteResultsLayout;
     private AddPlaceAutocompleteAdapter mAdapter;
     private LinearLayout addFavPlaceParentLayout;
-
     private ProgressDialog mProgressDialog;
-
-    private MetaPlace metaPlace;
+    private UserPlace metaPlace;
     private boolean addNewMetaPlace = false, myLocationButtonClicked = false;
-
     private LatLng latlng;
-
-    int top, bottom, left, right;
-
     private View.OnFocusChangeListener mPlaceNameFocusChangeListener = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
@@ -167,7 +155,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
-        public void OnSuccess(MetaPlace place) {
+        public void OnSuccess(UserPlace place) {
 
             // On Click Disable handling/showing any more results
             mAdapter.setSearching(false);
@@ -213,7 +201,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         Intent intent = getIntent();
         if (intent != null) {
             if (intent.hasExtra("meta_place")) {
-                metaPlace = (MetaPlace) intent.getSerializableExtra("meta_place");
+                metaPlace = (UserPlace) intent.getSerializableExtra("meta_place");
                 latlng = metaPlace.getLatLng();
             }
         }
@@ -356,7 +344,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         mMap.getUiSettings().setTiltGesturesEnabled(false);
         mMap.getUiSettings().setRotateGesturesEnabled(false);
 
-        if (metaPlace.getLatitude() != 0.0 && metaPlace.getLongitude() != 0.0) {
+        if (metaPlace.getLocation().getLatitude() != 0.0 && metaPlace.getLocation().getLongitude() != 0.0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(metaPlace.getLatLng(), 18.0f));
         } else {
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0.0, 0.0), 0.0f));
@@ -394,7 +382,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     }
 
     public void onSaveButtonClicked(MenuItem v) {
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user == null) {
             return;
         }
@@ -423,16 +411,10 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.WORK_ALREADY_EXISTS_ERROR);
                 return;
             }
-            // Check if PlaceID = 0 while Editing a place (this is not a valid case)
-        } else if (metaPlace.getId() == 0 && !addNewMetaPlace) {
-            Toast.makeText(this, R.string.place_already_exists_error, Toast.LENGTH_SHORT).show();
-
-            processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.PLACE_ALREADY_EXISTS_ERROR);
-            return;
         }
 
         metaPlace.setAddress(addPlaceAddressView.getText().toString());
-        metaPlace.setLatLng(latlng);
+        metaPlace.getLocation().setCoordinates(new double[]{latlng.latitude, latlng.longitude});
 
         if (addNewMetaPlace) {
             addPlace();
@@ -478,7 +460,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        UserStore.sharedStore.addPlace(metaPlace, new SuccessErrorCallback() {
+        OnboardingManager.sharedManager().getUser().addPlace(metaPlace, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
                 processUpdatedMetaPlaceForAnalytics(true, null);
@@ -500,19 +482,19 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
 
     private void editPlace() {
 
-        if (metaPlace.getId() == 0) {
+       /* if (metaPlace.getId() == 0) {
             Toast.makeText(AddFavoritePlace.this, ErrorMessages.EDITING_ALREADY_SAVED_PLACE_ERROR,
                     Toast.LENGTH_SHORT).show();
             processUpdatedMetaPlaceForAnalytics(false, ErrorMessages.EDITING_ALREADY_SAVED_PLACE_ERROR);
             return;
-        }
+        }*/
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setMessage(getString(R.string.editing_favorite_addresses_message));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
 
-        UserStore.sharedStore.editPlace(metaPlace, new SuccessErrorCallback() {
+        OnboardingManager.sharedManager().getUser().editPlace(metaPlace, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
                 processUpdatedMetaPlaceForAnalytics(true, null);
@@ -563,13 +545,13 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         } else {
 
             if (addNewMetaPlace) {
-                User user = UserStore.sharedStore.getUser();
+                OnboardingUser user = OnboardingManager.sharedManager().getUser();
 
-                // Initialize favoritesCount based on current MetaPlace update status
+                // Initialize favoritesCount based on current UserPlace update status
                 int favoritesCount = status ? 1 : 0;
 
                 if (user != null) {
-                    RealmList<MetaPlace> userPlaces = user.getPlaces();
+                    List<UserPlace> userPlaces = user.getPlaces();
                     if (userPlaces != null && userPlaces.size() > 0)
                         favoritesCount = userPlaces.size();
                 }
@@ -693,25 +675,6 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         }
     }
 
-    @SuppressLint("ParcelCreator")
-    private class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            //remove spinner from address text view
-
-            if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
-                setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
-            } else {
-                Toast.makeText(AddFavoritePlace.this, resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY),
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_add_fav_place, menu);
@@ -732,5 +695,24 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.e(TAG, "onConnectionFailed: ConnectionResult.getErrorCode() = "
                 + connectionResult.getErrorCode());
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            //remove spinner from address text view
+
+            if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
+                setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+            } else {
+                Toast.makeText(AddFavoritePlace.this, resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY),
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.presenter;
 
 import io.hypertrack.sendeta.model.Membership;
@@ -7,9 +8,11 @@ import io.hypertrack.sendeta.store.callback.UserStoreGetUserDataCallback;
 import io.hypertrack.sendeta.store.callback.UserStoreMembershipCallback;
 import io.hypertrack.sendeta.view.BusinessProfileView;
 
+*/
 /**
  * Created by piyush on 22/07/16.
- */
+ *//*
+
 public class BusinessProfilePresenter implements IBusinessProfilePresenter<BusinessProfileView> {
 
     private BusinessProfileView view;
@@ -96,3 +99,4 @@ public class BusinessProfilePresenter implements IBusinessProfilePresenter<Busin
         });
     }
 }
+*/

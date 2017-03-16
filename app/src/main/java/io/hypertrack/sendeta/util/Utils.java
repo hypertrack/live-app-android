@@ -6,8 +6,9 @@ import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 
-import io.hypertrack.sendeta.model.User;
-import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.store.OnboardingManager;
+
 
 /**
  * Created by piyush on 10/09/16.
@@ -15,7 +16,7 @@ import io.hypertrack.sendeta.store.UserStore;
 public class Utils {
 
     public static void setCrashlyticsKeys(Context context){
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             // Set UserID
             String userID = user.getId() != null ? user.getId().toString() : "NULL";
@@ -23,12 +24,12 @@ public class Utils {
             Crashlytics.setString(CrashlyticsKeys.USER_ID, userID);
 
             // Set UserName
-            String userName = !TextUtils.isEmpty(user.getFullName()) ? user.getFullName() : "NULL";
+            String userName = !TextUtils.isEmpty(user.getName()) ? user.getName() : "NULL";
             Crashlytics.setUserName(userName);
             Crashlytics.setString(CrashlyticsKeys.USER_NAME, userName);
 
             // Set UserPhone & UserDeviceID
-            Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !TextUtils.isEmpty(user.getPhoneNumber()) ? user.getPhoneNumber() : "NULL");
+            Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !TextUtils.isEmpty(user.getPhone()) ? user.getPhone() : "NULL");
             String deviceUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
             Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !TextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
         }

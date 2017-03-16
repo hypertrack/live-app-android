@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.content.Intent;
@@ -16,9 +17,11 @@ import io.hypertrack.sendeta.presenter.BusinessProfilePresenter;
 import io.hypertrack.sendeta.presenter.IBusinessProfilePresenter;
 import io.hypertrack.sendeta.util.Constants;
 
+*/
 /**
  * Created by piyush on 22/07/16.
- */
+ *//*
+
 public class BusinessProfile extends BaseActivity implements BusinessProfileView {
 
     public static final String TAG = BusinessProfile.class.getSimpleName();
@@ -250,3 +253,4 @@ public class BusinessProfile extends BaseActivity implements BusinessProfileView
         });
     }
 }
+*/

@@ -14,18 +14,14 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.gcm.GcmListenerService;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.hypertrack.lib.HyperTrackGcmListenerService;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.MetaPlace;
 import io.hypertrack.sendeta.util.Constants;
-import io.hypertrack.sendeta.view.BusinessProfile;
 import io.hypertrack.sendeta.view.Home;
 import io.realm.Realm;
 
@@ -34,31 +30,26 @@ import io.realm.Realm;
  */
 public class MetaGCMListenerService extends GcmListenerService {
 
-    private static final String TAG = MetaGCMListenerService.class.getSimpleName();
-
-    private static final String KEY_NOTIFICATION_TYPE = "type";
-    private static final String KEY_NOTIFICATION_ID = "id";
     // Notification Types
     public static final String NOTIFICATION_TYPE_DEFAULT = "default";
     public static final String NOTIFICATION_TYPE_TASK_CREATED = "task.created";
     public static final String NOTIFICATION_TYPE_ACCEPT_INVITE = "accept";
     public static final String NOTIFICATION_TYPE_DESTINATION_UPDATED = "task.destination_updated";
-
     // Notification Ids for NOTIFICATION_TYPE
     public static final int NOTIFICATION_TYPE_DEFAULT_ID = 1;
     public static final int NOTIFICATION_TYPE_TASK_CREATED_ID = 2;
     public static final int NOTIFICATION_TYPE_ACCEPT_INVITE_ID = 3;
     public static final int NOTIFICATION_TYPE_DESTINATION_UPDATED_ID = 4;
-
     public static final String NOTIFICATION_KEY_MESSAGE = "body";
     public static final String NOTIFICATION_KEY_TITLE = "message";
-
     // Notification keys for NOTIFICATION_TYPE_TASK_CREATED
     public static final String NOTIFICATION_KEY_ACCOUNT_ID = "account_id";
     public static final String NOTIFICATION_KEY_TASK = "task";
-
     public static final String NOTIFICATION_KEY_META_PLACE_ID = "place_id";
     public static final String NOTIFICATION_KEY_UPDATED_DESTINATION = "destination";
+    private static final String TAG = MetaGCMListenerService.class.getSimpleName();
+    private static final String KEY_NOTIFICATION_TYPE = "type";
+    private static final String KEY_NOTIFICATION_ID = "id";
 
     /**
      * Called when message is received.
@@ -114,12 +105,12 @@ public class MetaGCMListenerService extends GcmListenerService {
                 data.getString(KEY_NOTIFICATION_TYPE)))
             return NOTIFICATION_TYPE_ACCEPT_INVITE;
 
-        if (NOTIFICATION_TYPE_DESTINATION_UPDATED.equalsIgnoreCase(
+        /*if (NOTIFICATION_TYPE_DESTINATION_UPDATED.equalsIgnoreCase(
                 data.getString(KEY_NOTIFICATION_TYPE))) {
 
             updateDestinationLocation(data);
             return NOTIFICATION_TYPE_DESTINATION_UPDATED;
-        }
+        }*/
 
         return NOTIFICATION_TYPE_DEFAULT;
     }
@@ -140,14 +131,14 @@ public class MetaGCMListenerService extends GcmListenerService {
 
         }
 
-        if (data != null && NOTIFICATION_TYPE_ACCEPT_INVITE.equals(notificationType)) {
+       /* if (data != null && NOTIFICATION_TYPE_ACCEPT_INVITE.equals(notificationType)) {
 
             // Set Intent For BusinessProfile Screen to handle Pending Membership Invites
             intent.setClass(getApplicationContext(), BusinessProfile.class);
             intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
 
             return intent;
-        }
+        }*/
 
         // Set Default Intent For Home Screen
         intent.setClass(getApplicationContext(), Home.class);
@@ -237,7 +228,7 @@ public class MetaGCMListenerService extends GcmListenerService {
     public void updatePlace(final int metaPlaceID, final String metaPlaceAddress, final double[] coordinates) {
 
         Realm realm = Realm.getDefaultInstance();
-        final MetaPlace placeToUpdate = realm.where(MetaPlace.class).equalTo("id", metaPlaceID).findFirst();
+        /*final UserPlace placeToUpdate = realm.where(UserPlace.class).equalTo("id", metaPlaceID).findFirst();
 
         if (placeToUpdate != null) {
             try {
@@ -256,6 +247,6 @@ public class MetaGCMListenerService extends GcmListenerService {
             } finally {
                 realm.close();
             }
-        }
+        }*/
     }
 }

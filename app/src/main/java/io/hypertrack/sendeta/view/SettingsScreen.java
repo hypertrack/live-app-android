@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.app.AlertDialog;
@@ -25,7 +26,7 @@ import io.hypertrack.sendeta.adapter.MembershipsAdapter;
 import io.hypertrack.sendeta.adapter.callback.FavoritePlaceOnClickListener;
 import io.hypertrack.sendeta.adapter.callback.MembershipOnClickListener;
 import io.hypertrack.sendeta.model.Membership;
-import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
@@ -66,11 +67,13 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 Toast.makeText(SettingsScreen.this, "Click one more time to see Shift screen", Toast.LENGTH_SHORT).show();
             }
 
-           /* if (profileImageClickedCount >= 5) {
+           */
+/* if (profileImageClickedCount >= 5) {
                 Intent shiftScreenIntent = new Intent(SettingsScreen.this, ShiftsScreen.class);
                 startActivity(shiftScreenIntent);
                 return;
-            }*/
+            }*//*
+
 
             if (profileImageClickedHandler == null) {
                 profileImageClickedHandler = new Handler();
@@ -127,14 +130,16 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         mFavoritePlacesRecyclerView.setNestedScrollingEnabled(false);
         setupFavoritePlacesAdapter();
 
-        /*
+        */
+/*
         // Initialize Business Profiles RecyclerView & Set Adapter
         LinearLayoutManager membershipsLayoutManager = new LinearLayoutManager(this);
         membershipsLayoutManager.setAutoMeasureEnabled(true);
         mMembershipsRecyclerView.setLayoutManager(membershipsLayoutManager);
         mMembershipsRecyclerView.setNestedScrollingEnabled(false);
         setupMembershipsAdapter();
-        */
+        *//*
+
 
         // Set up User's Profile Image
         updateProfileImage();
@@ -255,46 +260,46 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
 
     @Override
     public void OnAddHomeClick() {
-        MetaPlace newHome = new MetaPlace(MetaPlace.HOME, LocationStore.sharedStore().getCurrentLatLng());
+        UserPlace newHome = new UserPlace(UserPlace.HOME, LocationStore.sharedStore().getCurrentLatLng());
         showAddPlaceScreen(newHome);
     }
 
     @Override
-    public void OnEditHomeClick(MetaPlace place) {
-        showAddPlaceScreen(new MetaPlace(place));
+    public void OnEditHomeClick(UserPlace place) {
+        showAddPlaceScreen(new UserPlace(place));
     }
 
     @Override
     public void OnAddWorkClick() {
-        MetaPlace newWork = new MetaPlace(MetaPlace.WORK, LocationStore.sharedStore().getCurrentLatLng());
+        UserPlace newWork = new UserPlace(UserPlace.WORK, LocationStore.sharedStore().getCurrentLatLng());
         showAddPlaceScreen(newWork);
     }
 
     @Override
-    public void OnEditWorkClick(MetaPlace place) {
-        showAddPlaceScreen(new MetaPlace(place));
+    public void OnEditWorkClick(UserPlace place) {
+        showAddPlaceScreen(new UserPlace(place));
     }
 
     @Override
     public void OnAddPlaceClick() {
-        MetaPlace newPlace = new MetaPlace(LocationStore.sharedStore().getCurrentLatLng());
+        UserPlace newPlace = new UserPlace(LocationStore.sharedStore().getCurrentLatLng());
         showAddPlaceScreen(newPlace);
     }
 
     @Override
-    public void OnEditPlaceClick(MetaPlace place) {
-        showAddPlaceScreen(new MetaPlace(place));
+    public void OnEditPlaceClick(UserPlace place) {
+        showAddPlaceScreen(new UserPlace(place));
     }
 
-    private void showAddPlaceScreen(MetaPlace place) {
-        // Start an intent to AddFavoritePlace with MetaPlace object as parameter
+    private void showAddPlaceScreen(UserPlace place) {
+        // Start an intent to AddFavoritePlace with UserPlace object as parameter
         Intent addFavPlaceIntent = new Intent(this, AddFavoritePlace.class);
         addFavPlaceIntent.putExtra("meta_place", place);
         startActivityForResult(addFavPlaceIntent, Constants.FAVORITE_PLACE_REQUEST_CODE, null);
     }
 
     @Override
-    public void OnDeletePlace(final MetaPlace place) {
+    public void OnDeletePlace(final UserPlace place) {
 
         // Create a confirmation Dialog for Deleting a User Favorite Place
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -310,7 +315,7 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
                 mProgressDialog.show();
 
                 // Delete User Favorite Place from DB & Server
-                UserStore.sharedStore.deletePlace(new MetaPlace(place), new SuccessErrorCallback() {
+                UserStore.sharedStore.deletePlace(new UserPlace(place), new SuccessErrorCallback() {
                     @Override
                     public void OnSuccess() {
                         if (mProgressDialog != null && !SettingsScreen.this.isFinishing())
@@ -354,14 +359,16 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
     }
 
     private void showBusinessProfileScreen(int membershipAccountId) {
-        Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
+       */
+/* Intent businessProfileIntent = new Intent(SettingsScreen.this, BusinessProfile.class);
         if (membershipAccountId != 0) {
             businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
             businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_ACCOUNT_ID, membershipAccountId);
         } else {
             businessProfileIntent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, false);
         }
-        startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);
+        startActivityForResult(businessProfileIntent, Constants.BUSINESS_PROFILE_REQUEST_CODE);*//*
+
     }
 
     @Override
@@ -444,3 +451,4 @@ public class SettingsScreen extends BaseActivity implements FavoritePlaceOnClick
         }
     }
 }
+*/

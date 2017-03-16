@@ -33,10 +33,8 @@ import io.hypertrack.sendeta.model.Country;
 import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
 import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
@@ -70,11 +68,8 @@ public class EditProfile extends BaseActivity {
     private TextView.OnEditorActionListener mFirstNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                return true;
-            }
+            return actionId == EditorInfo.IME_ACTION_DONE;
 
-            return false;
         }
     };
 
@@ -118,13 +113,13 @@ public class EditProfile extends BaseActivity {
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);
         // mLastNameView.setOnEditorActionListener(mLastNameEditorActionListener);
 
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             oldProfileImage = user.getImageBitmap();
         }
 
 
-        // Setup UI Views with User Data
+        // Setup UI Views with OnboardingUser Data
         updateFirstName();
         //updateLastName();
         updateImage();
@@ -164,13 +159,14 @@ public class EditProfile extends BaseActivity {
     }
 
 
+
     private void updateFirstName() {
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user == null) {
             return;
         }
 
-        String firstName = user.getFirstName();
+        String firstName = user.getName();
         if (firstName == null) {
             return;
         }
@@ -179,7 +175,7 @@ public class EditProfile extends BaseActivity {
     }
 
     private void updateLastName() {
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user == null) {
             return;
         }
@@ -193,7 +189,7 @@ public class EditProfile extends BaseActivity {
     }
 
     private void updateImage() {
-        User user = UserStore.sharedStore.getUser();
+        OnboardingUser user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             Bitmap bitmap = user.getImageBitmap();
             if (bitmap != null) {
@@ -250,20 +246,20 @@ public class EditProfile extends BaseActivity {
         user.setName(firstName);
         if (!TextUtils.isEmpty(phoneNumberView.getText().toString()))
             user.setPhone(phoneNumberView.getText().toString());
-        user.setOnboardingUser();
+        OnboardingUser.setOnboardingUser();
       /*  String lastName = mLastNameView.getText().toString();
         if (!TextUtils.isEmpty(lastName)) {
             lastName = lastName.trim();
         }*/
 
-       /* UserStore.sharedStore.updateInfo(firstName, lastName, new SuccessErrorCallback() {
+       /*OnboardingManager.sharedManager().updateInfo(firstName, lastName, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
 
                 // Check if the profile image has changed from the existing one
                 if (updatedProfileImageFile != null && updatedProfileImageFile.length() > 0 && !updatedProfileImage.sameAs(oldProfileImage)) {
 
-                    UserStore.sharedStore.updatePhoto(updatedProfileImageFile, new SuccessErrorCallback() {
+                   OnboardingManager.sharedManager().updatePhoto(updatedProfileImageFile, new SuccessErrorCallback() {
 
                         @Override
                         public void OnSuccess() {
@@ -317,11 +313,11 @@ public class EditProfile extends BaseActivity {
     }
 
     /**
-     * Method to process uploaded User Profile Image to log Analytics Event
+     * Method to process uploaded OnboardingUser Profile Image to log Analytics Event
      *
      * @param status          Flag to indicate status of FavoritePlace Deletion event
      * @param errorMessage    ErrorMessage in case of Failure
-     * @param oldProfileImage User's Existing Profile Image
+     * @param oldProfileImage OnboardingUser's Existing Profile Image
      */
     private void processImageDataForAnalytics(boolean status, String errorMessage, Bitmap oldProfileImage, EasyImage.ImageSource imageSource) {
 

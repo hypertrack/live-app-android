@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
@@ -58,17 +59,17 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.ErrorData;
-import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.UserPlace;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.RequestTrackingDTO;
 import io.hypertrack.sendeta.model.RequestTrackingResponse;
-import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
 import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
-import io.hypertrack.sendeta.store.UserStore;
+import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.LocationUtils;
@@ -79,16 +80,18 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+*/
 /**
  * Created by piyush on 21/10/16.
- */
+ *//*
+
 public class RequestETA extends BaseActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks, TouchableWrapper.TouchActionDown, TouchableWrapper.TouchActionUp {
 
     private final String TAG = RequestETA.class.getSimpleName();
     private Location defaultLocation = new Location("default");
 
-    private User user;
+    private OnboardingUser user;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
 
@@ -141,7 +144,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
-        public void OnSuccess(MetaPlace place) {
+        public void OnSuccess(UserPlace place) {
             autoCompletePlaceSelected = true;
 
             // On Click Disable handling/showing any more results
@@ -149,7 +152,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
             // Check if selected place is a User Favorite to log Analytics Event
             boolean isFavorite = false;
-            user = UserStore.sharedStore.getUser();
+            user = OnboardingManager.sharedManager().getUser();
             if (user != null && place != null) {
                 isFavorite = user.isSynced(place);
             }
@@ -173,7 +176,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
             KeyboardUtils.hideKeyboard(RequestETA.this, mAutocompletePlacesView);
 
             if (mMap != null && place != null) {
-                currentLatLng = new LatLng(place.getLatitude(), place.getLongitude());
+                currentLatLng =place.getLatLng();
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 18.0f));
             }
 
@@ -211,8 +214,11 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Initialize UserStore
-        UserStore.sharedStore.initializeUser();
+        */
+/*//*
+/ Initialize UserStore
+        UserStore.sharedStore.initializeUser();*//*
+
 
         // Initialize FB SDK
         setContentView(R.layout.activity_request_eta);
@@ -314,7 +320,9 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     private void initGoogleClient() {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
-                    .enableAutoManage(this, 0 /* clientId */, this)
+                    .enableAutoManage(this, 0 */
+/* clientId *//*
+, this)
                     .addApi(Places.GEO_DATA_API)
                     .addApi(LocationServices.API)
                     .addConnectionCallbacks(this)
@@ -372,7 +380,7 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
 
         SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
                 SharedPreferenceManager.getUserAuthToken());
-        requestTrackingLinkCall = sendETAService.getRequestTrackingURL(UserStore.sharedStore.getUser().getId(),
+        requestTrackingLinkCall = sendETAService.getRequestTrackingURL(OnboardingManager.sharedManager().getUser().getId(),
                 request);
         requestTrackingLinkCall.enqueue(new Callback<RequestTrackingResponse>() {
             @Override
@@ -453,11 +461,13 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
             reverseGeocode(mMap.getCameraPosition().target);
     }
 
-    /**
+    */
+/**
      * Method to publish update received from Adapter on the Autocomplete Results List
      *
      * @param publish Flag to indicate whether to update/remove the results
-     */
+ *//*
+
     public void processPublishedResults(boolean publish) {
         showAutocompleteResults(publish);
         mAutocompleteLoader.setVisibility(View.GONE);
@@ -475,8 +485,8 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
     }
 
     private void updateAutoCompleteResults() {
-        List<MetaPlace> places = null;
-        user = UserStore.sharedStore.getUser();
+        List<UserPlace> places = null;
+        user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             places = user.getPlaces();
         }
@@ -577,10 +587,12 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
         }
     }
 
-    /**
+    */
+/**
      * Method to check if the Location Services are enabled and in case not, request user to
      * enable them.
-     */
+ *//*
+
     private void checkIfLocationIsEnabled() {
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
@@ -651,3 +663,4 @@ public class RequestETA extends BaseActivity implements OnMapReadyCallback, Goog
                 + connectionResult.getErrorCode());
     }
 }
+*/

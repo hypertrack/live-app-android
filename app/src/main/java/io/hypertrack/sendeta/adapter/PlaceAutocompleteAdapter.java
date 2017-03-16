@@ -52,9 +52,8 @@ import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
-import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.view.Home;
-import io.hypertrack.sendeta.view.RequestETA;
 
 /**
  * Adapter that handles Autocomplete requests from the Places Geo Data API.
@@ -91,9 +90,9 @@ public class PlaceAutocompleteAdapter
     /**
      * Saved places
      */
-    private List<MetaPlace> favorites;
+    private List<UserPlace> favorites;
 
-    private List<MetaPlace> filteredFavorites;
+    private List<UserPlace> filteredFavorites;
 
     /**
      * The autocomplete filter used to restrict queries to a specific set of place types.
@@ -117,7 +116,7 @@ public class PlaceAutocompleteAdapter
             try {
                 if (!places.getStatus().isSuccess()) {
                     // Request did not complete successfully
-                    Log.d(TAG, "MetaPlace query did not complete. Error: " + places.getStatus().toString());
+                    Log.d(TAG, "UserPlace query did not complete. Error: " + places.getStatus().toString());
                     places.release();
                     if (listener != null) {
                         listener.OnError();
@@ -132,13 +131,13 @@ public class PlaceAutocompleteAdapter
                     }
                 }
 
-                // Get the MetaPlace object from the buffer.
+                // Get the UserPlace object from the buffer.
                 final Place place = places.get(0);
 
-                Log.i(TAG, "MetaPlace details received: " + place.getName());
+                Log.i(TAG, "UserPlace details received: " + place.getName());
 
                 if (listener != null) {
-                    listener.OnSuccess(new MetaPlace(place));
+                    listener.OnSuccess(new UserPlace(place));
                 }
                 places.release();
 
@@ -190,9 +189,9 @@ public class PlaceAutocompleteAdapter
     private void filterFavorites() {
         this.filteredFavorites = new ArrayList<>();
 
-        Iterator<MetaPlace> it = this.favorites.iterator();
+        Iterator<UserPlace> it = this.favorites.iterator();
         while (it.hasNext()) {
-            MetaPlace place = it.next();
+            UserPlace place = it.next();
 
             if (!TextUtils.isEmpty(place.getName()) && place.getName().toLowerCase().contains(this.filterString)) {
                 this.filteredFavorites.add(place);
@@ -200,7 +199,7 @@ public class PlaceAutocompleteAdapter
         }
     }
 
-    public void refreshFavorites(List<MetaPlace> favorites) {
+    public void refreshFavorites(List<UserPlace> favorites) {
         if (this.favorites == null) {
             this.favorites = favorites;
         }
@@ -225,7 +224,7 @@ public class PlaceAutocompleteAdapter
     @Override
     public void onBindViewHolder(AutocompleteViewHolder holder, int position) {
         if (!this.isSearching) {
-            MetaPlace place = this.favorites.get(position);
+            UserPlace place = this.favorites.get(position);
 
             if (place.isHome()) {
                 holder.icon.setImageResource(R.drawable.ic_home);
@@ -240,7 +239,7 @@ public class PlaceAutocompleteAdapter
             holder.description.setText(place.getAddress());
         } else {
             if (this.isFilteredPlace(position)) {
-                MetaPlace place = this.filteredFavorites.get(position);
+                UserPlace place = this.filteredFavorites.get(position);
 
                 if (place.isHome()) {
                     holder.icon.setImageResource(R.drawable.ic_home);
@@ -332,9 +331,9 @@ public class PlaceAutocompleteAdapter
                 if (!isSearching) {
                     if (context instanceof Home) {
                         ((Home) context).processPublishedResults(favorites != null && favorites.size() > 0);
-                    } else if (context instanceof RequestETA) {
+                    } /*else if (context instanceof RequestETA) {
                         ((RequestETA) context).processPublishedResults(favorites != null && favorites.size() > 0);
-                    }
+                    }*/
                     return;
                 }
 
@@ -354,9 +353,9 @@ public class PlaceAutocompleteAdapter
 
                 if (context instanceof Home) {
                     ((Home) context).processPublishedResults(mResultList != null && mResultList.size() > 0);
-                } else if (context instanceof RequestETA) {
+                } /*else if (context instanceof RequestETA) {
                     ((RequestETA) context).processPublishedResults(favorites != null && favorites.size() > 0);
-                }
+                }*/
             }
 
             @Override
@@ -375,7 +374,7 @@ public class PlaceAutocompleteAdapter
     /**
      * Submits an autocomplete query to the Places Geo Data Autocomplete API.
      * Results are returned as frozen AutocompletePrediction objects, ready to be cached.
-     * objects to store the MetaPlace ID and description that the API returns.
+     * objects to store the UserPlace ID and description that the API returns.
      * Returns an empty list if no results were found.
      * Returns null if the API client is not available or the query did not complete
      * successfully.
@@ -421,9 +420,9 @@ public class PlaceAutocompleteAdapter
 
         if (!this.isSearching) {
             if (this.favorites.size() > 0 && this.favorites.size() > position) {
-                MetaPlace place = this.favorites.get(position);
+                UserPlace place = this.favorites.get(position);
                 if (this.listener != null) {
-                    this.listener.OnSuccess(new MetaPlace(place));
+                    this.listener.OnSuccess(new UserPlace(place));
                 }
             } else {
                 if (this.listener != null) {
@@ -433,9 +432,9 @@ public class PlaceAutocompleteAdapter
         } else {
             if (this.isFilteredPlace(position)) {
                 if (this.filteredFavorites.size() > 0 && this.filteredFavorites.size() > position) {
-                    MetaPlace place = this.filteredFavorites.get(position);
+                    UserPlace place = this.filteredFavorites.get(position);
                     if (this.listener != null) {
-                        this.listener.OnSuccess(new MetaPlace(place));
+                        this.listener.OnSuccess(new UserPlace(place));
                     }
                 } else {
                     if (this.listener != null) {
