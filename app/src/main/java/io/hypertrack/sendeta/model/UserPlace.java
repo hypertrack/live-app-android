@@ -20,6 +20,9 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
     @SerializedName("google_places_id")
     private String googlePlacesID;
 
+    @SerializedName("user_place_id")
+    private String userPlaceID;
+
     public UserPlace() {
 
     }
@@ -48,10 +51,8 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
         setName(name);
     }
 
-    public UserPlace(UserPlace place) {
-        this(place.getLatLng());
-        setName(place.getName());
-        this.googlePlacesID = place.getGooglePlacesID();
+    public UserPlace(com.hypertrack.lib.models.Place place) {
+        this(place.getName(), place.getLocation().getLatLng());
         setAddress(place.getAddress());
         setId(place.getId());
 
@@ -92,6 +93,14 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
         return getName().equalsIgnoreCase(HOME);
     }
 
+    public String getUserPlaceID() {
+        return userPlaceID;
+    }
+
+    public void setUserPlaceID(String userPlaceID) {
+        this.userPlaceID = userPlaceID;
+    }
+
     public boolean isWork() {
         if (TextUtils.isEmpty(getName()))
             return false;
@@ -108,7 +117,7 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
     }
 
     public LatLng getLatLng() {
-        return new LatLng(getLocation().getLatitude(), getLocation().getLongitude());
+        return getLocation().getLatLng();
     }
 
 }
