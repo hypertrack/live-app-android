@@ -604,13 +604,23 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(final MenuItem item) {
         switch (item.getItemId()) {
             case R.id.tracking_toogle:
                 if (!TextUtils.isEmpty(item.getTitle().toString())) {
                     if (item.getTitle().toString().equalsIgnoreCase("Resume Tracking")) {
-                        startHyperTrackTracking(true);
-                        item.setTitle("Pause Tracking");
+                        startHyperTrackTracking(true, new HyperTrackCallback() {
+                            @Override
+                            public void onSuccess(@NonNull SuccessResponse response) {
+                                item.setTitle("Pause Tracking");
+                            }
+
+                            @Override
+                            public void onError(@NonNull ErrorResponse errorResponse) {
+
+                            }
+                        });
+
                     } else {
                         stopHyperTrackTracking();
                         item.setTitle("Resume Tracking");
@@ -1678,13 +1688,34 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         startLocationPolling();
     }
 
-    private void startHyperTrackTracking(boolean byUser) {
+    private void startHyperTrackTracking(final boolean byUser) {
+        startHyperTrackTracking(byUser, null);
+    }
+
+    private void startHyperTrackTracking(final boolean byUser, final HyperTrackCallback callback) {
         // HACK: Check if user is tracking currently or not
         // Only for exisitng users because Permission and Location Settings have been checked here
         if (!HyperTrack.isTracking()) {
-            HyperTrack.startTracking();
-        }
-        if (byUser) {
+            HyperTrack.startTracking(new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (byUser) {
+                        SharedPreferenceManager.setTrackingON();
+                        supportInvalidateOptionsMenu();
+                    }
+                    if (callback != null)
+                        callback.onSuccess(response);
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    requestLocation();
+                    if (callback != null)
+                        callback.onError(errorResponse);
+
+                }
+            });
+        } else if (byUser) {
             SharedPreferenceManager.setTrackingON();
             supportInvalidateOptionsMenu();
         }
@@ -1694,6 +1725,26 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         HyperTrack.stopTracking();
         SharedPreferenceManager.setTrackingOFF();
         supportInvalidateOptionsMenu();
+    }
+
+    public void requestLocation() {
+        if (HyperTrack.checkLocationPermission(this)) {
+            if (!HyperTrack.checkLocationServices(this)) {
+                HyperTrack.requestLocationServices(Home.this, new HyperTrackCallback() {
+                    @Override
+                    public void onSuccess(@NonNull SuccessResponse successResponse) {
+
+                    }
+
+                    @Override
+                    public void onError(@NonNull ErrorResponse errorResponse) {
+                    }
+                });
+            }
+
+        } else {
+            HyperTrack.requestPermissions(this);
+        }
     }
 
     private void startLocationPolling() {
@@ -1711,6 +1762,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * enable them.
      */
     private void checkIfLocationIsEnabled() {
+
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest).setAlwaysShow(true);
@@ -1986,8 +2038,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
+                    if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
                         checkIfLocationIsEnabled();
+                    }
 
                 } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                     PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
