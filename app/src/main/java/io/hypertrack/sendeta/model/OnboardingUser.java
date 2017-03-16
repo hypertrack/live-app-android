@@ -319,5 +319,11 @@ public class OnboardingUser extends HTUser {
         return false;
     }
 
+    public byte[] getPhotoData() {
+        return photoData;
+    }
 
+    public void setPhotoData(byte[] photoData) {
+        this.photoData = photoData;
+    }
 }
