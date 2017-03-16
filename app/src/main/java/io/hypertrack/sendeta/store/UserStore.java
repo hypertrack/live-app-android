@@ -5,9 +5,13 @@ import android.text.TextUtils;
 
 import com.hypertrack.lib.HyperTrack;
 
+import io.hypertrack.sendeta.model.MetaPlace;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.User;
+import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.realm.Realm;
+import io.realm.RealmList;
 
 /**
  * Created by ulhas on 18/06/16.
@@ -81,16 +85,51 @@ public class UserStore {
             }
             return true;
         }
-        // Check if DriverId exists for current user
-        String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
-        if (TextUtils.isEmpty(hyperTrackDriverID)) {
-            return false;
+
+
+        initializeUser();
+        //Check if old user exist with data
+        if (user != null && user.isValid()) {
+            OnboardingUser onboardingUser = OnboardingManager.sharedManager().getUser();
+            onboardingUser.setId("");
+            onboardingUser.setName(user.getFullName());
+            onboardingUser.setPhone(user.getPhoneNumber());
+            onboardingUser.setPhotoURL(user.getPhoto());
+            onboardingUser.setPhotoData(user.getImageByteArray());
+            setPlaces(user.getPlaces(), onboardingUser);
+            OnboardingUser.setOnboardingUser();
+
+            // Check if DriverId exists for current user
+            String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
+            if (!TextUtils.isEmpty(hyperTrackDriverID)) {
+                OnboardingManager.sharedManager().getUser().setId(hyperTrackDriverID);
+                HyperTrack.setUserId(hyperTrackDriverID);
+                deleteUser();
+            }
+            return true;
         }
 
-        // Configure UserId for v3 HyperTrack SDK, if not done already
-        OnboardingManager.sharedManager().getUser().setId(hyperTrackDriverID);
-        HyperTrack.setUserId(hyperTrackDriverID);
-        return true;
+        return false;
+    }
+
+    public void deleteUser() {
+        if (user != null && user.isValid()) {
+            realm.beginTransaction();
+            user.deleteFromRealm();
+            realm.commitTransaction();
+        }
+    }
+
+    public void setPlaces(RealmList<MetaPlace> places, OnboardingUser onboardingUser) {
+        if (places != null && places.size() > 0) {
+            for (MetaPlace metaPlace : places) {
+                UserPlace userPlace = new UserPlace(metaPlace.getName(), metaPlace.getLatLng());
+                userPlace.setGooglePlacesID(metaPlace.getGooglePlacesID());
+                userPlace.setAddress(metaPlace.getAddress());
+                userPlace.setUserPlaceID(metaPlace.getId());
+                onboardingUser.addPlace(userPlace);
+            }
+        }
     }
 
     /*public void addPlace(final UserPlace placeToBeAdded, final SuccessErrorCallback callback) {
