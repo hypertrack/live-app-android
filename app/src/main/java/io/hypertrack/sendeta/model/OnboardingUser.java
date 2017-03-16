@@ -37,7 +37,7 @@ public class OnboardingUser extends HTUser {
 
     private File photoImage;
 
-    @SerializedName("photo")
+    @SerializedName("photoData")
     private byte[] photoData;
 
     private boolean isExistingUser;
@@ -251,10 +251,8 @@ public class OnboardingUser extends HTUser {
     }
 
     public boolean isSynced(Place place) {
-        if (this.getPlaces().size() == 0) {
+        if (getPlaces() == null || getPlaces().size() == 0)
             return false;
-        }
-
         for (Place candidate : this.getPlaces()) {
             if (candidate.getId() == place.getId()) {
                 return true;
@@ -307,11 +305,8 @@ public class OnboardingUser extends HTUser {
 
 
     public boolean isFavorite(Place place) {
-        if (place == null)
+        if (place == null || getPlaces() == null || getPlaces().size() == 0)
             return false;
-        if (this.getPlaces().size() == 0) {
-            return false;
-        }
 
         for (Place candidate : this.getPlaces()) {
             if (candidate.getId() == place.getId()
