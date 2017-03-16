@@ -89,6 +89,7 @@ import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 import com.hypertrack.lib.models.SuccessResponse;
+import com.hypertrack.lib.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -106,6 +107,7 @@ import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.TaskManager;
+import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
@@ -632,6 +634,41 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
+    private void checkIfUserCreated() {
+        final OnboardingUser onboardingUser = OnboardingUser.sharedOnboardingUser();
+        if (TextUtils.isEmpty(onboardingUser.getId())) {
+
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.create_user));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+
+            //Create a new user and set UserID
+            HyperTrack.createUser(onboardingUser.getName(), onboardingUser.getPhone(), new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (response.getResponseObject() != null) {
+                        User user = (User) response.getResponseObject();
+                        String userID = user.getId();
+                        onboardingUser.setId(userID);
+                        OnboardingUser.setOnboardingUser();
+                        checkForTrackingPermission();
+                        if (mProgressDialog != null)
+                            mProgressDialog.cancel();
+                        UserStore.sharedStore.deleteUser();
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (mProgressDialog != null)
+                        mProgressDialog.cancel();
+                    Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
     private void setHyperTrackCallback() {
         HyperTrack.setCallback(new HyperTrackEventCallback() {
             @Override
@@ -670,8 +707,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void checkForTrackingPermission() {
-        if (!SharedPreferenceManager.isAskForTrackingDialog()) {
-            startHyperTrackTracking(true);
+        if (!TextUtils.isEmpty(OnboardingManager.sharedManager().getUser().getId())) {
+            if (!SharedPreferenceManager.isAskForTrackingDialog()) {
+                startHyperTrackTracking(true);
            /* AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("We will enable the background tracking by default. Do you want to disable it ?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -687,7 +725,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         }
                     })
                     .show();*/
-            SharedPreferenceManager.setAskedForTrackingDialog();
+                SharedPreferenceManager.setAskedForTrackingDialog();
+            }
         }
     }
 
@@ -2134,6 +2173,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     @Override
     protected void onResume() {
         super.onResume();
+
+        //Check if user is created or not
+        checkIfUserCreated();
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
         if (taskManager.getHyperTrackAction() != null && !taskManager.getHyperTrackAction().isCompleted()) {

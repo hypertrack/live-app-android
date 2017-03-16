@@ -68,6 +68,7 @@
     <string name="verifying_your_code">Verifying your code</string>
     <string name="enter_phone_number">Enter Phone Number</string>
     <string name="resending_verification_code">Resending verification code</string>
+    <string name="create_user">@string/registration_phone_number</string>
 
     <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
     <string name="fetching_current_location">Please wait while we fetch your current location</string>
