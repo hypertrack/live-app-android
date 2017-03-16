@@ -14,7 +14,9 @@ import android.os.PersistableBundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -74,6 +76,8 @@ public class Profile extends BaseActivity implements ProfileView {
     private Target profileImageDownloadTarget;
     private File profileImage;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
+    private boolean showSkip = true;
+
     private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -94,6 +98,29 @@ public class Profile extends BaseActivity implements ProfileView {
             }
 
             return false;
+        }
+    };
+    private TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (TextUtils.isEmpty(mNameView.getText().toString()) && TextUtils.isEmpty(phoneNumberView.getText().toString())) {
+                showSkip = true;
+                supportInvalidateOptionsMenu();
+            } else if (showSkip && !TextUtils.isEmpty(s.toString())) {
+                showSkip = false;
+                supportInvalidateOptionsMenu();
+            }
+
         }
     };
 
@@ -128,6 +155,8 @@ public class Profile extends BaseActivity implements ProfileView {
         // Initialize UI Action Listeners
         mNameView.setOnEditorActionListener(mNameEditorActionListener);
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);
+        mNameView.addTextChangedListener(mTextWatcher);
+        phoneNumberView.addTextChangedListener(mTextWatcher);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -297,8 +326,8 @@ public class Profile extends BaseActivity implements ProfileView {
             intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         } else {*/
-            intent = new Intent(Profile.this, Home.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent = new Intent(Profile.this, Home.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         /*}*/
 
         TaskStackBuilder.create(Profile.this)
@@ -379,7 +408,9 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
-        return super.onCreateOptionsMenu(menu);
+        if (showSkip)
+            return super.onCreateOptionsMenu(menu);
+        return false;
     }
 
     private String getName() {

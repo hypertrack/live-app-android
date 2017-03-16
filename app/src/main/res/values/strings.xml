@@ -17,6 +17,7 @@
 
     <string name="action_done">Done</string>
     <string name="action_save">Save</string>
+    <string name="action_skip">Skip</string>
 
     <string name="title_activity_login">Phone Number</string>
     <string name="title_activity_signup_profile">Profile</string>

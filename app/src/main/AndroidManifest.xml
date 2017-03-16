@@ -100,10 +100,10 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".view.RequestETA"
-            android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
+        <!--  <activity
+              android:name=".view.RequestETA"
+              android:parentActivityName=".view.Home"
+              android:screenOrientation="portrait" />-->
 
         <activity
             android:name=".view.CheckPermission"
