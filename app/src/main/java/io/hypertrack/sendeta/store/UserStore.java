@@ -5,12 +5,13 @@ import android.text.TextUtils;
 
 import com.hypertrack.lib.HyperTrack;
 
-import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.model.User;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.realm.Realm;
-import io.realm.RealmConfiguration;
 
+/**
+ * Created by ulhas on 18/06/16.
+ */
 public class UserStore {
 
     public static UserStore sharedStore = new UserStore();
@@ -83,19 +84,6 @@ public class UserStore {
         // Check if DriverId exists for current user
         String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
         if (TextUtils.isEmpty(hyperTrackDriverID)) {
-            try {
-                if (this.realm != null)
-                    this.realm.close();
-
-                // Delete Realm Data in order to prevent further crashes
-                RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(context)
-                        .schemaVersion(1)
-                        .migration(new DBMigration())
-                        .build();
-                Realm.deleteRealm(realmConfiguration);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
             return false;
         }
 

@@ -134,10 +134,10 @@ public class OnboardingUser extends HTUser {
     }
 
     public String getInternationalNumber() throws NumberParseException {
+        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         if (TextUtils.isEmpty(getPhone()))
             return null;
 
-        PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
         Phonenumber.PhoneNumber number = phoneUtil.parse(getPhone(), getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
     }
