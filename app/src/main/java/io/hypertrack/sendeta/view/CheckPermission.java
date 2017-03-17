@@ -84,17 +84,21 @@ public class CheckPermission extends BaseActivity {
     }
 
     public void requestLocation() {
-        HyperTrack.requestLocationServices(CheckPermission.this, new HyperTrackCallback() {
-            @Override
-            public void onSuccess(@NonNull SuccessResponse successResponse) {
+        if (!HyperTrack.checkLocationServices(this)) {
+            HyperTrack.requestLocationServices(CheckPermission.this, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse successResponse) {
 
-            }
+                }
 
-            @Override
-            public void onError(@NonNull ErrorResponse errorResponse) {
-                showSnackBar();
-            }
-        });
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    showSnackBar();
+                }
+            });
+        } else {
+            proceedToProfileScreen();
+        }
     }
 
     @Override
