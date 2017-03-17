@@ -48,6 +48,7 @@ import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
+import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
@@ -221,7 +222,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
         String name = mNameView.getText().toString();
         String number = phoneNumberView.getText().toString();
-
+        KeyboardUtils.hideKeyboard(Profile.this, register);
         presenter.attemptLogin(name, number, isoCode, profileImage, oldProfileImage, updatedProfileImage);
     }
 
