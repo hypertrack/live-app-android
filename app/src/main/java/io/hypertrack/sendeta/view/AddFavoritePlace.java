@@ -414,7 +414,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         }
 
         metaPlace.setAddress(addPlaceAddressView.getText().toString());
-        metaPlace.getLocation().setCoordinates(new double[]{latlng.latitude, latlng.longitude});
+        metaPlace.setLatLng(latlng);
 
         if (addNewMetaPlace) {
             addPlace();

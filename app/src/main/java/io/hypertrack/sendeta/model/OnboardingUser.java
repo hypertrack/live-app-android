@@ -43,7 +43,7 @@ public class OnboardingUser extends HTUser {
     private boolean isExistingUser;
 
     @SerializedName("places")
-    private List<UserPlace> places;
+    private List<UserPlace> places = new ArrayList<UserPlace>();
 
     private OnboardingUser() {
     }
@@ -61,7 +61,7 @@ public class OnboardingUser extends HTUser {
         return onboardingUser;
     }
 
-    public static OnboardingUser getOnboardingUser() {
+    private static OnboardingUser getOnboardingUser() {
         OnboardingUser onboardingUser = new OnboardingUser();
 
         if (SharedPreferenceManager.getOnboardingUser() != null) {
@@ -304,12 +304,12 @@ public class OnboardingUser extends HTUser {
     }
 
 
-    public boolean isFavorite(Place place) {
+    public boolean isFavorite(UserPlace place) {
         if (place == null || getPlaces() == null || getPlaces().size() == 0)
             return false;
 
-        for (Place candidate : this.getPlaces()) {
-            if (candidate.getId() == place.getId()
+        for (UserPlace candidate : this.getPlaces()) {
+            if (candidate.getUserPlaceID() == place.getUserPlaceID()
                     || (((candidate.getLocation().getLatitude()) == (place.getLocation().getLatitude()))
                     && ((candidate.getLocation().getLongitude()) == (place.getLocation().getLongitude())))) {
                 return true;
