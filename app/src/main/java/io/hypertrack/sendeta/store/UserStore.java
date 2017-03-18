@@ -124,9 +124,16 @@ public class UserStore {
         if (places != null && places.size() > 0) {
             for (MetaPlace metaPlace : places) {
                 UserPlace userPlace = new UserPlace(metaPlace.getName(), metaPlace.getLatLng());
+
+                if (metaPlace.isHome())
+                    userPlace.setUserPlaceID(0);
+                else if (metaPlace.isWork())
+                    userPlace.setUserPlaceID(1);
+                else
+                    userPlace.setUserPlaceID(metaPlace.getId());
                 userPlace.setGooglePlacesID(metaPlace.getGooglePlacesID());
                 userPlace.setAddress(metaPlace.getAddress());
-                userPlace.setUserPlaceID(metaPlace.getId());
+
                 onboardingUser.addPlace(userPlace);
             }
         }
