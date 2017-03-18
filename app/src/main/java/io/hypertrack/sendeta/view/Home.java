@@ -591,6 +591,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             selectPushedTaskMetaPlace = true;
             handlePushedTaskIntent(intent);
         }
+        Toast.makeText(Home.this, HyperTrack.getSDKVersion(), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -1326,7 +1327,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     share();
 
                     onStartTask();
-
+                    addToRecentSearch();
 
                     // Reset handle pushedTask DeepLink Flag
                     handlePushedTaskDeepLink = false;
@@ -1352,6 +1353,20 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
         });
 
+    }
+
+    private void addToRecentSearch() {
+        if (destinationPlace != null) {
+            UserPlace recent = destinationPlace;
+            if (!destinationPlace.isHome() && !destinationPlace.isWork()) {
+                int size = OnboardingUser.onboardingUser.getPlaces().size();
+                if (destinationPlace.getUserPlaceID() == -1) {
+                    recent.setUserPlaceID(size);
+                    OnboardingUser.onboardingUser.addPlace(recent);
+                    OnboardingUser.setOnboardingUser();
+                }
+            }
+        }
     }
 
     private void updatePushedDestinationAddress() {
@@ -1738,12 +1753,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             HyperTrack.startTracking(new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
+                    if (callback != null)
+                        callback.onSuccess(response);
                     if (byUser) {
                         SharedPreferenceManager.setTrackingON();
                         supportInvalidateOptionsMenu();
                     }
-                    if (callback != null)
-                        callback.onSuccess(response);
                 }
 
                 @Override
