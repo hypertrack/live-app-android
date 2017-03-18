@@ -591,7 +591,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             selectPushedTaskMetaPlace = true;
             handlePushedTaskIntent(intent);
         }
-        Toast.makeText(Home.this, HyperTrack.getSDKVersion(), Toast.LENGTH_LONG).show();
     }
 
     @Override

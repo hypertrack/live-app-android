@@ -14,4 +14,8 @@ public class DevDebugUtils {
     public static void setHTLogLevel(int logLevel) {
         //do nothing
     }
+
+    public static void sdkVersionMessage(Context context) {
+        //do nothing
+    }
 }
