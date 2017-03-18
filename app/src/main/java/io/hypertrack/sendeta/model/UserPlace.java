@@ -21,7 +21,7 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
     private String googlePlacesID;
 
     @SerializedName("user_place_id")
-    private int userPlaceID;
+    private int userPlaceID = -1;
 
     public UserPlace() {
 
@@ -118,6 +118,10 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
 
     public LatLng getLatLng() {
         return getLocation().getLatLng();
+    }
+
+    public void setLatLng(LatLng latLng) {
+        getLocation().setCoordinates(new double[]{latLng.longitude, latLng.latitude});
     }
 
 }
