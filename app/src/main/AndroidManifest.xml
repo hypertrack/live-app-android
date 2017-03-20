@@ -45,53 +45,53 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Intent Filter to handle browsable deeplinks -->
-            <intent-filter android:label="@string/filter_title_request_eta">
-                <action android:name="android.intent.action.VIEW" />
+            <!-- &lt;!&ndash; Intent Filter to handle browsable deeplinks &ndash;&gt;
+             <intent-filter android:label="@string/filter_title_request_eta">
+                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                 <category android:name="android.intent.category.DEFAULT" />
+                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="http" />
-                <data android:scheme="https" />
+                 <data android:scheme="http" />
+                 <data android:scheme="https" />
 
-                <!-- Add sendeta.com/request DeepLink URL -->
-                <data
-                    android:host="@string/request_eta_base_url"
-                    android:pathPrefix="/request" />
-            </intent-filter>
+                 &lt;!&ndash; Add sendeta.com/request DeepLink URL &ndash;&gt;
+                 <data
+                     android:host="@string/request_eta_base_url"
+                     android:pathPrefix="/request" />
+             </intent-filter>
 
-            <intent-filter android:label="@string/filter_title_request_eta">
-                <action android:name="android.intent.action.VIEW" />
+             <intent-filter android:label="@string/filter_title_request_eta">
+                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                 <category android:name="android.intent.category.DEFAULT" />
+                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="http" />
-                <data android:scheme="https" />
+                 <data android:scheme="http" />
+                 <data android:scheme="https" />
 
-                <!-- Add sendeta.com/request DeepLink URL -->
-                <data
-                    android:host="@string/hypertrack_live_request_eta_base_url"
-                    android:pathPrefix="/live/request" />
-            </intent-filter>
+                 &lt;!&ndash; Add sendeta.com/request DeepLink URL &ndash;&gt;
+                 <data
+                     android:host="@string/hypertrack_live_request_eta_base_url"
+                     android:pathPrefix="/live/request" />
+             </intent-filter>
 
-            <intent-filter android:label="@string/filter_title_track">
-                <action android:name="android.intent.action.VIEW" />
+             <intent-filter android:label="@string/filter_title_track">
+                 <action android:name="android.intent.action.VIEW" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                 <category android:name="android.intent.category.DEFAULT" />
+                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="@string/deeplink_scheme" />
-            </intent-filter>
+                 <data android:scheme="@string/deeplink_scheme" />
+             </intent-filter>
 
-            <!-- Intent Filter to handle FB Messenger messages -->
-            <intent-filter>
-                <action android:name="android.intent.action.PICK" />
+             &lt;!&ndash; Intent Filter to handle FB Messenger messages &ndash;&gt;
+             <intent-filter>
+                 <action android:name="android.intent.action.PICK" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
-            </intent-filter>
+                 <category android:name="android.intent.category.DEFAULT" />
+                 <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
+             </intent-filter>-->
         </activity>
 
         <activity
