@@ -30,7 +30,6 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
     public UserPlace(Double latitude, Double longitude) {
         if (latitude == null || longitude == null)
             return;
-
         setLocation(new GeoJSONLocation(latitude, longitude));
     }
 
@@ -68,7 +67,6 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
         setName(name);
     }
 
-
     public String getGooglePlacesID() {
         return googlePlacesID;
     }
@@ -76,7 +74,6 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
     public void setGooglePlacesID(String googlePlacesID) {
         this.googlePlacesID = googlePlacesID;
     }
-
 
     public void update(UserPlace place) {
 
@@ -106,7 +103,6 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
             return false;
         return getName().equalsIgnoreCase(WORK);
     }
-
 
     public boolean isEqualPlace(UserPlace place) {
         if (TextUtils.isEmpty(place.getId()) || TextUtils.isEmpty(getId())) {
