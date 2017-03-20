@@ -36,7 +36,6 @@ import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
 import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,7 +62,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
-    private ActionManagerListener actionRefreshedListener, actionComletedListener;
+    private ActionManagerListener actionRefreshedListener, actionCompletedListener;
     private Handler handler;
     private final Runnable refreshAction = new Runnable() {
         @Override
@@ -80,19 +79,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                     if (!isActionLive(actionResponse)) {
                         HTLog.i(TAG, "HyperTrack-Live Action Not Live, Calling completeAction() to complete the action");
 
-                        // Call completeAction when the Action object is null or it is not live anymore
-                        TaskManager.this.completeAction(new ActionManagerCallback() {
-                            @Override
-                            public void OnSuccess() {
-                                if (actionComletedListener != null) {
-                                    actionComletedListener.OnCallback();
-                                }
-                            }
-
-                            @Override
-                            public void OnError() {
-                            }
-                        });
+                        if (actionCompletedListener != null) {
+                            actionCompletedListener.OnCallback();
+                        }
                         return;
                     }
                     hyperTrackAction = actionResponse;
@@ -158,7 +147,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             HTLog.e(TAG, "HyperTrack-Live: Error occurred while shouldRestoreState: Driver is Active & UserPlace is NULL");
         }
 
-        completeAction(null);
+        if (actionCompletedListener != null)
+            actionCompletedListener.OnCallback();
         return false;
     }
 
@@ -233,6 +223,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         HyperTrack.completeAction(actionID);
         clearState();
 
+        if (actionCompletedListener != null)
+            actionCompletedListener.OnCallback();
+
         if (callback != null)
             callback.OnSuccess();
     }
@@ -252,7 +245,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     private void clearListeners() {
-        this.actionComletedListener = null;
+        this.actionCompletedListener = null;
         this.actionRefreshedListener = null;
     }
 
@@ -277,7 +270,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void stopRefreshingAction() {
         if (this.handler != null) {
-            this.handler.removeCallbacksAndMessages(refreshAction);
+            this.handler.removeCallbacks(refreshAction);
             this.handler = null;
         }
     }
@@ -341,11 +334,16 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void OnGeoFenceSuccess() {
-        if (this.hyperTrackAction == null) {
+        if (actionCompletedListener != null) {
+            actionCompletedListener.OnCallback();
+        }
+        HTLog.i(TAG, "OnGeoFence success: Action completed initiated.");
+
+       /* if (this.hyperTrackAction == null) {
             this.getSavedActionData();
             if (this.hyperTrackAction == null) {
-                if (actionComletedListener != null) {
-                    actionComletedListener.OnCallback();
+                if (actionCompletedListener != null) {
+                    actionCompletedListener.OnCallback();
                 }
 
                 HTLog.e(TAG, "HyperTrack-Live: Error occurred while OnGeoFenceSuccess: HypertrackTask is NULL");
@@ -358,8 +356,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         this.completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
-                if (actionComletedListener != null) {
-                    actionComletedListener.OnCallback();
+                if (actionCompletedListener != null) {
+                    actionCompletedListener.OnCallback();
                 }
 
                 AnalyticsStore.getLogger().autoTripEnded(true, null);
@@ -371,7 +369,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 AnalyticsStore.getLogger().autoTripEnded(false, ErrorMessages.AUTO_END_TRIP_FAILED);
                 HTLog.e(TAG, "OnGeoFence success: Task end (Auto) failed.");
             }
-        });
+        });*/
     }
 
     private GeofencingRequest getGeofencingRequest() {
@@ -425,7 +423,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void setActionComletedListener(ActionManagerListener listener) {
-        this.actionComletedListener = listener;
+        this.actionCompletedListener = listener;
     }
 
     public Action getHyperTrackAction() {
