@@ -675,23 +675,25 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onEvent(@NonNull final HyperTrackEvent event) {
                 switch (event.getEventType()) {
                     case HyperTrackEvent.EventType.STOP_ENDED_EVENT:
-                        Home.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
-                                ArrayList<String> action = new ArrayList<>();
-                                action.add("Set Destination Address");
-                                ServiceNotificationParams notificationParams = builder
-                                        .setSmallIcon(R.drawable.ic_ht_service_notification_small)
-                                        .setSmallIconBGColor(ContextCompat.getColor(Home.this, R.color.colorAccent))
-                                        .setContentTitle(getString(R.string.notification_share_tracking_link))
-                                        .setContextText(getString(R.string.notification_set_destination))
-                                        .setContentIntentActivityClass(SplashScreen.class)
-                                        .setContentIntentExtras(action)
-                                        .build();
-                                HyperTrack.setServiceNotificationParams(notificationParams);
-                            }
-                        });
+                        if (TaskManager.getSharedManager(Home.this).isActionLive(TaskManager.getSharedManager(Home.this).getHyperTrackAction())) {
+                            Home.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
+                                    ArrayList<String> action = new ArrayList<>();
+                                    action.add("Set Destination Address");
+                                    ServiceNotificationParams notificationParams = builder
+                                            .setSmallIcon(R.drawable.ic_ht_service_notification_small)
+                                            .setSmallIconBGColor(ContextCompat.getColor(Home.this, R.color.colorAccent))
+                                            .setContentTitle(getString(R.string.notification_share_tracking_link))
+                                            .setContextText(getString(R.string.notification_set_destination))
+                                            .setContentIntentActivityClass(SplashScreen.class)
+                                            .setContentIntentExtras(action)
+                                            .build();
+                                    HyperTrack.setServiceNotificationParams(notificationParams);
+                                }
+                            });
+                        }
                         break;
                     default:
                         HyperTrack.clearServiceNotificationParams();
