@@ -42,6 +42,7 @@ public class MetaApplication extends Application {
         DevDebugUtils.setHTLogLevel(Log.VERBOSE);
         HyperTrack.enableDebugLogging(Log.VERBOSE);
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
+        DevDebugUtils.sdkVersionMessage(this);
     }
 
     public static synchronized MetaApplication getInstance() {
