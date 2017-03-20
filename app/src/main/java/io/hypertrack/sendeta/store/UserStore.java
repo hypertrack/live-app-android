@@ -121,19 +121,14 @@ public class UserStore {
     }
 
     public void setPlaces(RealmList<MetaPlace> places, OnboardingUser onboardingUser) {
+        int i = 0;
         if (places != null && places.size() > 0) {
             for (MetaPlace metaPlace : places) {
                 UserPlace userPlace = new UserPlace(metaPlace.getName(), metaPlace.getLatLng());
 
-                if (metaPlace.isHome())
-                    userPlace.setUserPlaceID(0);
-                else if (metaPlace.isWork())
-                    userPlace.setUserPlaceID(1);
-                else
-                    userPlace.setUserPlaceID(metaPlace.getId());
+                userPlace.setUserPlaceID(i++);
                 userPlace.setGooglePlacesID(metaPlace.getGooglePlacesID());
                 userPlace.setAddress(metaPlace.getAddress());
-
                 onboardingUser.addPlace(userPlace);
             }
         }

@@ -9,7 +9,6 @@ import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
 import com.hypertrack.lib.internal.consumer.models.HTUser;
-import com.hypertrack.lib.models.Place;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.PlaceManager;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SuccessErrorCallback;
 
@@ -42,11 +40,21 @@ public class OnboardingUser extends HTUser {
 
     private boolean isExistingUser;
 
-    @SerializedName("places")
-    private List<UserPlace> places = new ArrayList<UserPlace>();
+    @SerializedName("favorite_places")
+    private List<UserPlace> favoritePlaces = new ArrayList<UserPlace>();
+
+    @SerializedName("recent_search")
+    private List<UserPlace> recentSearch = new ArrayList<UserPlace>();
 
     private OnboardingUser() {
     }
+
+    @SerializedName("home")
+    private UserPlace home;
+
+    @SerializedName("work")
+    private UserPlace work;
+
 
     public static OnboardingUser sharedOnboardingUser() {
         if (onboardingUser == null) {
@@ -143,22 +151,69 @@ public class OnboardingUser extends HTUser {
     }
 
     public List<UserPlace> getPlaces() {
-        return places;
+
+        return new ArrayList<UserPlace>() {{
+            if (hasHome())
+                add(getHome());
+            if (hasWork())
+                add(getWork());
+            addAll(getFavoritePlaces());
+            addAll(getRecentSearch());
+        }};
     }
 
-    public void setPlaces(List<UserPlace> places) {
-        this.places = places;
+    public List<UserPlace> getFavoritePlaces() {
+        return favoritePlaces;
     }
+
+    public void setFavoritePlaces(List<UserPlace> favoritePlaces) {
+        this.favoritePlaces = favoritePlaces;
+    }
+
+    public void addFavoritePlace(UserPlace place) {
+        favoritePlaces.add(0, place);
+    }
+
+    public List<UserPlace> getRecentSearch() {
+        return recentSearch;
+    }
+
+    public void setRecentSearch(List<UserPlace> recentSearch) {
+        this.recentSearch = recentSearch;
+    }
+
+    public void addRecentPlace(UserPlace userPlace) {
+        recentSearch.add(0, userPlace);
+    }
+
+    public void setPlaces(List<UserPlace> favoritePlaces) {
+        this.favoritePlaces = favoritePlaces;
+    }
+
 
     public void addPlace(UserPlace place) {
-        if (this.places == null || this.places.size() == 0) {
-            this.places = new ArrayList<UserPlace>();
-        }
-        this.places.add(place);
+
+        isRecent(place);
+
+        if (place.isHome())
+            setHome(place);
+        else if (place.isWork())
+            setWork(place);
+        else addFavoritePlace(place);
     }
 
+    public void isRecent(UserPlace place) {
+        for (UserPlace recent : recentSearch) {
+            if (recent.getUserPlaceID() == place.getUserPlaceID()) {
+                recentSearch.remove(recent);
+                return;
+            }
+        }
+    }
+
+
     public void addPlace(final UserPlace placeToBeAdded, final SuccessErrorCallback callback) {
-        PlaceManager placeManager = new PlaceManager();
+        //PlaceManager placeManager = new PlaceManager();
 
         addPlace(placeToBeAdded);
         if (callback != null) {
@@ -187,10 +242,10 @@ public class OnboardingUser extends HTUser {
         });*/
     }
 
-    public void editPlace(UserPlace place, final SuccessErrorCallback callback) {
+  /*  public void editPlace(UserPlace place, final SuccessErrorCallback callback) {
         PlaceManager placeManager = new PlaceManager();
         editPlace(place);
-       /* placeManager.editPlace(place, new PlaceManagerCallback() {
+       *//* placeManager.editPlace(place, new PlaceManagerCallback() {
             @Override
             public void OnSuccess(UserPlace place) {
                 editPlace(place);
@@ -205,13 +260,14 @@ public class OnboardingUser extends HTUser {
                     callback.OnError();
                 }
             }
-        });*/
-    }
+        });*//*
+    }*/
 
-    public void editPlace(final UserPlace place) {
+
+  /*  public void editPlace(final UserPlace place) {
         addPlace(place);
 
-    }
+    }*/
 
 
     public Bitmap getImageBitmap() {
@@ -250,11 +306,11 @@ public class OnboardingUser extends HTUser {
         update(this);
     }
 
-    public boolean isSynced(Place place) {
+    public boolean isSynced(UserPlace place) {
         if (getPlaces() == null || getPlaces().size() == 0)
             return false;
-        for (Place candidate : this.getPlaces()) {
-            if (candidate.getId() == place.getId()) {
+        for (UserPlace candidate : this.getPlaces()) {
+            if (candidate.getUserPlaceID() == place.getUserPlaceID()) {
                 return true;
             }
         }
@@ -263,37 +319,20 @@ public class OnboardingUser extends HTUser {
     }
 
     public UserPlace getHome() {
-        if (this.getPlaces().size() == 0) {
-            return null;
-        }
+        return home;
+    }
 
-        UserPlace place = null;
-        for (UserPlace candidate : this.getPlaces()) {
-            if (candidate.isHome()) {
-                place = candidate;
-                break;
-            }
-        }
-
-        return place;
+    public void setHome(UserPlace home) {
+        this.home = home;
     }
 
     public UserPlace getWork() {
-        if (this.getPlaces().size() == 0) {
-            return null;
-        }
-
-        UserPlace place = null;
-        for (UserPlace candidate : this.getPlaces()) {
-            if (candidate.isWork()) {
-                place = candidate;
-                break;
-            }
-        }
-
-        return place;
+        return work;
     }
 
+    public void setWork(UserPlace work) {
+        this.work = work;
+    }
 
     public boolean hasHome() {
         return this.getHome() != null;
@@ -305,10 +344,10 @@ public class OnboardingUser extends HTUser {
 
 
     public boolean isFavorite(UserPlace place) {
-        if (place == null || getPlaces() == null || getPlaces().size() == 0)
+        if (place == null || getFavoritePlaces() == null || getFavoritePlaces().size() == 0)
             return false;
 
-        for (UserPlace candidate : this.getPlaces()) {
+        for (UserPlace candidate : this.getFavoritePlaces()) {
             if (candidate.getUserPlaceID() == place.getUserPlaceID()
                     || (((candidate.getLocation().getLatitude()) == (place.getLocation().getLatitude()))
                     && ((candidate.getLocation().getLongitude()) == (place.getLocation().getLongitude())))) {

@@ -464,7 +464,6 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
             @Override
             public void OnSuccess() {
                 processUpdatedMetaPlaceForAnalytics(true, null);
-
                 mProgressDialog.dismiss();
                 broadcastResultIntent();
                 finish();
@@ -493,8 +492,8 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
         mProgressDialog.setMessage(getString(R.string.editing_favorite_addresses_message));
         mProgressDialog.setCancelable(false);
         mProgressDialog.show();
-
-        OnboardingManager.sharedManager().getUser().editPlace(metaPlace, new SuccessErrorCallback() {
+//TODO add editPlace method
+      /*  OnboardingManager.sharedManager().getUser().editPlace(metaPlace, new SuccessErrorCallback() {
             @Override
             public void OnSuccess() {
                 processUpdatedMetaPlaceForAnalytics(true, null);
@@ -512,7 +511,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 showEditPlaceError();
             }
         });
-
+*/
     }
 
     private void broadcastResultIntent() {
@@ -551,7 +550,7 @@ public class AddFavoritePlace extends BaseActivity implements OnMapReadyCallback
                 int favoritesCount = status ? 1 : 0;
 
                 if (user != null) {
-                    List<UserPlace> userPlaces = user.getPlaces();
+                    List<UserPlace> userPlaces = user.getFavoritePlaces();
                     if (userPlaces != null && userPlaces.size() > 0)
                         favoritesCount = userPlaces.size();
                 }

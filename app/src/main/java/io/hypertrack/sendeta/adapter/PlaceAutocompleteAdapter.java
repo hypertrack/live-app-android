@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.view.Home;
 
@@ -230,6 +231,8 @@ public class PlaceAutocompleteAdapter
                 holder.icon.setImageResource(R.drawable.ic_home);
             } else if (place.isWork()) {
                 holder.icon.setImageResource(R.drawable.ic_work);
+            } else if (isRecent(position)) {
+                holder.icon.setImageResource(android.R.drawable.ic_menu_recent_history);
             } else {
                 holder.icon.setImageResource(R.drawable.ic_favorite);
             }
@@ -245,22 +248,31 @@ public class PlaceAutocompleteAdapter
                     holder.icon.setImageResource(R.drawable.ic_home);
                 } else if (place.isWork()) {
                     holder.icon.setImageResource(R.drawable.ic_work);
+                } else if (isRecent(position)) {
+                    holder.icon.setImageResource(android.R.drawable.ic_menu_recent_history);
                 } else {
                     holder.icon.setImageResource(R.drawable.ic_favorite);
                 }
+
 
                 holder.header.setText(place.getName());
                 holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(place.getAddress());
             } else {
                 final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
-
                 holder.icon.setImageResource(R.drawable.ic_marker_gray);
                 holder.header.setText(item.getPrimaryText(STYLE_BOLD));
                 holder.description.setVisibility(View.VISIBLE);
                 holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
             }
         }
+    }
+
+    private boolean isRecent(int position) {
+        if (position >= (getItemCount() - OnboardingUser.sharedOnboardingUser().getRecentSearch().size())) {
+            return true;
+        }
+        return false;
     }
 
     private int filteredPlacesCount() {
