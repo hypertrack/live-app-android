@@ -184,7 +184,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private ProgressDialog mProgressDialog;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
             locationFrequencyIncreased = true, selectPushedTaskMetaPlace = false, handlePushedTaskDeepLink = false,
-            destinationAddressGeocoded = false, isMapLoaded = false;
+            destinationAddressGeocoded = false, isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private UserPlace pushedTaskMetaPlace;
     private String pushedTaskID;
     private float zoomLevel = 1.0f;
@@ -362,7 +362,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 @Override
                 public void run() {
                     Home.this.completeTask();
-                    HyperTrack.clearServiceNotificationParams();
                 }
             });
         }
@@ -466,6 +465,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void onETASuccess(TaskETAResponse response, UserPlace place) {
         // Make the VehicleTabLayout visible onETASuccess
         AnimationUtils.expand(vehicleTypeTabLayout);
+        isvehicleTypeTabLayoutVisible = true;
         LatLng latLng = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
         updateViewForETASuccess((int) response.getDuration() / 60, latLng);
         destinationPlace = place;
@@ -1045,8 +1045,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public void onEnterDestinationBackClick(View view) {
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);
+        isvehicleTypeTabLayoutVisible = false;
 
         enterDestinationLayoutClicked = false;
+
+        if (destinationLocationMarker != null) {
+            destinationLocationMarker.remove();
+            destinationLocationMarker = null;
+        }
 
         // Show the AppBar
         AnimationUtils.expand(appBarLayout, 200);
@@ -1054,9 +1060,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Hide the Autocomplete Results Layout
         showAutocompleteResults(false);
 
+        updateMapView();
+
         // Reset the Enter Destination Layout
         enterDestinationLayout.setVisibility(View.VISIBLE);
         mAutocompletePlacesLayout.setVisibility(View.GONE);
+        destinationDescription.setVisibility(View.GONE);
+        destinationText.setText("");
+
+        //Hide SendEta or Retry Button
+        sendETAButton.setVisibility(View.GONE);
+        retryButton.setVisibility(View.GONE);
+
 
         KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
     }
@@ -1408,17 +1423,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     /**
-     * Method to Initiate COMPLETE TASK
+     * Method to Initiate COMPLETE Action
      */
     private void completeTask() {
         TaskManager.getSharedManager(this).completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 OnCompleteTask();
-
+                HyperTrack.clearServiceNotificationParams();
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
                 HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
-
                 showEndingTripAnimation(false);
             }
 
@@ -1448,6 +1462,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void onStartTask() {
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);
+        isvehicleTypeTabLayoutVisible = false;
 
         sendETAButton.setVisibility(View.GONE);
         endTripSwipeButton.setVisibility(View.VISIBLE);
@@ -1487,7 +1502,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void updateDisplayStatusForOngoingTask(Action action) {
         // Set Toolbar Title as DisplayStatus for currently active task
-        if (action != null && action.getActionDisplay() != null) {
+        if (action != null && action.getActionDisplay() != null && TaskManager.getSharedManager(this).isActionLive(action)) {
             this.setTitle(action.getActionDisplay().getStatusText());
         } else {
 
@@ -1497,7 +1512,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Set Toolbar SubTitle as DisplaySubStatus for currently active task
-        if (action != null && action.getActionDisplay() != null) {
+        if (action != null && action.getActionDisplay() != null && TaskManager.getSharedManager(this).isActionLive(action)) {
             this.setSubTitle(action.getActionDisplay().getSubStatusText());
 
         } else {
@@ -2277,7 +2292,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     @Override
     public void onBackPressed() {
-        if (enterDestinationLayoutClicked) {
+        if (enterDestinationLayoutClicked || isvehicleTypeTabLayoutVisible) {
             onEnterDestinationBackClick(null);
         } else {
             super.onBackPressed();
