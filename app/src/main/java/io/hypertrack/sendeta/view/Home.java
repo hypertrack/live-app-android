@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
@@ -27,6 +28,7 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -711,22 +713,21 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void checkForTrackingPermission() {
         if (!TextUtils.isEmpty(OnboardingManager.sharedManager().getUser().getId())) {
             if (!SharedPreferenceManager.isAskForTrackingDialog()) {
-                startHyperTrackTracking(true);
-           /* AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("We will enable the background tracking by default. Do you want to disable it ?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startHyperTrackTracking(true);
-                        }
-                    })
-                    .show();*/
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage("We will enable the background tracking by default. Do you want to disable it ?")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startHyperTrackTracking(true);
+                            }
+                        })
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                startHyperTrackTracking(true);
+                            }
+                        })
+                        .show();
                 SharedPreferenceManager.setAskedForTrackingDialog();
             }
         }
@@ -1375,10 +1376,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (destinationPlace != null) {
             UserPlace recent = destinationPlace;
             if (!destinationPlace.isHome() && !destinationPlace.isWork()) {
-                int size = OnboardingUser.onboardingUser.getPlaces().size();
+                int size = OnboardingUser.onboardingUser.getRecentSearch().size();
                 if (destinationPlace.getUserPlaceID() == -1) {
                     recent.setUserPlaceID(size);
-                    OnboardingUser.onboardingUser.addPlace(recent);
+                    OnboardingUser.onboardingUser.addRecentPlace(recent);
                     OnboardingUser.setOnboardingUser();
                 }
             }
@@ -2082,7 +2083,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return;
             }
 
-            if (user.isFavorite(place)) {
+            if (place.isHome() || place.isWork() || user.isFavorite(place)) {
                 markAsFavorite();
             } else {
                 markAsNotFavorite();
