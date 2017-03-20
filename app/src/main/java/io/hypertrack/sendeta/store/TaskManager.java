@@ -76,6 +76,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
                     Action actionResponse = (Action) response.getResponseObject();
+                    HTLog.i(TAG, "Get Action Response : " + actionResponse.toString());
                     if (!isActionLive(actionResponse)) {
                         HTLog.i(TAG, "HyperTrack-Live Action Not Live, Calling completeAction() to complete the action");
 
@@ -223,8 +224,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         HyperTrack.completeAction(actionID);
         clearState();
 
-        if (actionCompletedListener != null)
-            actionCompletedListener.OnCallback();
+       /* if (actionCompletedListener != null)
+            actionCompletedListener.OnCallback();*/
 
         if (callback != null)
             callback.OnSuccess();

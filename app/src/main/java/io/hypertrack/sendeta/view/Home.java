@@ -343,7 +343,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             if (action == null) {
                 return;
             }
-
+            HTLog.d(TAG, "Response when action refresh: " + action.toString());
             // Update ETA & Dihsplay Statuses using Task's Display field
             updateETAForOnGoingTask(action, taskManager.getPlace());
             updateDisplayStatusForOngoingTask(action);
