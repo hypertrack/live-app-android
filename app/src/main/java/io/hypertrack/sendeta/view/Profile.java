@@ -235,6 +235,9 @@ public class Profile extends BaseActivity implements ProfileView {
         String nameFromAccount = getName();
         if (name != null) {
             mNameView.setText(nameFromAccount);
+            showSkip = false;
+            supportInvalidateOptionsMenu();
+
         }
         if (!TextUtils.isEmpty(name)) {
             mNameView.setText(name);
