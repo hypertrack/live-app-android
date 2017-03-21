@@ -105,8 +105,8 @@ public class UserStore {
                 OnboardingManager.sharedManager().getUser().setId(hyperTrackDriverID);
                 HyperTrack.setUserId(hyperTrackDriverID);
                 deleteUser();
+                return true;
             }
-            return true;
         }
 
         return false;

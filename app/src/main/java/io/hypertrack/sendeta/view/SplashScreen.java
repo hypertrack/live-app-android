@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.Window;
 
 import io.hypertrack.sendeta.model.AppDeepLink;
+import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
@@ -53,7 +54,12 @@ public class SplashScreen extends BaseActivity {
 
     private void proceedToNextScreen() {
         boolean isUserOnboard = UserStore.sharedStore.isUserLoggedIn(this);
-        if (!isUserOnboard) {
+        if (!isUserOnboard && !TextUtils.isEmpty(OnboardingUser.sharedOnboardingUser().getName())) {
+            Intent registerIntent = new Intent(this, Profile.class);
+            registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(registerIntent);
+            finish();
+        } else if (!isUserOnboard) {
             Intent registerIntent = new Intent(this, CheckPermission.class);
             registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(registerIntent);
