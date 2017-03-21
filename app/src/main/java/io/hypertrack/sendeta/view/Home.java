@@ -724,7 +724,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                startHyperTrackTracking(true);
                             }
                         })
                         .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -1382,10 +1381,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (destinationPlace != null) {
             UserPlace recent = destinationPlace;
             if (!destinationPlace.isHome() && !destinationPlace.isWork()) {
-                int size = OnboardingUser.onboardingUser.getRecentSearch().size();
+                int size = OnboardingUser.sharedOnboardingUser().getRecentSearch().size();
                 if (destinationPlace.getUserPlaceID() == -1) {
                     recent.setUserPlaceID(size);
-                    OnboardingUser.onboardingUser.addRecentPlace(recent);
+                    OnboardingUser.sharedOnboardingUser().addRecentPlace(recent);
                     OnboardingUser.setOnboardingUser();
                 }
             }
@@ -2216,7 +2215,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onResume();
 
         //Check if user is created or not
-        checkIfUserCreated();
+        // checkIfUserCreated();
 
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
         if (taskManager.getHyperTrackAction() != null && !taskManager.getHyperTrackAction().isCompleted()) {
