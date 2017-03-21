@@ -75,6 +75,8 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
             HyperTrack.getAction(action.getId(), new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
+                    if (!isActionLive(action))
+                        return;
                     Action actionResponse = (Action) response.getResponseObject();
                     HTLog.i(TAG, "Get Action Response : " + actionResponse.toString());
                     if (!isActionLive(actionResponse)) {
@@ -337,8 +339,10 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
     public void OnGeoFenceSuccess() {
         if (actionCompletedListener != null) {
             actionCompletedListener.OnCallback();
+            HTLog.i(TAG, "OnGeoFence success: Action completed initiated.");
+        } else {
+            HTLog.i(TAG, "Action Completed Listener was null.");
         }
-        HTLog.i(TAG, "OnGeoFence success: Action completed initiated.");
 
        /* if (this.hyperTrackAction == null) {
             this.getSavedActionData();
