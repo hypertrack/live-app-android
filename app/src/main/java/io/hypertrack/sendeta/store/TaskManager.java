@@ -69,17 +69,17 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         public void run() {
 
             final Action action = TaskManager.getSharedManager(mContext).getHyperTrackAction();
-            if (!isActionLive(action))
+            if (!isActionLive())
                 return;
 
             HyperTrack.getAction(action.getId(), new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
-                    if (!isActionLive(action))
+                    if (!isActionLive())
                         return;
                     Action actionResponse = (Action) response.getResponseObject();
                     HTLog.i(TAG, "Get Action Response : " + actionResponse.toString());
-                    if (!isActionLive(actionResponse)) {
+                    if (actionResponse == null || TextUtils.isEmpty(actionResponse.getId())) {
                         HTLog.i(TAG, "HyperTrack-Live Action Not Live, Calling completeAction() to complete the action");
 
                         if (actionCompletedListener != null) {
@@ -155,11 +155,9 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         return false;
     }
 
-    public boolean isActionLive(Action action) {
-        if (action == null)
-            action = this.getHyperTrackAction();
 
-        return action != null && !TextUtils.isEmpty(action.getId());
+    public boolean isActionLive() {
+        return hyperTrackAction != null && !TextUtils.isEmpty(hyperTrackAction.getId());
     }
 
     private void onActionRefresh() {

@@ -680,7 +680,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onEvent(@NonNull final HyperTrackEvent event) {
                 switch (event.getEventType()) {
                     case HyperTrackEvent.EventType.STOP_ENDED_EVENT:
-                        if (TaskManager.getSharedManager(Home.this).isActionLive(TaskManager.getSharedManager(Home.this).getHyperTrackAction())) {
+                        if (TaskManager.getSharedManager(Home.this).isActionLive()) {
                             Home.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -846,7 +846,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         //Check if Location Permission has been granted & Location has been enabled
         if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
                 && LocationUtils.isLocationEnabled(Home.this)) {
-            if (!TaskManager.getSharedManager(Home.this).isActionLive(null)) {
+            if (!TaskManager.getSharedManager(Home.this).isActionLive()) {
                 // Start the Task
                 startAction();
             } else {
@@ -1508,7 +1508,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void updateDisplayStatusForOngoingTask(Action action) {
         // Set Toolbar Title as DisplayStatus for currently active task
-        if (action != null && action.getActionDisplay() != null && TaskManager.getSharedManager(this).isActionLive(action)) {
+        if (action != null && action.getActionDisplay() != null && TaskManager.getSharedManager(this).isActionLive()) {
             this.setTitle(action.getActionDisplay().getStatusText());
         } else {
 
@@ -1518,7 +1518,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Set Toolbar SubTitle as DisplaySubStatus for currently active task
-        if (action != null && action.getActionDisplay() != null && TaskManager.getSharedManager(this).isActionLive(action)) {
+        if (action != null && action.getActionDisplay() != null && TaskManager.getSharedManager(this).isActionLive()) {
             this.setSubTitle(action.getActionDisplay().getSubStatusText());
 
         } else {
@@ -2078,7 +2078,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      */
     private void updateFavoritesButton() {
         TaskManager taskManager = TaskManager.getSharedManager(Home.this);
-        if (taskManager.isActionLive(null)) {
+        if (taskManager.isActionLive()) {
             UserPlace place = null;
             if (taskManager.getPlace() != null && taskManager.getPlace().getLocation() != null) {
                 place = taskManager.getPlace();
@@ -2232,6 +2232,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         updateFavoritesButton();
         updateCurrentLocationMarker();
+        if(!(TextUtils.isEmpty(destinationText.getText().toString())||isvehicleTypeTabLayoutVisible||TaskManager.getSharedManager(this).isActionLive())){
+            OnCompleteTask();
+        }
 
         // Re-register BroadcastReceiver for Location_Change, Network_Change & GCM
         LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
