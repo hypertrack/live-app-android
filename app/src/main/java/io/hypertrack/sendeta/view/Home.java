@@ -279,6 +279,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             // Show Autocomplete Data Fetch Loader when user typed something
             if (constraint.length() > 0)
                 mAutocompleteLoader.setVisibility(View.VISIBLE);
+            else {
+                mAutocompleteLoader.setVisibility(View.GONE);
+            }
         }
     };
     private AdapterView.OnClickListener enterDestinationClickListener = new View.OnClickListener() {
@@ -1613,6 +1616,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to update State Variables & UI to reflect Task Ended
      */
     private void OnCompleteTask() {
+        HTLog.i(TAG, "OnCompleteTask UI Changes Start");
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
@@ -1657,6 +1661,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             stopHyperTrackTracking();
         }
         supportInvalidateOptionsMenu();
+        HTLog.i(TAG, "OnCompleteTask UI Changes Completed");
+
 
     }
 
@@ -2213,8 +2219,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (taskManager.getHyperTrackAction() != null && !taskManager.getHyperTrackAction().isCompleted()) {
             taskManager.startRefreshingAction(0);
             // Set Task Manager Listeners
-            taskManager.setActionRefreshedListener(onActionRefreshedListener);
-            taskManager.setActionComletedListener(onActionCompletedListener);
+            //  taskManager.setActionRefreshedListener(onActionRefreshedListener);
+            //  taskManager.setActionComletedListener(onActionCompletedListener);
         } else {
             // Reset Toolbar Title as AppName in case no existing trip
             this.setTitle(getResources().getString(R.string.toolbar_title));
