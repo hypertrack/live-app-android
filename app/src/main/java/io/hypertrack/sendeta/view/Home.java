@@ -642,7 +642,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void checkIfUserCreated() {
         final OnboardingUser onboardingUser = OnboardingUser.sharedOnboardingUser();
         if (TextUtils.isEmpty(onboardingUser.getId())) {
-
+            HTLog.i(TAG, "If User id doesn't exist");
+            if (mProgressDialog != null)
+                mProgressDialog.cancel();
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setMessage(getString(R.string.create_user));
             mProgressDialog.setCancelable(false);
@@ -661,6 +663,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         if (mProgressDialog != null)
                             mProgressDialog.cancel();
                         UserStore.sharedStore.deleteUser();
+                        HTLog.i(TAG, "User ID Successfully created after migration of user.");
                     }
                 }
 
@@ -2232,7 +2235,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         updateFavoritesButton();
         updateCurrentLocationMarker();
-        if(!(TextUtils.isEmpty(destinationText.getText().toString())||isvehicleTypeTabLayoutVisible||TaskManager.getSharedManager(this).isActionLive())){
+        if (!(TextUtils.isEmpty(destinationText.getText().toString()) || isvehicleTypeTabLayoutVisible || TaskManager.getSharedManager(this).isActionLive())) {
             OnCompleteTask();
         }
 
