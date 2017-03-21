@@ -27,7 +27,7 @@ import io.hypertrack.sendeta.util.SuccessErrorCallback;
  */
 public class OnboardingUser extends HTUser {
 
-    public static OnboardingUser onboardingUser;
+    private static OnboardingUser onboardingUser;
     private static String TAG = OnboardingManager.class.getSimpleName();
 
     @SerializedName("code")
@@ -45,16 +45,13 @@ public class OnboardingUser extends HTUser {
 
     @SerializedName("recent_search")
     private List<UserPlace> recentSearch = new ArrayList<UserPlace>();
-
-    private OnboardingUser() {
-    }
-
     @SerializedName("home")
     private UserPlace home;
-
     @SerializedName("work")
     private UserPlace work;
 
+    private OnboardingUser() {
+    }
 
     public static OnboardingUser sharedOnboardingUser() {
         if (onboardingUser == null) {
@@ -162,6 +159,10 @@ public class OnboardingUser extends HTUser {
         }};
     }
 
+    public void setPlaces(List<UserPlace> favoritePlaces) {
+        this.favoritePlaces = favoritePlaces;
+    }
+
     public List<UserPlace> getFavoritePlaces() {
         return favoritePlaces;
     }
@@ -185,11 +186,6 @@ public class OnboardingUser extends HTUser {
     public void addRecentPlace(UserPlace userPlace) {
         recentSearch.add(0, userPlace);
     }
-
-    public void setPlaces(List<UserPlace> favoritePlaces) {
-        this.favoritePlaces = favoritePlaces;
-    }
-
 
     public void addPlace(UserPlace place) {
 
