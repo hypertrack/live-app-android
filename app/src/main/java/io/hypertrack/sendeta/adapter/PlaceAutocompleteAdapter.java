@@ -232,7 +232,7 @@ public class PlaceAutocompleteAdapter
             } else if (place.isWork()) {
                 holder.icon.setImageResource(R.drawable.ic_work);
             } else if (isRecent(position)) {
-                holder.icon.setImageResource(android.R.drawable.ic_menu_recent_history);
+                holder.icon.setImageResource(R.drawable.ic_access_time);
             } else {
                 holder.icon.setImageResource(R.drawable.ic_favorite);
             }
@@ -249,7 +249,7 @@ public class PlaceAutocompleteAdapter
                 } else if (place.isWork()) {
                     holder.icon.setImageResource(R.drawable.ic_work);
                 } else if (isRecent(position)) {
-                    holder.icon.setImageResource(android.R.drawable.ic_menu_recent_history);
+                    holder.icon.setImageResource(R.drawable.ic_access_time);
                 } else {
                     holder.icon.setImageResource(R.drawable.ic_favorite);
                 }
@@ -269,10 +269,7 @@ public class PlaceAutocompleteAdapter
     }
 
     private boolean isRecent(int position) {
-        if (position >= (getItemCount() - OnboardingUser.sharedOnboardingUser().getRecentSearch().size())) {
-            return true;
-        }
-        return false;
+        return position >= (getItemCount() - OnboardingUser.sharedOnboardingUser().getRecentSearch().size());
     }
 
     private int filteredPlacesCount() {
