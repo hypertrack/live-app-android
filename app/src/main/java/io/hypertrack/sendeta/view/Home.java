@@ -46,6 +46,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -72,6 +73,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -99,6 +101,7 @@ import java.util.List;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
+import io.hypertrack.sendeta.adapter.callback.ChooseOnMapClickListener;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.TaskETAResponse;
@@ -184,9 +187,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private UserPlace restoreTaskMetaPlace;
     private UserPlace destinationPlace;
     private ProgressDialog mProgressDialog;
+    private Button chooseDestination;
+    private ImageView chooseDestinationMarker;
+    private LatLng chooseDestinationMarkerLatLng;
     private boolean enterDestinationLayoutClicked = false, shouldRestoreTask = false, locationPermissionChecked = false,
             locationFrequencyIncreased = true, selectPushedTaskMetaPlace = false, handlePushedTaskDeepLink = false,
-            destinationAddressGeocoded = false, isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
+            destinationAddressGeocoded = false, isMapLoaded = false, isvehicleTypeTabLayoutVisible = false, showCurrentLocationMarker = true;
     private UserPlace pushedTaskMetaPlace;
     private String pushedTaskID;
     private float zoomLevel = 1.0f;
@@ -249,6 +255,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             destinationDescription.setText("");
         }
     };
+
+    private ChooseOnMapClickListener mChooseOnMapClickListener = new ChooseOnMapClickListener() {
+        @Override
+        public void OnClick() {
+            setChooseOnMapView();
+        }
+    };
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -260,27 +273,29 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         @Override
         public void afterTextChanged(Editable s) {
-            final String constraint = s != null ? s.toString() : "";
+            if (showCurrentLocationMarker) {
+                final String constraint = s != null ? s.toString() : "";
 
 
-            if (searchRunnable != null)
-                searchHandler.removeCallbacks(searchRunnable);
+                if (searchRunnable != null)
+                    searchHandler.removeCallbacks(searchRunnable);
 
-            searchRunnable = new Runnable() {
-                @Override
-                public void run() {
-                    mAdapter.setFilterString(constraint);
+                searchRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        mAdapter.setFilterString(constraint);
+                    }
+                };
+
+                searchHandler.postDelayed(searchRunnable, 400);
+
+
+                // Show Autocomplete Data Fetch Loader when user typed something
+                if (constraint.length() > 0)
+                    mAutocompleteLoader.setVisibility(View.VISIBLE);
+                else {
+                    mAutocompleteLoader.setVisibility(View.GONE);
                 }
-            };
-
-            searchHandler.postDelayed(searchRunnable, 400);
-
-
-            // Show Autocomplete Data Fetch Loader when user typed something
-            if (constraint.length() > 0)
-                mAutocompleteLoader.setVisibility(View.VISIBLE);
-            else {
-                mAutocompleteLoader.setVisibility(View.GONE);
             }
         }
     };
@@ -371,6 +386,50 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             });
         }
     };
+
+    public void onDestinationChooseOnMap(View view) {
+
+        resetChooseOnMapView();
+
+        if (destinationPlace != null) {
+            // Set the Enter Destination Layout to Selected Place
+            destinationText.setGravity(Gravity.START);
+            destinationText.setText(destinationPlace.getName());
+
+            if (!TextUtils.isEmpty(destinationPlace.getAddress())) {
+                // Set the selected Place Description as Place Address
+                destinationDescription.setText(destinationPlace.getAddress());
+                destinationDescription.setVisibility(View.VISIBLE);
+            }
+        }
+
+        KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+
+        // Initialize VehicleTabLayout
+        initializeVehicleTypeTab();
+
+        onSelectPlace(destinationPlace);
+    }
+
+    private void setChooseOnMapView() {
+        KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+        showCurrentLocationMarker = false;
+        showAutocompleteResults(false);
+        chooseDestinationMarker.setVisibility(View.VISIBLE);
+        currentLocationMarker.setVisible(false);
+        reverseGeoCodeToAddress(mMap.getCameraPosition().target);
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(15.0f));
+        mAutocompletePlacesView.setEnabled(false);
+    }
+
+    private void resetChooseOnMapView() {
+        showCurrentLocationMarker = true;
+        chooseDestinationMarker.setVisibility(View.GONE);
+        chooseDestination.setVisibility(View.GONE);
+        currentLocationMarker.setVisible(true);
+        mAutocompletePlacesView.setEnabled(true);
+        //onEnterDestinationBackClick(null);
+    }
 
     private void onSelectPlace(final UserPlace place) {
         if (place == null) {
@@ -795,15 +854,18 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mAutocompleteResultsLayout = (CardView) findViewById(R.id.autocomplete_places_results_layout);
         mAutocompleteLoader = (ProgressBar) findViewById(R.id.autocomplete_progress);
         mAutocompletePlacesView.addTextChangedListener(mTextWatcher);
+        chooseDestination = (Button) findViewById(R.id.choose_destination);
+        chooseDestinationMarker = (ImageView) findViewById(R.id.choose_destination_marker);
 
         // Initialize Autocomplete Results RecyclerView & Adapter
         LinearLayoutManager layoutManager = new LinearLayoutManager(Home.this);
         layoutManager.setAutoMeasureEnabled(true);
         mAutocompleteResults.setLayoutManager(layoutManager);
 
-        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mPlaceAutoCompleteListener);
+        mAdapter = new PlaceAutocompleteAdapter(this, mGoogleApiClient, mPlaceAutoCompleteListener, mChooseOnMapClickListener);
         mAutocompleteResults.setAdapter(mAdapter);
     }
+
 
     private void setupShareButton() {
         // Initialize Share Button UI View
@@ -1050,6 +1112,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         startService(intent);
     }
 
+    private void reverseGeoCodeToAddress(LatLng latLng) {
+        Intent intent = new Intent(this, FetchAddressIntentService.class);
+        intent.putExtra(FetchAddressIntentService.RECEIVER, new AddressResultReceiver(new Handler()));
+        intent.putExtra(FetchAddressIntentService.LOCATION_DATA_EXTRA, latLng);
+        startService(intent);
+    }
+
     public void onEnterDestinationBackClick(View view) {
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);
@@ -1082,6 +1151,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
 
         KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+
+        resetChooseOnMapView();
     }
 
     /**
@@ -1211,10 +1282,27 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+                if (mMap != null && !showCurrentLocationMarker) {
+                    mAutocompletePlacesView.setText(R.string.fetch_address_loading);
+                    mAdapter.setBounds(LocationUtils.getBounds(mMap.getCameraPosition().target, LocationUtils.DISTANCE_IN_METERS));
+                    reverseGeoCodeToAddress(mMap.getCameraPosition().target);
+                    chooseDestinationMarkerLatLng = mMap.getCameraPosition().target;
+                    destinationPlace = new UserPlace(chooseDestinationMarkerLatLng);
+                    if (!showCurrentLocationMarker) {
+                        mAutocompleteLoader.setVisibility(View.VISIBLE);
+                        chooseDestination.setClickable(false);
+                    }
 
+
+                    // set spinner for address text view
+                }
+            }
+        });
         // Check if Task has to be Restored & Update Map for that task
         if (shouldRestoreTask && restoreTaskMetaPlace != null) {
             if (TaskManager.getSharedManager(Home.this).getHyperTrackAction() == null) {
@@ -1913,7 +2001,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         Log.d(TAG, "Location: " + latLng.latitude + ", " + latLng.longitude);
 
         // Update Current Location on the map
-        updateCurrentLocation(location);
+        if (showCurrentLocationMarker)
+            updateCurrentLocation(location);
+
+        LocationStore.sharedStore().setCurrentLocation(location);
 
         // Check if Location Frequency was decreased to (INITIAL_LOCATION_UPDATE_INTERVAL_TIME)
         // Remove the existing FusedLocationUpdates, and resume it with
@@ -1951,7 +2042,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         mAdapter.setBounds(LocationUtils.getBounds(latLng, 10000));
 
-        LocationStore.sharedStore().setCurrentLocation(location);
+
     }
 
     private void addMarkerToCurrentLocation(LatLng latLng) {
@@ -2233,7 +2324,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateInfoMessageView();
 
         updateFavoritesButton();
-        updateCurrentLocationMarker();
+        if (showCurrentLocationMarker)
+            updateCurrentLocationMarker();
         if (!(TextUtils.isEmpty(destinationText.getText().toString()) || isvehicleTypeTabLayoutVisible || TaskManager.getSharedManager(this).isActionLive())) {
             OnCompleteTask();
         }
@@ -2325,6 +2417,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             mProgressDialog.dismiss();
     }
 
+
     @SuppressLint("ParcelCreator")
     private class GeocodingResultReceiver extends ResultReceiver {
         GeocodingResultReceiver(Handler handler) {
@@ -2337,7 +2430,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
                 if (latLng == null)
                     return;
-
                 defaultLocation.setLatitude(latLng.latitude);
                 defaultLocation.setLongitude(latLng.longitude);
                 Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
@@ -2355,6 +2447,33 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
                 }
+            }
+        }
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            //remove spinner from address text view
+
+            if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
+                destinationPlace.setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+                destinationPlace.setName(resultData.getString(FetchAddressIntentService.RESULT_DATA_NAME));
+                mAutocompleteLoader.setVisibility(View.GONE);
+                if (chooseDestination.getVisibility() == View.GONE)
+                    chooseDestination.setVisibility(View.VISIBLE);
+                chooseDestination.setClickable(true);
+                mAutocompletePlacesView.setText(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+                mAutocompletePlacesView.setSingleLine(true);
+                //   defaultLocation.setLatitude(latLng.latitude);
+            } else {
+                Toast.makeText(Home.this, resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY),
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }

@@ -16,6 +16,14 @@
         android:layout_height="match_parent"
         tools:context=".view.Home" />
 
+    <ImageView
+        android:id="@+id/choose_destination_marker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_ht_destination_marker_default"
+        android:visibility="gone" />
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -86,7 +94,6 @@
                     android:layout_marginLeft="@dimen/margin_high"
                     android:layout_marginRight="@dimen/margin_high"
                     android:layout_marginTop="@dimen/margin_high"
-                    android:background="@android:color/white"
                     android:elevation="@dimen/elevation_high"
                     app:cardCornerRadius="2dp">
 
@@ -128,7 +135,7 @@
                                     android:ellipsize="end"
                                     android:gravity="center"
                                     android:hint="@string/autocomplete_hint"
-                                    android:singleLine="true"
+                                    android:maxLines="1"
                                     android:textColor="@color/text_base"
                                     android:textSize="@dimen/text_medium" />
 
@@ -137,7 +144,7 @@
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:ellipsize="end"
-                                    android:singleLine="true"
+                                    android:maxLines="1"
                                     android:textColor="@color/text_disabled"
                                     android:textSize="@dimen/text_base"
                                     android:visibility="gone" />
@@ -152,6 +159,7 @@
                                 android:padding="@dimen/padding_low"
                                 android:src="@drawable/ic_favorite"
                                 android:visibility="gone" />
+
                         </LinearLayout>
 
                         <FrameLayout
@@ -166,15 +174,16 @@
                                 android:id="@+id/autocomplete_places"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:layout_marginLeft="@dimen/margin_max"
+                                android:layout_marginLeft="@dimen/margin_huge"
                                 android:layout_marginRight="@dimen/margin_xxxhigh"
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:ellipsize="end"
                                 android:hint="@string/autocomplete_hint"
+                                android:maxLines="1"
                                 android:paddingBottom="@dimen/padding_high"
+                                android:paddingRight="@dimen/padding_base"
                                 android:paddingTop="@dimen/padding_high"
-                                android:singleLine="true"
                                 android:textColor="@color/text_base"
                                 android:textSize="@dimen/text_medium" />
 
@@ -184,8 +193,8 @@
                                 android:layout_height="match_parent"
                                 android:layout_gravity="center_vertical"
                                 android:onClick="onEnterDestinationBackClick"
-                                android:paddingLeft="@dimen/padding_xhigh"
-                                android:paddingRight="@dimen/padding_xhigh"
+                                android:paddingLeft="@dimen/padding_high"
+                                android:paddingRight="@dimen/padding_high"
                                 android:scaleType="centerInside"
                                 android:src="@drawable/ic_navigation_arrow_back" />
 
@@ -309,6 +318,20 @@
                     android:textColor="#ffffff"
                     android:visibility="gone" />
             </FrameLayout>
+
+            <Button
+                android:id="@+id/choose_destination"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/cta_button_size"
+                android:layout_margin="@dimen/margin_high"
+                android:background="@color/colorAccent"
+                android:foreground="?android:attr/selectableItemBackground"
+                android:gravity="center"
+                android:onClick="onDestinationChooseOnMap"
+                android:padding="@dimen/padding_high"
+                android:text="@string/set_destination_text"
+                android:textColor="@color/text_dark_bg_base"
+                android:visibility="gone" />
         </LinearLayout>
     </LinearLayout>
 

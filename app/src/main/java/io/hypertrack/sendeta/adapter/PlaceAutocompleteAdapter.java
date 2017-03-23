@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.adapter.callback.ChooseOnMapClickListener;
 import io.hypertrack.sendeta.adapter.callback.PlaceAutoCompleteOnClickListener;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.UserPlace;
@@ -66,11 +67,14 @@ import io.hypertrack.sendeta.view.Home;
  * connection states. The API client must be connected with the {@link Places#GEO_DATA_API} API.
  */
 public class PlaceAutocompleteAdapter
-        extends RecyclerView.Adapter<PlaceAutocompleteAdapter.AutocompleteViewHolder> implements Filterable {
+        extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements Filterable {
 
     private static final String TAG = "PlaceAutocompAdapter";
     private static final CharacterStyle STYLE_BOLD = new StyleSpan(Typeface.BOLD);
     private static final CharacterStyle STYLE_NORMAL = new StyleSpan(Typeface.NORMAL);
+
+    private static final int ITEM_CHOOSE_ON_MAP = 0;
+    private static final int ITEM_TYPE = 1;
 
     private Context context;
     /**
@@ -105,6 +109,8 @@ public class PlaceAutocompleteAdapter
     private String filterString;
 
     private PlaceAutoCompleteOnClickListener listener;
+
+    private ChooseOnMapClickListener chooseOnMapClickListener;
     /**
      * Callback for results from a Places Geo Data API query that shows the first place result in
      * the details view on screen.
@@ -155,12 +161,13 @@ public class PlaceAutocompleteAdapter
      *
      * @see ArrayAdapter#ArrayAdapter(Context, int)
      */
-    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener) {
+    public PlaceAutocompleteAdapter(Context context, GoogleApiClient mGoogleApiClient, PlaceAutoCompleteOnClickListener listener, ChooseOnMapClickListener chooseOnMapClickListener) {
         super();
         this.context = context;
         this.mGoogleApiClient = mGoogleApiClient;
         this.favorites = new ArrayList<>();
         this.listener = listener;
+        this.chooseOnMapClickListener = chooseOnMapClickListener;
     }
 
     private PlaceAutocompleteAdapter() {
@@ -194,7 +201,7 @@ public class PlaceAutocompleteAdapter
         while (it.hasNext()) {
             UserPlace place = it.next();
 
-            if (!TextUtils.isEmpty(place.getName()) && place.getName().toLowerCase().contains(this.filterString)) {
+            if (!TextUtils.isEmpty(place.getName()) && place.getName().toLowerCase().contains(this.filterString) && !place.getName().toLowerCase().equalsIgnoreCase("Choose on map")) {
                 this.filteredFavorites.add(place);
             }
         }
@@ -204,8 +211,11 @@ public class PlaceAutocompleteAdapter
         if (this.favorites == null) {
             this.favorites = favorites;
         }
-
         this.favorites.clear();
+        UserPlace userPlace = new UserPlace();
+        userPlace.setName("Choose on map");
+        userPlace.setAddress("");
+        favorites.add(0, userPlace);
         this.favorites.addAll(favorites);
     }
 
@@ -217,55 +227,81 @@ public class PlaceAutocompleteAdapter
     }
 
     @Override
-    public AutocompleteViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_item_place, parent, false);
-        return new AutocompleteViewHolder(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view;
+        switch (viewType) {
+            case ITEM_TYPE:
+                view = LayoutInflater.from(context).inflate(R.layout.list_item_place, parent, false);
+                return new AutocompleteViewHolder(view);
+            case ITEM_CHOOSE_ON_MAP:
+                view = LayoutInflater.from(context).inflate(R.layout.list_item_choose_on_map, parent, false);
+                return new ChooseOnMapViewHolder(view);
+        }
+        return null;
+
     }
 
     @Override
-    public void onBindViewHolder(AutocompleteViewHolder holder, int position) {
-        if (!this.isSearching) {
-            UserPlace place = this.favorites.get(position);
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
+        switch (viewHolder.getItemViewType()) {
+            case ITEM_TYPE:
+                AutocompleteViewHolder holder = (AutocompleteViewHolder) viewHolder;
+                if (!this.isSearching) {
+                    UserPlace place = this.favorites.get(position);
+                    if (place.isHome()) {
+                        holder.icon.setImageResource(R.drawable.ic_home);
+                    } else if (place.isWork()) {
+                        holder.icon.setImageResource(R.drawable.ic_work);
+                    } else if (isRecent(position)) {
+                        holder.icon.setImageResource(R.drawable.ic_access_time);
+                    } else {
+                        holder.icon.setImageResource(R.drawable.ic_favorite);
+                    }
 
-            if (place.isHome()) {
-                holder.icon.setImageResource(R.drawable.ic_home);
-            } else if (place.isWork()) {
-                holder.icon.setImageResource(R.drawable.ic_work);
-            } else if (isRecent(position)) {
-                holder.icon.setImageResource(R.drawable.ic_access_time);
-            } else {
-                holder.icon.setImageResource(R.drawable.ic_favorite);
-            }
-
-            holder.header.setText(place.getName());
-            holder.description.setVisibility(View.VISIBLE);
-            holder.description.setText(place.getAddress());
-        } else {
-            if (this.isFilteredPlace(position)) {
-                UserPlace place = this.filteredFavorites.get(position);
-
-                if (place.isHome()) {
-                    holder.icon.setImageResource(R.drawable.ic_home);
-                } else if (place.isWork()) {
-                    holder.icon.setImageResource(R.drawable.ic_work);
-                } else if (isRecent(position)) {
-                    holder.icon.setImageResource(R.drawable.ic_access_time);
+                    holder.header.setText(place.getName());
+                    holder.description.setVisibility(View.VISIBLE);
+                    holder.description.setText(place.getAddress());
                 } else {
-                    holder.icon.setImageResource(R.drawable.ic_favorite);
+                    if (this.isFilteredPlace(position)) {
+                        UserPlace place = this.filteredFavorites.get(position);
+
+                        if (place.isHome()) {
+                            holder.icon.setImageResource(R.drawable.ic_home);
+                        } else if (place.isWork()) {
+                            holder.icon.setImageResource(R.drawable.ic_work);
+                        } else if (isRecent(position)) {
+                            holder.icon.setImageResource(R.drawable.ic_access_time);
+                        } else {
+                            holder.icon.setImageResource(R.drawable.ic_favorite);
+                        }
+
+                        holder.header.setText(place.getName());
+                        holder.description.setVisibility(View.VISIBLE);
+                        holder.description.setText(place.getAddress());
+                    } else {
+                        final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
+                        holder.icon.setImageResource(R.drawable.ic_marker_gray);
+                        holder.header.setText(item.getPrimaryText(STYLE_BOLD));
+                        holder.description.setVisibility(View.VISIBLE);
+                        holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
+                    }
+                }
+                break;
+            case ITEM_CHOOSE_ON_MAP:
+                ChooseOnMapViewHolder chooseOnMapViewHolder = (ChooseOnMapViewHolder) viewHolder;
+                if (!isSearching) {
+                    //chooseOnMapViewHolder.icon.setImageResource(R.drawable.ic_marker_gray);
                 }
 
-
-                holder.header.setText(place.getName());
-                holder.description.setVisibility(View.VISIBLE);
-                holder.description.setText(place.getAddress());
-            } else {
-                final AutocompletePrediction item = mResultList.get(position - this.filteredPlacesCount());
-                holder.icon.setImageResource(R.drawable.ic_marker_gray);
-                holder.header.setText(item.getPrimaryText(STYLE_BOLD));
-                holder.description.setVisibility(View.VISIBLE);
-                holder.description.setText(item.getSecondaryText(STYLE_NORMAL));
-            }
+                break;
         }
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (!isSearching && position == 0) {
+            return ITEM_CHOOSE_ON_MAP;
+        } else return ITEM_TYPE;
     }
 
     private boolean isRecent(int position) {
@@ -283,6 +319,7 @@ public class PlaceAutocompleteAdapter
     @Override
     public int getItemCount() {
         if (!this.isSearching) {
+
             return this.favorites != null ? this.favorites.size() : 0;
         }
 
@@ -463,6 +500,12 @@ public class PlaceAutocompleteAdapter
         }
     }
 
+    private void chooseONMapClicked() {
+        if (chooseOnMapClickListener != null) {
+            chooseOnMapClickListener.OnClick();
+        }
+    }
+
     public class AutocompleteViewHolder extends RecyclerView.ViewHolder {
         public TextView header;
         public TextView description;
@@ -478,6 +521,20 @@ public class PlaceAutocompleteAdapter
                 @Override
                 public void onClick(View v) {
                     itemClickedAtPosition(getAdapterPosition());
+                }
+            });
+        }
+    }
+
+    public class ChooseOnMapViewHolder extends RecyclerView.ViewHolder {
+
+
+        public ChooseOnMapViewHolder(View itemView) {
+            super(itemView);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    chooseONMapClicked();
                 }
             });
         }

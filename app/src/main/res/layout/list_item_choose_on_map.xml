@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
+    android:background="@android:color/transparent"
     android:foreground="?android:attr/selectableItemBackground"
     android:orientation="vertical">
 
@@ -10,17 +10,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
+        android:layout_marginBottom="@dimen/padding_base"
+        android:layout_marginTop="8dp"
         android:background="@android:color/white"
-        android:paddingBottom="@dimen/padding_base"
-        android:paddingRight="@dimen/padding_high"
-        android:paddingTop="@dimen/padding_base">
+        android:paddingRight="@dimen/padding_high">
 
         <ImageView
             android:id="@+id/item_place.icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/margin_high"
-            android:src="@drawable/ic_favorite_hollow" />
+            android:src="@drawable/ic_marker_gray" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -43,19 +43,10 @@
                     android:ellipsize="end"
                     android:fontFamily="sans-serif-medium"
                     android:maxLines="1"
+                    android:text="Choose on map"
                     android:textColor="@color/text_base"
                     android:textSize="@dimen/text_medium" />
 
-                <TextView
-                    android:id="@+id/item_place.desc"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="@dimen/text_base"
-                    android:visibility="gone" />
             </LinearLayout>
 
             <ImageView
@@ -66,11 +57,13 @@
                 android:foreground="?android:attr/selectableItemBackground"
                 android:src="@drawable/ic_action_delete"
                 android:visibility="gone" />
+
         </LinearLayout>
     </FrameLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@drawable/divider_light_border_bottom" />
+        android:background="@color/app_primary" />
+
 </LinearLayout>

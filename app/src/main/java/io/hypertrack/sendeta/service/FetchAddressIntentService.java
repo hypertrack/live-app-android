@@ -32,6 +32,7 @@ public class FetchAddressIntentService extends IntentService {
     public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
     public static final String RESULT_DATA_KEY = PACKAGE_NAME +
             ".RESULT_DATA_KEY";
+    public static final String RESULT_DATA_NAME = PACKAGE_NAME + ".RESULT_DATA_NAME";
     public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME +
             ".LOCATION_DATA_EXTRA";
 
@@ -51,6 +52,7 @@ public class FetchAddressIntentService extends IntentService {
         LatLng location = intent.getParcelableExtra(LOCATION_DATA_EXTRA);
 
         List<Address> addresses = null;
+        String featureName = null;
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         StringBuffer addressString = new StringBuffer();
 
@@ -76,10 +78,10 @@ public class FetchAddressIntentService extends IntentService {
                 errorMessage = getString(R.string.no_address_found);
                 Log.e(TAG, errorMessage);
             }
-            deliverResultToReceiver(FAILURE_RESULT, errorMessage, receiver);
+            deliverResultToReceiver(FAILURE_RESULT, errorMessage, null, receiver);
         } else {
             Address address = addresses.get(0);
-
+            featureName = address.getFeatureName();
             addressString.append(address.getAddressLine(0));
             for (int i = 1; i <= address.getMaxAddressLineIndex(); i++) {
                 if (address.getAddressLine(i) != null) {
@@ -87,13 +89,14 @@ public class FetchAddressIntentService extends IntentService {
                 }
             }
 
-            deliverResultToReceiver(SUCCESS_RESULT, addressString.toString(), receiver);
+            deliverResultToReceiver(SUCCESS_RESULT, addressString.toString(), featureName, receiver);
         }
     }
 
-    private void deliverResultToReceiver(int resultCode, String message, ResultReceiver resultReceiver) {
+    private void deliverResultToReceiver(int resultCode, String message, String featureName, ResultReceiver resultReceiver) {
         Bundle bundle = new Bundle();
         bundle.putString(RESULT_DATA_KEY, message);
+        bundle.putString(RESULT_DATA_NAME, featureName);
         resultReceiver.send(resultCode, bundle);
     }
 }
