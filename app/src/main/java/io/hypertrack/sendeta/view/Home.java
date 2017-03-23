@@ -262,6 +262,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             setChooseOnMapView();
         }
     };
+
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -389,7 +390,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     public void onDestinationChooseOnMap(View view) {
 
-        resetChooseOnMapView();
+        onEnterDestinationBackClick(null);
 
         if (destinationPlace != null) {
             // Set the Enter Destination Layout to Selected Place
@@ -402,8 +403,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 destinationDescription.setVisibility(View.VISIBLE);
             }
         }
-
-        KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
 
         // Initialize VehicleTabLayout
         initializeVehicleTypeTab();
@@ -422,14 +421,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mAutocompletePlacesView.setEnabled(false);
     }
 
-    private void resetChooseOnMapView() {
-        showCurrentLocationMarker = true;
-        chooseDestinationMarker.setVisibility(View.GONE);
-        chooseDestination.setVisibility(View.GONE);
-        currentLocationMarker.setVisible(true);
-        mAutocompletePlacesView.setEnabled(true);
-        //onEnterDestinationBackClick(null);
-    }
 
     private void onSelectPlace(final UserPlace place) {
         if (place == null) {
@@ -554,10 +545,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             places = user.getPlaces();
-        }
-
-        if (places == null || places.isEmpty()) {
-            return;
         }
 
         mAdapter.refreshFavorites(places);
@@ -1120,6 +1107,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     public void onEnterDestinationBackClick(View view) {
+
+        //Reset the "Choose on Map" view
+        showCurrentLocationMarker = true;
+        chooseDestinationMarker.setVisibility(View.GONE);
+        chooseDestination.setVisibility(View.GONE);
+        currentLocationMarker.setVisible(true);
+        mAutocompletePlacesView.setEnabled(true);
+
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);
         isvehicleTypeTabLayoutVisible = false;
@@ -1151,8 +1146,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
 
         KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
-
-        resetChooseOnMapView();
     }
 
     /**
