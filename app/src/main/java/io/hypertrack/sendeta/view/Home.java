@@ -98,6 +98,7 @@ import com.hypertrack.lib.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.PlaceAutocompleteAdapter;
@@ -203,6 +204,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private Handler searchHandler = new Handler();
     private Runnable searchRunnable;
 
+
+    //Listener to get the seleceted place
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
         public void OnSuccess(UserPlace place) {
@@ -255,7 +258,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             destinationDescription.setText("");
         }
     };
-
+    //
     private ChooseOnMapClickListener mChooseOnMapClickListener = new ChooseOnMapClickListener() {
         @Override
         public void OnClick() {
@@ -581,7 +584,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         OnboardingManager.sharedManager().initializeUser();*/
 
         // Initialize Toolbar without Home Button
-        initToolbar(getResources().getString(R.string.toolbar_title), false);
+        initToolbar(BuildConfig.TOOLBAR_TITLE, false);
 
         user = OnboardingManager.sharedManager().getUser();
         if (user.getImageBitmap() != null) {
@@ -1277,6 +1280,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(false);
         mMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
@@ -1351,6 +1355,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onMapLoaded() {
                 isMapLoaded = true;
                 updateMapView();
+            }
+        });
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14.0f));
+                return true;
             }
         });
     }
@@ -1596,7 +1607,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         } else {
 
             // Set Toolbar Title as AppName
-            this.setTitle(getResources().getString(R.string.toolbar_title));
+            this.setTitle(BuildConfig.TOOLBAR_TITLE);
             this.setSubTitle("");
         }
 
@@ -1731,7 +1742,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         updateMapPadding(false);
 
         // Reset Toolbar Title on EndTrip
-        this.setTitle(getResources().getString(R.string.toolbar_title));
+        this.setTitle(BuildConfig.TOOLBAR_TITLE);
         this.setSubTitle("");
 
         // Resume LocationUpdates
@@ -2309,7 +2320,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             //  taskManager.setActionComletedListener(onActionCompletedListener);
         } else {
             // Reset Toolbar Title as AppName in case no existing trip
-            this.setTitle(getResources().getString(R.string.toolbar_title));
+            this.setTitle(BuildConfig.TOOLBAR_TITLE);
             this.setSubTitle("");
         }
 
