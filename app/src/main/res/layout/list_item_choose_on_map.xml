@@ -64,6 +64,6 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@color/app_primary" />
+        android:background="@drawable/divider_light_border_bottom" />
 
 </LinearLayout>
