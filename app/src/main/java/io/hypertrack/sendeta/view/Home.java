@@ -732,7 +732,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onEvent(@NonNull final HyperTrackEvent event) {
                 switch (event.getEventType()) {
                     case HyperTrackEvent.EventType.STOP_ENDED_EVENT:
-                        if (TaskManager.getSharedManager(Home.this).isActionLive()) {
+                        if (!TaskManager.getSharedManager(Home.this).isActionLive()) {
                             Home.this.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -752,7 +752,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                             });
                         }
                         break;
-                    default:
+                    case HyperTrackEvent.EventType.TRACKING_STOPPED_EVENT:
+                    case HyperTrackEvent.EventType.ACTION_ASSIGNED_EVENT:
+                    case HyperTrackEvent.EventType.ACTION_COMPLETED_EVENT:
+                    case HyperTrackEvent.EventType.STOP_STARTED_EVENT:
                         HyperTrack.clearServiceNotificationParams();
                         break;
                 }
