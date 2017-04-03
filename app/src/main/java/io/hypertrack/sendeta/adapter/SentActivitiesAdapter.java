@@ -1,3 +1,4 @@
+/*
 package io.hypertrack.sendeta.adapter;
 
 import android.content.Context;
@@ -32,9 +33,11 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.adapter.callback.UserActivitiesOnClickListener;
 import io.hypertrack.sendeta.model.UserActivityModel;
 
+*/
 /**
  * Created by piyush on 03/09/16.
- */
+ *//*
+
 public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAdapter.SentActivitiesViewHolder> {
 
     private Context mContext;
@@ -306,9 +309,11 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
             mapSummaryView.setVisibility(View.GONE);
         }
 
-        /**
+        */
+/**
          * Initialises the MapView by calling its lifecycle methods.
-         */
+ *//*
+
         public void initializeMapView() {
             if (mapSummaryView != null) {
                 // Initialise the MapView
@@ -319,3 +324,4 @@ public class SentActivitiesAdapter extends RecyclerView.Adapter<SentActivitiesAd
         }
     }
 }
+*/

@@ -24,6 +24,7 @@
     <application
         android:name=".MetaApplication"
         android:allowBackup="true"
+        android:debuggable="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${applicationLabel}"
         android:supportsRtl="true"
@@ -45,48 +46,49 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- &lt;!&ndash; Intent Filter to handle browsable deeplinks &ndash;&gt;
-             <intent-filter android:label="@string/filter_title_request_eta">
-                 <action android:name="android.intent.action.VIEW" />
+            <!-- Intent Filter to handle browsable deeplinks -->
+            <intent-filter android:label="@string/filter_title_request_eta">
+                <action android:name="android.intent.action.VIEW" />
 
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                 <data android:scheme="http" />
-                 <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
 
-                 &lt;!&ndash; Add sendeta.com/request DeepLink URL &ndash;&gt;
-                 <data
-                     android:host="@string/request_eta_base_url"
-                     android:pathPrefix="/request" />
-             </intent-filter>
+                <!-- Add sendeta.com/request DeepLink URL -->
+                <data
+                    android:host="@string/request_eta_base_url"
+                    android:pathPrefix="/request" />
+            </intent-filter>
 
-             <intent-filter android:label="@string/filter_title_request_eta">
-                 <action android:name="android.intent.action.VIEW" />
+            <intent-filter android:label="@string/filter_title_request_eta">
+                <action android:name="android.intent.action.VIEW" />
 
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                 <data android:scheme="http" />
-                 <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
 
-                 &lt;!&ndash; Add sendeta.com/request DeepLink URL &ndash;&gt;
-                 <data
-                     android:host="@string/hypertrack_live_request_eta_base_url"
-                     android:pathPrefix="/live/request" />
-             </intent-filter>
+                <!-- Add sendeta.com/request DeepLink URL -->
+                <data
+                    android:host="@string/hypertrack_live_request_eta_base_url"
+                    android:pathPrefix="/live/request" />
+            </intent-filter>
 
-             <intent-filter android:label="@string/filter_title_track">
-                 <action android:name="android.intent.action.VIEW" />
+            <intent-filter android:label="@string/filter_title_track">
+                <action android:name="android.intent.action.VIEW" />
 
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                 <data android:scheme="@string/deeplink_scheme" />
-             </intent-filter>
+                <data android:scheme="@string/deeplink_scheme" />
+            </intent-filter>
 
-             &lt;!&ndash; Intent Filter to handle FB Messenger messages &ndash;&gt;
-             <intent-filter>
+
+            <!-- Intent Filter to handle FB Messenger messages -->
+            <!-- <intent-filter>
                  <action android:name="android.intent.action.PICK" />
 
                  <category android:name="android.intent.category.DEFAULT" />
@@ -145,6 +147,9 @@
         <activity
             android:name=".view.AddFavoritePlace"
             android:screenOrientation="portrait" />
+        <activity
+            android:name=".view.Track"
+            android:screenOrientation="portrait" />
 
         <!-- <activity
              android:name=".view.BusinessProfile"
@@ -156,10 +161,7 @@
              android:parentActivityName=".view.Home"
              android:screenOrientation="portrait" />
 
-         <activity
-             android:name=".view.Track"
-             android:parentActivityName=".view.UserActivities"
-             android:screenOrientation="portrait" />
+
 
          <activity
              android:name=".view.ShiftsScreen"

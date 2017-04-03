@@ -45,8 +45,8 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION = "io.hypertrack.meta:CurrentAction";
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
-
     private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
+    private static final String CURRENT_TRACKING_ACTION = "io.hypertrack.htlive:currentTrackingAction";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -215,6 +215,17 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
+    public static String getCurrentTrackingAction() {
+        return getSharedPreferences().getString(CURRENT_TRACKING_ACTION, null);
+    }
+
+    public static void setCurrentTrackingAction(String actionID) {
+
+        SharedPreferences.Editor editor = getEditor();
+
+        editor.putString(CURRENT_TRACKING_ACTION, actionID);
+        editor.apply();
+    }
 
     public static void setTask(Task task) {
         SharedPreferences.Editor editor = getEditor();

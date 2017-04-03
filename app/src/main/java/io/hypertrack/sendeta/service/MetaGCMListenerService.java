@@ -17,7 +17,7 @@ import com.google.android.gms.gcm.GcmListenerService;
 import com.google.gson.Gson;
 import com.hypertrack.lib.HyperTrackGcmListenerService;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
+import com.hypertrack.lib.models.GeoJSONLocation;
 import com.hypertrack.lib.models.Place;
 
 import io.hypertrack.sendeta.R;

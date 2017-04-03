@@ -3,7 +3,7 @@ package io.hypertrack.sendeta.model;
 import android.location.Location;
 
 import com.google.gson.annotations.SerializedName;
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
+import com.hypertrack.lib.models.HyperTrackLocation;
 
 
 /**
