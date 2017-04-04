@@ -44,7 +44,8 @@ public class Track extends BaseActivity {
 
         //Intialize Map Fragment
         hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
-
+        mapAdapter = new MyMapAdapter(Track.this);
+        hyperTrackMapFragment.setHTMapAdapter(mapAdapter);
         displayLoader(true);
 
         // Initialize UI elements
@@ -96,8 +97,8 @@ public class Track extends BaseActivity {
         HyperTrack.trackActionsForUser(actionsIDList, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
-                mapAdapter = new MyMapAdapter(Track.this);
-                hyperTrackMapFragment.setHTMapAdapter(mapAdapter);
+
+                hyperTrackMapFragment.notifyChanged();
                 displayLoader(false);
             }
 
