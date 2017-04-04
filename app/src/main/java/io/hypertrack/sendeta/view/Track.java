@@ -4,29 +4,22 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
-import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
-import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.models.ErrorResponse;
-import com.hypertrack.lib.models.SuccessResponse;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.presenter.ITrackPresenter;
+import io.hypertrack.sendeta.presenter.TrackPresenter;
 
 
-public class Track extends BaseActivity {
+public class Track extends BaseActivity implements TrackView {
 
     public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
     public static final String KEY_TASK_ID_LIST = "task_id_list";
@@ -37,20 +30,16 @@ public class Track extends BaseActivity {
     private MyMapAdapter mapAdapter;
     private Intent intent;
     private ProgressDialog progressDialog;
+    private TrackPresenter trackPresenter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
 
-        //Intialize Map Fragment
-        hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
-        mapAdapter = new MyMapAdapter(Track.this);
-        hyperTrackMapFragment.setHTMapAdapter(mapAdapter);
-        displayLoader(true);
+        trackPresenter = new ITrackPresenter(this);
 
-        // Initialize UI elements
-        retryButton = (Button) findViewById(R.id.retryButton);
+        initUI();
 
         intent = getIntent();
         if (processIntentParams())
@@ -58,8 +47,15 @@ public class Track extends BaseActivity {
 
         displayLoader(false);
 
-        Toast.makeText(Track.this, R.string.error_tracking_trip_message, Toast.LENGTH_SHORT).show();
         finish();
+    }
+
+    private void initUI() {
+        //Intialize Map Fragment
+        hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
+        mapAdapter = new MyMapAdapter(Track.this);
+        hyperTrackMapFragment.setHTMapAdapter(mapAdapter);
+        retryButton = (Button) findViewById(R.id.retryButton);
     }
 
     private boolean processIntentParams() {
@@ -74,42 +70,18 @@ public class Track extends BaseActivity {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
 
                     //Remove any previous action if currently being tracked.
-                    if (!TextUtils.isEmpty(SharedPreferenceManager.getCurrentTrackingAction())) {
-                        HyperTrack.removeActions(new ArrayList<String>() {{
-                            add(SharedPreferenceManager.getCurrentTrackingAction());
-                        }});
-                    }
+                    trackPresenter.removeTrackingAction();
 
                     //Set the current tracking action
-                    SharedPreferenceManager.setCurrentTrackingAction(actionIDList.get(0));
+                    trackPresenter.addTrackingAction(actionIDList.get(0));
 
                     // Add TaskId being tracked by this user
-                    addTaskForTracking(actionIDList);
+                    trackPresenter.trackAction(actionIDList);
                 }
                 return true;
             }
         }
         return false;
-    }
-
-    private void addTaskForTracking(List<String> actionsIDList) {
-        displayLoader(true);
-
-        HyperTrack.trackActionsForUser(actionsIDList, new HyperTrackCallback() {
-            @Override
-            public void onSuccess(@NonNull SuccessResponse response) {
-
-                hyperTrackMapFragment.notifyChanged();
-                displayLoader(false);
-            }
-
-            @Override
-            public void onError(@NonNull ErrorResponse errorResponse) {
-                displayLoader(false);
-                Toast.makeText(Track.this, "Error Occured", Toast.LENGTH_LONG).show();
-                showRetryButton(true);
-            }
-        });
     }
 
     private void showRetryButton(boolean showRetryButton) {
@@ -130,17 +102,8 @@ public class Track extends BaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
-
-    @Override
     protected void onDestroy() {
+        trackPresenter.destroy();
         super.onDestroy();
     }
 
@@ -155,12 +118,28 @@ public class Track extends BaseActivity {
 
     }
 
+    @Override
+    public void showLoader(boolean toggle) {
+
+        displayLoader(toggle);
+    }
+
+    @Override
+    public void showTrackingDetail() {
+        mapAdapter.notifyDataSetChanged();
+        displayLoader(false);
+    }
+
+    @Override
+    public void showError() {
+        showRetryButton(true);
+        displayLoader(false);
+    }
+
     private class MyMapAdapter extends HyperTrackMapAdapter {
-        private Context mContext;
 
         public MyMapAdapter(Context mContext) {
             super(mContext);
-            this.mContext = mContext;
         }
 
         @Override
