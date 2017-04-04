@@ -1135,7 +1135,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         showCurrentLocationMarker = true;
         chooseDestinationMarker.setVisibility(View.GONE);
         chooseDestination.setVisibility(View.GONE);
-        currentLocationMarker.setVisible(true);
+        if (currentLocationMarker != null)
+            currentLocationMarker.setVisible(true);
         mAutocompletePlacesView.setEnabled(true);
 
         // Hide VehicleType TabLayout onStartTask success
@@ -2486,14 +2487,16 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             //remove spinner from address text view
 
             if (resultCode == FetchAddressIntentService.SUCCESS_RESULT) {
-                destinationPlace.setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
-                destinationPlace.setName(resultData.getString(FetchAddressIntentService.RESULT_DATA_NAME));
-                mAutocompleteLoader.setVisibility(View.GONE);
-                if (chooseDestination.getVisibility() == View.GONE)
-                    chooseDestination.setVisibility(View.VISIBLE);
-                chooseDestination.setClickable(true);
-                mAutocompletePlacesView.setText(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
-                mAutocompletePlacesView.setSingleLine(true);
+                if (!showCurrentLocationMarker) {
+                    destinationPlace.setAddress(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+                    destinationPlace.setName(resultData.getString(FetchAddressIntentService.RESULT_DATA_NAME));
+                    mAutocompleteLoader.setVisibility(View.GONE);
+                    if (chooseDestination.getVisibility() == View.GONE)
+                        chooseDestination.setVisibility(View.VISIBLE);
+                    chooseDestination.setClickable(true);
+                    mAutocompletePlacesView.setText(resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY));
+                    mAutocompletePlacesView.setSingleLine(true);
+                }
                 //   defaultLocation.setLatitude(latLng.latitude);
             } else {
                 Toast.makeText(Home.this, resultData.getString(FetchAddressIntentService.RESULT_DATA_KEY),
