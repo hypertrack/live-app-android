@@ -4,7 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.internal.common.logging.HTLog;
+import android.util.Log;
 
 /**
  * Created by piyush on 03/07/16.
@@ -21,8 +21,7 @@ public class DevDebugUtils {
         //do nothing
     }
 
-    public static void sdkVersionMessage(Context context) {
-        //do nothing
-        HTLog.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
+    public static void sdkVersionMessage() {
+        Log.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
     }
 }

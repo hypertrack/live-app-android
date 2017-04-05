@@ -35,14 +35,16 @@ public class MetaApplication extends Application {
         // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
 
-        // Initialize Stetho to debug Databases
-        // (NOTE: IFF current Build Variant is DEBUG)
-        DevDebugUtils.installStetho(this);
-        // Set HyperTrack LogLevel to VERBOSE
-        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
-        HyperTrack.enableDebugLogging(Log.VERBOSE);
+        // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
-        DevDebugUtils.sdkVersionMessage(this);
+
+        // (NOTE: IFF current Build Variant is DEBUG)
+        // Initialize Stetho to debug Databases
+        DevDebugUtils.installStetho(this);
+        // Enable HyperTrack Debug Logging
+        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
+        // Log HyperTrack SDK Version
+        DevDebugUtils.sdkVersionMessage();
     }
 
     public static synchronized MetaApplication getInstance() {
