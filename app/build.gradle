@@ -137,16 +137,10 @@ dependencies {
         transitive = true;
     }
 
-    /* debugCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':debug@aar') {
-         transitive = true
-     }
-     releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-         transitive = true
-     }*/
-
-    releaseCompile(project(path: ':library', configuration: 'release')) {
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
+
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
