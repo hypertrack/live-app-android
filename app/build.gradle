@@ -139,19 +139,17 @@ dependencies {
 
     /* debugCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':debug@aar') {
          transitive = true
-     }
-     releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-         transitive = true
      }*/
-
-    releaseCompile(project(path: ':library', configuration: 'release')) {
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
+
+    / * releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    } * /
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
-
-
 
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.android.support:design:25.1.0'
@@ -169,7 +167,7 @@ dependencies {
 
 }
 
-// Compute HyperTrack SDKVersion
+//Compute HyperTrack SDKVersion
 def computeHyperTrackSDKVersion() {
     def versionPropsFile = file('gradle.properties')
 

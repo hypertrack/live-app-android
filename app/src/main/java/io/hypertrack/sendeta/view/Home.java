@@ -464,7 +464,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
 
-
     public void onDestinationChooseOnMap(View view) {
 
         onEnterDestinationBackClick(null);
@@ -516,13 +515,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 if (handlePushedTaskDeepLink) {
                     sendETAButton.performClick();
                 }
-                onETASuccess(null, place);
             }
 
             @Override
             public void OnError() {
                 // Show Retry button to fetch eta again
-                //showRetryButton(true, place);
+                showRetryButton(true, place);
 
                 if (destinationLocationMarker != null) {
                     destinationLocationMarker.remove();
@@ -601,10 +599,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         AnimationUtils.expand(vehicleTypeTabLayout);
         isvehicleTypeTabLayoutVisible = true;
         LatLng latLng = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
-        if (response == null)
-            updateViewForETASuccess(0, latLng);
-        else
-            updateViewForETASuccess((int) response.getDuration() / 60, latLng);
+        updateViewForETASuccess((int) response.getDuration() / 60, latLng);
         destinationPlace = place;
         ActionManager.getSharedManager(this).setPlace(destinationPlace);
     }
