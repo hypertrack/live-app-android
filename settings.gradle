@@ -1,4 +1,6 @@
-include ':app', ':library'
+include ':app'
+include ':library'
+project(':library').projectDir = new File(settingsDir, '../hypertrack-android-v2/library')
 
 
 
