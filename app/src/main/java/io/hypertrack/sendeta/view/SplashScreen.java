@@ -8,6 +8,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
 
+import java.util.ArrayList;
+
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.store.UserStore;
@@ -86,7 +88,7 @@ public class SplashScreen extends BaseActivity {
                 finish();
                 break;
 
-           /* case DeepLinkUtil.TRACK:
+            case DeepLinkUtil.TRACK:
 
                 ArrayList<String> taskIDList = new ArrayList<>();
                 taskIDList.add(appDeepLink.taskID);
@@ -97,7 +99,7 @@ public class SplashScreen extends BaseActivity {
                                 .putExtra(Track.KEY_TRACK_DEEPLINK, true)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
-                break;*/
+                break;
 
             case DeepLinkUtil.DEFAULT:
             default:

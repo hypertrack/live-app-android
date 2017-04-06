@@ -18,5 +18,8 @@
             android:id="@+id/drawer_settings"
             android:icon="@drawable/ic_settings"
             android:title="@string/title_activity_favorites" />
+        <item
+            android:id="@+id/drawer_about"
+            android:title="@string/about" />
     </group>
 </menu>

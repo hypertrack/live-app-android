@@ -206,6 +206,7 @@
     <string name="location_permission_detail">HyperTrack needs location permission to let your friends and family track you</string>
     <string name="set_destination_text">SET DESTINATION</string>
     <string name="fetch_address_loading">Fetching Address...</string>
+    <string name="about">About</string>
 
 
 </resources>

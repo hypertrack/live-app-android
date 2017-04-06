@@ -1,8 +1,7 @@
 package io.hypertrack.sendeta.util;
 
 import android.app.Application;
-import android.content.Context;
-import android.widget.Toast;
+import android.util.Log;
 
 import com.facebook.stetho.Stetho;
 import com.hypertrack.lib.HyperTrack;
@@ -12,6 +11,8 @@ import com.hypertrack.lib.HyperTrack;
  * Created by piyush on 03/07/16.
  */
 public class DevDebugUtils {
+
+    private static final String TAG = DevDebugUtils.class.getSimpleName();
 
     public static void installStetho(Application application) {
 
@@ -27,7 +28,7 @@ public class DevDebugUtils {
         HyperTrack.enableDebugLogging(logLevel);
     }
 
-    public static void sdkVersionMessage(Context context) {
-        Toast.makeText(context, HyperTrack.getSDKVersion(), Toast.LENGTH_LONG).show();
+    public static void sdkVersionMessage() {
+        Log.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
     }
 }

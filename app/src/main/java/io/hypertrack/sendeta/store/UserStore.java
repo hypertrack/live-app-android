@@ -80,9 +80,6 @@ public class UserStore {
     public boolean isUserLoggedIn(Context context) {
         // Check if user has signed up
         if (!TextUtils.isEmpty(HyperTrack.getUserId())) {
-            if (TextUtils.isEmpty(OnboardingManager.sharedManager().getUser().getId())) {
-                OnboardingManager.sharedManager().getUser().setId(HyperTrack.getUserId());
-            }
             return true;
         }
 
@@ -91,10 +88,10 @@ public class UserStore {
         //Check if old user exist with data
         if (user != null && user.isValid()) {
             OnboardingUser onboardingUser = OnboardingManager.sharedManager().getUser();
-            onboardingUser.setId("");
-            onboardingUser.setName(user.getFullName());
+
+            /*onboardingUser.setName(user.getFullName());
             onboardingUser.setPhone(user.getPhoneNumber());
-            onboardingUser.setPhotoURL(user.getPhoto());
+            onboardingUser.setPhotoURL(user.getPhoto());*/
             onboardingUser.setPhotoData(user.getImageByteArray());
             setPlaces(user.getPlaces(), onboardingUser);
             OnboardingUser.setOnboardingUser();
@@ -102,7 +99,6 @@ public class UserStore {
             // Check if DriverId exists for current user
             String hyperTrackDriverID = SharedPreferenceManager.getHyperTrackDriverID(context);
             if (!TextUtils.isEmpty(hyperTrackDriverID)) {
-                OnboardingManager.sharedManager().getUser().setId(hyperTrackDriverID);
                 HyperTrack.setUserId(hyperTrackDriverID);
                 deleteUser();
                 return true;

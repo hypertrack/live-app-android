@@ -237,16 +237,16 @@ public class EditProfile extends BaseActivity {
             mProgressDialog.show();
         }
 
-        String firstName = mNameView.getText().toString();
+        /*String firstName = mNameView.getText().toString();
         if (!TextUtils.isEmpty(firstName)) {
             firstName = firstName.trim();
         }
         OnboardingManager onboardingManager = OnboardingManager.sharedManager();
         OnboardingUser user = onboardingManager.getUser();
-        user.setName(firstName);
+        *//*user.setName(firstName);
         if (!TextUtils.isEmpty(phoneNumberView.getText().toString()))
-            user.setPhone(phoneNumberView.getText().toString());
-        OnboardingUser.setOnboardingUser();
+            user.setPhone(phoneNumberView.getText().toString());*//*
+        OnboardingUser.setOnboardingUser();*/
       /*  String lastName = mLastNameView.getText().toString();
         if (!TextUtils.isEmpty(lastName)) {
             lastName = lastName.trim();

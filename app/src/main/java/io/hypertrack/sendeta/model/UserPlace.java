@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.SerializedName;
-import com.hypertrack.lib.internal.common.models.GeoJSONLocation;
+import com.hypertrack.lib.models.GeoJSONLocation;
 
 import java.io.Serializable;
 

@@ -11,13 +11,11 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.widget.Toast;
 
+import com.hypertrack.lib.HyperTrack;
 
 import io.hypertrack.sendeta.R;
 
-*/
-/**
- * Created by piyush on 29/08/16.
- *//*
+
 
 public class UserActivities extends BaseActivity {
 
@@ -68,7 +66,7 @@ public class UserActivities extends BaseActivity {
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         viewPager.setCurrentItem(0);
-        tabLayout.setOnTabSelectedListener(onTabSelectedListener);
+        tabLayout.addOnTabSelectedListener(onTabSelectedListener);
     }
 
     public class ActivitiesPagerAdapter extends FragmentStatePagerAdapter {
@@ -98,7 +96,7 @@ public class UserActivities extends BaseActivity {
         super.onBackPressed();
 
         // Clear HyperTrack Tasks being tracked currently
-        HTConsumerClient.getInstance(this).clearTasks();
+        HyperTrack.getConsumerClient().clearActions();
     }
 
     @Override
@@ -106,7 +104,7 @@ public class UserActivities extends BaseActivity {
         super.onDestroy();
 
         // Clear HyperTrack Tasks being tracked currently
-        HTConsumerClient.getInstance(this).clearTasks();
+        HyperTrack.getConsumerClient().clearActions();
     }
 }
 */

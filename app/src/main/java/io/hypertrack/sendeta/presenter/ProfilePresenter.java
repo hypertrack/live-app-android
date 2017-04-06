@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import com.google.i18n.phonenumbers.NumberParseException;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
@@ -39,7 +38,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         profileInteractor = new ProfileInteractor();
 
         OnboardingUser user = this.onboardingManager.getUser();
-        this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhotoURL());
+        this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhoto());
     }
 
     @Override
@@ -53,10 +52,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
 
         final OnboardingUser user = this.onboardingManager.getUser();
-        if (!TextUtils.isEmpty(userName))
-            user.setName(userName);
-        if (!TextUtils.isEmpty(phone))
-            user.setPhone(phone);
         if (!TextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
         if (profileImage != null && profileImage.length() > 0) {
@@ -65,18 +60,23 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         OnboardingUser.setOnboardingUser();
 
         try {
-            HyperTrack.createUser(userName, user.getInternationalNumber(), new HyperTrackCallback() {
+            //For Testing
+          /*  OnboardingUser onboardingUser = onboardingManager.getUser();
+            HyperTrack.setUserId("2122af00-e04f-46de-87c7-ed6abba6a9ee");
+            onboardingUser.setId("2122af00-e04f-46de-87c7-ed6abba6a9ee");
+            onboardingUser.setName("Aman Jain V2");
+            onboardingUser.setOnboardingUser();
+            UserStore.sharedStore.deleteUser();
+            if (view != null) {
+                view.navigateToHomeScreen();
+            }*/
+            HyperTrack.createUser(userName, user.getInternationalNumber(phone), new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     User user = (User) successResponse.getResponseObject();
-                    String userID = user.getId();
-                    OnboardingUser onboardingUser = onboardingManager.getUser();
-                    onboardingUser.setId(userID);
-                    onboardingUser.setName(user.getName());
-                    onboardingUser.setPhone(user.getPhone());
-                    OnboardingUser.setOnboardingUser();
+                   /* OnboardingUser onboardingUser = (OnboardingUser) user;
+                    onboardingUser.setOnboardingUser();*/
                     AnalyticsStore.getLogger().enteredName(true, null);
-                    AnalyticsStore.getLogger().completedProfileSetUp(onboardingUser.isExistingUser());
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
                     if (profileImage != null && profileImage.length() > 0) {
                         onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
@@ -118,7 +118,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                 }
             });
-        } catch (NumberParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             HTLog.i(TAG, "");
             if (view != null) {
