@@ -19,9 +19,25 @@ import io.realm.exceptions.RealmMigrationNeededException;
  */
 public class MetaApplication extends Application {
 
+    private static final String TAG = MetaApplication.class.getSimpleName();
     private static MetaApplication mInstance;
     private static boolean activityVisible;
-    private static final String TAG = MetaApplication.class.getSimpleName();
+
+    public static synchronized MetaApplication getInstance() {
+        return mInstance;
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;
+    }
 
     @Override
     public void onCreate() {
@@ -35,18 +51,16 @@ public class MetaApplication extends Application {
         // Initialize AnalyticsStore to start logging Analytics Events
         AnalyticsStore.init(this);
 
-        // Initialize Stetho to debug Databases
-        // (NOTE: IFF current Build Variant is DEBUG)
-        DevDebugUtils.installStetho(this);
-        // Set HyperTrack LogLevel to VERBOSE
-        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
-        HyperTrack.enableDebugLogging(Log.VERBOSE);
+        // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
-        DevDebugUtils.sdkVersionMessage(this);
-    }
 
-    public static synchronized MetaApplication getInstance() {
-        return mInstance;
+        // (NOTE: IFF current Build Variant is DEBUG)
+        // Initialize Stetho to debug Databases
+        DevDebugUtils.installStetho(this);
+        // Enable HyperTrack Debug Logging
+        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
+        // Log HyperTrack SDK Version
+        DevDebugUtils.sdkVersionMessage();
     }
 
     private void setupRealm() {
@@ -71,18 +85,6 @@ public class MetaApplication extends Application {
             e.printStackTrace();
             Crashlytics.logException(e);
         }
-    }
-
-    public static boolean isActivityVisible() {
-        return activityVisible;
-    }
-
-    public static void activityResumed() {
-        activityVisible = true;
-    }
-
-    public static void activityPaused() {
-        activityVisible = false;
     }
 
     @Override
