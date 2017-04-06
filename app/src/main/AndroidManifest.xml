@@ -24,7 +24,6 @@
     <application
         android:name=".MetaApplication"
         android:allowBackup="true"
-        android:debuggable="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${applicationLabel}"
         android:supportsRtl="true"
