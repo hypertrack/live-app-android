@@ -21,7 +21,6 @@ public class MetaApplication extends Application {
 
     private static MetaApplication mInstance;
     private static boolean activityVisible;
-    private static final String TAG = MetaApplication.class.getSimpleName();
 
     @Override
     public void onCreate() {

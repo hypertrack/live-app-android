@@ -1,10 +1,9 @@
 package io.hypertrack.sendeta.util;
 
 import android.app.Application;
-import android.content.Context;
+import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
-import android.util.Log;
 
 /**
  * Created by piyush on 03/07/16.
