@@ -504,7 +504,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             return;
         }
 
-
         getEtaForDestination(new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude()), new TaskETACallback() {
             @Override
             public void OnSuccess(TaskETAResponse etaResponse) {
