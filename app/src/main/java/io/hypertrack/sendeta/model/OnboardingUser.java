@@ -8,7 +8,6 @@ import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
-import com.hypertrack.lib.internal.consumer.models.HTUser;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -25,7 +24,7 @@ import io.hypertrack.sendeta.util.SuccessErrorCallback;
 /**
  * Created by ulhas on 15/06/16.
  */
-public class OnboardingUser extends HTUser {
+public class OnboardingUser extends com.hypertrack.lib.models.User {
 
     private static OnboardingUser onboardingUser;
     private static String TAG = OnboardingManager.class.getSimpleName();
@@ -90,14 +89,14 @@ public class OnboardingUser extends HTUser {
      * @param user User Object containing the updated OnboardingUser Data
      */
     public void update(OnboardingUser user) {
-        this.setId(user.getId());
+       /* this.setId(user.getId());
 
         setName(user.getName());
 
         setPhone(user.getPhone());
 
         this.setPhotoImage(user.getPhotoImage());
-        this.setPhotoURL(user.getPhotoURL());
+        this.setPhotoURL(user.getPhotoURL());*/
 
 
         setOnboardingUser();
@@ -138,12 +137,12 @@ public class OnboardingUser extends HTUser {
         isExistingUser = existingUser;
     }
 
-    public String getInternationalNumber() throws NumberParseException {
+    public String getInternationalNumber(String phoneNo) throws NumberParseException {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        if (TextUtils.isEmpty(getPhone()))
+        if (TextUtils.isEmpty(phoneNo))
             return null;
 
-        Phonenumber.PhoneNumber number = phoneUtil.parse(getPhone(), getCountryCode());
+        Phonenumber.PhoneNumber number = phoneUtil.parse(phoneNo, getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
     }
 

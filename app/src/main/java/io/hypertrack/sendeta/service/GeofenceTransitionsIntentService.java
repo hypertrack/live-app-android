@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.store.TaskManager;
+import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.util.GeofenceErrorMessages;
 
 /**
@@ -72,7 +72,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
                 Log.i(TAG, "User is dwelling in geo fence.");
                 HTLog.i(TAG, "User is dwelling in geo fence.");
-                TaskManager.getSharedManager(getApplicationContext()).OnGeoFenceSuccess();
+                ActionManager.getSharedManager(getApplicationContext()).OnGeoFenceSuccess();
 
             } else {
                 // Log the error.

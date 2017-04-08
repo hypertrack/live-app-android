@@ -44,15 +44,15 @@ import retrofit2.Response;
 /**
  * Created by piyush on 15/08/16.
  */
-public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
+public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
     public static final int LOITERING_DELAY_MS = 30000;
-    private static final String TAG = TaskManager.class.getSimpleName();
+    private static final String TAG = ActionManager.class.getSimpleName();
     private static final long REFRESH_DELAY = 30000;
     private static final int NOTIFICATION_RESPONSIVENESS_MS = 5000;
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
-    private static TaskManager sharedManager;
+    private static ActionManager sharedManager;
     private Context mContext;
     private String actionID;
     private Action hyperTrackAction;
@@ -68,7 +68,7 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         @Override
         public void run() {
 
-            final Action action = TaskManager.getSharedManager(mContext).getHyperTrackAction();
+            final Action action = ActionManager.getSharedManager(mContext).getHyperTrackAction();
             if (!isActionLive())
                 return;
 
@@ -104,13 +104,13 @@ public class TaskManager implements GoogleApiClient.ConnectionCallbacks {
         }
     };
 
-    private TaskManager(Context mContext) {
+    private ActionManager(Context mContext) {
         this.mContext = mContext;
     }
 
-    public static TaskManager getSharedManager(Context context) {
+    public static ActionManager getSharedManager(Context context) {
         if (sharedManager == null) {
-            sharedManager = new TaskManager(context);
+            sharedManager = new ActionManager(context);
         }
 
         return sharedManager;

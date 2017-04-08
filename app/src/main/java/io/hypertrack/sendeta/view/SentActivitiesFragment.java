@@ -19,6 +19,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.model.LatLng;
+import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.internal.consumer.utils.HTMapUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,20 +34,17 @@ import io.hypertrack.sendeta.model.UserActivitiesListResponse;
 import io.hypertrack.sendeta.model.UserActivityDetails;
 import io.hypertrack.sendeta.model.UserActivityModel;
 import io.hypertrack.sendeta.network.retrofit.ErrorCodes;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.network.retrofit.SendETAService;
 import io.hypertrack.sendeta.network.retrofit.ServiceGenerator;
-import io.hypertrack.sendeta.store.TaskManager;
+import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.callback.TaskManagerListener;
 import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
-*/
-/**
- * Created by piyush on 29/08/16.
- *//*
 
 public class SentActivitiesFragment extends BaseFragment implements UserActivitiesOnClickListener {
 
@@ -92,7 +91,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         public void onClick(View v) {
             displayLoader(true);
 
-            SendETAService sendETAService = ServiceGenerator.createService(SendETAService.class,
+            HyperTrackService sendETAService = HyperTrackServiceGenerator.createService(HyperTrackService.class,
                     SharedPreferenceManager.getUserAuthToken());
             getHistoryActivities(sendETAService);
         }
@@ -175,7 +174,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     private void getInProcessActivity() {
         inProcessActivities.clear();
 
-        TaskManager taskManager = TaskManager.getSharedManager(getActivity());
+        ActionManager taskManager = ActionManager.getSharedManager(getActivity());
 
         // Check if current trip is a Personal Trip
         if ((BuildConfig.API_KEY).equalsIgnoreCase(HyperTrack.getPublishableKey(getActivity()))) {
@@ -242,7 +241,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         checkForNoData();
     }
 
-    private void getHistoryActivities(SendETAService sendETAService) {
+    private void getHistoryActivities(HyperTrackService sendETAService) {
         if (historyActivitiesCallCompleted) {
             historyActivitiesCallCompleted = false;
 
@@ -458,7 +457,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         if (!currentPublishableKey.equalsIgnoreCase(BuildConfig.API_KEY)) {
 
             // Check if a business trip is active and show an error
-            if (TaskManager.getSharedManager(getActivity()).isTaskActive()) {
+            if (ActionManager.getSharedManager(getActivity()).isTaskActive()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(R.string.error_tracking_while_on_business_trip);
                 builder.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
@@ -521,8 +520,8 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
         super.onResume();
 
         // Start Refreshing Task, if one exists
-        if (TaskManager.getSharedManager(getActivity()).getHyperTrackTask() != null) {
-            TaskManager.getSharedManager(getActivity()).startRefreshingAction(0);
+        if (ActionManager.getSharedManager(getActivity()).getHyperTrackTask() != null) {
+            ActionManager.getSharedManager(getActivity()).startRefreshingAction(0);
         }
 
         if (historyActivitiesAdapter != null) {
@@ -536,7 +535,7 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
     public void onPause() {
         super.onPause();
 
-        TaskManager.getSharedManager(getActivity()).stopRefreshingTask();
+        ActionManager.getSharedManager(getActivity()).stopRefreshingTask();
 
         if (historyActivitiesAdapter != null) {
             for (MapView m : historyActivitiesAdapter.getMapViews()) {
@@ -559,4 +558,5 @@ public class SentActivitiesFragment extends BaseFragment implements UserActiviti
 
         super.onDestroy();
     }
-}*/
+}
+*/

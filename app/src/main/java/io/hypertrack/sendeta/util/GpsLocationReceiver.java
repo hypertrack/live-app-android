@@ -7,7 +7,7 @@ import android.content.Intent;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 
-import io.hypertrack.sendeta.store.TaskManager;
+import io.hypertrack.sendeta.store.ActionManager;
 
 /**
  * Created by piyush on 08/07/16.
@@ -22,8 +22,8 @@ public class GpsLocationReceiver extends BroadcastReceiver {
 
             if (isLocationEnabled(context) && SharedPreferenceManager.getGeofencingRequest() != null) {
                 // Add Geofencing Request
-                TaskManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
-                TaskManager.getSharedManager(context).addGeofencingRequest();
+                ActionManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
+                ActionManager.getSharedManager(context).addGeofencingRequest();
             }
 
             Intent locationChangedIntent = new Intent(LOCATION_CHANGED);
@@ -37,13 +37,7 @@ public class GpsLocationReceiver extends BroadcastReceiver {
             // Find out what the settings say about which providers are enabled
             int mode = Settings.Secure.getInt(
                     contentResolver, Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF);
-            if (mode == Settings.Secure.LOCATION_MODE_OFF) {
-                // Location is turned OFF!
-                return false;
-            } else {
-                // Location is turned ON!
-                return true;
-            }
+            return mode != Settings.Secure.LOCATION_MODE_OFF;
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -589,7 +589,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         if (!currentPublishableKey.equalsIgnoreCase(BuildConfig.API_KEY)) {
 
             // Check if a business trip is active and show an error
-            if (TaskManager.getSharedManager(getActivity()).isTaskActive()) {
+            if (ActionManager.getSharedManager(getActivity()).isTaskActive()) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(R.string.error_tracking_while_on_business_trip);
                 builder.setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {

@@ -1,7 +1,6 @@
 package io.hypertrack.sendeta.model;
 
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackLocation;
-
+import com.hypertrack.lib.models.HyperTrackLocation;
 
 /**
  * Created by piyush on 22/10/16.
