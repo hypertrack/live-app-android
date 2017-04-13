@@ -9,7 +9,6 @@ import com.hypertrack.lib.HyperTrack;
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.store.AnalyticsStore;
-import io.hypertrack.sendeta.util.DevDebugUtils;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.exceptions.RealmMigrationNeededException;
@@ -19,25 +18,8 @@ import io.realm.exceptions.RealmMigrationNeededException;
  */
 public class MetaApplication extends Application {
 
-    private static final String TAG = MetaApplication.class.getSimpleName();
     private static MetaApplication mInstance;
     private static boolean activityVisible;
-
-    public static synchronized MetaApplication getInstance() {
-        return mInstance;
-    }
-
-    public static boolean isActivityVisible() {
-        return activityVisible;
-    }
-
-    public static void activityResumed() {
-        activityVisible = true;
-    }
-
-    public static void activityPaused() {
-        activityVisible = false;
-    }
 
     @Override
     public void onCreate() {
@@ -63,6 +45,10 @@ public class MetaApplication extends Application {
         DevDebugUtils.sdkVersionMessage();
     }
 
+    public static synchronized MetaApplication getInstance() {
+        return mInstance;
+    }
+
     private void setupRealm() {
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder(this)
                 .schemaVersion(1)
@@ -85,6 +71,18 @@ public class MetaApplication extends Application {
             e.printStackTrace();
             Crashlytics.logException(e);
         }
+    }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;
     }
 
     @Override

@@ -491,7 +491,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         showCurrentLocationMarker = false;
         showAutocompleteResults(false);
         chooseDestinationMarker.setVisibility(View.VISIBLE);
-        currentLocationMarker.setVisible(false);
+        if (currentLocationMarker != null)
+            currentLocationMarker.setVisible(false);
         reverseGeoCodeToAddress(mMap.getCameraPosition().target);
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15.0f));
         mAutocompletePlacesView.setEnabled(false);
@@ -502,7 +503,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (place == null) {
             return;
         }
-
 
         getEtaForDestination(new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude()), new TaskETACallback() {
             @Override
@@ -1500,10 +1500,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updatePushedDestinationAddress() {
-
-
         // Update the selected place with updated destinationLocationAddress
-
         ActionManager.getSharedManager(this).setPlace(pushedTaskMetaPlace);
 
         // Set the Enter Destination Layout to Selected Place
@@ -2315,6 +2312,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onPause();
 
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);

@@ -142,7 +142,7 @@ public class OnboardingUser extends com.hypertrack.lib.models.User {
         if (TextUtils.isEmpty(phoneNo))
             return null;
 
-        Phonenumber.PhoneNumber number = phoneUtil.parse(getPhone(), getCountryCode());
+        Phonenumber.PhoneNumber number = phoneUtil.parse(phoneNo, getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
     }
 
