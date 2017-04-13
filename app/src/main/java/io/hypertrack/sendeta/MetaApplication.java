@@ -9,6 +9,7 @@ import com.hypertrack.lib.HyperTrack;
 import io.fabric.sdk.android.Fabric;
 import io.hypertrack.sendeta.model.DBMigration;
 import io.hypertrack.sendeta.store.AnalyticsStore;
+import io.hypertrack.sendeta.util.DevDebugUtils;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.exceptions.RealmMigrationNeededException;
