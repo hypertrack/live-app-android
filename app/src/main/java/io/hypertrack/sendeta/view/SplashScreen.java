@@ -2,19 +2,27 @@ package io.hypertrack.sendeta.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Window;
+
+import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.SuccessResponse;
 
 import java.util.ArrayList;
 
+import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 
 /**
@@ -29,7 +37,7 @@ public class SplashScreen extends BaseActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        setContentView(R.layout.activity_splash);
         prepareAppDeepLink();
         proceedToNextScreen();
     }
@@ -89,16 +97,7 @@ public class SplashScreen extends BaseActivity {
                 break;
 
             case DeepLinkUtil.TRACK:
-
-                ArrayList<String> taskIDList = new ArrayList<>();
-                taskIDList.add(appDeepLink.taskID);
-
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, Track.class)
-                                .putExtra(Track.KEY_TASK_ID_LIST, taskIDList)
-                                .putExtra(Track.KEY_TRACK_DEEPLINK, true)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                        .startActivities();
+                handleTrackingUrlDeepLink(appDeepLink.shortCode);
                 break;
 
             case DeepLinkUtil.DEFAULT:
@@ -110,5 +109,57 @@ public class SplashScreen extends BaseActivity {
                 finish();
                 break;
         }
+    }
+
+    private void handleTrackingUrlDeepLink(String shortCode) {
+        displayLoader(true);
+
+        HyperTrack.getActionForShortCode(shortCode, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (SplashScreen.this.isFinishing())
+                    return;
+
+                displayLoader(false);
+
+                Action action = (Action) response.getResponseObject();
+                ArrayList<String> taskIDList = new ArrayList<>();
+                taskIDList.add(action.getId());
+
+                // Check if current user is sharing location or not
+                if (SharedPreferenceManager.getActionID(SplashScreen.this) == null) {
+                    // Handle Deeplink on Home Screen with Live Location Sharing enabled
+                    TaskStackBuilder.create(SplashScreen.this)
+                            .addNextIntentWithParentStack(new Intent(SplashScreen.this, Home.class)
+                                    .putExtra(Track.KEY_TASK_ID_LIST, taskIDList)
+                                    .putExtra(Track.KEY_LOOKUP_ID, action.getLookupID())
+                                    .putExtra(Track.KEY_TRACK_DEEPLINK, true)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                            .startActivities();
+
+                } else {
+                    // Handle Deeplink on Track Screen with Live Location Sharing disabled
+                    TaskStackBuilder.create(SplashScreen.this)
+                            .addNextIntentWithParentStack(new Intent(SplashScreen.this, Track.class)
+                                    .putExtra(Track.KEY_TASK_ID_LIST, taskIDList)
+                                    .putExtra(Track.KEY_LOOKUP_ID, action.getLookupID())
+                                    .putExtra(Track.KEY_TRACK_DEEPLINK, true)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                            .startActivities();
+                }
+                finish();
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                displayLoader(false);
+
+                TaskStackBuilder.create(SplashScreen.this)
+                        .addNextIntentWithParentStack(new Intent(SplashScreen.this, Home.class)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                        .startActivities();
+                finish();
+            }
+        });
     }
 }

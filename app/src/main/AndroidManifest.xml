@@ -36,8 +36,7 @@
             android:allowTaskReparenting="false"
             android:label="${applicationLabel}"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Transparent">
+            android:screenOrientation="portrait" >
 
             <!-- Intent Filter to make this Screen as the launcher screen -->
             <intent-filter>
@@ -85,14 +84,21 @@
                 <data android:scheme="@string/deeplink_scheme" />
             </intent-filter>
 
-
             <!-- Intent Filter to handle FB Messenger messages -->
-            <!-- <intent-filter>
-                 <action android:name="android.intent.action.PICK" />
+             <intent-filter>
+                 <action android:name="android.intent.action.VIEW" />
 
                  <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
-             </intent-filter>-->
+                 <category android:name="android.intent.category.BROWSABLE" />
+
+                 <data android:scheme="http" />
+                 <data android:scheme="https" />
+
+                 <!-- Add trck.at DeepLink URL -->
+                 <data
+                     android:host="@string/tracking_url"
+                     android:pathPrefix="/" />
+             </intent-filter>
         </activity>
 
         <activity
