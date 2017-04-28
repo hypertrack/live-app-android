@@ -97,6 +97,7 @@ import com.hypertrack.lib.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.MetaApplication;
@@ -396,9 +397,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        /*// Initialize UserStore
-        OnboardingManager.sharedManager().initializeUser();*/
-
         // Initialize Toolbar without Home Button
         initToolbar(BuildConfig.TOOLBAR_TITLE, false);
 
@@ -463,7 +461,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-
     public void onDestinationChooseOnMap(View view) {
 
         onEnterDestinationBackClick(null);
@@ -497,7 +494,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mMap.moveCamera(CameraUpdateFactory.zoomTo(15.0f));
         mAutocompletePlacesView.setEnabled(false);
     }
-
 
     private void onSelectPlace(final UserPlace place) {
         if (place == null) {
@@ -1436,6 +1432,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         ActionParams params = new ActionParamsBuilder()
                 .setExpectedPlace(destinationPlace)
+                .setLookupId(UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT)
                 .build();
 
@@ -1482,7 +1479,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
             }
         });
-
     }
 
     private void addToRecentSearch() {
@@ -1631,37 +1627,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         } else {
             this.setSubTitle("");
         }
-    }
-
-    private String getFormattedTimeString(Double timeInSeconds) {
-        if (this.isFinishing() || timeInSeconds == null || timeInSeconds < 0)
-            return null;
-
-        int hours = (int) (timeInSeconds / 3600);
-        int remainder = (int) (timeInSeconds - (hours * 3600));
-        int mins = remainder / 60;
-
-        if (hours <= 0 && mins <= 0)
-            return null;
-
-        StringBuilder builder = new StringBuilder();
-
-        if (hours > 0) {
-            builder.append(hours)
-                    .append(" ")
-                    .append(this.getResources().getQuantityString(R.plurals.hour_text, hours))
-                    .append(" ");
-        }
-
-        if (mins > 0) {
-            builder.append(mins)
-                    .append(" ")
-                    .append(this.getResources().getQuantityString(
-                            R.plurals.minute_text, mins))
-                    .append(" ");
-        }
-
-        return builder.toString();
     }
 
     private void updateDestinationLocationIfApplicable(Action action) {
@@ -2190,12 +2155,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         ActionManager actionManager = ActionManager.getSharedManager(Home.this);
         if (actionManager.isActionLive()) {
             UserPlace place = null;
+
             if (actionManager.getPlace() != null && actionManager.getPlace().getLocation() != null) {
                 place = actionManager.getPlace();
             }
 
             user = OnboardingManager.sharedManager().getUser();
-            if (user == null) {
+            if (user == null || place == null) {
                 return;
             }
 
