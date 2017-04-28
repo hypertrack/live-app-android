@@ -615,7 +615,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         taskIDList.add(inProcessActivity.getTaskID());
 
         Intent trackTaskIntent = new Intent(getActivity(), Track.class);
-        trackTaskIntent.putStringArrayListExtra(Track.KEY_TASK_ID_LIST, taskIDList);
+        trackTaskIntent.putStringArrayListExtra(Track.KEY_ACTION_ID_LIST, taskIDList);
         startActivity(trackTaskIntent);
     }
 
@@ -628,7 +628,7 @@ public class ReceivedActivitiesFragment extends BaseFragment implements UserActi
         taskIDList.add(historyActivity.getTaskID());
 
         Intent trackTaskIntent = new Intent(getActivity(), Track.class);
-        trackTaskIntent.putStringArrayListExtra(Track.KEY_TASK_ID_LIST, taskIDList);
+        trackTaskIntent.putStringArrayListExtra(Track.KEY_ACTION_ID_LIST, taskIDList);
         startActivity(trackTaskIntent);
     }
 

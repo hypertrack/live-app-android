@@ -16,8 +16,7 @@ public class DevDebugUtils {
 
     public static void installStetho(Application application) {
 
-        Stetho.initialize(
-                Stetho.newInitializerBuilder(application)
+        Stetho.initialize(Stetho.newInitializerBuilder(application)
                         .enableDumpapp(Stetho.defaultDumperPluginsProvider(application))
                         .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(application))
                         .build());

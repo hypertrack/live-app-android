@@ -54,7 +54,6 @@ public class UserPlace extends com.hypertrack.lib.models.Place implements Serial
         this(place.getName(), place.getLocation().getLatLng());
         setAddress(place.getAddress());
         setId(place.getId());
-
     }
 
     public UserPlace(Place place) {

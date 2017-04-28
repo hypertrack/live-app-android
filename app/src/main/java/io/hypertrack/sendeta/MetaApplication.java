@@ -36,6 +36,7 @@ public class MetaApplication extends Application {
 
         // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
+        HyperTrack.enableMockLocations(true);
 
         // (NOTE: IFF current Build Variant is DEBUG)
         // Initialize Stetho to debug Databases

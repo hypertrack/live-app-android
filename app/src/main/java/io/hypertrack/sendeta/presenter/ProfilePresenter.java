@@ -9,7 +9,6 @@ import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
-import com.hypertrack.lib.models.User;
 
 import java.io.File;
 
@@ -50,34 +49,23 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     public void attemptLogin(final String userName, String phone, String ISOCode, final File profileImage,
                              final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
 
-
         final OnboardingUser user = this.onboardingManager.getUser();
         if (!TextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
+
         if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
         }
         OnboardingUser.setOnboardingUser();
 
         try {
-            //For Testing
-          /*  OnboardingUser onboardingUser = onboardingManager.getUser();
-            HyperTrack.setUserId("2122af00-e04f-46de-87c7-ed6abba6a9ee");
-            onboardingUser.setId("2122af00-e04f-46de-87c7-ed6abba6a9ee");
-            onboardingUser.setName("Aman Jain V2");
-            onboardingUser.setOnboardingUser();
-            UserStore.sharedStore.deleteUser();
-            if (view != null) {
-                view.navigateToHomeScreen();
-            }*/
-            HyperTrack.createUser(userName, user.getInternationalNumber(phone), new HyperTrackCallback() {
+            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone),
+                    new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    User user = (User) successResponse.getResponseObject();
-                   /* OnboardingUser onboardingUser = (OnboardingUser) user;
-                    onboardingUser.setOnboardingUser();*/
                     AnalyticsStore.getLogger().enteredName(true, null);
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+
                     if (profileImage != null && profileImage.length() > 0) {
                         onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
                             @Override
