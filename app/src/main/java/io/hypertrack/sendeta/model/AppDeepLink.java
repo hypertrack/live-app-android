@@ -4,8 +4,6 @@ package io.hypertrack.sendeta.model;
  * Created by piyush on 26/07/16.
  */
 public class AppDeepLink {
-
-
     //screen identifier
     public int mId;
 
@@ -22,6 +20,7 @@ public class AppDeepLink {
     // Used for Track feature
     public String taskID;
     public String shortCode;
+    public String lookupId;
 
     public AppDeepLink(int mId) {
         this.mId = mId;
