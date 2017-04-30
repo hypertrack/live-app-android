@@ -10,11 +10,11 @@
     tools:showIn="@layout/activity_home">
 
     <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:id="@+id/htMapfragment"
+        android:name="com.hypertrack.lib.HyperTrackMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.Home" />
+        tools:layout="@layout/fragment_map" />
 
     <ImageView
         android:id="@+id/choose_destination_marker"
@@ -149,17 +149,6 @@
                                     android:textSize="@dimen/text_base"
                                     android:visibility="gone" />
                             </LinearLayout>
-
-                            <ImageButton
-                                android:id="@+id/favorite_button"
-                                android:layout_width="wrap_content"
-                                android:layout_height="match_parent"
-                                android:background="@null"
-                                android:onClick="OnFavoriteClick"
-                                android:padding="@dimen/padding_low"
-                                android:src="@drawable/ic_favorite"
-                                android:visibility="gone" />
-
                         </LinearLayout>
 
                         <FrameLayout

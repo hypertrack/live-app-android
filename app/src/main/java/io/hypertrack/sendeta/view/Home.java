@@ -16,8 +16,6 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,7 +26,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,7 +53,6 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -71,14 +67,16 @@ import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.HyperTrackMapAdapter;
+import com.hypertrack.lib.HyperTrackMapFragment;
+import com.hypertrack.lib.HyperTrackUtils;
+import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
@@ -93,7 +91,6 @@ import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 import com.hypertrack.lib.models.SuccessResponse;
-import com.hypertrack.lib.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -112,9 +109,7 @@ import io.hypertrack.sendeta.service.FetchAddressIntentService;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
-import io.hypertrack.sendeta.store.LocationStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
@@ -123,19 +118,16 @@ import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.GpsLocationReceiver;
 import io.hypertrack.sendeta.util.ImageUtils;
-import io.hypertrack.sendeta.util.KeyboardUtils;
-import io.hypertrack.sendeta.util.LocationUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
-import io.hypertrack.sendeta.util.NetworkUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.SwipeButton;
 import io.hypertrack.sendeta.util.SwipeButtonCustomItems;
+import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 
 public class Home extends DrawerBaseActivity implements ResultCallback<Status>, LocationListener,
-        OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = Home.class.getSimpleName();
     public CardView mAutocompleteResultsLayout;
@@ -160,12 +152,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             Log.d(TAG, "Location Changed");
 
             // Initiate FusedLocation Updates on Location Changed
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && LocationUtils.isLocationEnabled(Home.this)) {
+            if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && HyperTrackUtils.isLocationEnabled(Home.this)) {
                 // Remove location updates so that it resets
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, Home.this);
 
                 //change the time of location updates
-                createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+                createLocationRequest(Utils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
 
                 //restart location updates with the new interval
                 resumeLocationUpdates();
@@ -181,7 +173,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private FrameLayout mAutocompletePlacesLayout, bottomButtonLayout;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
-    private ImageButton shareButton, navigateButton, favoriteButton;
+    private ImageButton shareButton, navigateButton;
     private View customMarkerView;
     private RoundedImageView heroMarkerProfileImageView;
     private ProgressBar mAutocompleteLoader;
@@ -203,7 +195,31 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private Handler searchHandler = new Handler();
     private Runnable searchRunnable;
-    private DrawerLayout mDrawerLayout;
+
+    public class HomeMapAdapter extends HyperTrackMapAdapter {
+        public HomeMapAdapter(Context mContext) {
+            super(mContext);
+        }
+
+        @Override
+        public boolean showOrderStatusToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
+            return false;
+        }
+
+        @Override
+        public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
+            return true;
+        }
+    }
+
+    public MapFragmentCallback callback = new MapFragmentCallback() {
+        @Override
+        public void onMapReadyCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
+            super.onMapReadyCallback(hyperTrackMapFragment, map);
+            onMapReady(map);
+        }
+    };
+
     //Listener to get the seleceted place
     private PlaceAutoCompleteOnClickListener mPlaceAutoCompleteListener = new PlaceAutoCompleteOnClickListener() {
         @Override
@@ -243,7 +259,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 }
             }
 
-            KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+            Utils.hideKeyboard(Home.this, mAutocompletePlacesView);
 
             // Initialize VehicleTabLayout
             initializeVehicleTypeTab();
@@ -321,7 +337,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             // Check if Location was enabled & if valid location was received
-            if (!LocationUtils.isLocationEnabled(Home.this)) {
+            if (!HyperTrackUtils.isLocationEnabled(Home.this)) {
                 if (mGoogleApiClient != null && mGoogleApiClient.isConnected())
                     checkIfLocationIsEnabled();
             } else {
@@ -339,7 +355,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 // Reset the Autocomplete TextView
                 mAutocompletePlacesView.setText("");
                 mAutocompletePlacesView.requestFocus();
-                KeyboardUtils.showKeyboard(Home.this, mAutocompletePlacesView);
+                Utils.showKeyboard(Home.this, mAutocompletePlacesView);
 
                 // Show the Autocomplete Places Layout
                 enterDestinationLayout.setVisibility(View.GONE);
@@ -406,9 +422,11 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             setToolbarIcon(bitmap);
         }
 
-        // Initialize Maps
-        SupportMapFragment mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mMapFragment.getMapAsync(this);
+        // Initialize Map Fragment added in Activity Layout to getMapAsync
+        HyperTrackMapFragment htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.htMapfragment);
+        htMapFragment.setHTMapAdapter(new HomeMapAdapter(this));
+        htMapFragment.setMapFragmentCallback(callback);
 
         // Initialize UI Views
         appBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
@@ -422,14 +440,13 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         initGoogleClient();
 
-        createLocationRequest(LocationUtils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
+        createLocationRequest(Utils.INITIAL_LOCATION_UPDATE_INTERVAL_TIME);
         setupEnterDestinationView();
         setupAutoCompleteView();
         setupShareButton();
         setupSendETAButton();
         setupEndTripSwipeButton();
         setupNavigateButton();
-        setupFavoriteButton();
         setupInfoMessageView();
         initCustomMarkerView();
 
@@ -437,7 +454,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         setupVehicleTypeTabLayout();
 
         // Check & Prompt User if Internet is Not Connected
-        if (!NetworkUtils.isConnectedToInternet(this)) {
+        if (!HyperTrackUtils.isInternetConnected(this)) {
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
@@ -484,7 +501,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void setChooseOnMapView() {
-        KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+        Utils.hideKeyboard(Home.this, mAutocompletePlacesView);
         showCurrentLocationMarker = false;
         showAutocompleteResults(false);
         chooseDestinationMarker.setVisibility(View.VISIBLE);
@@ -625,10 +642,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateInfoMessageView() {
-        if (!LocationUtils.isLocationEnabled(Home.this)) {
+        if (!HyperTrackUtils.isLocationEnabled(Home.this)) {
             infoMessageView.setVisibility(View.VISIBLE);
 
-            if (!isInternetEnabled()) {
+            if (!HyperTrackUtils.isInternetConnected(this)) {
                 infoMessageViewText.setText(R.string.location_off_info_message);
             } else {
                 infoMessageViewText.setText(R.string.location_off_info_message);
@@ -636,7 +653,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         } else {
             infoMessageView.setVisibility(View.VISIBLE);
 
-            if (!isInternetEnabled()) {
+            if (!HyperTrackUtils.isInternetConnected(this)) {
                 infoMessageViewText.setText(R.string.internet_off_info_message);
             } else {
                 // Both Location & Network Enabled, Hide the Info Message View
@@ -684,53 +701,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void checkIfUserCreated() {
-        final OnboardingUser onboardingUser = OnboardingUser.sharedOnboardingUser();
-        if (TextUtils.isEmpty(onboardingUser.getId())) {
-            HTLog.i(TAG, "If User id doesn't exist");
-            if (mProgressDialog != null)
-                mProgressDialog.cancel();
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.create_user));
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
-
-            //For Testing
-            /*HyperTrack.setUserId("97468c5d-bf83-4961-92b0-aeeccd646e51");
-            onboardingUser.setId("97468c5d-bf83-4961-92b0-aeeccd646e51");
-            onboardingUser.setName("Aman Jain V2");
-            OnboardingUser.setOnboardingUser();
-            checkForTrackingPermission();
-            if (mProgressDialog != null)
-                mProgressDialog.cancel();
-            UserStore.sharedStore.deleteUser();*/
-
-            //Create a new user and set UserID
-            HyperTrack.createUser(onboardingUser.getName(), onboardingUser.getPhone(), new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse response) {
-                    if (response.getResponseObject() != null) {
-                        User user = (User) response.getResponseObject();
-                        OnboardingUser.setOnboardingUser();
-                        checkForTrackingPermission();
-                        if (mProgressDialog != null)
-                            mProgressDialog.cancel();
-                        UserStore.sharedStore.deleteUser();
-                        HTLog.i(TAG, "User ID Successfully created after migration of user.");
-                    }
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    if (mProgressDialog != null)
-                        mProgressDialog.cancel();
-                    Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-
         }
     }
 
@@ -812,12 +782,12 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     private void geocodeUserCountryName() {
         // Fetch Country Level Location only if no cached location is available
-        Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
+        Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
         if (lastKnownCachedLocation == null || lastKnownCachedLocation.getLatitude() == 0.0
                 || lastKnownCachedLocation.getLongitude() == 0.0) {
 
             OnboardingManager onboardingManager = OnboardingManager.sharedManager();
-            String countryName = PhoneUtils.getCountryName(onboardingManager.getUser().getCountryCode());
+            String countryName = Utils.getCountryName(onboardingManager.getUser().getCountryCode());
 
             if (!TextUtils.isEmpty(countryName)) {
                 Intent intent = new Intent(this, FetchLocationIntentService.class);
@@ -910,7 +880,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     private void createSharingLink() {
         //Check if Location Permission has been granted & Location has been enabled
         if (PermissionUtils.checkForPermission(Home.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                && LocationUtils.isLocationEnabled(Home.this)) {
+                && HyperTrackUtils.isLocationEnabled(Home.this)) {
             if (!ActionManager.getSharedManager(Home.this).isActionLive()) {
                 // Start the Task
                 startAction();
@@ -935,6 +905,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 // Check if Location Permission has been granted & Location has been enabled
                 if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
                     showEndingTripAnimation(true);
+                    HyperTrack.removeActions(null);
                     completeTask();
                 } else {
                     if (!HyperTrack.checkLocationServices(Home.this)) {
@@ -953,7 +924,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         HyperTrack.requestPermissions(Home.this);
                     }
                 }
-
             }
         };
 
@@ -988,13 +958,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         });
     }
 
-    private void setupFavoriteButton() {
-        // Initialize Favorite Button UI View
-        favoriteButton = (ImageButton) findViewById(R.id.favorite_button);
-        if (favoriteButton != null)
-            favoriteButton.setVisibility(View.GONE);
-    }
-
     private void setupInfoMessageView() {
         infoMessageView = (LinearLayout) findViewById(R.id.home_info_message_view);
         infoMessageViewText = (TextView) findViewById(R.id.home_info_message_text);
@@ -1008,7 +971,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     }
 
     private void updateProfileImage() {
-
         try {
             Drawable d = heroMarkerProfileImageView.getDrawable();
             if (d != null && d instanceof BitmapDrawable) {
@@ -1159,8 +1121,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         sendETAButton.setVisibility(View.GONE);
         retryButton.setVisibility(View.GONE);
 
-
-        KeyboardUtils.hideKeyboard(Home.this, mAutocompletePlacesView);
+        Utils.hideKeyboard(Home.this, mAutocompletePlacesView);
     }
 
     /**
@@ -1257,7 +1218,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (place == null)
             return;
 
-
         // Call getETAForDestination with selected vehicleType
         Home.this.onSelectPlace(place);
     }
@@ -1277,16 +1237,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
     }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Mumbai, India.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
@@ -1298,7 +1248,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             public void onCameraMove() {
                 if (mMap != null && !showCurrentLocationMarker) {
                     mAutocompletePlacesView.setText(R.string.fetch_address_loading);
-                    mAdapter.setBounds(LocationUtils.getBounds(mMap.getCameraPosition().target, LocationUtils.DISTANCE_IN_METERS));
+                    mAdapter.setBounds(Utils.getBounds(mMap.getCameraPosition().target, Utils.DISTANCE_IN_METERS));
                     reverseGeoCodeToAddress(mMap.getCameraPosition().target);
                     chooseDestinationMarkerLatLng = mMap.getCameraPosition().target;
                     destinationPlace = new UserPlace(chooseDestinationMarkerLatLng);
@@ -1330,7 +1280,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Set Default View for map according to User's LastKnownLocation
-        Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
+        Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
         if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
                 && lastKnownCachedLocation.getLongitude() != 0.0) {
 
@@ -1449,6 +1399,10 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     if (mProgressDialog != null) {
                         mProgressDialog.dismiss();
                     }
+
+                    ArrayList<String> actionIds = new ArrayList<>();
+                    actionIds.add(action.getId());
+                    HyperTrack.trackAction(actionIds, null);
 
                     // Show ShareCard
                     share();
@@ -1580,8 +1534,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
         enterDestinationLayout.setOnClickListener(null);
-        favoriteButton.setVisibility(View.VISIBLE);
-        updateFavoritesButton();
 
         // Update SelectedVehicleType in persistentStorage
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
@@ -1645,7 +1597,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if destinationMarker's location has been changed
         if (destinationLocationMarker != null && destinationLocationMarker.getPosition() != null) {
-            if (!LocationUtils.areLocationsSame(destinationLocationMarker.getPosition(), updatedDestinationLatLng)) {
+            if (!HyperTrackUtils.areLocationsSame(destinationLocationMarker.getPosition(), updatedDestinationLatLng)) {
 
                 // Check if the DestinationLocationID has changed or only LatLng has changed
                 UserPlace lastUpdatedDestination = ActionManager.getSharedManager(Home.this).getLastUpdatedDestination();
@@ -1670,7 +1622,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 }
 
                 ActionManager.getSharedManager(Home.this).setPlace(lastUpdatedDestination);
-                Home.this.updateFavoritesButton();
 
                 // Update Geofencing Request for updatedDestinationLocation
                 ActionManager.getSharedManager(Home.this).setupGeofencing();
@@ -1706,7 +1657,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         navigateButton.setVisibility(View.GONE);
 
         mAutocompletePlacesView.setVisibility(View.VISIBLE);
-        favoriteButton.setVisibility(View.GONE);
 
         // Reset the Destination Text View
         destinationText.setGravity(Gravity.CENTER);
@@ -1814,21 +1764,9 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Initiate location updates if permission granted
         if (PermissionUtils.checkForPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
-                LocationUtils.isLocationEnabled(Home.this)) {
+                HyperTrackUtils.isLocationEnabled(Home.this)) {
             requestLocationUpdates();
         }
-    }
-
-    private boolean isInternetEnabled() {
-        try {
-            ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-
-            NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-            return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     private void requestLocationUpdates() {
@@ -1986,7 +1924,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         if (showCurrentLocationMarker)
             updateCurrentLocation(location);
 
-        LocationStore.sharedStore().setCurrentLocation(location);
+        SharedPreferenceManager.setLastKnownLocation(location);
 
         // Check if Location Frequency was decreased to (INITIAL_LOCATION_UPDATE_INTERVAL_TIME)
         // Remove the existing FusedLocationUpdates, and resume it with
@@ -2000,7 +1938,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             }
 
             // Change the time of location updates
-            createLocationRequest(LocationUtils.LOCATION_UPDATE_INTERVAL_TIME);
+            createLocationRequest(Utils.LOCATION_UPDATE_INTERVAL_TIME);
 
             // Restart location updates with the new interval
             requestLocationUpdates();
@@ -2022,7 +1960,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
             updateMapView();
         }
 
-        mAdapter.setBounds(LocationUtils.getBounds(latLng, 10000));
+        mAdapter.setBounds(Utils.getBounds(latLng, 10000));
 
 
     }
@@ -2037,7 +1975,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         }
 
         // Handle pushedTask DeepLink
-        if (selectPushedTaskMetaPlace && LocationUtils.isLocationEnabled(Home.this)) {
+        if (selectPushedTaskMetaPlace && HyperTrackUtils.isLocationEnabled(Home.this)) {
             mPlaceAutoCompleteListener.OnSuccess(pushedTaskMetaPlace);
         }
     }
@@ -2110,7 +2048,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
      * Method to Navigate current task in Google Navigation
      */
     private void navigate() {
-
         ActionManager actionManager = ActionManager.getSharedManager(Home.this);
 
         Place place = actionManager.getPlace();
@@ -2127,62 +2064,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         mapIntent.setPackage("com.google.android.apps.maps");
 
         startActivity(mapIntent);
-    }
-
-    /**
-     * Method to add current selected destination as a Favorite
-     * (NOTE: Only Applicable for Live Task)
-     */
-    public void OnFavoriteClick(View view) {
-        ActionManager actionManager = ActionManager.getSharedManager(Home.this);
-        showAddPlace(actionManager.getPlace());
-
-        AnalyticsStore.getLogger().tappedFavorite();
-    }
-
-    private void showAddPlace(UserPlace place) {
-
-        Intent addPlace = new Intent(this, AddFavoritePlace.class);
-        addPlace.putExtra("meta_place", place);
-        startActivityForResult(addPlace, Constants.FAVORITE_PLACE_REQUEST_CODE, null);
-    }
-
-    /**
-     * Method to add Click Listener to Favorite Icon
-     * (depends if current task is a Live Task & selected Place is not already a favorite)
-     */
-    private void updateFavoritesButton() {
-        ActionManager actionManager = ActionManager.getSharedManager(Home.this);
-        if (actionManager.isActionLive()) {
-            UserPlace place = null;
-
-            if (actionManager.getPlace() != null && actionManager.getPlace().getLocation() != null) {
-                place = actionManager.getPlace();
-            }
-
-            user = OnboardingManager.sharedManager().getUser();
-            if (user == null || place == null) {
-                return;
-            }
-
-            if (place.isHome() || place.isWork() || user.isFavorite(place)) {
-                markAsFavorite();
-            } else {
-                markAsNotFavorite();
-            }
-        }
-    }
-
-    private void markAsFavorite() {
-        favoriteButton.setSelected(true);
-        favoriteButton.setClickable(false);
-        favoriteButton.setImageResource(R.drawable.ic_favorite);
-    }
-
-    private void markAsNotFavorite() {
-        favoriteButton.setSelected(false);
-        favoriteButton.setImageResource(R.drawable.ic_favorite_hollow);
-        favoriteButton.setClickable(true);
     }
 
     @Override
@@ -2242,34 +2123,8 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                     // Reset EnterDestinationLayoutClicked Flag if Location permission was denied
                     if (enterDestinationLayoutClicked)
                         enterDestinationLayoutClicked = false;
-
                     break;
             }
-
-        } else if (requestCode == Constants.FAVORITE_PLACE_REQUEST_CODE) {
-
-            // Update the Place Data
-            if (data != null && data.hasExtra(AddFavoritePlace.KEY_UPDATED_PLACE)) {
-                UserPlace updatedPlace = (UserPlace) data.getSerializableExtra(AddFavoritePlace.KEY_UPDATED_PLACE);
-                if (updatedPlace != null) {
-                    ActionManager.getSharedManager(Home.this).setPlace(updatedPlace);
-
-                    if (!TextUtils.isEmpty(updatedPlace.getName())) {
-                        // Set the DestinationText as updatedDestination's Name
-                        destinationText.setGravity(Gravity.START);
-                        destinationText.setText(updatedPlace.getName());
-                    }
-
-                    if (!TextUtils.isEmpty(updatedPlace.getAddress())) {
-                        // Set the DestinationDescription as updatedDestination's Address
-                        destinationDescription.setText(updatedPlace.getAddress());
-                        destinationDescription.setVisibility(View.VISIBLE);
-                    }
-                }
-            }
-
-            updateFavoritesButton();
-
         }
     }
 
@@ -2289,12 +2144,14 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
     protected void onResume() {
         super.onResume();
 
-        //Check if user is created or not
-        // checkIfUserCreated();
-
         ActionManager actionManager = ActionManager.getSharedManager(Home.this);
         if (actionManager.getHyperTrackAction() != null && !actionManager.getHyperTrackAction().isCompleted()) {
             actionManager.startRefreshingAction(0);
+
+            ArrayList<String> actionIds = new ArrayList<>();
+            actionIds.add(actionManager.getHyperTrackAction().getId());
+            HyperTrack.trackAction(actionIds, null);
+
             // Set Task Manager Listeners
             //  actionManager.setActionRefreshedListener(onActionRefreshedListener);
             //  actionManager.setActionComletedListener(onActionCompletedListener);
@@ -2307,7 +2164,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
         // Check if Location & Network are Enabled
         updateInfoMessageView();
 
-        updateFavoritesButton();
         if (showCurrentLocationMarker)
             updateCurrentLocationMarker();
         if (!(TextUtils.isEmpty(destinationText.getText().toString()) || isvehicleTypeTabLayoutVisible || ActionManager.getSharedManager(this).isActionLive())) {
@@ -2321,27 +2177,6 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
 
         AppEventsLogger.activateApp(getApplication());
-    }
-
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    private boolean checkPlayServices() {
-        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
-        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (apiAvailability.isUserResolvableError(resultCode)) {
-                apiAvailability.getErrorDialog(this, resultCode, Constants.PLAY_SERVICES_RESOLUTION_REQUEST)
-                        .show();
-            } else {
-                Log.i(TAG, "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
     }
 
     private void updateCurrentLocationMarker() {
@@ -2361,7 +2196,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
         // Check if Location is Enabled & Resume LocationUpdates
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            if (LocationUtils.isLocationEnabled(Home.this)) {
+            if (HyperTrackUtils.isLocationEnabled(Home.this)) {
                 requestLocationUpdates();
             }
         } else {
@@ -2382,6 +2217,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
 
     @Override
     public void onBackPressed() {
+        HyperTrack.removeActions(null);
         if (enterDestinationLayoutClicked || isvehicleTypeTabLayoutVisible) {
             onEnterDestinationBackClick(null);
         } else {
@@ -2423,7 +2259,7 @@ public class Home extends DrawerBaseActivity implements ResultCallback<Status>, 
                         zoomLevel = 4.0f;
 
                     // Check if any Location Data is available, meaning Country zoom level need not be used
-                    Location lastKnownCachedLocation = LocationStore.sharedStore().getLastKnownUserLocation();
+                    Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
                     if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
                             && lastKnownCachedLocation.getLongitude() != 0.0) {
                         return;

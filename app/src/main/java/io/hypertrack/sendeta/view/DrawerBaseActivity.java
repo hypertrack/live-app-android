@@ -30,58 +30,6 @@ public class DrawerBaseActivity extends BaseActivity {
             initToolbar(title);
 
         drawerLayout = (DrawerLayout) findViewById(R.id.home_drawer_layout);
-      /*  NavigationView navigationView = (NavigationView) findViewById(R.id.home_drawer);
-
-        if (navigationView != null) {
-            View navigationHeaderView = navigationView.getHeaderView(0);
-            if (navigationHeaderView != null) {
-                profileImageView = (ImageView) navigationHeaderView.findViewById(R.id.drawer_header_profile_image);
-                profileName = (TextView) navigationHeaderView.findViewById(R.id.drawer_header_profile_name);
-            }
-
-            navigationView.setNavigationItemSelectedListener(
-                    new NavigationView.OnNavigationItemSelectedListener() {
-                        @Override
-                        public boolean onNavigationItemSelected(MenuItem item) {
-
-                            drawerLayout.closeDrawers();
-
-                            switch (item.getItemId()) {
-                                case R.id.drawer_send_eta: {
-                                    break;
-                                }
-
-                                case R.id.drawer_receive_eta: {
-                                    Intent receiveETAIntent = new Intent(DrawerBaseActivity.this, RequestETA.class);
-                                    startActivity(receiveETAIntent);
-                                    break;
-                                }
-
-                               *//* case R.id.drawer_user_activities: {
-                                    Intent activitiesIntent = new Intent(DrawerBaseActivity.this, UserActivities.class);
-                                    startActivity(activitiesIntent);
-                                    break;
-                                }*//*
-
-                                case R.id.drawer_settings: {
-                                    AnalyticsStore.getLogger().tappedProfile();
-
-                                    Intent settingsIntent = new Intent(DrawerBaseActivity.this, SettingsScreen.class);
-                                    startActivity(settingsIntent);
-                                    break;
-                                }
-                            }
-
-                            return true;
-                        }
-                    }
-            );
-
-            NavigationMenuView navigationMenuView = (NavigationMenuView) navigationView.getChildAt(0);
-            if (navigationMenuView != null) {
-                navigationMenuView.setVerticalScrollBarEnabled(false);
-            }
-        }*/
 
         // Update User Data in Navigation Drawer Header
         updateUserData();

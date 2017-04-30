@@ -19,7 +19,7 @@ import android.widget.Toast;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.IVerifyPresenter;
 import io.hypertrack.sendeta.presenter.VerifyPresenter;
-import io.hypertrack.sendeta.util.KeyboardUtils;
+import io.hypertrack.sendeta.util.Utils;
 
 public class Verify extends BaseActivity implements VerifyView {
 
@@ -93,7 +93,7 @@ public class Verify extends BaseActivity implements VerifyView {
         firstCodeTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                Utils.showKeyboard(Verify.this, verificationCodeView);
                 return false;
             }
         });
@@ -101,7 +101,7 @@ public class Verify extends BaseActivity implements VerifyView {
         secondCodeTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                Utils.showKeyboard(Verify.this, verificationCodeView);
                 return false;
             }
         });
@@ -109,7 +109,7 @@ public class Verify extends BaseActivity implements VerifyView {
         thirdCodeTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                Utils.showKeyboard(Verify.this, verificationCodeView);
                 return false;
             }
         });
@@ -117,7 +117,7 @@ public class Verify extends BaseActivity implements VerifyView {
         fouthCodeTextView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                KeyboardUtils.showKeyboard(Verify.this, verificationCodeView);
+                Utils.showKeyboard(Verify.this, verificationCodeView);
                 return false;
             }
         });

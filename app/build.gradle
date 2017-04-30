@@ -94,8 +94,8 @@ android {
 
     buildTypes {
         release {
-            debuggable false
-            minifyEnabled true
+            debuggable true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "TOOLBAR_TITLE", '"HYPERTRACK LIVE"'
             buildConfigField "String", "HYPERTRACK_PK", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
@@ -104,6 +104,7 @@ android {
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "request_eta_base_url", "www.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.com"
+            resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1544357779206506"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -122,6 +123,7 @@ android {
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
             resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
+            resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1548496698792614"
             ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
             ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
@@ -137,7 +139,7 @@ dependencies {
         transitive = true;
     }
 
-    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+    releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
 

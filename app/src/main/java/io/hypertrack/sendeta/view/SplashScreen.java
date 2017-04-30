@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.store.UserStore;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
@@ -63,7 +62,9 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void proceedToNextScreen() {
-        boolean isUserOnboard = UserStore.sharedStore.isUserLoggedIn(this);
+        // Check if user has signed up
+        boolean isUserOnboard = !TextUtils.isEmpty(HyperTrack.getUserId());
+
         if (!isUserOnboard && !TextUtils.isEmpty(OnboardingUser.sharedOnboardingUser().getName())) {
             Intent registerIntent = new Intent(this, Profile.class);
             registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -27,8 +27,6 @@ public class PermissionUtils {
     public static final int REQUEST_CODE_PERMISSION_RECORD_AUDIO = 6;
     public static final int REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE = 7;
 
-    public static final int MY_PERMISSIONS_REQUEST_CALL_PHONE = 1009;
-
     public static boolean checkForPermission(@NonNull final Activity activity,
                                              @NonNull final String permission) {
         if (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED) {
@@ -56,18 +54,6 @@ public class PermissionUtils {
         return false;
     }
 
-    /**
-     * @param permission Permission for which Snackbar has to be shown
-     */
-    private static int getPermissionDeclinedMessage(final String permission) {
-        switch (permission) {
-            case Manifest.permission.ACCESS_FINE_LOCATION:
-                return R.string.location_permission_never_allow;
-            default:
-                return R.string.permission_declined_default_msg;
-        }
-    }
-
     private static int getRequestCodeByPermission(final String permission) {
         switch (permission) {
             case Manifest.permission.GET_ACCOUNTS:
@@ -89,33 +75,11 @@ public class PermissionUtils {
         }
     }
 
-    public static void requestCallPermissions(Activity activity) {
-        ActivityCompat.requestPermissions(activity,
-                new String[]{Manifest.permission.CALL_PHONE}, MY_PERMISSIONS_REQUEST_CALL_PHONE);
-    }
-
     public static AlertDialog showRationaleMessageAsDialog(@NonNull final Activity activity,
                                                            @NonNull final String permission,
                                                            @NonNull final String message) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(message);
-        builder.setPositiveButton(activity.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                PermissionUtils.requestPermission(activity, permission);
-            }
-        });
-        return builder.show();
-    }
-
-    public static AlertDialog showRationaleMessageAsDialog(@NonNull final Activity activity,
-                                                           @NonNull final String permission,
-                                                           @NonNull final String title,
-                                                           @NonNull final String message) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(title);
         builder.setMessage(message);
         builder.setPositiveButton(activity.getString(android.R.string.ok), new DialogInterface.OnClickListener() {
             @Override
@@ -145,38 +109,6 @@ public class PermissionUtils {
                                                                   @NonNull final String message) {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(message);
-        builder.setPositiveButton(activity.getString(R.string.action_settings), new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                openSettings(activity);
-            }
-        });
-        builder.setNegativeButton(activity.getString(android.R.string.cancel), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        builder.show();
-
-        return builder;
-    }
-
-    /**
-     * @param activity   Context where the Snackbar will be shown
-     * @param permission Permission for which Snackbar has to be shown,
-     *                   helps in deciding the message string for Snackbar
-     * @return snackbar snackbar instance which can be useful to set callbacks,if needed
-     */
-    public static AlertDialog.Builder showPermissionDeclineDialog(@NonNull final Activity activity,
-                                                       @NonNull final String permission,
-                                                       @NonNull final String title,
-                                                       @NonNull final String message) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setTitle(title);
         builder.setMessage(message);
         builder.setPositiveButton(activity.getString(R.string.action_settings), new DialogInterface.OnClickListener() {
 

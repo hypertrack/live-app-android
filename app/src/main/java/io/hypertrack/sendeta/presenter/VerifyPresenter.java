@@ -11,7 +11,6 @@ import io.hypertrack.sendeta.view.VerifyView;
 
 public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
 
-    private static final String TAG = VerifyPresenter.class.getSimpleName();
     private VerifyView view;
     private VerificationInteractor verificationInteractor;
 
@@ -82,7 +81,6 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
                     AnalyticsStore.getLogger().resendOTP(false, ErrorMessages.RESEND_OTP_FAILED);
                 }
             }
-
         );
     }
 }

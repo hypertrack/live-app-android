@@ -48,9 +48,7 @@ import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
-import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.PhoneUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
@@ -175,7 +173,7 @@ public class Profile extends BaseActivity implements ProfileView {
         adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         countryCodeSpinner.setAdapter(adapter);
 
-        String isoCountryCode = PhoneUtils.getCountryRegionFromPhone(this);
+        String isoCountryCode = Utils.getCountryRegionFromPhone(this);
         Log.v(TAG, "Region ISO: " + isoCountryCode);
 
         if (!TextUtils.isEmpty(isoCountryCode)) {
@@ -222,7 +220,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
         String name = mNameView.getText().toString();
         String number = phoneNumberView.getText().toString();
-        KeyboardUtils.hideKeyboard(Profile.this, register);
+        Utils.hideKeyboard(Profile.this, register);
         presenter.attemptLogin(name, number, isoCode, profileImage, oldProfileImage, updatedProfileImage);
     }
 

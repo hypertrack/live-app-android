@@ -18,7 +18,6 @@ import java.util.Date;
 
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.model.Task;
 import io.hypertrack.sendeta.model.UserPlace;
 
 /**
@@ -28,15 +27,8 @@ public class SharedPreferenceManager {
 
     private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
     private static final String USER_AUTH_TOKEN = "user_auth_token";
-    private static final String GCM_TOKEN = "gcm_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
-    private static final String CURRENT_ACTION_PLACE = "io.hypertrack.meta:CurrentActionPlace";
-    private static final String CURRENT_TASK = "io.hypertrack.meta:CurrentTask";
-    private static final String CURRENT_TASK_ID = "io.hypertrack.meta:CurrentTaskID";
 
-    private static final String CURRENT_SHIFT = "io.hypertrack.meta:CurrentShift";
-    private static final String CURRENT_SHIFT_DRIVER_ID = "io.hypertrack.meta:CurrentShiftDriverID";
-    private static final String CURRENT_HYPERTRACK_DRIVER_ID = "io.hypertrack.meta:HyperTrackDriverID";
     private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
     private static final String ONBOARDED_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
@@ -46,7 +38,6 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
     private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
-    private static final String CURRENT_TRACKING_ACTION = "io.hypertrack.htlive:currentTrackingAction";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -68,26 +59,6 @@ public class SharedPreferenceManager {
 
     public static String getUserAuthToken() {
         return getSharedPreferences().getString(USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
-    }
-
-    public static void setUserAuthToken(String userAuthToken) {
-        SharedPreferences.Editor editor = getEditor();
-
-        editor.putString(USER_AUTH_TOKEN, userAuthToken);
-        editor.apply();
-    }
-
-    public static UserPlace getPlace() {
-        String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
-        if (placeJson == null) {
-            return null;
-        }
-
-        Gson gson = new Gson();
-        Type type = new TypeToken<UserPlace>() {
-        }.getType();
-
-        return gson.fromJson(placeJson, type);
     }
 
     public static void setPlace(UserPlace place) {
@@ -113,36 +84,9 @@ public class SharedPreferenceManager {
         return gson.fromJson(placeJson, type);
     }
 
-    public static String getGCMToken() {
-        return getSharedPreferences().getString(GCM_TOKEN, "");
-    }
-
-    public static void setGcmToken(String token) {
-        SharedPreferences.Editor editor = getEditor();
-
-        editor.putString(GCM_TOKEN, token);
-        editor.apply();
-    }
-
     public static void deletePlace() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_PLACE);
-        editor.apply();
-    }
-
-    public static String getTaskID(Context context) {
-        return getSharedPreferences().getString(CURRENT_TASK_ID, null);
-    }
-
-    public static void setTaskID(String taskID) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(CURRENT_TASK_ID, taskID);
-        editor.apply();
-    }
-
-    public static void deleteTaskID() {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_TASK_ID);
         editor.apply();
     }
 
@@ -160,26 +104,6 @@ public class SharedPreferenceManager {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_ACTION_ID);
         editor.apply();
-    }
-
-    public static Task getTask(Context context) {
-        String taskJson = getSharedPreferences().getString(CURRENT_TASK, null);
-        if (taskJson == null) {
-            return null;
-        }
-
-        try {
-            Gson gson = getGson();
-            Type type = new TypeToken<Task>() {
-            }.getType();
-
-            return gson.fromJson(taskJson, type);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-
-        return null;
     }
 
     public static Action getAction(Context context) {
@@ -214,36 +138,6 @@ public class SharedPreferenceManager {
         editor.remove(CURRENT_ACTION);
         editor.apply();
     }
-
-    public static String getCurrentTrackingAction() {
-        return getSharedPreferences().getString(CURRENT_TRACKING_ACTION, null);
-    }
-
-    public static void setCurrentTrackingAction(String actionID) {
-
-        SharedPreferences.Editor editor = getEditor();
-
-        editor.putString(CURRENT_TRACKING_ACTION, actionID);
-        editor.apply();
-    }
-
-    public static void setTask(Task task) {
-        SharedPreferences.Editor editor = getEditor();
-
-        Gson gson = getGson();
-        String taskJSON = gson.toJson(task);
-
-        editor.putString(CURRENT_TASK, taskJSON);
-        editor.apply();
-    }
-
-
-    public static void deleteTask() {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_TASK);
-        editor.apply();
-    }
-
 
     public static OnboardingUser getOnboardingUser() {
         String userJSON = getSharedPreferences().getString(ONBOARDED_USER, null);
@@ -343,38 +237,6 @@ public class SharedPreferenceManager {
     public static void setLastSelectedVehicleType(HTUserVehicleType vehicleType) {
         SharedPreferences.Editor editor = getEditor();
         editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
-        editor.apply();
-    }
-
-    public static String getHyperTrackDriverID(Context context) {
-        return getSharedPreferences().getString(CURRENT_HYPERTRACK_DRIVER_ID, null);
-    }
-
-    public static void setHyperTrackDriverID(Context context, String driverID) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(CURRENT_HYPERTRACK_DRIVER_ID, driverID);
-        editor.apply();
-    }
-
-    public static void clearHyperTrackDriverID(Context context) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_HYPERTRACK_DRIVER_ID);
-        editor.apply();
-    }
-
-    public static String getShiftDriverID(Context context) {
-        return getSharedPreferences().getString(CURRENT_SHIFT_DRIVER_ID, null);
-    }
-
-    public static void setShiftDriverID(Context context, String driverID) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(CURRENT_SHIFT_DRIVER_ID, driverID);
-        editor.apply();
-    }
-
-    public static void clearShiftDriverID(Context context) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(CURRENT_SHIFT_DRIVER_ID);
         editor.apply();
     }
 
