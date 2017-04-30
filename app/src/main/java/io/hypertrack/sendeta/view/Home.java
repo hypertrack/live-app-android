@@ -126,7 +126,7 @@ import io.hypertrack.sendeta.util.SwipeButtonCustomItems;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 
-public class Home extends DrawerBaseActivity implements ResultCallback<Status>, LocationListener,
+public class Home extends BaseActivity implements ResultCallback<Status>, LocationListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = Home.class.getSimpleName();

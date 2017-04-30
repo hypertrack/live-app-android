@@ -3,9 +3,7 @@ package io.hypertrack.sendeta.view;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.CardView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import io.hypertrack.sendeta.R;
@@ -19,17 +17,10 @@ public class BaseFragment extends Fragment {
     private CardView loadingLayoutMessageContainer;
     private TextView loadingLayoutMessage;
 
-    public LinearLayout retryContainer;
-    public TextView retryLayoutMessage;
-    public Button retryLayoutButton;
-
-    public void initRetryAndLoader(View rootView) {
+    public void initLoader(View rootView) {
         loadingLayout = (FrameLayout) rootView.findViewById(R.id.loading_container);
         loadingLayoutMessage = (TextView) rootView.findViewById(R.id.loading_message);
         loadingLayoutMessageContainer = (CardView) rootView.findViewById(R.id.loading_message_container);
-        retryContainer = (LinearLayout) rootView.findViewById(R.id.retry_container);
-        retryLayoutMessage = (TextView) rootView.findViewById(R.id.retry_message);
-        retryLayoutButton = (Button) rootView.findViewById(R.id.retry_action);
     }
 
     /**
@@ -66,38 +57,5 @@ public class BaseFragment extends Fragment {
      */
     public void displayLoader(boolean isEnabled) {
         displayLoader(isEnabled, null);
-    }
-
-    /**
-     * Show retry layout within a container, width and height will be adjusted according to parent
-     * [IMPORTANT not to use if display area is very small as scrolling is not supported
-     *
-     * @param message  message to be shown
-     * @param listener action to be performed on retry button click
-     * @return true or false depending on that view was successfully inflated or not
-     */
-    public boolean showRetryLayout(String message, View.OnClickListener listener) {
-
-        if (retryContainer != null) {
-            retryLayoutMessage.setText(message);
-            retryLayoutButton.setOnClickListener(listener);
-            retryContainer.setVisibility(View.VISIBLE);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Hide retry layout, default is hidden
-     *
-     * @return true or false depending on that view was successfully inflated or not
-     */
-    public boolean hideRetryLayout() {
-
-        if (retryContainer != null) {
-            retryContainer.setVisibility(View.GONE);
-            return true;
-        }
-        return false;
     }
 }

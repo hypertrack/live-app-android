@@ -50,7 +50,6 @@
                 android:id="@+id/home.info_message_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/toolbar"
                 android:background="#d89d3b"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"

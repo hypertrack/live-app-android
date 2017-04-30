@@ -178,7 +178,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         String originQueryParam = origin.latitude + "," + origin.longitude;
         String destinationQueryParam = destination.latitude + "," + destination.longitude;
 
-        HyperTrackService sendETAService = HyperTrackServiceGenerator.createService(HyperTrackService.class, SharedPreferenceManager.getUserAuthToken());
+        HyperTrackService sendETAService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
 
         Call<List<TaskETAResponse>> call = sendETAService.getTaskETA(originQueryParam, destinationQueryParam, vehicleType);
         call.enqueue(new Callback<List<TaskETAResponse>>() {

@@ -26,7 +26,6 @@ import io.hypertrack.sendeta.model.UserPlace;
 public class SharedPreferenceManager {
 
     private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
-    private static final String USER_AUTH_TOKEN = "user_auth_token";
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
 
     private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
@@ -55,10 +54,6 @@ public class SharedPreferenceManager {
         gsonBuilder.registerTypeAdapter(Location.class, LocationSerializer.getInstance());
         gsonBuilder.registerTypeAdapter(Location.class, LocationDeserializer.getInstance());
         return gsonBuilder.create();
-    }
-
-    public static String getUserAuthToken() {
-        return getSharedPreferences().getString(USER_AUTH_TOKEN, Constants.DEFAULT_STRING_VALUE);
     }
 
     public static void setPlace(UserPlace place) {
