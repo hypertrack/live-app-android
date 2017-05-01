@@ -12,13 +12,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.models.Place;
 
 import java.lang.reflect.Type;
 import java.util.Date;
 
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.model.UserPlace;
 
 /**
  * Created by suhas on 25/02/16.
@@ -56,7 +56,7 @@ public class SharedPreferenceManager {
         return gsonBuilder.create();
     }
 
-    public static void setPlace(UserPlace place) {
+    public static void setPlace(Place place) {
         SharedPreferences.Editor editor = getEditor();
 
         Gson gson = new Gson();
@@ -66,14 +66,14 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static UserPlace getActionPlace() {
+    public static Place getActionPlace() {
         String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
         if (placeJson == null) {
             return null;
         }
 
         Gson gson = new Gson();
-        Type type = new TypeToken<UserPlace>() {
+        Type type = new TypeToken<Place>() {
         }.getType();
 
         return gson.fromJson(placeJson, type);

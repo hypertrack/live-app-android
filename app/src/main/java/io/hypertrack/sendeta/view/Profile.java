@@ -10,7 +10,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
@@ -64,14 +63,11 @@ public class Profile extends BaseActivity implements ProfileView {
     public ProgressBar mProfileImageLoader;
     public Bitmap oldProfileImage = null, updatedProfileImage = null;
     private ProgressDialog mProgressDialog;
-    private LinearLayout profileParentLayout;
     private EditText phoneNumberView;
     private TextView countryCodeTextView;
     private Spinner countryCodeSpinner;
-    private LinearLayout countryCodeLayout;
     private Button register;
     private String isoCode;
-    private CountrySpinnerAdapter adapter;
     private Target profileImageDownloadTarget;
     private File profileImage;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
@@ -135,12 +131,11 @@ public class Profile extends BaseActivity implements ProfileView {
         mNameView = (EditText) findViewById(R.id.profile_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
-        profileParentLayout = (LinearLayout) findViewById(R.id.profile_parent_layout);
         register = (Button) findViewById(R.id.profile_register);
         phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
         countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
         countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
-        countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
+        LinearLayout countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
         countryCodeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -170,7 +165,7 @@ public class Profile extends BaseActivity implements ProfileView {
         CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
 
-        adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
+        CountrySpinnerAdapter adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         countryCodeSpinner.setAdapter(adapter);
 
         String isoCountryCode = Utils.getCountryRegionFromPhone(this);
@@ -278,21 +273,6 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void registrationFailed() {
-        mProgressDialog.dismiss();
-        Toast.makeText(Profile.this, ErrorMessages.PHONE_NO_REGISTRATION_FAILED, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void registrationSuccessful() {
-        mProgressDialog.dismiss();
-        // Navigate to Verification Screen for both Positive & Negative cases
-        Intent intent = new Intent(Profile.this, Verify.class);
-        startActivity(intent);
-    }
-
-
-    @Override
     public void showProfilePicUploadSuccess() {
         Toast.makeText(Profile.this, R.string.profile_upload_success, Toast.LENGTH_SHORT).show();
         if (updatedProfileImage != null) {
@@ -306,13 +286,10 @@ public class Profile extends BaseActivity implements ProfileView {
         Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
 
         // Complete User SignUp on Profile Pic Upload Failure
-
     }
 
     @Override
     public void navigateToHomeScreen() {
-        //  UserStore.sharedStore.initializeUser();
-        //   OnboardingManager.sharedManager().getUser();
         Utils.setCrashlyticsKeys(this);
         showProgress(false);
 
@@ -321,21 +298,10 @@ public class Profile extends BaseActivity implements ProfileView {
         SharedPreferenceManager.deletePlace();
         HTLog.i("Profile", "User Registration successful: Clearing Active Trip, if any");
 
-//        User user = UserStore.sharedStore.getUser();
-        Intent intent;
-       /* if (user != null && user.getPendingMemberships() != null && user.getPendingMemberships().size() > 0) {
-            intent = new Intent(Profile.this, BusinessProfile.class);
-            intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        } else {*/
-        intent = new Intent(Profile.this, Home.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        /*}*/
-
         TaskStackBuilder.create(Profile.this)
-                .addNextIntentWithParentStack(intent)
+                .addNextIntentWithParentStack(new Intent(Profile.this, Home.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
-
         finish();
     }
 
@@ -388,7 +354,6 @@ public class Profile extends BaseActivity implements ProfileView {
                     mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
             }
         });
     }
@@ -417,6 +382,11 @@ public class Profile extends BaseActivity implements ProfileView {
 
     private String getName() {
         AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+
         Account[] list = manager.getAccounts();
 
         for (Account account : list) {
@@ -425,21 +395,6 @@ public class Profile extends BaseActivity implements ProfileView {
             }
         }
         return null;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onRestoreInstanceState(savedInstanceState, persistentState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
     }
 
     @Override

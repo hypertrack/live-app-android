@@ -117,7 +117,7 @@ android {
             resValue "string", "app_name", "Debug HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             buildConfigField "String", "TOOLBAR_TITLE", '"DEBUG HYPERTRACK LIVE"'
-            buildConfigField "String", "HYPERTRACK_PK", '"pk_eea7dd1601af5a4b8d3a61b8fb24ef9a5eca31d2"'
+            buildConfigField "String", "HYPERTRACK_PK", '"pk_03e3176a9831360e162093292049757b130c75cf"'
             buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"

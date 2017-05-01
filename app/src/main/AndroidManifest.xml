@@ -116,11 +116,6 @@
             android:name=".view.CheckPermission"
             android:screenOrientation="portrait" />
 
-        <activity
-            android:name=".view.Verify"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
-
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -221,10 +216,6 @@
         <!-- Register Services here -->
         <service
             android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
-
-        <service
-            android:name=".service.FetchAddressIntentService"
             android:exported="false" />
 
         <service

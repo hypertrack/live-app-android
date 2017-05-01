@@ -22,6 +22,7 @@ import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.SuccessResponse;
 
 import java.text.SimpleDateFormat;
@@ -29,7 +30,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.hypertrack.sendeta.model.TaskETAResponse;
-import io.hypertrack.sendeta.model.UserPlace;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
@@ -56,8 +56,8 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     private Context mContext;
     private String actionID;
     private Action hyperTrackAction;
-    private UserPlace lastUpdatedDestination = null;
-    private UserPlace place;
+    private Place lastUpdatedDestination = null;
+    private Place place;
     private GoogleApiClient mGoogleAPIClient;
     private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
@@ -147,7 +147,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
                 return true;
             }
-            HTLog.e(TAG, "HyperTrack-Live: Error occurred while shouldRestoreState: Driver is Active & UserPlace is NULL");
+            HTLog.e(TAG, "HyperTrack-Live: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
         }
 
         if (actionCompletedListener != null)
@@ -406,11 +406,11 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         this.geofencingRequest = request;
     }
 
-    public UserPlace getPlace() {
+    public Place getPlace() {
         return place;
     }
 
-    public void setPlace(UserPlace place) {
+    public void setPlace(Place place) {
         this.place = place;
         this.savePlace();
     }
@@ -459,11 +459,11 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
 
-    public UserPlace getLastUpdatedDestination() {
+    public Place getLastUpdatedDestination() {
         return lastUpdatedDestination;
     }
 
-    public void setLastUpdatedDestination(UserPlace lastUpdatedDestination) {
+    public void setLastUpdatedDestination(Place lastUpdatedDestination) {
         this.lastUpdatedDestination = lastUpdatedDestination;
     }
 
