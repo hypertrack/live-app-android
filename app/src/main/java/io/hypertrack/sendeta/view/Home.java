@@ -95,32 +95,39 @@ import io.hypertrack.sendeta.util.Utils;
 public class Home extends BaseActivity implements ResultCallback<Status> {
 
     private static final String TAG = Home.class.getSimpleName();
-
     private OnboardingUser user;
     private GoogleMap mMap;
     private Marker expectedPlaceMarker;
     private String lookupId = null;
-
     private Location defaultLocation = new Location("default");
-
     private TabLayout vehicleTypeTabLayout;
     private TextView infoMessageViewText;
     private LinearLayout infoMessageView, endTripLoaderAnimationLayout;
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
     private FrameLayout bottomButtonLayout;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
     private ImageButton shareButton, navigateButton;
     private Place destinationPlace;
     private ProgressDialog mProgressDialog;
-
     private boolean shouldRestoreTask = false, isMapLoaded = false,
             isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 1.0f;
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
-
-    public HomeMapAdapter adapter;
+    private HomeMapAdapter adapter;
 
     public class HomeMapAdapter extends HyperTrackMapAdapter {
         public HomeMapAdapter(Context mContext) {
@@ -193,6 +200,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             updateMapView();
         }
     };
+    private HyperTrackMapFragment htMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -986,6 +994,19 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
                 HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
                 showEndingTripAnimation(false);
+                if (mMap != null) {
+
+                    if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
+
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng(), 16f));
+
+                    } else if (mMap.getMyLocation() != null) {
+
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 16f));
+                    }
+
+                    htMapFragment.clearSelectExpectedPlaceView();
+                }
             }
 
             @Override
@@ -1032,8 +1053,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
         lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupID();
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
+        /*if (adapter != null)
+            adapter.notifyDataSetChanged();*/
 
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
@@ -1353,21 +1374,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         AppEventsLogger.activateApp(getApplication());
     }
-
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
 
     @Override
     public void onBackPressed() {
