@@ -116,11 +116,11 @@
                     android:id="@+id/sendETAButton"
                     android:layout_width="wrap_content"
                     android:layout_height="@dimen/cta_button_size"
+                    android:layout_gravity="center"
                     android:layout_margin="@dimen/margin_high"
                     android:background="@drawable/share_live_location_btn_bg"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:gravity="center"
-                    android:layout_gravity="center"
                     android:paddingLeft="@dimen/padding_xxxhigh"
                     android:paddingRight="@dimen/padding_xxxhigh"
                     android:textColor="@color/text_dark_bg_base"
@@ -134,15 +134,15 @@
                         android:id="@+id/endTripSwipeButton"
                         android:layout_width="wrap_content"
                         android:layout_height="@dimen/cta_button_size"
+                        android:layout_gravity="center"
                         android:layout_margin="@dimen/margin_high"
                         android:background="@color/colorAccent"
                         android:clickable="true"
                         android:elevation="@dimen/elevation_base"
                         android:gravity="center"
-                        android:layout_gravity="center"
-                        android:text="@string/action_slide_to_end_sharing"
                         android:paddingLeft="@dimen/padding_xxxhigh"
                         android:paddingRight="@dimen/padding_xxxhigh"
+                        android:text="@string/action_slide_to_end_sharing"
                         android:textColor="@color/text_dark_bg_base"
                         android:textSize="@dimen/text_base"
                         android:visibility="gone" />
@@ -190,7 +190,7 @@
                 android:textColor="@color/text_dark_bg_base"
                 android:textSize="@dimen/text_base" />
 
-            <pl.tajchert.sample.DotsTextView
+            <pl.tajchert.waitingdots.DotsTextView
                 android:id="@+id/endTripLoaderAnimationDots"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
