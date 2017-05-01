@@ -144,7 +144,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.hyperTrackAction != null) {
             // Start Refreshing the task without any delay
             if (this.place != null) {
-
                 return true;
             }
             HTLog.e(TAG, "HyperTrack-Live: Error occurred while shouldRestoreState: Driver is Active & Place is NULL");
