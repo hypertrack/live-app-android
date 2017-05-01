@@ -22,7 +22,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,9 +55,9 @@ import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+import com.hypertrack.lib.internal.common.util.TextUtils;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
-import com.hypertrack.lib.models.ActionParams;
 import com.hypertrack.lib.models.ActionParamsBuilder;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.HyperTrackError;
@@ -68,6 +67,7 @@ import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 import com.hypertrack.lib.models.SuccessResponse;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import io.hypertrack.sendeta.BuildConfig;
@@ -99,7 +99,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private OnboardingUser user;
     private GoogleMap mMap;
     private Marker expectedPlaceMarker;
-    private String lookupId;
+    private String lookupId = null;
 
     private Location defaultLocation = new Location("default");
 
@@ -155,6 +155,14 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         @Override
         public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
             return false;
+        }
+
+        @Override
+        public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
+            int top = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+            return new int[]{0, top, right, bottom};
         }
     }
 
@@ -234,6 +242,9 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         // Check if there is any currently running task to be restored
         restoreTaskStateIfNeeded();
+
+        // Handles Tracking Url deeplink
+        handleDeeplink();
     }
 
     private void onSelectPlace(final Place place) {
@@ -540,13 +551,10 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (SharedPreferenceManager.isTrackingON()) {
-                    createSharingLink();
-                } else {
+                if (!SharedPreferenceManager.isTrackingON()) {
                     startHyperTrackTracking(false);
-                    createSharingLink();
                 }
+                createSharingLink();
             }
         });
     }
@@ -651,6 +659,69 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
             // Initialize VehicleTabLayout
             initializeVehicleTypeTab();
+        }
+    }
+
+    private void handleDeeplink() {
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
+
+            lookupId = intent.getStringExtra(Track.KEY_LOOKUP_ID);
+            if (!TextUtils.isEmpty(lookupId)) {
+                mProgressDialog = new ProgressDialog(this);
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.setMessage(getString(R.string.fetching_data_msg));
+                mProgressDialog.show();
+
+                HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+                    @Override
+                    public void onSuccess(@NonNull SuccessResponse response) {
+                        if (mProgressDialog != null)
+                            mProgressDialog.dismiss();
+
+                        List<Action> actions = (List<Action>) response.getResponseObject();
+                        if (actions != null && !actions.isEmpty()) {
+                            Action action = actions.get(0);
+                            destinationPlace = action.getExpectedPlace();
+                            ActionManager.getSharedManager(Home.this).setPlace(destinationPlace);
+                            setupSendETAButton();
+                            showSendETAButton();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull ErrorResponse errorResponse) {
+                        if (mProgressDialog != null)
+                            mProgressDialog.dismiss();
+                        Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+            } else {
+                List<String> actionIdList = intent.getStringArrayListExtra(Track.KEY_ACTION_ID_LIST);
+                // Check if a valid TASK_ID_LIST is available
+                if (actionIdList != null && !actionIdList.isEmpty()) {
+                    mProgressDialog = new ProgressDialog(this);
+                    mProgressDialog.setCancelable(false);
+                    mProgressDialog.setMessage(getString(R.string.fetching_data_msg));
+                    mProgressDialog.show();
+
+                    HyperTrack.trackAction(actionIdList, new HyperTrackCallback() {
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse response) {
+                            if (mProgressDialog != null)
+                                mProgressDialog.dismiss();
+                        }
+
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            if (mProgressDialog != null)
+                                mProgressDialog.dismiss();
+                            Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
         }
     }
 
@@ -830,14 +901,18 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             return;
         }
 
-        ActionParams params = new ActionParamsBuilder()
-                .setExpectedPlace(destinationPlace)
-                .setLookupId(UUID.randomUUID().toString())
-                .setType(Action.ACTION_TYPE_VISIT)
-                .build();
+        ActionParamsBuilder builder = new ActionParamsBuilder()
+                .setLookupId(lookupId != null ? lookupId : UUID.randomUUID().toString())
+                .setType(Action.ACTION_TYPE_VISIT);
+
+        if (!TextUtils.isEmpty(destinationPlace.getId())) {
+            builder.setExpectedPlaceId(destinationPlace.getId());
+        } else {
+            builder.setExpectedPlace(destinationPlace);
+        }
 
         // Call assignAction to start the tracking action
-        HyperTrack.createAndAssignAction(params, new HyperTrackCallback() {
+        HyperTrack.createAndAssignAction(builder.build(), new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
@@ -1299,13 +1374,13 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
         } else {
             OnCompleteTask();
-
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        HyperTrack.removeActions(null);
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
     }

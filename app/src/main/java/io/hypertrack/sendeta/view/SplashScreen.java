@@ -15,6 +15,7 @@ import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
@@ -112,6 +113,56 @@ public class SplashScreen extends BaseActivity {
         }
     }
 
+    private void processTrackingDeepLink(AppDeepLink appDeepLink) {
+        // Check if lookup_id is available from deeplink
+        if (!TextUtils.isEmpty(appDeepLink.lookupId)) {
+            ArrayList<String> actionIds = new ArrayList<>();
+            actionIds.add(appDeepLink.taskID);
+            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, actionIds);
+            return;
+        }
+
+        displayLoader(true);
+
+        // Fetch Action details (lookupId) for given short code
+        HyperTrack.getActionForShortCode(appDeepLink.shortCode, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (SplashScreen.this.isFinishing())
+                    return;
+                displayLoader(false);
+
+                if (response.getResponseObject() == null) {
+                    // Handle getActionForShortCode API error
+                    handleTrackingDeepLinkError();
+                    return;
+                }
+
+                List<Action> actions = (List<Action>) response.getResponseObject();
+                if (actions != null && !actions.isEmpty()) {
+                    // Handle getActionForShortCode API success
+                    ArrayList<String> actionIds = new ArrayList<>();
+                    actionIds.add(actions.get(0).getId());
+                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actionIds);
+
+                } else {
+                    // Handle getActionForShortCode API error
+                    handleTrackingDeepLinkError();
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                if (SplashScreen.this.isFinishing())
+                    return;
+                displayLoader(false);
+
+                // Handle getActionForShortCode API error
+                handleTrackingDeepLinkError();
+            }
+        });
+    }
+
     private void handleTrackingDeepLinkSuccess(String lookupId, ArrayList<String> actionIds) {
         // Check if current user is sharing location or not
         if (SharedPreferenceManager.getActionID(SplashScreen.this) == null) {
@@ -143,49 +194,5 @@ public class SplashScreen extends BaseActivity {
                         .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
         finish();
-    }
-
-    private void processTrackingDeepLink(AppDeepLink appDeepLink) {
-        // Check if lookup_id is available from deeplink
-        if (!TextUtils.isEmpty(appDeepLink.lookupId)) {
-            ArrayList<String> actionIds = new ArrayList<>();
-            actionIds.add(appDeepLink.taskID);
-            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, actionIds);
-            return;
-        }
-
-        displayLoader(true);
-
-        // Fetch Action details (lookupId) for given short code
-        HyperTrack.getActionForShortCode(appDeepLink.shortCode, new HyperTrackCallback() {
-            @Override
-            public void onSuccess(@NonNull SuccessResponse response) {
-                if (SplashScreen.this.isFinishing())
-                    return;
-                displayLoader(false);
-
-                if (response.getResponseObject() == null) {
-                    // Handle getActionForShortCode API error
-                    handleTrackingDeepLinkError();
-                    return;
-                }
-
-                // Handle getActionForShortCode API success
-                Action action = (Action) response.getResponseObject();
-                ArrayList<String> actionIds = new ArrayList<>();
-                actionIds.add(action.getId());
-                handleTrackingDeepLinkSuccess(action.getLookupID(), actionIds);
-            }
-
-            @Override
-            public void onError(@NonNull ErrorResponse errorResponse) {
-                if (SplashScreen.this.isFinishing())
-                    return;
-                displayLoader(false);
-
-                // Handle getActionForShortCode API error
-                handleTrackingDeepLinkError();
-            }
-        });
     }
 }

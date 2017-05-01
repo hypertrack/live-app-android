@@ -56,10 +56,7 @@ public class Track extends BaseActivity implements TrackView {
             String lookupId = intent.getStringExtra(KEY_LOOKUP_ID);
             if (!TextUtils.isEmpty(lookupId)) {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
-                    //Remove any previous action if currently being tracked.
-                    trackPresenter.removeTrackingAction();
-
-                    // Add TaskId being tracked by this user
+                    // Add lookupId being tracked by this user
                     trackPresenter.trackAction(lookupId);
                 }
                 return true;
@@ -70,9 +67,6 @@ public class Track extends BaseActivity implements TrackView {
                 // Check if a valid TASK_ID_LIST is available
                 if (actionIdList != null && !actionIdList.isEmpty()) {
                     if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
-                        //Remove any previous action if currently being tracked.
-                        trackPresenter.removeTrackingAction();
-
                         // Add TaskId being tracked by this user
                         trackPresenter.trackAction(actionIdList);
                     }
