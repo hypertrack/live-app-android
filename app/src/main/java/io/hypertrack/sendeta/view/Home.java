@@ -159,10 +159,14 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         @Override
         public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
-            int top = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
-            int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int bottom = getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
             int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            return new int[]{0, top, right, bottom};
+            return new int[]{0, 0, right, bottom};
+        }
+
+        @Override
+        public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
+            return R.drawable.ic_reset_bounds_button;
         }
     }
 
@@ -876,8 +880,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
     private void updateMapPadding() {
         if (mMap != null && lookupId == null) {
-            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding) :
-                    getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout);
+            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
+                    getResources().getDimensionPixelSize(R.dimen.map_top_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
@@ -1010,6 +1014,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private void onStartTask() {
         if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null)
             return;
+
+        expectedPlaceMarker = null;
 
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);

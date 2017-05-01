@@ -223,9 +223,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         HyperTrack.completeAction(actionID);
         clearState();
 
-       /* if (actionCompletedListener != null)
-            actionCompletedListener.OnCallback();*/
-
         if (callback != null)
             callback.OnSuccess();
     }
