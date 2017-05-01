@@ -128,51 +128,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
-
-    public class HomeMapAdapter extends HyperTrackMapAdapter {
-        public HomeMapAdapter(Context mContext) {
-            super(mContext);
-        }
-
-        @Override
-        public boolean showOrderStatusToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
-            return false;
-        }
-
-        @Override
-        public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-            return lookupId == null;
-        }
-
-        @Override
-        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return false;
-        }
-
-        @Override
-        public boolean showSelectExpectedPlace() {
-            return true;
-        }
-
-        @Override
-        public boolean showTrailingPolyline(String actionID) {
-            return true;
-        }
-
-        @Override
-        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
-            return false;
-        }
-
-        @Override
-        public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
-            int top = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
-            int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
-            int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            return new int[]{0, top, right, bottom};
-        }
-    }
-
+    private HyperTrackMapFragment htMapFragment;
     public MapFragmentCallback callback = new MapFragmentCallback() {
         @Override
         public void onMapReadyCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
@@ -196,7 +152,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             updateMapView();
         }
     };
-    private HyperTrackMapFragment htMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -213,7 +168,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
 
         // Initialize Map Fragment added in Activity Layout to getMapAsync
-        HyperTrackMapFragment htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
+        htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
         adapter = new HomeMapAdapter(this);
         htMapFragment.setHTMapAdapter(adapter);
@@ -656,8 +611,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 }
             }
 
-            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
-            onStartTask();
+            //  updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
+            // onStartTask();
 
             shouldRestoreTask = true;
 
@@ -841,7 +796,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             LatLng latLng = new LatLng(destinationPlace.getLocation().getLatitude(), destinationPlace.getLocation().getLongitude());
 
             if (etaInMinutes != null && etaInMinutes != 0) {
-
                 updateViewForETASuccess(etaInMinutes, latLng);
             } else {
                 updateViewForETASuccess(null, latLng);
@@ -1054,6 +1008,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 // do nothing
+                htMapFragment.notifyChanged();
             }
 
             @Override
@@ -1389,6 +1344,50 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         HyperTrack.removeActions(null);
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
+    }
+
+    public class HomeMapAdapter extends HyperTrackMapAdapter {
+        public HomeMapAdapter(Context mContext) {
+            super(mContext);
+        }
+
+        @Override
+        public boolean showOrderStatusToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
+            return false;
+        }
+
+        @Override
+        public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
+            return lookupId == null;
+        }
+
+        @Override
+        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return false;
+        }
+
+        @Override
+        public boolean showSelectExpectedPlace() {
+            return true;
+        }
+
+        @Override
+        public boolean showTrailingPolyline(String actionID) {
+            return true;
+        }
+
+        @Override
+        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
+            return false;
+        }
+
+        @Override
+        public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
+            int top = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+            return new int[]{0, top, right, bottom};
+        }
     }
 
     @SuppressLint("ParcelCreator")
