@@ -36,7 +36,7 @@
             android:allowTaskReparenting="false"
             android:label="${applicationLabel}"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait">
 
             <!-- Intent Filter to make this Screen as the launcher screen -->
             <intent-filter>
@@ -85,20 +85,20 @@
             </intent-filter>
 
             <!-- Intent Filter to handle FB Messenger messages -->
-             <intent-filter>
-                 <action android:name="android.intent.action.VIEW" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                 <data android:scheme="http" />
-                 <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:scheme="https" />
 
-                 <!-- Add trck.at DeepLink URL -->
-                 <data
-                     android:host="@string/tracking_url"
-                     android:pathPrefix="/" />
-             </intent-filter>
+                <!-- Add trck.at DeepLink URL -->
+                <data
+                    android:host="@string/tracking_url"
+                    android:pathPrefix="/" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -107,61 +107,20 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
-        <!--  <activity
-              android:name=".view.RequestETA"
-              android:parentActivityName=".view.Home"
-              android:screenOrientation="portrait" />-->
-
         <activity
             android:name=".view.CheckPermission"
             android:screenOrientation="portrait" />
-
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
-        <!--
-            <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-        -->
 
         <activity
             android:name=".view.Profile"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <!--   <activity
-               android:name=".view.SettingsScreen"
-               android:parentActivityName=".view.Home"
-               android:screenOrientation="portrait" />
-   -->
-
         <activity
             android:name=".view.Track"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".view.Home"/>
 
-        <!-- <activity
-             android:name=".view.BusinessProfile"
-             android:parentActivityName=".view.Home"
-             android:screenOrientation="portrait" />
-
-         <activity
-             android:name=".view.UserActivities"
-             android:parentActivityName=".view.Home"
-             android:screenOrientation="portrait" />
-
-
-
-         <activity
-             android:name=".view.ShiftsScreen"
-             android:parentActivityName=".view.SettingsScreen"
-             android:screenOrientation="portrait" />
- -->
         <!-- Register Receivers here -->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
@@ -198,6 +157,14 @@
         </receiver>
 
         <!-- Register meta-data here -->
+        <!--
+            The API key for Google Maps-based APIs is defined as a string resource.
+            (See the file "res/values/google_maps_api.xml").
+            Note that the API key is linked to the encryption key used to sign the APK.
+            You need a different API key for each encryption key, including the release key that is used to
+            sign the APK for publishing.
+            You can define the keys for the debug and release targets in src/debug/ and src/release/.
+       -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />

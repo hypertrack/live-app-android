@@ -126,8 +126,10 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
+
     private HomeMapAdapter adapter;
     private HyperTrackMapFragment htMapFragment;
+
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
         public void OnCallback() {
@@ -140,6 +142,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             });
         }
     };
+
     public MapFragmentCallback callback = new MapFragmentCallback() {
         @Override
         public void onMapReadyCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
@@ -559,6 +562,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         //Check if there is any existing task to be restored
         if (actionManager.shouldRestoreState()) {
 
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.fetching_data_msg));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+
             Log.v(TAG, "Task is active");
             HTLog.i(TAG, "Task restored successfully.");
 
@@ -594,9 +602,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
 
             lookupId = intent.getStringExtra(Track.KEY_LOOKUP_ID);
-            if (adapter != null)
-                adapter.setShowMyLocation(lookupId == null);
-
             if (!TextUtils.isEmpty(lookupId)) {
                 mProgressDialog = new ProgressDialog(this);
                 mProgressDialog.setCancelable(false);
@@ -810,7 +815,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     }
 
     private void updateMapPadding() {
-        if (mMap != null && lookupId == null) {
+        if (mMap != null) {
             int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
                     getResources().getDimensionPixelSize(R.dimen.map_top_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
@@ -818,7 +823,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
             if (endTripSwipeButton.isShown())
                 bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
-
+            if (lookupId == null)
+                bottom = getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
             mMap.setPadding(left, top, 0, bottom);
         }
     }
@@ -863,14 +869,14 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                         mProgressDialog.dismiss();
                     }
 
+                    // Show ShareCard
+                    share();
+
                     onStartTask();
 
                     HyperTrack.clearServiceNotificationParams();
                     AnalyticsStore.getLogger().startedTrip(true, null);
                     HTLog.i(TAG, "Task started successfully.");
-
-                    // Show ShareCard
-                    share();
                 }
             }
 
@@ -922,6 +928,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
                 showEndingTripAnimation(false);
 
+
                 if (mMap != null) {
 
                     if (SharedPreferenceManager.getLastKnownLocation() != null) {
@@ -964,6 +971,24 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null)
             return;
 
+        ActionManager.getSharedManager(this).setActionComletedListener(actionCompletedListener);
+        lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupID();
+
+        HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                // do nothing
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
         expectedPlaceMarker = null;
 
         // Hide VehicleType TabLayout onStartTask success
@@ -980,22 +1005,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         // Update SelectedVehicleType in persistentStorage
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
-        ActionManager.getSharedManager(this).setActionComletedListener(actionCompletedListener);
-        lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupID();
-
-        HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
-            @Override
-            public void onSuccess(@NonNull SuccessResponse response) {
-                // do nothing
-                htMapFragment.notifyChanged();
-            }
-
-            @Override
-            public void onError(@NonNull ErrorResponse errorResponse) {
-                Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
         supportInvalidateOptionsMenu();
     }
 
@@ -1010,11 +1019,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         HyperTrack.removeActions(null);
         lookupId = null;
-        if (adapter != null) {
-            adapter.showMyLocation = true;
-        }
-
-        updateMapView();
 
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);
@@ -1036,8 +1040,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         } else {
             stopHyperTrackTracking();
         }
+
         supportInvalidateOptionsMenu();
         HTLog.i(TAG, "OnCompleteTask UI Changes Completed");
+
+        updateMapView();
     }
 
     private void updateDestinationMarker(LatLng destinationLocation, Integer etaInMinutes) {
@@ -1180,7 +1187,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
 
             if (count == 1 && currentLocation != null) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14.0f));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14.0f));
 
             } else if (count >= 1) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
@@ -1317,11 +1324,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             actionManager.setActionComletedListener(actionCompletedListener);
 
             lookupId = actionManager.getHyperTrackAction().getLookupID();
-            if (adapter != null)
-                adapter.setShowMyLocation(true);
-
             HyperTrack.trackActionByLookupId(lookupId, null);
-
         } else {
             // Reset Toolbar Title as AppName in case no existing trip
             this.setTitle(BuildConfig.TOOLBAR_TITLE);
@@ -1387,11 +1390,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                     if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
                             && lastKnownCachedLocation.getLongitude() != 0.0) {
                         return;
-                }
+                    }
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+                }
             }
         }
-    }
     }
 }

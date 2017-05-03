@@ -33,12 +33,14 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return showMyLocation;
+        return HyperTrack.getConsumerClient().getActionIDs() == null ||
+                HyperTrack.getConsumerClient().getActionIDs().isEmpty();
     }
 
     @Override
     public boolean setMyLocationButtonEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return showMyLocation;
+        return HyperTrack.getConsumerClient().getActionIDs() == null ||
+                HyperTrack.getConsumerClient().getActionIDs().isEmpty();
     }
 
     @Override
