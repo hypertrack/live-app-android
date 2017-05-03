@@ -802,22 +802,33 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
             onStartTask();
         }
+        LatLng latLng;
+        try {
+            if (googleMap != null && googleMap.getMyLocation() != null) {
+                SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
+                latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
 
-        // Set Default View for map according to User's LastKnownLocation
-        if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
-            LatLng lastKnownLatLng = HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng();
-            if (lastKnownLatLng != null && lastKnownLatLng.latitude != 0.0
-                    && lastKnownLatLng.longitude != 0.0) {
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Set Default View for map according to User's LastKnownLocation
+            if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
+                LatLng lastKnownLatLng = HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng();
+                if (lastKnownLatLng != null && lastKnownLatLng.latitude != 0.0
+                        && lastKnownLatLng.longitude != 0.0) {
 
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 12.0f));
 
-            } else {
-                // Else Set Default View for map according to either User's Default Location
-                // (If Country Info was available) or (0.0, 0.0)
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 12.0f));
+                } else {
+                    // Else Set Default View for map according to either User's Default Location
+                    // (If Country Info was available) or (0.0, 0.0)
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+                }
             }
         }
+
 
         checkForLocationPermission();
     }
@@ -879,6 +890,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
+
                     Action action = (Action) response.getResponseObject();
                     action.getActionDisplay().setDurationRemaining(String.valueOf(etaInMinutes));
                     ActionManager actionManager = ActionManager.getSharedManager(Home.this);
@@ -1386,9 +1398,13 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         @Override
         public int getHeroMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return R.drawable.icon_desitination;
+            return R.drawable.ic_ht_destination_marker_default;
         }
 
+        @Override
+        public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return false;
+        }
 
         @Override
         public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
@@ -1400,6 +1416,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         @Override
         public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
             return R.drawable.ic_reset_bounds_button;
+        }
+
+        @Override
+        public boolean showCompletedAction() {
+            return false;
         }
     }
 
