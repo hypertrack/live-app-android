@@ -102,6 +102,18 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private TabLayout vehicleTypeTabLayout;
     private TextView infoMessageViewText;
     private LinearLayout infoMessageView, endTripLoaderAnimationLayout;
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
     private FrameLayout bottomButtonLayout;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
@@ -117,6 +129,19 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
     private HomeMapAdapter adapter;
     private HyperTrackMapFragment htMapFragment;
+
+    private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
+        @Override
+        public void OnCallback() {
+            // Initiate Stop Sharing on UI thread
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    completeTask();
+                }
+            });
+        }
+    };
 
     public MapFragmentCallback callback = new MapFragmentCallback() {
         @Override
@@ -749,21 +774,26 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
             onStartTask();
         }
+        LatLng latLng;
+        try {
+            if (googleMap != null && googleMap.getMyLocation() != null) {
+                SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
+                latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
 
-        // Set Default View for map according to User's LastKnownLocation
-        if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
-            LatLng lastKnownLatLng = HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng();
-            if (lastKnownLatLng != null && lastKnownLatLng.latitude != 0.0
-                    && lastKnownLatLng.longitude != 0.0) {
-
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 12.0f));
-
-            } else {
-                // Else Set Default View for map according to either User's Default Location
-                // (If Country Info was available) or (0.0, 0.0)
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                        new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Set Default View for map according to User's LastKnownLocation
+
+            if (SharedPreferenceManager.getLastKnownLocation() != null) {
+                defaultLocation = SharedPreferenceManager.getLastKnownLocation();
+            }
+
+            // Else Set Default View for map according to either User's Default Location
+            // (If Country Info was available) or (0.0, 0.0)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
         }
 
         checkForLocationPermission();
@@ -829,6 +859,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
+
                     Action action = (Action) response.getResponseObject();
                     action.getActionDisplay().setDurationRemaining(String.valueOf(etaInMinutes));
                     ActionManager actionManager = ActionManager.getSharedManager(Home.this);
@@ -883,19 +914,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
-    private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
-        @Override
-        public void OnCallback() {
-            // Initiate Stop Sharing on UI thread
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    completeTask();
-                }
-            });
-        }
-    };
-
     /**
      * Method to Initiate COMPLETE Action
      */
@@ -907,6 +925,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 HyperTrack.clearServiceNotificationParams();
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
                 HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
+
                 showEndingTripAnimation(false);
             }
 
@@ -1135,6 +1154,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         if (HyperTrack.checkLocationPermission(this) && mMap.isMyLocationEnabled() && mMap.getMyLocation() != null) {
             currentLocation = new LatLng(mMap.getMyLocation().getLatitude(),
                     mMap.getMyLocation().getLongitude());
+            SharedPreferenceManager.setLastKnownLocation(mMap.getMyLocation());
         }
 
         try {
@@ -1273,53 +1293,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
-    @SuppressLint("ParcelCreator")
-    private class GeocodingResultReceiver extends ResultReceiver {
-        GeocodingResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
-                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
-                if (latLng == null)
-                    return;
-                defaultLocation.setLatitude(latLng.latitude);
-                defaultLocation.setLongitude(latLng.longitude);
-                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
-
-                if (mMap != null) {
-                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
-                        zoomLevel = 4.0f;
-
-                    // Check if any Location Data is available, meaning Country zoom level need not be used
-                    Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
-                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
-                            && lastKnownCachedLocation.getLongitude() != 0.0) {
-                        return;
-                    }
-
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-                }
-            }
-        }
-    }
-
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -1375,5 +1348,38 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         HyperTrack.removeActions(null);
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class GeocodingResultReceiver extends ResultReceiver {
+        GeocodingResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
+                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
+                if (latLng == null)
+                    return;
+                defaultLocation.setLatitude(latLng.latitude);
+                defaultLocation.setLongitude(latLng.longitude);
+                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
+
+                if (mMap != null) {
+                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
+                        zoomLevel = 4.0f;
+
+                    // Check if any Location Data is available, meaning Country zoom level need not be used
+                    Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
+                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
+                            && lastKnownCachedLocation.getLongitude() != 0.0) {
+                        return;
+                    }
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+                }
+            }
+        }
     }
 }

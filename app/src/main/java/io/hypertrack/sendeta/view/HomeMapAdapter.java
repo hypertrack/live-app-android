@@ -59,6 +59,16 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
+    public int getHeroMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return R.drawable.ic_ht_destination_marker_default;
+    }
+
+    @Override
+    public boolean showCompletedAction() {
+        return false;
+    }
+
+    @Override
     public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
         int bottom = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
         int right = mContext.getResources().getDimensionPixelSize(R.dimen.map_side_padding);
@@ -74,5 +84,10 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
         return R.drawable.ic_reset_bounds_button;
+    }
+
+    @Override
+    public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return false;
     }
 }

@@ -46,7 +46,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void attemptLogin(final String userName, String phone, String ISOCode, final File profileImage,
+    public void attemptLogin(final String userName, String phone, String ISOCode, final String deviceID, final File profileImage,
                              final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
 
         final OnboardingUser user = this.onboardingManager.getUser();
@@ -59,7 +59,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         OnboardingUser.setOnboardingUser();
 
         try {
-            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone),
+            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
                     new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {

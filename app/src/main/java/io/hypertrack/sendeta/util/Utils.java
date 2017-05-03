@@ -123,4 +123,15 @@ public class Utils {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+    /**
+     * Method to get the device ID
+     * @param context
+     * @return
+     */
+
+    public static String getDeviceId(Context context) {
+        String device_uuid = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        return device_uuid != null ? device_uuid : "";
+    }
 }
