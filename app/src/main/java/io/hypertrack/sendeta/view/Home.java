@@ -771,7 +771,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
         LatLng latLng;
         try {
-            if (googleMap != null && googleMap.getMyLocation() != null) {
+            if (googleMap != null && googleMap.isMyLocationEnabled() && googleMap.getMyLocation() != null) {
                 SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
                 latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
@@ -924,11 +924,12 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
                 if (mMap != null) {
 
-                    if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
+                    if (SharedPreferenceManager.getLastKnownLocation() != null) {
 
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng(), 16f));
+                        LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
 
-                    } else if (mMap.getMyLocation() != null) {
+                    } else if (mMap.getMyLocation() != null && mMap.isMyLocationEnabled()) {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 16f));
                         SharedPreferenceManager.setLastKnownLocation(mMap.getMyLocation());
