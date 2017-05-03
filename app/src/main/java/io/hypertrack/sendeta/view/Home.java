@@ -102,6 +102,18 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private TabLayout vehicleTypeTabLayout;
     private TextView infoMessageViewText;
     private LinearLayout infoMessageView, endTripLoaderAnimationLayout;
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
     private FrameLayout bottomButtonLayout;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
@@ -116,8 +128,18 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private HyperTrackMapFragment htMapFragment;
-
-
+    private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
+        @Override
+        public void OnCallback() {
+            // Initiate Stop Sharing on UI thread
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    completeTask();
+                }
+            });
+        }
+    };
     public MapFragmentCallback callback = new MapFragmentCallback() {
         @Override
         public void onMapReadyCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
@@ -141,7 +163,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             updateMapView();
         }
     };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -759,22 +780,16 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         } catch (Exception e) {
             e.printStackTrace();
             // Set Default View for map according to User's LastKnownLocation
-            if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
-                LatLng lastKnownLatLng = HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng();
-                if (lastKnownLatLng != null && lastKnownLatLng.latitude != 0.0
-                        && lastKnownLatLng.longitude != 0.0) {
 
-
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 12.0f));
-                } else {
-                    // Else Set Default View for map according to either User's Default Location
-                    // (If Country Info was available) or (0.0, 0.0)
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
-                }
+            if (SharedPreferenceManager.getLastKnownLocation() != null) {
+                defaultLocation = SharedPreferenceManager.getLastKnownLocation();
             }
-        }
 
+            // Else Set Default View for map according to either User's Default Location
+            // (If Country Info was available) or (0.0, 0.0)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+        }
 
         checkForLocationPermission();
     }
@@ -893,19 +908,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
-    private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
-        @Override
-        public void OnCallback() {
-            // Initiate Stop Sharing on UI thread
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    completeTask();
-                }
-            });
-        }
-    };
-
     /**
      * Method to Initiate COMPLETE Action
      */
@@ -929,6 +931,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                     } else if (mMap.getMyLocation() != null) {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 16f));
+                        SharedPreferenceManager.setLastKnownLocation(mMap.getMyLocation());
                     }
                 }
             }
@@ -1158,6 +1161,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         if (HyperTrack.checkLocationPermission(this) && mMap.isMyLocationEnabled() && mMap.getMyLocation() != null) {
             currentLocation = new LatLng(mMap.getMyLocation().getLatitude(),
                     mMap.getMyLocation().getLongitude());
+            SharedPreferenceManager.setLastKnownLocation(mMap.getMyLocation());
         }
 
         try {
@@ -1296,22 +1300,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
-
-
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
     @Override
     protected void onPause() {
         super.onPause();
@@ -1398,11 +1386,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                     if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
                             && lastKnownCachedLocation.getLongitude() != 0.0) {
                         return;
-                    }
+                }
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-                }
             }
         }
+    }
     }
 }
