@@ -155,7 +155,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
 
         // Initialize Map Fragment added in Activity Layout to getMapAsync
-        HyperTrackMapFragment htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
+        htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
         adapter = new HomeMapAdapter(this);
         htMapFragment.setHTMapAdapter(adapter);
@@ -739,7 +739,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             LatLng latLng = new LatLng(destinationPlace.getLocation().getLatitude(), destinationPlace.getLocation().getLongitude());
 
             if (etaInMinutes != null && etaInMinutes != 0) {
-
                 updateViewForETASuccess(etaInMinutes, latLng);
             } else {
                 updateViewForETASuccess(null, latLng);
@@ -748,18 +747,19 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
 
         // Set Default View for map according to User's LastKnownLocation
-        Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
-        if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
-                && lastKnownCachedLocation.getLongitude() != 0.0) {
+        if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
+            LatLng lastKnownLatLng = HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng();
+            if (lastKnownLatLng != null && lastKnownLatLng.latitude != 0.0
+                    && lastKnownLatLng.longitude != 0.0) {
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(lastKnownCachedLocation.getLatitude(), lastKnownCachedLocation.getLongitude()), 12.0f));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 12.0f));
 
-        } else {
-            // Else Set Default View for map according to either User's Default Location
-            // (If Country Info was available) or (0.0, 0.0)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+            } else {
+                // Else Set Default View for map according to either User's Default Location
+                // (If Country Info was available) or (0.0, 0.0)
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+            }
         }
 
         checkForLocationPermission();
@@ -833,14 +833,14 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                         mProgressDialog.dismiss();
                     }
 
-                    // Show ShareCard
-                    share();
-
                     onStartTask();
 
                     HyperTrack.clearServiceNotificationParams();
                     AnalyticsStore.getLogger().startedTrip(true, null);
                     HTLog.i(TAG, "Task started successfully.");
+
+                    // Show ShareCard
+                    share();
                 }
             }
 
@@ -966,6 +966,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 // do nothing
+                htMapFragment.notifyChanged();
             }
 
             @Override
@@ -1384,5 +1385,38 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         HyperTrack.removeActions(null);
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
+    }
+
+    @SuppressLint("ParcelCreator")
+    private class GeocodingResultReceiver extends ResultReceiver {
+        GeocodingResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
+                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
+                if (latLng == null)
+                    return;
+                defaultLocation.setLatitude(latLng.latitude);
+                defaultLocation.setLongitude(latLng.longitude);
+                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
+
+                if (mMap != null) {
+                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
+                        zoomLevel = 4.0f;
+
+                    // Check if any Location Data is available, meaning Country zoom level need not be used
+                    Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
+                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
+                            && lastKnownCachedLocation.getLongitude() != 0.0) {
+                        return;
+                    }
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
+                }
+            }
+        }
     }
 }
