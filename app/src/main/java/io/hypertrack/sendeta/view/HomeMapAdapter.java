@@ -15,11 +15,6 @@ import io.hypertrack.sendeta.R;
 public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     public Context mContext;
-    public boolean showMyLocation = true;
-
-    public void setShowMyLocation(boolean showMyLocation) {
-        this.showMyLocation = showMyLocation;
-    }
 
     public HomeMapAdapter(Context mContext) {
         super(mContext);
@@ -33,12 +28,14 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return showMyLocation;
+        return HyperTrack.getConsumerClient().getActionIDs() == null ||
+                HyperTrack.getConsumerClient().getActionIDs().isEmpty();
     }
 
     @Override
     public boolean setMyLocationButtonEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return showMyLocation;
+        return HyperTrack.getConsumerClient().getActionIDs() == null ||
+                HyperTrack.getConsumerClient().getActionIDs().isEmpty();
     }
 
     @Override

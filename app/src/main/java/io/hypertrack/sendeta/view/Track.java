@@ -1,11 +1,13 @@
 package io.hypertrack.sendeta.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
+import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.internal.common.util.TextUtils;
 
@@ -24,6 +26,27 @@ public class Track extends BaseActivity implements TrackView {
     private Intent intent;
     private Button retryButton;
     private TrackPresenter trackPresenter;
+
+    class TrackMapAdapter extends HyperTrackMapAdapter {
+        public TrackMapAdapter(Context mContext) {
+            super(mContext);
+        }
+
+        @Override
+        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return true;
+        }
+
+        @Override
+        public boolean showTrailingPolyline(String actionID) {
+            return true;
+        }
+
+        @Override
+        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
+            return false;
+        }
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,6 +68,7 @@ public class Track extends BaseActivity implements TrackView {
         // Initialize HyperTrackMapFragment, adapter and callback
         HyperTrackMapFragment hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment);
+        hyperTrackMapFragment.setHTMapAdapter(new TrackMapAdapter(this));
 
         // Initialize UI buttons
         retryButton = (Button) findViewById(R.id.retryButton);
