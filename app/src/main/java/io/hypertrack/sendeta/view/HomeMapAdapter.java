@@ -17,13 +17,13 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     public Context mContext;
     public boolean showMyLocation = true;
 
-    public void setShowMyLocation(boolean showMyLocation) {
-        this.showMyLocation = showMyLocation;
-    }
-
     public HomeMapAdapter(Context mContext) {
         super(mContext);
         this.mContext = mContext;
+    }
+
+    public void setShowMyLocation(boolean showMyLocation) {
+        this.showMyLocation = showMyLocation;
     }
 
     @Override
@@ -68,7 +68,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean showCompletedAction() {
-        return false;
+        return true;
     }
 
     @Override
