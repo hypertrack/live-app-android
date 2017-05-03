@@ -216,7 +216,7 @@ public class Profile extends BaseActivity implements ProfileView {
         String name = mNameView.getText().toString();
         String number = phoneNumberView.getText().toString();
         Utils.hideKeyboard(Profile.this, register);
-        presenter.attemptLogin(name, number, isoCode, profileImage, oldProfileImage, updatedProfileImage);
+        presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage, oldProfileImage, updatedProfileImage);
     }
 
     public void onNextButtonClicked(MenuItem menuItem) {

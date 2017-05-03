@@ -46,8 +46,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.HyperTrackConstants;
-import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
@@ -79,6 +77,7 @@ import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
+import io.hypertrack.sendeta.store.callback.ActionManagerListener;
 import io.hypertrack.sendeta.store.callback.TaskETACallback;
 import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
@@ -103,18 +102,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private TabLayout vehicleTypeTabLayout;
     private TextView infoMessageViewText;
     private LinearLayout infoMessageView, endTripLoaderAnimationLayout;
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
     private FrameLayout bottomButtonLayout;
     private Button sendETAButton, retryButton;
     private SwipeButton endTripSwipeButton;
@@ -129,6 +116,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private HyperTrackMapFragment htMapFragment;
+
+
     public MapFragmentCallback callback = new MapFragmentCallback() {
         @Override
         public void onMapReadyCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
@@ -152,6 +141,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             updateMapView();
         }
     };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -240,7 +230,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     }
 
     private void showRetryButton(boolean showRetryButton, final Place place) {
-
         if (showRetryButton) {
             // Initialize RetryButton on getETAForDestination failure
             bottomButtonLayout.setVisibility(View.VISIBLE);
@@ -355,52 +344,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 // Both Location & Network Enabled, Hide the Info Message View
                 infoMessageView.setVisibility(View.GONE);
             }
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (ActionManager.getSharedManager(this).getHyperTrackAction() != null)
-            return false;
-
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-        MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
-        if (SharedPreferenceManager.isTrackingON()) {
-            menuItem.setTitle("Pause Tracking");
-        } else {
-            menuItem.setTitle("Resume Tracking");
-        }
-
-        // Hide menu items if user is on an Action
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.tracking_toogle:
-                if (!TextUtils.isEmpty(item.getTitle().toString())) {
-                    if (item.getTitle().toString().equalsIgnoreCase("Resume Tracking")) {
-                        startHyperTrackTracking(true, new HyperTrackCallback() {
-                            @Override
-                            public void onSuccess(@NonNull SuccessResponse response) {
-                                item.setTitle("Pause Tracking");
-                            }
-
-                            @Override
-                            public void onError(@NonNull ErrorResponse errorResponse) {
-
-                            }
-                        });
-
-                    } else {
-                        stopHyperTrackTracking();
-                        item.setTitle("Resume Tracking");
-                    }
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
         }
     }
 
@@ -630,6 +573,9 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
 
             lookupId = intent.getStringExtra(Track.KEY_LOOKUP_ID);
+            if (adapter != null)
+                adapter.setShowMyLocation(lookupId == null);
+
             if (!TextUtils.isEmpty(lookupId)) {
                 mProgressDialog = new ProgressDialog(this);
                 mProgressDialog.setCancelable(false);
@@ -853,10 +799,12 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
                     getResources().getDimensionPixelSize(R.dimen.map_top_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
 
-            mMap.setPadding(left, top, right, bottom);
+            if (endTripSwipeButton.isShown())
+                bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+
+            mMap.setPadding(left, top, 0, bottom);
         }
     }
 
@@ -945,6 +893,19 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
+    private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
+        @Override
+        public void OnCallback() {
+            // Initiate Stop Sharing on UI thread
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    completeTask();
+                }
+            });
+        }
+    };
+
     /**
      * Method to Initiate COMPLETE Action
      */
@@ -956,7 +917,9 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 HyperTrack.clearServiceNotificationParams();
                 AnalyticsStore.getLogger().tappedEndTrip(true, null);
                 HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
+
                 showEndingTripAnimation(false);
+
                 if (mMap != null) {
 
                     if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
@@ -967,8 +930,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 16f));
                     }
-
-                    htMapFragment.clearSelectExpectedPlaceView();
                 }
             }
 
@@ -1015,9 +976,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         // Update SelectedVehicleType in persistentStorage
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
+        ActionManager.getSharedManager(this).setActionComletedListener(actionCompletedListener);
         lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupID();
-        /*if (adapter != null)
-            adapter.notifyDataSetChanged();*/
 
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
@@ -1044,11 +1004,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             mProgressDialog.dismiss();
         }
 
-        // TODO: 01/05/17 Figure out how to handle action completions here
         HyperTrack.removeActions(null);
         lookupId = null;
-        if (adapter != null)
-            adapter.notifyDataSetChanged();
+        if (adapter != null) {
+            adapter.showMyLocation = true;
+        }
 
         updateMapView();
 
@@ -1218,22 +1178,13 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14.0f));
 
             } else if (count >= 1) {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 0));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
             }
 
             updateMapPadding();
         } catch (Exception e) {
             e.printStackTrace();
             Crashlytics.logException(e);
-        }
-    }
-
-    @Override
-    public void onResult(@NonNull Status status) {
-        if (status.isSuccess()) {
-            Log.v(TAG, "Geofencing added successfully");
-        } else {
-            Log.v(TAG, "Geofencing not added. There was an error");
         }
     }
 
@@ -1276,12 +1227,56 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (ActionManager.getSharedManager(this).getHyperTrackAction() != null)
+            return false;
+
+        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
+        if (SharedPreferenceManager.isTrackingON()) {
+            menuItem.setTitle("Pause Tracking");
+        } else {
+            menuItem.setTitle("Resume Tracking");
+        }
+
+        // Hide menu items if user is on an Action
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.tracking_toogle:
+                if (!TextUtils.isEmpty(item.getTitle().toString())) {
+                    if (item.getTitle().toString().equalsIgnoreCase("Resume Tracking")) {
+                        startHyperTrackTracking(true, new HyperTrackCallback() {
+                            @Override
+                            public void onSuccess(@NonNull SuccessResponse response) {
+                                item.setTitle("Pause Tracking");
+                            }
+
+                            @Override
+                            public void onError(@NonNull ErrorResponse errorResponse) {
+
+                            }
+                        });
+
+                    } else {
+                        stopHyperTrackTracking();
+                        item.setTitle("Resume Tracking");
+                    }
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case PermissionUtils.REQUEST_CODE_PERMISSION_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    // TODO: 01/05/17 Clean this up
                     HyperTrack.requestLocationServices(Home.this, null);
 
                 } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -1293,21 +1288,33 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == HyperTrackConstants.REQUEST_CODE_DESTINATION_PLACE) {
-            if (resultCode == RESULT_OK) {
-                Toast.makeText(Home.this, "Result Okay", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(Home.this, "Result Cancelled", Toast.LENGTH_SHORT).show();
-            }
+    public void onResult(@NonNull Status status) {
+        if (status.isSuccess()) {
+            Log.v(TAG, "Geofencing added successfully");
+        } else {
+            Log.v(TAG, "Geofencing not added. There was an error");
         }
     }
+
+
+
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
 
     @Override
     protected void onPause() {
         super.onPause();
-
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
     }
@@ -1318,7 +1325,12 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         ActionManager actionManager = ActionManager.getSharedManager(Home.this);
         if (actionManager.getHyperTrackAction() != null && !actionManager.getHyperTrackAction().isCompleted()) {
+            actionManager.setActionComletedListener(actionCompletedListener);
+
             lookupId = actionManager.getHyperTrackAction().getLookupID();
+            if (adapter != null)
+                adapter.setShowMyLocation(true);
+
             HyperTrack.trackActionByLookupId(lookupId, null);
 
         } else {
@@ -1359,69 +1371,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         HyperTrack.removeActions(null);
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
-    }
-
-    public class HomeMapAdapter extends HyperTrackMapAdapter {
-        public HomeMapAdapter(Context mContext) {
-            super(mContext);
-        }
-
-        @Override
-        public boolean showOrderStatusToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
-            return false;
-        }
-
-        @Override
-        public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-            return lookupId == null;
-        }
-
-        @Override
-        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return false;
-        }
-
-        @Override
-        public boolean showSelectExpectedPlace() {
-            return true;
-        }
-
-        @Override
-        public boolean showTrailingPolyline(String actionID) {
-            return true;
-        }
-
-        @Override
-        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
-            return false;
-        }
-
-        @Override
-        public int getHeroMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return R.drawable.ic_ht_destination_marker_default;
-        }
-
-        @Override
-        public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return false;
-        }
-
-        @Override
-        public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
-            int bottom = getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
-            int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            return new int[]{0, 0, right, bottom};
-        }
-
-        @Override
-        public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-            return R.drawable.ic_reset_bounds_button;
-        }
-
-        @Override
-        public boolean showCompletedAction() {
-            return false;
-        }
     }
 
     @SuppressLint("ParcelCreator")
