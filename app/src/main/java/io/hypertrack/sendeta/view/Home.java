@@ -611,8 +611,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 }
             }
 
-            //  updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
-            // onStartTask();
+            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
+            onStartTask();
 
             shouldRestoreTask = true;
 
@@ -804,18 +804,19 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
 
         // Set Default View for map according to User's LastKnownLocation
-        Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
-        if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
-                && lastKnownCachedLocation.getLongitude() != 0.0) {
+        if (HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation() != null) {
+            LatLng lastKnownLatLng = HyperTrack.getConsumerClient().getUserPreferences().getLastRecordedLocation().getGeoJSONLocation().getLatLng();
+            if (lastKnownLatLng != null && lastKnownLatLng.latitude != 0.0
+                    && lastKnownLatLng.longitude != 0.0) {
 
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(lastKnownCachedLocation.getLatitude(), lastKnownCachedLocation.getLongitude()), 12.0f));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastKnownLatLng, 12.0f));
 
-        } else {
-            // Else Set Default View for map according to either User's Default Location
-            // (If Country Info was available) or (0.0, 0.0)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+            } else {
+                // Else Set Default View for map according to either User's Default Location
+                // (If Country Info was available) or (0.0, 0.0)
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+            }
         }
 
         checkForLocationPermission();
@@ -838,8 +839,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
     private void updateMapPadding() {
         if (mMap != null && lookupId == null) {
-            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding) :
-                    getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout);
+            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
+                    getResources().getDimensionPixelSize(R.dimen.map_top_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
@@ -887,14 +888,14 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                         mProgressDialog.dismiss();
                     }
 
-                    // Show ShareCard
-                    share();
-
                     onStartTask();
 
                     HyperTrack.clearServiceNotificationParams();
                     AnalyticsStore.getLogger().startedTrip(true, null);
                     HTLog.i(TAG, "Task started successfully.");
+
+                    // Show ShareCard
+                    share();
                 }
             }
 
@@ -985,6 +986,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private void onStartTask() {
         if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null)
             return;
+
+        expectedPlaceMarker = null;
 
         // Hide VehicleType TabLayout onStartTask success
         AnimationUtils.collapse(vehicleTypeTabLayout);
@@ -1382,11 +1385,21 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
 
         @Override
+        public int getHeroMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return R.drawable.icon_desitination;
+        }
+
+
+        @Override
         public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
-            int top = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
-            int bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+            int bottom = getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
             int right = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            return new int[]{0, top, right, bottom};
+            return new int[]{0, 0, right, bottom};
+        }
+
+        @Override
+        public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
+            return R.drawable.ic_reset_bounds_button;
         }
     }
 

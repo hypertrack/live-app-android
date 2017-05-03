@@ -108,7 +108,6 @@
                 android:id="@+id/home.bottomButtonLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/drawable_background_gradient_home"
                 android:foreground="?android:attr/selectableItemBackground"
                 android:visibility="gone">
 

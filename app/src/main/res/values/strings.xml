@@ -72,10 +72,10 @@
 
     <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
     <string name="fetching_current_location">Please wait while we fetch your current location</string>
-    <string name="calculating_eta_message">Calculating your ETA</string>
-    <string name="starting_task_message">Generating a link</string>
-    <string name="fetching_data_msg">Fetching details</string>
-    <string name="completing_task_message">Ending your trip</string>
+    <string name="calculating_eta_message">Calculating ETA…</string>
+    <string name="starting_task_message">Sharing your live location…</string>
+    <string name="fetching_data_msg">Fetching details…</string>
+    <string name="completing_task_message">Stopping your live location…</string>
 
     <string name="saving_favorite_addresses_message">Saving your favorite address</string>
     <string name="editing_favorite_addresses_message">Saving your edits</string>
