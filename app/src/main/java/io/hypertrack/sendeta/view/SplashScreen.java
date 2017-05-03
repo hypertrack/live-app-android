@@ -116,9 +116,7 @@ public class SplashScreen extends BaseActivity {
     private void processTrackingDeepLink(AppDeepLink appDeepLink) {
         // Check if lookup_id is available from deeplink
         if (!TextUtils.isEmpty(appDeepLink.lookupId)) {
-            ArrayList<String> actionIds = new ArrayList<>();
-            actionIds.add(appDeepLink.taskID);
-            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, actionIds);
+            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, appDeepLink.taskID, false);
             return;
         }
 
@@ -141,9 +139,8 @@ public class SplashScreen extends BaseActivity {
                 List<Action> actions = (List<Action>) response.getResponseObject();
                 if (actions != null && !actions.isEmpty()) {
                     // Handle getActionForShortCode API success
-                    ArrayList<String> actionIds = new ArrayList<>();
-                    actionIds.add(actions.get(0).getId());
-                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actionIds);
+                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actions.get(0).getId(),
+                            actions.get(0).hasActionFinished());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -163,28 +160,31 @@ public class SplashScreen extends BaseActivity {
         });
     }
 
-    private void handleTrackingDeepLinkSuccess(String lookupId, ArrayList<String> actionIds) {
+    private void handleTrackingDeepLinkSuccess(String lookupId, String actionId, boolean isCompleted) {
+        ArrayList<String> actionIds = new ArrayList<>();
+        actionIds.add(actionId);
+
+        Intent intent = new Intent()
+                .putExtra(Track.KEY_ACTION_ID_LIST, actionIds)
+                .putExtra(Track.KEY_TRACK_DEEPLINK, true)
+                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
         // Check if current user is sharing location or not
         if (SharedPreferenceManager.getActionID(SplashScreen.this) == null) {
-            // Handle Deeplink on Home Screen with Live Location Sharing enabled
-            TaskStackBuilder.create(SplashScreen.this)
-                    .addNextIntentWithParentStack(new Intent(SplashScreen.this, Home.class)
-                            .putExtra(Track.KEY_ACTION_ID_LIST, actionIds)
-                            .putExtra(Track.KEY_LOOKUP_ID, lookupId)
-                            .putExtra(Track.KEY_TRACK_DEEPLINK, true)
-                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                    .startActivities();
-
+             intent.setClass(SplashScreen.this, Home.class);
         } else {
-            // Handle Deeplink on Track Screen with Live Location Sharing disabled
-            TaskStackBuilder.create(SplashScreen.this)
-                    .addNextIntentWithParentStack(new Intent(SplashScreen.this, Track.class)
-                            .putExtra(Track.KEY_ACTION_ID_LIST, actionIds)
-                            .putExtra(Track.KEY_LOOKUP_ID, lookupId)
-                            .putExtra(Track.KEY_TRACK_DEEPLINK, true)
-                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                    .startActivities();
+            intent.setClass(SplashScreen.this, Track.class);
         }
+
+        // Add lookupId for ongoing actions
+        if (!isCompleted) {
+            intent.putExtra(Track.KEY_LOOKUP_ID, lookupId);
+        }
+
+        // Handle Deeplink on Track Screen with Live Location Sharing disabled
+        TaskStackBuilder.create(SplashScreen.this)
+                .addNextIntentWithParentStack(intent)
+                .startActivities();
         finish();
     }
 
