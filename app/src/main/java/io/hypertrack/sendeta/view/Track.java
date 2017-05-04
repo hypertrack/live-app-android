@@ -150,6 +150,11 @@ public class Track extends BaseActivity implements TrackView {
         }
 
         @Override
+        public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return false;
+        }
+
+        @Override
         public boolean showTrailingPolyline() {
             return true;
         }

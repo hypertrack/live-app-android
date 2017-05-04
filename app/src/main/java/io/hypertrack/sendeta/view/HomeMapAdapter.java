@@ -66,6 +66,11 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
+    public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return false;
+    }
+
+    @Override
     public boolean showSelectExpectedPlace() {
         return true;
     }
@@ -78,11 +83,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
         return false;
-    }
-
-    @Override
-    public boolean showCompletedAction() {
-        return true;
     }
 
     @Override
@@ -104,8 +104,8 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public int showETAOn() {
-        return HyperTrackMapAdapter.ETA_ON_HERO_MARKER;
+    public int enableLiveLocationSharing() {
+        return HyperTrackMapAdapter.enableLiveLocationSharingView;
     }
 
     @Override
