@@ -17,7 +17,6 @@ import com.hypertrack.lib.internal.common.util.TextUtils;
 
 import java.util.List;
 
-import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
 import io.hypertrack.sendeta.presenter.TrackPresenter;
@@ -147,7 +146,7 @@ public class Track extends BaseActivity implements TrackView {
 
         @Override
         public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
-            return BuildConfig.TOOLBAR_TITLE;
+            return Track.this.getString(R.string.app_name);
         }
 
         @Override

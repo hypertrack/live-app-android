@@ -12,10 +12,10 @@ import com.hypertrack.lib.models.SuccessResponse;
 
 import java.io.File;
 
+import io.hypertrack.sendeta.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.view.Profile;
 import io.hypertrack.sendeta.view.ProfileView;

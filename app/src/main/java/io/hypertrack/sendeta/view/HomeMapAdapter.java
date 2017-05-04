@@ -10,7 +10,6 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 
-import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
@@ -36,7 +35,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
-        return BuildConfig.TOOLBAR_TITLE;
+        return mContext.getString(R.string.app_name);
     }
 
     @Override

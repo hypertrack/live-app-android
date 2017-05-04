@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 
 import java.io.File;
 
+import io.hypertrack.sendeta.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
-import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 
 /**
  * Created by ulhas on 18/06/16.
