@@ -54,18 +54,13 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public boolean showTrailingPolyline(String actionID) {
+    public boolean showTrailingPolyline() {
         return true;
     }
 
     @Override
     public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
         return false;
-    }
-
-    @Override
-    public int getHeroMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return R.drawable.ic_ht_destination_marker_default;
     }
 
     @Override
@@ -94,5 +89,15 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
         return false;
+    }
+
+    @Override
+    public int showETAOn() {
+        return HyperTrackMapAdapter.ETA_ON_HERO_MARKER;
+    }
+
+    @Override
+    public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return R.drawable.ic_ht_destination_marker_default;
     }
 }
