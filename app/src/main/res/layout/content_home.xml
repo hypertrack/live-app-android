@@ -14,59 +14,59 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
-        android:theme="@style/AppTheme.AppBarOverlay">
-
-        <include layout="@layout/toolbar" />
-
-        <android.support.design.widget.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="42dp"
-            android:visibility="gone"
-            app:tabGravity="fill"
-            app:tabMode="fixed" />
-
-        <!-- info message container-->
-        <LinearLayout
-            android:id="@+id/home.info_message_view"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/app_bar_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#d89d3b"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="@dimen/padding_medium"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:layout_gravity="top"
+            android:theme="@style/AppTheme.AppBarOverlay">
 
-            <ImageView
-                android:id="@+id/home.info_message_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="@dimen/margin_medium" />
+            <include layout="@layout/toolbar" />
 
-            <TextView
-                android:id="@+id/home.info_message_text"
+            <android.support.design.widget.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:visibility="gone"
+                app:tabGravity="fill"
+                app:tabMode="fixed" />
+
+            <!-- info message container-->
+            <LinearLayout
+                android:id="@+id/home.info_message_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@null"
-                android:fontFamily="sans-serif-medium"
-                android:gravity="center"
-                android:textColor="@android:color/white"
-                android:textSize="@dimen/text_base" />
-        </LinearLayout>
-    </android.support.design.widget.AppBarLayout>
+                android:background="#d89d3b"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="@dimen/padding_medium"
+                android:visibility="gone"
+                tools:visibility="visible">
 
-    <fragment
-        android:id="@+id/htMapfragment"
-        android:name="com.hypertrack.lib.HyperTrackMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout="@layout/fragment_map" />
+                <ImageView
+                    android:id="@+id/home.info_message_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/margin_medium" />
+
+                <TextView
+                    android:id="@+id/home.info_message_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:fontFamily="sans-serif-medium"
+                    android:gravity="center"
+                    android:textColor="@android:color/white"
+                    android:textSize="@dimen/text_base" />
+            </LinearLayout>
+        </android.support.design.widget.AppBarLayout>
+
+        <fragment
+            android:id="@+id/htMapfragment"
+            android:name="com.hypertrack.lib.HyperTrackMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/fragment_map" />
     </LinearLayout>
 
     <LinearLayout
@@ -109,7 +109,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:foreground="?android:attr/selectableItemBackground"
-                android:visibility="gone">
+                android:visibility="visible">
 
                 <Button
                     android:id="@+id/sendETAButton"
@@ -125,27 +125,40 @@
                     android:textColor="@color/text_dark_bg_base"
                     android:visibility="gone" />
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <Button
+                    android:id="@+id/endTripSwipeButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/cta_button_size"
+                    android:layout_gravity="center"
+                    android:layout_margin="@dimen/margin_high"
+                    android:background="@drawable/stop_sharing_btn_bg"
+                    android:foreground="?android:attr/selectableItemBackground"
+                    android:gravity="center"
+                    android:paddingLeft="@dimen/padding_xhigh"
+                    android:paddingRight="@dimen/padding_xhigh"
+                    android:textColor="@color/text_dark_bg_base"
+                    android:visibility="gone" />
+                <!-- <FrameLayout
+                     android:layout_width="match_parent"
+                     android:layout_height="wrap_content">
 
-                    <io.hypertrack.sendeta.util.SwipeButton
-                        android:id="@+id/endTripSwipeButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="@dimen/cta_button_size"
-                        android:layout_gravity="center"
-                        android:layout_margin="@dimen/margin_high"
-                        android:background="@color/colorAccent"
-                        android:clickable="true"
-                        android:elevation="@dimen/elevation_base"
-                        android:gravity="center"
-                        android:paddingLeft="@dimen/padding_xxxhigh"
-                        android:paddingRight="@dimen/padding_xxxhigh"
-                        android:text="@string/action_slide_to_end_sharing"
-                        android:textColor="@color/text_dark_bg_base"
-                        android:textSize="@dimen/text_base"
-                        android:visibility="gone" />
-                </FrameLayout>
+                     <io.hypertrack.sendeta.util.SwipeButton
+                         android:id="@+id/endTripSwipeButton"
+                         android:layout_width="wrap_content"
+                         android:layout_height="@dimen/cta_button_size"
+                         android:layout_gravity="center"
+                         android:layout_margin="@dimen/margin_high"
+                         android:background="@color/colorAccent"
+                         android:clickable="true"
+                         android:elevation="@dimen/elevation_base"
+                         android:gravity="center"
+                         android:paddingLeft="@dimen/padding_xxxhigh"
+                         android:paddingRight="@dimen/padding_xxxhigh"
+                         android:text="@string/action_slide_to_end_sharing"
+                         android:textColor="@color/text_dark_bg_base"
+                         android:textSize="@dimen/text_base"
+                         android:visibility="visible" />
+                 </FrameLayout>-->
 
                 <Button
                     android:id="@+id/retryButton"

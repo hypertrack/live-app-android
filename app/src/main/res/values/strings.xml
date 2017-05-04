@@ -1,6 +1,7 @@
 <resources>
     <string name="action_settings">Settings</string>
     <string name="action_slide_to_end_sharing">SLIDE TO STOP SHARING</string>
+    <string name="complete_action">STOP SHARING</string>
     <string name="action_ending_trip">ENDING TRIP</string>
     <string name="action_send_eta">Share Live Location</string>
     <string name="action_request_eta">Request Tracking Link</string>

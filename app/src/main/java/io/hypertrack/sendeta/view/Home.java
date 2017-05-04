@@ -87,8 +87,6 @@ import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
-import io.hypertrack.sendeta.util.SwipeButton;
-import io.hypertrack.sendeta.util.SwipeButtonCustomItems;
 import io.hypertrack.sendeta.util.Utils;
 
 public class Home extends BaseActivity implements ResultCallback<Status> {
@@ -115,8 +113,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     };
     private FrameLayout bottomButtonLayout;
-    private Button sendETAButton, retryButton;
-    private SwipeButton endTripSwipeButton;
+    private Button sendETAButton, retryButton, endTripSwipeButton;
     private ImageButton shareButton, navigateButton;
     private Place destinationPlace;
     private ProgressDialog mProgressDialog;
@@ -506,10 +503,22 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     }
 
     private void setupEndTripSwipeButton() {
-        endTripSwipeButton = (SwipeButton) findViewById(R.id.endTripSwipeButton);
+        endTripSwipeButton = (Button) findViewById(R.id.endTripSwipeButton);
+        endTripSwipeButton.setText(getString(R.string.complete_action));
+        endTripSwipeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Check if Location Permission has been granted & Location has been enabled
+                if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
+                    showEndingTripAnimation(true);
+                    completeTask();
+                }
+            }
+        });
+
         endTripLoaderAnimationLayout = (LinearLayout) findViewById(R.id.endTripLoaderAnimationLayout);
 
-        SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
+/*        SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
             @Override
             public void onSwipeConfirm() {
                 // Check if Location Permission has been granted & Location has been enabled
@@ -524,8 +533,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 .setActionConfirmText(getString(R.string.action_slide_to_end_sharing));
 
         if (endTripSwipeButton != null) {
-            endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);
-        }
+            endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);*/
     }
 
     private void showEndingTripAnimation(boolean show) {
@@ -997,7 +1005,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         sendETAButton.setVisibility(View.GONE);
         endTripSwipeButton.setVisibility(View.VISIBLE);
-        endTripSwipeButton.setText(R.string.action_slide_to_end_sharing);
+        endTripSwipeButton.setText(R.string.complete_action);
 
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
