@@ -42,7 +42,8 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
         if (SharedPreferenceManager.getLastKnownLocation() != null) {
-            LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
+            LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
+                    SharedPreferenceManager.getLastKnownLocation().getLongitude());
             return CameraUpdateFactory.newLatLng(latLng);
         }
         return super.getMapFragmentInitialState(hyperTrackMapFragment);
@@ -104,7 +105,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public int enableLiveLocationSharing() {
+    public int enableLiveLocationSharingView() {
         return HyperTrackMapAdapter.enableLiveLocationSharingView;
     }
 
@@ -116,5 +117,10 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public boolean showActionSummaryForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
         return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1;
+    }
+
+    @Override
+    public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return false;
     }
 }
