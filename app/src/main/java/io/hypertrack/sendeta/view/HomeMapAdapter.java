@@ -112,4 +112,9 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
         return R.drawable.ic_ht_destination_marker_default;
     }
+
+    @Override
+    public boolean showActionSummaryForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1;
+    }
 }
