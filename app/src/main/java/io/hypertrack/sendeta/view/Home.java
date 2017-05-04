@@ -68,7 +68,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.OnboardingUser;
 import io.hypertrack.sendeta.model.TaskETAResponse;
@@ -100,18 +99,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private TabLayout vehicleTypeTabLayout;
     private TextView infoMessageViewText;
     private LinearLayout infoMessageView, endTripLoaderAnimationLayout;
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
     private FrameLayout bottomButtonLayout;
     private Button sendETAButton, retryButton, endTripSwipeButton;
     private ImageButton shareButton, navigateButton;
@@ -170,18 +157,13 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         setContentView(R.layout.activity_home);
 
         // Initialize Toolbar without Home Button
-        initToolbar(BuildConfig.TOOLBAR_TITLE, false);
-
+        initToolbar();
         user = OnboardingManager.sharedManager().getUser();
-        if (user.getImageBitmap() != null) {
-            Bitmap bitmap = user.getImageBitmap();
-            setToolbarIcon(bitmap);
-        }
 
         // Initialize Map Fragment added in Activity Layout to getMapAsync
         htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
-        adapter = new HomeMapAdapter(this);
+        adapter = new HomeMapAdapter(this, getToolbar());
         htMapFragment.setHTMapAdapter(adapter);
         htMapFragment.setMapFragmentCallback(callback);
 
@@ -799,6 +781,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
             onStartTask();
         }
+
         checkForLocationPermission();
     }
 
@@ -1033,10 +1016,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         shareButton.setVisibility(View.GONE);
         navigateButton.setVisibility(View.GONE);
-
-        // Reset Toolbar Title on EndTrip
-        this.setTitle(BuildConfig.TOOLBAR_TITLE);
-        this.setSubTitle("");
 
         if (SharedPreferenceManager.isTrackingON()) {
             startHyperTrackTracking(true);
@@ -1311,6 +1290,20 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
+    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+
+    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateInfoMessageView();
+        }
+    };
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -1328,10 +1321,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
             lookupId = actionManager.getHyperTrackAction().getLookupID();
             HyperTrack.trackActionByLookupId(lookupId, null);
-        } else {
-            // Reset Toolbar Title as AppName in case no existing trip
-            this.setTitle(BuildConfig.TOOLBAR_TITLE);
-            this.setSubTitle("");
         }
 
         // Check if Location & Network are Enabled

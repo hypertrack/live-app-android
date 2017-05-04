@@ -21,7 +21,15 @@
             android:layout_gravity="top"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-            <include layout="@layout/toolbar" />
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?android:attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                app:titleTextAppearance="@style/Toolbar.TitleText"
+                app:subtitleTextAppearance="@style/Toolbar.SubTitleText"
+                android:theme="@style/HTOrderStatusToolbarTheme"
+                app:popupTheme="@style/AppTheme.PopupOverlay"/>
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabLayout"

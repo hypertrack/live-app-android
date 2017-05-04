@@ -1,6 +1,7 @@
 package io.hypertrack.sendeta.view;
 
 import android.content.Context;
+import android.support.v7.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -9,6 +10,7 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.util.SharedPreferenceManager;
 
@@ -19,15 +21,22 @@ import io.hypertrack.sendeta.util.SharedPreferenceManager;
 public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     public Context mContext;
-    public boolean showMyLocation = true;
+    private Toolbar toolbar;
 
-    public HomeMapAdapter(Context mContext) {
+    public HomeMapAdapter(Context mContext, Toolbar toolbar) {
         super(mContext);
         this.mContext = mContext;
+        this.toolbar = toolbar;
     }
 
-    public void setShowMyLocation(boolean showMyLocation) {
-        this.showMyLocation = showMyLocation;
+    @Override
+    public Toolbar getToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
+        return toolbar;
+    }
+
+    @Override
+    public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
+        return BuildConfig.TOOLBAR_TITLE;
     }
 
     @Override
@@ -37,11 +46,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
             return CameraUpdateFactory.newLatLng(latLng);
         }
         return super.getMapFragmentInitialState(hyperTrackMapFragment);
-    }
-
-    @Override
-    public boolean showOrderStatusToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
-        return false;
     }
 
     @Override
