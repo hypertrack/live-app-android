@@ -106,7 +106,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private ProgressDialog mProgressDialog;
     private boolean shouldRestoreTask = false, isMapLoaded = false,
             isvehicleTypeTabLayoutVisible = false;
-    private float zoomLevel = 1.0f;
+    private float zoomLevel = 15.0f;
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
@@ -556,30 +556,10 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             mProgressDialog.setMessage(getString(R.string.fetching_data_msg));
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
-
-            Log.v(TAG, "Task is active");
-            HTLog.i(TAG, "Task restored successfully.");
-
-            destinationPlace = actionManager.getPlace();
-
-            // Start the Task
-            LatLng latLng = new LatLng(destinationPlace.getLocation().getLatitude(), destinationPlace.getLocation().getLongitude());
-
-            if (etaInMinutes == null || etaInMinutes == 0) {
-                Action action = actionManager.getHyperTrackAction();
-                if (action != null && action.getActionDisplay() != null && !TextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
-                    Double displayETA = Double.valueOf(action.getActionDisplay().getDurationRemaining()) / 60;
-                    etaInMinutes = displayETA.intValue();
-                }
-            }
-
-            updateViewForETASuccess(etaInMinutes != 0 ? etaInMinutes : null, latLng);
             onStartTask();
-
             shouldRestoreTask = true;
 
         } else {
-            HTLog.e(TAG, "No Task to restore.");
             shouldRestoreTask = false;
 
             // Initialize VehicleTabLayout
@@ -745,42 +725,32 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         LatLng latLng;
-        if (googleMap != null && googleMap.isMyLocationEnabled() && googleMap.getMyLocation() != null) {
-            SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
-            latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
 
-        } else {
-            // Set Default View for map according to User's LastKnownLocation
+        if (SharedPreferenceManager.getActionID(Home.this) == null) {
+            if (googleMap != null && googleMap.isMyLocationEnabled() && googleMap.getMyLocation() != null) {
+                SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
+                latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
 
-            if (SharedPreferenceManager.getLastKnownLocation() != null) {
-                defaultLocation = SharedPreferenceManager.getLastKnownLocation();
+            } else {
+                // Set Default View for map according to User's LastKnownLocation
+                if (SharedPreferenceManager.getLastKnownLocation() != null) {
+                    defaultLocation = SharedPreferenceManager.getLastKnownLocation();
+                }
+
+                // Else Set Default View for map according to either User's Default Location
+                // (If Country Info was available) or (0.0, 0.0)
+                if (defaultLocation != null && defaultLocation.getLatitude() != 0.0
+                        && defaultLocation.getLongitude() != 0.0) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+                }
             }
-            // Else Set Default View for map according to either User's Default Location
-            // (If Country Info was available) or (0.0, 0.0)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
         }
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
-
-        // Check if Task has to be Restored & Update Map for that task
-        if (shouldRestoreTask && destinationPlace != null) {
-            if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null) {
-                return;
-            }
-
-            latLng = new LatLng(destinationPlace.getLocation().getLatitude(), destinationPlace.getLocation().getLongitude());
-
-            if (etaInMinutes != null && etaInMinutes != 0) {
-                updateViewForETASuccess(etaInMinutes, latLng);
-            } else {
-                updateViewForETASuccess(null, latLng);
-            }
-            onStartTask();
-        }
 
         checkForLocationPermission();
     }
@@ -920,7 +890,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                     if (SharedPreferenceManager.getLastKnownLocation() != null) {
 
                         LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16f));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
 
                     } else if (mMap.getMyLocation() != null && mMap.isMyLocationEnabled()) {
 
@@ -1169,7 +1139,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
 
             if (count == 1 && currentLocation != null) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 14.0f));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, zoomLevel));
 
             } else if (count >= 1) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));

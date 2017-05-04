@@ -44,7 +44,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
         if (SharedPreferenceManager.getLastKnownLocation() != null) {
             LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
                     SharedPreferenceManager.getLastKnownLocation().getLongitude());
-            return CameraUpdateFactory.newLatLng(latLng);
+            return CameraUpdateFactory.newLatLngZoom(latLng, 15.0f);
         }
         return super.getMapFragmentInitialState(hyperTrackMapFragment);
     }
