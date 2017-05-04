@@ -63,7 +63,8 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return false;
+        return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1 &&
+                HyperTrack.getConsumerClient().getAction(HyperTrack.getConsumerClient().getActionIDs().get(0)).hasActionFinished();
     }
 
     @Override
@@ -116,7 +117,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean showActionSummaryForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1;
+       return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1;
     }
 
     @Override

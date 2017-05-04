@@ -36,8 +36,7 @@
             android:allowTaskReparenting="false"
             android:label="${applicationLabel}"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Transparent">
+            android:screenOrientation="portrait">
 
             <!-- Intent Filter to make this Screen as the launcher screen -->
             <intent-filter>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 
@@ -16,6 +17,7 @@ import com.hypertrack.lib.internal.common.util.TextUtils;
 
 import java.util.List;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
 import io.hypertrack.sendeta.presenter.TrackPresenter;
@@ -141,6 +143,16 @@ public class Track extends BaseActivity implements TrackView {
         }
 
         @Override
+        public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
+            return BuildConfig.TOOLBAR_TITLE;
+        }
+
+        @Override
+        public Toolbar getToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
+            return null;
+        }
+
+        @Override
         public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
             if (SharedPreferenceManager.getLastKnownLocation() != null) {
                 LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
@@ -168,6 +180,5 @@ public class Track extends BaseActivity implements TrackView {
         public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
             return R.drawable.ic_reset_bounds_button;
         }
-
     }
 }
