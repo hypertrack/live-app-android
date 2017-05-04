@@ -24,11 +24,14 @@ public class DeepLinkUtil {
     public static final String KEY_ID = "id";
     public static final String KEY_UUID = "uuid";
     public static final String KEY_TASK_ID = "task_id";
+    public static final String KEY_ACTION_ID = "action_id";
     public static final String KEY_LAT = "lat";
     public static final String KEY_LNG = "lng";
     public static final String KEY_ADDRESS = "add";
     public static final String KEY_SHORT_CODE = "short_code";
     public static final String KEY_LOOKUP_ID = "lookup_id";
+    public static final String KEY_ORDER_ID = "order_id";
+
 
     //private static AppDeepLink appDeepLink;
     public static AppDeepLink prepareAppDeepLink(Context context, Uri uri) {
@@ -100,6 +103,7 @@ public class DeepLinkUtil {
                     }
                     break;
 
+                case KEY_ACTION_ID:
                 case KEY_TASK_ID:
                     try {
                         appDeepLink.taskID = uri.getQueryParameter(paramName);
@@ -140,6 +144,7 @@ public class DeepLinkUtil {
                     }
                     break;
 
+                case KEY_ORDER_ID:
                 case KEY_LOOKUP_ID:
                     try {
                         appDeepLink.lookupId = uri.getQueryParameter(paramName);
