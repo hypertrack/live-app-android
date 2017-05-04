@@ -104,7 +104,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public int enableLiveLocationSharing() {
+    public int enableLiveLocationSharingView() {
         return HyperTrackMapAdapter.enableLiveLocationSharingView;
     }
 
