@@ -49,7 +49,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public boolean showTrailingPolyline(String actionID) {
+    public boolean showTrailingPolyline() {
         return true;
     }
 
