@@ -7,6 +7,9 @@ import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.internal.common.util.TextUtils;
@@ -16,6 +19,7 @@ import java.util.List;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
 import io.hypertrack.sendeta.presenter.TrackPresenter;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 
 public class Track extends BaseActivity implements TrackView {
 
@@ -26,27 +30,6 @@ public class Track extends BaseActivity implements TrackView {
     private Intent intent;
     private Button retryButton;
     private TrackPresenter trackPresenter;
-
-    class TrackMapAdapter extends HyperTrackMapAdapter {
-        public TrackMapAdapter(Context mContext) {
-            super(mContext);
-        }
-
-        @Override
-        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return true;
-        }
-
-        @Override
-        public boolean showTrailingPolyline() {
-            return true;
-        }
-
-        @Override
-        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
-            return false;
-        }
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -145,5 +128,41 @@ public class Track extends BaseActivity implements TrackView {
     protected void onDestroy() {
         super.onDestroy();
         trackPresenter.destroy();
+    }
+
+    class TrackMapAdapter extends HyperTrackMapAdapter {
+        public TrackMapAdapter(Context mContext) {
+            super(mContext);
+        }
+
+        @Override
+        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return true;
+        }
+
+        @Override
+        public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
+            if (SharedPreferenceManager.getLastKnownLocation() != null) {
+                LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
+                return CameraUpdateFactory.newLatLng(latLng);
+            }
+            return super.getMapFragmentInitialState(hyperTrackMapFragment);
+        }
+
+        @Override
+        public boolean showTrailingPolyline() {
+            return true;
+        }
+
+        @Override
+        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
+            return false;
+        }
+
+        @Override
+        public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
+            return R.drawable.ic_reset_bounds_button;
+        }
+
     }
 }

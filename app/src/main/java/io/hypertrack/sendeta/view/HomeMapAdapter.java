@@ -2,11 +2,15 @@ package io.hypertrack.sendeta.view;
 
 import android.content.Context;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.util.SharedPreferenceManager;
 
 /**
  * Created by piyush on 03/05/17.
@@ -24,6 +28,15 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     public void setShowMyLocation(boolean showMyLocation) {
         this.showMyLocation = showMyLocation;
+    }
+
+    @Override
+    public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
+        if (SharedPreferenceManager.getLastKnownLocation() != null) {
+            LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
+            return CameraUpdateFactory.newLatLng(latLng);
+        }
+        return super.getMapFragmentInitialState(hyperTrackMapFragment);
     }
 
     @Override
@@ -84,11 +97,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
         return R.drawable.ic_reset_bounds_button;
-    }
-
-    @Override
-    public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return false;
     }
 
     @Override
