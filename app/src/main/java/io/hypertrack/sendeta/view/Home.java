@@ -762,6 +762,23 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        LatLng latLng;
+        if (googleMap != null && googleMap.isMyLocationEnabled() && googleMap.getMyLocation() != null) {
+            SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
+            latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
+
+        } else {
+            // Set Default View for map according to User's LastKnownLocation
+
+            if (SharedPreferenceManager.getLastKnownLocation() != null) {
+                defaultLocation = SharedPreferenceManager.getLastKnownLocation();
+            }
+            // Else Set Default View for map according to either User's Default Location
+            // (If Country Info was available) or (0.0, 0.0)
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
+        }
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
@@ -773,7 +790,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 return;
             }
 
-            LatLng latLng = new LatLng(destinationPlace.getLocation().getLatitude(), destinationPlace.getLocation().getLongitude());
+            latLng = new LatLng(destinationPlace.getLocation().getLatitude(), destinationPlace.getLocation().getLongitude());
 
             if (etaInMinutes != null && etaInMinutes != 0) {
                 updateViewForETASuccess(etaInMinutes, latLng);
@@ -782,28 +799,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             }
             onStartTask();
         }
-        LatLng latLng;
-        try {
-            if (googleMap != null && googleMap.isMyLocationEnabled() && googleMap.getMyLocation() != null) {
-                SharedPreferenceManager.setLastKnownLocation(googleMap.getMyLocation());
-                latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            // Set Default View for map according to User's LastKnownLocation
-
-            if (SharedPreferenceManager.getLastKnownLocation() != null) {
-                defaultLocation = SharedPreferenceManager.getLastKnownLocation();
-            }
-
-            // Else Set Default View for map according to either User's Default Location
-            // (If Country Info was available) or (0.0, 0.0)
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                    new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
-        }
-
         checkForLocationPermission();
     }
 
