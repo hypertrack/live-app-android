@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
@@ -48,7 +49,7 @@ import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
@@ -84,6 +85,7 @@ public class Profile extends BaseActivity implements ProfileView {
             return false;
         }
     };
+
     private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -95,15 +97,14 @@ public class Profile extends BaseActivity implements ProfileView {
             return false;
         }
     };
+
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
         }
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-
         }
 
         @Override
@@ -115,7 +116,6 @@ public class Profile extends BaseActivity implements ProfileView {
                 showSkip = false;
                 supportInvalidateOptionsMenu();
             }
-
         }
     };
 
@@ -127,6 +127,13 @@ public class Profile extends BaseActivity implements ProfileView {
         // Initialize Toolbar
         initToolbar(getString(R.string.title_activity_signup_profile), false);
 
+        // Attach View Presenter to View
+        presenter.attachView(this);
+
+        initUIViews();
+    }
+
+    private void initUIViews() {
         // Initialize UI Views before Attaching View Presenter
         mNameView = (EditText) findViewById(R.id.profile_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
@@ -143,9 +150,6 @@ public class Profile extends BaseActivity implements ProfileView {
             }
         });
 
-        // Attach View Presenter to View
-        presenter.attachView(this);
-
         // Initialize UI Action Listeners
         mNameView.setOnEditorActionListener(mNameEditorActionListener);
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);
@@ -158,7 +162,6 @@ public class Profile extends BaseActivity implements ProfileView {
             }
         });
         initCountryFlagSpinner();
-
     }
 
     private void initCountryFlagSpinner() {
@@ -194,7 +197,6 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     public void onProfileImageViewClicked(View view) {
-
         // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             EasyImage.openChooser(Profile.this, "Please select", true);
@@ -210,17 +212,16 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
+    public void onNextButtonClicked(MenuItem menuItem) {
+        this.onSignInButtonClicked();
+    }
+
     private void onSignInButtonClicked() {
         showProgress(true);
-
         String name = mNameView.getText().toString();
         String number = phoneNumberView.getText().toString();
         Utils.hideKeyboard(Profile.this, register);
         presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage, oldProfileImage, updatedProfileImage);
-    }
-
-    public void onNextButtonClicked(MenuItem menuItem) {
-        this.onSignInButtonClicked();
     }
 
     @Override
@@ -272,6 +273,23 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
+    private String getName() {
+        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
+
+        Account[] list = manager.getAccounts();
+
+        for (Account account : list) {
+            if (account.type.equalsIgnoreCase("com.google")) {
+                return account.name;
+            }
+        }
+        return null;
+    }
+
     @Override
     public void showProfilePicUploadSuccess() {
         Toast.makeText(Profile.this, R.string.profile_upload_success, Toast.LENGTH_SHORT).show();
@@ -282,10 +300,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void showProfilePicUploadError() {
-        // TODO: 30/06/16 Add Background Upload of Image
         Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
-
-        // Complete User SignUp on Profile Pic Upload Failure
     }
 
     @Override
@@ -296,7 +311,7 @@ public class Profile extends BaseActivity implements ProfileView {
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
-        HTLog.i("Profile", "User Registration successful: Clearing Active Trip, if any");
+        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
 
         TaskStackBuilder.create(Profile.this)
                 .addNextIntentWithParentStack(new Intent(Profile.this, Home.class)
@@ -342,7 +357,6 @@ public class Profile extends BaseActivity implements ProfileView {
                 // Cancel Profile Pic Download Request from Server & Hide Image Download Loader
                 Picasso.with(Profile.this).cancelRequest(profileImageDownloadTarget);
                 mProfileImageLoader.setVisibility(View.GONE);
-
                 profileImage = ImageUtils.getScaledFile(imageFile);
 
                 updatedProfileImage = ImageUtils.getRotatedBitMap(imageFile);
@@ -359,42 +373,24 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onProfileImageViewClicked(null);
-                } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
-                            getString(R.string.read_external_storage_permission_never_allow));
-                }
-                break;
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if (requestCode == PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Handle Read external storage permission successfully granted response
+                onProfileImageViewClicked(null);
+
+            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Handle Read external storage permission request denied error
+                PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        getString(R.string.read_external_storage_permission_never_allow));
+            }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
-        if (showSkip)
-            return super.onCreateOptionsMenu(menu);
-        return false;
-    }
-
-    private String getName() {
-        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            return null;
-        }
-
-        Account[] list = manager.getAccounts();
-
-        for (Account account : list) {
-            if (account.type.equalsIgnoreCase("com.google")) {
-                return account.name;
-            }
-        }
-        return null;
+        return showSkip && super.onCreateOptionsMenu(menu);
     }
 
     @Override

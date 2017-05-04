@@ -69,29 +69,29 @@ import java.util.List;
 import java.util.UUID;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.model.TaskETAResponse;
+import io.hypertrack.sendeta.callback.ActionManagerCallback;
+import io.hypertrack.sendeta.callback.ActionManagerListener;
+import io.hypertrack.sendeta.callback.ETACallback;
+import io.hypertrack.sendeta.model.ETAResponse;
+import io.hypertrack.sendeta.model.HyperTrackLiveUser;
+import io.hypertrack.sendeta.receiver.GpsLocationReceiver;
+import io.hypertrack.sendeta.receiver.NetworkChangeReceiver;
 import io.hypertrack.sendeta.service.FetchLocationIntentService;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.callback.ActionManagerCallback;
-import io.hypertrack.sendeta.store.callback.ActionManagerListener;
-import io.hypertrack.sendeta.store.callback.TaskETACallback;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
-import io.hypertrack.sendeta.util.GpsLocationReceiver;
 import io.hypertrack.sendeta.util.ImageUtils;
-import io.hypertrack.sendeta.util.NetworkChangeReceiver;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 
 public class Home extends BaseActivity implements ResultCallback<Status> {
 
     private static final String TAG = Home.class.getSimpleName();
-    private OnboardingUser user;
+    private HyperTrackLiveUser user;
     private GoogleMap mMap;
     private Marker expectedPlaceMarker;
     private String lookupId = null;
@@ -104,8 +104,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private ImageButton shareButton, navigateButton;
     private Place destinationPlace;
     private ProgressDialog mProgressDialog;
-    private boolean shouldRestoreTask = false, isMapLoaded = false,
-            isvehicleTypeTabLayoutVisible = false;
+    private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private Integer etaInMinutes = 0;
     private Bitmap userBitmap;
@@ -208,9 +207,9 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             return;
         }
 
-        getEtaForDestination(new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude()), new TaskETACallback() {
+        getEtaForDestination(new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude()), new ETACallback() {
             @Override
-            public void OnSuccess(TaskETAResponse etaResponse) {
+            public void OnSuccess(ETAResponse etaResponse) {
                 // Hide Retry Button
                 showRetryButton(false, null);
                 etaInMinutes = (int) etaResponse.getDuration();
@@ -252,7 +251,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
     }
 
-    private void getEtaForDestination(final LatLng destinationLocation, final TaskETACallback callback) {
+    private void getEtaForDestination(final LatLng destinationLocation, final ETACallback callback) {
         if (Home.this.isFinishing())
             return;
 
@@ -268,9 +267,9 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
                 ActionManager.getSharedManager(Home.this).getETA(
                         new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
-                        destinationLocation, selectedVehicleType.toString(), new TaskETACallback() {
+                        destinationLocation, selectedVehicleType.toString(), new ETACallback() {
                             @Override
-                            public void OnSuccess(TaskETAResponse etaResponse) {
+                            public void OnSuccess(ETAResponse etaResponse) {
                                 if (mProgressDialog != null && !Home.this.isFinishing())
                                     mProgressDialog.dismiss();
 
@@ -306,7 +305,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         Toast.makeText(this, getString(R.string.eta_fetching_error), Toast.LENGTH_SHORT).show();
     }
 
-    private void onETASuccess(TaskETAResponse response, Place place) {
+    private void onETASuccess(ETAResponse response, Place place) {
         // Make the VehicleTabLayout visible onETASuccess
         AnimationUtils.expand(vehicleTypeTabLayout);
         isvehicleTypeTabLayoutVisible = true;
@@ -557,11 +556,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
             onStartTask();
-            shouldRestoreTask = true;
 
         } else {
-            shouldRestoreTask = false;
-
             // Initialize VehicleTabLayout
             initializeVehicleTypeTab();
         }
@@ -831,7 +827,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                     onStartTask();
 
                     HyperTrack.clearServiceNotificationParams();
-                    AnalyticsStore.getLogger().startedTrip(true, null);
+                    AnalyticsStore.getLogger().sharedLiveLocation(true, null);
                     HTLog.i(TAG, "Task started successfully.");
                 }
             }
@@ -845,7 +841,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 showStartTaskError(errorResponse);
                 HTLog.e(TAG, "Task start failed.");
 
-                AnalyticsStore.getLogger().startedTrip(false, ErrorMessages.START_TRIP_FAILED);
+                AnalyticsStore.getLogger().sharedLiveLocation(false, ErrorMessages.START_TRIP_FAILED);
             }
         });
     }
@@ -879,7 +875,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             public void OnSuccess() {
                 OnCompleteTask();
                 HyperTrack.clearServiceNotificationParams();
-                AnalyticsStore.getLogger().tappedEndTrip(true, null);
+                AnalyticsStore.getLogger().tappedStopSharing(true, null);
                 HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
 
                 showEndingTripAnimation(false);
@@ -904,7 +900,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             public void OnError() {
                 showCompleteTaskError();
 
-                AnalyticsStore.getLogger().tappedEndTrip(false, ErrorMessages.END_TRIP_FAILED);
+                AnalyticsStore.getLogger().tappedStopSharing(false, ErrorMessages.END_TRIP_FAILED);
                 HTLog.e(TAG, "Complete Action (CTA) failed.");
 
                 showEndingTripAnimation(false);
@@ -1156,7 +1152,10 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
      * Method to Share current task
      */
     private void share() {
-        String shareMessage = ActionManager.getSharedManager(Home.this).getShareMessage();
+        if (ActionManager.getSharedManager(this).getHyperTrackAction() == null)
+            return;
+
+        String shareMessage = ActionManager.getSharedManager(Home.this).getHyperTrackAction().getShareMessage();
         if (shareMessage == null) {
             Toast.makeText(Home.this, R.string.share_message_error, Toast.LENGTH_SHORT).show();
             return;
@@ -1195,7 +1194,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         if (ActionManager.getSharedManager(this).getHyperTrackAction() != null)
             return false;
 
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
+        getMenuInflater().inflate(R.menu.menu_home, menu);
         MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
         if (SharedPreferenceManager.isTrackingON()) {
             menuItem.setTitle("Pause Tracking");

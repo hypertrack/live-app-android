@@ -146,27 +146,6 @@
                     android:paddingRight="@dimen/padding_xhigh"
                     android:textColor="@color/text_dark_bg_base"
                     android:visibility="gone" />
-                <!-- <FrameLayout
-                     android:layout_width="match_parent"
-                     android:layout_height="wrap_content">
-
-                     <io.hypertrack.sendeta.util.SwipeButton
-                         android:id="@+id/endTripSwipeButton"
-                         android:layout_width="wrap_content"
-                         android:layout_height="@dimen/cta_button_size"
-                         android:layout_gravity="center"
-                         android:layout_margin="@dimen/margin_high"
-                         android:background="@color/colorAccent"
-                         android:clickable="true"
-                         android:elevation="@dimen/elevation_base"
-                         android:gravity="center"
-                         android:paddingLeft="@dimen/padding_xxxhigh"
-                         android:paddingRight="@dimen/padding_xxxhigh"
-                         android:text="@string/action_slide_to_end_sharing"
-                         android:textColor="@color/text_dark_bg_base"
-                         android:textSize="@dimen/text_base"
-                         android:visibility="visible" />
-                 </FrameLayout>-->
 
                 <Button
                     android:id="@+id/retryButton"

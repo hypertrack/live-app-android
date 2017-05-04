@@ -10,5 +10,4 @@ import java.io.File;
 public interface IProfilePresenter<V> extends Presenter<V> {
     void attemptLogin(String userFirstName, String number, String deviceID, String ISOCode, File profileImageFile,
                       Bitmap oldProfileImage, Bitmap updatedProfileImage);
-    void attemptRegistration(String number, String ISOCode);
 }

@@ -73,21 +73,6 @@ public class AnalyticsStore implements AnalyticsInterface {
     }
 
     @Override
-    public void enteredCorrectOTP(boolean status, String errorMessage, int retries) {
-        Bundle params = getBundle(status, errorMessage);
-        params.putString(EventParam.NO_OF_ATTEMPT, String.valueOf(retries));
-
-        logEvent(Event.ENTERED_CORRECT_OTP, params);
-    }
-
-    @Override
-    public void resendOTP(boolean status, String errorMessage) {
-        Bundle params = getBundle(status, errorMessage);
-
-        logEvent(Event.RESEND_OTP, params);
-    }
-
-    @Override
     public void enteredName(boolean status, String errorMessage) {
         Bundle params = getBundle(status, errorMessage);
 
@@ -101,21 +86,12 @@ public class AnalyticsStore implements AnalyticsInterface {
         logEvent(Event.UPLOADED_PROFILE_PHOTO, params);
     }
 
-    // Add Destination Address Events
+    // Location Sharing Events
     @Override
-    public void selectedAddress(int charactersTyped, boolean isFavorite) {
-        Bundle params = getBundle();
-        params.putString(EventParam.IS_ADDRESS_FAVORITE, String.valueOf(isFavorite));
-
-        logEvent(Event.SELECTED_AN_ADDRESS, params);
-    }
-
-    // Trip Events
-    @Override
-    public void startedTrip(boolean status, String errorMessage) {
+    public void sharedLiveLocation(boolean status, String errorMessage) {
         Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.STARTED_A_TRIP, params);
+        logEvent(Event.STARTED_SHARING, params);
         logPurchaseEvent();
     }
 
@@ -133,10 +109,10 @@ public class AnalyticsStore implements AnalyticsInterface {
     }
 
     @Override
-    public void tappedEndTrip(boolean status, String errorMessage) {
+    public void tappedStopSharing(boolean status, String errorMessage) {
         Bundle params = getBundle(status, errorMessage);
 
-        logEvent(Event.TAPPED_END_TRIP, params);
+        logEvent(Event.TAPPED_STOP_SHARING, params);
     }
 
     /**

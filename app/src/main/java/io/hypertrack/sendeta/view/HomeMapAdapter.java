@@ -12,7 +12,7 @@ import com.hypertrack.lib.HyperTrackMapFragment;
 
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
 /**
  * Created by piyush on 03/05/17.

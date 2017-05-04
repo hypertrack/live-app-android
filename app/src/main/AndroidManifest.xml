@@ -108,7 +108,7 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.CheckPermission"
+            android:name=".view.ConfigurePermissions"
             android:screenOrientation="portrait" />
 
         <activity
@@ -133,14 +133,14 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.GpsLocationReceiver">
+        <receiver android:name=".receiver.GpsLocationReceiver">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.NetworkChangeReceiver">
+        <receiver android:name=".receiver.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
@@ -148,7 +148,7 @@
         </receiver>
 
         <receiver
-            android:name=".util.BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>

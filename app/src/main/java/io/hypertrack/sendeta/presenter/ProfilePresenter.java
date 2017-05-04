@@ -12,8 +12,7 @@ import com.hypertrack.lib.models.SuccessResponse;
 
 import java.io.File;
 
-import io.hypertrack.sendeta.interactor.ProfileInteractor;
-import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
@@ -28,15 +27,12 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private static final String TAG = Profile.class.getSimpleName();
     private ProfileView view;
-    private ProfileInteractor profileInteractor;
     private OnboardingManager onboardingManager = OnboardingManager.sharedManager();
 
     @Override
     public void attachView(ProfileView view) {
         this.view = view;
-        profileInteractor = new ProfileInteractor();
-
-        OnboardingUser user = this.onboardingManager.getUser();
+        HyperTrackLiveUser user = this.onboardingManager.getUser();
         this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhoto());
     }
 
@@ -48,15 +44,18 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     @Override
     public void attemptLogin(final String userName, String phone, String ISOCode, final String deviceID, final File profileImage,
                              final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
+        final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
-        final OnboardingUser user = this.onboardingManager.getUser();
+        // Update Country Code from device's current location
         if (!TextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
 
+        // Set user's profile image
         if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
         }
-        OnboardingUser.setOnboardingUser();
+
+        HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
             HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
@@ -86,7 +85,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                             @Override
                             public void onImageUploadNotNeeded() {
-
                             }
                         });
                     } else {
@@ -114,43 +112,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             }
             AnalyticsStore.getLogger().enteredName(false, ErrorMessages.INVALID_PHONE_NUMBER);
         }
-
-
     }
-
-    @Override
-    public void attemptRegistration(String number, String ISOCode) {
-
-    }
-
-   /* @Override
-    public void attemptRegistration(String number, String ISOCode) {
-        if (!TextUtils.isEmpty(number)) {
-            onboardingManager.getUser().setPhone(number);
-            onboardingManager.getUser().setCountryCode(ISOCode);
-            OnboardingUser.setOnboardingUser();
-            profileInteractor.registerPhoneNumber(new OnRegisterCallback() {
-                @Override
-                public void OnSuccess() {
-                    if (view != null) {
-                        view.registrationSuccessful();
-                    }
-
-                    AnalyticsStore.getLogger().enteredPhoneNumber(true, null);
-                }
-
-                @Override
-                public void OnError() {
-                    if (view != null) {
-                        view.registrationFailed();
-                    }
-
-                    AnalyticsStore.getLogger().enteredPhoneNumber(false, ErrorMessages.PHONE_NO_REGISTRATION_FAILED);
-                }
-            });
-        } else {
-            AnalyticsStore.getLogger().enteredPhoneNumber(false, ErrorMessages.INVALID_PHONE_NUMBER);
-        }
-    }*/
 }
 

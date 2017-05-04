@@ -3,10 +3,8 @@ package io.hypertrack.sendeta.store;
 import android.graphics.Bitmap;
 
 import java.io.File;
-import java.util.HashMap;
 
-import io.hypertrack.sendeta.model.OnboardingUser;
-import io.hypertrack.sendeta.store.callback.OnOnboardingCallback;
+import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 
 /**
@@ -14,12 +12,11 @@ import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
  */
 public class OnboardingManager {
 
-    private static String TAG = OnboardingManager.class.getSimpleName();
     private static OnboardingManager sSharedManager = null;
-    private OnboardingUser onboardingUser;
+    private HyperTrackLiveUser hyperTrackLiveUser;
 
     private OnboardingManager() {
-        this.onboardingUser = OnboardingUser.sharedOnboardingUser();
+        this.hyperTrackLiveUser = HyperTrackLiveUser.sharedHyperTrackLiveUser();
     }
 
     public static OnboardingManager sharedManager() {
@@ -30,56 +27,21 @@ public class OnboardingManager {
         return sSharedManager;
     }
 
-    public OnboardingUser getUser() {
-        return onboardingUser;
-    }
-
-    public void verifyCode(String code, final OnOnboardingCallback callback) {
-        HashMap<String, String> verificationParams = new HashMap<>();
-        verificationParams.put("verification_code", code);
-        verificationParams.put("phone_number", onboardingUser.getPhone());
-    }
-
-    public void resendVerificationCode(final OnOnboardingCallback callback) {
-        HashMap<String, String> phoneNumber = new HashMap<>();
-        phoneNumber.put("phone_number", this.onboardingUser.getPhone());
-
-      /*  Call<Map<String, Object>> call = sendETAService.resendCode(phoneNumber);
-        call.enqueue(new Callback<Map<String, Object>>() {
-            @Override
-            public void onResponse(Call<Map<String, Object>> call, Response<Map<String, Object>> response) {
-                if (response.isSuccessful()) {
-                    if (callback != null) {
-                        callback.onSuccess();
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.onError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Map<String, Object>> call, Throwable t) {
-                if (callback != null) {
-                    callback.onError();
-                }
-            }
-        });*/
+    public HyperTrackLiveUser getUser() {
+        return hyperTrackLiveUser;
     }
 
     public void uploadPhoto(final Bitmap oldProfileImage, final Bitmap updatedProfileImage,
                             final OnOnboardingImageUploadCallback callback) {
-        File profileImage = this.onboardingUser.getPhotoImage();
+        File profileImage = this.hyperTrackLiveUser.getPhotoImage();
 
         if (profileImage != null && profileImage.length() > 0) {
-            //UserStore.sharedStore.addImage(profileImage);
 
             // Check if the profile image has changed from the existing one
             if (updatedProfileImage != null && updatedProfileImage.getByteCount() > 0
                     && !updatedProfileImage.sameAs(oldProfileImage)) {
-                this.onboardingUser.saveFileAsBitmap(profileImage);
-                OnboardingUser.setOnboardingUser();
+                this.hyperTrackLiveUser.saveFileAsBitmap(profileImage);
+                HyperTrackLiveUser.setHyperTrackLiveUser();
                 if (callback != null) {
                     callback.onSuccess();
                 }

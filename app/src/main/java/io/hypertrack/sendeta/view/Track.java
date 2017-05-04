@@ -21,7 +21,7 @@ import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
 import io.hypertrack.sendeta.presenter.TrackPresenter;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
 public class Track extends BaseActivity implements TrackView {
 
@@ -132,8 +132,11 @@ public class Track extends BaseActivity implements TrackView {
         trackPresenter.destroy();
     }
 
+    /**
+     * Implementation for HyperTrackMapAdapter specifying the UI customizations for Live-tracking view
+     */
     class TrackMapAdapter extends HyperTrackMapAdapter {
-        public TrackMapAdapter(Context mContext) {
+        TrackMapAdapter(Context mContext) {
             super(mContext);
         }
 
@@ -155,7 +158,8 @@ public class Track extends BaseActivity implements TrackView {
         @Override
         public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
             if (SharedPreferenceManager.getLastKnownLocation() != null) {
-                LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
+                LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
+                        SharedPreferenceManager.getLastKnownLocation().getLongitude());
                 return CameraUpdateFactory.newLatLng(latLng);
             }
             return super.getMapFragmentInitialState(hyperTrackMapFragment);

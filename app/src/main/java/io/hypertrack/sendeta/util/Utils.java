@@ -13,7 +13,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 
 import java.util.Locale;
 
-import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.OnboardingManager;
 
 
@@ -33,7 +33,7 @@ public class Utils {
     }
 
     public static void setCrashlyticsKeys(Context context){
-        OnboardingUser user = OnboardingManager.sharedManager().getUser();
+        HyperTrackLiveUser user = OnboardingManager.sharedManager().getUser();
         if (user != null) {
             // Set UserID
             String userID = user.getId() != null ? user.getId().toString() : "NULL";

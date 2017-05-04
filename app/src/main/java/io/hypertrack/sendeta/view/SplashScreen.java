@@ -19,9 +19,8 @@ import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
-import io.hypertrack.sendeta.util.Constants;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 
 /**
@@ -72,7 +71,7 @@ public class SplashScreen extends BaseActivity {
                 startActivity(registerIntent);
                 finish();
             } else {
-                Intent registerIntent = new Intent(this, CheckPermission.class);
+                Intent registerIntent = new Intent(this, ConfigurePermissions.class);
                 registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(registerIntent);
                 finish();
@@ -86,19 +85,6 @@ public class SplashScreen extends BaseActivity {
     // Method to proceed to next screen with deepLink params
     private void processAppDeepLink(final AppDeepLink appDeepLink) {
         switch (appDeepLink.mId) {
-            case DeepLinkUtil.RECEIVE_ETA:
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, Home.class)
-                                .putExtra(Constants.KEY_PUSH_TASK, true)
-                                .putExtra(Constants.KEY_TASK_ID, appDeepLink.uuid)
-                                .putExtra(Constants.KEY_PUSH_DESTINATION_LAT, appDeepLink.lat)
-                                .putExtra(Constants.KEY_PUSH_DESTINATION_LNG, appDeepLink.lng)
-                                .putExtra(Constants.KEY_ADDRESS, appDeepLink.address)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                        .startActivities();
-                finish();
-                break;
-
             case DeepLinkUtil.TRACK:
                 processTrackingDeepLink(appDeepLink);
                 break;
