@@ -38,7 +38,7 @@ public class Track extends BaseActivity implements TrackView {
         }
 
         @Override
-        public boolean showTrailingPolyline(String actionID) {
+        public boolean showTrailingPolyline() {
             return true;
         }
 
