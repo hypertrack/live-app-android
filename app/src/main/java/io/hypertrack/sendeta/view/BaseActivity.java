@@ -41,7 +41,7 @@ public class BaseActivity extends AppCompatActivity {
      * Default toolbar with no title and app's primary color as background
      */
     public void initToolbar() {
-        setupToolbar(null, null, true);
+        setupToolbar(null, null, false);
     }
 
     /**
