@@ -207,7 +207,7 @@
     <string name="request_eta_url">http://%1$s/request/?uuid=%2$s&amp;lat=%3$s&amp;lng=%4$s</string>
 
     <!--Toolbar Title-->
-    <string name="location_permission_detail">HyperTrack needs location permission to let your friends and family track you</string>
+    <string name="location_permission_detail">HyperTrack needs location permission to let you share your live location with your friends and family.</string>
     <string name="set_destination_text">SET DESTINATION</string>
     <string name="fetch_address_loading">Fetching Address...</string>
     <string name="about">About</string>

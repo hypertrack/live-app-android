@@ -34,6 +34,11 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
+    public Integer getToolbarLogoIcon(HyperTrackMapFragment hyperTrackMapFragment) {
+        return R.drawable.ic_ht_logo;
+    }
+
+    @Override
     public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
         return mContext.getString(R.string.app_name);
     }
@@ -105,18 +110,13 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public int enableLiveLocationSharingView() {
-        return HyperTrackMapAdapter.enableLiveLocationSharingView;
+    public boolean enableLiveLocationSharingView() {
+        return true;
     }
 
     @Override
     public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
         return R.drawable.ic_ht_destination_marker_default;
-    }
-
-    @Override
-    public boolean showActionSummaryForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-       return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1;
     }
 
     @Override

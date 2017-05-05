@@ -102,12 +102,14 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private FrameLayout bottomButtonLayout;
     private Button sendETAButton, retryButton, endTripSwipeButton;
     private ImageButton shareButton, navigateButton;
-    private Place destinationPlace;
+    private Place expectedPlace;
     private ProgressDialog mProgressDialog;
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private Integer etaInMinutes = 0;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
+
+    private HomeMapAdapter adapter;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -130,11 +132,11 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         }
 
         @Override
-        public void onDestinationPlaceSelected(Place destinationPlace) {
+        public void onExpectedPlaceSelected(Place expectedPlace) {
             // Check if destination place was selected
-            if (destinationPlace != null) {
-                Home.this.destinationPlace = destinationPlace;
-                onSelectPlace(destinationPlace);
+            if (expectedPlace != null) {
+                Home.this.expectedPlace = expectedPlace;
+                onSelectPlace(Home.this.expectedPlace);
             }
         }
 
@@ -158,7 +160,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         // Initialize Map Fragment added in Activity Layout to getMapAsync
         HyperTrackMapFragment htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
-        HomeMapAdapter adapter = new HomeMapAdapter(this, getToolbar());
+        adapter = new HomeMapAdapter(this, getToolbar());
         htMapFragment.setHTMapAdapter(adapter);
         htMapFragment.setMapFragmentCallback(callback);
 
@@ -307,8 +309,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         isvehicleTypeTabLayoutVisible = true;
         LatLng latLng = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
         updateViewForETASuccess((int) response.getDuration() / 60, latLng);
-        destinationPlace = place;
-        ActionManager.getSharedManager(this).setPlace(destinationPlace);
+        expectedPlace = place;
+        ActionManager.getSharedManager(this).setPlace(expectedPlace);
     }
 
     private void updateViewForETASuccess(Integer etaInMinutes, LatLng latLng) {
@@ -494,23 +496,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         });
 
         endTripLoaderAnimationLayout = (LinearLayout) findViewById(R.id.endTripLoaderAnimationLayout);
-
-/*        SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
-            @Override
-            public void onSwipeConfirm() {
-                // Check if Location Permission has been granted & Location has been enabled
-                if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
-                    showEndingTripAnimation(true);
-                    completeTask();
-                }
-            }
-        };
-
-        swipeButtonSettings.setButtonPressText(getString(R.string.action_slide_to_end_sharing))
-                .setActionConfirmText(getString(R.string.action_slide_to_end_sharing));
-
-        if (endTripSwipeButton != null) {
-            endTripSwipeButton.setSwipeButtonCustomItems(swipeButtonSettings);*/
     }
 
     private void showEndingTripAnimation(boolean show) {
@@ -579,8 +564,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                         List<Action> actions = (List<Action>) response.getResponseObject();
                         if (actions != null && !actions.isEmpty()) {
                             Action action = actions.get(0);
-                            destinationPlace = action.getExpectedPlace();
-                            ActionManager.getSharedManager(Home.this).setPlace(destinationPlace);
+                            expectedPlace = action.getExpectedPlace();
+                            ActionManager.getSharedManager(Home.this).setPlace(expectedPlace);
                             setupSendETAButton();
                             showSendETAButton();
                         }
@@ -796,10 +781,10 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 .setLookupId(lookupId != null ? lookupId : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT);
 
-        if (!TextUtils.isEmpty(destinationPlace.getId())) {
-            builder.setExpectedPlaceId(destinationPlace.getId());
+        if (!TextUtils.isEmpty(expectedPlace.getId())) {
+            builder.setExpectedPlaceId(expectedPlace.getId());
         } else {
-            builder.setExpectedPlace(destinationPlace);
+            builder.setExpectedPlace(expectedPlace);
         }
 
         // Call assignAction to start the tracking action
@@ -875,18 +860,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
                 HTLog.i(TAG, "Complete Action (CTA) happened successfully.");
 
                 showEndingTripAnimation(false);
-
-                if (mMap != null) {
-                    if (SharedPreferenceManager.getLastKnownLocation() != null) {
-                        LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
-                                SharedPreferenceManager.getLastKnownLocation().getLongitude());
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-
-                    } else if (mMap.getMyLocation() != null && mMap.isMyLocationEnabled()) {
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 16f));
-                        SharedPreferenceManager.setLastKnownLocation(mMap.getMyLocation());
-                    }
-                }
             }
 
             @Override

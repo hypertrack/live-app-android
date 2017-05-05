@@ -2,6 +2,7 @@ package io.hypertrack.sendeta.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
@@ -61,25 +62,31 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void proceedToNextScreen() {
-        // Check if user has signed up
-        boolean isUserOnboard = !TextUtils.isEmpty(HyperTrack.getUserId());
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // Check if user has signed up
+                boolean isUserOnboard = !TextUtils.isEmpty(HyperTrack.getUserId());
 
-        if (!isUserOnboard) {
-            if (HyperTrack.checkLocationPermission(this) && HyperTrack.checkLocationServices(this)) {
-                Intent registerIntent = new Intent(this, Profile.class);
-                registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(registerIntent);
-                finish();
-            } else {
-                Intent registerIntent = new Intent(this, ConfigurePermissions.class);
-                registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(registerIntent);
-                finish();
+                if (!isUserOnboard) {
+                    if (HyperTrack.checkLocationPermission(SplashScreen.this)
+                            && HyperTrack.checkLocationServices(SplashScreen.this)) {
+                        Intent registerIntent = new Intent(SplashScreen.this, Profile.class);
+                        registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(registerIntent);
+                        finish();
+                    } else {
+                        Intent registerIntent = new Intent(SplashScreen.this, ConfigurePermissions.class);
+                        registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(registerIntent);
+                        finish();
+                    }
+                } else {
+                    Utils.setCrashlyticsKeys(SplashScreen.this);
+                    processAppDeepLink(appDeepLink);
+                }
             }
-        } else {
-            Utils.setCrashlyticsKeys(this);
-            processAppDeepLink(appDeepLink);
-        }
+        }, 500);
     }
 
     // Method to proceed to next screen with deepLink params
