@@ -107,11 +107,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private Integer etaInMinutes = 0;
-    private Bitmap userBitmap;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
-
-    private HomeMapAdapter adapter;
-    private HyperTrackMapFragment htMapFragment;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -160,9 +156,9 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         user = OnboardingManager.sharedManager().getUser();
 
         // Initialize Map Fragment added in Activity Layout to getMapAsync
-        htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
+        HyperTrackMapFragment htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
-        adapter = new HomeMapAdapter(this, getToolbar());
+        HomeMapAdapter adapter = new HomeMapAdapter(this, getToolbar());
         htMapFragment.setHTMapAdapter(adapter);
         htMapFragment.setMapFragmentCallback(callback);
 
@@ -880,16 +876,13 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
                 showEndingTripAnimation(false);
 
-
                 if (mMap != null) {
-
                     if (SharedPreferenceManager.getLastKnownLocation() != null) {
-
-                        LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(), SharedPreferenceManager.getLastKnownLocation().getLongitude());
+                        LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
+                                SharedPreferenceManager.getLastKnownLocation().getLongitude());
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
 
                     } else if (mMap.getMyLocation() != null && mMap.isMyLocationEnabled()) {
-
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()), 16f));
                         SharedPreferenceManager.setLastKnownLocation(mMap.getMyLocation());
                     }
@@ -969,7 +962,7 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
             mProgressDialog.dismiss();
         }
 
-        HyperTrack.removeActions(null);
+        // Reset lookupId variable
         lookupId = null;
 
         // Hide VehicleType TabLayout onStartTask success
@@ -1307,12 +1300,8 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     @Override
     public void onBackPressed() {
         if (!isvehicleTypeTabLayoutVisible) {
+            HyperTrack.removeActions(null);
             super.onBackPressed();
-
-            if (userBitmap != null) {
-                userBitmap.recycle();
-                userBitmap = null;
-            }
         } else {
             OnCompleteTask();
         }
