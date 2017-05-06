@@ -180,6 +180,21 @@ public class Track extends BaseActivity implements TrackView {
         }
 
         @Override
+        public boolean enableLiveLocationSharingView() {
+            return true;
+        }
+
+        @Override
+        public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return false;
+        }
+
+        @Override
+        public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return R.drawable.ic_ht_destination_marker_default;
+        }
+
+        @Override
         public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
             return R.drawable.ic_reset_bounds_button;
         }

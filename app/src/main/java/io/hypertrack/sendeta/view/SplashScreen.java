@@ -20,6 +20,7 @@ import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
+import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
 import io.hypertrack.sendeta.util.Utils;
@@ -110,7 +111,13 @@ public class SplashScreen extends BaseActivity {
     private void processTrackingDeepLink(AppDeepLink appDeepLink) {
         // Check if lookup_id is available from deeplink
         if (!TextUtils.isEmpty(appDeepLink.lookupId)) {
-            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, appDeepLink.taskID, false);
+            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, appDeepLink.taskID);
+            return;
+        }
+
+        // Check if shortCode is empty and taskId is available
+        if (TextUtils.isEmpty(appDeepLink.shortCode) && !TextUtils.isEmpty(appDeepLink.taskID)) {
+            handleTrackingDeepLinkSuccess(null, appDeepLink.taskID);
             return;
         }
 
@@ -133,8 +140,7 @@ public class SplashScreen extends BaseActivity {
                 List<Action> actions = (List<Action>) response.getResponseObject();
                 if (actions != null && !actions.isEmpty()) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actions.get(0).getId(),
-                            actions.get(0).hasActionFinished());
+                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actions.get(0).getId());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -154,7 +160,19 @@ public class SplashScreen extends BaseActivity {
         });
     }
 
-    private void handleTrackingDeepLinkSuccess(String lookupId, String actionId, boolean isCompleted) {
+    private void handleTrackingDeepLinkSuccess(String lookupId, String actionId) {
+        // Check if current lookupId is same as the one active currently
+        if (!TextUtils.isEmpty(lookupId) &&
+                lookupId.equals(ActionManager.getSharedManager(this).getHyperTrackActionLookupId())) {
+            TaskStackBuilder.create(this)
+                    .addNextIntentWithParentStack(new Intent(this, Home.class)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                    .startActivities();
+            finish();
+            return;
+        }
+
+        // Proceed with deeplink
         ArrayList<String> actionIds = new ArrayList<>();
         actionIds.add(actionId);
 
@@ -164,15 +182,11 @@ public class SplashScreen extends BaseActivity {
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         // Check if current user is sharing location or not
-        if (SharedPreferenceManager.getActionID(SplashScreen.this) == null) {
-             intent.setClass(SplashScreen.this, Home.class);
+        if (SharedPreferenceManager.getActionID(this) == null) {
+             intent.setClass(SplashScreen.this, Home.class)
+                     .putExtra(Track.KEY_LOOKUP_ID, lookupId);
         } else {
             intent.setClass(SplashScreen.this, Track.class);
-        }
-
-        // Add lookupId for ongoing actions
-        if (!isCompleted) {
-            intent.putExtra(Track.KEY_LOOKUP_ID, lookupId);
         }
 
         // Handle Deeplink on Track Screen with Live Location Sharing disabled

@@ -334,6 +334,10 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         return this.actionID;
     }
 
+    public String getHyperTrackActionLookupId() {
+        return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupID();
+    }
+
     private void savePlace() {
         SharedPreferenceManager.setPlace(this.place);
     }
