@@ -94,8 +94,8 @@ android {
 
     buildTypes {
         release {
-            debuggable true
-            minifyEnabled false
+            debuggable false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "HYPERTRACK_PK", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
@@ -127,7 +127,7 @@ dependencies {
         transitive = true;
     }
 
-    releaseCompile(project(path: ':library', configuration: 'release')) {
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
 
