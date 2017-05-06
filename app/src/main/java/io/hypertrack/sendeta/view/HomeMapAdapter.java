@@ -55,14 +55,12 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return HyperTrack.getConsumerClient().getActionIDs() == null ||
-                HyperTrack.getConsumerClient().getActionIDs().isEmpty();
+        return HyperTrack.getConsumerClient().getActionIDs() == null;
     }
 
     @Override
     public boolean setMyLocationButtonEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return HyperTrack.getConsumerClient().getActionIDs() == null ||
-                HyperTrack.getConsumerClient().getActionIDs().isEmpty();
+        return HyperTrack.getConsumerClient().getActionIDs() == null;
     }
 
     @Override
@@ -96,7 +94,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
         int bottom = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
         int right = mContext.getResources().getDimensionPixelSize(R.dimen.map_side_padding);
 
-        if (HyperTrack.getConsumerClient().getActionIDs() == null || HyperTrack.getConsumerClient().getActionIDs().isEmpty()) {
+        if (HyperTrack.getConsumerClient().getActionIDs() == null) {
             bottom = mContext.getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
             return new int[]{0, 0, 0, bottom};
         }

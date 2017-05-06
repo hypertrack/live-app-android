@@ -127,7 +127,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
     public MapFragmentCallback callback = new MapFragmentCallback() {
         @Override
         public void onMapReadyCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
-            super.onMapReadyCallback(hyperTrackMapFragment, map);
             onMapReady(map);
         }
 
@@ -142,9 +141,16 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
 
         @Override
         public void onMapLoadedCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
-            super.onMapLoadedCallback(hyperTrackMapFragment, map);
             isMapLoaded = true;
             updateMapView();
+        }
+
+        @Override
+        public void onActionRefreshed(List<String> refreshedActionIds, List<Action> refreshedActions) {
+            if (sendETAButton != null && sendETAButton.isShown()
+                    && HyperTrack.getConsumerClient().getActiveActionIDList() == null) {
+                sendETAButton.setVisibility(View.GONE);
+            }
         }
     };
 
@@ -457,9 +463,6 @@ public class Home extends BaseActivity implements ResultCallback<Status> {
         sendETAButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!SharedPreferenceManager.isTrackingON()) {
-                    startHyperTrackTracking(false);
-                }
                 createSharingLink();
             }
         });

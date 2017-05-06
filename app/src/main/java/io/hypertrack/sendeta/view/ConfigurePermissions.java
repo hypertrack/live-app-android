@@ -80,7 +80,7 @@ public class ConfigurePermissions extends BaseActivity {
         if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_SERVICES) {
             if (resultCode == Activity.RESULT_OK) {
                 // Handle Location services successfully enabled response
-                proceedToProfileScreen();
+                checkForLocationSettings();
 
             } else {
                 // Handle Location services request denied error
