@@ -21,12 +21,11 @@ import io.hypertrack.sendeta.util.images.RoundedImageView;
  */
 public class BaseActivity extends AppCompatActivity {
 
-    public LinearLayout retryContainer, infoMessageContainer;
+    public LinearLayout retryContainer;
 
     //to be only accessed through methods, do not change access modifier
     private Toolbar toolbar;
-    private TextView infoMessage, loadingLayoutMessage;
-    private ImageView infoMessageIcon;
+    private TextView loadingLayoutMessage;
     private FrameLayout loadingLayout;
     private CardView loadingLayoutMessageContainer;
     private TextView textView;
@@ -42,7 +41,7 @@ public class BaseActivity extends AppCompatActivity {
      * Default toolbar with no title and app's primary color as background
      */
     public void initToolbar() {
-        setupToolbar(null, null, true);
+        setupToolbar(null, null, false);
     }
 
     /**
@@ -79,10 +78,6 @@ public class BaseActivity extends AppCompatActivity {
         textView = (TextView) toolbar.findViewById(R.id.toolbar_title);
         toolbar.setTitle("");
         toolbarIcon = (RoundedImageView) toolbar.findViewById(R.id.toolbar_icon);
-//        toolbar.setTitleTextColor(getResources().getColor(R.color.colorAccent));
-//        toolbar.setSubtitleTextColor(Color.WHITE);
-
-//        retryContainer = (LinearLayout) findViewById(R.id.retry_container);
 
         if (!TextUtils.isEmpty(title)) {
             textView.setText(title);
@@ -134,36 +129,6 @@ public class BaseActivity extends AppCompatActivity {
             toolbar.setSubtitle(subTitle);
         }
     }
-
-    /**
-     * Triggers info message container below toolbar
-     *
-     * @param enabled      true to show and false to hide
-     * @param iconResource icon to display, hidden if value is NULL or <0
-     * @param message      Message to display
-     */
-//    public void displayInfoMessage(boolean enabled, Integer iconResource, String message) {
-//
-//        if (infoMessageContainer == null || infoMessage == null || infoMessageIcon == null) {
-//            infoMessage = (TextView) findViewById(R.id.booking_info_message);
-//            infoMessageIcon = (ImageView) findViewById(R.id.booking_info_message_icon);
-//            infoMessageContainer = (LinearLayout) findViewById(R.id.booking_info_message_container);
-//        }
-//
-//        if (!enabled) {
-//            AnimationUtils.collapse(infoMessageContainer);
-//        } else {
-//            infoMessage.setText(message != null ? message : ErrorMessages.GENERIC_ERROR_MSG);
-//
-//            if (iconResource == null || iconResource <= 0) {
-//                infoMessageIcon.setVisibility(View.GONE);
-//            } else {
-//                infoMessageIcon.setVisibility(View.VISIBLE);
-//                infoMessageIcon.setImageResource(iconResource);
-//            }
-//            AnimationUtils.expand(infoMessageContainer);
-//        }
-//    }
 
     /**
      * In case toolbar is not required, then use this directly without init call
@@ -220,27 +185,6 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     /**
-     * Show retry layout within a container, width and height will be adjusted according to parent
-     * [IMPORTANT not to use if display area is very small as scrolling is not supported
-     *
-     * @param message  message to be shown
-     * @param listener action to be performed on retry button click
-     * @return true or false depending on that view was successfully inflated or not
-     */
-//    public boolean showRetryLayout(String message, View.OnClickListener listener) {
-//
-//        if (retryContainer != null) {
-//            TextView messageView = (TextView) findViewById(R.id.retry_message);
-//            messageView.setText(message);
-//            Button retryBtn = (Button) findViewById(R.id.retry_action);
-//            retryBtn.setOnClickListener(listener);
-//            retryContainer.setVisibility(View.VISIBLE);
-//            return true;
-//        }
-//        return false;
-//    }
-
-    /**
      * Hide retry layout, default is hidden
      *
      * @return true or false depending on that view was successfully inflated or not
@@ -252,10 +196,6 @@ public class BaseActivity extends AppCompatActivity {
             return true;
         }
         return false;
-    }
-
-    public void setMenuItem(int resId) {
-        toolbar.inflateMenu(resId);
     }
 
     @Override

@@ -9,15 +9,13 @@ import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
-import com.hypertrack.lib.models.User;
 
 import java.io.File;
 
-import io.hypertrack.sendeta.interactor.ProfileInteractor;
-import io.hypertrack.sendeta.model.OnboardingUser;
+import io.hypertrack.sendeta.callback.OnOnboardingImageUploadCallback;
+import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.view.Profile;
 import io.hypertrack.sendeta.view.ProfileView;
@@ -29,15 +27,12 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private static final String TAG = Profile.class.getSimpleName();
     private ProfileView view;
-    private ProfileInteractor profileInteractor;
     private OnboardingManager onboardingManager = OnboardingManager.sharedManager();
 
     @Override
     public void attachView(ProfileView view) {
         this.view = view;
-        profileInteractor = new ProfileInteractor();
-
-        OnboardingUser user = this.onboardingManager.getUser();
+        HyperTrackLiveUser user = this.onboardingManager.getUser();
         this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhoto());
     }
 
@@ -47,37 +42,29 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void attemptLogin(final String userName, String phone, String ISOCode, final File profileImage,
+    public void attemptLogin(final String userName, String phone, String ISOCode, final String deviceID, final File profileImage,
                              final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
+        final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
-
-        final OnboardingUser user = this.onboardingManager.getUser();
+        // Update Country Code from device's current location
         if (!TextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
+
+        // Set user's profile image
         if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
         }
-        OnboardingUser.setOnboardingUser();
+
+        HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-            //For Testing
-          /*  OnboardingUser onboardingUser = onboardingManager.getUser();
-            HyperTrack.setUserId("2122af00-e04f-46de-87c7-ed6abba6a9ee");
-            onboardingUser.setId("2122af00-e04f-46de-87c7-ed6abba6a9ee");
-            onboardingUser.setName("Aman Jain V2");
-            onboardingUser.setOnboardingUser();
-            UserStore.sharedStore.deleteUser();
-            if (view != null) {
-                view.navigateToHomeScreen();
-            }*/
-            HyperTrack.createUser(userName, user.getInternationalNumber(phone), new HyperTrackCallback() {
+            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
+                    new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    User user = (User) successResponse.getResponseObject();
-                   /* OnboardingUser onboardingUser = (OnboardingUser) user;
-                    onboardingUser.setOnboardingUser();*/
                     AnalyticsStore.getLogger().enteredName(true, null);
                     AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+
                     if (profileImage != null && profileImage.length() > 0) {
                         onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
                             @Override
@@ -98,7 +85,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                             @Override
                             public void onImageUploadNotNeeded() {
-
                             }
                         });
                     } else {
@@ -126,43 +112,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             }
             AnalyticsStore.getLogger().enteredName(false, ErrorMessages.INVALID_PHONE_NUMBER);
         }
-
-
     }
-
-    @Override
-    public void attemptRegistration(String number, String ISOCode) {
-
-    }
-
-   /* @Override
-    public void attemptRegistration(String number, String ISOCode) {
-        if (!TextUtils.isEmpty(number)) {
-            onboardingManager.getUser().setPhone(number);
-            onboardingManager.getUser().setCountryCode(ISOCode);
-            OnboardingUser.setOnboardingUser();
-            profileInteractor.registerPhoneNumber(new OnRegisterCallback() {
-                @Override
-                public void OnSuccess() {
-                    if (view != null) {
-                        view.registrationSuccessful();
-                    }
-
-                    AnalyticsStore.getLogger().enteredPhoneNumber(true, null);
-                }
-
-                @Override
-                public void OnError() {
-                    if (view != null) {
-                        view.registrationFailed();
-                    }
-
-                    AnalyticsStore.getLogger().enteredPhoneNumber(false, ErrorMessages.PHONE_NO_REGISTRATION_FAILED);
-                }
-            });
-        } else {
-            AnalyticsStore.getLogger().enteredPhoneNumber(false, ErrorMessages.INVALID_PHONE_NUMBER);
-        }
-    }*/
 }
 

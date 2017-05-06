@@ -10,7 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
@@ -48,10 +48,8 @@ import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
-import io.hypertrack.sendeta.util.KeyboardUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.PhoneUtils;
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
@@ -66,14 +64,11 @@ public class Profile extends BaseActivity implements ProfileView {
     public ProgressBar mProfileImageLoader;
     public Bitmap oldProfileImage = null, updatedProfileImage = null;
     private ProgressDialog mProgressDialog;
-    private LinearLayout profileParentLayout;
     private EditText phoneNumberView;
     private TextView countryCodeTextView;
     private Spinner countryCodeSpinner;
-    private LinearLayout countryCodeLayout;
     private Button register;
     private String isoCode;
-    private CountrySpinnerAdapter adapter;
     private Target profileImageDownloadTarget;
     private File profileImage;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
@@ -90,6 +85,7 @@ public class Profile extends BaseActivity implements ProfileView {
             return false;
         }
     };
+
     private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -101,15 +97,14 @@ public class Profile extends BaseActivity implements ProfileView {
             return false;
         }
     };
+
     private TextWatcher mTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
         }
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-
         }
 
         @Override
@@ -121,7 +116,6 @@ public class Profile extends BaseActivity implements ProfileView {
                 showSkip = false;
                 supportInvalidateOptionsMenu();
             }
-
         }
     };
 
@@ -133,25 +127,28 @@ public class Profile extends BaseActivity implements ProfileView {
         // Initialize Toolbar
         initToolbar(getString(R.string.title_activity_signup_profile), false);
 
+        // Attach View Presenter to View
+        presenter.attachView(this);
+
+        initUIViews();
+    }
+
+    private void initUIViews() {
         // Initialize UI Views before Attaching View Presenter
         mNameView = (EditText) findViewById(R.id.profile_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
-        profileParentLayout = (LinearLayout) findViewById(R.id.profile_parent_layout);
         register = (Button) findViewById(R.id.profile_register);
         phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
         countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
         countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
-        countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
+        LinearLayout countryCodeLayout = (LinearLayout) findViewById(R.id.register_country_code_layout);
         countryCodeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 countryCodeSpinner.performClick();
             }
         });
-
-        // Attach View Presenter to View
-        presenter.attachView(this);
 
         // Initialize UI Action Listeners
         mNameView.setOnEditorActionListener(mNameEditorActionListener);
@@ -165,17 +162,16 @@ public class Profile extends BaseActivity implements ProfileView {
             }
         });
         initCountryFlagSpinner();
-
     }
 
     private void initCountryFlagSpinner() {
         CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
 
-        adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
+        CountrySpinnerAdapter adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         countryCodeSpinner.setAdapter(adapter);
 
-        String isoCountryCode = PhoneUtils.getCountryRegionFromPhone(this);
+        String isoCountryCode = Utils.getCountryRegionFromPhone(this);
         Log.v(TAG, "Region ISO: " + isoCountryCode);
 
         if (!TextUtils.isEmpty(isoCountryCode)) {
@@ -201,7 +197,6 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     public void onProfileImageViewClicked(View view) {
-
         // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             EasyImage.openChooser(Profile.this, "Please select", true);
@@ -217,17 +212,16 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    private void onSignInButtonClicked() {
-        showProgress(true);
-
-        String name = mNameView.getText().toString();
-        String number = phoneNumberView.getText().toString();
-        KeyboardUtils.hideKeyboard(Profile.this, register);
-        presenter.attemptLogin(name, number, isoCode, profileImage, oldProfileImage, updatedProfileImage);
-    }
-
     public void onNextButtonClicked(MenuItem menuItem) {
         this.onSignInButtonClicked();
+    }
+
+    private void onSignInButtonClicked() {
+        showProgress(true);
+        String name = mNameView.getText().toString();
+        String number = phoneNumberView.getText().toString();
+        Utils.hideKeyboard(Profile.this, register);
+        presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage, oldProfileImage, updatedProfileImage);
     }
 
     @Override
@@ -279,20 +273,22 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    @Override
-    public void registrationFailed() {
-        mProgressDialog.dismiss();
-        Toast.makeText(Profile.this, ErrorMessages.PHONE_NO_REGISTRATION_FAILED, Toast.LENGTH_SHORT).show();
-    }
+    private String getName() {
+        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            return null;
+        }
 
-    @Override
-    public void registrationSuccessful() {
-        mProgressDialog.dismiss();
-        // Navigate to Verification Screen for both Positive & Negative cases
-        Intent intent = new Intent(Profile.this, Verify.class);
-        startActivity(intent);
-    }
+        Account[] list = manager.getAccounts();
 
+        for (Account account : list) {
+            if (account.type.equalsIgnoreCase("com.google")) {
+                return account.name;
+            }
+        }
+        return null;
+    }
 
     @Override
     public void showProfilePicUploadSuccess() {
@@ -304,40 +300,23 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void showProfilePicUploadError() {
-        // TODO: 30/06/16 Add Background Upload of Image
         Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
-
-        // Complete User SignUp on Profile Pic Upload Failure
-
     }
 
     @Override
     public void navigateToHomeScreen() {
-        //  UserStore.sharedStore.initializeUser();
-        //   OnboardingManager.sharedManager().getUser();
         Utils.setCrashlyticsKeys(this);
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
-        HTLog.i("Profile", "User Registration successful: Clearing Active Trip, if any");
-
-//        User user = UserStore.sharedStore.getUser();
-        Intent intent;
-       /* if (user != null && user.getPendingMemberships() != null && user.getPendingMemberships().size() > 0) {
-            intent = new Intent(Profile.this, BusinessProfile.class);
-            intent.putExtra(BusinessProfile.KEY_MEMBERSHIP_INVITE, true);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        } else {*/
-        intent = new Intent(Profile.this, Home.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        /*}*/
+        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
 
         TaskStackBuilder.create(Profile.this)
-                .addNextIntentWithParentStack(intent)
+                .addNextIntentWithParentStack(new Intent(Profile.this, Home.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
-
         finish();
     }
 
@@ -378,7 +357,6 @@ public class Profile extends BaseActivity implements ProfileView {
                 // Cancel Profile Pic Download Request from Server & Hide Image Download Loader
                 Picasso.with(Profile.this).cancelRequest(profileImageDownloadTarget);
                 mProfileImageLoader.setVisibility(View.GONE);
-
                 profileImage = ImageUtils.getScaledFile(imageFile);
 
                 updatedProfileImage = ImageUtils.getRotatedBitMap(imageFile);
@@ -390,58 +368,29 @@ public class Profile extends BaseActivity implements ProfileView {
                     mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-
             }
         });
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onProfileImageViewClicked(null);
-                } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
-                            getString(R.string.read_external_storage_permission_never_allow));
-                }
-                break;
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if (requestCode == PermissionUtils.REQUEST_CODE_PERMISSION_READ_EXTERNAL_STORAGE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Handle Read external storage permission successfully granted response
+                onProfileImageViewClicked(null);
+
+            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                // Handle Read external storage permission request denied error
+                PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        getString(R.string.read_external_storage_permission_never_allow));
+            }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_profile, menu);
-        if (showSkip)
-            return super.onCreateOptionsMenu(menu);
-        return false;
-    }
-
-    private String getName() {
-        AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
-        Account[] list = manager.getAccounts();
-
-        for (Account account : list) {
-            if (account.type.equalsIgnoreCase("com.google")) {
-                return account.name;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
-
-    @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState, PersistableBundle persistentState) {
-        super.onRestoreInstanceState(savedInstanceState, persistentState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
+        return showSkip && super.onCreateOptionsMenu(menu);
     }
 
     @Override

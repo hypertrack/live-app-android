@@ -10,5 +10,4 @@
         android:icon="@drawable/ic_action_forward"
         android:onClick="onVerifyButtonClicked"
         app:showAsAction="always" />
-
 </menu>

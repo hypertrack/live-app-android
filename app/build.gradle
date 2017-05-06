@@ -60,7 +60,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 3
+        def versionMinor = 4
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -97,16 +97,11 @@ android {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            buildConfigField "String", "TOOLBAR_TITLE", '"HYPERTRACK LIVE"'
             buildConfigField "String", "HYPERTRACK_PK", '"pk_e956d4c123e8b726c10b553fe62bbaa9c1ac9451"'
-            buildConfigField "String", "BASE_URL", '"https://api.sendeta.com"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
-            resValue "string", "request_eta_base_url", "www.sendeta.com"
-            resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack.com"
+            resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1544357779206506"
-            ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
             signingConfig signingConfigs.release
         }
         debug {
@@ -115,16 +110,11 @@ android {
             applicationIdSuffix ".debug"
             resValue "string", "app_name", "Debug HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "TOOLBAR_TITLE", '"DEBUG HYPERTRACK LIVE"'
             buildConfigField "String", "HYPERTRACK_PK", '"pk_03e3176a9831360e162093292049757b130c75cf"'
-            buildConfigField "String", "BASE_URL", '"https://meta-api-staging.herokuapp.com/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
-            resValue "string", "request_eta_base_url", "www.staging.sendeta.com"
-            resValue "string", "hypertrack_live_request_eta_base_url", "hypertrack-web-staging.herokuapp.com"
+            resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1548496698792614"
-            ext.betaDistributionReleaseNotes = "BETA distribution via Gradle"
-            ext.betaDistributionEmails = "ulhas@hypertrack.io, piyush@hypertrack.io"
         }
     }
 }
@@ -145,15 +135,15 @@ dependencies {
         transitive = true
     }
 
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.android.support:design:25.1.0'
-    compile 'com.android.support:cardview-v7:25.1.0'
-    compile 'com.android.support:recyclerview-v7:25.1.0'
-    compile 'com.googlecode.libphonenumber:libphonenumber:7.2.3'
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:design:25.3.0'
+    compile 'com.android.support:cardview-v7:25.3.0'
+    compile 'com.android.support:recyclerview-v7:25.3.0'
+    compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
-    compile 'com.github.tajchert:WaitingDots:0.3.2'
+    compile 'com.github.tajchert:WaitingDots:0.4.0'
     compile 'com.google.android.gms:play-services-gcm:10.2.0'
     compile 'com.google.android.gms:play-services-places:10.2.0'
     compile 'com.google.android.gms:play-services-location:10.2.0'

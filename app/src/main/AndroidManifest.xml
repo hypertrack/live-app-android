@@ -36,8 +36,7 @@
             android:allowTaskReparenting="false"
             android:label="${applicationLabel}"
             android:launchMode="singleTop"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.Transparent">
+            android:screenOrientation="portrait">
 
             <!-- Intent Filter to make this Screen as the launcher screen -->
             <intent-filter>
@@ -46,36 +45,6 @@
             </intent-filter>
 
             <!-- Intent Filter to handle browsable deeplinks -->
-            <intent-filter android:label="@string/filter_title_request_eta">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-
-                <!-- Add sendeta.com/request DeepLink URL -->
-                <data
-                    android:host="@string/request_eta_base_url"
-                    android:pathPrefix="/request" />
-            </intent-filter>
-
-            <intent-filter android:label="@string/filter_title_request_eta">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-
-                <!-- Add sendeta.com/request DeepLink URL -->
-                <data
-                    android:host="@string/hypertrack_live_request_eta_base_url"
-                    android:pathPrefix="/live/request" />
-            </intent-filter>
-
             <intent-filter android:label="@string/filter_title_track">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -85,14 +54,21 @@
                 <data android:scheme="@string/deeplink_scheme" />
             </intent-filter>
 
-
             <!-- Intent Filter to handle FB Messenger messages -->
-            <!-- <intent-filter>
-                 <action android:name="android.intent.action.PICK" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
 
-                 <category android:name="android.intent.category.DEFAULT" />
-                 <category android:name="com.facebook.orca.category.PLATFORM_THREAD_20150314" />
-             </intent-filter>-->
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+
+                <!-- Add trck.at DeepLink URL -->
+                <data
+                    android:host="@string/tracking_url"
+                    android:pathPrefix="/" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -101,72 +77,20 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
 
-        <!--  <activity
-              android:name=".view.RequestETA"
-              android:parentActivityName=".view.Home"
-              android:screenOrientation="portrait" />-->
-
         <activity
-            android:name=".view.CheckPermission"
+            android:name=".view.ConfigurePermissions"
             android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".view.Verify"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize" />
-
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
-        <!--
-            <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-        -->
 
         <activity
             android:name=".view.Profile"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <!--   <activity
-               android:name=".view.SettingsScreen"
-               android:parentActivityName=".view.Home"
-               android:screenOrientation="portrait" />
-   -->
-        <activity
-            android:name=".view.EditProfile"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".view.AddFavoritePlace"
-            android:screenOrientation="portrait" />
         <activity
             android:name=".view.Track"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:parentActivityName=".view.Home"/>
 
-        <!-- <activity
-             android:name=".view.BusinessProfile"
-             android:parentActivityName=".view.Home"
-             android:screenOrientation="portrait" />
-
-         <activity
-             android:name=".view.UserActivities"
-             android:parentActivityName=".view.Home"
-             android:screenOrientation="portrait" />
-
-
-
-         <activity
-             android:name=".view.ShiftsScreen"
-             android:parentActivityName=".view.SettingsScreen"
-             android:screenOrientation="portrait" />
- -->
         <!-- Register Receivers here -->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
@@ -179,14 +103,14 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.GpsLocationReceiver">
+        <receiver android:name=".receiver.GpsLocationReceiver">
             <intent-filter>
                 <action android:name="android.location.PROVIDERS_CHANGED" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".util.NetworkChangeReceiver">
+        <receiver android:name=".receiver.NetworkChangeReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
@@ -194,7 +118,7 @@
         </receiver>
 
         <receiver
-            android:name=".util.BootReceiver"
+            android:name=".receiver.BootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
@@ -203,6 +127,14 @@
         </receiver>
 
         <!-- Register meta-data here -->
+        <!--
+            The API key for Google Maps-based APIs is defined as a string resource.
+            (See the file "res/values/google_maps_api.xml").
+            Note that the API key is linked to the encryption key used to sign the APK.
+            You need a different API key for each encryption key, including the release key that is used to
+            sign the APK for publishing.
+            You can define the keys for the debug and release targets in src/debug/ and src/release/.
+       -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
@@ -224,24 +156,8 @@
             android:exported="false" />
 
         <service
-            android:name=".service.FetchAddressIntentService"
-            android:exported="false" />
-
-        <service
             android:name=".service.FetchLocationIntentService"
             android:exported="false" />
-
-        <service
-            android:name=".service.RegistrationIntentService"
-            android:exported="false" />
-
-        <service
-            android:name=".service.MetaInstanceIDListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.gms.iid.InstanceID" />
-            </intent-filter>
-        </service>
 
         <service
             android:name=".service.MetaGCMListenerService"

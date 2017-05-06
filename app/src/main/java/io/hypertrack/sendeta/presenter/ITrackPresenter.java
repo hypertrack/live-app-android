@@ -1,17 +1,14 @@
 package io.hypertrack.sendeta.presenter;
 
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import io.hypertrack.sendeta.util.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.TrackView;
 
 /**
@@ -28,25 +25,37 @@ public class ITrackPresenter implements TrackPresenter {
 
     @Override
     public void removeTrackingAction() {
-        if (!TextUtils.isEmpty(SharedPreferenceManager.getCurrentTrackingAction())) {
-            HyperTrack.removeActions(new ArrayList<String>() {{
-                add(SharedPreferenceManager.getCurrentTrackingAction());
-            }});
-
-        }
+        HyperTrack.removeActions(null);
     }
 
     @Override
-    public void addTrackingAction(String id) {
-        SharedPreferenceManager.setCurrentTrackingAction(id);
-    }
-
-    @Override
-    public void trackAction(List<String> actionsIDList) {
+    public void trackAction(String lookupId) {
         if (trackView != null)
             trackView.showLoader(true);
 
-        HyperTrack.trackActionsForUser(actionsIDList, new HyperTrackCallback() {
+        HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (trackView != null) {
+                    trackView.showTrackingDetail();
+                    trackView.showLoader(false);
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                if (trackView != null)
+                    trackView.showError();
+            }
+        });
+    }
+
+    @Override
+    public void trackAction(final List<String> actionsIDList) {
+        if (trackView != null)
+            trackView.showLoader(true);
+
+        HyperTrack.trackAction(actionsIDList, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (trackView != null) {
@@ -67,5 +76,4 @@ public class ITrackPresenter implements TrackPresenter {
     public void destroy() {
         trackView = null;
     }
-
 }

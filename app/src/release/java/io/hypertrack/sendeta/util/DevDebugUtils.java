@@ -18,6 +18,7 @@ public class DevDebugUtils {
 
     public static void setHTLogLevel(int logLevel) {
         //do nothing
+        HyperTrack.enableDebugLogging(Log.VERBOSE);
     }
 
     public static void sdkVersionMessage() {

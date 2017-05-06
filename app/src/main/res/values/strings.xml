@@ -1,8 +1,9 @@
 <resources>
     <string name="action_settings">Settings</string>
     <string name="action_slide_to_end_sharing">SLIDE TO STOP SHARING</string>
+    <string name="complete_action">STOP SHARING</string>
     <string name="action_ending_trip">ENDING TRIP</string>
-    <string name="action_send_eta">Send Tracking Link</string>
+    <string name="action_send_eta">Share Live Location</string>
     <string name="action_request_eta">Request Tracking Link</string>
     <string name="action_retry">Retry</string>
     <string name="autocomplete_hint">Enter your destination</string>
@@ -72,9 +73,10 @@
 
     <string name="fetching_existing_trip">Please wait while we check if there is any existing trip</string>
     <string name="fetching_current_location">Please wait while we fetch your current location</string>
-    <string name="calculating_eta_message">Calculating your ETA</string>
-    <string name="starting_task_message">Generating a link</string>
-    <string name="completing_task_message">Ending your trip</string>
+    <string name="calculating_eta_message">Calculating ETA…</string>
+    <string name="starting_task_message">Sharing your live location…</string>
+    <string name="fetching_data_msg">Fetching details…</string>
+    <string name="completing_task_message">Stopping your live location…</string>
 
     <string name="saving_favorite_addresses_message">Saving your favorite address</string>
     <string name="editing_favorite_addresses_message">Saving your edits</string>
@@ -121,7 +123,9 @@
     <!-- Permission Error Strings -->
     <string name="permission_declined_default_msg">Permission was denied</string>
 
-    <string name="location_permission_rationale_msg">To let your friends and family track you live, you need to allow HyperTrack Live to access this device’s location</string>
+    <string name="location_permission_rationale_msg">To let your friends and family track you live, allow HyperTrack Live to access this device’s location</string>
+    <string name="location_permission_snackbar_msg">Allow location permission for HyperTrack Live to access this device’s location</string>
+    <string name="location_services_snackbar_msg">Enable Location Services for HyperTrack Live to access this device’s location</string>
     <string name="location_permission_never_allow">To let your friends and family track you live, you need to allow HyperTrack Live to access this device’s location.
         \n\nGo to Settings, tap on Permissions, and turn on Location.</string>
 
@@ -203,7 +207,7 @@
     <string name="request_eta_url">http://%1$s/request/?uuid=%2$s&amp;lat=%3$s&amp;lng=%4$s</string>
 
     <!--Toolbar Title-->
-    <string name="location_permission_detail">HyperTrack needs location permission to let your friends and family track you</string>
+    <string name="location_permission_detail">HyperTrack needs location permission to let you share your live location with your friends and family.</string>
     <string name="set_destination_text">SET DESTINATION</string>
     <string name="fetch_address_loading">Fetching Address...</string>
     <string name="about">About</string>

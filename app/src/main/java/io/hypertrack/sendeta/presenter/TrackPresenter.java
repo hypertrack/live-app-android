@@ -9,10 +9,9 @@ import java.util.List;
 public interface TrackPresenter {
     void removeTrackingAction();
 
-    void addTrackingAction(String id);
+    void trackAction(String lookupId);
 
     void trackAction(List<String> actionsIDList);
 
     void destroy();
-
 }

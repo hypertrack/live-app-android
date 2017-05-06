@@ -12,14 +12,5 @@ public interface ProfileView {
 
     void showErrorMessage();
 
-
-
     void updateViews(String name,String phone,String ISOCode ,String profileURL);
-
-    void registrationFailed();
-
-    void registrationSuccessful();
-
-
-
 }

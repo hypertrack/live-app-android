@@ -1,35 +1,35 @@
 package io.hypertrack.sendeta.view;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
+import com.hypertrack.lib.internal.common.util.TextUtils;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
 import io.hypertrack.sendeta.presenter.TrackPresenter;
-
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
 public class Track extends BaseActivity implements TrackView {
 
     public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
-    public static final String KEY_TASK_ID_LIST = "task_id_list";
+    public static final String KEY_ACTION_ID_LIST = "action_id_list";
+    public static final String KEY_LOOKUP_ID = "lookup_id";
 
-    private Button retryButton;
-
-    private HyperTrackMapFragment hyperTrackMapFragment;
-    private MyMapAdapter mapAdapter;
     private Intent intent;
-    private ProgressDialog progressDialog;
+    private Button retryButton;
     private TrackPresenter trackPresenter;
 
     @Override
@@ -39,48 +39,50 @@ public class Track extends BaseActivity implements TrackView {
 
         trackPresenter = new ITrackPresenter(this);
 
-        initUI();
+        initializeUI();
 
         intent = getIntent();
-        if (processIntentParams())
-            return;
-
-        displayLoader(false);
-
-        finish();
+        if (!processIntentParams(intent)) {
+            displayLoader(false);
+            finish();
+        }
     }
 
-    private void initUI() {
-        //Intialize Map Fragment
-        hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_fragment);
-        mapAdapter = new MyMapAdapter(Track.this);
-        hyperTrackMapFragment.setHTMapAdapter(mapAdapter);
+    private void initializeUI() {
+        // Initialize HyperTrackMapFragment, adapter and callback
+        HyperTrackMapFragment hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map_fragment);
+        hyperTrackMapFragment.setHTMapAdapter(new TrackMapAdapter(this));
+
+        // Initialize UI buttons
         retryButton = (Button) findViewById(R.id.retryButton);
     }
 
-    private boolean processIntentParams() {
+    private boolean processIntentParams(Intent intent) {
         // Check if Intent has a valid TASK_ID_LIST extra
-        if (intent != null && intent.hasExtra(KEY_TASK_ID_LIST)) {
-
-            ArrayList<String> actionIDList = intent.getStringArrayListExtra(KEY_TASK_ID_LIST);
-
-            // Check if a valid TASK_ID_LIST is available
-            if (actionIDList != null && !actionIDList.isEmpty()) {
-
+        if (intent != null) {
+            String lookupId = intent.getStringExtra(KEY_LOOKUP_ID);
+            if (!TextUtils.isEmpty(lookupId)) {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
-
-                    //Remove any previous action if currently being tracked.
-                    trackPresenter.removeTrackingAction();
-
-                    //Set the current tracking action
-                    trackPresenter.addTrackingAction(actionIDList.get(0));
-
-                    // Add TaskId being tracked by this user
-                    trackPresenter.trackAction(actionIDList);
+                    // Add lookupId being tracked by this user
+                    trackPresenter.trackAction(lookupId);
                 }
                 return true;
+
+            } else if (intent.hasExtra(KEY_ACTION_ID_LIST)) {
+                List<String> actionIdList = intent.getStringArrayListExtra(KEY_ACTION_ID_LIST);
+
+                // Check if a valid TASK_ID_LIST is available
+                if (actionIdList != null && !actionIdList.isEmpty()) {
+                    if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
+                        // Add TaskId being tracked by this user
+                        trackPresenter.trackAction(actionIdList);
+                    }
+                    return true;
+                }
             }
         }
+
         return false;
     }
 
@@ -90,7 +92,7 @@ public class Track extends BaseActivity implements TrackView {
                 @Override
                 public void onClick(View v) {
                     displayLoader(true);
-                    processIntentParams();
+                    processIntentParams(intent);
                 }
             });
             retryButton.setEnabled(true);
@@ -102,31 +104,12 @@ public class Track extends BaseActivity implements TrackView {
     }
 
     @Override
-    protected void onDestroy() {
-        trackPresenter.destroy();
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        TaskStackBuilder.create(this)
-                .addNextIntentWithParentStack(new Intent(this, Home.class)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                .startActivities();
-        finish();
-
-    }
-
-    @Override
     public void showLoader(boolean toggle) {
-
         displayLoader(toggle);
     }
 
     @Override
     public void showTrackingDetail() {
-        mapAdapter.notifyDataSetChanged();
         displayLoader(false);
     }
 
@@ -136,15 +119,84 @@ public class Track extends BaseActivity implements TrackView {
         displayLoader(false);
     }
 
-    private class MyMapAdapter extends HyperTrackMapAdapter {
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        trackPresenter.removeTrackingAction();
+    }
 
-        public MyMapAdapter(Context mContext) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        trackPresenter.destroy();
+    }
+
+    /**
+     * Implementation for HyperTrackMapAdapter specifying the UI customizations for Live-tracking view
+     */
+    class TrackMapAdapter extends HyperTrackMapAdapter {
+        TrackMapAdapter(Context mContext) {
             super(mContext);
         }
 
         @Override
-        public boolean showHeroMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
             return true;
+        }
+
+        @Override
+        public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
+            return Track.this.getString(R.string.app_name);
+        }
+
+        @Override
+        public Toolbar getToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
+            return null;
+        }
+
+        @Override
+        public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
+            if (SharedPreferenceManager.getLastKnownLocation() != null) {
+                LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
+                        SharedPreferenceManager.getLastKnownLocation().getLongitude());
+                return CameraUpdateFactory.newLatLng(latLng);
+            }
+            return super.getMapFragmentInitialState(hyperTrackMapFragment);
+        }
+
+        @Override
+        public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return false;
+        }
+
+        @Override
+        public boolean showTrailingPolyline() {
+            return true;
+        }
+
+        @Override
+        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
+            return false;
+        }
+
+        @Override
+        public boolean enableLiveLocationSharingView() {
+            return true;
+        }
+
+        @Override
+        public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return false;
+        }
+
+        @Override
+        public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            return R.drawable.ic_ht_destination_marker_default;
+        }
+
+        @Override
+        public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
+            return R.drawable.ic_reset_bounds_button;
         }
     }
 }

@@ -25,30 +25,20 @@ public class HyperTrackServiceGenerator {
                     .addConverterFactory(GsonConverterFactory.create());
 
     public static <S> S createService(Class<S> serviceClass) {
-        Retrofit retrofit = builder.client(httpClient.build())
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        httpClient.interceptors().add(new Interceptor() {
+            @Override
+            public Response intercept(Interceptor.Chain chain) throws IOException {
+                Request original = chain.request();
 
-        return retrofit.create(serviceClass);
-    }
+                // Request customization: add request headers
+                Request.Builder requestBuilder = original.newBuilder()
+                        .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
+                        .method(original.method(), original.body());
 
-    public static <S> S createService(Class<S> serviceClass, final String authToken) {
-        if (authToken != null) {
-            httpClient.interceptors().add(new Interceptor() {
-                @Override
-                public Response intercept(Interceptor.Chain chain) throws IOException {
-                    Request original = chain.request();
-
-                    // Request customization: add request headers
-                    Request.Builder requestBuilder = original.newBuilder()
-                            .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
-                            .method(original.method(), original.body());
-
-                    Request request = requestBuilder.build();
-                    return chain.proceed(request);
-                }
-            });
-        }
+                Request request = requestBuilder.build();
+                return chain.proceed(request);
+            }
+        });
 
         OkHttpClient client = httpClient.build();
         Retrofit retrofit = builder.client(client).build();

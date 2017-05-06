@@ -36,12 +36,6 @@ class EasyImageFiles {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
     }
 
-//    public static File publicRootPicturesDir(Context context) {
-//        File dir = new File(publicRootDir(context), getFolderName(context));
-//        if (!dir.exists()) dir.mkdirs();
-//        return dir;
-//    }
-
     public static File publicAppExternalDir(Context context) {
         return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     }
@@ -56,12 +50,6 @@ class EasyImageFiles {
     private static File privateTemplDir(Context context) {
         return new File(context.getApplicationContext().getCacheDir(), getFolderName(context));
     }
-
-//    public static File publicAppExternalFilesDir(Context context) {
-//        File dir = new File(publicAppExternalDir(context), getFolderName(context));
-//        if (!dir.exists()) dir.mkdirs();
-//        return dir;
-//    }
 
     public static void writeToFile(InputStream in, File file) {
         try {
@@ -105,6 +93,4 @@ class EasyImageFiles {
         File imageFile = File.createTempFile(UUID.randomUUID().toString(), ".jpg", dir);
         return imageFile;
     }
-
-
 }
