@@ -246,13 +246,13 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void setAskedForTrackingDialog() {
+    public static void setRequestedForBackgroundTracking() {
         SharedPreferences.Editor editor = getEditor();
         editor.putBoolean(TRACKING_DIALOG, true);
         editor.apply();
     }
 
-    public static boolean isAskForTrackingDialog() {
+    public static boolean hasRequestedForBackgroundTracking() {
         return getSharedPreferences().getBoolean(TRACKING_DIALOG, false);
     }
 
