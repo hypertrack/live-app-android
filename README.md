@@ -19,10 +19,10 @@ Your location and trips are completely private and secure. They are shared only 
 
 ## Usage
 1. Clone the project.
-2. Get HyperTrack API keys. Learn more about them [here](https://docs.hypertrack.com/v3/gettingstarted/authentication.html), and sign up for them. [here](https://dashboard.hypertrack.com/signup).
-3. Get [Google Map API Key](https://developers.google.com/maps/documentation/android-api/signup) and add them to AndroidManifest.xml.
+2. Get HyperTrack API keys. Learn more about them [here](https://docs.hypertrack.com/gettingstarted/authentication.html), and sign up for them [here](https://dashboard.hypertrack.com/signup).
+3. Get [Google Map API Key](https://developers.google.com/maps/documentation/android-api/signup) and add them to the AndroidManifest.xml.
 4. Add publishable key to hypertrackkey.properties file [here](https://github.com/hypertrack/hypertrack-live-android/blob/master/hypertrackkey.properties).
-5. Follow the [live location sharing tutorial](https://www.hypertrack.com/tutorials/live-location-sharing-android-messaging-app).
+5. Check out the [Live Location Sharing tutorial](https://www.hypertrack.com/tutorials/live-location-sharing-android-messaging-app) and the [Service Visit Tracking tutorial](https://www.hypertrack.com/tutorials/service-visit-tracking-android) for a few suggestions of how to use this source code in your business.
 
 ## Documentation
 For detailed documentation of the methods and customizations, please visit the official [HyperTrack Docs](https://docs.hypertrack.com/).
