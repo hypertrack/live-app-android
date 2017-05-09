@@ -3,10 +3,10 @@ package io.hypertrack.sendeta.presenter;
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
@@ -77,7 +77,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                             @Override
                             public void onError() {
-                                HTLog.i(TAG, "Profile Image not saved in local database");
+                                Log.i(TAG, "Profile Image not saved in local database");
                                 if (view != null) {
                                     view.showProfilePicUploadError();
                                 }
@@ -96,7 +96,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
-                    HTLog.i(TAG, "");
                     if (view != null) {
                         view.showErrorMessage();
                     }
@@ -106,7 +105,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             });
         } catch (Exception e) {
             e.printStackTrace();
-            HTLog.i(TAG, "");
             if (view != null) {
                 view.showErrorMessage();
             }

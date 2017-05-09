@@ -15,7 +15,6 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
@@ -87,13 +86,15 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         return false;
     }
 
-    public void getETA(LatLng origin, LatLng destination, String vehicleType, final ETACallback callback) {
-        String originQueryParam = origin.latitude + "," + origin.longitude;
-        String destinationQueryParam = destination.latitude + "," + destination.longitude;
+    public void getETA(double currentLocationLatitude, double currentLocationLongitude,
+                       double expectedPlaceLatitude, double expectedPlaceLongitude,
+                       String vehicleType, final ETACallback callback) {
+        String currentLocationQueryParam = currentLocationLatitude + "," + currentLocationLongitude;
+        String expectedPlaceQueryParam = expectedPlaceLatitude + "," + expectedPlaceLongitude;
 
         HyperTrackService sendETAService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
-
-        Call<List<ETAResponse>> call = sendETAService.getTaskETA(originQueryParam, destinationQueryParam, vehicleType);
+        Call<List<ETAResponse>> call = sendETAService.getTaskETA(currentLocationQueryParam,
+                expectedPlaceQueryParam, vehicleType);
         call.enqueue(new Callback<List<ETAResponse>>() {
             @Override
             public void onResponse(Call<List<ETAResponse>> call, Response<List<ETAResponse>> response) {
