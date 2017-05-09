@@ -165,11 +165,6 @@ public class Track extends BaseActivity implements TrackView {
         }
 
         @Override
-        public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return false;
-        }
-
-        @Override
         public boolean showTrailingPolyline() {
             return true;
         }
@@ -181,17 +176,12 @@ public class Track extends BaseActivity implements TrackView {
 
         @Override
         public boolean enableLiveLocationSharingView() {
-            return true;
+            return false;
         }
 
         @Override
         public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
             return false;
-        }
-
-        @Override
-        public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return R.drawable.ic_ht_destination_marker_default;
         }
 
         @Override
