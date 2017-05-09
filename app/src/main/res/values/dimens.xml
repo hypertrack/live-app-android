@@ -1,0 +1,71 @@
+<resources>
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <!-- Standard Margin Dimensions -->
+    <dimen name="margin_very_low">2dp</dimen>
+    <dimen name="margin_low">4dp</dimen>
+    <dimen name="margin_base">8dp</dimen>
+    <dimen name="margin_medium">12dp</dimen>
+    <dimen name="margin_high">16dp</dimen>
+    <dimen name="margin_xhigh">24dp</dimen>
+    <dimen name="margin_xxhigh">28dp</dimen>
+    <dimen name="margin_xxxhigh">32dp</dimen>
+    <dimen name="margin_huge">56dp</dimen>
+    <dimen name="margin_max">72dp</dimen>
+
+    <!-- Standard Padding Dimensions -->
+    <dimen name="padding_low">4dp</dimen>
+    <dimen name="padding_base">8dp</dimen>
+    <dimen name="padding_medium">12dp</dimen>
+    <dimen name="padding_high">16dp</dimen>
+    <dimen name="padding_xhigh">24dp</dimen>
+    <dimen name="padding_xxhigh">28dp</dimen>
+    <dimen name="padding_xxxhigh">32dp</dimen>
+    <dimen name="padding_huge">56dp</dimen>
+    <dimen name="padding_max">72dp</dimen>
+
+    <!-- Standard Text Dimensions -->
+    <dimen name="text_very_small">10sp</dimen>
+    <dimen name="text_small">12sp</dimen>
+    <dimen name="text_base">14sp</dimen>
+    <dimen name="text_medium">16sp</dimen>
+    <dimen name="text_large">20sp</dimen>
+    <dimen name="text_very_large">24sp</dimen>
+    <dimen name="text_extra_large">32sp</dimen>
+
+    <!-- Button dimensions -->
+    <dimen name="cta_button_size">50dp</dimen>
+    <dimen name="home_cta_bottom_layout_size">160dp</dimen>
+    <dimen name="cta_button_radius">25dp</dimen>
+
+    <!-- Standard Elevation Dimensions-->
+    <dimen name="elevation_base">2dp</dimen>
+    <dimen name="elevation_medium">4dp</dimen>
+    <dimen name="elevation_high">8dp</dimen>
+
+    <!-- CardView Dimensions -->
+    <dimen name="card_radius">4dp</dimen>
+    <dimen name="card_radius_low">2dp</dimen>
+
+    <!-- Map Padding -->
+    <dimen name="map_side_padding">16dp</dimen>
+    <dimen name="map_top_padding">192dp</dimen>
+    <dimen name="map_top_padding_with_vehicle_type_layout">240dp</dimen>
+    <dimen name="map_bottom_padding">120dp</dimen>
+    <dimen name="home_map_bottom_padding">72dp</dimen>
+    <dimen name="live_tracking_map_bottom_padding">72dp</dimen>
+
+    <dimen name="image_view_size">100dp</dimen>
+    <dimen name="image_view_size_half">50dp</dimen>
+
+    <dimen name="drawer_header_subtitle_height">56dp</dimen>
+
+    <dimen name="hero_marker_image">48dp</dimen>
+    <dimen name="profile_image_size">100dp</dimen>
+
+    <dimen name="icon_size">24dp</dimen>
+    <dimen name="toolbar_user_icon">30dp</dimen>
+</resources>

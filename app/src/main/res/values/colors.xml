@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/app_primary_light</color>
+    <color name="colorPrimaryDark">@color/app_primary</color>
+    <color name="colorAccent">#FF008CEE</color>
+
+    <color name="app_primary">#909090</color>
+    <color name="app_primary_light">#F4F4F4</color>
+    <color name="app_primary_dark">#606060</color>
+
+    <color name="app_background_theme">#474D62</color>
+    <color name="app_background_theme_light">#dddddd</color>
+
+    <color name="appBackground">#F4F4F4</color>
+    <color name="app_background_gradient">#55F4F4F4</color>
+
+    <color name="ic_ht_service_notification_icon_bg_color">@color/colorAccent</color>
+
+    <!-- Default Text Colors -->
+    <color name="text_base">#6a6a6a</color>
+    <color name="text_secondary">#888888</color>
+    <color name="text_tertiary">#b2b2b2</color>
+    <color name="text_disabled">#7e888888</color>
+    <color name="text_error">#DD2C00</color>
+    <color name="text_warning">#D78A00</color>
+    <color name="text_highlight">@color/colorAccent</color>
+
+    <!-- Dark Background Text Colors -->
+    <color name="text_dark_bg_base">#FFFFFF</color>
+    <color name="text_dark_bg_secondary">#AAFFFFFF</color>
+    <color name="text_dark_bg_disabled">#78FFFFFF</color>
+
+    <color name="border_color">#C8C8C8</color>
+
+    <color name="divider">#28000000</color>
+    <color name="divider_light">#16000000</color>
+    <color name="divider_dark">#777777</color>
+
+    <color name="tab_layout_selected_item">@color/colorAccent</color>
+    <color name="tab_layout_unselected_item">#66008CEE</color>
+
+    <color name="slide_to_end_gradient">#FF58B8FC</color>
+</resources>

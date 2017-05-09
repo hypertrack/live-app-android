@@ -1,0 +1,29 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:layout_width="68dp"
+        android:layout_height="68dp"
+        android:src="@drawable/icon_eta" />
+
+    <TextView
+        android:id="@+id/eta_time"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/text_large" />
+
+    <TextView
+        android:id="@+id/eta_time_type_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:textAllCaps="true"
+        android:textColor="#ffffff"
+        android:textSize="@dimen/text_very_small" />
+</FrameLayout>

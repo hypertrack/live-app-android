@@ -1,0 +1,91 @@
+<resources>
+    <string name="action_settings">Settings</string>
+    <string name="action_stop_sharing">STOP SHARING</string>
+    <string name="action_share_live_location">Share Live Location</string>
+    <string name="action_retry">Retry</string>
+    <string name="action_resume_tracking">Resume tracking</string>
+    <string name="action_pause_tracking">Pause tracking</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_name">Name</string>
+    <string name="action_skip">Skip</string>
+
+    <string name="title_activity_signup_profile">Profile</string>
+    <string name="filter_title_track">HyperTrack Live</string>
+
+    <string name="geofence_not_available">Geofence service is not available now. Network Location Provider is disabled</string>
+    <string name="geofence_too_many_geofences">Your app has registered too many geofences</string>
+    <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call</string>
+    <string name="unknown_geofence_error">Unknown error: the Geofence service is not available now</string>
+    <string name="geofence_transition_invalid_type">Geofence transition error: invalid transition type %1$d</string>
+
+    <string name="enter_phone_number_footer_note">We will use your phone number to send verification code for HyperTrack-Live</string>
+
+    <!-- Geocoding Intent Service string -->
+    <string name="service_not_available">There was an error fetching address. Please try again</string>
+    <string name="invalid_lat_lng_used">There was an error fetching address. Please try again</string>
+    <string name="no_address_found">There was an error fetching address. Please try again</string>
+
+    <string name="geofence_transition_entered">GEOFENCE_TRANSITION_ENTER</string>
+    <string name="geofence_transition_exited">GEOFENCE_TRANSITION_EXIT</string>
+    <string name="geofence_transition_dwelled">GEOFENCE_TRANSITION_DWELL</string>
+    <string name="unknown_geofence_transition">GEOFENCE_TRANSITION_UNKNOWN</string>
+
+    <!-- Progress bar strings -->
+    <string name="registration_phone_number">Setting up your account</string>
+    <string name="enter_phone_number">Enter Phone Number</string>
+
+    <string name="calculating_eta_message">Calculating ETA…</string>
+    <string name="sharing_live_location_message">Sharing your live location…</string>
+    <string name="fetching_details_msg">Fetching details…</string>
+    <string name="stop_sharing_message">Stopping your live location…</string>
+
+    <!-- Success Strings -->
+    <string name="profile_upload_success">Profile pic uploaded successfully</string>
+
+    <!-- Error Strings -->
+    <string name="network_issue">Bad connection. Try again later</string>
+    <string name="profile_update_failed">We had problem connecting with the server. Please try again in sometime</string>
+    <string name="profile_pic_choose_failed">There was an error choosing profile image. Please try again</string>
+    <string name="stop_sharing_failed">Error ending your trip. Please try again</string>
+    <string name="eta_fetching_error">Sorry, we could not calculate an ETA. Please try again later</string>
+    <string name="share_message_error">We had a problem sharing your trip. Please try again in some time.</string>
+    <string name="navigate_to_expected_place_error">We had a problem starting navigation for your expected place. Please try again in some time.</string>
+
+    <string name="location_off_info_message">Please turn on your location</string>
+    <string name="internet_off_info_message">Unable to connect to internet</string>
+    <string name="internet_location_both_off_info_message">Internet &amp; Location OFF</string>
+
+    <!-- Permission Error Strings -->
+    <string name="location_permission_rationale_msg">To let your friends and family track you live, allow HyperTrack Live to access this device’s location</string>
+    <string name="location_permission_snackbar_msg">Allow location permission for HyperTrack Live to access this device’s location</string>
+    <string name="location_services_snackbar_msg">Enable Location Services for HyperTrack Live to access this device’s location</string>
+    <string name="location_permission_never_allow">To let your friends and family track you live, you need to allow HyperTrack Live to access this device’s location.
+        \n\nGo to Settings, tap on Permissions, and turn on Location.</string>
+
+    <string name="read_external_storage_permission_msg">To upload and change a profile photo, you need to allow HyperTrack Live to access photos on your device</string>
+    <string name="read_external_storage_permission_never_allow">To upload and change a profile photo, you need to allow HyperTrack Live to access photos on your device.
+        \n\nGo to Settings, tap on Permissions, and turn on Storage.</string>
+
+    <!-- Notification Strings -->
+    <string name="notification_share_tracking_link">Share your tracking link with your friends &amp; family.</string>
+    <string name="notification_set_expected_place">Set your destination</string>
+
+    <!-- ETA Marker Strings -->
+    <plurals name="eta_in_minute_text">
+        <item quantity="zero">min</item>
+        <item quantity="one">min</item>
+        <item quantity="other">mins</item>
+    </plurals>
+
+    <plurals name="eta_in_hour_text">
+        <item quantity="zero">hr</item>
+        <item quantity="one">hr</item>
+        <item quantity="other">hrs</item>
+    </plurals>
+
+    <!--Toolbar Title-->
+    <string name="location_permission_detail">HyperTrack needs location permission to let you share your live location with your friends and family.</string>
+
+    <string name="background_tracking_permission_msg">We will enable the background tracking by default. Do you want to enable it?</string>
+</resources>

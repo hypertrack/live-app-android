@@ -1,0 +1,15 @@
+<resources>>
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:colorButtonNormal">#2196f3</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="TextViewSpinnerItem" parent="@android:style/Widget.Material.TextView.SpinnerItem">
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+    </style>
+</resources>
