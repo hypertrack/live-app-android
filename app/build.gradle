@@ -1,0 +1,78 @@
+buildscript {
+    repositories {
+        maven { url 'https://jitpack.io' }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
+    }
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.mindera.gradle.slack'
+apply plugin: 'realm-android'
+
+repositories {
+    // HyperTrack Repository
+    maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion '25.0.2'
+    lintOptions {
+        abortOnError false
+    }
+
+    def hyperTrackKeyPropertiesFile = rootProject.file("hypertrackkey.properties");
+    def hyperTrackKeyProperties = new Properties()
+    hyperTrackKeyProperties.load(new FileInputStream(hyperTrackKeyPropertiesFile))
+
+    defaultConfig {
+        applicationId "io.hypertrack.sendeta"
+        versionCode 1
+        versionName "0.1.1"
+        minSdkVersion 19
+        targetSdkVersion 25
+        resValue "string", "app_name", "HyperTrack Live"
+        buildConfigField "String", "HYPERTRACK_PK", hyperTrackKeyProperties['publishableKey']
+        buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
+        resValue "string", "deeplink_scheme", "com.hypertracklive"
+        resValue "string", "tracking_url", "www.trck.at"
+        manifestPlaceholders = [applicationLabel: "@string/app_name"]
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            debuggable false
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    testCompile 'junit:junit:4.12'
+
+    compile("com.hypertrack:android:0.2.1:release@aar") {
+        transitive = true;
+    }
+
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.android.support:design:25.3.0'
+    compile 'com.android.support:cardview-v7:25.3.0'
+    compile 'com.android.support:recyclerview-v7:25.3.0'
+    compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
+    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
+    compile 'com.squareup.picasso:picasso:2.4.0'
+    compile 'com.github.tajchert:WaitingDots:0.4.0'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-places:10.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
+}
+
+apply plugin: 'com.google.gms.google-services'
