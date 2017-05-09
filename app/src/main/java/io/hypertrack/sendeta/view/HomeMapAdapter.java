@@ -70,7 +70,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public boolean showSelectExpectedPlace() {
+    public boolean showPlaceSelectorView() {
         return true;
     }
 
