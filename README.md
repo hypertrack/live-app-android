@@ -10,7 +10,7 @@ Let your friends and family track you on a map when you are on the way. No more 
 Send your real-time ETA to your friends and family based on mode of transport and trip progress.
 
 ### Easy to share
-Use your favorite messaging app to send ETA with a web link for live tracking. 
+Use your favorite messaging app to send ETA with a web link for live tracking.
 
 ### Private and secure
 Your location and trips are completely private and secure. They are shared only with people you chose and only for the duration of the trip.
