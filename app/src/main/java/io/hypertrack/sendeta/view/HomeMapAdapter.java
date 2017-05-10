@@ -70,12 +70,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public boolean rotateHeroMarker(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return false;
-    }
-
-    @Override
-    public boolean showSelectExpectedPlace() {
+    public boolean showPlaceSelectorView() {
         return true;
     }
 
@@ -103,22 +98,12 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-        return R.drawable.ic_reset_bounds_button;
-    }
-
-    @Override
     public boolean enableLiveLocationSharingView() {
         return true;
     }
 
     @Override
-    public int getExpectedPlaceMarkerIconForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return R.drawable.ic_ht_destination_marker_default;
-    }
-
-    @Override
-    public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return false;
+    public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
+        return R.drawable.ic_reset_bounds_button;
     }
 }
