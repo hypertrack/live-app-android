@@ -3,6 +3,8 @@
 
 Share your live location with family and friends and let them share their location back with you.
 
+[![Live Tracking Demo](https://cloud.githubusercontent.com/assets/296864/25905314/5382bb02-3567-11e7-8403-556353e0c834.gif)
+
 ### Live location
 Let your friends and family track you on a map when you are on the way. No more phone calls asking where you are.
 
@@ -16,8 +18,6 @@ Use your favorite messaging app to send ETA with a web link for live tracking.
 Your location and trips are completely private and secure. They are shared only with people you chose and only for the duration of the trip.
 
 <a href='https://play.google.com/store/apps/details?id=io.hypertrack.sendeta&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
-
-[![Live Tracking Demo](https://cloud.githubusercontent.com/assets/296864/25905314/5382bb02-3567-11e7-8403-556353e0c834.gif)
 
 ## Usage
 1. Clone the project.
