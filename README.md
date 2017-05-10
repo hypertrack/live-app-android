@@ -17,6 +17,8 @@ Your location and trips are completely private and secure. They are shared only 
 
 <a href='https://play.google.com/store/apps/details?id=io.hypertrack.sendeta&pcampaignid=MKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png'/></a>
 
+[![Live Tracking Demo](https://cloud.githubusercontent.com/assets/296864/25905314/5382bb02-3567-11e7-8403-556353e0c834.gif)
+
 ## Usage
 1. Clone the project.
 2. Get HyperTrack API keys. Learn more about them [here](https://docs.hypertrack.com/gettingstarted/authentication.html), and sign up for them [here](https://dashboard.hypertrack.com/signup).
