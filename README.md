@@ -1,4 +1,5 @@
 # HyperTrack Live
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/4fad0c93fd3749d690571a7a728ce047)](https://www.codacy.com/app/piyushguptaece/hypertrack-live-android?utm_source=github.com&utm_medium=referral&utm_content=hypertrack/hypertrack-live-android&utm_campaign=badger)
 [![Slack Status](http://slack.hypertrack.com/badge.svg)](http://slack.hypertrack.com)
 
 Share your live location with family and friends and let them share their location back with you.
