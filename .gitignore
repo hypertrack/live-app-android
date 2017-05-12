@@ -91,4 +91,3 @@ crashlytics-build.properties
 .DS_store
 app/src/main/java/io/hypertrack/sendeta/SearchView/
 app/src/main/java/io/hypertrack/sendeta/autocompleteplace/
-/hypertrackkey.properties
