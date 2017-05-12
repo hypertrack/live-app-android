@@ -54,12 +54,11 @@ public class DeepLinkUtil {
     public static AppDeepLink prepareAppDeepLink(Context context, Uri uri) {
 
         AppDeepLink appDeepLink = new AppDeepLink(DEFAULT);
-
         if (uri == null)
             return appDeepLink;
 
         try {
-            return DeepLinkUtil.parseAppDeepLinkURI(context, appDeepLink, uri);
+            return DeepLinkUtil.parseAppDeepLinkURI(context, uri);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -67,7 +66,8 @@ public class DeepLinkUtil {
         return appDeepLink;
     }
 
-    private static void parsePathParams(Context context, AppDeepLink appDeepLink, Uri uri) {
+    private static AppDeepLink parsePathParams(Context context, Uri uri) {
+        AppDeepLink appDeepLink = new AppDeepLink(DEFAULT);
         if (uri.getScheme() != null
                 && uri.getScheme().equalsIgnoreCase(context.getString(R.string.deeplink_scheme))
                 && !TextUtils.isEmpty(uri.getHost())
@@ -83,10 +83,12 @@ public class DeepLinkUtil {
                 appDeepLink.shortCode = pathParams[1];
             }
         }
+
+        return appDeepLink;
     }
 
-    private static AppDeepLink parseAppDeepLinkURI(Context context, AppDeepLink appDeepLink, Uri uri) {
-        DeepLinkUtil.parsePathParams(context, appDeepLink, uri);
+    private static AppDeepLink parseAppDeepLinkURI(Context context, Uri uri) {
+        AppDeepLink appDeepLink = DeepLinkUtil.parsePathParams(context, uri);
 
         Set<String> queryParamNames = uri.getQueryParameterNames();
         if (queryParamNames == null || queryParamNames.isEmpty())

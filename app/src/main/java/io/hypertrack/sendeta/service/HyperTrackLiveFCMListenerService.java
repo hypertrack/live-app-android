@@ -23,12 +23,17 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.service;
 
-import com.hypertrack.lib.HyperTrackFirebaseMessagingService;
-
 /**
  * Created by piyush on 27/07/16.
  */
-public class MetaFCMListenerService extends HyperTrackFirebaseMessagingService {
+
+/**
+ * - Uncomment `HyperTrackLiveFCMListenerService` service tag in the <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L161">AndroidManifest.xml</a> file.
+ * - Uncomment <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L36">HyperTrackLiveFCMListenerService.java</a> file.
+ * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
+ * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
+ */
+//public class HyperTrackLiveFCMListenerService extends HyperTrackFirebaseMessagingService {
     // No need to implement/override any method for HyperTrack SDK's Gcm/Fcm integration
     // In case onMessageReceived method is overridden, super.onMessageReceived() method should be called.
-}
+//}

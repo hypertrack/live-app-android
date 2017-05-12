@@ -137,7 +137,7 @@
        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value=<Add your Google Map API key> />
+            android:value="Add your Google Map API key" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -152,13 +152,19 @@
             android:name=".service.FetchLocationIntentService"
             android:exported="false" />
 
-        <service
-            android:name=".service.MetaFCMListenerService"
+        <!--
+        * - Uncomment `HyperTrackLiveFCMListenerService` service tag in the <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L161">AndroidManifest.xml</a> file.
+        * - Uncomment <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L36">HyperTrackLiveFCMListenerService.java</a> file.
+        * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
+        * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
+        -->
+    <!-- <service
+            android:name=".service.HyperTrackLiveFCMListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-        </service>
+        </service> -->
 
     </application>
 
