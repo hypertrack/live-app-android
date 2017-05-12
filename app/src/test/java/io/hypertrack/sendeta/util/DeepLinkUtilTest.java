@@ -13,11 +13,13 @@ import org.robolectric.RobolectricGradleTestRunner;
 import org.robolectric.annotation.Config;
 
 import io.hypertrack.sendeta.BuildConfig;
+import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricGradleTestRunner.class)
 @Config(sdk = 21, constants = BuildConfig.class)
@@ -42,6 +44,18 @@ public class DeepLinkUtilTest {
         assertNull(appDeepLink.taskID);
         assertNull(appDeepLink.lookupId);
         assertNull(appDeepLink.shortCode);
+    }
+
+    @Test
+    public void prepareAppDeepLinkTestWhenUriIsNotNull() throws Exception {
+        when(context.getString(R.string.tracking_url)).thenReturn("www.trck.at");
+
+        AppDeepLink appDeepLink = DeepLinkUtil.prepareAppDeepLink(context, uri);
+        assertNotNull(appDeepLink);
+        assertEquals(DeepLinkUtil.TRACK, appDeepLink.mId);
+        assertNull(appDeepLink.taskID);
+        assertNull(appDeepLink.lookupId);
+        assertNotNull(appDeepLink.shortCode);
     }
 
     private Uri getUri(String uri) {
