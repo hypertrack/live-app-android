@@ -153,10 +153,10 @@
             android:exported="false" />
 
         <service
-            android:name=".service.MetaGCMListenerService"
+            android:name=".service.MetaFCMListenerService"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
