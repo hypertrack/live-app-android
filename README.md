@@ -4,7 +4,7 @@
 
 Share your live location with family and friends and let them share their location back with you.
 
-[![Live Tracking Demo](https://cloud.githubusercontent.com/assets/296864/25905314/5382bb02-3567-11e7-8403-556353e0c834.gif)
+[![Live Tracking Demo](https://raw.githubusercontent.com/hypertrack/hypertrack-live-android/master/live_location_sharing.gif)
 
 ### Live location
 Let your friends and family track you on a map when you are on the way. No more phone calls asking where you are.
