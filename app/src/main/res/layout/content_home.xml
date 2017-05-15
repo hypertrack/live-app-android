@@ -150,17 +150,19 @@
 
                 <Button
                     android:id="@+id/retryButton"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="@dimen/cta_button_size"
                     android:layout_gravity="center"
+                    android:layout_margin="@dimen/margin_high"
                     android:background="@drawable/share_live_location_btn_bg"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:gravity="center"
+                    android:text="@string/action_retry"
                     android:paddingLeft="@dimen/padding_xhigh"
                     android:paddingRight="@dimen/padding_xhigh"
-                    android:text="@string/action_retry"
                     android:textColor="@color/text_dark_bg_base"
                     android:visibility="gone" />
+
             </FrameLayout>
         </LinearLayout>
     </LinearLayout>
