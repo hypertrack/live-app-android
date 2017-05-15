@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.callback;
 
+import com.hypertrack.lib.models.ErrorResponse;
+
 import io.hypertrack.sendeta.model.ETAResponse;
 
 /**
@@ -7,5 +9,5 @@ import io.hypertrack.sendeta.model.ETAResponse;
  */
 public abstract class ETACallback {
     public abstract void OnSuccess(ETAResponse etaResponse);
-    public abstract void OnError();
+    public abstract void OnError(ErrorResponse errorResponse);
 }
