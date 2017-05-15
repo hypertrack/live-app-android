@@ -80,7 +80,6 @@ android {
             minSdkVersion 19
             targetSdkVersion 25
             resValue "string", "app_name", "HyperTrack Live"
-
             multiDexEnabled true
         }
 
@@ -103,7 +102,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "HYPERTRACK_PK", hyperTrackKeyProperties['publishableKey']
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1544357779206506"
