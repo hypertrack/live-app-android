@@ -17,7 +17,7 @@ If you want to experience the app or want to share live location amongst your fr
 
 1. Clone the project.
     
-2. Get your HyperTrack API keys [here](https://dashboard.hypertrack.com/signup), and add the publishable key to [gradle.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/gradle.properties) file. Refer to the [Authentication](https://docs.hypertrack.com/gettingstarted/authentication.html) docs to learn more about keys.
+2. Get your HyperTrack API keys [here](https://dashboard.hypertrack.com/signup), and add the publishable key to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file. Refer to the [Authentication](https://docs.hypertrack.com/gettingstarted/authentication.html) docs to learn more about keys.
     
 3. Get [Google Map API Key](https://developers.google.com/maps/documentation/android-api/signup) and add them to the AndroidManifest.xml.
     
