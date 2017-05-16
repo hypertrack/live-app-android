@@ -52,7 +52,7 @@ dependencies {
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.robolectric:shadows-support-v4:3.0'
 
-    compile("com.hypertrack:android:0.2.2:release@aar") {
+    compile("com.hypertrack:android:0.2.3:release@aar") {
         transitive = true;
     }
 
