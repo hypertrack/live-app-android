@@ -1084,7 +1084,7 @@ public class Home extends BaseActivity implements HomeView {
         if (actionManager.getHyperTrackAction() != null && !actionManager.getHyperTrackAction().isCompleted()) {
             actionManager.setActionComletedListener(actionCompletedListener);
 
-            lookupId = actionManager.getHyperTrackAction().getLookupID();
+            lookupId = actionManager.getHyperTrackAction().getLookupId();
             HyperTrack.trackActionByLookupId(lookupId, null);
         }
 
