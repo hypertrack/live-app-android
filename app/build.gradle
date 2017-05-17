@@ -52,12 +52,12 @@ dependencies {
     testCompile 'org.robolectric:robolectric:3.0'
     testCompile 'org.robolectric:shadows-support-v4:3.0'
 
-    compile("com.hypertrack:android:0.2.3:release@aar") {
+    compile("com.hypertrack:android:0.2.4:release@aar") {
         transitive = true;
     }
 
-    compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.android.support:design:25.3.0'
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
 
     compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
