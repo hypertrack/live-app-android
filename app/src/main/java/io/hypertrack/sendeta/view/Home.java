@@ -27,6 +27,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -756,7 +757,7 @@ public class Home extends BaseActivity implements HomeView {
             return;
 
         ActionManager.getSharedManager(this).setActionComletedListener(actionCompletedListener);
-        lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupID();
+        lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupId();
 
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
@@ -916,7 +917,17 @@ public class Home extends BaseActivity implements HomeView {
         Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
-        startActivity(mapIntent);
+        //Check if map application is installed or not.
+        try {
+            startActivity(mapIntent);
+        } catch (ActivityNotFoundException ex) {
+            try {
+                Intent unrestrictedIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                startActivity(unrestrictedIntent);
+            } catch (ActivityNotFoundException innerEx) {
+                Toast.makeText(this, "Please install a map application", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
