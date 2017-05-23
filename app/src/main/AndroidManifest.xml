@@ -137,7 +137,7 @@
        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBZrtyCRtxixNlCp1qiSjhnXATAXiKPsvU" />
+            android:value="AIzaSyBe-FtjbVHbKOTuTbaURpaYnwuwiHrDms0" />
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="012ca85a4085707d726df8e4cc885fa5109d825a" />
