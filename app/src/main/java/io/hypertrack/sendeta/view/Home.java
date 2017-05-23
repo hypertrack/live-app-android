@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -102,7 +103,7 @@ public class Home extends BaseActivity implements HomeView {
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
-
+    private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
@@ -157,9 +158,11 @@ public class Home extends BaseActivity implements HomeView {
         initializeUIViews();
 
         // Initialize Map Fragment added in Activity Layout to getMapAsync
-        HyperTrackMapFragment htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
+        HyperTrackMapFragment htMapFragment;
+        htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
-        HomeMapAdapter adapter = new HomeMapAdapter(this, getToolbar());
+
+        adapter = new HomeMapAdapter(this, getToolbar());
         htMapFragment.setHTMapAdapter(adapter);
         htMapFragment.setMapFragmentCallback(callback);
 
@@ -418,7 +421,7 @@ public class Home extends BaseActivity implements HomeView {
      * @param place Expected place for the user
      */
     private void onSelectPlace(final Place place) {
-        if (place == null || this.isFinishing()) {
+        if (place == null || place.getLocation() == null ||  this.isFinishing()) {
             return;
         }
 
@@ -895,7 +898,17 @@ public class Home extends BaseActivity implements HomeView {
         Uri gmmIntentUri = Uri.parse("google.navigation:q=" + navigationString);
         Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
         mapIntent.setPackage("com.google.android.apps.maps");
-        startActivity(mapIntent);
+        //Check if map application is installed or not.
+        try {
+            startActivity(mapIntent);
+        } catch (ActivityNotFoundException ex) {
+            try {
+                Intent unrestrictedIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+                startActivity(unrestrictedIntent);
+            } catch (ActivityNotFoundException innerEx) {
+                Toast.makeText(this, "Please install a map application", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     @Override
@@ -1116,6 +1129,9 @@ public class Home extends BaseActivity implements HomeView {
     public void onBackPressed() {
         if (!isvehicleTypeTabLayoutVisible) {
             HyperTrack.removeActions(null);
+            if(adapter != null){
+                adapter.notifyDataSetChanged();
+            }
             super.onBackPressed();
         } else {
             OnStopSharing();

@@ -17,6 +17,7 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.Place;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
                     }
                 } else {
                     if (callback != null) {
-                        callback.OnError();
+                        callback.OnError(new ErrorResponse(response.raw().code(),response.raw().message()));
                     }
                 }
             }
@@ -114,7 +115,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
             @Override
             public void onFailure(Call<List<ETAResponse>> call, Throwable t) {
                 if (callback != null) {
-                    callback.OnError();
+                    callback.OnError(null);
                 }
             }
         });

@@ -58,8 +58,8 @@
 
     <!-- Permission Error Strings -->
     <string name="location_permission_rationale_msg">To let your friends and family track you live, allow HyperTrack Live to access this device’s location</string>
-    <string name="location_permission_snackbar_msg">Allow location permission for HyperTrack Live to access this device’s location</string>
-    <string name="location_services_snackbar_msg">Enable Location Services for HyperTrack Live to access this device’s location</string>
+    <string name="location_permission_snackbar_msg">Allow location permission for app to access this device’s location</string>
+    <string name="location_services_snackbar_msg">Enable Location Services for app to access this device’s location</string>
     <string name="location_permission_never_allow">To let your friends and family track you live, you need to allow HyperTrack Live to access this device’s location.
         \n\nGo to Settings, tap on Permissions, and turn on Location.</string>
 

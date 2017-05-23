@@ -68,8 +68,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                             }
 
                             @Override
-                            public void OnError() {
-                                ErrorResponse errorResponse = new ErrorResponse();
+                            public void OnError(ErrorResponse errorResponse) {
                                 if (view != null)
                                     view.showGetETAForExpectedPlaceError(errorResponse, expectedPlace);
                                 Log.e(TAG, "Error occurred in getETAForExpectedPlace: " + errorResponse.getErrorMessage());
