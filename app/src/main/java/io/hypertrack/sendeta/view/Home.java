@@ -426,7 +426,7 @@ public class Home extends BaseActivity implements HomeView {
      * @param place Expected place for the user
      */
     private void onSelectPlace(final Place place) {
-        if (place == null || this.isFinishing()) {
+        if (place == null || place.getLocation() == null || this.isFinishing()) {
             return;
         }
 
