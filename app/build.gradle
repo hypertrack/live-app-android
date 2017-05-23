@@ -103,7 +103,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "HYPERTRACK_PK", hyperTrackKeyProperties['publishableKey']
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://app.hypertrack.io/api/v1/"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1544357779206506"
@@ -116,7 +116,7 @@ android {
             resValue "string", "app_name", "Debug HyperTrack Live"
             buildConfigField "String", "HYPERTRACK_PK", hyperTrackKeyProperties['testPublishableKey']
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://hypertrack-api-v2-staging.herokuapp.com/api/v1/"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive.staging"
             resValue "string", "tracking_url", "www.trck.at"
             resValue "string", "facebook_app_id", "1548496698792614"
@@ -132,14 +132,13 @@ dependencies {
         transitive = true;
     }
 
-    /* releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-         transitive = true
-     }*/
-
-
-    releaseCompile(project(path: ':library', configuration: 'release')) {
+    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
+
+    /*releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }*/
 
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
