@@ -150,7 +150,8 @@
 
                 <Button
                     android:id="@+id/retryButton"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_margin="@dimen/margin_high"
                     android:layout_height="@dimen/cta_button_size"
                     android:layout_gravity="center"
                     android:background="@drawable/share_live_location_btn_bg"
