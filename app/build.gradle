@@ -64,7 +64,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 4
+        def versionMinor = 5
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -131,13 +131,13 @@ dependencies {
         transitive = true;
     }
 
-    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
-
-    /* releaseCompile(project(path: ':library', configuration: 'release')) {
+    /*releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }*/
+
+    releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
 
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
