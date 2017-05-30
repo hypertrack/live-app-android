@@ -64,7 +64,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 5
+        def versionMinor = 4
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
