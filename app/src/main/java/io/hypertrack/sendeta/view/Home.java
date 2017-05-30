@@ -149,20 +149,26 @@ public class Home extends BaseActivity implements HomeView {
                     && HyperTrack.getConsumerClient().getActiveActionIDList() == null) {
                 shareLiveLocationButton.setVisibility(View.GONE);
             }
+
             ActionManager actionManager = ActionManager.getSharedManager(Home.this);
 
             if(actionManager.getHyperTrackAction() != null ){
-
+                //Get the index of active action from refreshed action Ids
                 int index = refreshedActionIds.indexOf(actionManager.getHyperTrackActionId());
+
                 if(index >= 0) {
+
+                    //Get refreshed action Data
                     Action action = refreshedActions.get(refreshedActionIds.indexOf(
                             actionManager.getHyperTrackActionId()));
-
-
+                    //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
 
+                    //If action has completed hide stop sharing button
                     if (action.hasActionFinished()) {
                         stopSharingButton.setVisibility(View.GONE);
+
+                        //Show share live location button only when there are multiple action tracking
                         if (refreshedActionIds.size() > 1) {
                             showShareLiveLocationButton();
                         }
@@ -298,7 +304,7 @@ public class Home extends BaseActivity implements HomeView {
         if (HyperTrack.checkLocationPermission(this) && HyperTrack.checkLocationServices(this)) {
             if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null ||
                     ActionManager.getSharedManager(Home.this).getHyperTrackAction().hasActionFinished()) {
-                // Start the Task
+                // Start the Action
                 startAction();
             } else {
                 OnStopSharing();
@@ -1115,9 +1121,6 @@ public class Home extends BaseActivity implements HomeView {
             lookupId = actionManager.getHyperTrackAction().getLookupId();
             HyperTrack.trackActionByLookupId(lookupId, null);
         }
-        /*else {
-            presenter.stopSharing();
-        }*/
 
         // Check if Location & Network are Enabled
         updateInfoMessageView();
@@ -1168,6 +1171,8 @@ public class Home extends BaseActivity implements HomeView {
 
         ActionManager actionManager = ActionManager.getSharedManager(this);
 
+        //If tracking action has completed and summary view is visible then on back press clear the view
+        // so that user can share new tracking url without reopening the app.
         if(actionManager.getHyperTrackAction() != null &&
                 actionManager.getHyperTrackAction().hasActionFinished()){
 
@@ -1193,6 +1198,8 @@ public class Home extends BaseActivity implements HomeView {
 
         ActionManager actionManager = ActionManager.getSharedManager(this);
 
+        //If tracking action has completed and summary view is visible then on back press clear the view
+        // so that user can share new tracking url without reopening the app.
         if(actionManager.getHyperTrackAction() != null &&
                 actionManager.getHyperTrackAction().hasActionFinished()){
 
