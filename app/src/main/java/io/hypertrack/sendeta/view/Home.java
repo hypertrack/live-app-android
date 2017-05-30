@@ -31,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -105,6 +106,8 @@ public class Home extends BaseActivity implements HomeView {
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
+    private LinearLayout placelineView;
+    private EditText otherUserId;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -146,7 +149,28 @@ public class Home extends BaseActivity implements HomeView {
                     && HyperTrack.getConsumerClient().getActiveActionIDList() == null) {
                 shareLiveLocationButton.setVisibility(View.GONE);
             }
+            ActionManager actionManager = ActionManager.getSharedManager(Home.this);
+
+            if(actionManager.getHyperTrackAction() != null ){
+
+                int index = refreshedActionIds.indexOf(actionManager.getHyperTrackActionId());
+                if(index >= 0) {
+                    Action action = refreshedActions.get(refreshedActionIds.indexOf(
+                            actionManager.getHyperTrackActionId()));
+
+
+                    actionManager.setHyperTrackAction(action);
+
+                    if (action.hasActionFinished()) {
+                        stopSharingButton.setVisibility(View.GONE);
+                        if (refreshedActionIds.size() > 1) {
+                            showShareLiveLocationButton();
+                        }
+                    }
+                }
+            }
         }
+
     };
 
     @Override
@@ -188,6 +212,9 @@ public class Home extends BaseActivity implements HomeView {
 
         // Handles Tracking Url deeplink
         handleTrackingUrlDeeplink();
+
+        // Attach View Presenter to View
+        presenter.attachView(this);
     }
 
     private void initializeUIViews() {
@@ -249,17 +276,31 @@ public class Home extends BaseActivity implements HomeView {
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bus));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
+
+        placelineView = (LinearLayout) findViewById(R.id.placeline_view);
+        otherUserId  = (EditText) findViewById(R.id.other_user_id);
+        findViewById(R.id.open_timeline).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(Home.this,Timeline.class);
+                if(otherUserId.getText().toString().isEmpty())
+                    intent.putExtra("user_id",HyperTrack.getUserId());
+                else
+                    intent.putExtra("user_id",otherUserId.getText().toString());
+                startActivity(intent);
+            }
+        });
     }
 
     private void shareLiveLocation() {
         //Check if Location Permission has been granted & Location has been enabled
         if (HyperTrack.checkLocationPermission(this) && HyperTrack.checkLocationServices(this)) {
-            if (!ActionManager.getSharedManager(Home.this).isActionLive()) {
+            if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null ||
+                    ActionManager.getSharedManager(Home.this).getHyperTrackAction().hasActionFinished()) {
                 // Start the Task
                 startAction();
             } else {
-                // Reset Current State when user chooses to edit destination
-                ActionManager.getSharedManager(Home.this).clearState();
                 OnStopSharing();
             }
         } else {
@@ -364,16 +405,12 @@ public class Home extends BaseActivity implements HomeView {
 
         //Check if there is any existing task to be restored
         if (actionManager.shouldRestoreState()) {
+
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setMessage(getString(R.string.fetching_details_msg));
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
-
             onShareLiveLocation();
-
-        } else {
-            // Initialize VehicleTabLayout
-            initializeVehicleTypeTab();
         }
     }
 
@@ -751,7 +788,7 @@ public class Home extends BaseActivity implements HomeView {
             return;
 
         ActionManager.getSharedManager(this).setActionComletedListener(actionCompletedListener);
-        lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupID();
+        lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupId();
 
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
@@ -808,9 +845,6 @@ public class Home extends BaseActivity implements HomeView {
         if (mProgressDialog != null) {
             mProgressDialog.dismiss();
         }
-
-        // Reset lookupId variable
-        lookupId = null;
 
         // Hide VehicleType TabLayout onShareLiveLocation success
         AnimationUtils.collapse(vehicleTypeTabLayout);
@@ -920,8 +954,10 @@ public class Home extends BaseActivity implements HomeView {
         MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
         if (SharedPreferenceManager.isTrackingON()) {
             menuItem.setTitle("Pause Tracking");
+            startHyperTrackTracking(false);
         } else {
             menuItem.setTitle("Resume Tracking");
+            stopHyperTrackTracking();
         }
 
         // Hide menu items if user is on an Action
@@ -1072,16 +1108,16 @@ public class Home extends BaseActivity implements HomeView {
     protected void onResume() {
         super.onResume();
 
-        // Attach View Presenter to View
-        presenter.attachView(this);
-
         ActionManager actionManager = ActionManager.getSharedManager(Home.this);
         if (actionManager.getHyperTrackAction() != null && !actionManager.getHyperTrackAction().isCompleted()) {
             actionManager.setActionComletedListener(actionCompletedListener);
 
-            lookupId = actionManager.getHyperTrackAction().getLookupID();
+            lookupId = actionManager.getHyperTrackAction().getLookupId();
             HyperTrack.trackActionByLookupId(lookupId, null);
         }
+        /*else {
+            presenter.stopSharing();
+        }*/
 
         // Check if Location & Network are Enabled
         updateInfoMessageView();
@@ -1120,29 +1156,67 @@ public class Home extends BaseActivity implements HomeView {
     protected void onPause() {
         super.onPause();
         // Attach View Presenter to View
-        presenter.detachView();
+        //   presenter.detachView();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
     }
 
     @Override
     public void onBackPressed() {
-        if (!isvehicleTypeTabLayoutVisible) {
-            HyperTrack.removeActions(null);
-            if(adapter != null){
-                adapter.notifyDataSetChanged();
-            }
-            super.onBackPressed();
-        } else {
+
+        HyperTrack.removeActions(null);
+
+        ActionManager actionManager = ActionManager.getSharedManager(this);
+
+        if(actionManager.getHyperTrackAction() != null &&
+                actionManager.getHyperTrackAction().hasActionFinished()){
+
+            // Reset lookupId variable
+            lookupId = null;
+            // Initialize VehicleTabLayout
+            initializeVehicleTypeTab();
             OnStopSharing();
+            ActionManager.getSharedManager(this).clearState();
+
+            return;
+
+        }else if (isvehicleTypeTabLayoutVisible) {
+            OnStopSharing();
+            return;
         }
+
+        super.onBackPressed();
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
+
+        ActionManager actionManager = ActionManager.getSharedManager(this);
+
+        if(actionManager.getHyperTrackAction() != null &&
+                actionManager.getHyperTrackAction().hasActionFinished()){
+
+            // Reset lookupId variable
+            lookupId = null;
+
+            // Initialize VehicleTabLayout
+            initializeVehicleTypeTab();
+            OnStopSharing();
+            ActionManager.getSharedManager(this).clearState();
+        }
+
         HyperTrack.removeActions(null);
+
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Detach View from Presenter
+        presenter.detachView();
+        super.onDestroy();
     }
 }

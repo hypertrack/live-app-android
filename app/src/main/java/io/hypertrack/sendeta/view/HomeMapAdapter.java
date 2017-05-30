@@ -88,13 +88,14 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
         int bottom = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
         int right = mContext.getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+        int top = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_top_padding);
 
         if (HyperTrack.getConsumerClient().getActionIDs() == null) {
             bottom = mContext.getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
             return new int[]{0, 0, 0, bottom};
         }
 
-        return new int[]{0, 0, right, bottom};
+        return new int[]{0, top, right, bottom};
     }
 
     @Override
