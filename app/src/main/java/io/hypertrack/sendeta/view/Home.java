@@ -277,7 +277,7 @@ public class Home extends BaseActivity implements HomeView {
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
 
-        placelineView = (LinearLayout) findViewById(R.id.placeline_view);
+       /* placelineView = (LinearLayout) findViewById(R.id.placeline_view);
         otherUserId  = (EditText) findViewById(R.id.other_user_id);
         findViewById(R.id.open_timeline).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -290,7 +290,7 @@ public class Home extends BaseActivity implements HomeView {
                     intent.putExtra("user_id",otherUserId.getText().toString());
                 startActivity(intent);
             }
-        });
+        });*/
     }
 
     private void shareLiveLocation() {
