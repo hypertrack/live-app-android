@@ -202,7 +202,7 @@ public class BaseActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //back button inside toolbar
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            //onBackPressed();
             return true;
         } else
             return false;
