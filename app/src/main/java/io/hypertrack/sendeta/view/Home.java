@@ -302,6 +302,7 @@ public class Home extends BaseActivity implements HomeView {
     private void shareLiveLocation() {
         //Check if Location Permission has been granted & Location has been enabled
         if (HyperTrack.checkLocationPermission(this) && HyperTrack.checkLocationServices(this)) {
+            //Check if user has already shared his tracking link
             if (ActionManager.getSharedManager(Home.this).getHyperTrackAction() == null ||
                     ActionManager.getSharedManager(Home.this).getHyperTrackAction().hasActionFinished()) {
                 // Start the Action
@@ -1158,8 +1159,7 @@ public class Home extends BaseActivity implements HomeView {
     @Override
     protected void onPause() {
         super.onPause();
-        // Attach View Presenter to View
-        //   presenter.detachView();
+
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
     }
