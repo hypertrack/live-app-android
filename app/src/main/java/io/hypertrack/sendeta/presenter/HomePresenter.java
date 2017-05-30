@@ -138,7 +138,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
     }
 
     @Override
-    public void stopSharing(ActionManager actionManager) {
+    public void stopSharing(final ActionManager actionManager) {
         actionManager.completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
@@ -146,8 +146,9 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 AnalyticsStore.getLogger().tappedStopSharing(true, null);
                 Log.i(TAG, "Stopped sharing live location successfully.");
 
-                if (view != null)
+                if (view != null) {
                     view.showStopSharingSuccess();
+                }
             }
 
             @Override

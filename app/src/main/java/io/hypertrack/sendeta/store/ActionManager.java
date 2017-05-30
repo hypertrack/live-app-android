@@ -115,13 +115,14 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
             @Override
             public void onFailure(Call<List<ETAResponse>> call, Throwable t) {
                 if (callback != null) {
-                    callback.OnError(null);
+                    callback.OnError(new ErrorResponse());
                 }
             }
         });
     }
 
     public void completeAction(final ActionManagerCallback callback) {
+
         if (TextUtils.isEmpty(this.getHyperTrackActionId())) {
             if (callback != null) {
                 callback.OnError();
@@ -137,10 +138,10 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         HyperTrack.completeAction(actionID);
-        clearState();
 
         if (callback != null)
             callback.OnSuccess();
+
     }
 
     public void onActionStart() {
@@ -322,7 +323,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         SharedPreferenceManager.setActionID(actionID);
     }
 
-    private String getHyperTrackActionId() {
+    public String getHyperTrackActionId() {
         if (this.actionID == null) {
             this.actionID = SharedPreferenceManager.getActionID(mContext);
         }
@@ -337,7 +338,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public String getHyperTrackActionLookupId() {
-        return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupID();
+        return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupId();
     }
 
     private void savePlace() {
