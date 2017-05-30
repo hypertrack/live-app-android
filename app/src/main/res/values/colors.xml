@@ -16,6 +16,11 @@
 
     <color name="ic_ht_service_notification_icon_bg_color">@color/colorAccent</color>
 
+    <!--Placeline segments color-->
+    <color name="stop">#ffab40</color>
+    <color name="trip">#2196f3</color>
+    <color name="no_information">#b6b1b1</color>
+
     <!-- Default Text Colors -->
     <color name="text_base">#6a6a6a</color>
     <color name="text_secondary">#888888</color>

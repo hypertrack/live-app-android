@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:layout_marginLeft="@dimen/margin_high"
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:id="@+id/timeline"
+        android:animateLayoutChanges="true"
+        android:layout_height="match_parent">
+        <View
+            android:layout_width="10dp"
+            android:id="@+id/line_type"
+            android:layout_height="match_parent"
+            android:background="@drawable/stop_background" />
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_very_low"
+            android:background="@drawable/circle_timeline"/>
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/margin_very_low"
+            android:background="@drawable/circle_timeline"/>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/margin_base"
+        android:animateLayoutChanges="true"
+        android:layout_toRightOf="@id/timeline">
+
+        <TextView
+            android:id="@+id/top_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true" />
+
+        <TextView
+            android:id="@+id/bottom_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:ellipsize="end"
+            android:maxLines="1"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:animateLayoutChanges="true"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/middle_text"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:layout_width="wrap_content"
+                android:maxLines="1"
+                android:tag="close"
+                android:drawableTint="@color/light_black"
+                android:ellipsize="end"
+                android:drawablePadding="@dimen/padding_medium"
+                android:layout_height="wrap_content"
+                />
+
+            <TextView
+                android:id="@+id/detail"
+                style="@style/TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
