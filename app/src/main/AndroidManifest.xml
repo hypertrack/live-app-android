@@ -91,6 +91,9 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".view.Home"/>
 
+        <activity android:name=".view.Timeline"
+            android:screenOrientation="portrait" />
+
         <!-- Register Receivers here -->
         <receiver
             android:name="com.google.android.gms.gcm.GcmReceiver"
