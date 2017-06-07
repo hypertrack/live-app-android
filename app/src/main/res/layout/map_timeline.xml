@@ -9,9 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:fitsSystemWindows="true"
-        app:theme="@style/Toolbar"
         app:expanded="false"
-        app:layout_behavior="io.hypertrack.sendeta.view.ScrollingCalendarBehavior">
+        app:layout_behavior="io.hypertrack.sendeta.view.ScrollingCalendarBehavior"
+        app:theme="@style/Toolbar">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:id="@+id/collapsingToolbarLayout"
@@ -38,8 +38,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:paddingLeft="10dp"
-                    android:visibility="visible"
                     android:paddingRight="10dp"
+                    android:visibility="visible"
                     app:compactCalendarBackgroundColor="@android:color/white"
                     app:compactCalendarCurrentDayBackgroundColor="@color/colorAccent"
                     app:compactCalendarCurrentSelectedDayBackgroundColor="@android:color/darker_gray"
@@ -58,19 +58,56 @@
                 app:popupTheme="@style/Toolbar"
                 app:titleTextColor="@android:color/white">
 
-
             </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 
     </android.support.design.widget.AppBarLayout>
 
-    <fragment
-        android:id="@+id/map_view"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <fragment
+            android:id="@+id/map_view"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@id/map_view"
+            android:layout_weight="1"
+            android:background="@android:color/white">
+
+            <io.hypertrack.sendeta.view.DashedLine
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="117dp"
+                android:layerType="software"
+                app:color="@color/gray"
+                app:dashGap="5dp"
+                app:dashLength="5dp"
+                app:dashThickness="1dp"
+                app:orientation="vertical" />
+
+            <android.support.v7.widget.RecyclerView
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:id="@+id/timeline_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+
+            </android.support.v7.widget.RecyclerView>
+
+
+        </FrameLayout>
+    </LinearLayout>
 
 
 </android.support.design.widget.CoordinatorLayout>

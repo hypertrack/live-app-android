@@ -290,7 +290,7 @@ public class Segment implements Serializable
     }
 
     public String getDistanceAndDuration(){
-        String value = getFormatedDuration() + ", "+ getDistanceInKMS();
+        String value = getFormatedDuration() + "  |  "+ getDistanceInKMS();
         return value;
     }
 

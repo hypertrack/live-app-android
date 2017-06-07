@@ -169,7 +169,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:id="@+id/placeline_view"
-            android:visibility="gone"
+            android:visibility="visible"
             android:orientation="horizontal"
             android:layout_height="wrap_content">
             <EditText

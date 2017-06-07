@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="150dp"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:id="@+id/time_view"
+        android:layout_width="100dp"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/top_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="13:20"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/bottom_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal"
+            android:text="18:60"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/segment_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/margin_base"
+            android:layout_marginRight="@dimen/margin_low"
+            android:src="@drawable/ic_trip" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/segment_bar"
+        android:layout_width="15dp"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_marginLeft="20.5dp"
+        android:layout_toRightOf="@id/time_view"
+        android:src="@drawable/trip_background"
+        android:visibility="visible" />
+
+    <RelativeLayout
+        android:id="@+id/segment_bar_layout"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="-3dp"
+        android:layout_marginBottom="-3dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_toRightOf="@id/time_view">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:src="@drawable/ic_circle" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/ic_rectangle" />
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
+        android:layout_margin="@dimen/margin_high"
+        android:layout_toRightOf="@id/segment_bar_layout"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/segment_type_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Trip"
+                android:textColor="@android:color/black"
+                android:textSize="@dimen/text_medium"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_xxhigh"
+                android:text="2.9 miles  |  23 minutes"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/segment_address"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_base"
+            android:drawableEnd="@drawable/ic_keyboard_arrow_right_black_24dp"
+            android:ellipsize="end"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:tag="close"
+            android:text="2733 Mcallister Avenue asdasd asdas ds ds sadas asdasd "
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

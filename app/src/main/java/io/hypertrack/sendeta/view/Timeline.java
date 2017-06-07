@@ -1,34 +1,42 @@
 package io.hypertrack.sendeta.view;
 
+import android.graphics.Color;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.TextUtils;
-import com.hypertrack.lib.models.Action;
+import com.hypertrack.lib.internal.consumer.utils.TimeAwarePolylineUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -43,7 +51,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.Segment;
-import io.hypertrack.sendeta.model.UserEvent;
 import io.hypertrack.sendeta.model.UserTimelineData;
 import io.hypertrack.sendeta.store.TimelineManager;
 
@@ -58,28 +65,34 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
     private TimelineAdapter timelineAdapter;
     private List<Segment> sanitizeSegments = new ArrayList<>();
     private TimelineManager timelineManager;
-    private SlidingUpPanelLayout slidingPaneLayout;
+    //    private SlidingUpPanelLayout slidingPaneLayout;
     private SupportMapFragment supportMapFragment;
     private CompactCalendarView mCompactCalendarView;
     private AppBarLayout mAppBarLayout;
     private SimpleDateFormat dateFormat = new SimpleDateFormat("d MMMM yyyy", /*Locale.getDefault()*/Locale.ENGLISH);
     private SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);
+    private SimpleDateFormat format = new SimpleDateFormat("EEEE, MMM d", Locale.ENGLISH);
     private Date selectedDate;
     private  boolean isExpanded = false;
     private ImageView arrow;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private UserTimelineData userTimelineData;
-    private TextView userName,timelineStatus;
-    private ProgressBar progressBar;
+    //private TextView userName,timelineStatus;
+    //private ProgressBar progressBar;
     private RelativeLayout topBar;
-    private CardView topBarCardView;
+    //private CardView topBarCardView;
     private String userID;
+    private Handler handler;
+    private Runnable runnable;
+    private int FETCH_TIME = 30*1000;
+    private GoogleMap mMap;
+    int previousIndex = -1;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_timeline);
+        setContentView(R.layout.map_timeline);
 
         userID = getIntent().getStringExtra("user_id");
         if(TextUtils.isEmpty(userID)){
@@ -92,12 +105,22 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
 
         timelineManager = TimelineManager.getTimelineManager(this);
 
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                getTimelineData();
+            }
+        };
+
+        handler = new Handler();
+
         setTimelineData();
+
     }
 
     private void initUI(){
         //  topBar= (RelativeLayout) findViewById(R.id.top_bar);
-        slidingPaneLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_panel_layout);
+        /*slidingPaneLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_panel_layout);
         slidingPaneLayout.setAnchorPoint(0.4f);
         slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
         SlideListener slideListener = new SlideListener();
@@ -107,9 +130,9 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
             public void onClick(View v) {
                 Log.d(TAG, "onClick: ");
             }
-        });
+        });*/
 
-        topBarCardView = (CardView) findViewById(R.id.top_bar_card_view);
+     /*   topBarCardView = (CardView) findViewById(R.id.top_bar_card_view);
 
         //Set Panel Height when view is topBarCardView has been drawn on scree.
         topBarCardView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -117,16 +140,16 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
             public void onGlobalLayout() {
                 topBarCardView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 Log.d(TAG, "initUI: "+ topBarCardView.getHeight()+" ,  "+ topBarCardView.getMeasuredHeight()+"  , "+ topBarCardView.getMeasuredHeightAndState());
-                slidingPaneLayout.setPanelHeight(topBarCardView.getHeight() - 8);
+              //  slidingPaneLayout.setPanelHeight(topBarCardView.getHeight() - 8);
             }
-        });
+        });*/
 
         supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_view);
         supportMapFragment.getMapAsync(this);
 
-        userName = (TextView) findViewById(R.id.user_name);
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        timelineStatus = (TextView) findViewById(R.id.timeline_status);
+        //userName = (TextView) findViewById(R.id.user_name);
+        //progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        //timelineStatus = (TextView) findViewById(R.id.timeline_status);
 
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -158,14 +181,96 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         });
 
         timelineRecyclerView = (RecyclerView) findViewById(R.id.timeline_recycler_view);
-        slidingPaneLayout.setScrollableView(timelineRecyclerView);
-
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        //slidingPaneLayout.setScrollableView(timelineRecyclerView);
+        timelineRecyclerView.addItemDecoration(new OverlapDecoration());
+        final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         timelineRecyclerView.setLayoutManager(linearLayoutManager);
+
+        ViewCompat.setNestedScrollingEnabled(timelineRecyclerView, false);
+
+        final SnapHelper snapHelperTop = new LinearSnapHelper();
+        snapHelperTop.attachToRecyclerView(timelineRecyclerView);
+        timelineRecyclerView.setOnFlingListener(snapHelperTop);
+        timelineRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if(newState == RecyclerView.SCROLL_STATE_IDLE){
+                    View view = snapHelperTop.findSnapView(linearLayoutManager);
+                    Log.d(TAG, "onScrollStateChanged: "+recyclerView.getChildAdapterPosition(view));
+                    int index = recyclerView.getChildAdapterPosition(view);
+                    if(previousIndex != index && index >= 0) {
+                        mMap.clear();
+                        Segment segment = sanitizeSegments.get(index);
+                        if(segment.isTrip()) {
+                            List<LatLng> latLngList = TimeAwarePolylineUtils.getLatLngList(segment.getTimeAwarePolyline());
+                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                            for (LatLng latLng : latLngList) {
+                                builder.include(latLng);
+                            }
+
+                            builder.include(segment.getStartLocation().getGeoJSONLocation().getLatLng());
+                            builder.include(segment.getEndLocation().getGeoJSONLocation().getLatLng());
+
+                            LatLngBounds bounds = builder.build();
+                            int width = getResources().getDisplayMetrics().widthPixels;
+                            int height = getResources().getDisplayMetrics().heightPixels;
+                            int padding = (int) (width * 0.12);
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds,100);
+
+                            PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
+                            mMap.addPolyline(polylineOptions);
+                            mMap.animateCamera(cameraUpdate,1500,null);
+
+                            float[] anchors = new float[]{0.5f, 1.0f};
+                            MarkerOptions startMarkerOption = new MarkerOptions().
+                                    position(segment.getStartLocation().getGeoJSONLocation().getLatLng()).
+                                    icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_circle)).
+                                    anchor(anchors[0],anchors[1]);
+                            mMap.addMarker(startMarkerOption);
+
+                            MarkerOptions endMarkerOptions = new MarkerOptions().
+                                    position(segment.getEndLocation().getGeoJSONLocation().getLatLng()).
+                                    icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_rectangle)).
+                                    anchor(anchors[0],anchors[1]);
+                            mMap.addMarker(endMarkerOptions);
+
+                        }
+                        else if(segment.isStop()){
+                            LatLng latLng = segment.getPlace().getLocation().getLatLng();
+                            MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+                            mMap.addMarker(markerOptions);
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,20f));
+                        }
+
+                        previousIndex = index;
+                    }
+                }
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
         timelineAdapter = new TimelineAdapter(sanitizeSegments,this);
+        timelineAdapter.setCurrentDate(selectedDate);
         timelineRecyclerView.setAdapter(timelineAdapter);
 
+    }
+
+    public class OverlapDecoration extends RecyclerView.ItemDecoration {
+
+        private final static int vertOverlap = -30;
+
+        @Override
+        public void getItemOffsets (Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            int itemPosition = parent.getChildAdapterPosition(view);
+            if (itemPosition != 0 && itemPosition != ( parent.getAdapter().getItemCount() -1 )) {
+                outRect.set(0, vertOverlap, 0, 0);
+            }
+
+        }
     }
 
     private void setDateFormatMonth(Date date){
@@ -181,11 +286,22 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         if (mCompactCalendarView != null) {
             mCompactCalendarView.setCurrentDate(date);
         }
+        //timelineStatus.setText(format.format(date));
     }
 
     @Override
     protected void onResume() {
+
         super.onResume();
+
+        handler.postDelayed(runnable,FETCH_TIME);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacks(runnable);
     }
 
     @Override
@@ -195,45 +311,53 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     private void setTimelineData(){
-        timelineStatus.setVisibility(View.GONE);
-        progressBar.setVisibility(View.VISIBLE);
+        //  timelineStatus.setVisibility(View.GONE);
+        //progressBar.setVisibility(View.VISIBLE);
         sanitizeSegments.clear();
+        timelineAdapter.setCurrentDate(selectedDate);
         timelineAdapter.notifyDataSetChanged();
+        if(handler != null)
+            handler.removeCallbacks(runnable);
+        getTimelineData();
+
+    }
+
+    private void getTimelineData(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = dateFormat.format(selectedDate);
-
         timelineManager.getTimelineData(userID, date, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
-                progressBar.setVisibility(View.GONE);
-                timelineStatus.setVisibility(View.VISIBLE);
-                timelineStatus.setText("No Placeline Activity");
+                //progressBar.setVisibility(View.GONE);
+                //  timelineStatus.setVisibility(View.VISIBLE);
+                //    timelineStatus.setText("No Placeline Activity");
                 if(response != null){
 
                     userTimelineData = (UserTimelineData) response.getResponseObject();
                     if(userTimelineData != null){
-                        userName.setText(userTimelineData.getName());
+                        //userName.setText(userTimelineData.getName());
+                        mMap.clear();
                         sanitizeTimelineData(userTimelineData);
                         if(userTimelineData.getSegmentList().size()>0){
-                            timelineStatus.setText("Placeline Activity");
-                            slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
+                            //  timelineStatus.setText("Placeline Activity");
+                          /*  if(slidingPaneLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED)
+                                slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);*/
                         }
                         else{
-                            slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+//                            slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                         }
                     }
                 }
-
+                handler.postDelayed(runnable,FETCH_TIME);
             }
 
             @Override
             public void onError(@NonNull ErrorResponse errorResponse) {
-                progressBar.setVisibility(View.GONE);
-                timelineStatus.setText("No Placeline Activity");
-                timelineStatus.setVisibility(View.VISIBLE);
+                //progressBar.setVisibility(View.GONE);
+                //  timelineStatus.setText("No Placeline Activity");
+                //  timelineStatus.setVisibility(View.VISIBLE);
             }
         });
-
     }
 
     private void sanitizeTimelineData(UserTimelineData userTimelineData){
@@ -241,6 +365,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         addMissingSegment(segmentList);
         sanitizeSegments.clear();
         sanitizeSegments.addAll(addMissingSegment(segmentList));
+        timelineAdapter.setCurrentDate(selectedDate);
         timelineAdapter.notifyDataSetChanged();
     }
 
@@ -266,7 +391,8 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
 
         List<Segment> result = new ArrayList<>();
         int size = segmentList.size();
-        result.add(segmentList.get(0));
+        if(size > 0)
+            result.add(segmentList.get(0));
 
         for(int i = 1 ; i < size ; i++ ){
 
@@ -366,19 +492,9 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         return  false;
     }
 
-
-
-    private void sanitizeActions(List<Action> actionList){
-
-    }
-
-    private void sanitizeEvents(List<UserEvent> userEventList){
-
-    }
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
-
+        mMap = googleMap;
     }
 
     @Override
@@ -460,10 +576,10 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
             hideCalendar();
             return;
         }
-        else if(slidingPaneLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED){
+       /* else if(slidingPaneLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED){
             slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
             return;
-        }
+        }*/
         super.onBackPressed();
     }
 }

@@ -18,7 +18,7 @@
 
     <!--Placeline segments color-->
     <color name="stop">#ffab40</color>
-    <color name="trip">#2196f3</color>
+    <color name="trip">#3b3c3d</color>
     <color name="no_information">#b6b1b1</color>
 
     <!-- Default Text Colors -->

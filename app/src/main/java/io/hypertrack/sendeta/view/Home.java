@@ -167,6 +167,8 @@ public class Home extends BaseActivity implements HomeView {
                     //If action has completed hide stop sharing button
                     if (action.hasActionFinished()) {
                         stopSharingButton.setVisibility(View.GONE);
+                        navigateButton.setVisibility(View.GONE);
+                        shareButton.setVisibility(View.GONE);
 
                         //Show share live location button only when there are multiple action tracking
                         if (refreshedActionIds.size() > 1) {
@@ -284,6 +286,7 @@ public class Home extends BaseActivity implements HomeView {
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
 
         placelineView = (LinearLayout) findViewById(R.id.placeline_view);
+
         otherUserId  = (EditText) findViewById(R.id.other_user_id);
         findViewById(R.id.open_timeline).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -297,6 +300,8 @@ public class Home extends BaseActivity implements HomeView {
                 startActivity(intent);
             }
         });
+        // findViewById(R.id.open_timeline).performClick();
+
     }
 
     private void shareLiveLocation() {
@@ -397,6 +402,7 @@ public class Home extends BaseActivity implements HomeView {
                     .setNegativeButton("Disable", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
+
                         }
                     })
                     .show();
@@ -448,7 +454,8 @@ public class Home extends BaseActivity implements HomeView {
             mProgressDialog.dismiss();
 
         expectedPlace = ActionManager.getSharedManager(Home.this).getPlace();
-        showShareLiveLocationButton();
+        if(expectedPlace != null)
+            showShareLiveLocationButton();
     }
 
     @Override
@@ -873,6 +880,8 @@ public class Home extends BaseActivity implements HomeView {
         supportInvalidateOptionsMenu();
 
         updateMapView();
+
+        placelineView.setVisibility(View.VISIBLE);
     }
 
     private void updateMapView() {
@@ -1121,6 +1130,8 @@ public class Home extends BaseActivity implements HomeView {
 
             lookupId = actionManager.getHyperTrackAction().getLookupId();
             HyperTrack.trackActionByLookupId(lookupId, null);
+
+            placelineView.setVisibility(View.GONE);
         }
         /*else {
             presenter.stopSharing();
