@@ -5,6 +5,6 @@
     <item
         android:id="@+id/choose_date"
         android:title="@string/action_skip"
-        android:icon="@drawable/ic_today_black_24dp"
+        android:icon="@drawable/ic_today_white_24dp"
         app:showAsAction="always" />
 </menu>

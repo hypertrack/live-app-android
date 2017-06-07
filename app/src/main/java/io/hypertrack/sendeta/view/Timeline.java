@@ -203,43 +203,58 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                         mMap.clear();
                         Segment segment = sanitizeSegments.get(index);
                         if(segment.isTrip()) {
-                            if(TextUtils.isEmpty(segment.getTimeAwarePolyline())) {
-                                List<LatLng> latLngList = TimeAwarePolylineUtils.getLatLngList(segment.getTimeAwarePolyline());
-                                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                                for (LatLng latLng : latLngList) {
-                                    builder.include(latLng);
+                            List<LatLng> latLngList = new ArrayList<LatLng>();
+
+                            if(!TextUtils.isEmpty(segment.getTimeAwarePolyline())) {
+
+                                latLngList = TimeAwarePolylineUtils.
+                                        getLatLngList(segment.getTimeAwarePolyline());
+
+                            }else {
+                                if (segment.getStartLocation() != null &&
+                                        segment.getStartLocation().getGeoJSONLocation() != null) {
+
+                                    latLngList.add(segment.getStartLocation().getGeoJSONLocation().getLatLng());
+
                                 }
+                                if (segment.getEndLocation() != null &&
+                                        segment.getEndLocation().getGeoJSONLocation() != null) {
 
-                                //  builder.include(segment.getStartLocation().getGeoJSONLocation().getLatLng());
-                                // builder.include(segment.getEndLocation().getGeoJSONLocation().getLatLng());
-
-                                LatLngBounds bounds = builder.build();
-                                int width = getResources().getDisplayMetrics().widthPixels;
-                                int height = getResources().getDisplayMetrics().heightPixels;
-                                int padding = (int) (width * 0.12);
-                                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
-
-                                PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
-                                mMap.addPolyline(polylineOptions);
-                                mMap.animateCamera(cameraUpdate, 1500, null);
-
-                                float[] anchors = new float[]{0.5f, 1.0f};
-
-                                if (latLngList.size() > 0) {
-
-                                    MarkerOptions startMarkerOption = new MarkerOptions().
-                                            position(latLngList.get(0)).
-                                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_circle)).
-                                            anchor(anchors[0], anchors[1]);
-                                    mMap.addMarker(startMarkerOption);
-
-                                    MarkerOptions endMarkerOptions = new MarkerOptions().
-                                            position(latLngList.get(latLngList.size() - 1)).
-                                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_rectangle)).
-                                            anchor(anchors[0], anchors[1]);
-                                    mMap.addMarker(endMarkerOptions);
+                                    latLngList.add(segment.getEndLocation().getGeoJSONLocation().getLatLng());
                                 }
                             }
+                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                            for (LatLng latLng : latLngList) {
+                                builder.include(latLng);
+                            }
+
+                            //  builder.include(segment.getStartLocation().getGeoJSONLocation().getLatLng());
+                            // builder.include(segment.getEndLocation().getGeoJSONLocation().getLatLng());
+
+                            LatLngBounds bounds = builder.build();
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+
+                            PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
+                            mMap.addPolyline(polylineOptions);
+                            mMap.animateCamera(cameraUpdate, 1500, null);
+
+                            float[] anchors = new float[]{0.5f, 1.0f};
+
+                            if (latLngList.size() > 0) {
+
+                                MarkerOptions startMarkerOption = new MarkerOptions().
+                                        position(latLngList.get(0)).
+                                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_circle)).
+                                        anchor(anchors[0], anchors[1]);
+                                mMap.addMarker(startMarkerOption);
+
+                                MarkerOptions endMarkerOptions = new MarkerOptions().
+                                        position(latLngList.get(latLngList.size() - 1)).
+                                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_rectangle)).
+                                        anchor(anchors[0], anchors[1]);
+                                mMap.addMarker(endMarkerOptions);
+                            }
+
 
                         }
                         else if(segment.isStop()){
