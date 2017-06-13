@@ -682,7 +682,7 @@ public class Home extends BaseActivity implements HomeView {
             return;
 
         // Call getETAForDestination with selected vehicleType
-        Home.this.onSelectPlace(place);
+        onSelectPlace(place);
     }
 
     private HTUserVehicleType getVehicleTypeForTabPosition(int tabPosition) {
