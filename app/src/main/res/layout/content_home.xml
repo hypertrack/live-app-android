@@ -166,6 +166,11 @@
             </FrameLayout>
         </LinearLayout>
 
+        <android.support.design.widget.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_my_calendar"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:id="@+id/placeline_view"

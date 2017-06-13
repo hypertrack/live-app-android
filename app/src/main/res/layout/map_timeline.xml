@@ -96,7 +96,7 @@
                 app:orientation="vertical" />
 
             <android.support.v7.widget.RecyclerView
-                android:paddingTop="10dp"
+                android:layout_marginTop="@dimen/margin_medium"
                 android:paddingBottom="10dp"
                 android:id="@+id/timeline_recycler_view"
                 android:layout_width="match_parent"
