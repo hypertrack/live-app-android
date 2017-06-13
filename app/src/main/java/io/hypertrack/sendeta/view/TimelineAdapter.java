@@ -123,7 +123,6 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             });
 
             if ((position == getItemCount() - 1) && currentDate.getDay() == new Date().getDay()) {
-
                 rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
                 rippleBackground.setVisibility(View.VISIBLE);
                 RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
@@ -148,18 +147,8 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             holder.segmentAddress.setVisibility(View.GONE);
             holder.segmentBar.setVisibility(View.VISIBLE);
 
-            if ((position == getItemCount() - 1) && currentDate.getDay() == new Date().getDay()) {
-                RippleBackground rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
-                RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pixelToDP(100), pixelToDP(150));
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                layoutParams.setMargins(pixelToDP(78), pixelToDP(120), 0, 0);
-                relativeLayout.addView(rippleBackground, layoutParams);
-                rippleBackground.startRippleAnimation();
-            } else {
-                if (rippleBackground != null)
-                    rippleBackground.setVisibility(View.GONE);
-            }
+            if (rippleBackground != null)
+                rippleBackground.setVisibility(View.GONE);
 
         } else if (segment.isLocationVoid()) {
             holder.segmentBar.setImageResource(R.drawable.no_location_background);
