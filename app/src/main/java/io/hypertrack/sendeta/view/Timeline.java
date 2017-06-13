@@ -20,7 +20,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.github.sundeepk.compactcalendarview.CompactCalendarView;
 import com.google.android.gms.maps.CameraUpdate;
@@ -78,8 +80,8 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private UserTimelineData userTimelineData;
-    //private TextView userName,timelineStatus;
-    //private ProgressBar progressBar;
+    private TextView timelineStatus;
+    private ProgressBar progressBar;
     private RelativeLayout topBar;
     //private CardView topBarCardView;
     private String userID;
@@ -148,8 +150,8 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         supportMapFragment.getMapAsync(this);
 
         //userName = (TextView) findViewById(R.id.user_name);
-        //progressBar = (ProgressBar) findViewById(R.id.progress_bar);
-        //timelineStatus = (TextView) findViewById(R.id.timeline_status);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        timelineStatus = (TextView) findViewById(R.id.timeline_status);
 
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -232,13 +234,13 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                             // builder.include(segment.getEndLocation().getGeoJSONLocation().getLatLng());
 
                             LatLngBounds bounds = builder.build();
-                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 130);
 
                             PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
                             mMap.addPolyline(polylineOptions);
                             mMap.animateCamera(cameraUpdate, 1500, null);
 
-                            float[] anchors = new float[]{0.5f, 1.0f};
+                            float[] anchors = new float[]{0.5f, 0.5f};
 
                             if (latLngList.size() > 0) {
 
@@ -261,7 +263,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                             LatLng latLng = segment.getPlace().getLocation().getLatLng();
                             MarkerOptions markerOptions = new MarkerOptions().position(latLng);
                             mMap.addMarker(markerOptions);
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,20f));
+                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,17f));
                         }
 
                         previousIndex = index;
@@ -339,6 +341,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         timelineAdapter.notifyDataSetChanged();
         if(handler != null)
             handler.removeCallbacks(runnable);
+        progressBar.setVisibility(View.VISIBLE);
         getTimelineData();
 
     }
@@ -349,9 +352,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         timelineManager.getTimelineData(userID, date, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
-                //progressBar.setVisibility(View.GONE);
-                //  timelineStatus.setVisibility(View.VISIBLE);
-                //    timelineStatus.setText("No Placeline Activity");
+                progressBar.setVisibility(View.GONE);
                 if(response != null){
 
                     userTimelineData = (UserTimelineData) response.getResponseObject();
@@ -360,12 +361,10 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                         mMap.clear();
                         sanitizeTimelineData(userTimelineData);
                         if(userTimelineData.getSegmentList().size()>0){
-                            //  timelineStatus.setText("Placeline Activity");
-                          /*  if(slidingPaneLayout.getPanelState() != SlidingUpPanelLayout.PanelState.EXPANDED)
-                                slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);*/
+                            timelineStatus.setVisibility(View.GONE);
                         }
                         else{
-//                            slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                            timelineStatus.setVisibility(View.VISIBLE);
                         }
                     }
                 }
@@ -374,9 +373,8 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
 
             @Override
             public void onError(@NonNull ErrorResponse errorResponse) {
-                //progressBar.setVisibility(View.GONE);
-                //  timelineStatus.setText("No Placeline Activity");
-                //  timelineStatus.setVisibility(View.VISIBLE);
+                progressBar.setVisibility(View.GONE);
+                timelineStatus.setVisibility(View.VISIBLE);
             }
         });
     }

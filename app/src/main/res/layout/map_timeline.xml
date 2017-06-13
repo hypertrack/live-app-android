@@ -67,6 +67,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
@@ -102,10 +103,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="visible">
-
             </android.support.v7.widget.RecyclerView>
 
+            <ProgressBar
+                android:layout_width="match_parent"
+                android:layout_gravity="center"
+                android:id="@+id/progress_bar"
+                android:background="#6b000000"
+                android:padding="130dp"
+                android:visibility="visible"
+                android:layout_height="match_parent" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/timeline_status"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:text="No Placeline Activity"
+                android:layout_gravity="center"/>
         </FrameLayout>
     </LinearLayout>
 
