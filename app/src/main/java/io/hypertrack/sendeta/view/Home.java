@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -31,7 +32,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -106,8 +106,7 @@ public class Home extends BaseActivity implements HomeView {
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
-    private LinearLayout placelineView;
-    private EditText otherUserId;
+    private FloatingActionButton placelineView;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -223,6 +222,7 @@ public class Home extends BaseActivity implements HomeView {
 
         // Attach View Presenter to View
         presenter.attachView(this);
+
     }
 
     private void initializeUIViews() {
@@ -285,18 +285,14 @@ public class Home extends BaseActivity implements HomeView {
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
 
-        placelineView = (LinearLayout) findViewById(R.id.placeline_view);
+        placelineView = (FloatingActionButton) findViewById(R.id.placeline_view);
 
-        otherUserId  = (EditText) findViewById(R.id.other_user_id);
-        findViewById(R.id.open_timeline).setOnClickListener(new View.OnClickListener() {
+        placelineView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 Intent intent = new Intent(Home.this,Timeline.class);
-                if(otherUserId.getText().toString().isEmpty())
-                    intent.putExtra("user_id",HyperTrack.getUserId());
-                else
-                    intent.putExtra("user_id",otherUserId.getText().toString());
+                intent.putExtra("user_id",HyperTrack.getUserId());
                 startActivity(intent);
             }
         });
@@ -757,6 +753,7 @@ public class Home extends BaseActivity implements HomeView {
         mProgressDialog.show();
 
         presenter.shareLiveLocation(ActionManager.getSharedManager(this), lookupId, expectedPlace);
+        placelineView.setVisibility(View.GONE);
     }
 
     @Override
@@ -880,8 +877,6 @@ public class Home extends BaseActivity implements HomeView {
         supportInvalidateOptionsMenu();
 
         updateMapView();
-
-        placelineView.setVisibility(View.VISIBLE);
     }
 
     private void updateMapView() {
@@ -1198,6 +1193,7 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
 
+            placelineView.setVisibility(View.VISIBLE);
             return;
 
         }else if (isvehicleTypeTabLayoutVisible) {
