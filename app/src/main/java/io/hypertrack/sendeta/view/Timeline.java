@@ -40,7 +40,6 @@ import com.hypertrack.lib.internal.common.util.TextUtils;
 import com.hypertrack.lib.internal.consumer.utils.TimeAwarePolylineUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -584,27 +583,6 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         isExpanded = false;
     }
 
-    class SlideListener implements SlidingUpPanelLayout.PanelSlideListener {
-
-        @Override
-        public void onPanelSlide(View panel, float slideOffset) {
-
-        }
-
-        @Override
-        public void onPanelStateChanged(View panel, SlidingUpPanelLayout.PanelState previousState, SlidingUpPanelLayout.PanelState newState) {
-           /* if(mAppBarLayout !=null ) {
-                if (newState == SlidingUpPanelLayout.PanelState.EXPANDED) {
-                    ObjectAnimator objectAnimator = new ObjectAnimator.ofFloat(mAppBarLayout,View.TRANSLATION_Y,-toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).;
-
-                    mAppBarLayout.animate().translationY(-toolbar.getBottom()).setInterpolator(new AccelerateInterpolator()).start();
-                } else {
-                    mAppBarLayout.animate().translationY(0).setInterpolator(new DecelerateInterpolator()).start();
-
-                }
-            }*/
-        }
-    }
 
     @Override
     public void onBackPressed() {
