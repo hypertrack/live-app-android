@@ -94,6 +94,8 @@
                 app:dashGap="5dp"
                 app:dashLength="5dp"
                 app:dashThickness="1dp"
+                android:id="@+id/dashed_line"
+                android:visibility="gone"
                 app:orientation="vertical" />
 
             <android.support.v7.widget.RecyclerView
