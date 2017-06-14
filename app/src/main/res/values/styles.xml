@@ -23,7 +23,8 @@
         <item name="titleTextColor">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" >
+    </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.NoActionBar">
 
@@ -66,4 +67,32 @@
         <item name="titleTextColor">@color/colorAccent</item>
         <item name="subtitleTextColor">@color/colorAccent</item>
     </style>
+
+    <style name="Toolbar" parent="Theme.AppCompat">
+        <!-- android:actionMenuTextColor is the color of the text of action (menu) items in the Toolbar, at least in the
+        Theme.AppCompat theme. For some reason, they already get the textColorPrimary when running on API 21, but not on older versions of
+        Android, so this is only necessary to support older Android versions. -->
+        <item name="actionMenuTextColor">@android:color/white</item>
+        <item name="android:background">@color/colorAccent</item>
+    </style>
+
+    <style name="ToolbarStyle">
+        <item name="android:minHeight">?attr/actionBarSize</item>
+        <!--<item name="android:background">@color/colorPrimary</item>-->
+        <item name="theme">@style/Toolbar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlHighlight">#3fff</item>
+        <item name="titleTextAppearance">@style/ToolbarTitleTextAppearance</item>
+        <item name="subtitleTextAppearance">@style/ToolbarSubtitleTextAppearance</item>
+    </style>
+
+    <style name="ToolbarTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="ToolbarSubtitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 </resources>
