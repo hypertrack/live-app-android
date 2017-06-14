@@ -15,7 +15,6 @@ import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -89,6 +88,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
     private Runnable runnable;
     private int FETCH_TIME = 30*1000;
     private GoogleMap mMap;
+    private DashedLine dashedLine;
     int previousIndex = -1;
 
     @Override
@@ -182,6 +182,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
             }
         });
 
+        dashedLine = (DashedLine) findViewById(R.id.dashed_line);
         timelineRecyclerView = (RecyclerView) findViewById(R.id.timeline_recycler_view);
         //slidingPaneLayout.setScrollableView(timelineRecyclerView);
         timelineRecyclerView.addItemDecoration(new OverlapDecoration());
@@ -194,80 +195,14 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         final SnapHelper snapHelperTop = new LinearSnapHelper();
         snapHelperTop.attachToRecyclerView(timelineRecyclerView);
         timelineRecyclerView.setOnFlingListener(snapHelperTop);
+
         timelineRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if(newState == RecyclerView.SCROLL_STATE_IDLE){
                     View view = snapHelperTop.findSnapView(linearLayoutManager);
-                    Log.d(TAG, "onScrollStateChanged: "+recyclerView.getChildAdapterPosition(view));
                     int index = recyclerView.getChildAdapterPosition(view);
-                    if(previousIndex != index && index >= 0) {
-                        mMap.clear();
-                        Segment segment = sanitizeSegments.get(index);
-                        if(segment.isTrip()) {
-                            List<LatLng> latLngList = new ArrayList<LatLng>();
-
-                            if(!TextUtils.isEmpty(segment.getTimeAwarePolyline())) {
-
-                                latLngList = TimeAwarePolylineUtils.
-                                        getLatLngList(segment.getTimeAwarePolyline());
-
-                            }else {
-                                if (segment.getStartLocation() != null &&
-                                        segment.getStartLocation().getGeoJSONLocation() != null) {
-
-                                    latLngList.add(segment.getStartLocation().getGeoJSONLocation().getLatLng());
-
-                                }
-                                if (segment.getEndLocation() != null &&
-                                        segment.getEndLocation().getGeoJSONLocation() != null) {
-
-                                    latLngList.add(segment.getEndLocation().getGeoJSONLocation().getLatLng());
-                                }
-                            }
-                            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                            for (LatLng latLng : latLngList) {
-                                builder.include(latLng);
-                            }
-
-                            //  builder.include(segment.getStartLocation().getGeoJSONLocation().getLatLng());
-                            // builder.include(segment.getEndLocation().getGeoJSONLocation().getLatLng());
-
-                            LatLngBounds bounds = builder.build();
-                            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 130);
-
-                            PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
-                            mMap.addPolyline(polylineOptions);
-                            mMap.animateCamera(cameraUpdate, 1500, null);
-
-                            float[] anchors = new float[]{0.5f, 0.5f};
-
-                            if (latLngList.size() > 0) {
-
-                                MarkerOptions startMarkerOption = new MarkerOptions().
-                                        position(latLngList.get(0)).
-                                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_circle)).
-                                        anchor(anchors[0], anchors[1]);
-                                mMap.addMarker(startMarkerOption);
-
-                                MarkerOptions endMarkerOptions = new MarkerOptions().
-                                        position(latLngList.get(latLngList.size() - 1)).
-                                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_rectangle)).
-                                        anchor(anchors[0], anchors[1]);
-                                mMap.addMarker(endMarkerOptions);
-                            }
-
-
-                        }
-                        else if(segment.isStop()){
-                            LatLng latLng = segment.getPlace().getLocation().getLatLng();
-                            MarkerOptions markerOptions = new MarkerOptions().position(latLng);
-                            mMap.addMarker(markerOptions);
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,17f));
-                        }
-
-                        previousIndex = index;
-                    }
+                    animateMap(index);
                 }
             }
 
@@ -280,6 +215,77 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         timelineAdapter.setCurrentDate(selectedDate);
         timelineRecyclerView.setAdapter(timelineAdapter);
 
+    }
+
+    private void animateMap(int index){
+        if(previousIndex != index && index >= 0) {
+            mMap.clear();
+            Segment segment = sanitizeSegments.get(index);
+            if(segment.isTrip()) {
+                List<LatLng> latLngList = new ArrayList<LatLng>();
+
+                if(!TextUtils.isEmpty(segment.getTimeAwarePolyline())) {
+
+                    latLngList = TimeAwarePolylineUtils.
+                            getLatLngList(segment.getTimeAwarePolyline());
+
+                }else {
+                    if (segment.getStartLocation() != null &&
+                            segment.getStartLocation().getGeoJSONLocation() != null) {
+
+                        latLngList.add(segment.getStartLocation().getGeoJSONLocation().getLatLng());
+
+                    }
+                    if (segment.getEndLocation() != null &&
+                            segment.getEndLocation().getGeoJSONLocation() != null) {
+
+                        latLngList.add(segment.getEndLocation().getGeoJSONLocation().getLatLng());
+                    }
+                }
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                for (LatLng latLng : latLngList) {
+                    builder.include(latLng);
+                }
+
+                LatLngBounds bounds = builder.build();
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 200);
+
+                PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
+                mMap.addPolyline(polylineOptions);
+                mMap.animateCamera(cameraUpdate, 1500, null);
+
+                float[] anchors = new float[]{0.5f, 0.5f};
+
+                if (latLngList.size() > 0) {
+
+                    MarkerOptions startMarkerOption = new MarkerOptions().
+                            position(latLngList.get(0)).
+                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_circle)).
+                            anchor(anchors[0], anchors[1]);
+                    mMap.addMarker(startMarkerOption);
+
+                    MarkerOptions endMarkerOptions = new MarkerOptions().
+                            position(latLngList.get(latLngList.size() - 1)).
+                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_rectangle)).
+                            anchor(anchors[0], anchors[1]);
+                    mMap.addMarker(endMarkerOptions);
+                }
+
+            }
+            else if(segment.isStop()){
+                LatLng latLng = segment.getPlace().getLocation().getLatLng();
+                MarkerOptions markerOptions = new MarkerOptions().
+                        position(latLng).
+                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop_marker));
+                mMap.addMarker(markerOptions);
+                float zoom = mMap.getCameraPosition().zoom;
+                if(zoom < 16f)
+                    zoom = 16f;
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,zoom));
+            }
+
+            previousIndex = index;
+        }
     }
 
     public class OverlapDecoration extends RecyclerView.ItemDecoration {
@@ -342,6 +348,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         if(handler != null)
             handler.removeCallbacks(runnable);
         progressBar.setVisibility(View.VISIBLE);
+        previousIndex = -1;
         getTimelineData();
 
     }
@@ -360,12 +367,23 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                         //userName.setText(userTimelineData.getName());
                         mMap.clear();
                         sanitizeTimelineData(userTimelineData);
-                        if(userTimelineData.getSegmentList().size()>0){
+                        if(sanitizeSegments.size() > 0){
                             timelineStatus.setVisibility(View.GONE);
+                            dashedLine.setVisibility(View.VISIBLE);
+                            if(previousIndex == -1 ){
+                                animateMap(0);
+                            }
+                            else {
+                                int index = previousIndex;
+                                previousIndex = -1;
+                                animateMap(index);
+                            }
                         }
                         else{
                             timelineStatus.setVisibility(View.VISIBLE);
+                            dashedLine.setVisibility(View.GONE);
                         }
+
                     }
                 }
                 handler.postDelayed(runnable,FETCH_TIME);

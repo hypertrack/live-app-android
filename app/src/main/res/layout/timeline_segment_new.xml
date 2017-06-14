@@ -108,9 +108,10 @@
 
         <TextView
             android:id="@+id/segment_address"
-            android:layout_width="200dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/margin_base"
+            android:layout_marginRight="@dimen/margin_xxhigh"
             android:drawableEnd="@drawable/ic_keyboard_arrow_right_black_24dp"
             android:ellipsize="end"
             android:gravity="center_vertical"
