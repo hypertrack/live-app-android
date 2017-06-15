@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:dots="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -26,10 +25,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="?android:attr/actionBarSize"
                 android:background="@color/colorPrimary"
-                app:titleTextAppearance="@style/Toolbar.TitleText"
-                app:subtitleTextAppearance="@style/Toolbar.SubTitleText"
                 android:theme="@style/HTOrderStatusToolbarTheme"
-                app:popupTheme="@style/AppTheme.PopupOverlay"/>
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:subtitleTextAppearance="@style/Toolbar.SubTitleText"
+                app:titleTextAppearance="@style/Toolbar.TitleText" />
 
             <android.support.design.widget.TabLayout
                 android:id="@+id/tabLayout"
@@ -142,17 +141,18 @@
                     android:background="@drawable/stop_sharing_btn_bg"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:gravity="center"
-                    android:text="@string/action_stop_sharing"
                     android:paddingLeft="@dimen/padding_xhigh"
                     android:paddingRight="@dimen/padding_xhigh"
+                    android:text="@string/action_stop_sharing"
                     android:textColor="@color/text_dark_bg_base"
                     android:visibility="gone" />
 
                 <Button
                     android:id="@+id/retryButton"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="@dimen/cta_button_size"
                     android:layout_gravity="center"
+                    android:layout_margin="@dimen/margin_high"
                     android:background="@drawable/share_live_location_btn_bg"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:gravity="center"
@@ -161,7 +161,20 @@
                     android:text="@string/action_retry"
                     android:textColor="@color/text_dark_bg_base"
                     android:visibility="gone" />
+
             </FrameLayout>
         </LinearLayout>
+
     </LinearLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/placeline_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/white"
+        android:layout_gravity="bottom|right"
+        android:layout_margin="@dimen/margin_base"
+        android:background="#ffffff"
+        app:fabSize="normal"
+        android:src="@drawable/ic_timeline" />
+
 </FrameLayout>

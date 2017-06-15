@@ -176,7 +176,7 @@ public class Track extends BaseActivity implements TrackView {
 
         @Override
         public boolean enableLiveLocationSharingView() {
-            return false;
+            return true;
         }
 
         @Override
