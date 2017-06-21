@@ -178,6 +178,17 @@ public class Home extends BaseActivity implements HomeView {
             }
         }
 
+        @Override
+        public void onLiveLocationShareButtonClicked(Action action) {
+           shareLiveLocation();
+        }
+
+        @Override
+        public void onLiveLocationStopButtonClicked(Action action) {
+            if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
+                presenter.stopSharing(ActionManager.getSharedManager(Home.this));
+            }
+        }
     };
 
     @Override
@@ -228,7 +239,6 @@ public class Home extends BaseActivity implements HomeView {
     private void initializeUIViews() {
         // Initialize Toolbar without Home Button
         initToolbar();
-
         // Initialize Retry button
         retryButton = (Button) findViewById(R.id.retryButton);
 
@@ -730,13 +740,14 @@ public class Home extends BaseActivity implements HomeView {
 
     private void updateMapPadding() {
         if (mMap != null) {
-            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
-                    getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+//            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
+//                    getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+            int top = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
 
-            if (stopSharingButton.isShown())
-                bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+          /*  if (stopSharingButton.isShown())
+                bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);*/
             if (lookupId == null)
                 bottom = getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
             mMap.setPadding(left, top, 0, bottom);
