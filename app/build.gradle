@@ -97,7 +97,7 @@ android {
 
     buildTypes {
         release {
-            debuggable false
+            debuggable true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "HYPERTRACK_PK", hyperTrackKeyProperties['publishableKey']
@@ -131,21 +131,21 @@ dependencies {
         transitive = true;
     }
 
-    releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+   /* releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
 
     debugCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':debug@aar') {
         transitive = true
     }
-
-    /*releaseCompile(project(path: ':library', configuration: 'release')) {
+*/
+    releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
 
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
-    }*/
+    }
 
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.android.support:design:25.3.0'
