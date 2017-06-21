@@ -98,11 +98,14 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT);
 
-        if (!TextUtils.isEmpty(expectedPlace.getId())) {
+        if ((expectedPlace == null)){
+        }
+        else if (!TextUtils.isEmpty(expectedPlace.getId())) {
             builder.setExpectedPlaceId(expectedPlace.getId());
         } else {
             builder.setExpectedPlace(expectedPlace);
         }
+
 
         // Call assignAction to start the tracking action
         HyperTrack.createAndAssignAction(builder.build(), new HyperTrackCallback() {
