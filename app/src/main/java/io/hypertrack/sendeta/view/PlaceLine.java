@@ -43,7 +43,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.consumer.utils.TimeAwarePolylineUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
@@ -108,7 +108,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         setContentView(R.layout.map_timeline);
 
         userID = getIntent().getStringExtra("user_id");
-        if(TextUtils.isEmpty(userID)){
+        if(HTTextUtils.isEmpty(userID)){
             userID = HyperTrack.getUserId();
         }
 
@@ -268,7 +268,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
             if(segment.isTrip()) {
                 List<LatLng> latLngList = new ArrayList<LatLng>();
 
-                if(!TextUtils.isEmpty(segment.getTimeAwarePolyline())) {
+                if(!HTTextUtils.isEmpty(segment.getTimeAwarePolyline())) {
 
                     latLngList = TimeAwarePolylineUtils.
                             getLatLngList(segment.getTimeAwarePolyline());

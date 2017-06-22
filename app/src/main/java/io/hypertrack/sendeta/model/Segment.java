@@ -4,7 +4,7 @@ package io.hypertrack.sendeta.model;
 import android.location.Location;
 
 import com.google.gson.annotations.SerializedName;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
 
@@ -242,28 +242,28 @@ public class Segment implements Serializable
     }
 
     public boolean isStop(){
-        if(TextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_STOP))
+        if(HTTextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_STOP))
             return false;
 
         return true;
     }
 
     public boolean isTrip(){
-        if(TextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_TRIP))
+        if(HTTextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_TRIP))
             return false;
 
         return true;
     }
 
     public boolean isLocationVoid(){
-        if(TextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_LOCATION_VOID))
+        if(HTTextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_LOCATION_VOID))
             return false;
 
         return true;
     }
 
     public boolean isNoInformation(){
-        if(TextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_NO_INFORMATION))
+        if(HTTextUtils.isEmpty(type) || !type.equalsIgnoreCase(SEGMENT_TYPE_NO_INFORMATION))
             return false;
 
         return true;

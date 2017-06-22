@@ -3,13 +3,13 @@ package io.hypertrack.sendeta.util;
 import android.content.Context;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import java.util.Locale;
 
@@ -41,14 +41,14 @@ public class Utils {
             Crashlytics.setString(CrashlyticsKeys.USER_ID, userID);
 
             // Set UserName
-            String userName = !TextUtils.isEmpty(user.getName()) ? user.getName() : "NULL";
+            String userName = !HTTextUtils.isEmpty(user.getName()) ? user.getName() : "NULL";
             Crashlytics.setUserName(userName);
             Crashlytics.setString(CrashlyticsKeys.USER_NAME, userName);
 
             // Set UserPhone & UserDeviceID
-            Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !TextUtils.isEmpty(user.getPhone()) ? user.getPhone() : "NULL");
+            Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !HTTextUtils.isEmpty(user.getPhone()) ? user.getPhone() : "NULL");
             String deviceUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-            Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !TextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
+            Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !HTTextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
         }
     }
 
@@ -60,11 +60,11 @@ public class Utils {
             code = service.getNetworkCountryIso();
         }
 
-        if (!TextUtils.isEmpty(code)) {
+        if (!HTTextUtils.isEmpty(code)) {
             code = service.getSimCountryIso();
         }
 
-        if (TextUtils.isEmpty(code)) {
+        if (HTTextUtils.isEmpty(code)) {
             code = paramContext.getResources().getConfiguration().locale.getCountry();
         }
 
@@ -76,7 +76,7 @@ public class Utils {
     }
 
     public static String getCountryName(String isoCode) {
-        if (!TextUtils.isEmpty(isoCode)) {
+        if (!HTTextUtils.isEmpty(isoCode)) {
             Locale locale = new Locale(Locale.getDefault().getDisplayLanguage(), isoCode);
             return locale.getDisplayCountry().trim();
         }

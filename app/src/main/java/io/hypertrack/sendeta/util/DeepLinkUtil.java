@@ -2,7 +2,8 @@ package io.hypertrack.sendeta.util;
 
 import android.content.Context;
 import android.net.Uri;
-import android.text.TextUtils;
+
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import java.util.Set;
 
@@ -47,7 +48,7 @@ public class DeepLinkUtil {
     private static void parsePathParams(Context context, AppDeepLink appDeepLink, Uri uri) {
         if (uri.getScheme() != null
                 && uri.getScheme().equalsIgnoreCase(context.getString(R.string.deeplink_scheme))
-                && !TextUtils.isEmpty(uri.getHost())
+                && !HTTextUtils.isEmpty(uri.getHost())
                 && uri.getHost().contains("track")) {
             appDeepLink.mId = DeepLinkUtil.TRACK;
         }
