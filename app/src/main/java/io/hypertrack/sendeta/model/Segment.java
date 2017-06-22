@@ -278,7 +278,7 @@ public class Segment implements Serializable
 
         String durationText = null;
         int minute = (int) ((Math.round(duration/60)) % 60)  ;
-        int hour = (int) Math.round(duration / 3600);
+        int hour = (int) (duration / 3600);
 
         if (minute == 0) {
             durationText = "1 min";

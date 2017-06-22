@@ -15,7 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -34,6 +33,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hypertrack.lib.internal.common.logging.HTLog;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -46,10 +46,10 @@ import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
@@ -109,10 +109,10 @@ public class Profile extends BaseActivity implements ProfileView {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (TextUtils.isEmpty(mNameView.getText().toString()) && TextUtils.isEmpty(phoneNumberView.getText().toString())) {
+            if (HTTextUtils.isEmpty(mNameView.getText().toString()) && HTTextUtils.isEmpty(phoneNumberView.getText().toString())) {
                 showSkip = true;
                 supportInvalidateOptionsMenu();
-            } else if (showSkip && !TextUtils.isEmpty(s.toString())) {
+            } else if (showSkip && !HTTextUtils.isEmpty(s.toString())) {
                 showSkip = false;
                 supportInvalidateOptionsMenu();
             }
@@ -174,7 +174,7 @@ public class Profile extends BaseActivity implements ProfileView {
         String isoCountryCode = Utils.getCountryRegionFromPhone(this);
         Log.v(TAG, "Region ISO: " + isoCountryCode);
 
-        if (!TextUtils.isEmpty(isoCountryCode)) {
+        if (!HTTextUtils.isEmpty(isoCountryCode)) {
             for (Country c : countries) {
                 if (c.mCountryIso.equalsIgnoreCase(isoCountryCode)) {
                     countryCodeSpinner.setSelection(adapter.getPosition(c));
@@ -233,7 +233,7 @@ public class Profile extends BaseActivity implements ProfileView {
             supportInvalidateOptionsMenu();
 
         }
-        if (!TextUtils.isEmpty(name)) {
+        if (!HTTextUtils.isEmpty(name)) {
             mNameView.setText(name);
         }
 

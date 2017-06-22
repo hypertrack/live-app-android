@@ -2,11 +2,11 @@ package io.hypertrack.sendeta.presenter;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
@@ -47,7 +47,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
-        if (!TextUtils.isEmpty(ISOCode))
+        if (!HTTextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
 
         // Set user's profile image

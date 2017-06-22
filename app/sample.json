@@ -1,56 +1,58 @@
 {
-  "id": "f3c41337-5886-48d3-84fc-666756c248d6",
-  "group_id": "4d5ea9bf-6bb0-42e0-9c42-76cf048d102b",
-  "lookup_id": "+91 91677 83870_fb7b690b194fe4c1",
-  "name": "utkarsh Android",
-  "phone": "+91 91677 83870",
-  "photo": "http://hypertrack.com",
+  "id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+  "group_id": null,
+  "lookup_id": "null_456bf03db947d743",
+  "name": "Nexus Test21",
+  "phone": null,
+  "photo": "https://hypertrack-api-v2-prod.s3.amazonaws.com/default_drivers/v2/b8.png",
   "availability_status": "online",
   "vehicle_type": "unknown",
   "pending_actions": [],
   "last_location": {
-    "activity_confidence": 59,
-    "activity": "walking",
+    "activity_confidence": 100,
+    "activity": "stationary",
     "provider": "non_gps",
     "geojson": {
       "type": "Point",
       "coordinates": [
-        77.1615479,
-        28.562203
+        77.1615871,
+        28.5621788
       ]
     },
-    "recorded_at": "2017-05-31T05:59:57.282000+00:00",
-    "accuracy": 22.726
+    "recorded_at": "2017-06-22T14:13:06.644000+00:00",
+    "accuracy": 16.131
   },
-  "last_online_at": "2017-05-30T03:18:18Z",
-  "last_heartbeat_at": "2017-05-31T06:46:42.794742Z",
-  "last_battery": 40,
+  "last_online_at": "2017-06-22T14:13:06.317000Z",
+  "last_heartbeat_at": "2017-06-22T14:14:34.856800Z",
+  "last_battery": 100,
   "location_status": "location_available",
   "display": {
-    "activity_text": "Walking",
-    "status_text": "At place",
-    "sub_status_text": "Last updated 2 minutes ago",
+    "sub_status_text": "Last updated 4 minutes ago",
+    "battery": 100,
     "has_new_sdk": true,
+    "activity_text": "Stationary",
+    "status_text": "At place",
+    "speed": null,
     "is_warning": false
   },
-  "created_at": "2017-05-30T03:17:59.948351Z",
-  "modified_at": "2017-05-31T06:46:42.794884Z",
+  "created_at": "2017-05-04T16:54:54.206497Z",
+  "modified_at": "2017-06-22T14:14:34.861903Z",
   "is_connected": true,
   "segments": [
     {
-      "id": "f9f368d5-7d2f-4876-bc1b-420b4c21374d",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "ffc7173d-754c-499b-819d-dc1a81c3fe4c",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "place": {
-        "id": "a52c2795-5068-4a09-a012-2722fa9c6fd9",
-        "name": "",
+        "id": "e64b1157-c118-4de5-aeec-8c6be4a1014d",
+        "name": "98",
         "location": {
           "type": "Point",
           "coordinates": [
-            77.226929,
-            28.554559
+            77.19366230070591,
+            28.563625655116798
           ]
         },
-        "address": "8, Siri Fort Rd, Sector 3, Sadiq Nagar, New Delhi, Delhi 110049, India",
+        "address": "98, Gali Number 4, Block B 2, Safdarjung Enclave, New Delhi, Delhi 110022, India",
         "locality": "",
         "landmark": "",
         "zip_code": "",
@@ -58,153 +60,217 @@
         "state": "",
         "country": ""
       },
-      "started_at": "2017-05-30T03:18:19.225000Z",
-      "ended_at": "2017-05-30T03:18:40.456000Z",
-      "duration": 21.231,
+      "started_at": "2017-06-21T16:37:41.949000Z",
+      "ended_at": "2017-06-22T04:11:53.852000Z",
+      "duration": 41651.903,
       "location": {
-        "activity_confidence": 0,
-        "recorded_at": "2017-05-30T03:18:19.207000+00:00",
+        "activity_confidence": 92,
+        "altitude": 203.0,
+        "activity": "stationary",
         "provider": "non_gps",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.2266841,
-            28.5545269
+            77.1936791,
+            28.5635582
           ]
         },
-        "accuracy": 23.939
+        "recorded_at": "2017-06-21T16:37:41.848000+00:00",
+        "accuracy": 58.0
       },
-      "lookup_id": "2ef388cf-7cc9-4081-aacb-3d687c3aadeb",
-      "created_at": "2017-05-30T03:18:20.999189Z",
-      "modified_at": "2017-05-30T03:18:43.319404Z",
+      "lookup_id": "9e084c55-7eef-4dcd-ba31-935fa46bd9c5",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-21T16:48:34.290413Z",
+      "modified_at": "2017-06-22T04:11:56.321773Z",
       "type": "stop"
     },
     {
-      "id": "a73b4aa7-2f5f-4ab1-8508-0f0a3c58e6f6",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "73825219-1331-416a-a005-5511f39b1ff7",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "activity_type": "automotive",
-      "started_at": "2017-05-30T03:18:40.456000Z",
+      "started_at": "2017-06-22T04:11:53.852000Z",
       "start_location": {
-        "activity_confidence": 0,
-        "recorded_at": "2017-05-30T03:18:19.207000+00:00",
+        "activity_confidence": 92,
+        "altitude": 203.0,
+        "activity": "stationary",
         "provider": "non_gps",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.2266841,
-            28.5545269
+            77.1936791,
+            28.5635582
           ]
         },
-        "accuracy": 23.939
+        "recorded_at": "2017-06-22T04:11:53.852000+00:00",
+        "accuracy": 58.0
       },
-      "ended_at": "2017-05-30T03:19:34.753000Z",
+      "ended_at": "2017-06-22T04:11:54.016000Z",
       "end_location": {
-        "activity_confidence": 0,
-        "recorded_at": "2017-05-30T03:19:31.897000+00:00",
+        "activity_confidence": 100,
+        "activity": "stationary",
         "provider": "non_gps",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.224259,
-            28.5549236
+            77.1615703,
+            28.5621828
           ]
         },
-        "accuracy": 23.943
+        "recorded_at": "2017-06-22T04:11:53.758000+00:00",
+        "accuracy": 22.486
       },
-      "distance": 17,
-      "duration": 54.297,
-      "encoded_polyline": "{`hmDqijvM\\F",
-      "time_aware_polyline": "{`hmDqijvMufqrdxA\\FA",
-      "created_at": "2017-05-30T03:18:43.350770Z",
-      "modified_at": "2017-05-30T03:22:58.476855Z",
+      "distance": 3423,
+      "duration": 0.164,
+      "encoded_polyline": "gyimDo{cvMCLSG_Be@??Jk@??@A??`E|@??????Fw@??VD~CviEC?",
+      "time_aware_polyline": "gyimDo{cvMqw`lhxACL?SGhzbA_Be@_@??a@Jk@a@??_@@Aa@??a@`E|@a@??knA??yC??iAFw@iA??iAVDiA~CviE_XC?s|~@",
+      "created_at": "2017-06-21T18:33:01.746778Z",
+      "modified_at": "2017-06-22T04:16:56.526853Z",
       "type": "trip"
     },
     {
-      "id": "26ca057b-d7b2-4c43-bab2-ed90c69ebffb",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "4cd9e17a-704b-428a-a738-4c61ac97498d",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "place": {
-        "id": "a5a627fc-498e-4d0c-85e9-5580f76373c1",
-        "name": "",
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
         "location": {
           "type": "Point",
           "coordinates": [
-            77.224753,
-            28.5549258
+            77.1616109,
+            28.5622531
           ]
         },
-        "address": "24, Siri Fort Rd, Sector 3, Sadiq Nagar, New Delhi, Delhi 110049, India",
-        "locality": "Sadiq Nagar",
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
         "landmark": "",
-        "zip_code": "110049",
-        "city": "New Delhi",
-        "state": "DL",
-        "country": "IN"
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
       },
-      "started_at": "2017-05-30T03:19:34.753000Z",
-      "ended_at": "2017-05-30T03:26:17.244000Z",
-      "duration": 402.491,
+      "started_at": "2017-06-22T04:11:54.016000Z",
+      "ended_at": "2017-06-22T08:13:13.792000Z",
+      "duration": 14479.776,
       "location": {
-        "activity_confidence": 0,
-        "recorded_at": "2017-05-30T03:19:31.897000+00:00",
+        "activity_confidence": 100,
+        "activity": "stationary",
         "provider": "non_gps",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.224259,
-            28.5549236
+            77.1615703,
+            28.5621828
           ]
         },
-        "accuracy": 23.943
+        "recorded_at": "2017-06-22T04:11:53.758000+00:00",
+        "accuracy": 22.486
       },
-      "lookup_id": "8fa27a12-e7df-4be8-97b9-86acaec9d0fb",
-      "created_at": "2017-05-30T03:22:58.518921Z",
-      "modified_at": "2017-05-30T03:26:18.665905Z",
+      "lookup_id": "7675e7aa-8e29-437a-a535-9624af556b3f",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-22T04:14:56.464914Z",
+      "modified_at": "2017-06-22T08:13:19.312065Z",
       "type": "stop"
     },
     {
-      "id": "9ee8c9c5-985e-4cff-9731-c8464c6cd6f5",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "58341e07-4128-4e83-8e00-934a0775f18b",
+      "started_at": "2017-06-22T08:13:13.792000Z",
+      "ended_at": "2017-06-22T08:51:29.307000Z",
+      "duration": 2295.515,
+      "reason": "disabled",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "location_void"
+    },
+    {
+      "id": "c43f2e58-4dd6-4198-b5b9-1b7a619af05d",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "place": {
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1616109,
+            28.5622531
+          ]
+        },
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T08:51:29.506000Z",
+      "ended_at": "2017-06-22T08:52:29.506000Z",
+      "duration": 60.0,
+      "location": {
+        "activity_confidence": 100,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "recorded_at": "2017-06-22T08:51:29.471000+00:00",
+        "accuracy": 22.423
+      },
+      "lookup_id": "a340222a-075f-4bd0-83da-52b375963f6d",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-22T08:51:31.752831Z",
+      "modified_at": "2017-06-22T12:24:40.101569Z",
+      "type": "stop"
+    },
+    {
+      "id": "45b1c121-1dda-452f-90a2-93b8b9ef7f59",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "activity_type": "automotive",
-      "started_at": "2017-05-30T03:26:17.244000Z",
+      "started_at": "2017-06-22T12:24:38.446000Z",
       "start_location": {
-        "activity_confidence": 0,
-        "recorded_at": "2017-05-30T03:19:31.897000+00:00",
-        "provider": "non_gps",
+        "activity_confidence": 100,
+        "recorded_at": "2017-06-22T12:24:38.433000+00:00",
+        "activity": "stationary",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.224259,
-            28.5549236
+            77.1615591,
+            28.5621705
           ]
         },
-        "accuracy": 23.943
+        "accuracy": 22.78
       },
-      "ended_at": "2017-05-30T03:45:51.007000Z",
+      "ended_at": "2017-06-22T14:12:54.404000Z",
       "end_location": {
-        "activity_confidence": 40,
-        "activity": "walking",
+        "activity_confidence": 100,
+        "activity": "stationary",
         "provider": "non_gps",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.1615479,
-            28.562203
+            77.1615816,
+            28.5621502
           ]
         },
-        "recorded_at": "2017-05-30T03:45:27.252000+00:00",
-        "accuracy": 22.484
+        "recorded_at": "2017-06-22T14:11:38.910000+00:00",
+        "accuracy": 22.847
       },
-      "distance": 285,
-      "duration": 1173.763,
-      "encoded_polyline": "q_hmDgtgvMNX??JL??`@d@??PLVVRRTV??TLTNd@VXN??VN\\RFB^Pl@RZN",
-      "time_aware_polyline": "q_hmDgtgvMcmrrdxANX????JL????`@d@????PL?VV?RR?TVA??CTLCTN?d@VAXNA???VNA\\RAFB?^P?l@R?ZNA??e_A",
-      "created_at": "2017-05-30T03:26:18.727104Z",
-      "modified_at": "2017-05-30T03:50:54.677108Z",
+      "distance": 887,
+      "duration": 6495.958,
+      "encoded_polyline": "qpimDwr}uM@??CAaA?G??s@?K@S@????I@m@J_ARUHm@RYJ??h@fBb@hA??EB_@P]R_@T??m@b@q@d@??e@_AAA??u@iB??h@[r@g@d@Y??HE`@WZOFC??XKx@YHC~@Sd@IFAHA????RAJAr@????F@`A@D?E",
+      "time_aware_polyline": "qpimDwr}uMkozmhxA@???C?AaAoq@?G????s@??K@?S@A??????I@?m@J?_AR?UHAm@R?YJ????h@fB?b@hA????EB?_@P?]R?_@T????m@b@?q@d@????e@_A?AA????u@iB????h@[?r@g@?d@Y????HEA`@W?ZO?FC???AXK?x@YAHC?~@S?d@IAFA?HA??????ARA?JA?r@??????FA@`AA@DA?E{aJ",
+      "created_at": "2017-06-22T12:24:40.147578Z",
+      "modified_at": "2017-06-22T14:14:56.529215Z",
       "type": "trip"
     },
     {
-      "id": "25c7fc8c-c43f-422a-95d7-f704acf18f34",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "d830c814-844f-4545-afeb-ececcfeb3deb",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "place": {
         "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
         "name": "",
@@ -223,498 +289,84 @@
         "state": "",
         "country": ""
       },
-      "started_at": "2017-05-30T03:45:51.007000Z",
-      "ended_at": "2017-05-30T08:51:35.629000Z",
-      "duration": 18344.622,
+      "started_at": "2017-06-22T14:13:06.660000Z",
+      "ended_at": null,
+      "duration": 88.1968,
       "location": {
-        "activity_confidence": 40,
-        "activity": "walking",
+        "activity_confidence": 0,
+        "recorded_at": "2017-06-22T14:13:06.644000+00:00",
         "provider": "non_gps",
         "geojson": {
           "type": "Point",
           "coordinates": [
-            77.1615479,
-            28.562203
+            77.1615871,
+            28.5621788
           ]
         },
-        "recorded_at": "2017-05-30T03:45:27.252000+00:00",
-        "accuracy": 22.484
+        "accuracy": 16.131
       },
-      "lookup_id": "5cf23442-da46-4f23-a5be-e7b9034d0d61",
-      "created_at": "2017-05-30T03:48:55.135942Z",
-      "modified_at": "2017-05-30T08:55:28.212514Z",
-      "type": "stop"
-    },
-    {
-      "id": "3557debb-a2c1-498c-8d70-bbbbe1e131de",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "activity_type": "automotive",
-      "started_at": "2017-05-30T08:51:35.629000Z",
-      "start_location": {
-        "activity_confidence": 92,
-        "recorded_at": "2017-05-30T08:48:51.854000+00:00",
-        "activity": "stationary",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "accuracy": 22.18
-      },
-      "ended_at": "2017-05-30T09:35:31.314000Z",
-      "end_location": {
-        "activity_confidence": 23,
-        "activity": "automotive",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.0921049,
-            28.4897096
-          ]
-        },
-        "recorded_at": "2017-05-30T09:35:03.416000+00:00",
-        "accuracy": 23.594
-      },
-      "distance": 594,
-      "duration": 2635.685,
-      "encoded_polyline": "gajmDum}uMEB{A~@EB??Q_@gAwBAA??iAt@i@Z??o@b@y@d@??}@oB??A@y@f@CB??bDrG??EBYP",
-      "time_aware_polyline": "gajmDum}uMkjxsdxAEB?{A~@?EBE??EQ_@EgAwBAAA????iAt@?i@Z????o@b@?y@d@???A}@oB????A@Ay@f@ACBE??EbDrGG??EEBGYPA??{_D",
-      "created_at": "2017-05-30T08:48:53.718084Z",
-      "modified_at": "2017-05-30T09:40:36.049665Z",
-      "type": "trip"
-    },
-    {
-      "id": "59648790-c227-4c4b-b83b-724089ec1618",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "place": {
-        "id": "33d2bff9-502f-4ce6-9a9c-194653586cd5",
-        "name": "Goibibo",
-        "location": {
-          "type": "Point",
-          "coordinates": [
-            77.09203876554966,
-            28.489888486493676
-          ]
-        },
-        "address": "122022, DLF Cyber City, DLF Phase 2, Sector 24, Gurugram, Haryana, India",
-        "locality": "",
-        "landmark": "",
-        "zip_code": "",
-        "city": "",
-        "state": "",
-        "country": ""
-      },
-      "started_at": "2017-05-30T09:35:31.314000Z",
-      "ended_at": "2017-05-30T10:44:42.222000Z",
-      "duration": 4150.908,
-      "location": {
-        "activity_confidence": 23,
-        "activity": "automotive",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.0921049,
-            28.4897096
-          ]
-        },
-        "recorded_at": "2017-05-30T09:35:03.416000+00:00",
-        "accuracy": 23.594
-      },
-      "lookup_id": "2ba32b85-a62e-4d09-b88a-58ebd63ede27",
-      "created_at": "2017-05-30T09:38:35.772408Z",
-      "modified_at": "2017-05-30T10:44:45.438275Z",
-      "type": "stop"
-    },
-    {
-      "id": "6ebf3240-10a7-44c5-83b6-ac9e559a4af9",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "activity_type": "automotive",
-      "started_at": "2017-05-30T10:44:42.222000Z",
-      "start_location": {
-        "activity_confidence": 23,
-        "activity": "automotive",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.0921049,
-            28.4897096
-          ]
-        },
-        "recorded_at": "2017-05-30T09:35:03.416000+00:00",
-        "accuracy": 23.594
-      },
-      "ended_at": "2017-05-30T11:19:47.510000Z",
-      "end_location": {
-        "activity_confidence": 67,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "recorded_at": "2017-05-30T11:19:07.769000+00:00",
-        "accuracy": 22.49
-      },
-      "distance": 15625,
-      "duration": 2105.288,
-      "encoded_polyline": "of{lDu{ouMvAiC??yEiD??Zy@??`@iA??Vm@@C?EAC?ACCCCCAkAw@??^_A??{@c@_@Q????a@~@??]|@??c@dA??AFIV??Q^??Y~@??{AhD?B??GL??]bA??cAfD??p@X??`EhBdAZH@XBNAF?PEDCJI`@m@uvOipL@?Z_@^YZU??pA{@x@i@zBwAlBkAbBeA\\YjFcD`C_BnA{@??LIDGFO??`@S??n@a@??~@g@??FG??d@W^W??hAu@??j@_@??lEsC??`Ak@v[sP??`@WTO??LI??Rb@DH??\\n@??l@~AFN??CR??Np@RbA??h@jC@HJd@??VdC??PbBb@rDJdA??DX???BPpA??HV??FlAAP??@\\APCz@I|@Gn@??UE??c@Iw@OIAa@GGAE???q@Gw@CaA@o@B???FBfA",
-      "time_aware_polyline": "of{lDu{ouMmuetdxAvAiC????yEiD????Zy@????`@iA????Vm@?@C??E?AC??A?CC?CC?CAAkAw@????^_A????{@c@?_@QA??????a@~@????]|@????c@dA????AF?IV????Q^????Y~@????{AhDA?B????GL????]bA????cAfD???Ap@X????`EhB?dAZ?H@AXB?NAAF??PE?DCAJI?`@m@AuvOipLA@??Z_@?^Y?ZU????pA{@?x@i@AzBwAe@lBkAg@bBeAe@\\Yg@jFcDe@`C_Bg@nA{@g@??wBLIyBDGyBFOwB??yB`@SyB??yBn@a@wB??yB~@g@yB??yBFGwB??yBd@WyB^WyB??wBhAu@yB??yBj@_@yB??wBlEsCyB??yB`Ak@yBv[sPA???`@W?TO????LI????Rb@?DH????\\n@????l@~A?FN????CR????Np@?RbA????h@jCA@H?Jd@A??AVdCA???PbBAb@rDAJdAA???DXA??A?BAPpA????HV????FlA?AP????@\\?APACz@?I|@?Gn@????UE???Ac@I?w@O?IA?a@GAGA_AE?aA??_Aq@GaAw@C_AaA@aAo@B_A??aA?FaABfAA??_J",
-      "created_at": "2017-05-30T10:44:45.479563Z",
-      "modified_at": "2017-05-30T11:24:51.178952Z",
-      "type": "trip"
-    },
-    {
-      "id": "936091a1-459c-49e8-b0a9-d61e04dad22c",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "place": {
-        "id": "fd795a60-664f-4072-8d81-296fc3a21748",
-        "name": "Hypertrack",
-        "location": {
-          "type": "Point",
-          "coordinates": [
-            77.16159800000001,
-            28.562179999999994
-          ]
-        },
-        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
-        "locality": "",
-        "landmark": "",
-        "zip_code": "",
-        "city": "",
-        "state": "",
-        "country": ""
-      },
-      "started_at": "2017-05-30T11:19:47.510000Z",
-      "ended_at": "2017-05-30T12:52:46.148000Z",
-      "duration": 5578.638,
-      "location": {
-        "activity_confidence": 67,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "recorded_at": "2017-05-30T11:19:07.769000+00:00",
-        "accuracy": 22.49
-      },
-      "lookup_id": "0708aaca-1b46-4dea-9e67-a062809a52f8",
-      "created_at": "2017-05-30T11:22:51.367612Z",
-      "modified_at": "2017-05-30T13:12:04.333605Z",
-      "type": "stop"
-    },
-    {
-      "id": "12105ebd-a0a6-4f79-ab06-d283466ec0a6",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "activity_type": "automotive",
-      "started_at": "2017-05-30T12:52:46.148000Z",
-      "start_location": {
-        "activity_confidence": 67,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "recorded_at": "2017-05-30T11:19:07.769000+00:00",
-        "accuracy": 22.49
-      },
-      "ended_at": "2017-05-30T13:00:16.170000Z",
-      "end_location": {
-        "activity_confidence": 52,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1601549,
-            28.5614872
-          ]
-        },
-        "recorded_at": "2017-05-30T12:54:04.870000+00:00",
-        "accuracy": 23.059
-      },
-      "distance": 39,
-      "duration": 450.022,
-      "encoded_polyline": "skimDkl}uMMlA",
-      "time_aware_polyline": "skimDkl}uM}rttdxAMlAyA",
-      "created_at": "2017-05-30T13:12:04.388308Z",
-      "modified_at": "2017-05-30T13:12:04.654936Z",
-      "type": "trip"
-    },
-    {
-      "id": "47a018f2-a008-4a72-8f0b-ad5bce939488",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "place": {
-        "id": "fac4e159-ab6e-47c6-b26b-43ba42aeb0a4",
-        "name": "",
-        "location": {
-          "type": "Point",
-          "coordinates": [
-            77.1602888,
-            28.5615546
-          ]
-        },
-        "address": "E-11, Block E, Vasant Vihar, New Delhi, Delhi 110057, India",
-        "locality": "",
-        "landmark": "",
-        "zip_code": "110057",
-        "city": "New Delhi",
-        "state": "DL",
-        "country": "IN"
-      },
-      "started_at": "2017-05-30T13:00:16.170000Z",
-      "ended_at": "2017-05-30T13:12:12.141000Z",
-      "duration": 715.971,
-      "location": {
-        "activity_confidence": 52,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1601549,
-            28.5614872
-          ]
-        },
-        "recorded_at": "2017-05-30T12:54:04.870000+00:00",
-        "accuracy": 23.059
-      },
-      "lookup_id": "369ffec2-140b-4f32-a6e9-331b8e334d74",
-      "created_at": "2017-05-30T13:12:04.522778Z",
-      "modified_at": "2017-05-30T13:12:13.156648Z",
-      "type": "stop"
-    },
-    {
-      "id": "316f945c-6170-4b88-9e5f-308d98488034",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "activity_type": "automotive",
-      "started_at": "2017-05-30T13:12:12.141000Z",
-      "start_location": {
-        "activity_confidence": 52,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1601549,
-            28.5614872
-          ]
-        },
-        "recorded_at": "2017-05-30T12:54:04.870000+00:00",
-        "accuracy": 23.059
-      },
-      "ended_at": "2017-05-30T13:13:18.914000Z",
-      "end_location": {
-        "activity_confidence": 58,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "recorded_at": "2017-05-30T13:12:11.822000+00:00",
-        "accuracy": 23.189
-      },
-      "distance": 153,
-      "duration": 66.773,
-      "encoded_polyline": "ilimD}i}uMyAiH",
-      "time_aware_polyline": "ilimD}i}uMwuttdxAyAiHgjA",
-      "created_at": "2017-05-30T13:12:13.233736Z",
-      "modified_at": "2017-05-30T13:16:20.400998Z",
-      "type": "trip"
-    },
-    {
-      "id": "1da5af0d-9b80-4ac1-8028-934eab78e88e",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "place": {
-        "id": "fd795a60-664f-4072-8d81-296fc3a21748",
-        "name": "Hypertrack",
-        "location": {
-          "type": "Point",
-          "coordinates": [
-            77.16159800000001,
-            28.562179999999994
-          ]
-        },
-        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
-        "locality": "",
-        "landmark": "",
-        "zip_code": "",
-        "city": "",
-        "state": "",
-        "country": ""
-      },
-      "started_at": "2017-05-30T13:13:18.914000Z",
-      "ended_at": "2017-05-30T14:00:07.386000Z",
-      "duration": 2808.472,
-      "location": {
-        "activity_confidence": 58,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "recorded_at": "2017-05-30T13:12:11.822000+00:00",
-        "accuracy": 23.189
-      },
-      "lookup_id": "31991fd4-3c9d-4efc-a890-5a2379adc245",
-      "created_at": "2017-05-30T13:16:20.472843Z",
-      "modified_at": "2017-05-30T14:00:08.614287Z",
-      "type": "stop"
-    },
-    {
-      "id": "de006577-4bfe-4f08-9239-bdbf5b85233a",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "activity_type": "automotive",
-      "started_at": "2017-05-30T14:00:07.386000Z",
-      "start_location": {
-        "activity_confidence": 58,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.1615479,
-            28.562203
-          ]
-        },
-        "recorded_at": "2017-05-30T13:12:11.822000+00:00",
-        "accuracy": 23.189
-      },
-      "ended_at": "2017-05-30T14:01:44.508000Z",
-      "end_location": {
-        "activity_confidence": 72,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.2402908,
-            28.5694915
-          ]
-        },
-        "recorded_at": "2017-05-30T14:00:29.670000+00:00",
-        "accuracy": 22.875
-      },
-      "distance": 45,
-      "duration": 97.122,
-      "encoded_polyline": "_|jmDk~lvMw@[C?C@CBCF",
-      "time_aware_polyline": "_|jmDk~lvMom|tdxAw@[?C??C@MCBMCFM??uC",
-      "created_at": "2017-05-30T14:00:08.669679Z",
-      "modified_at": "2017-05-30T14:06:47.378730Z",
-      "type": "trip"
-    },
-    {
-      "id": "e4a67949-d77c-4511-b50f-35950405d03f",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "place": {
-        "id": "086ddd06-2d58-43d5-ae9f-967745a34b6d",
-        "name": "RAMA APPARELS",
-        "location": {
-          "type": "Point",
-          "coordinates": [
-            77.24034689999999,
-            28.56962
-          ]
-        },
-        "address": "2-D-8, Central Market, Block D, Lajpat Nagar II, Lajpat Nagar, New Delhi, Delhi 110024, India",
-        "locality": "",
-        "landmark": "",
-        "zip_code": "",
-        "city": "",
-        "state": "",
-        "country": "IN"
-      },
-      "started_at": "2017-05-30T14:01:44.508000Z",
-      "ended_at": "2017-05-31T05:19:07.017000Z",
-      "duration": 55042.509,
-      "location": {
-        "activity_confidence": 72,
-        "activity": "walking",
-        "provider": "non_gps",
-        "geojson": {
-          "type": "Point",
-          "coordinates": [
-            77.2402908,
-            28.5694915
-          ]
-        },
-        "recorded_at": "2017-05-30T14:00:29.670000+00:00",
-        "accuracy": 22.875
-      },
-      "lookup_id": "5550b3e8-b5e3-46c9-aa4c-430469f0bdbf",
-      "created_at": "2017-05-30T14:04:47.205835Z",
-      "modified_at": "2017-05-31T05:19:08.208314Z",
+      "lookup_id": "18c4356e-5c56-4a16-ab14-2e66b538adcf",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-22T14:13:11.906679Z",
+      "modified_at": "2017-06-22T14:13:11.906719Z",
       "type": "stop"
     }
   ],
   "events": [
     {
-      "id": "6ef8d492-abe3-4ced-91cd-2538be544f33",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
-      "recorded_at": "2017-05-30T03:18:18.696000Z",
+      "id": "7dad2266-c509-4b60-805b-8b654a76162f",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T08:13:13.792000Z",
+      "type": "device.location.disabled",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    },
+    {
+      "id": "2e71ffdb-8e4a-4017-a25e-a76dc9cf4584",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T08:51:29.307000Z",
+      "type": "device.location.enabled",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    },
+    {
+      "id": "54b4ee71-1965-45c9-a4e8-38b1139016da",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T14:12:54.404000Z",
+      "type": "tracking.ended",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    },
+    {
+      "id": "e7744ce5-6be7-4e46-b916-0fc6bfc19074",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T14:13:06.317000Z",
       "type": "tracking.started",
-      "has_been_delivered": true,
-      "delivered_at": "2017-05-30T03:18:21.294145Z"
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
     }
   ],
   "actions": [
     {
-      "id": "cbaba9bc-5c3c-4556-b4c8-bc1152f1f988",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "f008b5b4-b41d-4a69-b679-49b2d3bbb653",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "type": "visit",
       "started_place": {
-        "id": "a5a627fc-498e-4d0c-85e9-5580f76373c1",
-        "name": "",
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
         "location": {
           "type": "Point",
           "coordinates": [
-            77.224753,
-            28.5549258
+            77.1616109,
+            28.5622531
           ]
         },
-        "address": "24, Siri Fort Rd, Sector 3, Sadiq Nagar, New Delhi, Delhi 110049, India",
-        "locality": "Sadiq Nagar",
-        "landmark": "",
-        "zip_code": "110049",
-        "city": "New Delhi",
-        "state": "DL",
-        "country": "IN"
-      },
-      "started_at": "2017-05-30T03:18:41.692000Z",
-      "expected_place": {
-        "id": "16c178c2-e270-44c2-93f1-c6a625f75ac1",
-        "name": "Hypertrack",
-        "location": {
-          "type": "Point",
-          "coordinates": [
-            77.16159783303738,
-            28.56218009901868
-          ]
-        },
-        "address": "Basement, E65, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
         "locality": "",
         "landmark": "",
         "zip_code": "",
@@ -722,19 +374,21 @@
         "state": "",
         "country": ""
       },
+      "started_at": "2017-06-22T04:42:35.060000Z",
+      "expected_place": null,
       "scheduled_at": null,
       "expected_at": null,
       "completed_place": {
-        "id": "c648203f-e403-416b-8bf2-136014e3be11",
+        "id": "62ae4007-dcac-4d02-925e-681786a6142f",
         "name": "",
         "location": {
           "type": "Point",
           "coordinates": [
-            77.1615479,
-            28.562203
+            77.1615703,
+            28.5621828
           ]
         },
-        "address": "A52, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
         "locality": "Vasant Vihar",
         "landmark": "",
         "zip_code": "110070",
@@ -742,32 +396,103 @@
         "state": "DL",
         "country": "IN"
       },
-      "completed_at": "2017-05-30T03:43:18.617000Z",
-      "assigned_at": "2017-05-30T03:18:43.271802Z",
+      "completed_at": "2017-06-22T04:44:10.505000Z",
+      "assigned_at": "2017-06-22T04:42:38.472405Z",
       "status": "completed",
       "sub_status": null,
-      "encoded_polyline": "ichmDu}ivMvBlhANX??JL??`@d@??PLVVRRTV??TLTNd@VXN??VN\\RFB^Pl@RZNk}@lvH",
+      "encoded_polyline": "aqimDas}uMLF",
       "eta": null,
-      "initial_eta": "2017-05-30T03:36:37.676018Z",
-      "short_code": "jXdhhp",
-      "tracking_url": "https://trck.at/jXdhhp",
-      "lookup_id": "f162b72e-32b2-4230-a3eb-921a2a3f84c3",
-      "created_at": "2017-05-30T03:18:43.259740Z",
-      "modified_at": "2017-05-30T03:43:20.142438Z",
+      "initial_eta": null,
+      "short_code": "4gpM0Ch",
+      "tracking_url": "https://trck.at/4gpM0Ch",
+      "lookup_id": "e6aa59ce-ca8b-45f0-aae5-7c1a73bd4343",
+      "created_at": "2017-06-22T04:42:38.450774Z",
+      "modified_at": "2017-06-22T04:44:10.819988Z",
       "display": {
-        "duration_remaining": null,
         "status_text": "Completed",
         "sub_status_text": "",
         "distance_remaining": null,
-        "show_summary": true
+        "duration_elapsed": 92.032595,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
       },
       "suspended_at": null,
       "canceled_at": null,
       "event_flags": []
     },
     {
-      "id": "7917547d-4489-4af5-bcb9-e25a2fa27fd6",
-      "user_id": "f3c41337-5886-48d3-84fc-666756c248d6",
+      "id": "00925ef7-fafb-43eb-8283-017d18b88b4d",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1616109,
+            28.5622531
+          ]
+        },
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T04:44:44.682000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "641654cb-4d3c-4e82-a5df-8d5ab4c3a001",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T04:47:06.392000Z",
+      "assigned_at": "2017-06-22T04:44:44.917974Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "aqimDas}uMLF",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "eobq2pKG",
+      "tracking_url": "https://trck.at/eobq2pKG",
+      "lookup_id": "e6aa59ce-ca8b-45f0-aae5-7c1a73bd4343",
+      "created_at": "2017-06-22T04:44:44.904820Z",
+      "modified_at": "2017-06-22T04:47:08.234824Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 141.474026,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "8d248d52-cf61-4c3b-acfd-ee1798684305",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
       "type": "visit",
       "started_place": {
         "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
@@ -787,18 +512,87 @@
         "state": "",
         "country": ""
       },
-      "started_at": "2017-05-30T08:48:51.854000Z",
-      "expected_place": {
-        "id": "33d2bff9-502f-4ce6-9a9c-194653586cd5",
-        "name": "Goibibo",
+      "started_at": "2017-06-22T12:24:38.433000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "ed96f0f4-6a6a-404b-998f-ce493ec09ced",
+        "name": "",
         "location": {
           "type": "Point",
           "coordinates": [
-            77.09203876554966,
-            28.489888486493676
+            77.1615591,
+            28.5621705
           ]
         },
-        "address": "122022, DLF Cyber City, DLF Phase 2, Sector 24, Gurugram, Haryana, India",
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:24:45.005000Z",
+      "assigned_at": "2017-06-22T12:24:40.101083Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uM@F",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "npvPJpgh",
+      "tracking_url": "https://trck.at/npvPJpgh",
+      "lookup_id": "7594ec09-f594-4b2b-905a-aad3493b4bc9",
+      "created_at": "2017-06-22T12:24:40.070213Z",
+      "modified_at": "2017-06-22T12:24:45.391718Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 4.903917,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "98fd84bf-25de-4a4e-b16b-2b442d15e0a2",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:38:06.611000Z",
+      "expected_place": {
+        "id": "37611b06-1f11-4d8a-88b6-7a1c833b5ab7",
+        "name": "Hauz Khas",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.20013681799173,
+            28.549448983976607
+          ]
+        },
+        "address": "Hauz Khas, New Delhi, Delhi 110016, India",
         "locality": "",
         "landmark": "",
         "zip_code": "",
@@ -809,46 +603,191 @@
       "scheduled_at": null,
       "expected_at": null,
       "completed_place": {
-        "id": "80ca921d-3968-4dce-a2a1-0e4941634f58",
+        "id": "fd6291ef-1d72-4d7a-96bc-81edeb321202",
         "name": "",
         "location": {
           "type": "Point",
           "coordinates": [
-            77.092015,
-            28.4900595
+            77.1615816,
+            28.562167
           ]
         },
-        "address": "canon, DLF Cyber City, DLF Phase 2, Sector 24, Gurugram, Haryana 122002, India",
-        "locality": "Sector 24",
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
         "landmark": "",
-        "zip_code": "122002",
-        "city": "Gurugram",
-        "state": "HR",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
         "country": "IN"
       },
-      "completed_at": "2017-05-30T09:22:28.934000Z",
-      "assigned_at": "2017-05-30T08:48:53.669432Z",
+      "completed_at": "2017-06-22T12:43:41.650000Z",
+      "assigned_at": "2017-06-22T12:38:09.923577Z",
       "status": "completed",
       "sub_status": null,
-      "encoded_polyline": "spimD_s}uMsOhDEB{A~@EB??Q_@gAwBAA??iAt@i@Z??o@b@y@d@??}@oB??A@y@f@CB??bDrG??EBYPf_N~bL",
+      "encoded_polyline": "spimD_s}uMgHHXKx@YHC~@Sd@IFAHA????RAJAr@????F@`A@DCE",
       "eta": null,
-      "initial_eta": "2017-05-30T09:15:21.863806Z",
-      "short_code": "VzKhTtg",
-      "tracking_url": "https://trck.at/VzKhTtg",
-      "lookup_id": "0d358df0-2c79-4e50-8034-ac4396d257d3",
-      "created_at": "2017-05-30T08:48:53.644763Z",
-      "modified_at": "2017-05-30T09:22:30.032930Z",
+      "initial_eta": "2017-06-22T12:53:26.337745Z",
+      "short_code": "WPbZRBar",
+      "tracking_url": "https://trck.at/WPbZRBar",
+      "lookup_id": "9c605d21-1043-47e3-94ea-00566f3b9dd0",
+      "created_at": "2017-06-22T12:38:09.905008Z",
+      "modified_at": "2017-06-22T12:43:42.357126Z",
       "display": {
-        "duration_remaining": null,
         "status_text": "Completed",
         "sub_status_text": "",
         "distance_remaining": null,
-        "show_summary": true
+        "duration_elapsed": 331.726423,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": [
+        {
+          "type": "action.completed_at_different_place_than_expected",
+          "value": 4022.4
+        }
+      ]
+    },
+    {
+      "id": "39850e34-3863-4aee-99c9-1de59081b939",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:44:32.655000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "e858020e-09ff-4c1e-80b9-1757aebf5f7e",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615775,
+            28.5621814
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:44:51.986000Z",
+      "assigned_at": "2017-06-22T12:44:32.904183Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uM?B",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "xvsE6mXp",
+      "tracking_url": "https://trck.at/xvsE6mXp",
+      "lookup_id": "f5f97b1d-9dc5-4e2c-8fff-caae86fc8a77",
+      "created_at": "2017-06-22T12:44:32.889696Z",
+      "modified_at": "2017-06-22T12:44:52.372272Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 19.081817,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "d39a9b8f-6d0b-4926-bd4f-0bf15190aeab",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:46:13.691000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "50e2e8e8-4251-48b7-9b30-2a8b43eddcdb",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615481,
+            28.562186
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:47:25.050000Z",
+      "assigned_at": "2017-06-22T12:46:14.397326Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uMAH",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "IDoBW9Cn",
+      "tracking_url": "https://trck.at/IDoBW9Cn",
+      "lookup_id": "f5f97b1d-9dc5-4e2c-8fff-caae86fc8a77",
+      "created_at": "2017-06-22T12:46:14.362472Z",
+      "modified_at": "2017-06-22T12:47:25.659578Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 70.652674,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
       },
       "suspended_at": null,
       "canceled_at": null,
       "event_flags": []
     }
   ],
-  "timeline_date": "2017-05-30"
+  "timeline_date": "2017-06-22"
 }

@@ -35,7 +35,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public Integer getToolbarLogoIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-        return R.drawable.ic_ht_logo;
+        return R.drawable.ic_ht_logo_white;
     }
 
     @Override

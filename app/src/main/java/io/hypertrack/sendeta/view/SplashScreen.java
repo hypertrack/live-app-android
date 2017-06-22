@@ -99,11 +99,22 @@ public class SplashScreen extends BaseActivity {
 
             case DeepLinkUtil.DEFAULT:
             default:
-                TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, PlaceLine.class)
-                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                        .startActivities();
+                final ActionManager actionManager = ActionManager.getSharedManager(this);
+                //Check if there is any existing task to be restored
+                if (actionManager.shouldRestoreState()) {
+                    TaskStackBuilder.create(this)
+                            .addNextIntentWithParentStack(new Intent(this, Home.class)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                            .startActivities();
+                }
+                else {
+                    TaskStackBuilder.create(this)
+                            .addNextIntentWithParentStack(new Intent(this, PlaceLine.class)
+                                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                            .startActivities();
+                }
                 finish();
+
                 break;
         }
     }
@@ -183,8 +194,8 @@ public class SplashScreen extends BaseActivity {
 
         // Check if current user is sharing location or not
         if (SharedPreferenceManager.getActionID(this) == null) {
-             intent.setClass(SplashScreen.this, Home.class)
-                     .putExtra(Track.KEY_LOOKUP_ID, lookupId);
+            intent.setClass(SplashScreen.this, Home.class)
+                    .putExtra(Track.KEY_LOOKUP_ID, lookupId);
         } else {
             intent.setClass(SplashScreen.this, Track.class);
         }
@@ -197,10 +208,20 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void handleTrackingDeepLinkError() {
-        TaskStackBuilder.create(SplashScreen.this)
-                .addNextIntentWithParentStack(new Intent(SplashScreen.this, PlaceLine.class)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                .startActivities();
+        final ActionManager actionManager = ActionManager.getSharedManager(this);
+        //Check if there is any existing task to be restored
+        if (actionManager.shouldRestoreState()) {
+            TaskStackBuilder.create(this)
+                    .addNextIntentWithParentStack(new Intent(this, Home.class)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                    .startActivities();
+        }
+        else {
+            TaskStackBuilder.create(this)
+                    .addNextIntentWithParentStack(new Intent(this, PlaceLine.class)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                    .startActivities();
+        }
         finish();
     }
 }

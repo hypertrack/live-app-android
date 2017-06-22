@@ -24,7 +24,7 @@ import io.hypertrack.sendeta.model.Segment;
  * Created by Aman Jain on 24/05/17.
  */
 
-public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.TimelineView> {
+public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.TimelineView> {
 
     private List<Segment> segmentList;
     private Context context;
@@ -32,7 +32,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
     private RippleBackground rippleBackground;
     private Date currentDate;
 
-    public TimelineAdapter(List<Segment> segmentList, Context context) {
+    public PlacelineAdapter(List<Segment> segmentList, Context context) {
         this.segmentList = segmentList;
         this.context = context;
     }
@@ -62,13 +62,16 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             String bottomText = segment.formatTime(segment.getEndedAt());
             holder.bottomText.setText(bottomText);
             holder.bottomText.setVisibility(View.VISIBLE);
+
         } else if (position == getItemCount() - 1) {
             String bottomText = segment.formatTime(segment.getEndedAt());
             holder.bottomText.setText(bottomText);
             holder.bottomText.setVisibility(View.VISIBLE);
+
         } else {
             holder.topText.setVisibility(View.GONE);
             holder.bottomText.setVisibility(View.GONE);
+
         }
         if (segment.isStop()) {
             holder.segmentBarLayout.setVisibility(View.INVISIBLE);
@@ -105,16 +108,14 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             });
 
             if ((position == getItemCount() - 1) && currentDate.getDay() == new Date().getDay()) {
-                if(rippleBackground == null) {
-                    rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
-                    rippleBackground.setVisibility(View.VISIBLE);
-                    RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
-                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pixelToDP(100), pixelToDP(150));
-                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                    layoutParams.setMargins(pixelToDP(77), pixelToDP(120), 0, 0);
-                    relativeLayout.addView(rippleBackground, layoutParams);
-                }
-
+                rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
+                rippleBackground.setVisibility(View.VISIBLE);
+                RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
+                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pixelToDP(100), pixelToDP(150));
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                layoutParams.setMargins(pixelToDP(77), pixelToDP(120), 0, 0);
+                relativeLayout.addView(rippleBackground, layoutParams);
+                rippleBackground.setVisibility(View.VISIBLE);
                 rippleBackground.startRippleAnimation();
 
             } else {

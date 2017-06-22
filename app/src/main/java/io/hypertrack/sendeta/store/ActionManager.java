@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -16,6 +15,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.Place;
@@ -77,9 +77,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         // Check if current Task exists in Shared Preference or not
         if (this.hyperTrackAction != null) {
             // Start Refreshing the task without any delay
-            if (this.place != null) {
-                return true;
-            }
+            return true;
         }
 
         if (actionCompletedListener != null)
@@ -123,7 +121,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void completeAction(final ActionManagerCallback callback) {
 
-        if (TextUtils.isEmpty(this.getHyperTrackActionId())) {
+        if (HTTextUtils.isEmpty(this.getHyperTrackActionId())) {
             if (callback != null) {
                 callback.OnError();
             }
@@ -279,7 +277,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public boolean isActionLive() {
-        return hyperTrackAction != null && !TextUtils.isEmpty(hyperTrackAction.getId());
+        return hyperTrackAction != null && !HTTextUtils.isEmpty(hyperTrackAction.getId());
     }
 
     private void clearListeners() {

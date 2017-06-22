@@ -200,7 +200,7 @@ public class Home extends BaseActivity implements HomeView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        startAnimation();
+        //  startAnimation();
         // Initialize UI Views
         initializeUIViews();
 
@@ -1235,8 +1235,8 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         super.onBackPressed();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
-
     @Override
     protected void onStop() {
 
