@@ -51,13 +51,56 @@
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
+
                 style="@style/ToolbarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/Toolbar"
+                android:background="@color/light_black"
                 app:titleTextColor="@android:color/white">
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/toolbar_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="@dimen/padding_base"
+                        android:paddingTop="@dimen/padding_base"
+                        android:src="@mipmap/ic_launcher" />
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="@dimen/margin_high"
+                        android:layout_toRightOf="@id/toolbar_icon"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/placeline_text"
+                            android:layout_width="wrap_content"
+                            android:textColor="@color/white"
+                            android:layout_height="wrap_content"
+                            android:text="@string/placeline" />
+
+                        <TextView
+                            android:id="@+id/date"
+                            android:layout_marginTop="@dimen/margin_low"
+                            android:textSize="@dimen/text_small"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/white"
+                            android:drawablePadding="@dimen/padding_low"
+                            android:gravity="center"
+                            android:drawableRight="@drawable/ic_keyboard_arrow_down_black_18dp"
+                            android:text="June 12, 2017" />
+                    </LinearLayout>
+
+                </RelativeLayout>
             </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -86,43 +129,42 @@
             android:background="@android:color/white">
 
             <io.hypertrack.sendeta.view.DashedLine
+                android:id="@+id/dashed_line"
                 android:layout_width="20dp"
                 android:layout_height="match_parent"
                 android:layout_marginLeft="117dp"
                 android:layerType="software"
+                android:visibility="gone"
                 app:color="@color/gray"
                 app:dashGap="5dp"
                 app:dashLength="5dp"
                 app:dashThickness="1dp"
-                android:id="@+id/dashed_line"
-                android:visibility="gone"
                 app:orientation="vertical" />
 
             <android.support.v7.widget.RecyclerView
-                android:layout_marginTop="@dimen/margin_medium"
-                android:paddingBottom="10dp"
                 android:id="@+id/timeline_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:visibility="visible">
-            </android.support.v7.widget.RecyclerView>
+                android:layout_marginTop="@dimen/margin_medium"
+                android:paddingBottom="10dp"
+                android:visibility="visible"></android.support.v7.widget.RecyclerView>
 
             <ProgressBar
-                android:layout_width="match_parent"
-                android:layout_gravity="center"
                 android:id="@+id/progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
                 android:background="#6b000000"
                 android:padding="130dp"
-                android:visibility="visible"
-                android:layout_height="match_parent" />
+                android:visibility="visible" />
 
             <TextView
-                android:layout_width="wrap_content"
                 android:id="@+id/timeline_status"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
+                android:layout_gravity="center"
                 android:text="No Placeline Activity"
-                android:layout_gravity="center"/>
+                android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
 
