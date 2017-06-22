@@ -59,7 +59,7 @@ import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -1096,7 +1096,7 @@ public class Home extends BaseActivity implements HomeView {
             OnboardingManager onboardingManager = OnboardingManager.sharedManager();
             String countryName = Utils.getCountryName(onboardingManager.getUser().getCountryCode());
 
-            if (!TextUtils.isEmpty(countryName)) {
+            if (!HTTextUtils.isEmpty(countryName)) {
                 Intent intent = new Intent(this, FetchLocationIntentService.class);
                 intent.putExtra(FetchLocationIntentService.RECEIVER, new GeocodingResultReceiver(new Handler()));
                 intent.putExtra(FetchLocationIntentService.ADDRESS_DATA_EXTRA, countryName);

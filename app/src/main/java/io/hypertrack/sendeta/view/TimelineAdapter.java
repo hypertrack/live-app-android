@@ -11,7 +11,7 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.skyfishjy.library.RippleBackground;
 
 import java.util.Date;
@@ -73,7 +73,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
         if (segment.isStop()) {
             holder.segmentBarLayout.setVisibility(View.INVISIBLE);
             holder.segmentAddress.setVisibility(View.VISIBLE);
-            holder.segmentAddress.setText(TextUtils.isEmpty(segment.getPlace().getLocality()) ?
+            holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
                     segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
 
             holder.segmentIcon.setImageResource(R.drawable.ic_stop);
@@ -86,7 +86,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             holder.segmentAddress.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    holder.segmentAddress.setText(TextUtils.isEmpty(segment.getPlace().getLocality()) ?
+                    holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
                             segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
                     if (holder.segmentAddress.getTag() != null && holder.segmentAddress.getTag().toString().equalsIgnoreCase("close")) {
                         holder.segmentAddress.setText(segment.getPlace().getDisplayString());
@@ -94,7 +94,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
                         holder.segmentAddress.setTag("open");
                         holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_keyboard_arrow_up_black_24dp, 0);
                     } else {
-                        holder.segmentAddress.setText(TextUtils.isEmpty(segment.getPlace().getLocality()) ?
+                        holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
                                 segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
                         holder.segmentAddress.setTag("close");
                         holder.segmentAddress.setMaxLines(1);
@@ -126,7 +126,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
 
             holder.segmentBar.setImageResource(R.drawable.trip_background);
             holder.segmentBarLayout.setVisibility(View.VISIBLE);
-            if(!TextUtils.isEmpty(segment.getActivityType())) {
+            if(!HTTextUtils.isEmpty(segment.getActivityType())) {
                 holder.segmentTypeText.setText(segment.getActivityType().substring(0, 1).toUpperCase()
                         + segment.getActivityType().substring(1, segment.getActivityType().length()));
             }

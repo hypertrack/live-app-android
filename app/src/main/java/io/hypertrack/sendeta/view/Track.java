@@ -13,7 +13,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public class Track extends BaseActivity implements TrackView {
         // Check if Intent has a valid TASK_ID_LIST extra
         if (intent != null) {
             String lookupId = intent.getStringExtra(KEY_LOOKUP_ID);
-            if (!TextUtils.isEmpty(lookupId)) {
+            if (!HTTextUtils.isEmpty(lookupId)) {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
                     // Add lookupId being tracked by this user
                     trackPresenter.trackAction(lookupId);

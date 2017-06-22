@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
@@ -56,7 +56,7 @@ public class SplashScreen extends BaseActivity {
 
         Intent intent = getIntent();
         // if started through deep link
-        if (intent != null && !TextUtils.isEmpty(intent.getDataString())) {
+        if (intent != null && !HTTextUtils.isEmpty(intent.getDataString())) {
             Log.d(TAG, "deeplink " + intent.getDataString());
             appDeepLink = DeepLinkUtil.prepareAppDeepLink(SplashScreen.this, intent.getData());
         }
@@ -67,7 +67,7 @@ public class SplashScreen extends BaseActivity {
             @Override
             public void run() {
                 // Check if user has signed up
-                boolean isUserOnboard = !TextUtils.isEmpty(HyperTrack.getUserId());
+                boolean isUserOnboard = !HTTextUtils.isEmpty(HyperTrack.getUserId());
 
                 if (!isUserOnboard) {
                     if (HyperTrack.checkLocationPermission(SplashScreen.this)
@@ -110,13 +110,13 @@ public class SplashScreen extends BaseActivity {
 
     private void processTrackingDeepLink(AppDeepLink appDeepLink) {
         // Check if lookup_id is available from deeplink
-        if (!TextUtils.isEmpty(appDeepLink.lookupId)) {
+        if (!HTTextUtils.isEmpty(appDeepLink.lookupId)) {
             handleTrackingDeepLinkSuccess(appDeepLink.lookupId, appDeepLink.taskID);
             return;
         }
 
         // Check if shortCode is empty and taskId is available
-        if (TextUtils.isEmpty(appDeepLink.shortCode) && !TextUtils.isEmpty(appDeepLink.taskID)) {
+        if (HTTextUtils.isEmpty(appDeepLink.shortCode) && !HTTextUtils.isEmpty(appDeepLink.taskID)) {
             handleTrackingDeepLinkSuccess(null, appDeepLink.taskID);
             return;
         }
@@ -162,7 +162,7 @@ public class SplashScreen extends BaseActivity {
 
     private void handleTrackingDeepLinkSuccess(String lookupId, String actionId) {
         // Check if current lookupId is same as the one active currently
-        if (!TextUtils.isEmpty(lookupId) &&
+        if (!HTTextUtils.isEmpty(lookupId) &&
                 lookupId.equals(ActionManager.getSharedManager(this).getHyperTrackActionLookupId())) {
             TaskStackBuilder.create(this)
                     .addNextIntentWithParentStack(new Intent(this, Home.class)
