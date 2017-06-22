@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="150dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal">
 
     <RelativeLayout
@@ -59,20 +60,37 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
             android:src="@drawable/ic_start_point" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:src="@drawable/ic_end_point"
-            android:layout_alignParentBottom="true" />
-
+            android:src="@drawable/ic_end_point" />
     </RelativeLayout>
 
+    <com.skyfishjy.library.RippleBackground
+
+        android:id="@+id/current_location_ripple"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        app:rb_color="#b70288d1"
+        app:rb_duration="4000"
+        app:rb_radius="6dp"
+        android:layout_marginBottom="-15dp"
+        app:rb_rippleAmount="3"
+        app:rb_scale="3"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="102dp">
+
+    </com.skyfishjy.library.RippleBackground>
+
     <LinearLayout
+        android:id="@+id/linearLayout3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
@@ -106,8 +124,8 @@
             android:id="@+id/segment_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/margin_base"
             android:layout_marginRight="@dimen/margin_xxhigh"
+            android:layout_marginTop="@dimen/margin_base"
             android:drawableEnd="@drawable/ic_keyboard_arrow_right_black_24dp"
             android:ellipsize="end"
             android:gravity="center_vertical"

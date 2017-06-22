@@ -29,7 +29,7 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
     private List<Segment> segmentList;
     private Context context;
     private int lastDay;
-    private RippleBackground rippleBackground;
+    //private RippleBackground rippleBackground;
     private Date currentDate;
 
     public PlacelineAdapter(List<Segment> segmentList, Context context) {
@@ -107,22 +107,6 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
                 }
             });
 
-            if ((position == getItemCount() - 1) && currentDate.getDay() == new Date().getDay()) {
-                rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
-                rippleBackground.setVisibility(View.VISIBLE);
-                RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pixelToDP(100), pixelToDP(150));
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                layoutParams.setMargins(pixelToDP(77), pixelToDP(120), 0, 0);
-                relativeLayout.addView(rippleBackground, layoutParams);
-                rippleBackground.setVisibility(View.VISIBLE);
-                rippleBackground.startRippleAnimation();
-
-            } else {
-                if (rippleBackground != null)
-                    rippleBackground.setVisibility(View.GONE);
-            }
-
         } else if (segment.isTrip()) {
 
             holder.segmentBar.setImageResource(R.drawable.trip_background);
@@ -159,11 +143,21 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
             holder.segmentAddress.setVisibility(View.GONE);
             holder.duration.setVisibility(View.VISIBLE);
         }
+        if (segment.isStop() && (position == getItemCount() - 1) &&
+                currentDate.getDay() == new Date().getDay()){
 
+            holder.currentLocationRipple.setVisibility(View.VISIBLE);
+            holder.currentLocationRipple.startRippleAnimation();
+        }
+        else{
+            holder.currentLocationRipple.stopRippleAnimation();
+            holder.currentLocationRipple.setVisibility(View.GONE);
+        }
+/*
         if(!segment.isStop() && position+1<segmentList.size()&&!segmentList.get(position+1).isStop() ) {
             if (rippleBackground != null)
                 rippleBackground.setVisibility(View.GONE);
-        }
+        }*/
     }
 
     public void setCurrentDate(Date date) {
@@ -185,6 +179,7 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
         ImageView segmentBar, segmentIcon;
         TextView topText, bottomText, segmentTypeText, segmentAddress, duration;
         RelativeLayout segmentBarLayout;
+        RippleBackground currentLocationRipple;
 
         public TimelineView(View itemView) {
             super(itemView);
@@ -196,6 +191,8 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
             segmentAddress = (TextView) itemView.findViewById(R.id.segment_address);
             duration = (TextView) itemView.findViewById(R.id.duration);
             segmentBarLayout = (RelativeLayout) itemView.findViewById(R.id.segment_bar_layout);
+            currentLocationRipple = (RippleBackground) itemView.findViewById(R.id.current_location_ripple);
         }
+
     }
 }
