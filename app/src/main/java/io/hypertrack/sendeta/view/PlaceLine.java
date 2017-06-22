@@ -98,6 +98,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     private DashedLine dashedLine;
     private TextView placelineText;
     private TextView dateSelector;
+    private RelativeLayout toolbarHeader;
+
     int previousIndex = -1;
     private FloatingActionButton floatingActionButton;
     private boolean isFirstTime = true;
@@ -177,11 +179,11 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         });
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbarHeader = (RelativeLayout) findViewById(R.id.toolbar_header);
+        toolbarHeader.setOnClickListener(dateSelectorOnClickListener);
         dateSelector = (TextView) findViewById(R.id.date_selector);
         arrow = (ImageView) findViewById(R.id.arrow);
         placelineText = (TextView) findViewById(R.id.placeline_text);
-        arrow.setOnClickListener(dateSelectorOnClickListener);
-        dateSelector.setOnClickListener(dateSelectorOnClickListener);
         SpannableStringBuilder cs = new SpannableStringBuilder(getString(R.string.your_placeline));
         cs.setSpan(new SuperscriptSpan(), 15, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         cs.setSpan(new RelativeSizeSpan(0.4f), 15, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
