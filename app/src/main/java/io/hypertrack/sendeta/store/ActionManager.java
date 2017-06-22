@@ -77,9 +77,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         // Check if current Task exists in Shared Preference or not
         if (this.hyperTrackAction != null) {
             // Start Refreshing the task without any delay
-            if (this.place != null) {
-                return true;
-            }
+            return true;
         }
 
         if (actionCompletedListener != null)

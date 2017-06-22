@@ -16,7 +16,6 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
-            android:text="13:20"
             android:visibility="visible" />
 
         <TextView
@@ -26,7 +25,6 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:gravity="center_horizontal"
-            android:text="18:60"
             android:visibility="visible" />
 
         <ImageView
@@ -92,7 +90,6 @@
                 android:id="@+id/segment_type_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Trip"
                 android:textColor="@android:color/black"
                 android:textSize="@dimen/text_medium"
                 android:textStyle="bold" />
@@ -102,7 +99,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/margin_xxhigh"
-                android:text="2.9 miles  |  23 minutes"
                 android:visibility="gone" />
         </LinearLayout>
 
@@ -117,7 +113,6 @@
             android:gravity="center_vertical"
             android:maxLines="1"
             android:tag="close"
-            android:text="2733 Mcallister Avenue asdasd asdas ds ds sadas asdasd "
             android:visibility="gone" />
 
     </LinearLayout>

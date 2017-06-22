@@ -1233,6 +1233,7 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             return;
         }
+
         super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }

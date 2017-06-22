@@ -48,6 +48,7 @@ import com.hypertrack.lib.internal.consumer.utils.TimeAwarePolylineUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -69,14 +70,14 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
     private static final String TAG = PlaceLine.class.getSimpleName();
     private RecyclerView timelineRecyclerView;
-    private TimelineAdapter timelineAdapter;
+    private PlacelineAdapter placelineAdapter;
     private List<Segment> sanitizeSegments = new ArrayList<>();
     private TimelineManager timelineManager;
     //    private SlidingUpPanelLayout slidingPaneLayout;
     private SupportMapFragment supportMapFragment;
     private CompactCalendarView mCompactCalendarView;
     private AppBarLayout mAppBarLayout;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("d MMMM yyyy", /*Locale.getDefault()*/Locale.ENGLISH);
+    private DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, /*Locale.getDefault()*/Locale.ENGLISH);
     private SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);
     private SimpleDateFormat format = new SimpleDateFormat("EEEE, MMM d", Locale.ENGLISH);
     private Date selectedDate;
@@ -99,6 +100,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     private TextView dateSelector;
     int previousIndex = -1;
     private FloatingActionButton floatingActionButton;
+    private boolean isFirstTime = true;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -126,6 +128,9 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         handler = new Handler();
 
         setTimelineData();
+
+        setCurrentDate(selectedDate);
+
 
     }
 
@@ -195,7 +200,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         mCompactCalendarView.setListener(new CompactCalendarView.CompactCalendarViewListener() {
             @Override
             public void onDayClick(Date dateClicked) {
-                setTitle(dateFormat.format(dateClicked));
+                setDate(dateFormat.format(dateClicked));
                 selectedDate  = dateClicked;
                 hideCalendar();
                 setTimelineData();
@@ -230,8 +235,6 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
                     animateMap(index);
                     floatingActionButton.show();
                 }
-
-
             }
 
             @Override
@@ -241,9 +244,9 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        timelineAdapter = new TimelineAdapter(sanitizeSegments,this);
-        timelineAdapter.setCurrentDate(selectedDate);
-        timelineRecyclerView.setAdapter(timelineAdapter);
+        placelineAdapter = new PlacelineAdapter(sanitizeSegments,this);
+        placelineAdapter.setCurrentDate(selectedDate);
+        timelineRecyclerView.setAdapter(placelineAdapter);
 
     }
 
@@ -347,7 +350,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     private void setDateFormatMonth(Date date){
-        setTitle(dateFormatMonth.format(date));
+        setDate(dateFormatMonth.format(date));
         if (mCompactCalendarView != null) {
             mCompactCalendarView.setCurrentDate(date);
         }
@@ -355,7 +358,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
     public void setCurrentDate(Date date) {
 
-        setTitle(dateFormat.format(date));
+        setDate(dateFormat.format(date));
         if (mCompactCalendarView != null) {
             mCompactCalendarView.setCurrentDate(date);
         }
@@ -366,7 +369,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     protected void onResume() {
 
         super.onResume();
-
+        getTimelineData();
         handler.postDelayed(runnable,FETCH_TIME);
 
     }
@@ -377,9 +380,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         handler.removeCallbacks(runnable);
     }
 
-    @Override
-    public void setTitle(CharSequence title) {
-        toolbar.setTitle(title);
+    public void setDate(CharSequence title) {
+        dateSelector.setText(title);
         //toolbarTitle.setText(title);
     }
 
@@ -387,8 +389,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         //  timelineStatus.setVisibility(View.GONE);
         //progressBar.setVisibility(View.VISIBLE);
         sanitizeSegments.clear();
-        timelineAdapter.setCurrentDate(selectedDate);
-        timelineAdapter.notifyDataSetChanged();
+        placelineAdapter.setCurrentDate(selectedDate);
+        placelineAdapter.notifyDataSetChanged();
         if(handler != null)
             handler.removeCallbacks(runnable);
         progressBar.setVisibility(View.VISIBLE);
@@ -414,7 +416,12 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
                         if(sanitizeSegments.size() > 0){
                             timelineStatus.setVisibility(View.GONE);
                             dashedLine.setVisibility(View.VISIBLE);
-                            if(previousIndex == -1 ){
+                            if(isFirstTime){
+                                animateMap(sanitizeSegments.size()-1);
+                                timelineRecyclerView.scrollToPosition(sanitizeSegments.size()-1);
+                                isFirstTime = false;
+                            }
+                            else if(previousIndex == -1 ){
                                 animateMap(0);
                             }
                             else {
@@ -446,8 +453,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         addMissingSegment(segmentList);
         sanitizeSegments.clear();
         sanitizeSegments.addAll(addMissingSegment(segmentList));
-        timelineAdapter.setCurrentDate(selectedDate);
-        timelineAdapter.notifyDataSetChanged();
+        placelineAdapter.setCurrentDate(selectedDate);
+        placelineAdapter.notifyDataSetChanged();
     }
 
     private List<Segment> sanitizeSegments(List<Segment> segmentList){
