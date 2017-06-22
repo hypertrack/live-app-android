@@ -167,6 +167,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
             public void onClick(View v) {
                 Intent intent = new Intent(PlaceLine.this,Home.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.enter, R.anim.exit);
             }
         });
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
