@@ -1,0 +1,49 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/light_black"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/padding_base"
+        android:paddingTop="@dimen/padding_base"
+        android:src="@drawable/ht_logo_with_circle" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/margin_high"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/placeline_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/your_placeline"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_large" />
+
+        <TextView
+            android:id="@+id/date_selector"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/placeline_text"
+            android:gravity="center"
+            android:text="June 12, 2017"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_small" />
+
+        <ImageView
+            android:id="@+id/arrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/placeline_text"
+            android:layout_marginLeft="@dimen/margin_low"
+            android:layout_toRightOf="@id/date_selector"
+            android:src="@drawable/ic_arrow_drop_down_white_18dp" />
+    </RelativeLayout>
+
+</LinearLayout>

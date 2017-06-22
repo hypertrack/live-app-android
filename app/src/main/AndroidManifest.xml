@@ -91,7 +91,7 @@
             android:screenOrientation="portrait"
             android:parentActivityName=".view.Home"/>
 
-        <activity android:name=".view.Timeline"
+        <activity android:name=".view.PlaceLine"
             android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->

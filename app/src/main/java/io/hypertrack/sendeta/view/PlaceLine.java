@@ -1,5 +1,7 @@
 package io.hypertrack.sendeta.view;
 
+import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -8,6 +10,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -15,8 +18,11 @@ import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.RelativeSizeSpan;
+import android.text.style.SuperscriptSpan;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -32,6 +38,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.hypertrack.lib.HyperTrack;
@@ -58,9 +65,9 @@ import io.hypertrack.sendeta.store.TimelineManager;
  * Created by Aman Jain on 24/05/17.
  */
 
-public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
+public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
-    private static final String TAG = Timeline.class.getSimpleName();
+    private static final String TAG = PlaceLine.class.getSimpleName();
     private RecyclerView timelineRecyclerView;
     private TimelineAdapter timelineAdapter;
     private List<Segment> sanitizeSegments = new ArrayList<>();
@@ -88,7 +95,10 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
     private int FETCH_TIME = 30*1000;
     private GoogleMap mMap;
     private DashedLine dashedLine;
+    private TextView placelineText;
+    private TextView dateSelector;
     int previousIndex = -1;
+    private FloatingActionButton floatingActionButton;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -151,13 +161,28 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         //userName = (TextView) findViewById(R.id.user_name);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         timelineStatus = (TextView) findViewById(R.id.timeline_status);
-
+        floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        floatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(PlaceLine.this,Home.class);
+                startActivity(intent);
+            }
+        });
         mAppBarLayout = (AppBarLayout) findViewById(R.id.app_bar_layout);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        dateSelector = (TextView) findViewById(R.id.date_selector);
+        arrow = (ImageView) findViewById(R.id.arrow);
+        placelineText = (TextView) findViewById(R.id.placeline_text);
+        arrow.setOnClickListener(dateSelectorOnClickListener);
+        dateSelector.setOnClickListener(dateSelectorOnClickListener);
+        SpannableStringBuilder cs = new SpannableStringBuilder(getString(R.string.your_placeline));
+        cs.setSpan(new SuperscriptSpan(), 15, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        cs.setSpan(new RelativeSizeSpan(0.4f), 15, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        placelineText.setText(cs);
         //toolbarTitle = (TextView) findViewById(R.id.toolbar_title_text);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingToolbarLayout);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         // Set up the CompactCalendarView
         mCompactCalendarView = (CompactCalendarView) findViewById(R.id.compactcalendar_view);
@@ -202,11 +227,16 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                     View view = snapHelperTop.findSnapView(linearLayoutManager);
                     int index = recyclerView.getChildAdapterPosition(view);
                     animateMap(index);
+                    floatingActionButton.show();
                 }
+
+
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0 ||dy<0 && floatingActionButton.isShown())
+                    floatingActionButton.hide();
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
@@ -215,6 +245,17 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
         timelineRecyclerView.setAdapter(timelineAdapter);
 
     }
+
+    private View.OnClickListener dateSelectorOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (isExpanded) {
+                hideCalendar();
+            } else {
+                showCalendar();
+            }
+        }
+    };
 
     private void animateMap(int index){
         if(previousIndex != index && index >= 0) {
@@ -247,7 +288,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                 }
 
                 LatLngBounds bounds = builder.build();
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 200);
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
 
                 PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
                 mMap.addPolyline(polylineOptions);
@@ -259,13 +300,13 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
 
                     MarkerOptions startMarkerOption = new MarkerOptions().
                             position(latLngList.get(0)).
-                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_circle)).
+                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_source_place_marker)).
                             anchor(anchors[0], anchors[1]);
                     mMap.addMarker(startMarkerOption);
 
                     MarkerOptions endMarkerOptions = new MarkerOptions().
                             position(latLngList.get(latLngList.size() - 1)).
-                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_rectangle)).
+                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker)).
                             anchor(anchors[0], anchors[1]);
                     mMap.addMarker(endMarkerOptions);
                 }
@@ -275,7 +316,7 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
                 LatLng latLng = segment.getPlace().getLocation().getLatLng();
                 MarkerOptions markerOptions = new MarkerOptions().
                         position(latLng).
-                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop_marker));
+                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop_point));
                 mMap.addMarker(markerOptions);
                 float zoom = mMap.getCameraPosition().zoom;
                 if(zoom < 16f)
@@ -296,6 +337,9 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
             int itemPosition = parent.getChildAdapterPosition(view);
             if (itemPosition != 0 && itemPosition != ( parent.getAdapter().getItemCount() -1 )) {
                 outRect.set(0, vertOverlap, 0, 0);
+            }
+            else {
+                outRect.set(0,20,0,0);
             }
 
         }
@@ -531,45 +575,30 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-    }
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style_1));
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_timeline, menu);
-        // Set current date to today
-        selectedDate = new Date();
-        setCurrentDate(selectedDate);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.choose_date) {
-            if (isExpanded) {
-                hideCalendar();
-            } else {
-                showCalendar();
+            if (!success) {
+                Log.e(TAG, "Style parsing failed.");
             }
-            return true;
-        }
-        else if(id == android.R.id.home){
-            onBackPressed();
-            return true;
+        } catch (Resources.NotFoundException e) {
+            Log.e(TAG, "Can't find style. Error: ", e);
         }
 
-        return super.onOptionsItemSelected(item);
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                hideCalendar();
+            }
+        });
     }
 
     private void showCalendar(){
         setDateFormatMonth(selectedDate);
-        ViewCompat.animate(arrow).rotation(180).start();
+        ViewCompat.animate(arrow).rotation(-90).start();
         mAppBarLayout.setExpanded(true, true);
         isExpanded = true;
 
@@ -578,8 +607,8 @@ public class Timeline extends AppCompatActivity implements OnMapReadyCallback{
 
     private void hideCalendar(){
         setCurrentDate(selectedDate);
-        ViewCompat.animate(arrow).rotation(0).start();
         mAppBarLayout.setExpanded(false, true);
+        ViewCompat.animate(arrow).rotation(0).start();
         isExpanded = false;
     }
 

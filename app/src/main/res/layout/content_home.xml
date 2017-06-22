@@ -167,16 +167,4 @@
         </LinearLayout>
 
     </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/placeline_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|right"
-        android:layout_margin="@dimen/margin_medium"
-        android:background="#ffffff"
-        android:src="@drawable/ic_timeline"
-        app:backgroundTint="@android:color/white"
-        app:fabSize="normal" />
-
 </FrameLayout>

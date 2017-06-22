@@ -71,7 +71,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                             public void onSuccess() {
                                 if (view != null) {
                                     view.showProfilePicUploadSuccess();
-                                    view.navigateToHomeScreen();
+                                    view.navigateToPlacelineScreen();
                                 }
                             }
 
@@ -89,7 +89,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                         });
                     } else {
                         if (view != null) {
-                            view.navigateToHomeScreen();
+                            view.navigateToPlacelineScreen();
                         }
                     }
                 }

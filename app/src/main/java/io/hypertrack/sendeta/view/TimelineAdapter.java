@@ -54,10 +54,7 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
         final Segment segment = segmentList.get(position);
 
         if (position % 2 == 0) {
-            String text = segment.formatTime(segment.getStartedAt()); /*+
-                    ( (segment.getStartedAt().getDay() != new Date().getDay() ) ?
-                            ("\n" + segment.formatDate(segment.getStartedAt())) : "");*/
-
+            String text = segment.formatTime(segment.getStartedAt());
             holder.topText.setText(text);
             lastDay = segment.getStartedAt().getDay();
             holder.topText.setVisibility(View.VISIBLE);
@@ -73,21 +70,6 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             holder.topText.setVisibility(View.GONE);
             holder.bottomText.setVisibility(View.GONE);
         }
-       /* else {
-            holder.topText.setVisibility(View.GONE);
-        }
-
-        if ((position == getItemCount() - 1) || lastDay != segment.getEndedAt().getDay()) {
-            String text = segment.formatTime(segment.getEndedAt()) +
-                    ( (segment.getEndedAt().getDay() != new Date().getDay() ) ?
-                            ("\n" + segment.formatDate(segment.getEndedAt())) : "");
-            holder.bottomText.setText(text);
-            lastDay = segment.getEndedAt().getDay();
-        } else {
-            String text = segment.formatTime(segment.getEndedAt());
-            holder.bottomText.setText(text);
-        }
-*/
         if (segment.isStop()) {
             holder.segmentBarLayout.setVisibility(View.INVISIBLE);
             holder.segmentAddress.setVisibility(View.VISIBLE);
@@ -123,14 +105,18 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             });
 
             if ((position == getItemCount() - 1) && currentDate.getDay() == new Date().getDay()) {
-                rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
-                rippleBackground.setVisibility(View.VISIBLE);
-                RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pixelToDP(100), pixelToDP(150));
-                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                layoutParams.setMargins(pixelToDP(78), pixelToDP(120), 0, 0);
-                relativeLayout.addView(rippleBackground, layoutParams);
+                if(rippleBackground == null) {
+                    rippleBackground = (RippleBackground) LayoutInflater.from(context).inflate(R.layout.current_location_ripple, null);
+                    rippleBackground.setVisibility(View.VISIBLE);
+                    RelativeLayout relativeLayout = (RelativeLayout) holder.itemView;
+                    RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pixelToDP(100), pixelToDP(150));
+                    layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                    layoutParams.setMargins(pixelToDP(77), pixelToDP(120), 0, 0);
+                    relativeLayout.addView(rippleBackground, layoutParams);
+                }
+
                 rippleBackground.startRippleAnimation();
+
             } else {
                 if (rippleBackground != null)
                     rippleBackground.setVisibility(View.GONE);
@@ -140,15 +126,17 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
 
             holder.segmentBar.setImageResource(R.drawable.trip_background);
             holder.segmentBarLayout.setVisibility(View.VISIBLE);
-            holder.segmentTypeText.setText("Trip");
+            if(!TextUtils.isEmpty(segment.getActivityType())) {
+                holder.segmentTypeText.setText(segment.getActivityType().substring(0, 1).toUpperCase()
+                        + segment.getActivityType().substring(1, segment.getActivityType().length()));
+            }
+            else
+                holder.segmentTypeText.setText("Trip");
             holder.duration.setText(segment.getDistanceAndDuration());
             holder.duration.setVisibility(View.VISIBLE);
             holder.segmentIcon.setImageResource(R.drawable.ic_trip);
             holder.segmentAddress.setVisibility(View.GONE);
             holder.segmentBar.setVisibility(View.VISIBLE);
-
-            if (rippleBackground != null)
-                rippleBackground.setVisibility(View.GONE);
 
         } else if (segment.isLocationVoid()) {
             holder.segmentBar.setImageResource(R.drawable.no_location_background);
@@ -171,6 +159,10 @@ public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.Timeli
             holder.duration.setVisibility(View.VISIBLE);
         }
 
+        if(!segment.isStop() && position+1<segmentList.size()&&!segmentList.get(position+1).isStop() ) {
+            if (rippleBackground != null)
+                rippleBackground.setVisibility(View.GONE);
+        }
     }
 
     public void setCurrentDate(Date date) {

@@ -304,7 +304,7 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void navigateToHomeScreen() {
+    public void navigateToPlacelineScreen() {
         Utils.setCrashlyticsKeys(this);
         showProgress(false);
 
@@ -314,7 +314,7 @@ public class Profile extends BaseActivity implements ProfileView {
         HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
 
         TaskStackBuilder.create(Profile.this)
-                .addNextIntentWithParentStack(new Intent(Profile.this, Home.class)
+                .addNextIntentWithParentStack(new Intent(Profile.this, PlaceLine.class)
                         .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
         finish();

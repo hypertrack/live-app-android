@@ -27,7 +27,7 @@
             <LinearLayout
                 android:id="@+id/compactcalendar_view_container"
                 android:layout_width="match_parent"
-                android:layout_height="270dp"
+                android:layout_height="280dp"
                 android:orientation="vertical"
                 android:paddingTop="?attr/actionBarSize"
                 app:layout_collapseMode="parallax"
@@ -40,6 +40,7 @@
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
                     android:visibility="visible"
+                    android:layout_marginTop="15dp"
                     app:compactCalendarBackgroundColor="@android:color/white"
                     app:compactCalendarCurrentDayBackgroundColor="@color/colorAccent"
                     app:compactCalendarCurrentSelectedDayBackgroundColor="@android:color/darker_gray"
@@ -51,56 +52,16 @@
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
-
                 style="@style/ToolbarStyle"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
+                android:layout_height="70dp"
+                android:background="@color/light_black"
                 app:layout_collapseMode="pin"
                 app:popupTheme="@style/Toolbar"
-                android:background="@color/light_black"
                 app:titleTextColor="@android:color/white">
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                <include layout="@layout/timeline_toolbar" />
 
-                    <ImageView
-                        android:id="@+id/toolbar_icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingBottom="@dimen/padding_base"
-                        android:paddingTop="@dimen/padding_base"
-                        android:src="@mipmap/ic_launcher" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginLeft="@dimen/margin_high"
-                        android:layout_toRightOf="@id/toolbar_icon"
-                        android:gravity="center_vertical"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/placeline_text"
-                            android:layout_width="wrap_content"
-                            android:textColor="@color/white"
-                            android:layout_height="wrap_content"
-                            android:text="@string/placeline" />
-
-                        <TextView
-                            android:id="@+id/date"
-                            android:layout_marginTop="@dimen/margin_low"
-                            android:textSize="@dimen/text_small"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="@color/white"
-                            android:drawablePadding="@dimen/padding_low"
-                            android:gravity="center"
-                            android:drawableRight="@drawable/ic_keyboard_arrow_down_black_18dp"
-                            android:text="June 12, 2017" />
-                    </LinearLayout>
-
-                </RelativeLayout>
             </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.CollapsingToolbarLayout>
@@ -112,7 +73,8 @@
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
         android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:id="@+id/linearLayout2">
 
         <fragment
             android:id="@+id/map_view"
@@ -145,9 +107,7 @@
                 android:id="@+id/timeline_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="@dimen/margin_medium"
-                android:paddingBottom="10dp"
-                android:visibility="visible"></android.support.v7.widget.RecyclerView>
+                android:visibility="visible"/>
 
             <ProgressBar
                 android:id="@+id/progress_bar"
@@ -165,8 +125,21 @@
                 android:layout_gravity="center"
                 android:text="No Placeline Activity"
                 android:visibility="gone" />
+
         </FrameLayout>
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
+        android:layout_margin="@dimen/margin_high"
+        android:src="@drawable/ic_share_white_24dp"
+        app:backgroundTint="@color/tracking_experince"
+        app:fabSize="auto"
+        app:layout_anchor="@+id/linearLayout2"
+        app:layout_anchorGravity="bottom|right" />
 
 
 </android.support.design.widget.CoordinatorLayout>

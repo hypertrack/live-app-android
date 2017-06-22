@@ -1,7 +1,9 @@
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -15,11 +17,12 @@ import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
@@ -31,6 +34,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -106,7 +111,7 @@ public class Home extends BaseActivity implements HomeView {
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
-    private FloatingActionButton placelineView;
+    private CoordinatorLayout rootLayout;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -180,7 +185,7 @@ public class Home extends BaseActivity implements HomeView {
 
         @Override
         public void onLiveLocationShareButtonClicked(Action action) {
-           shareLiveLocation();
+            shareLiveLocation();
         }
 
         @Override
@@ -195,7 +200,7 @@ public class Home extends BaseActivity implements HomeView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        startAnimation();
         // Initialize UI Views
         initializeUIViews();
 
@@ -234,6 +239,42 @@ public class Home extends BaseActivity implements HomeView {
         // Attach View Presenter to View
         presenter.attachView(this);
 
+    }
+
+    private void startAnimation() {
+        rootLayout = (CoordinatorLayout) findViewById(R.id.parent_layout);
+        rootLayout.setVisibility(View.INVISIBLE);
+        ViewTreeObserver viewTreeObserver = rootLayout.getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    circularRevealActivity();
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                        rootLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    } else {
+                        rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                }
+            });
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void circularRevealActivity() {
+
+        int cx = (rootLayout.getLeft() + rootLayout.getRight());
+        int cy = (rootLayout.getTop() + rootLayout.getBottom());
+
+        int finalRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
+
+        // create the animator for this view (the start radius is zero)
+        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, 0, finalRadius);
+        circularReveal.setDuration(600);
+
+        // make the view visible and start the animation
+        rootLayout.setVisibility(View.VISIBLE);
+        circularReveal.start();
     }
 
     private void initializeUIViews() {
@@ -294,20 +335,6 @@ public class Home extends BaseActivity implements HomeView {
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bus));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
         vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
-
-        placelineView = (FloatingActionButton) findViewById(R.id.placeline_view);
-
-        placelineView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent(Home.this,Timeline.class);
-                intent.putExtra("user_id",HyperTrack.getUserId());
-                startActivity(intent);
-            }
-        });
-        // findViewById(R.id.open_timeline).performClick();
-
     }
 
     private void shareLiveLocation() {
@@ -764,7 +791,6 @@ public class Home extends BaseActivity implements HomeView {
         mProgressDialog.show();
 
         presenter.shareLiveLocation(ActionManager.getSharedManager(this), lookupId, expectedPlace);
-        placelineView.setVisibility(View.GONE);
     }
 
     @Override
@@ -1136,8 +1162,6 @@ public class Home extends BaseActivity implements HomeView {
 
             lookupId = actionManager.getHyperTrackAction().getLookupId();
             HyperTrack.trackActionByLookupId(lookupId, null);
-
-            placelineView.setVisibility(View.GONE);
         }
         /*else {
             presenter.stopSharing();
@@ -1203,8 +1227,6 @@ public class Home extends BaseActivity implements HomeView {
 
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
-
-            placelineView.setVisibility(View.VISIBLE);
             return;
 
         }else if (isvehicleTypeTabLayoutVisible) {

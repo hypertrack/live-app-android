@@ -8,7 +8,7 @@ public interface ProfileView {
 
     void showProfilePicUploadSuccess();
 
-    void navigateToHomeScreen();
+    void navigateToPlacelineScreen();
 
     void showErrorMessage();
 

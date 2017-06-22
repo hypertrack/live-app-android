@@ -100,7 +100,7 @@ public class SplashScreen extends BaseActivity {
             case DeepLinkUtil.DEFAULT:
             default:
                 TaskStackBuilder.create(this)
-                        .addNextIntentWithParentStack(new Intent(this, Home.class)
+                        .addNextIntentWithParentStack(new Intent(this, PlaceLine.class)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 finish();
@@ -198,7 +198,7 @@ public class SplashScreen extends BaseActivity {
 
     private void handleTrackingDeepLinkError() {
         TaskStackBuilder.create(SplashScreen.this)
-                .addNextIntentWithParentStack(new Intent(SplashScreen.this, Home.class)
+                .addNextIntentWithParentStack(new Intent(SplashScreen.this, PlaceLine.class)
                         .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
         finish();

@@ -46,7 +46,7 @@
         android:layout_width="15dp"
         android:layout_height="match_parent"
         android:layout_centerHorizontal="true"
-        android:layout_marginLeft="20.5dp"
+        android:layout_marginLeft="20dp"
         android:layout_toRightOf="@id/time_view"
         android:src="@drawable/trip_background"
         android:visibility="visible" />
@@ -54,23 +54,23 @@
     <RelativeLayout
         android:id="@+id/segment_bar_layout"
         android:layout_width="wrap_content"
-        android:layout_marginTop="-3dp"
-        android:layout_marginBottom="-3dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/margin_high"
+        android:layout_marginLeft="18.5dp"
         android:layout_toRightOf="@id/time_view">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             android:layout_alignParentTop="true"
-            android:src="@drawable/ic_circle" />
+            android:src="@drawable/ic_start_point" />
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:src="@drawable/ic_rectangle" />
+            android:layout_centerHorizontal="true"
+            android:src="@drawable/ic_end_point"
+            android:layout_alignParentBottom="true" />
 
     </RelativeLayout>
 

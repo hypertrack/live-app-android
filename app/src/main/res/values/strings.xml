@@ -88,4 +88,5 @@
     <string name="location_permission_detail">HyperTrack needs location permission to let you share your live location with your friends and family.</string>
 
     <string name="background_tracking_permission_msg">We will enable the background tracking by default. Do you want to enable it?</string>
+    <string name="your_placeline">Your Placeline TM</string>
 </resources>
