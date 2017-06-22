@@ -4,13 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
@@ -20,7 +16,6 @@ import java.util.List;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
 import io.hypertrack.sendeta.presenter.TrackPresenter;
-import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
 public class Track extends BaseActivity implements TrackView {
 
@@ -137,56 +132,6 @@ public class Track extends BaseActivity implements TrackView {
     class TrackMapAdapter extends HyperTrackMapAdapter {
         TrackMapAdapter(Context mContext) {
             super(mContext);
-        }
-
-        @Override
-        public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return true;
-        }
-
-        @Override
-        public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
-            return Track.this.getString(R.string.app_name);
-        }
-
-        @Override
-        public Toolbar getToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
-            return null;
-        }
-
-        @Override
-        public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
-            if (SharedPreferenceManager.getLastKnownLocation() != null) {
-                LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
-                        SharedPreferenceManager.getLastKnownLocation().getLongitude());
-                return CameraUpdateFactory.newLatLng(latLng);
-            }
-            return super.getMapFragmentInitialState(hyperTrackMapFragment);
-        }
-
-        @Override
-        public boolean showTrailingPolyline() {
-            return true;
-        }
-
-        @Override
-        public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
-            return false;
-        }
-
-        @Override
-        public boolean enableLiveLocationSharingView() {
-            return true;
-        }
-
-        @Override
-        public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-            return false;
-        }
-
-        @Override
-        public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-            return R.drawable.ic_reset_bounds_button;
         }
     }
 }
