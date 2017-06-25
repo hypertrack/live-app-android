@@ -23,7 +23,10 @@ import android.text.SpannableStringBuilder;
 import android.text.style.RelativeSizeSpan;
 import android.text.style.SuperscriptSpan;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -60,6 +63,8 @@ import java.util.concurrent.TimeUnit;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.Segment;
 import io.hypertrack.sendeta.model.UserTimelineData;
+import io.hypertrack.sendeta.store.ActionManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.store.TimelineManager;
 
 /**
@@ -88,6 +93,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     private UserTimelineData userTimelineData;
     private TextView timelineStatus;
     private ProgressBar progressBar;
+    private FrameLayout progressLayout;
     private RelativeLayout topBar;
     //private CardView topBarCardView;
     private String userID;
@@ -107,7 +113,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.map_timeline);
+        setContentView(R.layout.activity_placeline);
 
         userID = getIntent().getStringExtra("user_id");
         if(HTTextUtils.isEmpty(userID)){
@@ -123,7 +129,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         runnable = new Runnable() {
             @Override
             public void run() {
-                getTimelineData();
+                getPlacelineData();
             }
         };
 
@@ -133,46 +139,54 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
         setCurrentDate(selectedDate);
 
-
+        // Ask for tracking permission
+        //checkForBackgroundTrackingPermission();
     }
 
+   /* *//**
+     * Method to request user to be tracked in background. This enables the app to give user better
+     * suggestions for tracking links when he/she is on the move.
+     *//*
+    private void checkForBackgroundTrackingPermission() {
+        // Check if a valid user exists
+        if (HyperTrack.getUserId() == null)
+            return;
+
+        // Check if the user has denied for Background tracking
+        if (!SharedPreferenceManager.hasRequestedForBackgroundTracking()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.background_tracking_permission_msg)
+                    .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startHyperTrackTracking(true);
+                        }
+                    })
+                    .setNegativeButton("Disable", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .show();
+            SharedPreferenceManager.setRequestedForBackgroundTracking();
+        }
+    }*/
+
     private void initUI(){
-        //  topBar= (RelativeLayout) findViewById(R.id.top_bar);
-        /*slidingPaneLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_panel_layout);
-        slidingPaneLayout.setAnchorPoint(0.4f);
-        slidingPaneLayout.setPanelState(SlidingUpPanelLayout.PanelState.ANCHORED);
-        SlideListener slideListener = new SlideListener();
-        slidingPaneLayout.addPanelSlideListener(slideListener);
-        slidingPaneLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onClick: ");
-            }
-        });*/
-
-     /*   topBarCardView = (CardView) findViewById(R.id.top_bar_card_view);
-
-        //Set Panel Height when view is topBarCardView has been drawn on scree.
-        topBarCardView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                topBarCardView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                Log.d(TAG, "initUI: "+ topBarCardView.getHeight()+" ,  "+ topBarCardView.getMeasuredHeight()+"  , "+ topBarCardView.getMeasuredHeightAndState());
-              //  slidingPaneLayout.setPanelHeight(topBarCardView.getHeight() - 8);
-            }
-        });*/
-
         supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_view);
         supportMapFragment.getMapAsync(this);
 
         //userName = (TextView) findViewById(R.id.user_name);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressLayout = (FrameLayout) findViewById(R.id.progress_layout);
         timelineStatus = (TextView) findViewById(R.id.timeline_status);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(PlaceLine.this,Home.class);
+                intent.putExtra("class_from",PlaceLine.class.getSimpleName());
                 startActivity(intent);
                 overridePendingTransition(R.anim.enter, R.anim.exit);
             }
@@ -185,8 +199,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         arrow = (ImageView) findViewById(R.id.arrow);
         placelineText = (TextView) findViewById(R.id.placeline_text);
         SpannableStringBuilder cs = new SpannableStringBuilder(getString(R.string.your_placeline));
-        cs.setSpan(new SuperscriptSpan(), 15, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        cs.setSpan(new RelativeSizeSpan(0.4f), 15, 17, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        cs.setSpan(new SuperscriptSpan(), 10, 12, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        cs.setSpan(new RelativeSizeSpan(0.4f), 10, 12, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         placelineText.setText(cs);
         //toolbarTitle = (TextView) findViewById(R.id.toolbar_title_text);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsingToolbarLayout);
@@ -216,7 +230,6 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
         dashedLine = (DashedLine) findViewById(R.id.dashed_line);
         timelineRecyclerView = (RecyclerView) findViewById(R.id.timeline_recycler_view);
-        //slidingPaneLayout.setScrollableView(timelineRecyclerView);
         timelineRecyclerView.addItemDecoration(new OverlapDecoration());
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
@@ -235,14 +248,11 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
                     View view = snapHelperTop.findSnapView(linearLayoutManager);
                     int index = recyclerView.getChildAdapterPosition(view);
                     animateMap(index);
-                    floatingActionButton.show();
                 }
             }
 
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (dy > 0 ||dy<0 && floatingActionButton.isShown())
-                    floatingActionButton.hide();
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
@@ -371,7 +381,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     protected void onResume() {
 
         super.onResume();
-        getTimelineData();
+        getPlacelineData();
         handler.postDelayed(runnable,FETCH_TIME);
 
     }
@@ -388,26 +398,24 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     }
 
     private void setTimelineData(){
-        //  timelineStatus.setVisibility(View.GONE);
-        //progressBar.setVisibility(View.VISIBLE);
         sanitizeSegments.clear();
         placelineAdapter.setCurrentDate(selectedDate);
         placelineAdapter.notifyDataSetChanged();
         if(handler != null)
             handler.removeCallbacks(runnable);
-        progressBar.setVisibility(View.VISIBLE);
+        progressLayout.setVisibility(View.VISIBLE);
         previousIndex = -1;
-        getTimelineData();
+        getPlacelineData();
 
     }
 
-    private void getTimelineData(){
+    private void getPlacelineData(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = dateFormat.format(selectedDate);
         timelineManager.getTimelineData(userID, date, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
-                progressBar.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
                 if(response != null){
 
                     userTimelineData = (UserTimelineData) response.getResponseObject();
@@ -444,7 +452,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
             @Override
             public void onError(@NonNull ErrorResponse errorResponse) {
-                progressBar.setVisibility(View.GONE);
+                progressLayout.setVisibility(View.GONE);
                 timelineStatus.setVisibility(View.VISIBLE);
             }
         });
@@ -598,6 +606,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
             Log.e(TAG, "Can't find style. Error: ", e);
         }
 
+        //mMap.moveCamera();
+
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -636,4 +646,74 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         }*/
         super.onBackPressed();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (ActionManager.getSharedManager(this).getHyperTrackAction() != null)
+            return false;
+
+        getMenuInflater().inflate(R.menu.menu_placeline, menu);
+        MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
+        if (SharedPreferenceManager.isTrackingON()) {
+            menuItem.setTitle(getString(R.string.stop_tracking));
+            if(!HyperTrack.isMockTracking())
+                startHyperTrackTracking(false);
+        } else {
+            menuItem.setTitle(getString(R.string.start_tracking));
+            if(HyperTrack.isMockTracking())
+                stopHyperTrackTracking();
+        }
+
+        // Hide menu items if user is on an Action
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(final MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.tracking_toogle:
+                // Check if clicked item is Resume tracking
+                if (getString(R.string.start_tracking).equalsIgnoreCase(item.getTitle().toString())) {
+                    // Start Tracking the user
+                    if(!HyperTrack.isMockTracking())
+                        startHyperTrackTracking(true);
+                    item.setTitle(R.string.stop_tracking);
+
+                } else {
+                    // Stop Tracking the user
+                    if(HyperTrack.isMockTracking())
+                        stopHyperTrackTracking();
+                    item.setTitle(R.string.start_tracking);
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void startHyperTrackTracking(final boolean byUser) {
+        // HACK: Check if user is tracking currently or not
+        // Only for exisitng users because Permission and Location Settings have been checked here
+        if (!HyperTrack.isMockTracking()) {
+            HyperTrack.startMockTracking(null);
+            if (byUser) {
+                SharedPreferenceManager.setTrackingON();
+                supportInvalidateOptionsMenu();
+            }
+
+        } else if (byUser) {
+            SharedPreferenceManager.setTrackingON();
+            supportInvalidateOptionsMenu();
+        }
+        getPlacelineData();
+    }
+
+    private void stopHyperTrackTracking() {
+        HyperTrack.stopTracking();
+        HyperTrack.stopMockTracking();
+        SharedPreferenceManager.setTrackingOFF();
+        supportInvalidateOptionsMenu();
+        getPlacelineData();
+    }
+
 }
