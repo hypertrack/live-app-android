@@ -58,51 +58,51 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
+            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
                     new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    AnalyticsStore.getLogger().enteredName(true, null);
-                    AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse successResponse) {
+                            AnalyticsStore.getLogger().enteredName(true, null);
+                            AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
 
-                    if (profileImage != null && profileImage.length() > 0) {
-                        onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
-                            @Override
-                            public void onSuccess() {
+                            if (profileImage != null && profileImage.length() > 0) {
+                                onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        if (view != null) {
+                                            view.showProfilePicUploadSuccess();
+                                            view.navigateToPlacelineScreen();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.i(TAG, "Profile Image not saved in local database");
+                                        if (view != null) {
+                                            view.showProfilePicUploadError();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onImageUploadNotNeeded() {
+                                    }
+                                });
+                            } else {
                                 if (view != null) {
-                                    view.showProfilePicUploadSuccess();
                                     view.navigateToPlacelineScreen();
                                 }
                             }
-
-                            @Override
-                            public void onError() {
-                                Log.i(TAG, "Profile Image not saved in local database");
-                                if (view != null) {
-                                    view.showProfilePicUploadError();
-                                }
-                            }
-
-                            @Override
-                            public void onImageUploadNotNeeded() {
-                            }
-                        });
-                    } else {
-                        if (view != null) {
-                            view.navigateToPlacelineScreen();
                         }
-                    }
-                }
 
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    if (view != null) {
-                        view.showErrorMessage();
-                    }
-                    AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            if (view != null) {
+                                view.showErrorMessage();
+                            }
+                            AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
 
-                }
-            });
+                        }
+                    });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {

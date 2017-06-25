@@ -3,24 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/appBackground">
-
-    <LinearLayout
+    android:fillViewport="true"
+    android:background="@color/white">
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/appBackground"
-        android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <FrameLayout
-            android:layout_width="@dimen/image_view_size"
-            android:layout_height="@dimen/image_view_size"
-            android:layout_marginTop="@dimen/margin_xhigh">
+            android:id="@+id/profile.image_layout"
+            android:layout_width="@dimen/profile_image_size"
+            android:layout_height="@dimen/profile_image_size"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_max">
 
             <io.hypertrack.sendeta.util.images.RoundedImageView
                 android:id="@+id/profile.image_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:background="@drawable/circle_image_button"
                 android:onClick="onProfileImageViewClicked"
                 android:padding="0dp"
@@ -34,53 +34,171 @@
                 android:layout_gravity="center"
                 android:indeterminate="true"
                 android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/profile.camera_icon"
+                android:layout_width="wrap_content"
+                android:layout_margin="@dimen/margin_low"
+                android:layout_gravity="end"
+                android:layout_height="wrap_content"
+                android:src="@drawable/profile_camera_icon" />
         </FrameLayout>
 
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/margin_high"
-            android:layout_marginRight="@dimen/margin_high"
-            android:layout_marginTop="@dimen/margin_high"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="0dp">
-
-            <android.support.design.widget.TextInputLayout
-                android:id="@+id/nameInputLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/margin_low"
-                android:layout_marginEnd="@dimen/margin_low"
-                android:layout_marginTop="@dimen/margin_low">
-
-                <EditText
-                    android:id="@+id/profile.name"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:hint="@string/prompt_name"
-                    android:imeActionId="@+id/login"
-                    android:inputType="textAutoComplete"
-                    android:maxLines="1"
-                    android:paddingBottom="20dp"
-                    android:textColorHint="@color/colorPrimaryDark"
-                    android:textSize="@dimen/text_large" />
-
-
-            </android.support.design.widget.TextInputLayout>
-
-        </android.support.v7.widget.CardView>
-
-
-        <include layout="@layout/content_register" />
-
-        <Button
-            android:id="@+id/profile.register"
+        <TextView
+            android:id="@+id/profile.description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="@dimen/padding_high"
-            android:text="Register"
+            android:layout_below="@id/profile.image_layout"
+            android:layout_marginLeft="@dimen/margin_xxhigh"
+            android:layout_marginRight="@dimen/margin_xxhigh"
+            android:layout_marginTop="@dimen/margin_xxxhigh"
+            android:gravity="center"
+            android:text="Add your photo, name and phone so that your friends can see you on a map, and call you when you are on the way"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_medium" />
+
+        <RelativeLayout
+            android:id="@+id/profile.detail_layout"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_below="@id/profile.description"
+            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_xxhigh"
+            android:background="@drawable/profile_detail_background">
+
+            <View
+                android:id="@+id/vertical_separator"
+                android:layout_width="1dp"
+                android:layout_height="60dp"
+                android:layout_centerHorizontal="true"
+                android:background="@color/profile_detail_border" />
+
+            <View
+                android:id="@+id/horizontal_separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/vertical_separator"
+                android:layout_centerVertical="true"
+                android:background="@color/profile_detail_border" />
+
+            <EditText
+                android:id="@+id/profile.first_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/horizontal_separator"
+                android:layout_alignParentTop="true"
+                android:maxLines="1"
+                android:imeOptions="actionNext"
+                android:inputType="textAutoComplete"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:layout_toLeftOf="@id/vertical_separator"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:hint="First name"
+                android:textColorHint="@color/profile_detail_border" />
+
+            <EditText
+                android:id="@+id/profile.last_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/horizontal_separator"
+                android:layout_alignParentTop="true"
+                android:maxLines="1"
+                android:imeOptions="actionNext"
+                android:inputType="textAutoComplete"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:layout_toRightOf="@id/vertical_separator"
+                android:background="@android:color/transparent"
+                android:gravity="center_vertical"
+                android:hint="Last name"
+                android:textColorHint="@color/profile_detail_border" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@id/horizontal_separator"
+                android:layout_centerHorizontal="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <LinearLayout
+                    android:id="@+id/register.country_code_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Spinner
+                        android:id="@+id/register.country_codes_spinner"
+                        style="@style/TextViewSpinnerItem"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:padding="0dp"
+                        android:spinnerMode="dialog"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/register.country_code"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingBottom="@dimen/padding_base"
+                        android:paddingRight="@dimen/padding_base"
+                        android:paddingTop="@dimen/padding_base"
+                        android:textColor="@color/text_base"
+                        android:textSize="@dimen/text_large"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/register.phone_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:gravity="center_vertical"
+                    android:hint="@string/enter_phone_number"
+                    android:imeActionId="@+id/login"
+                    android:inputType="phone"
+                    android:maxLength="10"
+                    android:textColorHint="@color/profile_detail_border"
+                    />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/register.skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onNextButtonClicked"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/margin_xxxxhigh"
+            android:text="Skip"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_medium" />
+
+        <Button
+            android:id="@+id/register.profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/register.skip"
+            android:layout_margin="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_huge"
+            android:background="@drawable/button_background"
+            android:text="Save Profile"
+            android:enabled="false"
+            android:textAllCaps="false"
             android:textColor="@android:color/white"
-            android:textSize="@dimen/text_large" />
-    </LinearLayout>
+            android:textSize="@dimen/text_large"
+            android:visibility="visible" />
+
+
+    </RelativeLayout>
 </ScrollView>

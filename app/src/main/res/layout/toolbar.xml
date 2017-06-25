@@ -19,6 +19,6 @@
         android:id="@+id/toolbar.title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/secondaryColor"
         android:textSize="@dimen/text_medium" />
 </android.support.v7.widget.Toolbar>

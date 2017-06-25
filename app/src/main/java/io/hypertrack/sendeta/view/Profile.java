@@ -15,10 +15,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -32,6 +32,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.squareup.picasso.Picasso;
@@ -59,15 +60,16 @@ public class Profile extends BaseActivity implements ProfileView {
 
     private final static String TAG = Profile.class.getSimpleName();
 
-    public EditText mNameView;
+    public EditText firstNameView,lastNameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
     public Bitmap oldProfileImage = null, updatedProfileImage = null;
     private ProgressDialog mProgressDialog;
     private EditText phoneNumberView;
-    private TextView countryCodeTextView;
+    private TextView countryCodeTextView, skip;
     private Spinner countryCodeSpinner;
     private Button register;
+
     private String isoCode;
     private Target profileImageDownloadTarget;
     private File profileImage;
@@ -77,7 +79,11 @@ public class Profile extends BaseActivity implements ProfileView {
     private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
+            if (v.getId() == firstNameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT) {
+                lastNameView.requestFocus();
+                return true;
+            }
+            else if (v.getId() == lastNameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT){
                 phoneNumberView.requestFocus();
                 return true;
             }
@@ -109,12 +115,12 @@ public class Profile extends BaseActivity implements ProfileView {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (HTTextUtils.isEmpty(mNameView.getText().toString()) && HTTextUtils.isEmpty(phoneNumberView.getText().toString())) {
+            if (HTTextUtils.isEmpty(firstNameView.getText().toString()) && HTTextUtils.isEmpty(phoneNumberView.getText().toString())) {
                 showSkip = true;
-                supportInvalidateOptionsMenu();
+                toggleRegisterButton();
             } else if (showSkip && !HTTextUtils.isEmpty(s.toString())) {
                 showSkip = false;
-                supportInvalidateOptionsMenu();
+                toggleRegisterButton();
             }
         }
     };
@@ -124,9 +130,6 @@ public class Profile extends BaseActivity implements ProfileView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Initialize Toolbar
-        initToolbar(getString(R.string.title_activity_signup_profile), false);
-
         // Attach View Presenter to View
         presenter.attachView(this);
 
@@ -135,10 +138,12 @@ public class Profile extends BaseActivity implements ProfileView {
 
     private void initUIViews() {
         // Initialize UI Views before Attaching View Presenter
-        mNameView = (EditText) findViewById(R.id.profile_name);
+        firstNameView = (EditText) findViewById(R.id.profile_first_name);
+        lastNameView = (EditText) findViewById(R.id.profile_last_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
-        register = (Button) findViewById(R.id.profile_register);
+        register = (Button) findViewById(R.id.register_profile);
+        skip = (TextView) findViewById(R.id.register_skip);
         phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
         countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
         countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
@@ -151,9 +156,11 @@ public class Profile extends BaseActivity implements ProfileView {
         });
 
         // Initialize UI Action Listeners
-        mNameView.setOnEditorActionListener(mNameEditorActionListener);
+        firstNameView.setOnEditorActionListener(mNameEditorActionListener);
+        lastNameView.setOnEditorActionListener(mNameEditorActionListener);
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);
-        mNameView.addTextChangedListener(mTextWatcher);
+        firstNameView.addTextChangedListener(mTextWatcher);
+        lastNameView.addTextChangedListener(mTextWatcher);
         phoneNumberView.addTextChangedListener(mTextWatcher);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -171,7 +178,7 @@ public class Profile extends BaseActivity implements ProfileView {
         CountrySpinnerAdapter adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         countryCodeSpinner.setAdapter(adapter);
 
-        String isoCountryCode = Utils.getCountryRegionFromPhone(this);
+        final String isoCountryCode = Utils.getCountryRegionFromPhone(this);
         Log.v(TAG, "Region ISO: " + isoCountryCode);
 
         if (!HTTextUtils.isEmpty(isoCountryCode)) {
@@ -186,8 +193,12 @@ public class Profile extends BaseActivity implements ProfileView {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 isoCode = countries.get(position).mCountryIso;
+
                 countryCodeTextView.setText("+ " + countries.get(position).mDialPrefix);
                 countryCodeTextView.setVisibility(View.VISIBLE);
+                int length = String.valueOf(PhoneNumberUtil.getInstance().
+                        getExampleNumber(isoCode).getNationalNumber()).length();
+                phoneNumberView.setFilters(new InputFilter[] { new InputFilter.LengthFilter(length)});
             }
 
             @Override
@@ -218,7 +229,15 @@ public class Profile extends BaseActivity implements ProfileView {
 
     private void onSignInButtonClicked() {
         showProgress(true);
-        String name = mNameView.getText().toString();
+        String firstName = firstNameView.getText().toString();
+        String lastName = lastNameView.getText().toString();
+        String name ="";
+        if(!HTTextUtils.isEmpty(firstName)){
+            name = firstName;
+        }
+        if(!HTTextUtils.isEmpty(lastName)){
+            name += " "+lastName;
+        }
         String number = phoneNumberView.getText().toString();
         Utils.hideKeyboard(Profile.this, register);
         presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage, oldProfileImage, updatedProfileImage);
@@ -228,13 +247,13 @@ public class Profile extends BaseActivity implements ProfileView {
     public void updateViews(String name, String phone, String ISOCode, String profileURL) {
         String nameFromAccount = getName();
         if (name != null) {
-            mNameView.setText(nameFromAccount);
+            firstNameView.setText(nameFromAccount);
             showSkip = false;
-            supportInvalidateOptionsMenu();
+            toggleRegisterButton();
 
         }
         if (!HTTextUtils.isEmpty(name)) {
-            mNameView.setText(name);
+            firstNameView.setText(name);
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
@@ -387,10 +406,8 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_profile, menu);
-        return showSkip && super.onCreateOptionsMenu(menu);
+    private void toggleRegisterButton(){
+        register.setEnabled(!showSkip);
     }
 
     @Override
