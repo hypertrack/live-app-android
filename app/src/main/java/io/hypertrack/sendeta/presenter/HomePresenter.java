@@ -113,7 +113,6 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
                     Action action = (Action) response.getResponseObject();
-//                    action.getActionDisplay().setDurationRemaining(String.valueOf(etaInMinutes));
                     actionManager.setHyperTrackAction(action);
                     actionManager.onActionStart();
 
