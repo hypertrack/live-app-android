@@ -163,6 +163,7 @@ dependencies {
     compile 'com.github.sundeepk:compact-calendar-view:1.9.2-beta'
     compile 'com.github.rubensousa:gravitysnaphelper:1.1'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
+    compile 'com.github.Q42:AndroidScrollingImageView:1.2'
 }
 
 // Compute HyperTrack SDKVersion

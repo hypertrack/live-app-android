@@ -8,7 +8,7 @@
     <ImageView
         android:layout_width="64dp"
         android:layout_height="64dp"
-        android:src="@drawable/ic_ht_logo"/>
+        android:src="@drawable/ic_ht_logo_black"/>
 
     <TextView
         android:layout_width="wrap_content"

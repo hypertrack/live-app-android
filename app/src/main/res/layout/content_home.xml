@@ -20,25 +20,6 @@
             android:layout_gravity="top"
             android:theme="@style/AppTheme.AppBarOverlay">
 
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?android:attr/actionBarSize"
-                android:background="@color/colorPrimary"
-                android:theme="@style/HTOrderStatusToolbarTheme"
-                app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:subtitleTextAppearance="@style/Toolbar.SubTitleText"
-                app:titleTextAppearance="@style/Toolbar.TitleText" />
-
-            <android.support.design.widget.TabLayout
-                android:id="@+id/tabLayout"
-                android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:visibility="gone"
-                app:tabGravity="fill"
-                app:tabMode="fixed" />
-
-            <!-- info message container-->
             <LinearLayout
                 android:id="@+id/home.info_message_view"
                 android:layout_width="match_parent"
@@ -66,6 +47,9 @@
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/text_base" />
             </LinearLayout>
+
+            <!-- info message container-->
+
         </android.support.design.widget.AppBarLayout>
 
         <fragment
@@ -73,7 +57,7 @@
             android:name="com.hypertrack.lib.HyperTrackMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:layout="@layout/fragment_map" />
+            tools:layout="@layout/fragment_map_new" />
     </LinearLayout>
 
     <LinearLayout
@@ -125,7 +109,7 @@
                     android:layout_height="@dimen/cta_button_size"
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/margin_high"
-                    android:background="@drawable/share_live_location_btn_bg"
+                    android:background="@drawable/button_background"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:gravity="center"
                     android:paddingLeft="@dimen/padding_xxxhigh"
@@ -154,7 +138,7 @@
                     android:layout_height="@dimen/cta_button_size"
                     android:layout_gravity="center"
                     android:layout_margin="@dimen/margin_high"
-                    android:background="@drawable/share_live_location_btn_bg"
+                    android:background="@drawable/button_background"
                     android:foreground="?android:attr/selectableItemBackground"
                     android:gravity="center"
                     android:paddingLeft="@dimen/padding_xhigh"
