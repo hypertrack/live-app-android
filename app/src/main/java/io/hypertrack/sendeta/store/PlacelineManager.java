@@ -10,7 +10,7 @@ import com.hypertrack.lib.models.SuccessResponse;
 
 import java.io.IOException;
 
-import io.hypertrack.sendeta.model.UserTimelineData;
+import io.hypertrack.sendeta.model.PlacelineData;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import retrofit2.Call;
@@ -21,36 +21,36 @@ import retrofit2.Response;
  * Created by Aman Jain on 24/05/17.
  */
 
-public class TimelineManager {
+public class PlacelineManager {
 
-    private static final String TAG = TimelineManager.class.getSimpleName();
-    private static TimelineManager timelineManager;
+    private static final String TAG = PlacelineManager.class.getSimpleName();
+    private static PlacelineManager placelineManager;
     private Context mContext;
 
-    private TimelineManager(Context mContext) {
+    private PlacelineManager(Context mContext) {
         this.mContext = mContext;
     }
 
-    public static TimelineManager getTimelineManager(Context context) {
-        if (timelineManager == null) {
-            timelineManager = new TimelineManager(context);
+    public static PlacelineManager getPlacelineManager(Context context) {
+        if (placelineManager == null) {
+            placelineManager = new PlacelineManager(context);
         }
 
-        return timelineManager;
+        return placelineManager;
     }
 
-    public void getTimelineData(String userId, String date, final HyperTrackCallback callback){
-        HyperTrackService getTimelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
-        Call<UserTimelineData> call = getTimelineService.getUsetTimeline(userId, date);
-        call.enqueue(new Callback<UserTimelineData>() {
+    public void getPlacelineData(String userId, String date, final HyperTrackCallback callback){
+        HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        Call<PlacelineData> call = getPlacelineService.getUserPlaceline(userId, date);
+        call.enqueue(new Callback<PlacelineData>() {
             @Override
-            public void onResponse(Call<UserTimelineData> call, Response<UserTimelineData> response) {
-                UserTimelineData userTimelineData = response.body();
+            public void onResponse(Call<PlacelineData> call, Response<PlacelineData> response) {
+                PlacelineData placelineData = response.body();
                 Log.d(TAG, "onResponse: "+response.body());
-                if(userTimelineData !=null ){
+                if(placelineData !=null ){
 
                     if(callback != null) {
-                        callback.onSuccess(new SuccessResponse(userTimelineData));
+                        callback.onSuccess(new SuccessResponse(placelineData));
                     }
 
                 }else {
@@ -66,7 +66,7 @@ public class TimelineManager {
             }
 
             @Override
-            public void onFailure(Call<UserTimelineData> call, Throwable t) {
+            public void onFailure(Call<PlacelineData> call, Throwable t) {
                 if(callback != null){
                     callback.onError(new ErrorResponse());
                 }

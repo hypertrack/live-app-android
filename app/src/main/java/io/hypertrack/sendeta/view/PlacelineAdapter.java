@@ -80,8 +80,15 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
                     segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
 
             holder.segmentIcon.setImageResource(R.drawable.ic_stop);
-            holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
-            holder.segmentTypeText.setText("Stop");
+            holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
+                    R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
+
+            if (segment.location != null && !HTTextUtils.isEmpty(segment.location.getActivity()) &&
+                    segment.location.getActivity().equalsIgnoreCase("unknown")) {
+                holder.segmentTypeText.setText(segment.location.getActivity());
+            } else {
+                holder.segmentTypeText.setText("Stop");
+            }
             holder.duration.setText(segment.getFormatedDuration());
             holder.duration.setVisibility(View.VISIBLE);
             holder.segmentBar.setVisibility(View.INVISIBLE);
@@ -91,17 +98,20 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
                 public void onClick(View v) {
                     holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
                             segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
-                    if (holder.segmentAddress.getTag() != null && holder.segmentAddress.getTag().toString().equalsIgnoreCase("close")) {
+                    if (holder.segmentAddress.getTag() != null &&
+                            holder.segmentAddress.getTag().toString().equalsIgnoreCase("close")) {
                         holder.segmentAddress.setText(segment.getPlace().getDisplayString());
                         holder.segmentAddress.setMaxLines(5);
                         holder.segmentAddress.setTag("open");
-                        holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_keyboard_arrow_up_black_24dp, 0);
+                        holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
+                                R.drawable.ic_keyboard_arrow_up_black_24dp, 0);
                     } else {
                         holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
                                 segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
                         holder.segmentAddress.setTag("close");
                         holder.segmentAddress.setMaxLines(1);
-                        holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
+                        holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
+                                R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
                     }
 
                 }
@@ -111,12 +121,15 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
 
             holder.segmentBar.setImageResource(R.drawable.trip_background);
             holder.segmentBarLayout.setVisibility(View.VISIBLE);
-            if(!HTTextUtils.isEmpty(segment.getActivityType())) {
+
+            if (!HTTextUtils.isEmpty(segment.getActivityType()) &&
+                    !segment.getActivityType().equalsIgnoreCase("unknown")) {
+
                 holder.segmentTypeText.setText(segment.getActivityType().substring(0, 1).toUpperCase()
                         + segment.getActivityType().substring(1, segment.getActivityType().length()));
-            }
-            else
+            } else
                 holder.segmentTypeText.setText("Trip");
+
             holder.duration.setText(segment.getDistanceAndDuration());
             holder.duration.setVisibility(View.VISIBLE);
             holder.segmentIcon.setImageResource(R.drawable.ic_trip);
@@ -144,12 +157,11 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
             holder.duration.setVisibility(View.VISIBLE);
         }
         if (segment.isStop() && (position == getItemCount() - 1) &&
-                currentDate.getDay() == new Date().getDay()){
+                currentDate.getDay() == new Date().getDay()) {
 
             holder.currentLocationRipple.setVisibility(View.VISIBLE);
             holder.currentLocationRipple.startRippleAnimation();
-        }
-        else{
+        } else {
             holder.currentLocationRipple.stopRippleAnimation();
             holder.currentLocationRipple.setVisibility(View.GONE);
         }

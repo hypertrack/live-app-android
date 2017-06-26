@@ -60,7 +60,7 @@
                 app:popupTheme="@style/Toolbar"
                 app:titleTextColor="@android:color/white">
 
-                <include layout="@layout/timeline_toolbar" />
+                <include layout="@layout/placeline_toolbar" />
 
             </android.support.v7.widget.Toolbar>
 
@@ -104,13 +104,13 @@
                 app:orientation="vertical" />
 
             <android.support.v7.widget.RecyclerView
-                android:id="@+id/timeline_recycler_view"
+                android:id="@+id/placeline_recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:visibility="visible" />
 
             <TextView
-                android:id="@+id/timeline_status"
+                android:id="@+id/placeline_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

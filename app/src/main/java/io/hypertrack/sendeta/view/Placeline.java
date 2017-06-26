@@ -61,23 +61,23 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.PlacelineData;
 import io.hypertrack.sendeta.model.Segment;
-import io.hypertrack.sendeta.model.UserTimelineData;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
-import io.hypertrack.sendeta.store.TimelineManager;
+import io.hypertrack.sendeta.store.PlacelineManager;
 
 /**
  * Created by Aman Jain on 24/05/17.
  */
 
-public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
+public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
 
-    private static final String TAG = PlaceLine.class.getSimpleName();
-    private RecyclerView timelineRecyclerView;
+    private static final String TAG = Placeline.class.getSimpleName();
+    private RecyclerView placelineRecyclerView;
     private PlacelineAdapter placelineAdapter;
     private List<Segment> sanitizeSegments = new ArrayList<>();
-    private TimelineManager timelineManager;
+    private PlacelineManager placelineManager;
     //    private SlidingUpPanelLayout slidingPaneLayout;
     private SupportMapFragment supportMapFragment;
     private CompactCalendarView mCompactCalendarView;
@@ -90,8 +90,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     private ImageView arrow;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
-    private UserTimelineData userTimelineData;
-    private TextView timelineStatus;
+    private PlacelineData placelineData;
+    private TextView placelineStatus;
     private ProgressBar progressBar;
     private FrameLayout progressLayout;
     private RelativeLayout topBar;
@@ -124,7 +124,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
         initUI();
 
-        timelineManager = TimelineManager.getTimelineManager(this);
+        placelineManager = PlacelineManager.getPlacelineManager(this);
 
         runnable = new Runnable() {
             @Override
@@ -135,10 +135,11 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
 
         handler = new Handler();
 
-        setTimelineData();
+        setPlacelineData();
 
         setCurrentDate(selectedDate);
 
+        startHyperTrackTracking(true);
         // Ask for tracking permission
         //checkForBackgroundTrackingPermission();
     }
@@ -180,13 +181,13 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         //userName = (TextView) findViewById(R.id.user_name);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
         progressLayout = (FrameLayout) findViewById(R.id.progress_layout);
-        timelineStatus = (TextView) findViewById(R.id.timeline_status);
+        placelineStatus = (TextView) findViewById(R.id.placeline_status);
         floatingActionButton = (FloatingActionButton) findViewById(R.id.floatingActionButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(PlaceLine.this,Home.class);
-                intent.putExtra("class_from",PlaceLine.class.getSimpleName());
+                Intent intent = new Intent(Placeline.this,Home.class);
+                intent.putExtra("class_from",Placeline.class.getSimpleName());
                 startActivity(intent);
                 overridePendingTransition(R.anim.enter, R.anim.exit);
             }
@@ -219,7 +220,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
                 setDate(dateFormat.format(dateClicked));
                 selectedDate  = dateClicked;
                 hideCalendar();
-                setTimelineData();
+                setPlacelineData();
             }
 
             @Override
@@ -229,19 +230,19 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         });
 
         dashedLine = (DashedLine) findViewById(R.id.dashed_line);
-        timelineRecyclerView = (RecyclerView) findViewById(R.id.timeline_recycler_view);
-        timelineRecyclerView.addItemDecoration(new OverlapDecoration());
+        placelineRecyclerView = (RecyclerView) findViewById(R.id.placeline_recycler_view);
+        placelineRecyclerView.addItemDecoration(new OverlapDecoration());
         final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        timelineRecyclerView.setLayoutManager(linearLayoutManager);
+        placelineRecyclerView.setLayoutManager(linearLayoutManager);
 
-        ViewCompat.setNestedScrollingEnabled(timelineRecyclerView, false);
+        ViewCompat.setNestedScrollingEnabled(placelineRecyclerView, false);
 
         final SnapHelper snapHelperTop = new LinearSnapHelper();
-        snapHelperTop.attachToRecyclerView(timelineRecyclerView);
-        timelineRecyclerView.setOnFlingListener(snapHelperTop);
+        snapHelperTop.attachToRecyclerView(placelineRecyclerView);
+        placelineRecyclerView.setOnFlingListener(snapHelperTop);
 
-        timelineRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        placelineRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 if(newState == RecyclerView.SCROLL_STATE_IDLE){
@@ -258,7 +259,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         });
         placelineAdapter = new PlacelineAdapter(sanitizeSegments,this);
         placelineAdapter.setCurrentDate(selectedDate);
-        timelineRecyclerView.setAdapter(placelineAdapter);
+        placelineRecyclerView.setAdapter(placelineAdapter);
 
     }
 
@@ -374,7 +375,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         if (mCompactCalendarView != null) {
             mCompactCalendarView.setCurrentDate(date);
         }
-        //timelineStatus.setText(format.format(date));
+        //placelineStatus.setText(format.format(date));
     }
 
     @Override
@@ -397,7 +398,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         //toolbarTitle.setText(title);
     }
 
-    private void setTimelineData(){
+    private void setPlacelineData(){
         sanitizeSegments.clear();
         placelineAdapter.setCurrentDate(selectedDate);
         placelineAdapter.notifyDataSetChanged();
@@ -412,23 +413,23 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
     private void getPlacelineData(){
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = dateFormat.format(selectedDate);
-        timelineManager.getTimelineData(userID, date, new HyperTrackCallback() {
+        placelineManager.getPlacelineData(userID, date, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 progressLayout.setVisibility(View.GONE);
                 if(response != null){
 
-                    userTimelineData = (UserTimelineData) response.getResponseObject();
-                    if(userTimelineData != null){
-                        //userName.setText(userTimelineData.getName());
+                    placelineData = (PlacelineData) response.getResponseObject();
+                    if(placelineData != null){
+                        //userName.setText(placelineData.getName());
                         mMap.clear();
-                        sanitizeTimelineData(userTimelineData);
+                        sanitizePlacelineData(placelineData);
                         if(sanitizeSegments.size() > 0){
-                            timelineStatus.setVisibility(View.GONE);
+                            placelineStatus.setVisibility(View.GONE);
                             dashedLine.setVisibility(View.VISIBLE);
                             if(isFirstTime){
                                 animateMap(sanitizeSegments.size()-1);
-                                timelineRecyclerView.scrollToPosition(sanitizeSegments.size()-1);
+                                placelineRecyclerView.scrollToPosition(sanitizeSegments.size()-1);
                                 isFirstTime = false;
                             }
                             else if(previousIndex == -1 ){
@@ -441,7 +442,7 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
                             }
                         }
                         else{
-                            timelineStatus.setVisibility(View.VISIBLE);
+                            placelineStatus.setVisibility(View.VISIBLE);
                             dashedLine.setVisibility(View.GONE);
                         }
 
@@ -453,13 +454,13 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
             @Override
             public void onError(@NonNull ErrorResponse errorResponse) {
                 progressLayout.setVisibility(View.GONE);
-                timelineStatus.setVisibility(View.VISIBLE);
+                placelineStatus.setVisibility(View.VISIBLE);
             }
         });
     }
 
-    private void sanitizeTimelineData(UserTimelineData userTimelineData){
-        List<Segment> segmentList = sanitizeSegments(userTimelineData.getSegmentList());
+    private void sanitizePlacelineData(PlacelineData placelineData){
+        List<Segment> segmentList = sanitizeSegments(placelineData.getSegmentList());
         addMissingSegment(segmentList);
         sanitizeSegments.clear();
         sanitizeSegments.addAll(addMissingSegment(segmentList));
@@ -528,11 +529,11 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
             if (first) {
                 if (segment.getStartedAt() != null && segment.getEndedAt() != null) {
                     cleanedSegments.add(segment);
-                } else if (segment.getStartedAt() != null && last && userTimelineData.getLastHeartbeatAt() != null ) {
+                } else if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null ) {
                     cleanedSegments.add(segment);
                 }
             } else if (last) {
-                if (segment.getStartedAt() != null && last && userTimelineData.getLastHeartbeatAt() != null ) {
+                if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null ) {
                     cleanedSegments.add(segment);
                 }
             } else if (segment.getStartedAt() != null && segment.getEndedAt() != null) {
@@ -546,8 +547,8 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
         boolean last = (index == segments.size() - 1);
 
         if (last && segment.getEndedAt() == null) {
-            if(userTimelineData.getLastHeartbeatAt() != null)
-                segment.setEndedAt(userTimelineData.getLastHeartbeatAt());
+            if(placelineData.getLastHeartbeatAt() != null)
+                segment.setEndedAt(placelineData.getLastHeartbeatAt());
             else {
                 segment.setEndedAt(new Date());
             }
@@ -564,10 +565,10 @@ public class PlaceLine extends AppCompatActivity implements OnMapReadyCallback{
             if (segment.getStartedAt() != null && segment.getEndedAt() != null) {
                 return true;
             }
-            return !!(segment.getStartedAt() != null && last && userTimelineData.getLastHeartbeatAt() != null);
+            return !!(segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null);
 
         } else if (last) {
-            if (segment.getStartedAt() != null && last && userTimelineData.getLastHeartbeatAt() != null) {
+            if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null) {
                 return this.isAfterPrevSegment(previous.getEndedAt(), segment.getStartedAt());
             }
             return (segment.getStartedAt() != null && this.isAfterPrevSegment(previous.getEndedAt(), segment.getStartedAt()));
