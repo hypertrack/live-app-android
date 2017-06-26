@@ -3,7 +3,7 @@ package io.hypertrack.sendeta.network.retrofit;
 import java.util.List;
 
 import io.hypertrack.sendeta.model.ETAResponse;
-import io.hypertrack.sendeta.model.UserTimelineData;
+import io.hypertrack.sendeta.model.PlacelineData;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -17,6 +17,6 @@ public interface HyperTrackService {
     Call<List<ETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
 
     @GET("users/{id}/timeline/")
-    Call<UserTimelineData> getUsetTimeline(@Path("id") String id, @Query("date") String date);
+    Call<PlacelineData> getUserPlaceline(@Path("id") String id, @Query("date") String date);
 
 }
