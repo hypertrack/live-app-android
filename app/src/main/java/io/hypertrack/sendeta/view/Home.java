@@ -142,11 +142,11 @@ public class Home extends BaseActivity implements HomeView {
         public void onActionRefreshed(List<String> refreshedActionIds, List<Action> refreshedActions) {
             ActionManager actionManager = ActionManager.getSharedManager(Home.this);
 
-            if(actionManager.getHyperTrackAction() != null ){
+            if (actionManager.getHyperTrackAction() != null) {
                 //Get the index of active action from refreshed action Ids
                 int index = refreshedActionIds.indexOf(actionManager.getHyperTrackActionId());
 
-                if(index >= 0) {
+                if (index >= 0) {
 
                     //Get refreshed action Data
                     Action action = refreshedActions.get(refreshedActionIds.indexOf(
@@ -158,6 +158,8 @@ public class Home extends BaseActivity implements HomeView {
                     if (action.hasActionFinished()) {
                         navigateButton.setVisibility(View.GONE);
                         shareButton.setVisibility(View.GONE);
+                        if (mProgressDialog != null)
+                            mProgressDialog.dismiss();
                     }
                 }
             }
@@ -165,12 +167,20 @@ public class Home extends BaseActivity implements HomeView {
 
         @Override
         public void onLiveLocationShareButtonClicked(Action action) {
+            if (action != null) {
+                expectedPlace = action.getExpectedPlace();
+                lookupId = action.getLookupId();
+            }
             shareLiveLocation();
         }
 
         @Override
         public void onLiveLocationStopButtonClicked(Action action) {
             if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
+                mProgressDialog = new ProgressDialog(Home.this);
+                mProgressDialog.setMessage(getString(R.string.stop_sharing_message));
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();
                 presenter.stopSharing(ActionManager.getSharedManager(Home.this));
             }
         }
@@ -181,9 +191,9 @@ public class Home extends BaseActivity implements HomeView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        if(getIntent()!= null && getIntent().hasExtra("class_from")){
-            if(getIntent().getStringExtra("class_from").
-                    equalsIgnoreCase(PlaceLine.class.getSimpleName()))
+        if (getIntent() != null && getIntent().hasExtra("class_from")) {
+            if (getIntent().getStringExtra("class_from").
+                    equalsIgnoreCase(Placeline.class.getSimpleName()))
                 fromPlaceline = true;
         }
         //  startAnimation();
@@ -366,7 +376,6 @@ public class Home extends BaseActivity implements HomeView {
     }
 
 
-
     /*
      * Method to restore app's state in case of ongoing location sharing for current user.
      */
@@ -424,10 +433,11 @@ public class Home extends BaseActivity implements HomeView {
     /**
      * Method to be called when user selects an expected place to be used for sharing his live location
      * via the tracking url.
+     *
      * @param place Expected place for the user
      */
     private void onSelectPlace(final Place place) {
-        if (place == null || place.getLocation() == null ||  this.isFinishing()) {
+        if (place == null || place.getLocation() == null || this.isFinishing()) {
             return;
         }
         expectedPlace = place;
@@ -708,9 +718,6 @@ public class Home extends BaseActivity implements HomeView {
      * Method to update State Variables & UI to reflect Task Ended
      */
     private void OnStopSharing() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
 
         shareButton.setVisibility(View.GONE);
         navigateButton.setVisibility(View.GONE);
@@ -720,7 +727,6 @@ public class Home extends BaseActivity implements HomeView {
         } else {
             stopHyperTrackTracking();
         }
-
 
 
         updateMapView();
@@ -985,8 +991,8 @@ public class Home extends BaseActivity implements HomeView {
 
         //If tracking action has completed and summary view is visible then on back press clear the view
         // so that user can share new tracking url without reopening the app.
-        if(actionManager.getHyperTrackAction() != null &&
-                actionManager.getHyperTrackAction().hasActionFinished()){
+        if (actionManager.getHyperTrackAction() != null &&
+                actionManager.getHyperTrackAction().hasActionFinished()) {
 
             // Reset lookupId variable
             lookupId = null;
@@ -994,16 +1000,17 @@ public class Home extends BaseActivity implements HomeView {
             ActionManager.getSharedManager(this).clearState();
             return;
 
-        }else if (isvehicleTypeTabLayoutVisible) {
+        } else if (isvehicleTypeTabLayoutVisible) {
             OnStopSharing();
             return;
         }
         super.onBackPressed();
-        if(!fromPlaceline){
-            startActivity(new Intent(Home.this,PlaceLine.class));
+        if (!fromPlaceline) {
+            startActivity(new Intent(Home.this, Placeline.class));
         }
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
+
     @Override
     protected void onStop() {
 
@@ -1011,8 +1018,8 @@ public class Home extends BaseActivity implements HomeView {
 
         //If tracking action has completed and summary view is visible then on back press clear the view
         // so that user can share new tracking url without reopening the app.
-        if(actionManager.getHyperTrackAction() != null &&
-                actionManager.getHyperTrackAction().hasActionFinished()){
+        if (actionManager.getHyperTrackAction() != null &&
+                actionManager.getHyperTrackAction().hasActionFinished()) {
 
             // Reset lookupId variable
             lookupId = null;
@@ -1020,8 +1027,6 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
         }
-
-        HyperTrack.removeActions(null);
 
         if (mProgressDialog != null)
             mProgressDialog.dismiss();
