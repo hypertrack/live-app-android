@@ -27,7 +27,7 @@
                 android:layout_centerHorizontal="true" />
 
             <TextView
-                android:id="@+id/timeline_status"
+                android:id="@+id/placeline_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
