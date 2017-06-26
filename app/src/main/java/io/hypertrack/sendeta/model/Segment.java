@@ -4,6 +4,7 @@ package io.hypertrack.sendeta.model;
 import android.location.Location;
 
 import com.google.gson.annotations.SerializedName;
+import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
@@ -31,7 +32,7 @@ public class Segment implements Serializable
     @SerializedName("user_id")
     public String userId;
 
-    @SerializedName("activity_type")
+    @SerializedName("activity")
     public String activityType;
 
     @SerializedName("place")
@@ -50,13 +51,13 @@ public class Segment implements Serializable
     public HyperTrackLocation endLocation;
 
     @SerializedName("distance")
-    public Integer distance;
+    public Float distance;
 
     @SerializedName("duration")
     public Double duration;
 
     @SerializedName("location")
-    public Location location;
+    public HyperTrackLocation location;
 
     @SerializedName("lookup_id")
     public String lookupId;
@@ -78,7 +79,7 @@ public class Segment implements Serializable
 
     public Segment(String id, String userId, String activityType, Place place, Date startedAt,
                    HyperTrackLocation startLocation, Date endedAt, HyperTrackLocation endLocation,
-                   Integer distance, Double duration, Location location, String lookupId,
+                   Float distance, Double duration, HyperTrackLocation location, String lookupId,
                    String encodedPolyline, String timeAwarePolyline, Date createdAt,
                    Date modifiedAt, String type) {
 
@@ -153,11 +154,11 @@ public class Segment implements Serializable
         this.endLocation = endLocation;
     }
 
-    public Integer getDistance() {
+    public Float getDistance() {
         return distance;
     }
 
-    public void setDistance(Integer distance) {
+    public void setDistance(Float distance) {
         this.distance = distance;
     }
 
@@ -169,11 +170,11 @@ public class Segment implements Serializable
         this.duration = duration;
     }
 
-    public Location getLocation() {
+    public HyperTrackLocation getLocation() {
         return location;
     }
 
-    public void setLocation(Location location) {
+    public void setLocation(HyperTrackLocation location) {
         this.location = location;
     }
 
