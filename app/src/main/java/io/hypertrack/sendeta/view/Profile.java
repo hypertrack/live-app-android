@@ -223,7 +223,7 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    public void onNextButtonClicked(MenuItem menuItem) {
+    public void onNextButtonClicked(View view) {
         this.onSignInButtonClicked();
     }
 
@@ -333,7 +333,7 @@ public class Profile extends BaseActivity implements ProfileView {
         HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
 
         TaskStackBuilder.create(Profile.this)
-                .addNextIntentWithParentStack(new Intent(Profile.this, PlaceLine.class)
+                .addNextIntentWithParentStack(new Intent(Profile.this, Placeline.class)
                         .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
         finish();
