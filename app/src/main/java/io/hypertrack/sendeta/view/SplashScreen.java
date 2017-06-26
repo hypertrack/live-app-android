@@ -109,7 +109,7 @@ public class SplashScreen extends BaseActivity {
                 }
                 else {
                     TaskStackBuilder.create(this)
-                            .addNextIntentWithParentStack(new Intent(this, PlaceLine.class)
+                            .addNextIntentWithParentStack(new Intent(this, Placeline.class)
                                     .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                             .startActivities();
                 }
@@ -218,7 +218,7 @@ public class SplashScreen extends BaseActivity {
         }
         else {
             TaskStackBuilder.create(this)
-                    .addNextIntentWithParentStack(new Intent(this, PlaceLine.class)
+                    .addNextIntentWithParentStack(new Intent(this, Placeline.class)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                     .startActivities();
         }
