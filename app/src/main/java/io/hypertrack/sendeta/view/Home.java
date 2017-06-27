@@ -182,7 +182,14 @@ public class Home extends BaseActivity implements HomeView {
                 mProgressDialog.setCancelable(false);
                 mProgressDialog.show();
                 presenter.stopSharing(ActionManager.getSharedManager(Home.this));
+            } else {
+                if (!HyperTrack.checkLocationServices(Home.this)) {
+                    HyperTrack.requestLocationServices(Home.this);
+                } else {
+                    HyperTrack.requestPermissions(Home.this);
+                }
             }
+
         }
     };
 
