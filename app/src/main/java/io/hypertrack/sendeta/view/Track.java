@@ -133,5 +133,10 @@ public class Track extends BaseActivity implements TrackView {
         TrackMapAdapter(Context mContext) {
             super(mContext);
         }
+
+        @Override
+        public boolean showTrailingPolyline() {
+            return true;
+        }
     }
 }

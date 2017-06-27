@@ -18,5 +18,4 @@ public interface HyperTrackService {
 
     @GET("users/{id}/timeline/")
     Call<PlacelineData> getUserPlaceline(@Path("id") String id, @Query("date") String date);
-
 }
