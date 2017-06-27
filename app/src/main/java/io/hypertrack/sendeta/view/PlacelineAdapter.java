@@ -24,7 +24,7 @@ import io.hypertrack.sendeta.model.Segment;
  * Created by Aman Jain on 24/05/17.
  */
 
-public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.TimelineView> {
+public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.PlacelineView> {
 
     private List<Segment> segmentList;
     private Context context;
@@ -38,9 +38,9 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
     }
 
     @Override
-    public TimelineView onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.timeline_segment_new, parent, false);
-        return new TimelineView(view);
+    public PlacelineView onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.placeline_segment, parent, false);
+        return new PlacelineView(view);
     }
 
     @Override
@@ -49,7 +49,7 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
     }
 
     @Override
-    public void onBindViewHolder(final TimelineView holder, int position) {
+    public void onBindViewHolder(final PlacelineView holder, int position) {
 
         final Segment segment = segmentList.get(position);
 
@@ -186,14 +186,14 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Time
         return px;
     }
 
-    public class TimelineView extends RecyclerView.ViewHolder {
+    public class PlacelineView extends RecyclerView.ViewHolder {
 
         ImageView segmentBar, segmentIcon;
         TextView topText, bottomText, segmentTypeText, segmentAddress, duration;
         RelativeLayout segmentBarLayout;
         RippleBackground currentLocationRipple;
 
-        public TimelineView(View itemView) {
+        public PlacelineView(View itemView) {
             super(itemView);
             segmentBar = (ImageView) itemView.findViewById(R.id.segment_bar);
             segmentIcon = (ImageView) itemView.findViewById(R.id.segment_icon);

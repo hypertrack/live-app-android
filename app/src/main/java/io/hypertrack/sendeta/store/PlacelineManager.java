@@ -46,7 +46,7 @@ public class PlacelineManager {
             @Override
             public void onResponse(Call<PlacelineData> call, Response<PlacelineData> response) {
                 PlacelineData placelineData = response.body();
-                Log.d(TAG, "onResponse: "+response.body());
+               //Log.d(TAG, "onResponse: "+response.body());
                 if(placelineData !=null ){
 
                     if(callback != null) {
