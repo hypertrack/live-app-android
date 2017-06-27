@@ -7,9 +7,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/padding_base"
-        android:paddingTop="@dimen/padding_base"
-        android:src="@drawable/ht_logo_with_circle" />
+        android:src="@drawable/ic_profile_logo" />
 
     <RelativeLayout
         android:layout_width="wrap_content"

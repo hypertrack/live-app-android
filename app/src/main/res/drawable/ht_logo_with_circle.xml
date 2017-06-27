@@ -16,6 +16,7 @@
         android:height="25dp"
         android:drawable="@drawable/ic_ht_logo_white"
         android:gravity="center">
+
     </item>
 
 </layer-list>
