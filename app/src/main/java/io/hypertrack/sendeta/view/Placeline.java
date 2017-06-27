@@ -306,8 +306,9 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
 
                 LatLngBounds bounds = builder.build();
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
-
-                PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(15);
+                float density = getResources().getDisplayMetrics().density;
+                int width = (int) (3 * density);
+                PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).color(Color.BLACK).width(width);
                 mMap.addPolyline(polylineOptions);
                 mMap.animateCamera(cameraUpdate, 1500, null);
 
