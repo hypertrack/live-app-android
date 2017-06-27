@@ -812,8 +812,8 @@ public class Home extends BaseActivity implements HomeView {
     private void startHyperTrackTracking(final boolean byUser) {
         // HACK: Check if user is tracking currently or not
         // Only for exisitng users because Permission and Location Settings have been checked here
-        if (!HyperTrack.isMockTracking()) {
-            HyperTrack.startMockTracking(null);
+        if (!HyperTrack.isTracking()) {
+            HyperTrack.startTracking();
             if (byUser) {
                 SharedPreferenceManager.setTrackingON();
             }
@@ -824,7 +824,7 @@ public class Home extends BaseActivity implements HomeView {
     }
 
     private void stopHyperTrackTracking() {
-        HyperTrack.stopMockTracking();
+        HyperTrack.stopTracking();
         SharedPreferenceManager.setTrackingOFF();
 
     }

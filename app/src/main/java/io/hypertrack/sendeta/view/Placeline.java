@@ -657,11 +657,11 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
         if (SharedPreferenceManager.isTrackingON()) {
             menuItem.setTitle(getString(R.string.stop_tracking));
-            if(!HyperTrack.isMockTracking())
+            if(!HyperTrack.isTracking())
                 startHyperTrackTracking(false);
         } else {
             menuItem.setTitle(getString(R.string.start_tracking));
-            if(HyperTrack.isMockTracking())
+            if(HyperTrack.isTracking())
                 stopHyperTrackTracking();
         }
 
@@ -676,13 +676,13 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
                 // Check if clicked item is Resume tracking
                 if (getString(R.string.start_tracking).equalsIgnoreCase(item.getTitle().toString())) {
                     // Start Tracking the user
-                    if(!HyperTrack.isMockTracking())
+                    if(!HyperTrack.isTracking())
                         startHyperTrackTracking(true);
                     item.setTitle(R.string.stop_tracking);
 
                 } else {
                     // Stop Tracking the user
-                    if(HyperTrack.isMockTracking())
+                    if(HyperTrack.isTracking())
                         stopHyperTrackTracking();
                     item.setTitle(R.string.start_tracking);
                 }
@@ -695,8 +695,8 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
     private void startHyperTrackTracking(final boolean byUser) {
         // HACK: Check if user is tracking currently or not
         // Only for exisitng users because Permission and Location Settings have been checked here
-        if (!HyperTrack.isMockTracking()) {
-            HyperTrack.startMockTracking(null);
+        if (!HyperTrack.isTracking()) {
+            HyperTrack.startTracking(null);
             if (byUser) {
                 SharedPreferenceManager.setTrackingON();
                 supportInvalidateOptionsMenu();
@@ -711,7 +711,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
 
     private void stopHyperTrackTracking() {
         HyperTrack.stopTracking();
-        HyperTrack.stopMockTracking();
+        HyperTrack.stopTracking();
         SharedPreferenceManager.setTrackingOFF();
         supportInvalidateOptionsMenu();
         getPlacelineData();
