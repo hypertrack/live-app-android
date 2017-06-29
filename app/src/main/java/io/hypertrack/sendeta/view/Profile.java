@@ -60,7 +60,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
     private final static String TAG = Profile.class.getSimpleName();
 
-    public EditText firstNameView,lastNameView;
+    public EditText firstNameView, lastNameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
     public Bitmap oldProfileImage = null, updatedProfileImage = null;
@@ -82,8 +82,7 @@ public class Profile extends BaseActivity implements ProfileView {
             if (v.getId() == firstNameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT) {
                 lastNameView.requestFocus();
                 return true;
-            }
-            else if (v.getId() == lastNameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT){
+            } else if (v.getId() == lastNameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT) {
                 phoneNumberView.requestFocus();
                 return true;
             }
@@ -198,7 +197,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 countryCodeTextView.setVisibility(View.VISIBLE);
                 int length = String.valueOf(PhoneNumberUtil.getInstance().
                         getExampleNumber(isoCode).getNationalNumber()).length();
-                phoneNumberView.setFilters(new InputFilter[] { new InputFilter.LengthFilter(length)});
+                phoneNumberView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(length)});
             }
 
             @Override
@@ -231,12 +230,12 @@ public class Profile extends BaseActivity implements ProfileView {
         showProgress(true);
         String firstName = firstNameView.getText().toString();
         String lastName = lastNameView.getText().toString();
-        String name ="";
-        if(!HTTextUtils.isEmpty(firstName)){
+        String name = "";
+        if (!HTTextUtils.isEmpty(firstName)) {
             name = firstName;
         }
-        if(!HTTextUtils.isEmpty(lastName)){
-            name += " "+lastName;
+        if (!HTTextUtils.isEmpty(lastName)) {
+            name += " " + lastName;
         }
         String number = phoneNumberView.getText().toString();
         Utils.hideKeyboard(Profile.this, register);
@@ -406,7 +405,7 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    private void toggleRegisterButton(){
+    private void toggleRegisterButton() {
         register.setEnabled(!showSkip);
     }
 

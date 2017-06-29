@@ -2,6 +2,7 @@ package io.hypertrack.sendeta.presenter;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.util.Base64;
 import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
@@ -11,6 +12,9 @@ import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import io.hypertrack.sendeta.callback.OnOnboardingImageUploadCallback;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
@@ -50,15 +54,19 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         if (!HTTextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
 
+        String encodedImage = null;
         // Set user's profile image
         if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
+            byte[] bytes = convertFiletoByteArray(profileImage);
+            if (bytes != null && bytes.length > 0)
+                encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
         }
 
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
+            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone), encodedImage, user.getInternationalNumber(phone) + "_" + deviceID,
                     new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -110,6 +118,25 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             }
             AnalyticsStore.getLogger().enteredName(false, ErrorMessages.INVALID_PHONE_NUMBER);
         }
+    }
+
+    private byte[] convertFiletoByteArray(File file) {
+        byte[] b = new byte[(int) file.length()];
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            fileInputStream.read(b);
+            for (int i = 0; i < b.length; i++) {
+                System.out.print((char) b[i]);
+            }
+            return b;
+        } catch (FileNotFoundException e) {
+            System.out.println("File Not Found.");
+            e.printStackTrace();
+        } catch (IOException e1) {
+            System.out.println("Error Reading The File.");
+            e1.printStackTrace();
+        }
+        return b;
     }
 }
 
