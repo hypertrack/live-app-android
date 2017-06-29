@@ -198,7 +198,7 @@ public class PlacelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 holder.segmentAddress.setVisibility(View.GONE);
                 holder.duration.setVisibility(View.VISIBLE);
             }
-            if (segment.isStop() && (position == getItemCount() - 1) &&
+            if (segment.isStop() && (position == getItemCount() - 3) &&
                     currentDate.getDay() == new Date().getDay()) {
 
                 holder.currentLocationRipple.setVisibility(View.VISIBLE);
