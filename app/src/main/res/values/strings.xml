@@ -40,7 +40,7 @@
     <string name="calculating_eta_message">Calculating ETA…</string>
     <string name="sharing_live_location_message">Sharing your live location…</string>
     <string name="fetching_details_msg">Fetching details…</string>
-    <string name="stop_sharing_message">Stopping your live location…</string>
+    <string name="stop_sharing_message">Completing your visit</string>
 
     <!-- Success Strings -->
     <string name="profile_upload_success">Profile pic uploaded successfully</string>

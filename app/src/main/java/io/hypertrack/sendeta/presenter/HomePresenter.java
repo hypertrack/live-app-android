@@ -98,9 +98,8 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT);
 
-        if ((expectedPlace == null)){
-        }
-        else if (!HTTextUtils.isEmpty(expectedPlace.getId())) {
+        if ((expectedPlace == null)) {
+        } else if (!HTTextUtils.isEmpty(expectedPlace.getId())) {
             builder.setExpectedPlaceId(expectedPlace.getId());
         } else {
             builder.setExpectedPlace(expectedPlace);
