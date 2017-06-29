@@ -80,7 +80,6 @@ public class ImageUtils {
             file.createNewFile();
             FileOutputStream outputStream = new FileOutputStream(file);
             selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-
             return file;
         } catch (Exception e) {
             return null;
