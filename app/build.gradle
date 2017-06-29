@@ -64,7 +64,7 @@ android {
         }
 
         def versionMajor = 1
-        def versionMinor = 7
+        def versionMinor = 6
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -97,7 +97,7 @@ android {
 
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             buildConfigField "String", "HYPERTRACK_PK", hyperTrackKeyProperties['publishableKey']
@@ -131,14 +131,14 @@ dependencies {
         transitive = true;
     }
 
-   /* releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
+    /* releaseCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+         transitive = true
+     }
 
-    debugCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':debug@aar') {
-        transitive = true
-    }
-*/
+     debugCompile('com.hypertrack:android:' + hypertrackSDKVersion + ':debug@aar') {
+         transitive = true
+     }
+ */
     releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
