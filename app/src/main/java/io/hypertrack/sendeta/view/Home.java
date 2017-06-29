@@ -95,6 +95,7 @@ public class Home extends BaseActivity implements HomeView {
     private Button retryButton;
     private ImageButton shareButton, navigateButton;
     private Place expectedPlace;
+    private ProgressDialog mProgressDialog;
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
@@ -388,6 +389,11 @@ public class Home extends BaseActivity implements HomeView {
 
         //Check if there is any existing task to be restored
         if (actionManager.shouldRestoreState()) {
+
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.fetching_details_msg));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
             onShareLiveLocation();
         }
     }
@@ -645,6 +651,10 @@ public class Home extends BaseActivity implements HomeView {
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
+                // do nothing
+                if (mProgressDialog != null) {
+                    mProgressDialog.dismiss();
+                }
             }
 
             @Override
