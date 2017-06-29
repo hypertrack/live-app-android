@@ -102,7 +102,7 @@ public class PlacelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
                 holder.bottomText.setText(bottomText);
                 holder.bottomText.setVisibility(View.VISIBLE);
 
-            } else if (position == getItemCount() - 1) {
+            } else if (position == getItemCount() - 3) {
                 String bottomText = segment.formatTime(segment.getEndedAt());
                 holder.bottomText.setText(bottomText);
                 holder.bottomText.setVisibility(View.VISIBLE);
