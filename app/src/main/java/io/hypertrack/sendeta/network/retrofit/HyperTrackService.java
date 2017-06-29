@@ -16,6 +16,6 @@ public interface HyperTrackService {
     @GET("/api/v1/eta/")
     Call<List<ETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
 
-    @GET("users/{id}/timeline/")
+    @GET("users/{id}/placeline/")
     Call<PlacelineData> getUserPlaceline(@Path("id") String id, @Query("date") String date);
 }
