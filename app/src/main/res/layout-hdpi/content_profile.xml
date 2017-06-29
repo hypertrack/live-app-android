@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
     android:background="@color/white">
-    <RelativeLayout
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <FrameLayout
@@ -15,7 +15,8 @@
             android:layout_width="@dimen/profile_image_size"
             android:layout_height="@dimen/profile_image_size"
             android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/margin_max">
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_huge">
 
             <io.hypertrack.sendeta.util.images.RoundedImageView
                 android:id="@+id/profile.image_view"
@@ -38,9 +39,9 @@
             <ImageView
                 android:id="@+id/profile.camera_icon"
                 android:layout_width="wrap_content"
-                android:layout_margin="@dimen/margin_low"
-                android:layout_gravity="end"
                 android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="@dimen/margin_low"
                 android:src="@drawable/profile_camera_icon" />
         </FrameLayout>
 
@@ -48,10 +49,9 @@
             android:id="@+id/profile.description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/profile.image_layout"
             android:layout_marginLeft="@dimen/margin_xxhigh"
             android:layout_marginRight="@dimen/margin_xxhigh"
-            android:layout_marginTop="@dimen/margin_xxxhigh"
+            android:layout_marginTop="@dimen/margin_xhigh"
             android:gravity="center"
             android:text="Add your photo, name and phone so that your friends can see you on a map, and call you when you are on the way"
             android:textColor="@color/colorPrimary"
@@ -61,10 +61,9 @@
             android:id="@+id/profile.detail_layout"
             android:layout_width="match_parent"
             android:layout_height="120dp"
-            android:layout_below="@id/profile.description"
             android:layout_marginLeft="@dimen/margin_high"
             android:layout_marginRight="@dimen/margin_high"
-            android:layout_marginTop="@dimen/margin_xxhigh"
+            android:layout_marginTop="@dimen/margin_high"
             android:background="@drawable/profile_detail_background">
 
             <View
@@ -88,15 +87,16 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@id/horizontal_separator"
                 android:layout_alignParentTop="true"
-                android:maxLines="1"
-                android:imeOptions="actionNext"
-                android:inputType="textAutoComplete"
-                android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/margin_high"
-                android:layout_toLeftOf="@id/vertical_separator"
+                android:layout_marginRight="@dimen/margin_high"
+                android:layout_toLeftOf="@+id/vertical_separator"
+                android:layout_toStartOf="@+id/vertical_separator"
                 android:background="@android:color/transparent"
                 android:gravity="center_vertical"
                 android:hint="First name"
+                android:imeOptions="actionNext"
+                android:inputType="textAutoComplete"
+                android:maxLines="1"
                 android:textColorHint="@color/profile_detail_border" />
 
             <EditText
@@ -105,15 +105,16 @@
                 android:layout_height="wrap_content"
                 android:layout_above="@id/horizontal_separator"
                 android:layout_alignParentTop="true"
-                android:maxLines="1"
-                android:imeOptions="actionNext"
-                android:inputType="textAutoComplete"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/margin_high"
+                android:layout_marginRight="@dimen/margin_high"
                 android:layout_toRightOf="@id/vertical_separator"
                 android:background="@android:color/transparent"
                 android:gravity="center_vertical"
                 android:hint="Last name"
+                android:imeOptions="actionNext"
+                android:inputType="textAutoComplete"
+                android:maxLines="1"
                 android:textColorHint="@color/profile_detail_border" />
 
             <LinearLayout
@@ -166,39 +167,36 @@
                     android:imeActionId="@+id/login"
                     android:inputType="phone"
                     android:maxLength="10"
-                    android:textColorHint="@color/profile_detail_border"
-                    />
+                    android:textColorHint="@color/profile_detail_border" />
             </LinearLayout>
 
         </RelativeLayout>
-
-        <TextView
-            android:id="@+id/register.skip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onNextButtonClicked"
-            android:layout_alignParentBottom="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginBottom="@dimen/margin_xxxxhigh"
-            android:text="Skip"
-            android:textColor="@color/colorPrimary"
-            android:textSize="@dimen/text_medium" />
 
         <Button
             android:id="@+id/register.profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@id/register.skip"
             android:layout_margin="@dimen/margin_high"
             android:layout_marginTop="@dimen/margin_huge"
             android:background="@drawable/button_background"
-            android:text="Save Profile"
             android:enabled="false"
+            android:text="Save Profile"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:textSize="@dimen/text_large"
             android:visibility="visible" />
 
+        <TextView
+            android:id="@+id/register.skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/margin_xxxxhigh"
+            android:onClick="onNextButtonClicked"
+            android:text="Skip"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_medium" />
 
-    </RelativeLayout>
+
+    </LinearLayout>
 </ScrollView>
