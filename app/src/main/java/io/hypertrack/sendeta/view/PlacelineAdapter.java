@@ -24,13 +24,16 @@ import io.hypertrack.sendeta.model.Segment;
  * Created by Aman Jain on 24/05/17.
  */
 
-public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.PlacelineView> {
+public class PlacelineAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Segment> segmentList;
     private Context context;
     private int lastDay;
     //private RippleBackground rippleBackground;
     private Date currentDate;
+    private static final int TYPE_HEADER = 0;
+    private static final int TYPE_ITEM = 1;
+    private static final int TYPE_FOOTER = 2;
 
     public PlacelineAdapter(List<Segment> segmentList, Context context) {
         this.segmentList = segmentList;
@@ -38,138 +41,173 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Plac
     }
 
     @Override
-    public PlacelineView onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.placeline_segment, parent, false);
-        return new PlacelineView(view);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v;
+        if (viewType == TYPE_HEADER || viewType == TYPE_FOOTER) {
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.header_footer, parent, false);
+            return new HeaderFooterViewHolder(v);
+        } else {
+            v = LayoutInflater.from(parent.getContext()).inflate(R.layout.placeline_segment, parent, false);
+            return new PlacelineView(v);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return segmentList.size();
+        int size = segmentList.size();
+
+        if (segmentList.size() > 0)
+            size += 2;
+
+       /* if (isHeader) {
+            size += 1;
+        }*/
+        return size;
     }
 
     @Override
-    public void onBindViewHolder(final PlacelineView holder, int position) {
+    public int getItemViewType(int position) {
+        if (isPositionFooter(position))
+            return TYPE_FOOTER;
 
-        final Segment segment = segmentList.get(position);
+        else if (isPositionHeader(position))
+            return TYPE_HEADER;
 
-        if (position % 2 == 0) {
-            String text = segment.formatTime(segment.getStartedAt());
-            holder.topText.setText(text);
-            lastDay = segment.getStartedAt().getDay();
-            holder.topText.setVisibility(View.VISIBLE);
+        else return TYPE_ITEM;
 
-            String bottomText = segment.formatTime(segment.getEndedAt());
-            holder.bottomText.setText(bottomText);
-            holder.bottomText.setVisibility(View.VISIBLE);
+    }
 
-        } else if (position == getItemCount() - 1) {
-            String bottomText = segment.formatTime(segment.getEndedAt());
-            holder.bottomText.setText(bottomText);
-            holder.bottomText.setVisibility(View.VISIBLE);
+    private boolean isPositionHeader(int position) {
+        return position == 0;
+    }
 
-        } else {
-            holder.topText.setVisibility(View.GONE);
-            holder.bottomText.setVisibility(View.GONE);
+    private boolean isPositionFooter(int position) {
+        return position == segmentList.size() +1;
+    }
 
-        }
-        if (segment.isStop()) {
-            holder.segmentBarLayout.setVisibility(View.INVISIBLE);
-            holder.segmentAddress.setVisibility(View.VISIBLE);
-            holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
-                    segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder viewHolder, int position) {
 
-            holder.segmentIcon.setImageResource(R.drawable.ic_stop);
-            holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
-                    R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
+        if (viewHolder instanceof PlacelineView) {
+            final PlacelineView holder = (PlacelineView) viewHolder;
+            position -=1;
+            final Segment segment = segmentList.get(position );
+            if (position % 2 == 0) {
+                String text = segment.formatTime(segment.getStartedAt());
+                holder.topText.setText(text);
+                lastDay = segment.getStartedAt().getDay();
+                holder.topText.setVisibility(View.VISIBLE);
 
-            if (segment.location != null && !HTTextUtils.isEmpty(segment.location.getActivity()) &&
-                    segment.location.getActivity().equalsIgnoreCase("unknown")) {
-                holder.segmentTypeText.setText(segment.location.getActivity());
+                String bottomText = segment.formatTime(segment.getEndedAt());
+                holder.bottomText.setText(bottomText);
+                holder.bottomText.setVisibility(View.VISIBLE);
+
+            } else if (position == getItemCount() - 1) {
+                String bottomText = segment.formatTime(segment.getEndedAt());
+                holder.bottomText.setText(bottomText);
+                holder.bottomText.setVisibility(View.VISIBLE);
+
             } else {
-                holder.segmentTypeText.setText("Stop");
+                holder.topText.setVisibility(View.GONE);
+                holder.bottomText.setVisibility(View.GONE);
             }
-            holder.duration.setText(segment.getFormatedDuration());
-            holder.duration.setVisibility(View.VISIBLE);
-            holder.segmentBar.setVisibility(View.INVISIBLE);
+            if (segment.isStop()) {
+                holder.segmentBarLayout.setVisibility(View.INVISIBLE);
+                holder.segmentAddress.setVisibility(View.VISIBLE);
+                holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
+                        segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
 
-            holder.segmentAddress.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
-                            segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
-                    if (holder.segmentAddress.getTag() != null &&
-                            holder.segmentAddress.getTag().toString().equalsIgnoreCase("close")) {
-                        holder.segmentAddress.setText(segment.getPlace().getDisplayString());
-                        holder.segmentAddress.setMaxLines(5);
-                        holder.segmentAddress.setTag("open");
-                        holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
-                                R.drawable.ic_keyboard_arrow_up_black_24dp, 0);
-                    } else {
+                holder.segmentIcon.setImageResource(R.drawable.ic_stop);
+                holder.segmentAddress.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                        R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
+
+                if (segment.location != null && !HTTextUtils.isEmpty(segment.location.getActivity()) &&
+                        segment.location.getActivity().equalsIgnoreCase("unknown")) {
+                    holder.segmentTypeText.setText(segment.location.getActivity());
+                } else {
+                    holder.segmentTypeText.setText("Stop");
+                }
+
+
+                String steps = (segment.stepCount == null || segment.stepCount == 0) ?
+                        "" : segment.stepCount + " steps | ";
+                holder.duration.setText(steps + segment.getFormatedDuration());
+                holder.duration.setVisibility(View.VISIBLE);
+                holder.segmentBar.setVisibility(View.INVISIBLE);
+
+                holder.segmentAddress.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
                         holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
                                 segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
-                        holder.segmentAddress.setTag("close");
-                        holder.segmentAddress.setMaxLines(1);
-                        holder.segmentAddress.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0,
-                                R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
+                        if (holder.segmentAddress.getTag() != null &&
+                                holder.segmentAddress.getTag().toString().equalsIgnoreCase("close")) {
+                            holder.segmentAddress.setText(segment.getPlace().getDisplayString());
+                            holder.segmentAddress.setMaxLines(5);
+                            holder.segmentAddress.setTag("open");
+                            holder.segmentAddress.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                    R.drawable.ic_keyboard_arrow_up_black_24dp, 0);
+                        } else {
+                            holder.segmentAddress.setText(HTTextUtils.isEmpty(segment.getPlace().getLocality()) ?
+                                    segment.getPlace().getDisplayString() : segment.getPlace().getLocality());
+                            holder.segmentAddress.setTag("close");
+                            holder.segmentAddress.setMaxLines(1);
+                            holder.segmentAddress.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                    R.drawable.ic_keyboard_arrow_right_black_24dp, 0);
+                        }
+
                     }
+                });
 
-                }
-            });
+            } else if (segment.isTrip()) {
 
-        } else if (segment.isTrip()) {
+                holder.segmentBar.setImageResource(R.drawable.trip_background);
+                holder.segmentBarLayout.setVisibility(View.VISIBLE);
 
-            holder.segmentBar.setImageResource(R.drawable.trip_background);
-            holder.segmentBarLayout.setVisibility(View.VISIBLE);
+                if (!HTTextUtils.isEmpty(segment.getActivityType()) &&
+                        !segment.getActivityType().equalsIgnoreCase("unknown")) {
 
-            if (!HTTextUtils.isEmpty(segment.getActivityType()) &&
-                    !segment.getActivityType().equalsIgnoreCase("unknown")) {
+                    holder.segmentTypeText.setText(segment.getActivityType().substring(0, 1).toUpperCase()
+                            + segment.getActivityType().substring(1, segment.getActivityType().length()));
+                } else
+                    holder.segmentTypeText.setText("Trip");
 
-                holder.segmentTypeText.setText(segment.getActivityType().substring(0, 1).toUpperCase()
-                        + segment.getActivityType().substring(1, segment.getActivityType().length()));
-            } else
-                holder.segmentTypeText.setText("Trip");
+                holder.duration.setText(segment.getDistanceAndDuration());
+                holder.duration.setVisibility(View.VISIBLE);
+                holder.segmentIcon.setImageResource(R.drawable.ic_trip);
+                holder.segmentAddress.setVisibility(View.GONE);
+                holder.segmentBar.setVisibility(View.VISIBLE);
 
-            holder.duration.setText(segment.getDistanceAndDuration());
-            holder.duration.setVisibility(View.VISIBLE);
-            holder.segmentIcon.setImageResource(R.drawable.ic_trip);
-            holder.segmentAddress.setVisibility(View.GONE);
-            holder.segmentBar.setVisibility(View.VISIBLE);
+            } else if (segment.isLocationVoid()) {
+                holder.segmentBar.setImageResource(R.drawable.no_location_background);
+                holder.segmentBar.setVisibility(View.VISIBLE);
+                holder.segmentBarLayout.setVisibility(View.INVISIBLE);
+                holder.segmentTypeText.setText("Location Disabled");
+                holder.duration.setText(segment.getFormatedDuration());
+                holder.segmentIcon.setImageResource(R.drawable.ic_no_location);
+                holder.segmentAddress.setVisibility(View.GONE);
+                holder.duration.setVisibility(View.VISIBLE);
 
-        } else if (segment.isLocationVoid()) {
-            holder.segmentBar.setImageResource(R.drawable.no_location_background);
-            holder.segmentBar.setVisibility(View.VISIBLE);
-            holder.segmentBarLayout.setVisibility(View.INVISIBLE);
-            holder.segmentTypeText.setText("Location Disabled");
-            holder.duration.setText(segment.getFormatedDuration());
-            holder.segmentIcon.setImageResource(R.drawable.ic_no_location);
-            holder.segmentAddress.setVisibility(View.GONE);
-            holder.duration.setVisibility(View.VISIBLE);
+            } else if (segment.isNoInformation()) {
+                holder.segmentBar.setImageResource(R.drawable.no_location_background);
+                holder.segmentBar.setVisibility(View.VISIBLE);
+                holder.segmentBarLayout.setVisibility(View.INVISIBLE);
+                holder.segmentTypeText.setText("No Information");
+                holder.duration.setText(segment.getFormatedDuration());
+                holder.segmentIcon.setImageResource(R.drawable.ic_no_information);
+                holder.segmentAddress.setVisibility(View.GONE);
+                holder.duration.setVisibility(View.VISIBLE);
+            }
+            if (segment.isStop() && (position == getItemCount() - 1) &&
+                    currentDate.getDay() == new Date().getDay()) {
 
-        } else if (segment.isNoInformation()) {
-            holder.segmentBar.setImageResource(R.drawable.no_location_background);
-            holder.segmentBar.setVisibility(View.VISIBLE);
-            holder.segmentBarLayout.setVisibility(View.INVISIBLE);
-            holder.segmentTypeText.setText("No Information");
-            holder.duration.setText(segment.getFormatedDuration());
-            holder.segmentIcon.setImageResource(R.drawable.ic_no_information);
-            holder.segmentAddress.setVisibility(View.GONE);
-            holder.duration.setVisibility(View.VISIBLE);
+                holder.currentLocationRipple.setVisibility(View.VISIBLE);
+                holder.currentLocationRipple.startRippleAnimation();
+            } else {
+                holder.currentLocationRipple.stopRippleAnimation();
+                holder.currentLocationRipple.setVisibility(View.GONE);
+            }
         }
-        if (segment.isStop() && (position == getItemCount() - 1) &&
-                currentDate.getDay() == new Date().getDay()) {
-
-            holder.currentLocationRipple.setVisibility(View.VISIBLE);
-            holder.currentLocationRipple.startRippleAnimation();
-        } else {
-            holder.currentLocationRipple.stopRippleAnimation();
-            holder.currentLocationRipple.setVisibility(View.GONE);
-        }
-/*
-        if(!segment.isStop() && position+1<segmentList.size()&&!segmentList.get(position+1).isStop() ) {
-            if (rippleBackground != null)
-                rippleBackground.setVisibility(View.GONE);
-        }*/
     }
 
     public void setCurrentDate(Date date) {
@@ -206,5 +244,13 @@ public class PlacelineAdapter extends RecyclerView.Adapter<PlacelineAdapter.Plac
             currentLocationRipple = (RippleBackground) itemView.findViewById(R.id.current_location_ripple);
         }
 
+    }
+
+    public class HeaderFooterViewHolder extends RecyclerView.ViewHolder {
+        public TextView footerText;
+
+        public HeaderFooterViewHolder(View itemView) {
+            super(itemView);
+        }
     }
 }

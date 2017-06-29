@@ -71,7 +71,7 @@ import io.hypertrack.sendeta.store.PlacelineManager;
  * Created by Aman Jain on 24/05/17.
  */
 
-public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
+public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
 
     private static final String TAG = Placeline.class.getSimpleName();
     private RecyclerView placelineRecyclerView;
@@ -86,7 +86,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
     private SimpleDateFormat dateFormatMonth = new SimpleDateFormat("MMMM yyyy", Locale.ENGLISH);
     private SimpleDateFormat format = new SimpleDateFormat("EEEE, MMM d", Locale.ENGLISH);
     private Date selectedDate;
-    private  boolean isExpanded = false;
+    private boolean isExpanded = false;
     private ImageView arrow;
     private Toolbar toolbar;
     private CollapsingToolbarLayout collapsingToolbarLayout;
@@ -99,7 +99,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
     private String userID;
     private Handler handler;
     private Runnable runnable;
-    private int FETCH_TIME = 30*1000;
+    private int FETCH_TIME = 30 * 1000;
     private GoogleMap mMap;
     private DashedLine dashedLine;
     private TextView placelineText;
@@ -116,7 +116,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         setContentView(R.layout.activity_placeline);
 
         userID = getIntent().getStringExtra("user_id");
-        if(HTTextUtils.isEmpty(userID)){
+        if (HTTextUtils.isEmpty(userID)) {
             userID = HyperTrack.getUserId();
         }
 
@@ -144,7 +144,9 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         //checkForBackgroundTrackingPermission();
     }
 
-   /* *//**
+   /* */
+
+    /**
      * Method to request user to be tracked in background. This enables the app to give user better
      * suggestions for tracking links when he/she is on the move.
      *//*
@@ -173,8 +175,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
             SharedPreferenceManager.setRequestedForBackgroundTracking();
         }
     }*/
-
-    private void initUI(){
+    private void initUI() {
         supportMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map_view);
         supportMapFragment.getMapAsync(this);
 
@@ -186,8 +187,8 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Placeline.this,Home.class);
-                intent.putExtra("class_from",Placeline.class.getSimpleName());
+                Intent intent = new Intent(Placeline.this, Home.class);
+                intent.putExtra("class_from", Placeline.class.getSimpleName());
                 startActivity(intent);
                 overridePendingTransition(R.anim.enter, R.anim.exit);
             }
@@ -218,7 +219,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
             @Override
             public void onDayClick(Date dateClicked) {
                 setDate(dateFormat.format(dateClicked));
-                selectedDate  = dateClicked;
+                selectedDate = dateClicked;
                 hideCalendar();
                 setPlacelineData();
             }
@@ -245,10 +246,11 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         placelineRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                if(newState == RecyclerView.SCROLL_STATE_IDLE){
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     View view = snapHelperTop.findSnapView(linearLayoutManager);
                     int index = recyclerView.getChildAdapterPosition(view);
-                    animateMap(index);
+                    if (index != 0 && index != placelineAdapter.getItemCount() - 1)
+                        animateMap(index - 1);
                 }
             }
 
@@ -257,7 +259,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        placelineAdapter = new PlacelineAdapter(sanitizeSegments,this);
+        placelineAdapter = new PlacelineAdapter(sanitizeSegments, this);
         placelineAdapter.setCurrentDate(selectedDate);
         placelineRecyclerView.setAdapter(placelineAdapter);
 
@@ -274,19 +276,19 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         }
     };
 
-    private void animateMap(int index){
-        if(previousIndex != index && index >= 0) {
+    private void animateMap(int index) {
+        if (previousIndex != index && index >= 0) {
             mMap.clear();
             Segment segment = sanitizeSegments.get(index);
-            if(segment.isTrip()) {
+            if (segment.isTrip()) {
                 List<LatLng> latLngList = new ArrayList<LatLng>();
 
-                if(!HTTextUtils.isEmpty(segment.getTimeAwarePolyline())) {
+                if (!HTTextUtils.isEmpty(segment.getTimeAwarePolyline())) {
 
                     latLngList = TimeAwarePolylineUtils.
                             getLatLngList(segment.getTimeAwarePolyline());
 
-                }else {
+                } else {
                     if (segment.getStartLocation() != null &&
                             segment.getStartLocation().getGeoJSONLocation() != null) {
 
@@ -329,17 +331,16 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
                     mMap.addMarker(endMarkerOptions);
                 }
 
-            }
-            else if(segment.isStop()){
+            } else if (segment.isStop()) {
                 LatLng latLng = segment.getPlace().getLocation().getLatLng();
                 MarkerOptions markerOptions = new MarkerOptions().
                         position(latLng).
                         icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop_point));
                 mMap.addMarker(markerOptions);
                 float zoom = mMap.getCameraPosition().zoom;
-                if(zoom < 16f)
+                if (zoom < 16f)
                     zoom = 16f;
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,zoom));
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
             }
 
             previousIndex = index;
@@ -351,19 +352,19 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         private final static int vertOverlap = -30;
 
         @Override
-        public void getItemOffsets (Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-            int itemPosition = parent.getChildAdapterPosition(view);
-            if (itemPosition != 0 && itemPosition != ( parent.getAdapter().getItemCount() -1 )) {
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+            //int itemPosition = parent.getChildAdapterPosition(view);
+            outRect.set(0, vertOverlap, 0, 0);
+           /* if (itemPosition != 0 && itemPosition != (parent.getAdapter().getItemCount() - 1)) {
                 outRect.set(0, vertOverlap, 0, 0);
-            }
-            else {
-                outRect.set(0,20,0,0);
-            }
+            } else {
+                outRect.set(0, 20, 0, 0);
+            }*/
 
         }
     }
 
-    private void setDateFormatMonth(Date date){
+    private void setDateFormatMonth(Date date) {
         setDate(dateFormatMonth.format(date));
         if (mCompactCalendarView != null) {
             mCompactCalendarView.setCurrentDate(date);
@@ -384,7 +385,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
 
         super.onResume();
         getPlacelineData();
-        handler.postDelayed(runnable,FETCH_TIME);
+        handler.postDelayed(runnable, FETCH_TIME);
 
     }
 
@@ -399,11 +400,11 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         //toolbarTitle.setText(title);
     }
 
-    private void setPlacelineData(){
+    private void setPlacelineData() {
         sanitizeSegments.clear();
         placelineAdapter.setCurrentDate(selectedDate);
         placelineAdapter.notifyDataSetChanged();
-        if(handler != null)
+        if (handler != null)
             handler.removeCallbacks(runnable);
         progressLayout.setVisibility(View.VISIBLE);
         previousIndex = -1;
@@ -411,45 +412,43 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
 
     }
 
-    private void getPlacelineData(){
+    private void getPlacelineData() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         String date = dateFormat.format(selectedDate);
         placelineManager.getPlacelineData(userID, date, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 progressLayout.setVisibility(View.GONE);
-                if(response != null){
+                if (response != null) {
 
                     placelineData = (PlacelineData) response.getResponseObject();
-                    if(placelineData != null){
+                    if (placelineData != null) {
                         //userName.setText(placelineData.getName());
-                        mMap.clear();
+                        if (mMap != null)
+                            mMap.clear();
                         sanitizePlacelineData(placelineData);
-                        if(sanitizeSegments.size() > 0){
+                        if (sanitizeSegments.size() > 0) {
                             placelineStatus.setVisibility(View.GONE);
                             dashedLine.setVisibility(View.VISIBLE);
-                            if(isFirstTime){
-                                animateMap(sanitizeSegments.size()-1);
-                                placelineRecyclerView.scrollToPosition(sanitizeSegments.size()-1);
+                            if (isFirstTime) {
+                                animateMap(sanitizeSegments.size() - 1);
+                                placelineRecyclerView.scrollToPosition(sanitizeSegments.size());
                                 isFirstTime = false;
-                            }
-                            else if(previousIndex == -1 ){
+                            } else if (previousIndex == -1) {
                                 animateMap(0);
-                            }
-                            else {
+                            } else {
                                 int index = previousIndex;
                                 previousIndex = -1;
                                 animateMap(index);
                             }
-                        }
-                        else{
+                        } else {
                             placelineStatus.setVisibility(View.VISIBLE);
                             dashedLine.setVisibility(View.GONE);
                         }
 
                     }
                 }
-                handler.postDelayed(runnable,FETCH_TIME);
+                handler.postDelayed(runnable, FETCH_TIME);
             }
 
             @Override
@@ -460,7 +459,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         });
     }
 
-    private void sanitizePlacelineData(PlacelineData placelineData){
+    private void sanitizePlacelineData(PlacelineData placelineData) {
         List<Segment> segmentList = sanitizeSegments(placelineData.getSegmentList());
         addMissingSegment(segmentList);
         sanitizeSegments.clear();
@@ -469,7 +468,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         placelineAdapter.notifyDataSetChanged();
     }
 
-    private List<Segment> sanitizeSegments(List<Segment> segmentList){
+    private List<Segment> sanitizeSegments(List<Segment> segmentList) {
         List<Segment> sanitizeSegments = new ArrayList<>();
         List<Segment> cleanedSegments = cleanSegmentsNotEnded(segmentList);
 
@@ -487,22 +486,22 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         return sanitizeSegments;
     }
 
-    private List<Segment> addMissingSegment(List<Segment> segmentList){
+    private List<Segment> addMissingSegment(List<Segment> segmentList) {
 
         List<Segment> result = new ArrayList<>();
         int size = segmentList.size();
-        if(size > 0)
+        if (size > 0)
             result.add(segmentList.get(0));
 
-        for(int i = 1 ; i < size ; i++ ){
+        for (int i = 1; i < size; i++) {
 
-            Segment previousSegment = (i > 0) ? segmentList.get(i-1) : null ;
+            Segment previousSegment = (i > 0) ? segmentList.get(i - 1) : null;
             Segment currentSegment = segmentList.get(i);
             long diff = currentSegment.getStartedAt().getTime() - previousSegment.getEndedAt().getTime();
             long minutes = TimeUnit.MILLISECONDS.toMinutes(diff);
 
-            if(minutes > 0){
-                segmentList.add(i,createNoInfoSegment(previousSegment,currentSegment,TimeUnit.MILLISECONDS.toSeconds(diff)));
+            if (minutes > 0) {
+                segmentList.add(i, createNoInfoSegment(previousSegment, currentSegment, TimeUnit.MILLISECONDS.toSeconds(diff)));
                 size++;
                 i++;
             }
@@ -511,7 +510,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         return segmentList;
     }
 
-    private Segment createNoInfoSegment(Segment previous, Segment currentSegment,long duration){
+    private Segment createNoInfoSegment(Segment previous, Segment currentSegment, long duration) {
         Segment segment = new Segment();
         segment.setStartedAt(previous.getEndedAt());
         segment.setEndedAt(currentSegment.getStartedAt());
@@ -530,11 +529,11 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
             if (first) {
                 if (segment.getStartedAt() != null && segment.getEndedAt() != null) {
                     cleanedSegments.add(segment);
-                } else if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null ) {
+                } else if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null) {
                     cleanedSegments.add(segment);
                 }
             } else if (last) {
-                if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null ) {
+                if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null) {
                     cleanedSegments.add(segment);
                 }
             } else if (segment.getStartedAt() != null && segment.getEndedAt() != null) {
@@ -548,7 +547,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         boolean last = (index == segments.size() - 1);
 
         if (last && segment.getEndedAt() == null) {
-            if(placelineData.getLastHeartbeatAt() != null)
+            if (placelineData.getLastHeartbeatAt() != null)
                 segment.setEndedAt(placelineData.getLastHeartbeatAt());
             else {
                 segment.setEndedAt(new Date());
@@ -557,7 +556,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         return segment;
     }
 
-    private boolean isValidSegment(Segment segment,int  index,List<Segment> segments) {
+    private boolean isValidSegment(Segment segment, int index, List<Segment> segments) {
         boolean first = (index == 0);
         boolean last = (index == segments.size() - 1);
         Segment previous = (index > 0) ? segments.get(index - 1) : null;
@@ -583,13 +582,12 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
     }
 
 
+    private boolean isAfterPrevSegment(Date date1, Date date2) {
 
-    private boolean isAfterPrevSegment(Date date1,Date date2) {
-
-        if(date1.compareTo(date2) <= 0){
+        if (date1.compareTo(date2) <= 0) {
             return true;
         }
-        return  false;
+        return false;
     }
 
     @Override
@@ -618,7 +616,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         });
     }
 
-    private void showCalendar(){
+    private void showCalendar() {
         setDateFormatMonth(selectedDate);
         ViewCompat.animate(arrow).rotation(-90).start();
         mAppBarLayout.setExpanded(true, true);
@@ -627,7 +625,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
     }
 
 
-    private void hideCalendar(){
+    private void hideCalendar() {
         setCurrentDate(selectedDate);
         mAppBarLayout.setExpanded(false, true);
         ViewCompat.animate(arrow).rotation(0).start();
@@ -638,7 +636,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
     @Override
     public void onBackPressed() {
 
-        if(isExpanded){
+        if (isExpanded) {
             hideCalendar();
             return;
         }
@@ -658,11 +656,11 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
         MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
         if (SharedPreferenceManager.isTrackingON()) {
             menuItem.setTitle(getString(R.string.stop_tracking));
-            if(!HyperTrack.isTracking())
+            if (!HyperTrack.isTracking())
                 startHyperTrackTracking(false);
         } else {
             menuItem.setTitle(getString(R.string.start_tracking));
-            if(HyperTrack.isTracking())
+            if (HyperTrack.isTracking())
                 stopHyperTrackTracking();
         }
 
@@ -677,13 +675,13 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback{
                 // Check if clicked item is Resume tracking
                 if (getString(R.string.start_tracking).equalsIgnoreCase(item.getTitle().toString())) {
                     // Start Tracking the user
-                    if(!HyperTrack.isTracking())
+                    if (!HyperTrack.isTracking())
                         startHyperTrackTracking(true);
                     item.setTitle(R.string.stop_tracking);
 
                 } else {
                     // Stop Tracking the user
-                    if(HyperTrack.isTracking())
+                    if (HyperTrack.isTracking())
                         stopHyperTrackTracking();
                     item.setTitle(R.string.start_tracking);
                 }

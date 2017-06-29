@@ -2,7 +2,7 @@
 <resources>
     <color name="colorPrimary">#2a2d2e</color>
     <color name="colorPrimaryDark">#000000</color>
-    <color name="colorAccent">@color/tracking_experince</color>
+    <color name="colorAccent">@color/tracking_experience</color>
 
     <color name="secondaryColor">#ffffff</color>
     <color name="app_primary">#909090</color>

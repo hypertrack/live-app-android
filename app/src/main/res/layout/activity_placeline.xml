@@ -42,7 +42,7 @@
                     android:visibility="visible"
 
                     app:compactCalendarBackgroundColor="@android:color/white"
-                    app:compactCalendarCurrentDayBackgroundColor="@color/tracking_experince"
+                    app:compactCalendarCurrentDayBackgroundColor="@color/tracking_experience"
                     app:compactCalendarCurrentSelectedDayBackgroundColor="@android:color/darker_gray"
                     app:compactCalendarTargetHeight="250dp"
                     app:compactCalendarTextColor="#1e1b1b"
@@ -127,7 +127,7 @@
         android:layout_gravity="top|left"
         android:layout_margin="@dimen/margin_high"
         android:src="@drawable/ic_share_white_24dp"
-        app:backgroundTint="@color/tracking_experince"
+        app:backgroundTint="@color/tracking_experience"
         app:fabSize="auto"
         app:layout_anchor="@+id/linearLayout2"
         app:layout_anchorGravity="bottom|right" />

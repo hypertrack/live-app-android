@@ -85,7 +85,9 @@
         app:rb_scale="3"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
-        android:layout_marginStart="102dp">
+        android:layout_marginStart="102dp"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="102dp">
 
     </com.skyfishjy.library.RippleBackground>
 
@@ -131,7 +133,8 @@
             android:gravity="center_vertical"
             android:maxLines="1"
             android:tag="close"
-            android:visibility="gone" />
+            android:visibility="gone"
+            android:drawableRight="@drawable/ic_keyboard_arrow_right_black_24dp" />
 
     </LinearLayout>
 
