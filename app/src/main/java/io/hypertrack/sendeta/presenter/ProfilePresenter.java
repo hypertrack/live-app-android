@@ -2,11 +2,11 @@ package io.hypertrack.sendeta.presenter;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
@@ -47,7 +47,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
-        if (!TextUtils.isEmpty(ISOCode))
+        if (!HTTextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
 
         // Set user's profile image
@@ -58,51 +58,51 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
+            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
                     new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    AnalyticsStore.getLogger().enteredName(true, null);
-                    AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse successResponse) {
+                            AnalyticsStore.getLogger().enteredName(true, null);
+                            AnalyticsStore.getLogger().uploadedProfilePhoto(true, null);
 
-                    if (profileImage != null && profileImage.length() > 0) {
-                        onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
-                            @Override
-                            public void onSuccess() {
+                            if (profileImage != null && profileImage.length() > 0) {
+                                onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        if (view != null) {
+                                            view.showProfilePicUploadSuccess();
+                                            view.navigateToPlacelineScreen();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onError() {
+                                        Log.i(TAG, "Profile Image not saved in local database");
+                                        if (view != null) {
+                                            view.showProfilePicUploadError();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onImageUploadNotNeeded() {
+                                    }
+                                });
+                            } else {
                                 if (view != null) {
-                                    view.showProfilePicUploadSuccess();
-                                    view.navigateToHomeScreen();
+                                    view.navigateToPlacelineScreen();
                                 }
                             }
-
-                            @Override
-                            public void onError() {
-                                Log.i(TAG, "Profile Image not saved in local database");
-                                if (view != null) {
-                                    view.showProfilePicUploadError();
-                                }
-                            }
-
-                            @Override
-                            public void onImageUploadNotNeeded() {
-                            }
-                        });
-                    } else {
-                        if (view != null) {
-                            view.navigateToHomeScreen();
                         }
-                    }
-                }
 
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    if (view != null) {
-                        view.showErrorMessage();
-                    }
-                    AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            if (view != null) {
+                                view.showErrorMessage();
+                            }
+                            AnalyticsStore.getLogger().enteredName(false, ErrorMessages.PROFILE_UPDATE_FAILED);
 
-                }
-            });
+                        }
+                    });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {

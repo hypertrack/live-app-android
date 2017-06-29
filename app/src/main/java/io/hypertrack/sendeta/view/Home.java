@@ -1,38 +1,36 @@
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
+import android.animation.Animator;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.PorterDuff;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -54,7 +52,7 @@ import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -79,7 +77,6 @@ import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.AnalyticsStore;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
-import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
@@ -93,20 +90,18 @@ public class Home extends BaseActivity implements HomeView {
     private Marker expectedPlaceMarker;
     private String lookupId = null;
     private Location defaultLocation = new Location("default");
-    private TabLayout vehicleTypeTabLayout;
     private TextView infoMessageViewText;
     private LinearLayout infoMessageView;
-    private FrameLayout bottomButtonLayout;
-    private Button shareLiveLocationButton, retryButton, stopSharingButton;
+    private Button retryButton;
     private ImageButton shareButton, navigateButton;
     private Place expectedPlace;
-    private ProgressDialog mProgressDialog;
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
-    private FloatingActionButton placelineView;
+    private CoordinatorLayout rootLayout;
+    private boolean fromPlaceline = false;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -144,18 +139,13 @@ public class Home extends BaseActivity implements HomeView {
 
         @Override
         public void onActionRefreshed(List<String> refreshedActionIds, List<Action> refreshedActions) {
-            if (shareLiveLocationButton != null && shareLiveLocationButton.isShown()
-                    && HyperTrack.getConsumerClient().getActiveActionIDList() == null) {
-                shareLiveLocationButton.setVisibility(View.GONE);
-            }
-
             ActionManager actionManager = ActionManager.getSharedManager(Home.this);
 
-            if(actionManager.getHyperTrackAction() != null ){
+            if (actionManager.getHyperTrackAction() != null) {
                 //Get the index of active action from refreshed action Ids
                 int index = refreshedActionIds.indexOf(actionManager.getHyperTrackActionId());
 
-                if(index >= 0) {
+                if (index >= 0) {
 
                     //Get refreshed action Data
                     Action action = refreshedActions.get(refreshedActionIds.indexOf(
@@ -165,19 +155,39 @@ public class Home extends BaseActivity implements HomeView {
 
                     //If action has completed hide stop sharing button
                     if (action.hasActionFinished()) {
-                        stopSharingButton.setVisibility(View.GONE);
                         navigateButton.setVisibility(View.GONE);
                         shareButton.setVisibility(View.GONE);
-
-                        //Show share live location button only when there are multiple action tracking
-                        if (refreshedActionIds.size() > 1) {
-                            showShareLiveLocationButton();
-                        }
                     }
                 }
             }
         }
 
+        @Override
+        public void onLiveLocationShareButtonClicked(Action action) {
+            if (action != null) {
+                expectedPlace = action.getExpectedPlace();
+                lookupId = action.getLookupId();
+            }
+            shareLiveLocation();
+        }
+
+        @Override
+        public void onLiveLocationStopButtonClicked(Action action) {
+            if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
+              /*  mProgressDialog = new ProgressDialog(Home.this);
+                mProgressDialog.setMessage(getString(R.string.stop_sharing_message));
+                mProgressDialog.setCancelable(false);
+                mProgressDialog.show();*/
+                presenter.stopSharing(ActionManager.getSharedManager(Home.this));
+            } else {
+                if (!HyperTrack.checkLocationServices(Home.this)) {
+                    HyperTrack.requestLocationServices(Home.this);
+                } else {
+                    HyperTrack.requestPermissions(Home.this);
+                }
+            }
+
+        }
     };
 
     @Override
@@ -185,6 +195,12 @@ public class Home extends BaseActivity implements HomeView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        if (getIntent() != null && getIntent().hasExtra("class_from")) {
+            if (getIntent().getStringExtra("class_from").
+                    equalsIgnoreCase(Placeline.class.getSimpleName()))
+                fromPlaceline = true;
+        }
+        //  startAnimation();
         // Initialize UI Views
         initializeUIViews();
 
@@ -211,9 +227,6 @@ public class Home extends BaseActivity implements HomeView {
         // Set callback for HyperTrackEvent updates
         setCallbackForHyperTrackEvents();
 
-        // Ask for tracking permission
-        checkForBackgroundTrackingPermission();
-
         // Check if location is being shared currently
         restoreLocationSharingIfNeeded();
 
@@ -225,10 +238,43 @@ public class Home extends BaseActivity implements HomeView {
 
     }
 
-    private void initializeUIViews() {
-        // Initialize Toolbar without Home Button
-        initToolbar();
+    private void startAnimation() {
+        rootLayout = (CoordinatorLayout) findViewById(R.id.parent_layout);
+        rootLayout.setVisibility(View.INVISIBLE);
+        ViewTreeObserver viewTreeObserver = rootLayout.getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    circularRevealActivity();
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                        rootLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                    } else {
+                        rootLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    }
+                }
+            });
+        }
+    }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void circularRevealActivity() {
+
+        int cx = (rootLayout.getLeft() + rootLayout.getRight());
+        int cy = (rootLayout.getTop() + rootLayout.getBottom());
+
+        int finalRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
+
+        // create the animator for this view (the start radius is zero)
+        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, 0, finalRadius);
+        circularReveal.setDuration(600);
+
+        // make the view visible and start the animation
+        rootLayout.setVisibility(View.VISIBLE);
+        circularReveal.start();
+    }
+
+    private void initializeUIViews() {
         // Initialize Retry button
         retryButton = (Button) findViewById(R.id.retryButton);
 
@@ -239,28 +285,6 @@ public class Home extends BaseActivity implements HomeView {
             public void onClick(View v) {
                 presenter.shareTrackingUrl(ActionManager.getSharedManager(Home.this));
                 AnalyticsStore.getLogger().tappedShareIcon(false);
-            }
-        });
-
-        // Initialize ShareLiveLocation button and its click listener
-        shareLiveLocationButton = (Button) findViewById(R.id.shareLiveLocation);
-        bottomButtonLayout = (FrameLayout) findViewById(R.id.home_bottomButtonLayout);
-        shareLiveLocationButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                shareLiveLocation();
-            }
-        });
-
-        // Initialize StopSharing button and its click listener
-        stopSharingButton = (Button) findViewById(R.id.stopSharingButton);
-        stopSharingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Check if Location Permission has been granted & Location has been enabled
-                if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
-                    presenter.stopSharing(ActionManager.getSharedManager(Home.this));
-                }
             }
         });
 
@@ -277,27 +301,6 @@ public class Home extends BaseActivity implements HomeView {
         // Setup Info message view layouts
         infoMessageView = (LinearLayout) findViewById(R.id.home_info_message_view);
         infoMessageViewText = (TextView) findViewById(R.id.home_info_message_text);
-
-        // Initializing the vehicleTypeTabLayout and its tabs using addTab() method
-        vehicleTypeTabLayout = (TabLayout) findViewById(R.id.tabLayout);
-        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_car));
-        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_bus));
-        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_motorbike));
-        vehicleTypeTabLayout.addTab(vehicleTypeTabLayout.newTab().setIcon(R.drawable.ic_vehicle_type_walk));
-
-        placelineView = (FloatingActionButton) findViewById(R.id.placeline_view);
-
-        placelineView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                Intent intent = new Intent(Home.this,Timeline.class);
-                intent.putExtra("user_id",HyperTrack.getUserId());
-                startActivity(intent);
-            }
-        });
-        // findViewById(R.id.open_timeline).performClick();
-
     }
 
     private void shareLiveLocation() {
@@ -376,35 +379,6 @@ public class Home extends BaseActivity implements HomeView {
         });
     }
 
-    /**
-     * Method to request user to be tracked in background. This enables the app to give user better
-     * suggestions for tracking links when he/she is on the move.
-     */
-    private void checkForBackgroundTrackingPermission() {
-        // Check if a valid user exists
-        if (HyperTrack.getUserId() == null)
-            return;
-
-        // Check if the user has denied for Background tracking
-        if (!SharedPreferenceManager.hasRequestedForBackgroundTracking()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.background_tracking_permission_msg)
-                    .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            startHyperTrackTracking(true);
-                        }
-                    })
-                    .setNegativeButton("Disable", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .show();
-            SharedPreferenceManager.setRequestedForBackgroundTracking();
-        }
-    }
 
     /*
      * Method to restore app's state in case of ongoing location sharing for current user.
@@ -414,11 +388,6 @@ public class Home extends BaseActivity implements HomeView {
 
         //Check if there is any existing task to be restored
         if (actionManager.shouldRestoreState()) {
-
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.fetching_details_msg));
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
             onShareLiveLocation();
         }
     }
@@ -429,11 +398,6 @@ public class Home extends BaseActivity implements HomeView {
     private void handleTrackingUrlDeeplink() {
         Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
-            // Add ProgressDialog
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.setMessage(getString(R.string.fetching_details_msg));
-            mProgressDialog.show();
 
             // Get required parameters for tracking Actions on map
             lookupId = intent.getStringExtra(Track.KEY_LOOKUP_ID);
@@ -446,46 +410,31 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showTrackActionsOnMapSuccess(List<Action> actions) {
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
         expectedPlace = ActionManager.getSharedManager(Home.this).getPlace();
-        if(expectedPlace != null)
-            showShareLiveLocationButton();
     }
 
     @Override
     public void showTrackActionsOnMapError(ErrorResponse errorResponse) {
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
         Toast.makeText(this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
     }
 
     /**
      * Method to be called when user selects an expected place to be used for sharing his live location
      * via the tracking url.
+     *
      * @param place Expected place for the user
      */
     private void onSelectPlace(final Place place) {
-        if (place == null || place.getLocation() == null ||  this.isFinishing()) {
+        if (place == null || place.getLocation() == null || this.isFinishing()) {
             return;
         }
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.calculating_eta_message));
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.show();
-
-        presenter.getETAForExpectedPlace(place, selectedVehicleType.toString(), ActionManager.getSharedManager(this));
+        expectedPlace = place;
+        ActionManager.getSharedManager(this).setPlace(expectedPlace);
+        //presenter.getETAForExpectedPlace(place, selectedVehicleType.toString(), ActionManager.getSharedManager(this));
     }
 
     @Override
     public void showGetETAForExpectedPlaceSuccess(ETAResponse etaResponse, Place expectedPlace) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         // Hide Retry Button
         showRetryButton(false, null);
         onETASuccess(etaResponse, expectedPlace);
@@ -493,10 +442,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showGetETAForExpectedPlaceError(ErrorResponse errorResponse, Place expectedPlace) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         // Show Retry button to fetch eta again
         showRetryButton(true, expectedPlace);
 
@@ -511,7 +456,6 @@ public class Home extends BaseActivity implements HomeView {
     private void showRetryButton(boolean showRetryButton, final Place place) {
         if (showRetryButton) {
             // Initialize RetryButton on getETAForDestination failure
-            bottomButtonLayout.setVisibility(View.VISIBLE);
             retryButton.setVisibility(View.VISIBLE);
             retryButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -522,7 +466,6 @@ public class Home extends BaseActivity implements HomeView {
             });
         } else {
             // Reset Retry button
-            bottomButtonLayout.setVisibility(View.GONE);
             retryButton.setVisibility(View.GONE);
             retryButton.setOnClickListener(null);
         }
@@ -530,8 +473,8 @@ public class Home extends BaseActivity implements HomeView {
 
     private void onETASuccess(ETAResponse response, Place place) {
         // Make the VehicleTabLayout visible onETASuccess
-        AnimationUtils.expand(vehicleTypeTabLayout);
-        isvehicleTypeTabLayoutVisible = true;
+        // AnimationUtils.expand(vehicleTypeTabLayout);
+        //isvehicleTypeTabLayoutVisible = true;
         LatLng latLng = new LatLng(place.getLocation().getLatitude(), place.getLocation().getLongitude());
         updateViewForETASuccess((int) response.getDuration() / 60, latLng);
         expectedPlace = place;
@@ -539,7 +482,6 @@ public class Home extends BaseActivity implements HomeView {
     }
 
     private void updateViewForETASuccess(Integer etaInMinutes, LatLng latLng) {
-        showShareLiveLocationButton();
         updateExpectedPlaceMarker(latLng, etaInMinutes);
         updateMapView();
     }
@@ -584,9 +526,7 @@ public class Home extends BaseActivity implements HomeView {
             etaInMinutes = 0;
             etaTimeTextView.setText(String.valueOf(etaInMinutes));
             etaTimeTypeTextView.setText(this.getResources().getQuantityString(R.plurals.eta_in_minute_text, etaInMinutes));
-
         } else {
-
             // Set ETA in minutes if etaInMinutes is equal or below MINUTES_ON_ETA_MARKER_LIMIT
             if (etaInMinutes <= Constants.MINUTES_ON_ETA_MARKER_LIMIT) {
                 etaTimeTextView.setText(String.valueOf(etaInMinutes));
@@ -605,93 +545,6 @@ public class Home extends BaseActivity implements HomeView {
                 }
                 etaTimeTypeTextView.setText(this.getResources().getQuantityString(R.plurals.eta_in_hour_text, hours));
             }
-        }
-    }
-
-    private void showShareLiveLocationButton() {
-        // Set SendETA Button Text
-        shareLiveLocationButton.setText(getString(R.string.action_share_live_location));
-        shareLiveLocationButton.setVisibility(View.VISIBLE);
-        bottomButtonLayout.setVisibility(View.VISIBLE);
-    }
-
-    private void initializeVehicleTypeTab() {
-        // Remove onTabSelectedListener
-        vehicleTypeTabLayout.setOnTabSelectedListener(null);
-
-        for (int i = 0; i < vehicleTypeTabLayout.getTabCount(); i++) {
-            TabLayout.Tab tab = vehicleTypeTabLayout.getTabAt(i);
-            if (tab != null) {
-                if (selectedVehicleType.equals(getVehicleTypeForTabPosition(tab.getPosition()))) {
-                    int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_selected_item);
-                    if (tab.getIcon() != null)
-                        tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
-                    tab.select();
-                    continue;
-                }
-
-                tab.setCustomView(R.layout.vehicle_type_tab_layout);
-
-                if (tab.getIcon() == null)
-                    return;
-
-                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
-                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
-            }
-        }
-
-        // Set onTabSelectedListener
-        vehicleTypeTabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                // VehicleType tab has been changed
-                onVehicleTypeTabChanged(tab);
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-                if (tab == null || tab.getIcon() == null)
-                    return;
-
-                int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_unselected_item);
-                tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-            }
-        });
-    }
-
-    private void onVehicleTypeTabChanged(TabLayout.Tab tab) {
-        if (tab == null || tab.getIcon() == null)
-            return;
-
-        int tabIconColor = ContextCompat.getColor(Home.this, R.color.tab_layout_selected_item);
-        tab.getIcon().setColorFilter(tabIconColor, PorterDuff.Mode.SRC_IN);
-
-        selectedVehicleType = getVehicleTypeForTabPosition(tab.getPosition());
-
-        // Check if a place has been selected or
-        Place place = ActionManager.getSharedManager(Home.this).getPlace();
-        if (place == null)
-            return;
-
-        // Call getETAForDestination with selected vehicleType
-        onSelectPlace(place);
-    }
-
-    private HTUserVehicleType getVehicleTypeForTabPosition(int tabPosition) {
-        switch (tabPosition) {
-            case 1:
-                return HTUserVehicleType.VAN;
-            case 2:
-                return HTUserVehicleType.MOTORCYCLE;
-            case 3:
-                return HTUserVehicleType.WALK;
-            case 0:
-            default:
-                return HTUserVehicleType.CAR;
         }
     }
 
@@ -730,13 +583,14 @@ public class Home extends BaseActivity implements HomeView {
 
     private void updateMapPadding() {
         if (mMap != null) {
-            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
-                    getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+//            int top = isvehicleTypeTabLayoutVisible ? getResources().getDimensionPixelSize(R.dimen.map_top_padding_with_vehicle_type_layout) :
+//                    getResources().getDimensionPixelSize(R.dimen.map_top_padding);
+            int top = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
 
-            if (stopSharingButton.isShown())
-                bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);
+          /*  if (stopSharingButton.isShown())
+                bottom = getResources().getDimensionPixelSize(R.dimen.map_bottom_padding);*/
             if (lookupId == null)
                 bottom = getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
             mMap.setPadding(left, top, 0, bottom);
@@ -747,20 +601,11 @@ public class Home extends BaseActivity implements HomeView {
      * Method to Initiate START TASK
      */
     private void startAction() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage(getString(R.string.sharing_live_location_message));
-        mProgressDialog.show();
-
         presenter.shareLiveLocation(ActionManager.getSharedManager(this), lookupId, expectedPlace);
-        placelineView.setVisibility(View.GONE);
     }
 
     @Override
     public void showShareLiveLocationError(ErrorResponse errorResponse) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
 
         switch (errorResponse.getErrorCode()) {
             case HyperTrackError.Code.PUBLISHABLE_KEY_NOT_CONFIGURED:
@@ -781,10 +626,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showShareLiveLocationSuccess(Action action) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         // Show ShareCard
         presenter.shareTrackingUrl(ActionManager.getSharedManager(this));
 
@@ -804,10 +645,6 @@ public class Home extends BaseActivity implements HomeView {
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
-                // do nothing
-                if (mProgressDialog != null) {
-                    mProgressDialog.dismiss();
-                }
             }
 
             @Override
@@ -818,29 +655,17 @@ public class Home extends BaseActivity implements HomeView {
 
         expectedPlaceMarker = null;
 
-        // Hide VehicleType TabLayout onShareLiveLocation success
-        AnimationUtils.collapse(vehicleTypeTabLayout);
-        isvehicleTypeTabLayoutVisible = false;
-
-        shareLiveLocationButton.setVisibility(View.GONE);
-        stopSharingButton.setVisibility(View.VISIBLE);
-        stopSharingButton.setText(R.string.action_stop_sharing);
-
         shareButton.setVisibility(View.VISIBLE);
         navigateButton.setVisibility(View.VISIBLE);
 
         // Update SelectedVehicleType in persistentStorage
         SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
 
-        supportInvalidateOptionsMenu();
+
     }
 
     @Override
     public void showStopSharingError() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         Toast.makeText(this, getString(R.string.stop_sharing_failed), Toast.LENGTH_SHORT).show();
     }
 
@@ -853,17 +678,6 @@ public class Home extends BaseActivity implements HomeView {
      * Method to update State Variables & UI to reflect Task Ended
      */
     private void OnStopSharing() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
-        // Hide VehicleType TabLayout onShareLiveLocation success
-        AnimationUtils.collapse(vehicleTypeTabLayout);
-        isvehicleTypeTabLayoutVisible = false;
-
-        shareLiveLocationButton.setVisibility(View.GONE);
-        stopSharingButton.setVisibility(View.GONE);
-        bottomButtonLayout.setVisibility(View.GONE);
 
         shareButton.setVisibility(View.GONE);
         navigateButton.setVisibility(View.GONE);
@@ -873,8 +687,6 @@ public class Home extends BaseActivity implements HomeView {
         } else {
             stopHyperTrackTracking();
         }
-
-        supportInvalidateOptionsMenu();
 
         updateMapView();
     }
@@ -956,46 +768,6 @@ public class Home extends BaseActivity implements HomeView {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (ActionManager.getSharedManager(this).getHyperTrackAction() != null)
-            return false;
-
-        getMenuInflater().inflate(R.menu.menu_home, menu);
-        MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
-        if (SharedPreferenceManager.isTrackingON()) {
-            menuItem.setTitle("Pause Tracking");
-            startHyperTrackTracking(false);
-        } else {
-            menuItem.setTitle("Resume Tracking");
-            stopHyperTrackTracking();
-        }
-
-        // Hide menu items if user is on an Action
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.tracking_toogle:
-                // Check if clicked item is Resume tracking
-                if (getString(R.string.action_resume_tracking).equalsIgnoreCase(item.getTitle().toString())) {
-                    // Start Tracking the user
-                    startHyperTrackTracking(true);
-                    item.setTitle(R.string.action_pause_tracking);
-
-                } else {
-                    // Stop Tracking the user
-                    stopHyperTrackTracking();
-                    item.setTitle(R.string.action_resume_tracking);
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     private void startHyperTrackTracking(final boolean byUser) {
         // HACK: Check if user is tracking currently or not
         // Only for exisitng users because Permission and Location Settings have been checked here
@@ -1003,19 +775,17 @@ public class Home extends BaseActivity implements HomeView {
             HyperTrack.startTracking();
             if (byUser) {
                 SharedPreferenceManager.setTrackingON();
-                supportInvalidateOptionsMenu();
             }
 
         } else if (byUser) {
             SharedPreferenceManager.setTrackingON();
-            supportInvalidateOptionsMenu();
         }
     }
 
     private void stopHyperTrackTracking() {
         HyperTrack.stopTracking();
         SharedPreferenceManager.setTrackingOFF();
-        supportInvalidateOptionsMenu();
+
     }
 
     @Override
@@ -1059,7 +829,7 @@ public class Home extends BaseActivity implements HomeView {
             OnboardingManager onboardingManager = OnboardingManager.sharedManager();
             String countryName = Utils.getCountryName(onboardingManager.getUser().getCountryCode());
 
-            if (!TextUtils.isEmpty(countryName)) {
+            if (!HTTextUtils.isEmpty(countryName)) {
                 Intent intent = new Intent(this, FetchLocationIntentService.class);
                 intent.putExtra(FetchLocationIntentService.RECEIVER, new GeocodingResultReceiver(new Handler()));
                 intent.putExtra(FetchLocationIntentService.ADDRESS_DATA_EXTRA, countryName);
@@ -1125,8 +895,6 @@ public class Home extends BaseActivity implements HomeView {
 
             lookupId = actionManager.getHyperTrackAction().getLookupId();
             HyperTrack.trackActionByLookupId(lookupId, null);
-
-            placelineView.setVisibility(View.GONE);
         }
         /*else {
             presenter.stopSharing();
@@ -1182,26 +950,24 @@ public class Home extends BaseActivity implements HomeView {
 
         //If tracking action has completed and summary view is visible then on back press clear the view
         // so that user can share new tracking url without reopening the app.
-        if(actionManager.getHyperTrackAction() != null &&
-                actionManager.getHyperTrackAction().hasActionFinished()){
+        if (actionManager.getHyperTrackAction() != null &&
+                actionManager.getHyperTrackAction().hasActionFinished()) {
 
             // Reset lookupId variable
             lookupId = null;
-            // Initialize VehicleTabLayout
-            initializeVehicleTypeTab();
-
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
-
-            placelineView.setVisibility(View.VISIBLE);
             return;
 
-        }else if (isvehicleTypeTabLayoutVisible) {
+        } else if (isvehicleTypeTabLayoutVisible) {
             OnStopSharing();
             return;
         }
-
         super.onBackPressed();
+        if (!fromPlaceline) {
+            startActivity(new Intent(Home.this, Placeline.class));
+        }
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 
     @Override
@@ -1211,23 +977,15 @@ public class Home extends BaseActivity implements HomeView {
 
         //If tracking action has completed and summary view is visible then on back press clear the view
         // so that user can share new tracking url without reopening the app.
-        if(actionManager.getHyperTrackAction() != null &&
-                actionManager.getHyperTrackAction().hasActionFinished()){
+        if (actionManager.getHyperTrackAction() != null &&
+                actionManager.getHyperTrackAction().hasActionFinished()) {
 
             // Reset lookupId variable
             lookupId = null;
 
-            // Initialize VehicleTabLayout
-            initializeVehicleTypeTab();
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
         }
-
-        HyperTrack.removeActions(null);
-
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
         super.onStop();
     }
 

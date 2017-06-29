@@ -10,7 +10,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".view.Register"
     tools:showIn="@layout/activity_register">
 
 
@@ -77,16 +76,4 @@
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/linearLayout"
-        android:layout_marginEnd="@dimen/margin_high"
-        android:layout_marginLeft="@dimen/margin_high"
-        android:layout_marginRight="@dimen/margin_high"
-        android:layout_marginStart="@dimen/margin_high"
-        android:layout_marginTop="@dimen/margin_high"
-        android:text="@string/enter_phone_number_footer_note"
-        android:textAlignment="center"
-        android:visibility="gone" />
 </RelativeLayout>

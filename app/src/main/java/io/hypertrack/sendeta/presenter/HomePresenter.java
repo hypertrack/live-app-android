@@ -7,7 +7,7 @@ import android.util.Log;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ActionParamsBuilder;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -98,11 +98,13 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT);
 
-        if (!TextUtils.isEmpty(expectedPlace.getId())) {
+        if ((expectedPlace == null)) {
+        } else if (!HTTextUtils.isEmpty(expectedPlace.getId())) {
             builder.setExpectedPlaceId(expectedPlace.getId());
         } else {
             builder.setExpectedPlace(expectedPlace);
         }
+
 
         // Call assignAction to start the tracking action
         HyperTrack.createAndAssignAction(builder.build(), new HyperTrackCallback() {
@@ -110,7 +112,6 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
                     Action action = (Action) response.getResponseObject();
-//                    action.getActionDisplay().setDurationRemaining(String.valueOf(etaInMinutes));
                     actionManager.setHyperTrackAction(action);
                     actionManager.onActionStart();
 
@@ -203,7 +204,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
     @Override
     public void trackActionsOnMap(final String lookupID, final List<String> actionIDs,
                                   final ActionManager actionManager) {
-        if (!TextUtils.isEmpty(lookupID)) {
+        if (!HTTextUtils.isEmpty(lookupID)) {
             HyperTrack.trackActionByLookupId(lookupID, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {

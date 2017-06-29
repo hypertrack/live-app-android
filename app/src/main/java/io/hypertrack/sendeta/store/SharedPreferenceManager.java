@@ -3,7 +3,6 @@ package io.hypertrack.sendeta.store;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.location.GeofencingRequest;
@@ -11,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 
@@ -217,7 +217,7 @@ public class SharedPreferenceManager {
 
     public static HTUserVehicleType getLastSelectedVehicleType(Context context) {
         String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
-        if (TextUtils.isEmpty(vehicleTypeString)) {
+        if (HTTextUtils.isEmpty(vehicleTypeString)) {
             return HTUserVehicleType.CAR;
         }
 

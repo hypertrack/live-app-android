@@ -1,12 +1,12 @@
 package io.hypertrack.sendeta.util;
 
-import android.text.TextUtils;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
@@ -43,7 +43,7 @@ public class DateDeserializer implements JsonDeserializer<Date> {
     // Fallback for ParseException while deserializing
     private Date deserialize12HourDateFormatString(String date) {
         try {
-            if (!TextUtils.isEmpty(date)) {
+            if (!HTTextUtils.isEmpty(date)) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy hh:mm:ss a", Locale.ENGLISH);
                 return dateFormat.parse(date);
             }
@@ -59,7 +59,7 @@ public class DateDeserializer implements JsonDeserializer<Date> {
     // Fallback for ParseException while deserializing
     private Date deserialize24HourDateFormatString(String date) {
         try {
-            if (!TextUtils.isEmpty(date)) {
+            if (!HTTextUtils.isEmpty(date)) {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd, yyyy HH:mm:ss", Locale.ENGLISH);
                 return dateFormat.parse(date);
             }
