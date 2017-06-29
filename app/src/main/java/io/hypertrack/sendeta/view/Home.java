@@ -95,7 +95,6 @@ public class Home extends BaseActivity implements HomeView {
     private Button retryButton;
     private ImageButton shareButton, navigateButton;
     private Place expectedPlace;
-    private ProgressDialog mProgressDialog;
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
     private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
@@ -158,8 +157,6 @@ public class Home extends BaseActivity implements HomeView {
                     if (action.hasActionFinished()) {
                         navigateButton.setVisibility(View.GONE);
                         shareButton.setVisibility(View.GONE);
-                        if (mProgressDialog != null)
-                            mProgressDialog.dismiss();
                     }
                 }
             }
@@ -177,10 +174,10 @@ public class Home extends BaseActivity implements HomeView {
         @Override
         public void onLiveLocationStopButtonClicked(Action action) {
             if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
-                mProgressDialog = new ProgressDialog(Home.this);
+              /*  mProgressDialog = new ProgressDialog(Home.this);
                 mProgressDialog.setMessage(getString(R.string.stop_sharing_message));
                 mProgressDialog.setCancelable(false);
-                mProgressDialog.show();
+                mProgressDialog.show();*/
                 presenter.stopSharing(ActionManager.getSharedManager(Home.this));
             } else {
                 if (!HyperTrack.checkLocationServices(Home.this)) {
@@ -391,11 +388,6 @@ public class Home extends BaseActivity implements HomeView {
 
         //Check if there is any existing task to be restored
         if (actionManager.shouldRestoreState()) {
-
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.fetching_details_msg));
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.show();
             onShareLiveLocation();
         }
     }
@@ -406,11 +398,6 @@ public class Home extends BaseActivity implements HomeView {
     private void handleTrackingUrlDeeplink() {
         Intent intent = getIntent();
         if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
-            // Add ProgressDialog
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setCancelable(false);
-            mProgressDialog.setMessage(getString(R.string.fetching_details_msg));
-            mProgressDialog.show();
 
             // Get required parameters for tracking Actions on map
             lookupId = intent.getStringExtra(Track.KEY_LOOKUP_ID);
@@ -423,17 +410,11 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showTrackActionsOnMapSuccess(List<Action> actions) {
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
         expectedPlace = ActionManager.getSharedManager(Home.this).getPlace();
     }
 
     @Override
     public void showTrackActionsOnMapError(ErrorResponse errorResponse) {
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
         Toast.makeText(this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
     }
 
@@ -454,10 +435,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showGetETAForExpectedPlaceSuccess(ETAResponse etaResponse, Place expectedPlace) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         // Hide Retry Button
         showRetryButton(false, null);
         onETASuccess(etaResponse, expectedPlace);
@@ -465,10 +442,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showGetETAForExpectedPlaceError(ErrorResponse errorResponse, Place expectedPlace) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         // Show Retry button to fetch eta again
         showRetryButton(true, expectedPlace);
 
@@ -628,19 +601,11 @@ public class Home extends BaseActivity implements HomeView {
      * Method to Initiate START TASK
      */
     private void startAction() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setCancelable(false);
-        mProgressDialog.setMessage(getString(R.string.sharing_live_location_message));
-        mProgressDialog.show();
-
         presenter.shareLiveLocation(ActionManager.getSharedManager(this), lookupId, expectedPlace);
     }
 
     @Override
     public void showShareLiveLocationError(ErrorResponse errorResponse) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
 
         switch (errorResponse.getErrorCode()) {
             case HyperTrackError.Code.PUBLISHABLE_KEY_NOT_CONFIGURED:
@@ -661,10 +626,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showShareLiveLocationSuccess(Action action) {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         // Show ShareCard
         presenter.shareTrackingUrl(ActionManager.getSharedManager(this));
 
@@ -684,10 +645,6 @@ public class Home extends BaseActivity implements HomeView {
         HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
-                // do nothing
-                if (mProgressDialog != null) {
-                    mProgressDialog.dismiss();
-                }
             }
 
             @Override
@@ -709,10 +666,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showStopSharingError() {
-        if (mProgressDialog != null) {
-            mProgressDialog.dismiss();
-        }
-
         Toast.makeText(this, getString(R.string.stop_sharing_failed), Toast.LENGTH_SHORT).show();
     }
 
@@ -734,7 +687,6 @@ public class Home extends BaseActivity implements HomeView {
         } else {
             stopHyperTrackTracking();
         }
-
 
         updateMapView();
     }
@@ -1034,10 +986,6 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
         }
-
-        if (mProgressDialog != null)
-            mProgressDialog.dismiss();
-
         super.onStop();
     }
 
