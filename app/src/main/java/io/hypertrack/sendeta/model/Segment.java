@@ -59,6 +59,9 @@ public class Segment implements Serializable
     @SerializedName("location")
     public HyperTrackLocation location;
 
+    @SerializedName("step_count")
+    public Integer stepCount;
+
     @SerializedName("lookup_id")
     public String lookupId;
 
@@ -176,6 +179,14 @@ public class Segment implements Serializable
 
     public void setLocation(HyperTrackLocation location) {
         this.location = location;
+    }
+
+    public Integer getStepCount() {
+        return stepCount;
+    }
+
+    public void setStepCount(Integer stepCount) {
+        this.stepCount = stepCount;
     }
 
     public String getLookupId() {
@@ -326,18 +337,19 @@ public class Segment implements Serializable
                 ", userId='" + userId + '\'' +
                 ", activityType='" + activityType + '\'' +
                 ", place=" + place +
-                ", startedAt='" + startedAt + '\'' +
+                ", startedAt=" + startedAt +
                 ", startLocation=" + startLocation +
-                ", endedAt='" + endedAt + '\'' +
+                ", endedAt=" + endedAt +
                 ", endLocation=" + endLocation +
                 ", distance=" + distance +
                 ", duration=" + duration +
                 ", location=" + location +
+                ", stepCount=" + stepCount +
                 ", lookupId='" + lookupId + '\'' +
                 ", encodedPolyline='" + encodedPolyline + '\'' +
                 ", timeAwarePolyline='" + timeAwarePolyline + '\'' +
-                ", createdAt='" + createdAt + '\'' +
-                ", modifiedAt='" + modifiedAt + '\'' +
+                ", createdAt=" + createdAt +
+                ", modifiedAt=" + modifiedAt +
                 ", type='" + type + '\'' +
                 '}';
     }
