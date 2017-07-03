@@ -1,0 +1,793 @@
+{
+  "id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+  "group_id": null,
+  "lookup_id": "null_456bf03db947d743",
+  "name": "Nexus Test21",
+  "phone": null,
+  "photo": "https://hypertrack-api-v2-prod.s3.amazonaws.com/default_drivers/v2/b8.png",
+  "availability_status": "online",
+  "vehicle_type": "unknown",
+  "pending_actions": [],
+  "last_location": {
+    "activity_confidence": 100,
+    "activity": "stationary",
+    "provider": "non_gps",
+    "geojson": {
+      "type": "Point",
+      "coordinates": [
+        77.1615871,
+        28.5621788
+      ]
+    },
+    "recorded_at": "2017-06-22T14:13:06.644000+00:00",
+    "accuracy": 16.131
+  },
+  "last_online_at": "2017-06-22T14:13:06.317000Z",
+  "last_heartbeat_at": "2017-06-22T14:14:34.856800Z",
+  "last_battery": 100,
+  "location_status": "location_available",
+  "display": {
+    "sub_status_text": "Last updated 4 minutes ago",
+    "battery": 100,
+    "has_new_sdk": true,
+    "activity_text": "Stationary",
+    "status_text": "At place",
+    "speed": null,
+    "is_warning": false
+  },
+  "created_at": "2017-05-04T16:54:54.206497Z",
+  "modified_at": "2017-06-22T14:14:34.861903Z",
+  "is_connected": true,
+  "segments": [
+    {
+      "id": "ffc7173d-754c-499b-819d-dc1a81c3fe4c",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "place": {
+        "id": "e64b1157-c118-4de5-aeec-8c6be4a1014d",
+        "name": "98",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.19366230070591,
+            28.563625655116798
+          ]
+        },
+        "address": "98, Gali Number 4, Block B 2, Safdarjung Enclave, New Delhi, Delhi 110022, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-21T16:37:41.949000Z",
+      "ended_at": "2017-06-22T04:11:53.852000Z",
+      "duration": 41651.903,
+      "location": {
+        "activity_confidence": 92,
+        "altitude": 203.0,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1936791,
+            28.5635582
+          ]
+        },
+        "recorded_at": "2017-06-21T16:37:41.848000+00:00",
+        "accuracy": 58.0
+      },
+      "lookup_id": "9e084c55-7eef-4dcd-ba31-935fa46bd9c5",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-21T16:48:34.290413Z",
+      "modified_at": "2017-06-22T04:11:56.321773Z",
+      "type": "stop"
+    },
+    {
+      "id": "73825219-1331-416a-a005-5511f39b1ff7",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "activity_type": "automotive",
+      "started_at": "2017-06-22T04:11:53.852000Z",
+      "start_location": {
+        "activity_confidence": 92,
+        "altitude": 203.0,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1936791,
+            28.5635582
+          ]
+        },
+        "recorded_at": "2017-06-22T04:11:53.852000+00:00",
+        "accuracy": 58.0
+      },
+      "ended_at": "2017-06-22T04:11:54.016000Z",
+      "end_location": {
+        "activity_confidence": 100,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "recorded_at": "2017-06-22T04:11:53.758000+00:00",
+        "accuracy": 22.486
+      },
+      "distance": 3423,
+      "duration": 0.164,
+      "encoded_polyline": "gyimDo{cvMCLSG_Be@??Jk@??@A??`E|@??????Fw@??VD~CviEC?",
+      "time_aware_polyline": "gyimDo{cvMqw`lhxACL?SGhzbA_Be@_@??a@Jk@a@??_@@Aa@??a@`E|@a@??knA??yC??iAFw@iA??iAVDiA~CviE_XC?s|~@",
+      "created_at": "2017-06-21T18:33:01.746778Z",
+      "modified_at": "2017-06-22T04:16:56.526853Z",
+      "type": "trip"
+    },
+    {
+      "id": "4cd9e17a-704b-428a-a738-4c61ac97498d",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "place": {
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1616109,
+            28.5622531
+          ]
+        },
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T04:11:54.016000Z",
+      "ended_at": "2017-06-22T08:13:13.792000Z",
+      "duration": 14479.776,
+      "location": {
+        "activity_confidence": 100,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "recorded_at": "2017-06-22T04:11:53.758000+00:00",
+        "accuracy": 22.486
+      },
+      "lookup_id": "7675e7aa-8e29-437a-a535-9624af556b3f",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-22T04:14:56.464914Z",
+      "modified_at": "2017-06-22T08:13:19.312065Z",
+      "type": "stop"
+    },
+    {
+      "id": "58341e07-4128-4e83-8e00-934a0775f18b",
+      "started_at": "2017-06-22T08:13:13.792000Z",
+      "ended_at": "2017-06-22T08:51:29.307000Z",
+      "duration": 2295.515,
+      "reason": "disabled",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "location_void"
+    },
+    {
+      "id": "c43f2e58-4dd6-4198-b5b9-1b7a619af05d",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "place": {
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1616109,
+            28.5622531
+          ]
+        },
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T08:51:29.506000Z",
+      "ended_at": "2017-06-22T08:52:29.506000Z",
+      "duration": 60.0,
+      "location": {
+        "activity_confidence": 100,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "recorded_at": "2017-06-22T08:51:29.471000+00:00",
+        "accuracy": 22.423
+      },
+      "lookup_id": "a340222a-075f-4bd0-83da-52b375963f6d",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-22T08:51:31.752831Z",
+      "modified_at": "2017-06-22T12:24:40.101569Z",
+      "type": "stop"
+    },
+    {
+      "id": "45b1c121-1dda-452f-90a2-93b8b9ef7f59",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "activity_type": "automotive",
+      "started_at": "2017-06-22T12:24:38.446000Z",
+      "start_location": {
+        "activity_confidence": 100,
+        "recorded_at": "2017-06-22T12:24:38.433000+00:00",
+        "activity": "stationary",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615591,
+            28.5621705
+          ]
+        },
+        "accuracy": 22.78
+      },
+      "ended_at": "2017-06-22T14:12:54.404000Z",
+      "end_location": {
+        "activity_confidence": 100,
+        "activity": "stationary",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615816,
+            28.5621502
+          ]
+        },
+        "recorded_at": "2017-06-22T14:11:38.910000+00:00",
+        "accuracy": 22.847
+      },
+      "distance": 887,
+      "duration": 6495.958,
+      "encoded_polyline": "qpimDwr}uM@??CAaA?G??s@?K@S@????I@m@J_ARUHm@RYJ??h@fBb@hA??EB_@P]R_@T??m@b@q@d@??e@_AAA??u@iB??h@[r@g@d@Y??HE`@WZOFC??XKx@YHC~@Sd@IFAHA????RAJAr@????F@`A@D?E",
+      "time_aware_polyline": "qpimDwr}uMkozmhxA@???C?AaAoq@?G????s@??K@?S@A??????I@?m@J?_AR?UHAm@R?YJ????h@fB?b@hA????EB?_@P?]R?_@T????m@b@?q@d@????e@_A?AA????u@iB????h@[?r@g@?d@Y????HEA`@W?ZO?FC???AXK?x@YAHC?~@S?d@IAFA?HA??????ARA?JA?r@??????FA@`AA@DA?E{aJ",
+      "created_at": "2017-06-22T12:24:40.147578Z",
+      "modified_at": "2017-06-22T14:14:56.529215Z",
+      "type": "trip"
+    },
+    {
+      "id": "d830c814-844f-4545-afeb-ececcfeb3deb",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T14:13:06.660000Z",
+      "ended_at": null,
+      "duration": 88.1968,
+      "location": {
+        "activity_confidence": 0,
+        "recorded_at": "2017-06-22T14:13:06.644000+00:00",
+        "provider": "non_gps",
+        "geojson": {
+          "type": "Point",
+          "coordinates": [
+            77.1615871,
+            28.5621788
+          ]
+        },
+        "accuracy": 16.131
+      },
+      "lookup_id": "18c4356e-5c56-4a16-ab14-2e66b538adcf",
+      "step_count": null,
+      "step_distance": null,
+      "created_at": "2017-06-22T14:13:11.906679Z",
+      "modified_at": "2017-06-22T14:13:11.906719Z",
+      "type": "stop"
+    }
+  ],
+  "events": [
+    {
+      "id": "7dad2266-c509-4b60-805b-8b654a76162f",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T08:13:13.792000Z",
+      "type": "device.location.disabled",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    },
+    {
+      "id": "2e71ffdb-8e4a-4017-a25e-a76dc9cf4584",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T08:51:29.307000Z",
+      "type": "device.location.enabled",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    },
+    {
+      "id": "54b4ee71-1965-45c9-a4e8-38b1139016da",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T14:12:54.404000Z",
+      "type": "tracking.ended",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    },
+    {
+      "id": "e7744ce5-6be7-4e46-b916-0fc6bfc19074",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "recorded_at": "2017-06-22T14:13:06.317000Z",
+      "type": "tracking.started",
+      "object_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "has_been_delivered": false,
+      "delivered_at": null
+    }
+  ],
+  "actions": [
+    {
+      "id": "f008b5b4-b41d-4a69-b679-49b2d3bbb653",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1616109,
+            28.5622531
+          ]
+        },
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T04:42:35.060000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "62ae4007-dcac-4d02-925e-681786a6142f",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T04:44:10.505000Z",
+      "assigned_at": "2017-06-22T04:42:38.472405Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "aqimDas}uMLF",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "4gpM0Ch",
+      "tracking_url": "https://trck.at/4gpM0Ch",
+      "lookup_id": "e6aa59ce-ca8b-45f0-aae5-7c1a73bd4343",
+      "created_at": "2017-06-22T04:42:38.450774Z",
+      "modified_at": "2017-06-22T04:44:10.819988Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 92.032595,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "00925ef7-fafb-43eb-8283-017d18b88b4d",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "0358a8f2-7199-407b-8c06-43c2570c207f",
+        "name": "Work",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1616109,
+            28.5622531
+          ]
+        },
+        "address": "52, Vasant Marg, Block A, Vasant Vihar, New Delhi, 110057, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T04:44:44.682000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "641654cb-4d3c-4e82-a5df-8d5ab4c3a001",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615703,
+            28.5621828
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T04:47:06.392000Z",
+      "assigned_at": "2017-06-22T04:44:44.917974Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "aqimDas}uMLF",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "eobq2pKG",
+      "tracking_url": "https://trck.at/eobq2pKG",
+      "lookup_id": "e6aa59ce-ca8b-45f0-aae5-7c1a73bd4343",
+      "created_at": "2017-06-22T04:44:44.904820Z",
+      "modified_at": "2017-06-22T04:47:08.234824Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 141.474026,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "8d248d52-cf61-4c3b-acfd-ee1798684305",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:24:38.433000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "ed96f0f4-6a6a-404b-998f-ce493ec09ced",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615591,
+            28.5621705
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:24:45.005000Z",
+      "assigned_at": "2017-06-22T12:24:40.101083Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uM@F",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "npvPJpgh",
+      "tracking_url": "https://trck.at/npvPJpgh",
+      "lookup_id": "7594ec09-f594-4b2b-905a-aad3493b4bc9",
+      "created_at": "2017-06-22T12:24:40.070213Z",
+      "modified_at": "2017-06-22T12:24:45.391718Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 4.903917,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "98fd84bf-25de-4a4e-b16b-2b442d15e0a2",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:38:06.611000Z",
+      "expected_place": {
+        "id": "37611b06-1f11-4d8a-88b6-7a1c833b5ab7",
+        "name": "Hauz Khas",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.20013681799173,
+            28.549448983976607
+          ]
+        },
+        "address": "Hauz Khas, New Delhi, Delhi 110016, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "fd6291ef-1d72-4d7a-96bc-81edeb321202",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615816,
+            28.562167
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:43:41.650000Z",
+      "assigned_at": "2017-06-22T12:38:09.923577Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uMgHHXKx@YHC~@Sd@IFAHA????RAJAr@????F@`A@DCE",
+      "eta": null,
+      "initial_eta": "2017-06-22T12:53:26.337745Z",
+      "short_code": "WPbZRBar",
+      "tracking_url": "https://trck.at/WPbZRBar",
+      "lookup_id": "9c605d21-1043-47e3-94ea-00566f3b9dd0",
+      "created_at": "2017-06-22T12:38:09.905008Z",
+      "modified_at": "2017-06-22T12:43:42.357126Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 331.726423,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": [
+        {
+          "type": "action.completed_at_different_place_than_expected",
+          "value": 4022.4
+        }
+      ]
+    },
+    {
+      "id": "39850e34-3863-4aee-99c9-1de59081b939",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:44:32.655000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "e858020e-09ff-4c1e-80b9-1757aebf5f7e",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615775,
+            28.5621814
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:44:51.986000Z",
+      "assigned_at": "2017-06-22T12:44:32.904183Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uM?B",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "xvsE6mXp",
+      "tracking_url": "https://trck.at/xvsE6mXp",
+      "lookup_id": "f5f97b1d-9dc5-4e2c-8fff-caae86fc8a77",
+      "created_at": "2017-06-22T12:44:32.889696Z",
+      "modified_at": "2017-06-22T12:44:52.372272Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 19.081817,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    },
+    {
+      "id": "d39a9b8f-6d0b-4926-bd4f-0bf15190aeab",
+      "user_id": "ef4172ce-2e85-4fa3-83fe-6d20e6fdc66f",
+      "type": "visit",
+      "started_place": {
+        "id": "35b42067-eebe-4e14-9aba-b9e553723e65",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.16159800000001,
+            28.562179999999994
+          ]
+        },
+        "address": "Basement, E65, Vasant Marg, Vasant Vihar, Block E, Vasant Vihar, New Delhi, Delhi 110029, India",
+        "locality": "",
+        "landmark": "",
+        "zip_code": "",
+        "city": "",
+        "state": "",
+        "country": ""
+      },
+      "started_at": "2017-06-22T12:46:13.691000Z",
+      "expected_place": null,
+      "scheduled_at": null,
+      "expected_at": null,
+      "completed_place": {
+        "id": "50e2e8e8-4251-48b7-9b30-2a8b43eddcdb",
+        "name": "",
+        "location": {
+          "type": "Point",
+          "coordinates": [
+            77.1615481,
+            28.562186
+          ]
+        },
+        "address": "A53, Vasant Marg, Vasant Vihar, New Delhi, Delhi 110070, India",
+        "locality": "Vasant Vihar",
+        "landmark": "",
+        "zip_code": "110070",
+        "city": "New Delhi",
+        "state": "DL",
+        "country": "IN"
+      },
+      "completed_at": "2017-06-22T12:47:25.050000Z",
+      "assigned_at": "2017-06-22T12:46:14.397326Z",
+      "status": "completed",
+      "sub_status": null,
+      "encoded_polyline": "spimD_s}uMAH",
+      "eta": null,
+      "initial_eta": null,
+      "short_code": "IDoBW9Cn",
+      "tracking_url": "https://trck.at/IDoBW9Cn",
+      "lookup_id": "f5f97b1d-9dc5-4e2c-8fff-caae86fc8a77",
+      "created_at": "2017-06-22T12:46:14.362472Z",
+      "modified_at": "2017-06-22T12:47:25.659578Z",
+      "display": {
+        "status_text": "Completed",
+        "sub_status_text": "",
+        "distance_remaining": null,
+        "duration_elapsed": 70.652674,
+        "show_summary": true,
+        "duration_remaining": null,
+        "is_late": false
+      },
+      "suspended_at": null,
+      "canceled_at": null,
+      "event_flags": []
+    }
+  ],
+  "timeline_date": "2017-06-22"
+}

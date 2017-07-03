@@ -3,8 +3,10 @@
     <string name="action_stop_sharing">STOP SHARING</string>
     <string name="action_share_live_location">Share Live Location</string>
     <string name="action_retry">Retry</string>
-    <string name="action_resume_tracking">Resume tracking</string>
-    <string name="action_pause_tracking">Pause tracking</string>
+    <string name="start_tracking">Start tracking</string>
+    <string name="stop_tracking">Stop tracking</string>
+    <string name="start_mock_tracking">Start Mock Tracking</string>
+    <string name="stop_mock_tracking">Stop Mock tracking</string>
 
     <!-- Strings related to login -->
     <string name="prompt_name">Name</string>
@@ -33,12 +35,12 @@
 
     <!-- Progress bar strings -->
     <string name="registration_phone_number">Setting up your account</string>
-    <string name="enter_phone_number">Enter Phone Number</string>
+    <string name="enter_phone_number">Phone Number</string>
 
     <string name="calculating_eta_message">Calculating ETA…</string>
     <string name="sharing_live_location_message">Sharing your live location…</string>
     <string name="fetching_details_msg">Fetching details…</string>
-    <string name="stop_sharing_message">Stopping your live location…</string>
+    <string name="stop_sharing_message">Completing your visit</string>
 
     <!-- Success Strings -->
     <string name="profile_upload_success">Profile pic uploaded successfully</string>
@@ -85,7 +87,8 @@
     </plurals>
 
     <!--Toolbar Title-->
-    <string name="location_permission_detail">HyperTrack needs location permission to let you share your live location with your friends and family.</string>
+    <string name="location_permission_detail">We need your location permission to let you share your live location with your friends and family</string>
 
     <string name="background_tracking_permission_msg">We will enable the background tracking by default. Do you want to enable it?</string>
+    <string name="your_placeline">Placeline TM</string>
 </resources>

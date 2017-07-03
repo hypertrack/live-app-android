@@ -35,7 +35,7 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public Integer getToolbarLogoIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-        return R.drawable.ic_ht_logo;
+        return R.drawable.ic_ht_logo_white;
     }
 
     @Override
@@ -63,11 +63,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
         return HyperTrack.getConsumerClient().getActionIDs() == null;
     }
 
-    @Override
-    public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1 &&
-                HyperTrack.getConsumerClient().getAction(HyperTrack.getConsumerClient().getActionIDs().get(0)).hasActionFinished();
-    }
 
     @Override
     public boolean showPlaceSelectorView() {
@@ -84,19 +79,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
         return false;
     }
 
-    @Override
-    public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
-        int bottom = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
-        int right = mContext.getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-        int top = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_top_padding);
-
-        if (HyperTrack.getConsumerClient().getActionIDs() == null) {
-            bottom = mContext.getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
-            return new int[]{0, 0, 0, bottom};
-        }
-
-        return new int[]{0, top, right, bottom};
-    }
 
     @Override
     public boolean enableLiveLocationSharingView() {

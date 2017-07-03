@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/app_primary_light</color>
-    <color name="colorPrimaryDark">@color/app_primary</color>
-    <color name="colorAccent">#FF008CEE</color>
+    <color name="colorPrimary">#2a2d2e</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">@color/tracking_experience</color>
 
+    <color name="secondaryColor">#ffffff</color>
     <color name="app_primary">#909090</color>
     <color name="app_primary_light">#F4F4F4</color>
     <color name="app_primary_dark">#606060</color>
@@ -45,4 +46,6 @@
     <color name="tab_layout_unselected_item">#66008CEE</color>
 
     <color name="slide_to_end_gradient">#FF58B8FC</color>
+
+    <color name="profile_detail_border">#bdbdbd</color>
 </resources>
