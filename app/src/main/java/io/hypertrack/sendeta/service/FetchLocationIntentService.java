@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -49,8 +50,7 @@ public class FetchLocationIntentService extends IntentService{
     public static final String PACKAGE_NAME =
             "io.hypertrack.meta";
     public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
-    public static final String RESULT_DATA_KEY = PACKAGE_NAME +
-            ".RESULT_DATA_KEY";
+    public static final String RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_ADDRESS_KEY";
     public static final String ADDRESS_DATA_EXTRA = PACKAGE_NAME +
             ".ADDRESS_DATA_EXTRA";
 

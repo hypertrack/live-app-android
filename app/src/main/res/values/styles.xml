@@ -3,11 +3,11 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimaryDark</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
 
-        <item name="colorButtonNormal">@color/colorAccent</item>
+        <item name="colorButtonNormal">@color/colorPrimaryDark</item>
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
@@ -19,11 +19,12 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:background">@color/colorPrimary</item>
         <item name="colorControlNormal">@color/colorAccent</item>
-        <item name="android:textColorPrimary">@color/colorAccent</item>
-        <item name="titleTextColor">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/secondaryColor</item>
+        <item name="titleTextColor">@color/secondaryColor</item>
     </style>
 
-    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" >
+    </style>
 
     <style name="Theme.Transparent" parent="Theme.AppCompat.Light.NoActionBar">
 
@@ -48,22 +49,50 @@
     <style name="Toolbar.TitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">20sp</item>
         <item name="android:textStyle">normal</item>
-        <item name="android:color">@color/colorAccent</item>
+        <item name="android:color">@color/secondaryColor</item>
     </style>
 
     <style name="Toolbar.SubTitleText" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">normal</item>
         <item name="android:textAllCaps">false</item>
-        <item name="android:color">@color/colorAccent</item>
+        <item name="android:color">@color/secondaryColor</item>
     </style>
 
     <style name="HTOrderStatusToolbarTheme" parent="ThemeOverlay.AppCompat.ActionBar">
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:gravity">center</item>
         <item name="colorControlNormal">@color/colorAccent</item>
-        <item name="android:textColorPrimary">@color/colorAccent</item>
-        <item name="titleTextColor">@color/colorAccent</item>
-        <item name="subtitleTextColor">@color/colorAccent</item>
+
+        <item name="android:textColorPrimary">@color/secondaryColor</item>
+        <item name="titleTextColor">@color/secondaryColor</item>
+        <item name="subtitleTextColor">@color/secondaryColor</item>
+    </style>
+
+    <style name="Toolbar" parent="Theme.AppCompat">
+        <!-- android:actionMenuTextColor is the color of the text of action (menu) items in the Toolbar, at least in the
+        Theme.AppCompat theme. For some reason, they already get the textColorPrimary when running on API 21, but not on older versions of
+        Android, so this is only necessary to support older Android versions. -->
+        <item name="actionMenuTextColor">@color/secondaryColor</item>
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
+    <style name="ToolbarStyle">
+        <item name="android:minHeight">?attr/actionBarSize</item>
+        <!--<item name="android:background">@color/colorPrimary</item>-->
+        <item name="theme">@style/Toolbar</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="colorControlNormal">@android:color/white</item>
+        <item name="colorControlHighlight">#3fff</item>
+        <item name="titleTextAppearance">@style/ToolbarTitleTextAppearance</item>
+        <item name="subtitleTextAppearance">@style/ToolbarSubtitleTextAppearance</item>
+    </style>
+
+    <style name="ToolbarTitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Title">
+        <item name="android:textColor">@color/secondaryColor</item>
+    </style>
+
+    <style name="ToolbarSubtitleTextAppearance" parent="TextAppearance.Widget.AppCompat.Toolbar.Subtitle">
+        <item name="android:textColor">@color/secondaryColor</item>
     </style>
 </resources>

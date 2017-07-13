@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -23,11 +24,18 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.network.retrofit;
 
+import com.hypertrack.lib.models.User;
+
 import java.util.List;
 
+import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.ETAResponse;
+import io.hypertrack.sendeta.model.PlacelineData;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -36,4 +44,10 @@ import retrofit2.http.Query;
 public interface HyperTrackService {
     @GET("/api/v1/eta/")
     Call<List<ETAResponse>> getTaskETA(@Query("origin") String origin, @Query("destination") String destination, @Query("vehicle_type") String vehicleType);
+
+    @GET("users/{id}/placeline/")
+    Call<PlacelineData> getUserPlaceline(@Path("id") String id, @Query("date") String date);
+
+    @POST("users/{id}/accept_invite/")
+    Call<User> acceptInvite(@Path("id") String id, @Body AcceptInviteModel acceptInviteModel);
 }

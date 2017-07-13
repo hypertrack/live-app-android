@@ -56,6 +56,7 @@ public class HyperTrackServiceGenerator {
                 // Request customization: add request headers
                 Request.Builder requestBuilder = original.newBuilder()
                         .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
+                        .header("User-Agent", "hypertrack-live-android")
                         .method(original.method(), original.body());
 
                 Request request = requestBuilder.build();

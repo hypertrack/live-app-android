@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -26,13 +27,12 @@ package io.hypertrack.sendeta.store;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.text.TextUtils;
-
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 
@@ -42,6 +42,7 @@ import java.util.Date;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.util.Constants;
+import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.DateDeserializer;
 import io.hypertrack.sendeta.util.DateSerializer;
 import io.hypertrack.sendeta.util.LocationDeserializer;
@@ -140,6 +141,7 @@ public class SharedPreferenceManager {
             return gson.fromJson(actionJson, type);
         } catch (Exception e) {
             e.printStackTrace();
+            CrashlyticsWrapper.log(e);
         }
         return null;
     }
@@ -238,7 +240,7 @@ public class SharedPreferenceManager {
 
     public static HTUserVehicleType getLastSelectedVehicleType(Context context) {
         String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
-        if (TextUtils.isEmpty(vehicleTypeString)) {
+        if (HTTextUtils.isEmpty(vehicleTypeString)) {
             return HTUserVehicleType.CAR;
         }
 
@@ -273,6 +275,11 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
+    public static void resetBackgroundTracking() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putBoolean(TRACKING_DIALOG, false);
+        editor.apply();
+    }
     public static boolean hasRequestedForBackgroundTracking() {
         return getSharedPreferences().getBoolean(TRACKING_DIALOG, false);
     }

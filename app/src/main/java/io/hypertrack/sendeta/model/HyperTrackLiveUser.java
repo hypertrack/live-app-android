@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -23,12 +24,11 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.model;
 
-import android.text.TextUtils;
-
 import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 
 import java.io.BufferedInputStream;
@@ -53,9 +53,6 @@ public class HyperTrackLiveUser extends User {
 
     @SerializedName("photoData")
     private byte[] photoData;
-
-    private HyperTrackLiveUser() {
-    }
 
     public static HyperTrackLiveUser sharedHyperTrackLiveUser() {
         if (hyperTrackLiveUser == null) {
@@ -107,7 +104,7 @@ public class HyperTrackLiveUser extends User {
 
     public String getInternationalNumber(String phoneNo) throws NumberParseException {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
-        if (TextUtils.isEmpty(phoneNo))
+        if (HTTextUtils.isEmpty(phoneNo))
             return null;
 
         Phonenumber.PhoneNumber number = phoneUtil.parse(phoneNo, getCountryCode());

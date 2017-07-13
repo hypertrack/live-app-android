@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -63,6 +64,9 @@ public class ImageUtils {
 
             return file;
         } catch (Exception e) {
+
+            CrashlyticsWrapper.log(e);
+            e.printStackTrace();
             return null;
         }
     }
@@ -101,9 +105,10 @@ public class ImageUtils {
             file.createNewFile();
             FileOutputStream outputStream = new FileOutputStream(file);
             selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-
             return file;
         } catch (Exception e) {
+            e.printStackTrace();
+            CrashlyticsWrapper.log(e);
             return null;
         }
     }
@@ -132,6 +137,7 @@ public class ImageUtils {
 
         } catch (IOException e) {
             e.printStackTrace();
+            CrashlyticsWrapper.log(e);
         }
 
         return rotatedBitmap;
@@ -153,6 +159,7 @@ public class ImageUtils {
             view.draw(canvas);
         } catch (Exception e) {
             e.printStackTrace();
+            CrashlyticsWrapper.log(e);
         }
 
         return bitmap;

@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -22,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 package io.hypertrack.sendeta.util.images;
-
 
 import android.content.Context;
 import android.content.res.ColorStateList;
