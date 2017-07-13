@@ -89,5 +89,13 @@ crashlytics-build.properties
 
 .DS_store/
 .DS_store
-app/src/main/java/io/hypertrack/sendeta/SearchView/
-app/src/main/java/io/hypertrack/sendeta/autocompleteplace/
+
+/key.properties
+/app/google-services.json
+app/google-services.json
+/crashlytics.properties
+/app/sendeta-release.jks
+/app/fabric.properties
+/keystore.properties
+/app/src/main/res/values/api-keys.xml
+

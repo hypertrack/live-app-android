@@ -26,15 +26,14 @@ package io.hypertrack.sendeta.util;
 import android.content.Context;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import java.util.Locale;
-
 
 /**
  * Created by piyush on 10/09/16.
@@ -52,11 +51,11 @@ public class Utils {
             code = service.getNetworkCountryIso();
         }
 
-        if (!TextUtils.isEmpty(code)) {
+        if (!HTTextUtils.isEmpty(code)) {
             code = service.getSimCountryIso();
         }
 
-        if (TextUtils.isEmpty(code)) {
+        if (HTTextUtils.isEmpty(code)) {
             code = paramContext.getResources().getConfiguration().locale.getCountry();
         }
 
@@ -68,7 +67,7 @@ public class Utils {
     }
 
     public static String getCountryName(String isoCode) {
-        if (!TextUtils.isEmpty(isoCode)) {
+        if (!HTTextUtils.isEmpty(isoCode)) {
             Locale locale = new Locale(Locale.getDefault().getDisplayLanguage(), isoCode);
             return locale.getDisplayCountry().trim();
         }
@@ -98,6 +97,7 @@ public class Utils {
 
     /**
      * Method to show Keyboard implicitly with @param editText as the focus
+     *
      * @param context
      * @param view
      */

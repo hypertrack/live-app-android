@@ -54,7 +54,8 @@
                 <data android:scheme="@string/deeplink_scheme" />
             </intent-filter>
 
-            <!-- Intent Filter to handle FB Messenger messages -->
+
+            <!-- Intent Filter to handle trck.at link  -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -69,6 +70,19 @@
                     android:host="@string/tracking_url"
                     android:pathPrefix="/" />
             </intent-filter>
+
+
+            <!--Intent filter to handle Branch Deep Link-->
+            <intent-filter>
+                <data
+                    android:host="open"
+                    android:scheme="hypertrack.io" />
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+
         </activity>
 
         <activity
@@ -84,24 +98,24 @@
         <activity
             android:name=".view.Profile"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden" />
+            android:windowSoftInputMode="adjustPan" />
 
         <activity
             android:name=".view.Track"
             android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait"/>
+
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.Placeline"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.AccountPermissions"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"></activity>
 
         <!-- Register Receivers here -->
-        <receiver
-            android:name="com.google.android.gms.gcm.GcmReceiver"
-            android:exported="true"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-
-                <category android:name="io.hypertrack.meta" />
-            </intent-filter>
-        </receiver>
 
         <receiver android:name=".receiver.GpsLocationReceiver">
             <intent-filter>
@@ -114,6 +128,15 @@
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
                 <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Branch install referrer tracking -->
+        <receiver
+            android:name="io.branch.referral.InstallListener"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
 
@@ -137,11 +160,31 @@
        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="Add your Google Map API key" />
-
+            android:value="@string/GoogleMapsKey" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
+
+        <!--Add your fabric crashlytics API key and
+         uncomment line from 171 to 173 to use Crashlytics-->
+
+        <!--   <meta-data
+               android:name="io.fabric.ApiKey"
+               android:value="YOUR_CRASHLYTICS_API_KEY" />-->
+
+        <!-- Branch init -->
+
+        <meta-data
+            android:name="io.branch.sdk.BranchKey"
+            android:value="@string/branch_live" />
+        <meta-data
+            android:name="io.branch.sdk.BranchKey.test"
+            android:value="@string/branch_test" />
+
+        <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
+        <meta-data
+            android:name="io.branch.sdk.TestMode"
+            android:value="false" />
 
         <!-- Register Services here -->
         <service
@@ -153,19 +196,18 @@
             android:exported="false" />
 
         <!--
-        * - Uncomment `HyperTrackLiveFCMListenerService` service tag in the <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L161">AndroidManifest.xml</a> file.
-        * - Uncomment <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L36">HyperTrackLiveFCMListenerService.java</a> file.
-        * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
-        * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
-        -->
-    <!-- <service
-            android:name=".service.HyperTrackLiveFCMListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service> -->
-
+       * - Uncomment `HyperTrackLiveFCMListenerService` service tag in the <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L161">AndroidManifest.xml</a> file.
+       * - Uncomment <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L36">HyperTrackLiveFCMListenerService.java</a> file.
+       * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
+       * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
+       -->
+        <!-- <service
+             android:name=".service.HyperTrackLiveFCMListenerService"
+             android:exported="false">
+             <intent-filter>
+                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
+             </intent-filter>
+         </service>-->
     </application>
 
 </manifest>

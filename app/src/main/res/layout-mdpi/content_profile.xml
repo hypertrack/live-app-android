@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/profile.image_layout"
+            android:layout_width="@dimen/profile_image_size"
+            android:layout_height="@dimen/profile_image_size"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/margin_huge">
+
+            <io.hypertrack.sendeta.util.images.RoundedImageView
+                android:id="@+id/profile.image_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/circle_image_button"
+                android:onClick="onProfileImageViewClicked"
+                android:padding="0dp"
+                android:scaleType="fitCenter"
+                android:src="@drawable/default_profile_pic" />
+
+            <ProgressBar
+                android:id="@+id/profile.image_loader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/profile.camera_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_margin="@dimen/margin_low"
+                android:src="@drawable/profile_camera_icon" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/profile.description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/margin_xxhigh"
+            android:layout_marginRight="@dimen/margin_xxhigh"
+            android:layout_marginTop="@dimen/margin_xhigh"
+            android:gravity="center"
+            android:text="Add your photo, name and phone so that your friends can see you on a map, and call you when you are on the way"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_medium" />
+
+        <RelativeLayout
+            android:id="@+id/profile.detail_layout"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginRight="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_high"
+            android:background="@drawable/profile_detail_background">
+
+            <View
+                android:id="@+id/horizontal_separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_centerVertical="true"
+                android:background="@color/profile_detail_border" />
+
+            <EditText
+                android:id="@+id/profile.name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/horizontal_separator"
+                android:layout_alignParentTop="true"
+                android:layout_marginLeft="@dimen/margin_high"
+                android:layout_marginRight="@dimen/margin_high"
+                android:background="@android:color/transparent"
+                android:gravity="center"
+                android:hint="@string/name"
+                android:imeOptions="actionNext"
+                android:inputType="textNoSuggestions"
+                android:maxLines="1"
+                android:textColorHint="@color/profile_detail_border" />
+
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@id/horizontal_separator"
+                android:layout_centerHorizontal="true"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <LinearLayout
+                    android:id="@+id/register.country_code_layout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <Spinner
+                        android:id="@+id/register.country_codes_spinner"
+                        style="@style/TextViewSpinnerItem"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:clipToPadding="true"
+                        android:gravity="center"
+                        android:padding="0dp"
+                        android:spinnerMode="dialog"
+                        android:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/register.country_code"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingBottom="@dimen/padding_base"
+                        android:paddingRight="@dimen/padding_base"
+                        android:paddingTop="@dimen/padding_base"
+                        android:textColor="@android:color/black"
+                        android:textColorHint="@color/profile_detail_border"
+                        android:textSize="@dimen/text_medium"
+                        android:visibility="gone" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/register.phone_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:hint="@string/enter_phone_number"
+                    android:imeActionId="@+id/login"
+                    android:inputType="phone"
+                    android:maxLength="10"
+                    android:paddingRight="@dimen/padding_xxhigh"
+                    android:textColorHint="@color/profile_detail_border"
+                    android:textSize="@dimen/text_medium" />
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/register.profile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/margin_high"
+            android:layout_marginTop="@dimen/margin_huge"
+            android:background="@drawable/button_background"
+            android:enabled="false"
+            android:text="Save Profile"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/text_large"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/register.skip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_marginBottom="@dimen/margin_xxxxhigh"
+            android:onClick="onSkipButtonClicked"
+            android:text="Skip"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_medium" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+</FrameLayout>
+</ScrollView>

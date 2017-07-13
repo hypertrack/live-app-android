@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -23,19 +24,20 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
-import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
-import android.util.Log;
+import android.util.Base64;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
+import com.hypertrack.lib.models.User;
 
 import java.io.File;
-
-import io.hypertrack.sendeta.callback.OnOnboardingImageUploadCallback;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.view.Profile;
@@ -51,10 +53,36 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     private OnboardingManager onboardingManager = OnboardingManager.sharedManager();
 
     @Override
-    public void attachView(ProfileView view) {
+    public void attachView(final ProfileView view) {
         this.view = view;
-        HyperTrackLiveUser user = this.onboardingManager.getUser();
-        this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhoto());
+        if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+            view.showProfileLoading(true);
+            HyperTrack.getUser(new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    User userModel = (User) response.getResponseObject();
+                    String ISOcode = null;
+                    String phoneNo = null;
+                    if (userModel != null) {
+                        if (!HTTextUtils.isEmpty(userModel.getPhone())) {
+                            int index = userModel.getPhone().indexOf(" ");
+                            ISOcode = userModel.getPhone().substring(0, index + 1);
+                            phoneNo = userModel.getPhone().substring(index + 1);
+                        }
+                        view.updateViews(userModel.getName(), phoneNo, ISOcode, userModel.getPhoto());
+                        view.showProfileLoading(false);
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    view.showProfileLoading(false);
+                }
+            });
+        } else {
+            HyperTrackLiveUser user = this.onboardingManager.getUser();
+            this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhoto());
+        }
     }
 
     @Override
@@ -63,64 +91,40 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void attemptLogin(final String userName, String phone, String ISOCode, final String deviceID, final File profileImage,
-                             final Bitmap oldProfileImage, final Bitmap updatedProfileImage) {
+    public void attemptLogin(final String userName, String phone, String ISOCode, final String deviceID, final File profileImage) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
-        if (!TextUtils.isEmpty(ISOCode))
+        if (!HTTextUtils.isEmpty(ISOCode))
             user.setCountryCode(ISOCode);
 
+        String encodedImage = null;
         // Set user's profile image
         if (profileImage != null && profileImage.length() > 0) {
             user.setPhotoImage(profileImage);
+            byte[] bytes = convertFiletoByteArray(profileImage);
+            if (bytes != null && bytes.length > 0)
+                encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
         }
 
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-            HyperTrack.createUser(userName, user.getInternationalNumber(phone), user.getInternationalNumber(phone) + "_" + deviceID,
+
+            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone), encodedImage, user.getInternationalNumber(phone) + "_" + deviceID,
                     new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse successResponse) {
-
-                    if (profileImage != null && profileImage.length() > 0) {
-                        onboardingManager.uploadPhoto(oldProfileImage, updatedProfileImage, new OnOnboardingImageUploadCallback() {
-                            @Override
-                            public void onSuccess() {
-                                if (view != null) {
-                                    view.showProfilePicUploadSuccess();
-                                    view.navigateToHomeScreen();
-                                }
-                            }
-
-                            @Override
-                            public void onError() {
-                                Log.i(TAG, "Profile Image not saved in local database");
-                                if (view != null) {
-                                    view.showProfilePicUploadError();
-                                }
-                            }
-
-                            @Override
-                            public void onImageUploadNotNeeded() {
-                            }
-                        });
-                    } else {
-                        if (view != null) {
-                            view.navigateToHomeScreen();
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse successResponse) {
+                            view.navigateToPlacelineScreen();
                         }
-                    }
-                }
 
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    if (view != null) {
-                        view.showErrorMessage();
-                    }
-
-                }
-            });
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            if (view != null) {
+                                view.showErrorMessage();
+                            }
+                        }
+                    });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {
@@ -128,4 +132,65 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             }
         }
     }
+
+    @Override
+    public void updateProfile(String name, String number, String ISOCode, File profileImage, String deviceId) {
+        final HyperTrackLiveUser user = this.onboardingManager.getUser();
+
+        // Update Country Code from device's current location
+        if (!HTTextUtils.isEmpty(ISOCode))
+            user.setCountryCode(ISOCode);
+
+        String encodedImage = null;
+        // Set user's profile image
+        if (profileImage != null && profileImage.length() > 0) {
+            user.setPhotoImage(profileImage);
+            byte[] bytes = convertFiletoByteArray(profileImage);
+            if (bytes != null && bytes.length > 0)
+                encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
+        }
+
+        HyperTrackLiveUser.setHyperTrackLiveUser();
+        try {
+            HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage, user.getInternationalNumber(number) + "_" + deviceId,
+                    new HyperTrackCallback() {
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse successResponse) {
+                            view.navigateToPlacelineScreen();
+                        }
+
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            if (view != null) {
+                                view.showErrorMessage();
+                            }
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (view != null) {
+                view.showErrorMessage();
+            }
+        }
+    }
+
+    private byte[] convertFiletoByteArray(File file) {
+        byte[] b = new byte[(int) file.length()];
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            fileInputStream.read(b);
+           /* for (int i = 0; i < b.length; i++) {
+                System.out.print((char) b[i]);
+            }*/
+            return b;
+        } catch (FileNotFoundException e) {
+            System.out.println("File Not Found.");
+            e.printStackTrace();
+        } catch (IOException e1) {
+            System.out.println("Error Reading The File.");
+            e1.printStackTrace();
+        }
+        return b;
+    }
 }
+

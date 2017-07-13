@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -31,9 +32,10 @@ public interface ProfileView {
 
     void showProfilePicUploadSuccess();
 
-    void navigateToHomeScreen();
-
+    void navigateToPlacelineScreen();
     void showErrorMessage();
 
     void updateViews(String name,String phone,String ISOCode ,String profileURL);
+
+    void showProfileLoading(boolean show);
 }

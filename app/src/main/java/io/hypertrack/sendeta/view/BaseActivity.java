@@ -27,13 +27,14 @@ import android.graphics.Bitmap;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.R;
@@ -102,11 +103,11 @@ public class BaseActivity extends AppCompatActivity {
         toolbar.setTitle("");
         toolbarIcon = (RoundedImageView) toolbar.findViewById(R.id.toolbar_icon);
 
-        if (!TextUtils.isEmpty(title)) {
+        if (!HTTextUtils.isEmpty(title)) {
             textView.setText(title);
         }
 
-        if (!TextUtils.isEmpty(subTitle)) {
+        if (!HTTextUtils.isEmpty(subTitle)) {
             textView.setText(subTitle);
         }
 
@@ -225,12 +226,11 @@ public class BaseActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         //back button inside toolbar
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            //onBackPressed();
             return true;
         } else
             return false;
     }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();

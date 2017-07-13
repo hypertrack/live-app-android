@@ -1,13 +1,23 @@
 buildscript {
     repositories {
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.fabric.io/public' }
         mavenCentral()
     }
-}
 
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.22.0'
+        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+apply plugin: 'com.mindera.gradle.slack'
+apply plugin: 'realm-android'
 
 repositories {
-    // HyperTrack SDK Repository
+    maven { url 'https://maven.fabric.io/public' }
+    // HyperTrack Repository
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
@@ -17,6 +27,30 @@ android {
     lintOptions {
         abortOnError false
     }
+
+    /*Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
+    * Add your keystore file to app folder
+    * Create a new keystore.properties file
+    * inside root folder with values
+    * storePassword=
+    * keyPassword=
+    * keyAlias=
+    * storeFile=<File path of keystore file
+    * */
+
+    /*
+
+    def keystorePropertiesFile = rootProject.file("keystore.properties");
+    def keystoreProperties = new Properties()
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+      signingConfigs {
+          release {
+              storeFile file(keystoreProperties['storeFile'])
+              storePassword keystoreProperties['storePassword']
+              keyAlias keystoreProperties['keyAlias']
+              keyPassword keystoreProperties['keyPassword']
+          }
+      }*/
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
@@ -34,12 +68,15 @@ android {
         resValue "string", "deeplink_scheme", "com.hypertracklive"
         resValue "string", "tracking_url", "www.trck.at"
         manifestPlaceholders = [applicationLabel: "@string/app_name"]
+        //Uncomment this code to sign your Release APK using keystore
+        /*signingConfig signingConfigs.release*/
         multiDexEnabled true
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            debuggable true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -48,22 +85,33 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.22'
-    testCompile 'org.robolectric:robolectric:3.0'
-    testCompile 'org.robolectric:shadows-support-v4:3.0'
 
-    compile("com.hypertrack:android:0.2.6:release@aar") {
+    compile("com.hypertrack:android:0.3.14:release@aar") {
         transitive = true;
     }
 
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+        transitive = true;
+    }
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'
-
+    compile 'com.android.support:cardview-v7:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.4.0'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-places:10.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
+    compile 'com.github.sundeepk:compact-calendar-view:1.9.2-beta'
+    compile 'com.github.rubensousa:gravitysnaphelper:1.1'
+    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
+    compile 'com.github.Q42:AndroidScrollingImageView:1.2'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    compile 'io.branch.sdk.android:library:2.+'
 }
 
 /**
@@ -72,4 +120,5 @@ dependencies {
  * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
+
 //apply plugin: 'com.google.gms.google-services'
