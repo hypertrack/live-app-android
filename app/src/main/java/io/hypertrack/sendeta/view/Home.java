@@ -99,6 +99,7 @@ import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.Utils;
+import retrofit2.http.HEAD;
 
 public class Home extends BaseActivity implements HomeView {
 
