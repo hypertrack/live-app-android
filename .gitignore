@@ -94,4 +94,3 @@ crashlytics-build.properties
 /app/sendeta-release.jks
 /key.properties
 /app/fabric.properties
-/app/src/main/res/values/api-keys.xml
