@@ -24,18 +24,18 @@ Follow [this step-by-step tutorial](https://www.hypertrack.com/tutorials/live-lo
     
 2. Get your HyperTrack API keys [here](https://dashboard.hypertrack.com/signup), and add the publishable key to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file.
     
-3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to `AndroidManifest.xml`.
+3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to [api-keys.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/res/values/api-keys.xml).
     
 4. To release the app on the Play Store, you will have to change the app's package name.
    - Change the package name in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L4) file.
    - Refactor the name of your package with right click → Refactor → Rename in the tree view, then Android Studio will display a window, select "Rename package" option.
-   - Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L26) file. Once done, clean and rebuild the project.
+   - Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L60) file. Once done, clean and rebuild the project.
         
 5. The HyperTrack SDK requires FCM/GCM for a battery efficient real-time tracking experience. Refer to the [FCM Integration guide](https://docs.hypertrack.com/sdks/android/guides/gcm-integration.html).
-   - Uncomment `HyperTrackLiveFCMListenerService` service tag in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L160) file.
-   - Uncomment the [HyperTrackLiveFCMListenerService](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L35) file.
+   - Uncomment `HyperTrackLiveFCMListenerService` service tag in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L198) file.
+   - Uncomment the [HyperTrackLiveFCMListenerService](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L32) file.
    - After setting up your account on the [Firebase console](https://console.firebase.google.com), you will need to add the [google-services.json](https://support.google.com/firebase/answer/7015592) file to your app.
-   - Uncomment `apply google-services plugin` in [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75) file.
+   - Uncomment `apply google-services plugin` in [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L124) file.
   
 ## Documentation
 For detailed documentation of the APIs, customizations and what all you can build using HyperTrack, please visit the official [docs](https://docs.hypertrack.com/).
