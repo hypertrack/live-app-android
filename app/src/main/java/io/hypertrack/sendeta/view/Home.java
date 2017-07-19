@@ -70,7 +70,6 @@ import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
-import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
@@ -99,7 +98,6 @@ import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.Utils;
-import retrofit2.http.HEAD;
 
 public class Home extends BaseActivity implements HomeView {
 
@@ -117,7 +115,6 @@ public class Home extends BaseActivity implements HomeView {
     private ProgressDialog mProgressDialog;
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
     private float zoomLevel = 15.0f;
-    private HTUserVehicleType selectedVehicleType = SharedPreferenceManager.getLastSelectedVehicleType(this);
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
     private CoordinatorLayout rootLayout;
@@ -471,6 +468,7 @@ public class Home extends BaseActivity implements HomeView {
     /**
      * Method to be called when user selects an expected place to be used for sharing his live location
      * via the tracking url.
+     *
      * @param place Expected place for the user
      */
     private void onSelectPlace(final Place place) {
@@ -598,10 +596,6 @@ public class Home extends BaseActivity implements HomeView {
 
             shareButton.setVisibility(View.VISIBLE);
             navigateButton.setVisibility(View.VISIBLE);
-
-            // Update SelectedVehicleType in persistentStorage
-            SharedPreferenceManager.setLastSelectedVehicleType(selectedVehicleType);
-
         }
     }
 
