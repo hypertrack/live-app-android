@@ -21,6 +21,23 @@ repositories {
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
+ext {
+    hypertrackSDKVersion = computeHyperTrackSDKVersion()
+}
+
+def computeHyperTrackSDKVersion() {
+    def versionPropsFile = file('gradle.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        return versionProps['HYPERTRACK_SDK_VERSION']
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+}
+
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
@@ -35,42 +52,80 @@ android {
     * storePassword=
     * keyPassword=
     * keyAlias=
-    * storeFile=<File path of keystore file
+    * storeFile=<File path of keystore file>
     * */
 
-    /*
 
     def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-      signingConfigs {
-          release {
-              storeFile file(keystoreProperties['storeFile'])
-              storePassword keystoreProperties['storePassword']
-              keyAlias keystoreProperties['keyAlias']
-              keyPassword keystoreProperties['keyPassword']
-          }
-      }*/
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
     keyProperties.load(new FileInputStream(keyPropertiesFile))
 
-    defaultConfig {
-        applicationId "io.hypertrack.sendeta"
-        versionCode 1
-        versionName "0.1.1"
-        minSdkVersion 19
-        targetSdkVersion 25
-        resValue "string", "app_name", "HyperTrack Live"
-        buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
-        buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
-        resValue "string", "deeplink_scheme", "com.hypertracklive"
-        resValue "string", "tracking_url", "www.trck.at"
-        manifestPlaceholders = [applicationLabel: "@string/app_name"]
-        //Uncomment this code to sign your Release APK using keystore
-        /*signingConfig signingConfigs.release*/
-        multiDexEnabled true
+    /*
+    *   Set App version using gradle.properties file
+    * */
+    def versionPropsFile = file('gradle.properties')
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def value = 0
+
+        def runTasks = gradle.startParameter.taskNames
+        if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks
+                || 'cUDR' in runTasks || 'crashlyticsUploadDistributionRelease' in runTasks) {
+            value = 1;
+        }
+
+        def versionMajor = 1
+        def versionMinor = 7
+        def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
+        def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
+
+        versionProps['VERSION_PATCH'] = versionPatch.toString()
+        versionProps['VERSION_NUMBER'] = versionNumber.toString()
+        versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        defaultConfig {
+            applicationId "io.hypertrack.sendeta"
+            versionCode versionNumber
+            versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+            minSdkVersion 16
+            targetSdkVersion 25
+            resValue "string", "app_name", "HyperTrack Live"
+            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
+            resValue "string", "deeplink_scheme", "com.hypertracklive"
+            resValue "string", "tracking_url", "www.trck.at"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            //Uncomment this code to sign your Release APK using keystore
+            signingConfig signingConfigs.release
+            multiDexEnabled true
+        }
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def newFileName = "HyperTrackLive-${variant.versionName}.apk";
+            def apk = output.outputFile;
+            output.outputFile = new File(apk.parentFile, newFileName);
+        }
     }
 
     buildTypes {
@@ -86,10 +141,16 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
 
-    compile("com.hypertrack:android:0.3.14:release@aar") {
-        transitive = true;
+    compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+        transitive = true
+    }
+   /* releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
     }
 
+    debugCompile(project(path: ':library', configuration: 'debug')) {
+        transitive = true
+    }*/
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
@@ -97,6 +158,7 @@ dependencies {
     compile 'com.android.support:design:25.3.1'
     compile 'com.android.support:cardview-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
@@ -121,4 +183,4 @@ dependencies {
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
 
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
