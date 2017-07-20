@@ -94,10 +94,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.ConfigurePermissions"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".view.Profile"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
