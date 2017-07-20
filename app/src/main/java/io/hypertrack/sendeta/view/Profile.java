@@ -275,10 +275,17 @@ public class Profile extends BaseActivity implements ProfileView {
         String number = phoneNumberView.getText().toString();
 
         Utils.hideKeyboard(Profile.this, register);
+        boolean verifyPhone = false;
+        if (!previousPhone.equalsIgnoreCase(number) ||
+                getIntent().getStringExtra("branch_params") != null) {
+            verifyPhone = true;
+        }
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
-            presenter.updateProfile(name, number, isoCode, profileImage, Utils.getDeviceId(this), previousPhone);
+            presenter.updateProfile(name, number, isoCode, profileImage,
+                    Utils.getDeviceId(this), verifyPhone);
         } else
-            presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage, previousPhone);
+            presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this),
+                    profileImage, verifyPhone);
     }
 
     @Override

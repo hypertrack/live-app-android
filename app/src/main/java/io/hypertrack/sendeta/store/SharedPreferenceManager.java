@@ -63,6 +63,7 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
     private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
+    private static final String PREVIOUS_USER_ID = "io.hypertrack.meta:PreviousUserID";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -124,6 +125,22 @@ public class SharedPreferenceManager {
     public static void deleteActionID() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_ACTION_ID);
+        editor.apply();
+    }
+
+    public static String getPreviousUserId(Context context) {
+        return getSharedPreferences().getString(PREVIOUS_USER_ID, null);
+    }
+
+    public static void setPreviousUserId(String previousUserId) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(PREVIOUS_USER_ID, previousUserId);
+        editor.apply();
+    }
+
+    public static void deletePreviousUserId() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(PREVIOUS_USER_ID);
         editor.apply();
     }
 

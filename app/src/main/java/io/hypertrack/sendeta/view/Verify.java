@@ -121,11 +121,11 @@ public class Verify extends BaseActivity implements VerifyView {
             Intent intent = new Intent(Verify.this, Invite.class);
             intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
             startActivity(intent);
+            finish();
             return;
         }
+        SharedPreferenceManager.deletePreviousUserId();
         CrashlyticsWrapper.setCrashlyticsKeys(this);
-
-
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();

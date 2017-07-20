@@ -101,7 +101,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void attemptLogin(final String userName, final String phone, String ISOCode,
-                             final String deviceID, final File profileImage, final String previousPhone) {
+                             final String deviceID, final File profileImage, final boolean verifyPhone) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -127,11 +127,10 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
                             Log.d(TAG, "onSuccess: User Created");
-                            if (HTTextUtils.isEmpty(phone))
-                                view.navigateToPlacelineScreen();
-                            else if (!previousPhone.equalsIgnoreCase(phone)) {
+                            if (verifyPhone) {
                                 sendVerificationCode();
-                            }
+                            } else
+                                view.navigateToPlacelineScreen();
                         }
 
                         @Override
@@ -151,7 +150,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void updateProfile(String name, final String number, String ISOCode, File profileImage,
-                              String deviceId, final String previousPhone) {
+                              String deviceId, final boolean verifyPhone) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -175,7 +174,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
                             Log.d(TAG, "onSuccess: User Profile Updated");
-                            if (!previousPhone.equalsIgnoreCase(number)) {
+                            if (verifyPhone) {
                                 sendVerificationCode();
                             } else
                                 view.navigateToPlacelineScreen();

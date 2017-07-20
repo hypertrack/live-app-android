@@ -202,8 +202,15 @@ public class SplashScreen extends BaseActivity {
                     if (HyperTrack.checkLocationPermission(SplashScreen.this)
                             && HyperTrack.checkLocationServices(SplashScreen.this)) {
                         Intent registerIntent = new Intent(SplashScreen.this, Profile.class);
-                        if (!HTTextUtils.isEmpty(userID))
+                        if (!HTTextUtils.isEmpty(userID)) {
+                            if (isUserOnboard) {
+                                SharedPreferenceManager.setPreviousUserId(HyperTrack.getUserId());
+                                HyperTrack.stopTracking();
+                                SharedPreferenceManager.resetBackgroundTracking();
+                            }
+                            HyperTrack.setUserId(userID);
                             registerIntent.putExtra("branch_params", branchParams.toString());
+                        }
                         registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(registerIntent);
                         finish();

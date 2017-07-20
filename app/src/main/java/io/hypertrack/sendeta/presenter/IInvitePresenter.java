@@ -5,5 +5,5 @@ package io.hypertrack.sendeta.presenter;
  */
 
 public interface IInvitePresenter<V>  extends Presenter<V>{
-    public void acceptInvite(String userID, String accountID);
+    public void acceptInvite(String userID, String accountID, String previousUserId);
 }

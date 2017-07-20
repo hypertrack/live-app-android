@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
-import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -107,7 +106,8 @@ public class Invite extends BaseActivity implements InviteView {
                     if (progressBar != null)
                         progressBar.setVisibility(View.VISIBLE);
                     Log.d(TAG, "onClick: Accept");
-                    presenter.acceptInvite(userID, accountID);
+                    presenter.acceptInvite(userID, accountID,
+                            SharedPreferenceManager.getPreviousUserId(Invite.this));
                 } else {
                     Log.d(TAG, "onClick: Continue");
                     HyperTrack.setUserId(userID);
@@ -122,18 +122,9 @@ public class Invite extends BaseActivity implements InviteView {
     public void inviteAccepted() {
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
-
-        if (!HTTextUtils.isEmpty(userID)) {
-            HyperTrack.stopTracking();
-            HyperTrack.setUserId(userID);
-            SharedPreferenceManager.resetBackgroundTracking();
-        }
+        SharedPreferenceManager.deletePreviousUserId();
         HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
-
-        TaskStackBuilder.create(Invite.this)
-                .addNextIntentWithParentStack(new Intent(Invite.this, Placeline.class)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                .startActivities();
+        startActivity(new Intent(Invite.this, Placeline.class));
         finish();
     }
 
