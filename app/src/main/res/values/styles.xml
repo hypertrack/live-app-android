@@ -75,6 +75,7 @@
         Android, so this is only necessary to support older Android versions. -->
         <item name="actionMenuTextColor">@color/secondaryColor</item>
         <item name="android:background">@color/colorPrimary</item>
+        <item name="colorControlNormal">@color/white</item>
     </style>
 
     <style name="ToolbarStyle">

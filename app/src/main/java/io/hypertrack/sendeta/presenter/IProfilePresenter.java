@@ -29,7 +29,7 @@ import java.io.File;
  * Created by ulhas on 19/05/16.
  */
 public interface IProfilePresenter<V> extends Presenter<V> {
-    void attemptLogin(String userName, String number, String deviceID, String ISOCode, File profileImageFile );
+    void attemptLogin(String userName, String number, String deviceID, String ISOCode, File profileImageFile, String previousPhone);
 
-    void updateProfile(String name, String number, String isoCode, File profileImage, String deviceId);
+    void updateProfile(String name, String number, String isoCode, File profileImage, String deviceId, String previousPhone);
 }
