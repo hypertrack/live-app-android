@@ -101,7 +101,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void attemptLogin(final String userName, final String phone, String ISOCode,
-                             final String deviceID, final File profileImage, final boolean verifyPhone) {
+                             final File profileImage, final boolean verifyPhone) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -120,9 +120,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-
             HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone),
-                    encodedImage, user.getInternationalNumber(phone) + "_" + deviceID,
+                    encodedImage, user.getInternationalNumber(phone),
                     new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -150,7 +149,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void updateProfile(String name, final String number, String ISOCode, File profileImage,
-                              String deviceId, final boolean verifyPhone) {
+                              final boolean verifyPhone) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -169,7 +168,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         HyperTrackLiveUser.setHyperTrackLiveUser();
         try {
             HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage,
-                    user.getInternationalNumber(number) + "_" + deviceId,
+                    user.getInternationalNumber(number),
                     new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
