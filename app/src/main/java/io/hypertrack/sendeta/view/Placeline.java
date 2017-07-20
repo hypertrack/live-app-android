@@ -581,7 +581,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
             if (segment.getStartedAt() != null && segment.getEndedAt() != null) {
                 return true;
             }
-            return !(segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null);
+            return (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null);
 
         } else if (last) {
             if (segment.getStartedAt() != null && last && placelineData.getLastHeartbeatAt() != null) {
