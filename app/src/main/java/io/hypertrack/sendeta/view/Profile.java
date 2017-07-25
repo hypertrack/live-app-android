@@ -55,6 +55,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
@@ -100,6 +101,7 @@ public class Profile extends BaseActivity implements ProfileView {
     private File profileImage;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
     private boolean showSkip = true;
+    private String previousPhone = "";
 
     private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
@@ -154,6 +156,18 @@ public class Profile extends BaseActivity implements ProfileView {
 
         // Attach View Presenter to View
         presenter.attachView(this);
+
+        requestSmsPermission();
+    }
+
+    private void requestSmsPermission() {
+        String permission = Manifest.permission.RECEIVE_SMS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
     }
 
     private void initUIViews() {
@@ -259,11 +273,17 @@ public class Profile extends BaseActivity implements ProfileView {
             name = firstName;
         }
         String number = phoneNumberView.getText().toString();
+
         Utils.hideKeyboard(Profile.this, register);
+        boolean verifyPhone = false;
+        if (!previousPhone.equalsIgnoreCase(number) ||
+                getIntent().getStringExtra("branch_params") != null) {
+            verifyPhone = true;
+        }
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
-            presenter.updateProfile(name, number, isoCode, profileImage, Utils.getDeviceId(this));
+            presenter.updateProfile(name, number, isoCode, profileImage, verifyPhone);
         } else
-            presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage);
+            presenter.attemptLogin(name, number, isoCode, profileImage, verifyPhone);
     }
 
     @Override
@@ -298,6 +318,7 @@ public class Profile extends BaseActivity implements ProfileView {
         if (!HTTextUtils.isEmpty(phone)) {
             phone = phone.replaceAll("\\s", "");
             phoneNumberView.setText(phone);
+            previousPhone = phone;
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
@@ -368,19 +389,38 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void navigateToPlacelineScreen() {
+
+        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
+            Intent intent = new Intent(Profile.this, Invite.class);
+            intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
+            startActivity(intent);
+            return;
+        }
+
         CrashlyticsWrapper.setCrashlyticsKeys(this);
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
-        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
 
+        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
+        Intent intent = new Intent(Profile.this, Placeline.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Profile.this)
-                .addNextIntentWithParentStack(new Intent(Profile.this, Placeline.class)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                .addNextIntentWithParentStack(intent)
                 .startActivities();
         finish();
+    }
+
+    @Override
+    public void navigateToVerifyCodeScreen() {
+        showProgress(false);
+        SharedPreferenceManager.deleteAction();
+        SharedPreferenceManager.deletePlace();
+        Intent intent = new Intent(Profile.this, Verify.class);
+        intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
+        startActivity(intent);
     }
 
     @Override

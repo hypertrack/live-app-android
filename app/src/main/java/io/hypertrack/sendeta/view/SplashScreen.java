@@ -24,15 +24,15 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.view;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.TaskStackBuilder;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -48,7 +48,6 @@ import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
-import com.hypertrack.lib.models.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,17 +58,11 @@ import java.util.List;
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.AppDeepLink;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by piyush on 23/07/16.
@@ -79,78 +72,29 @@ public class SplashScreen extends BaseActivity {
     private static final String TAG = SplashScreen.class.getSimpleName();
 
     private AppDeepLink appDeepLink;
-    private Button accept;
-    private TextView cancel, permissionText;
+    private Button enableLocation;
+    private TextView permissionText;
     private ProgressBar progressBar;
-    private String ACCOUNT_ID_KEY = "account_id";
+    private JSONObject branchParams = new JSONObject();
     private String USER_ID_KEY = "user_id";
-    private String HAS_ACCEPTED_KEY = "has_accepted";
-    private String ACCOUNT_NAME_KEY = "account_name";
-    private String accountID, userID;
-    private boolean hasAccepted;
+    private String userID;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_account_permission);
+        setContentView(R.layout.activity_splash);
         initUI();
     }
 
     public void initUI() {
-        accept = (Button) findViewById(R.id.accept);
-        cancel = (TextView) findViewById(R.id.cancel);
+        enableLocation = (Button) findViewById(R.id.enable_location);
         permissionText = (TextView) findViewById(R.id.permission_text);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar);
 
-        accept.setOnClickListener(new View.OnClickListener() {
+        enableLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                if (!hasAccepted) {
-                    if (progressBar != null)
-                        progressBar.setVisibility(View.VISIBLE);
-                    Log.d(TAG, "onClick: Accept");
-                    HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
-                    Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID));
-                    call.enqueue(new Callback<User>() {
-                        @Override
-                        public void onResponse(Call<User> call, Response<User> response) {
-                            Log.d(TAG, "onResponse: " + response.body());
-                            HyperTrack.stopTracking();
-                            HyperTrack.setUserId(userID);
-                            SharedPreferenceManager.resetBackgroundTracking();
-                            hasAccepted = true;
-                            prepareAppDeepLink();
-                            proceedToNextScreen();
-                            if (progressBar != null)
-                                progressBar.setVisibility(View.VISIBLE);
-                        }
-
-                        @Override
-                        public void onFailure(Call<User> call, Throwable t) {
-                            Log.d(TAG, "onFailure: " + t.getMessage());
-                            t.printStackTrace();
-                            if (progressBar != null)
-                                progressBar.setVisibility(View.VISIBLE);
-                        }
-                    });
-                } else {
-                    Log.d(TAG, "onClick: Continue");
-                    HyperTrack.setUserId(userID);
-                    prepareAppDeepLink();
-                    proceedToNextScreen();
-                    if (progressBar != null)
-                        progressBar.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
-        cancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Log.d(TAG, "onClick: Cancel");
-                prepareAppDeepLink();
-                proceedToNextScreen();
+                requestForLocationSettings();
             }
         });
 
@@ -205,43 +149,25 @@ public class SplashScreen extends BaseActivity {
         branch.initSession(new Branch.BranchReferralInitListener() {
             @Override
             public void onInitFinished(JSONObject referringParams, BranchError error) {
-                progressBar.setVisibility(View.GONE);
-
                 if (error == null) {
                     Log.d(TAG, "onInitFinished: Data: " + referringParams.toString());
                     try {
-                        hasAccepted = referringParams.getBoolean(HAS_ACCEPTED_KEY);
-                        accountID = referringParams.getString(ACCOUNT_ID_KEY);
                         userID = referringParams.getString(USER_ID_KEY);
-                        String accountName;
-                        accountName = referringParams.getString(ACCOUNT_NAME_KEY);
-                        if (!hasAccepted) {
-                            accept.setVisibility(View.VISIBLE);
-                            cancel.setVisibility(View.VISIBLE);
-                            SpannableStringBuilder str = new SpannableStringBuilder(accountName + " wants access to your location data collected on HyperTrack Live");
-                            str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, accountName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            permissionText.setText(str);
-                            // permissionText.setText("Zomato wants access to your location data collected on HyperTrack Live");
-                        } else {
-                            cancel.setVisibility(View.INVISIBLE);
-                            accept.setText("Continue");
-                            accept.setVisibility(View.VISIBLE);
-                            String temp = "You are already sharing your location with ";
-                            SpannableStringBuilder str = new SpannableStringBuilder(temp + accountName);
-                            str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), temp.length(), accountName.length() + temp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                            permissionText.setText(str);
-                        }
+                        branchParams = referringParams;
                     } catch (JSONException e) {
-                        prepareAppDeepLink();
-                        proceedToNextScreen();
                         e.printStackTrace();
-                        accept.setVisibility(View.INVISIBLE);
                     }
 
                 } else {
                     Log.d(TAG, "onInitFinished: Error " + error.getMessage());
+                }
+                if (isLocationOn()) {
                     prepareAppDeepLink();
                     proceedToNextScreen();
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    permissionText.setVisibility(View.VISIBLE);
+                    enableLocation.setVisibility(View.VISIBLE);
                 }
             }
         }, this.getIntent().getData(), this);
@@ -271,19 +197,30 @@ public class SplashScreen extends BaseActivity {
                 // Check if user has signed up
                 boolean isUserOnboard = !HTTextUtils.isEmpty(HyperTrack.getUserId());
 
-                if (!isUserOnboard || hasAccepted) {
+                if (!isUserOnboard || (!HTTextUtils.isEmpty(userID) &&
+                        !userID.equalsIgnoreCase(HyperTrack.getUserId()))) {
                     if (HyperTrack.checkLocationPermission(SplashScreen.this)
                             && HyperTrack.checkLocationServices(SplashScreen.this)) {
                         Intent registerIntent = new Intent(SplashScreen.this, Profile.class);
-                        registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(registerIntent);
-                        finish();
-                    } else {
-                        Intent registerIntent = new Intent(SplashScreen.this, ConfigurePermissions.class);
+                        if (!HTTextUtils.isEmpty(userID)) {
+                            if (isUserOnboard) {
+                                SharedPreferenceManager.setPreviousUserId(HyperTrack.getUserId());
+                                HyperTrack.stopTracking();
+                                SharedPreferenceManager.resetBackgroundTracking();
+                            }
+                            HyperTrack.setUserId(userID);
+                            registerIntent.putExtra("branch_params", branchParams.toString());
+                        }
                         registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(registerIntent);
                         finish();
                     }
+                } else if (!HTTextUtils.isEmpty(userID)) {
+                    Intent registerIntent = new Intent(SplashScreen.this, Invite.class);
+                    registerIntent.putExtra("branch_params", branchParams.toString());
+                    registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(registerIntent);
+                    finish();
                 } else {
                     CrashlyticsWrapper.setCrashlyticsKeys(SplashScreen.this);
                     processAppDeepLink(appDeepLink);
@@ -423,5 +360,83 @@ public class SplashScreen extends BaseActivity {
         }
         finish();
         actionManager = null;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Handle Location permission successfully granted response
+                requestForLocationSettings();
+
+            } else {
+                // Handle Location permission request denied error
+                showSnackBar();
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_SERVICES) {
+            if (resultCode == Activity.RESULT_OK) {
+                // Handle Location services successfully enabled response
+                requestForLocationSettings();
+
+            } else {
+                // Handle Location services request denied error
+                showSnackBar();
+            }
+        }
+    }
+
+    private boolean isLocationOn() {
+        if (!HyperTrack.checkLocationPermission(this) || !HyperTrack.checkLocationServices(this)) {
+            return false;
+        }
+        return true;
+    }
+
+    private void requestForLocationSettings() {
+        // Check for Location permission
+        if (!HyperTrack.checkLocationPermission(this)) {
+            HyperTrack.requestPermissions(this, null);
+            return;
+        }
+
+        // Check for Location settings
+        if (!HyperTrack.checkLocationServices(this)) {
+            HyperTrack.requestLocationServices(this);
+            return;
+        }
+
+        // Location Permissions and Settings have been enabled
+        // Proceed with your app logic here
+        prepareAppDeepLink();
+        proceedToNextScreen();
+    }
+
+
+    private void showSnackBar() {
+        if (!HyperTrack.checkLocationPermission(this)) {
+            // Handle Location permission request denied error
+            Snackbar.make(findViewById(R.id.parent_layout), R.string.location_permission_snackbar_msg,
+                    Snackbar.LENGTH_INDEFINITE).setAction("Allow", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    requestForLocationSettings();
+                }
+            }).show();
+
+        } else if (HyperTrack.checkLocationServices(this)) {
+            // Handle Location services request denied error
+            Snackbar.make(findViewById(R.id.parent_layout), R.string.location_services_snackbar_msg,
+                    Snackbar.LENGTH_INDEFINITE).setAction("Enable", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    requestForLocationSettings();
+                }
+            }).show();
+        }
     }
 }

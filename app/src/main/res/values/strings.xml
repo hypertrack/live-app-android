@@ -94,4 +94,7 @@
     <string name="cancel">Cancel</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="name">Name</string>
+    <string name="verify">Verify</string>
+    <string name="resend_code">Resend Code</string>
+    <string name="verification_description">Enter verification code to verify your contact number</string>
 </resources>

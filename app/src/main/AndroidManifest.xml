@@ -18,6 +18,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 
@@ -92,10 +94,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.ConfigurePermissions"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".view.Profile"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan" />
@@ -111,9 +109,12 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.AccountPermissions"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait"></activity>
+            android:name=".view.Invite"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.Verify"
+            android:screenOrientation="portrait" />
 
         <!-- Register Receivers here -->
 

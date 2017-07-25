@@ -98,7 +98,7 @@ public class BaseActivity extends AppCompatActivity {
 
     private void setupToolbar(String title, String subTitle, boolean homeButtonEnabled) {
 
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         textView = (TextView) toolbar.findViewById(R.id.toolbar_title);
         toolbar.setTitle("");
         toolbarIcon = (RoundedImageView) toolbar.findViewById(R.id.toolbar_icon);
@@ -159,7 +159,7 @@ public class BaseActivity extends AppCompatActivity {
      */
     public void hideToolbar() {
         if (toolbar == null) {
-            toolbar = (Toolbar) findViewById(R.id.toolbar);
+            toolbar = (Toolbar) findViewById(R.id.toolbar_layout);
         }
         toolbar.setVisibility(View.GONE);
     }

@@ -12,15 +12,12 @@ public class AcceptInviteModel implements Serializable {
     @SerializedName("account_id")
     String accountID;
 
-    public AcceptInviteModel(String accountID) {
-        this.accountID = accountID;
-    }
+    @SerializedName("existing_user_id")
+    String existingUserID;
 
-    public String getAccountID() {
-        return accountID;
-    }
 
-    public void setAccountID(String accountID) {
+    public AcceptInviteModel(String accountID, String previousUserId) {
         this.accountID = accountID;
+        existingUserID = previousUserId;
     }
 }

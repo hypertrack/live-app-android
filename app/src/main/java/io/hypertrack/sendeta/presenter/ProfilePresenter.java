@@ -26,6 +26,7 @@ package io.hypertrack.sendeta.presenter;
 
 import android.support.annotation.NonNull;
 import android.util.Base64;
+import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
@@ -38,10 +39,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.view.Profile;
 import io.hypertrack.sendeta.view.ProfileView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by suhas on 24/02/16.
@@ -60,6 +67,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             HyperTrack.getUser(new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
+                    Log.d(TAG, "onSuccess: Data get from getUser");
                     User userModel = (User) response.getResponseObject();
                     String ISOcode = null;
                     String phoneNo = null;
@@ -81,7 +89,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             });
         } else {
             HyperTrackLiveUser user = this.onboardingManager.getUser();
-            this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(), user.getPhoto());
+            this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(),
+                    user.getPhoto());
         }
     }
 
@@ -91,7 +100,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void attemptLogin(final String userName, String phone, String ISOCode, final String deviceID, final File profileImage) {
+    public void attemptLogin(final String userName, final String phone, String ISOCode,
+                             final File profileImage, final boolean verifyPhone) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -110,12 +120,16 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
         try {
-
-            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone), encodedImage, user.getInternationalNumber(phone) + "_" + deviceID,
+            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone),
+                    encodedImage, user.getInternationalNumber(phone),
                     new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
-                            view.navigateToPlacelineScreen();
+                            Log.d(TAG, "onSuccess: User Created");
+                            if (verifyPhone) {
+                                sendVerificationCode();
+                            } else
+                                view.navigateToPlacelineScreen();
                         }
 
                         @Override
@@ -134,7 +148,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
-    public void updateProfile(String name, String number, String ISOCode, File profileImage, String deviceId) {
+    public void updateProfile(String name, final String number, String ISOCode, File profileImage,
+                              final boolean verifyPhone) {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -152,11 +167,15 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
         HyperTrackLiveUser.setHyperTrackLiveUser();
         try {
-            HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage, user.getInternationalNumber(number) + "_" + deviceId,
+            HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage, user.getInternationalNumber(number),
                     new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
-                            view.navigateToPlacelineScreen();
+                            Log.d(TAG, "onSuccess: User Profile Updated");
+                            if (verifyPhone) {
+                                sendVerificationCode();
+                            } else
+                                view.navigateToPlacelineScreen();
                         }
 
                         @Override
@@ -172,6 +191,26 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 view.showErrorMessage();
             }
         }
+    }
+
+    private void sendVerificationCode() {
+        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                Log.d(TAG, "onResponse: Verification Code Sent");
+                if (view != null)
+                    view.navigateToVerifyCodeScreen();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                t.printStackTrace();
+                if (view != null)
+                    view.showErrorMessage();
+            }
+        });
     }
 
     private byte[] convertFiletoByteArray(File file) {
@@ -193,4 +232,5 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         return b;
     }
 }
+
 

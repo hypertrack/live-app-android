@@ -95,3 +95,4 @@ crashlytics-build.properties
 /key.properties
 /app/fabric.properties
 /app/src/main/res/values/api-keys.xml
+/app/google-services.json

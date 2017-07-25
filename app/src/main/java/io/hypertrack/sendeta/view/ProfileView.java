@@ -38,4 +38,6 @@ public interface ProfileView {
     void updateViews(String name,String phone,String ISOCode ,String profileURL);
 
     void showProfileLoading(boolean show);
+
+    void navigateToVerifyCodeScreen();
 }

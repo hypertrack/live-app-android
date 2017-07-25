@@ -22,7 +22,7 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:gravity="center"
@@ -30,10 +30,10 @@
 
             <ImageView
                 android:id="@+id/location_ripple"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:stateListAnimator="@anim/bounce_animation"
-                android:src="@drawable/ic_location_ripple" />
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:src="@drawable/ic_location_ripple"
+                android:stateListAnimator="@anim/bounce_animation" />
 
             <TextView
                 android:id="@+id/textView"
@@ -41,24 +41,33 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="@dimen/margin_high"
-                android:layout_marginTop="@dimen/margin_huge"
+                android:layout_marginTop="@dimen/margin_xxhigh"
                 android:text="@string/app_name"
                 android:textAllCaps="true"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="@dimen/text_large" />
 
+
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/permission_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/margin_xxhigh"
-                android:layout_marginRight="@dimen/margin_xxhigh"
+                android:layout_marginLeft="@dimen/margin_xxxxhigh"
+                android:layout_marginRight="@dimen/margin_xxxxhigh"
+                android:layout_marginTop="@dimen/margin_xxhigh"
                 android:gravity="center"
+                android:visibility="invisible"
                 android:text="@string/location_permission_detail"
                 android:textSize="@dimen/text_medium" />
 
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_xhigh" />
+
             <Button
-                android:id="@+id/lets_go"
+                android:id="@+id/enable_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/margin_huge"
@@ -70,7 +79,9 @@
                 android:text="Enable Location"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
-                android:visibility="visible" />
+                android:visibility="gone" />
         </LinearLayout>
+
+
     </RelativeLayout>
 </FrameLayout>
