@@ -55,8 +55,7 @@ android {
     * storeFile=<File path of keystore file>
     * */
 
-
-    def keystorePropertiesFile = rootProject.file("keystore.properties");
+    /*def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     signingConfigs {
@@ -66,7 +65,7 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
         }
-    }
+    }*/
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
@@ -112,7 +111,7 @@ android {
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             //Uncomment this code to sign your Release APK using keystore
-            signingConfig signingConfigs.release
+            //signingConfig signingConfigs.release
             multiDexEnabled true
         }
 
@@ -130,9 +129,13 @@ android {
 
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.enableCrashlytics = false
+        }
+        debug {
+            ext.enableCrashlytics = false
         }
     }
 }
@@ -183,4 +186,4 @@ dependencies {
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
 
-apply plugin: 'com.google.gms.google-services'
+//apply plugin: 'com.google.gms.google-services'
