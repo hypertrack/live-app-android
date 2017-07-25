@@ -67,8 +67,14 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 Log.d(TAG, "onResponse: Code Resend Successfully");
-                if (verifyView != null)
-                    verifyView.codeResent();
+                if(response.isSuccessful()) {
+                    if (verifyView != null)
+                        verifyView.codeResent();
+                }
+                else {
+                    if (verifyView != null)
+                        verifyView.showError("Error Occured");
+                }
             }
 
             @Override
