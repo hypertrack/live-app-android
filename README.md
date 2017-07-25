@@ -5,7 +5,7 @@ If you can track your Uber turn-by-turn with an accurate ETA, why not track frie
  
 This open source repo uses [HyperTrack](https://www.hypertrack.com) to enable location sharing and real-time tracking of your friends and family. Scrape parts of this app to add live location sharing into your own app, or fork the repo and modify it to your own need to build your own brand new app.
 
-![Live Tracking Demo](https://raw.githubusercontent.com/hypertrack/hypertrack-live-android/master/live_location_sharing.gif)
+![Live Tracking Demo](asset/live_location_sharing.gif)
 
 ## Example App
 If you want to experience the app or share live location amongst your friends & family, get HyperTrack Live from the Play Store.
