@@ -36,7 +36,9 @@ Follow [this step-by-step tutorial](https://www.hypertrack.com/tutorials/live-lo
    - Uncomment the [HyperTrackLiveFCMListenerService](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L32) file.
    - After setting up your account on the [Firebase console](https://console.firebase.google.com), you will need to add the [google-services.json](https://support.google.com/firebase/answer/7015592) file to your app.
    - Uncomment `apply google-services plugin` in [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L124) file.
-  
+   
+6. You can also enable the crashlytics crash reporting tool. Get your Crashlytics key, see the section Add Your API Key from [here](https://fabric.io/kits/android/crashlytics/install) and you can copy your API Key, and paste the key to [fabric.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/fabric.properties) and uncomment the code [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L171). This is optional it won't affect your integration.
+ 
 ## Documentation
 For detailed documentation of the APIs, customizations and what all you can build using HyperTrack, please visit the official [docs](https://docs.hypertrack.com/).
 
@@ -61,3 +63,4 @@ Join our [Slack community](http://slack.hypertrack.com) for instant responses, o
 * [RecylcerView Snap](https://github.com/rubensousa/RecyclerViewSnap)
 * [Leak Canary](https://github.com/square/leakcanary)
 * [Branch](https://branch.io/)
+* [Crashlytics](https://fabric.io/kits/android/crashlytics)
