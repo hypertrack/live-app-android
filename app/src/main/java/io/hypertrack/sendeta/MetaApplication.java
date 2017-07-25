@@ -55,8 +55,12 @@ public class MetaApplication extends Application {
             return;
         }
         LeakCanary.install(this);
-        if (!HTTextUtils.isEmpty(ApiKey.getApiKey(this))) {
-            Fabric.with(this, new Crashlytics());
+        try {
+            if (!HTTextUtils.isEmpty(ApiKey.getApiKey(this))) {
+                Fabric.with(this, new Crashlytics());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         mInstance = this;
 

@@ -53,21 +53,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public Toolbar getToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
-        return toolbar;
-    }
-
-    @Override
-    public Integer getToolbarLogoIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-        return R.drawable.ic_ht_logo_white;
-    }
-
-    @Override
-    public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
-        return mContext.getString(R.string.app_name);
-    }
-
-    @Override
     public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
         if (SharedPreferenceManager.getLastKnownLocation() != null) {
             LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),

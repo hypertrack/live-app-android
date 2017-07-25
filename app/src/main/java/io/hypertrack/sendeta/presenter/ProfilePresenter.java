@@ -167,8 +167,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
         HyperTrackLiveUser.setHyperTrackLiveUser();
         try {
-            HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage,
-                    user.getInternationalNumber(number),
+            HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage, user.getInternationalNumber(number),
                     new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -233,4 +232,5 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         return b;
     }
 }
+
 
