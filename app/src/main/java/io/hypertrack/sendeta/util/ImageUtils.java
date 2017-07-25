@@ -39,7 +39,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Created by piyush on 30/06/16.
@@ -114,14 +113,14 @@ public class ImageUtils {
     }
 
     public static Bitmap getRotatedBitMap(File imageFile) {
-        if (imageFile == null) {
+        if (imageFile == null || !imageFile.canRead() || !imageFile.exists()) {
             return null;
         }
 
         Bitmap rotatedBitmap = null;
-        Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 
         try {
+            Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
             ExifInterface exif = new ExifInterface(imageFile.getName());
             String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
             int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
@@ -135,7 +134,7 @@ public class ImageUtils {
             matrix.setRotate(rotationAngle, (float) srcBitmap.getWidth() / 2, (float) srcBitmap.getHeight() / 2);
             rotatedBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             CrashlyticsWrapper.log(e);
         }
