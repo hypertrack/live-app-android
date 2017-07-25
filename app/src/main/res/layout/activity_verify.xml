@@ -19,6 +19,7 @@
             android:background="?attr/colorPrimary"
             app:popupTheme="@style/Toolbar"
             app:title="Verify"
+            android:navigationIcon="@drawable/ic_arrow_back_white_24dp"
             app:titleTextColor="@color/white" />
 
     </android.support.design.widget.AppBarLayout>
