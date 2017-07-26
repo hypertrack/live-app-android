@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/register_next_item"
-        android:onClick="onNextButtonClicked"
+        android:onClick="onSkipButtonClicked"
         android:title="@string/action_skip"
         app:showAsAction="always" />
 </menu>

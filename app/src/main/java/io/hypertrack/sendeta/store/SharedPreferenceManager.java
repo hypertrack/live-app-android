@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -26,13 +27,11 @@ package io.hypertrack.sendeta.store;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.text.TextUtils;
 
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.hypertrack.lib.internal.common.models.HTUserVehicleType;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 
@@ -42,6 +41,7 @@ import java.util.Date;
 import io.hypertrack.sendeta.MetaApplication;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.util.Constants;
+import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.DateDeserializer;
 import io.hypertrack.sendeta.util.DateSerializer;
 import io.hypertrack.sendeta.util.LocationDeserializer;
@@ -55,7 +55,6 @@ public class SharedPreferenceManager {
     private static final String PREF_NAME = Constants.SHARED_PREFERENCES_NAME;
     private static final String CURRENT_PLACE = "io.hypertrack.meta:CurrentPlace";
 
-    private static final String LAST_SELECTED_VEHICLE_TYPE = "io.hypertrack.meta:LastSelectedVehicleType";
     private static final String HYPERTRACK_LIVE_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
     private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
@@ -64,6 +63,7 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
     private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
+    private static final String PREVIOUS_USER_ID = "io.hypertrack.meta:PreviousUserID";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MetaApplication.getInstance().getApplicationContext();
@@ -128,6 +128,22 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
+    public static String getPreviousUserId(Context context) {
+        return getSharedPreferences().getString(PREVIOUS_USER_ID, null);
+    }
+
+    public static void setPreviousUserId(String previousUserId) {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(PREVIOUS_USER_ID, previousUserId);
+        editor.apply();
+    }
+
+    public static void deletePreviousUserId() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(PREVIOUS_USER_ID);
+        editor.apply();
+    }
+
     public static Action getAction(Context context) {
         String actionJson = getSharedPreferences().getString(CURRENT_ACTION, null);
         if (actionJson == null)
@@ -140,6 +156,7 @@ public class SharedPreferenceManager {
             return gson.fromJson(actionJson, type);
         } catch (Exception e) {
             e.printStackTrace();
+            CrashlyticsWrapper.log(e);
         }
         return null;
     }
@@ -236,31 +253,6 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static HTUserVehicleType getLastSelectedVehicleType(Context context) {
-        String vehicleTypeString = getSharedPreferences().getString(LAST_SELECTED_VEHICLE_TYPE, null);
-        if (TextUtils.isEmpty(vehicleTypeString)) {
-            return HTUserVehicleType.CAR;
-        }
-
-        if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.CAR.toString())) {
-            return HTUserVehicleType.CAR;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.MOTORCYCLE.toString())) {
-            return HTUserVehicleType.MOTORCYCLE;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.WALK.toString())) {
-            return HTUserVehicleType.WALK;
-        } else if (vehicleTypeString.equalsIgnoreCase(HTUserVehicleType.VAN.toString())) {
-            return HTUserVehicleType.VAN;
-        }
-
-        return HTUserVehicleType.CAR;
-    }
-
-    public static void setLastSelectedVehicleType(HTUserVehicleType vehicleType) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(LAST_SELECTED_VEHICLE_TYPE, vehicleType.toString());
-        editor.apply();
-    }
-
     private static void setTrackingSetting(boolean flag) {
         SharedPreferences.Editor editor = getEditor();
         editor.putBoolean(TRACKING_SETTING, flag);
@@ -270,6 +262,12 @@ public class SharedPreferenceManager {
     public static void setRequestedForBackgroundTracking() {
         SharedPreferences.Editor editor = getEditor();
         editor.putBoolean(TRACKING_DIALOG, true);
+        editor.apply();
+    }
+
+    public static void resetBackgroundTracking() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.putBoolean(TRACKING_DIALOG, false);
         editor.apply();
     }
 

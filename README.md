@@ -5,7 +5,7 @@ If you can track your Uber turn-by-turn with an accurate ETA, why not track frie
  
 This open source repo uses [HyperTrack](https://www.hypertrack.com) to enable location sharing and real-time tracking of your friends and family. Scrape parts of this app to add live location sharing into your own app, or fork the repo and modify it to your own need to build your own brand new app.
 
-![Live Tracking Demo](https://raw.githubusercontent.com/hypertrack/hypertrack-live-android/master/live_location_sharing.gif)
+![Live Tracking Demo](asset/live_location_sharing.gif)
 
 ## Example App
 If you want to experience the app or share live location amongst your friends & family, get HyperTrack Live from the Play Store.
@@ -23,19 +23,21 @@ Follow [this step-by-step tutorial](https://www.hypertrack.com/tutorials/live-lo
     
 2. Get your HyperTrack API keys [here](https://dashboard.hypertrack.com/signup), and add the publishable key to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file.
     
-3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to `AndroidManifest.xml`.
+3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to [api-keys.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/res/values/api-keys.xml).
     
 4. To release the app on the Play Store, you will have to change the app's package name.
    - Change the package name in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L4) file.
    - Refactor the name of your package with right click → Refactor → Rename in the tree view, then Android Studio will display a window, select "Rename package" option.
-   - Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L26) file. Once done, clean and rebuild the project.
+   - Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L60) file. Once done, clean and rebuild the project.
         
 5. The HyperTrack SDK requires FCM/GCM for a battery efficient real-time tracking experience. Refer to the [FCM Integration guide](https://docs.hypertrack.com/sdks/android/guides/gcm-integration.html).
-   - Uncomment `HyperTrackLiveFCMListenerService` service tag in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L160) file.
-   - Uncomment the [HyperTrackLiveFCMListenerService](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L35) file.
+   - Uncomment `HyperTrackLiveFCMListenerService` service tag in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L198) file.
+   - Uncomment the [HyperTrackLiveFCMListenerService](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L32) file.
    - After setting up your account on the [Firebase console](https://console.firebase.google.com), you will need to add the [google-services.json](https://support.google.com/firebase/answer/7015592) file to your app.
-   - Uncomment `apply google-services plugin` in [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75) file.
-  
+   - Uncomment `apply google-services plugin` in [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L124) file.
+   
+6. You can also enable the crashlytics crash reporting tool. Get your Crashlytics key, see the section Add Your API Key from [here](https://fabric.io/kits/android/crashlytics/install) and you can copy your API Key, and paste the key to [fabric.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/fabric.properties) and uncomment the code [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L171). This is optional it won't affect your integration.
+ 
 ## Documentation
 For detailed documentation of the APIs, customizations and what all you can build using HyperTrack, please visit the official [docs](https://docs.hypertrack.com/).
 
@@ -54,3 +56,10 @@ Join our [Slack community](http://slack.hypertrack.com) for instant responses, o
 * [Square Retrofit](https://github.com/square/retrofit)
 * [Square Picasso](https://github.com/square/picasso)
 * [tajchert WaitingDots](https://github.com/tajchert/WaitingDots)
+* [Compact Calendar View](https://github.com/SundeepK/CompactCalendarView)
+* [Android Ripple Background](https://github.com/skyfishjy/android-ripple-background)
+* [Scrolling Image View](https://github.com/Q42/AndroidScrollingImageView)
+* [RecylcerView Snap](https://github.com/rubensousa/RecyclerViewSnap)
+* [Leak Canary](https://github.com/square/leakcanary)
+* [Branch](https://branch.io/)
+* [Crashlytics](https://fabric.io/kits/android/crashlytics)

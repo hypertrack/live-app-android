@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -21,6 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
@@ -38,12 +40,10 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.text.TextUtils;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
@@ -56,7 +56,10 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -70,6 +73,7 @@ import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
+import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
@@ -81,26 +85,28 @@ import io.hypertrack.sendeta.util.images.RoundedImageView;
 public class Profile extends BaseActivity implements ProfileView {
 
     private final static String TAG = Profile.class.getSimpleName();
-
-    public EditText mNameView;
+    public EditText nameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
     public Bitmap oldProfileImage = null, updatedProfileImage = null;
     private ProgressDialog mProgressDialog;
     private EditText phoneNumberView;
-    private TextView countryCodeTextView;
+    private TextView countryCodeTextView, skip;
     private Spinner countryCodeSpinner;
+    private CountrySpinnerAdapter adapter;
     private Button register;
+    private LinearLayout loadingLayout;
     private String isoCode;
     private Target profileImageDownloadTarget;
     private File profileImage;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
     private boolean showSkip = true;
+    private String previousPhone = "";
 
     private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
+            if (v.getId() == nameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT) {
                 phoneNumberView.requestFocus();
                 return true;
             }
@@ -113,7 +119,7 @@ public class Profile extends BaseActivity implements ProfileView {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                onSignInButtonClicked();
+                Utils.hideKeyboard(Profile.this, phoneNumberView);
                 return true;
             }
 
@@ -132,12 +138,12 @@ public class Profile extends BaseActivity implements ProfileView {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (TextUtils.isEmpty(mNameView.getText().toString()) && TextUtils.isEmpty(phoneNumberView.getText().toString())) {
+            if (HTTextUtils.isEmpty(nameView.getText().toString()) && HTTextUtils.isEmpty(phoneNumberView.getText().toString())) {
                 showSkip = true;
-                supportInvalidateOptionsMenu();
-            } else if (showSkip && !TextUtils.isEmpty(s.toString())) {
+                toggleRegisterButton();
+            } else if (showSkip && !HTTextUtils.isEmpty(s.toString())) {
                 showSkip = false;
-                supportInvalidateOptionsMenu();
+                toggleRegisterButton();
             }
         }
     };
@@ -146,22 +152,31 @@ public class Profile extends BaseActivity implements ProfileView {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-
-        // Initialize Toolbar
-        initToolbar(getString(R.string.title_activity_signup_profile), false);
+        initUIViews();
 
         // Attach View Presenter to View
         presenter.attachView(this);
 
-        initUIViews();
+        requestSmsPermission();
+    }
+
+    private void requestSmsPermission() {
+        String permission = Manifest.permission.RECEIVE_SMS;
+        int grant = ContextCompat.checkSelfPermission(this, permission);
+        if (grant != PackageManager.PERMISSION_GRANTED) {
+            String[] permission_list = new String[1];
+            permission_list[0] = permission;
+            ActivityCompat.requestPermissions(this, permission_list, 1);
+        }
     }
 
     private void initUIViews() {
         // Initialize UI Views before Attaching View Presenter
-        mNameView = (EditText) findViewById(R.id.profile_name);
+        nameView = (EditText) findViewById(R.id.profile_name);
         mProfileImageView = (RoundedImageView) findViewById(R.id.profile_image_view);
         mProfileImageLoader = (ProgressBar) findViewById(R.id.profile_image_loader);
-        register = (Button) findViewById(R.id.profile_register);
+        register = (Button) findViewById(R.id.register_profile);
+        skip = (TextView) findViewById(R.id.register_skip);
         phoneNumberView = (EditText) findViewById(R.id.register_phone_number);
         countryCodeTextView = (TextView) findViewById(R.id.register_country_code);
         countryCodeSpinner = (Spinner) findViewById(R.id.register_country_codes_spinner);
@@ -174,9 +189,9 @@ public class Profile extends BaseActivity implements ProfileView {
         });
 
         // Initialize UI Action Listeners
-        mNameView.setOnEditorActionListener(mNameEditorActionListener);
+        nameView.setOnEditorActionListener(mNameEditorActionListener);
         phoneNumberView.setOnEditorActionListener(mEditorActionListener);
-        mNameView.addTextChangedListener(mTextWatcher);
+        nameView.addTextChangedListener(mTextWatcher);
         phoneNumberView.addTextChangedListener(mTextWatcher);
         register.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -184,6 +199,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 onSignInButtonClicked();
             }
         });
+        loadingLayout = (LinearLayout) findViewById(R.id.loading_layout);
         initCountryFlagSpinner();
     }
 
@@ -191,16 +207,17 @@ public class Profile extends BaseActivity implements ProfileView {
         CountryMaster cm = CountryMaster.getInstance(this);
         final ArrayList<Country> countries = cm.getCountries();
 
-        CountrySpinnerAdapter adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
+        adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
         countryCodeSpinner.setAdapter(adapter);
 
-        String isoCountryCode = Utils.getCountryRegionFromPhone(this);
+        final String isoCountryCode = Utils.getCountryRegionFromPhone(this);
         Log.v(TAG, "Region ISO: " + isoCountryCode);
 
-        if (!TextUtils.isEmpty(isoCountryCode)) {
+        if (!HTTextUtils.isEmpty(isoCountryCode)) {
             for (Country c : countries) {
                 if (c.mCountryIso.equalsIgnoreCase(isoCountryCode)) {
                     countryCodeSpinner.setSelection(adapter.getPosition(c));
+                    break;
                 }
             }
         }
@@ -209,8 +226,12 @@ public class Profile extends BaseActivity implements ProfileView {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 isoCode = countries.get(position).mCountryIso;
+
                 countryCodeTextView.setText("+ " + countries.get(position).mDialPrefix);
                 countryCodeTextView.setVisibility(View.VISIBLE);
+                int length = String.valueOf(PhoneNumberUtil.getInstance().
+                        getExampleNumber(isoCode).getNationalNumber()).length();
+                phoneNumberView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(length)});
             }
 
             @Override
@@ -235,29 +256,69 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    public void onNextButtonClicked(MenuItem menuItem) {
-        this.onSignInButtonClicked();
+
+    public void onSkipButtonClicked(View view) {
+        if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+            finish();
+            return;
+        }
+        onSignInButtonClicked();
     }
 
     private void onSignInButtonClicked() {
         showProgress(true);
-        String name = mNameView.getText().toString();
+        String firstName = nameView.getText().toString();
+        String name = "";
+        if (!HTTextUtils.isEmpty(firstName)) {
+            name = firstName;
+        }
         String number = phoneNumberView.getText().toString();
+
         Utils.hideKeyboard(Profile.this, register);
-        presenter.attemptLogin(name, number, isoCode, Utils.getDeviceId(this), profileImage, oldProfileImage, updatedProfileImage);
+        boolean verifyPhone = false;
+        if (!previousPhone.equalsIgnoreCase(number) ||
+                getIntent().getStringExtra("branch_params") != null) {
+            verifyPhone = true;
+        }
+        if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+            presenter.updateProfile(name, number, isoCode, profileImage, verifyPhone);
+        } else
+            presenter.attemptLogin(name, number, isoCode, profileImage, verifyPhone);
     }
 
     @Override
     public void updateViews(String name, String phone, String ISOCode, String profileURL) {
+
+        if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+            skip.setText(R.string.cancel);
+        }
         String nameFromAccount = getName();
+
         if (name != null) {
-            mNameView.setText(nameFromAccount);
+            nameView.setText(nameFromAccount);
             showSkip = false;
-            supportInvalidateOptionsMenu();
+            toggleRegisterButton();
 
         }
-        if (!TextUtils.isEmpty(name)) {
-            mNameView.setText(name);
+        if (!HTTextUtils.isEmpty(name)) {
+            nameView.setText(name);
+        }
+
+        if (!HTTextUtils.isEmpty(ISOCode)) {
+            CountryMaster cm = CountryMaster.getInstance(this);
+            final ArrayList<Country> countries = cm.getCountries();
+            for (Country c : countries) {
+                if (c.mCountryIso.equalsIgnoreCase(ISOCode)) {
+                    countryCodeSpinner.setSelection(adapter.getPosition(c));
+                    break;
+                }
+            }
+        }
+
+        if (!HTTextUtils.isEmpty(phone)) {
+            phone = phone.replaceAll("\\s", "");
+            phoneNumberView.setText(phone);
+            previousPhone = phone;
         }
 
         if (profileURL != null && !profileURL.isEmpty()) {
@@ -327,21 +388,40 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void navigateToHomeScreen() {
+    public void navigateToPlacelineScreen() {
+
+        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
+            Intent intent = new Intent(Profile.this, Invite.class);
+            intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
+            startActivity(intent);
+            return;
+        }
+
+        CrashlyticsWrapper.setCrashlyticsKeys(this);
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
-        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
 
+        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
+        Intent intent = new Intent(Profile.this, Placeline.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Profile.this)
-                .addNextIntentWithParentStack(new Intent(Profile.this, Home.class)
-                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                .addNextIntentWithParentStack(intent)
                 .startActivities();
         finish();
     }
 
+    @Override
+    public void navigateToVerifyCodeScreen() {
+        showProgress(false);
+        SharedPreferenceManager.deleteAction();
+        SharedPreferenceManager.deletePlace();
+        Intent intent = new Intent(Profile.this, Verify.class);
+        intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
+        startActivity(intent);
+    }
 
     @Override
     public void showErrorMessage() {
@@ -352,12 +432,24 @@ public class Profile extends BaseActivity implements ProfileView {
     private void showProgress(boolean show) {
         if (show) {
             mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage(getString(R.string.registration_phone_number));
+            if (HTTextUtils.isEmpty(HyperTrack.getUserId()))
+                mProgressDialog.setMessage(getString(R.string.create_profile_message));
+            else {
+                mProgressDialog.setMessage(getString(R.string.update_profile_message));
+            }
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
         } else {
             mProgressDialog.dismiss();
         }
+    }
+
+    @Override
+    public void showProfileLoading(boolean show) {
+        if (show) {
+            loadingLayout.setVisibility(View.VISIBLE);
+        } else
+            loadingLayout.setVisibility(View.GONE);
     }
 
     @Override
@@ -372,7 +464,12 @@ public class Profile extends BaseActivity implements ProfileView {
 
             @Override
             public void onImagePicked(File imageFile, EasyImage.ImageSource source) {
-                if (imageFile == null) {
+                try {
+                    if (imageFile == null || !imageFile.canRead() || !imageFile.exists()) {
+                        return;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                     return;
                 }
 
@@ -409,10 +506,8 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_profile, menu);
-        return showSkip && super.onCreateOptionsMenu(menu);
+    private void toggleRegisterButton() {
+        register.setEnabled(!showSkip);
     }
 
     @Override

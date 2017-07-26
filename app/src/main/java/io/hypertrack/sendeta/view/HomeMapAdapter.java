@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -52,21 +53,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public Toolbar getToolbar(HyperTrackMapFragment hyperTrackMapFragment) {
-        return toolbar;
-    }
-
-    @Override
-    public Integer getToolbarLogoIcon(HyperTrackMapFragment hyperTrackMapFragment) {
-        return R.drawable.ic_ht_logo;
-    }
-
-    @Override
-    public String getOrderStatusToolbarDefaultTitle(HyperTrackMapFragment hyperTrackMapFragment) {
-        return mContext.getString(R.string.app_name);
-    }
-
-    @Override
     public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
         if (SharedPreferenceManager.getLastKnownLocation() != null) {
             LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
@@ -87,12 +73,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public boolean showUserInfoForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
-        return HyperTrack.getConsumerClient().getActionIDs() != null && HyperTrack.getConsumerClient().getActionIDs().size() == 1 &&
-                HyperTrack.getConsumerClient().getAction(HyperTrack.getConsumerClient().getActionIDs().get(0)).hasActionFinished();
-    }
-
-    @Override
     public boolean showPlaceSelectorView() {
         return true;
     }
@@ -105,19 +85,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public boolean showTrafficLayer(HyperTrackMapFragment hyperTrackMapFragment) {
         return false;
-    }
-
-    @Override
-    public int[] getMapPadding(HyperTrackMapFragment hyperTrackMapFragment) {
-        int bottom = mContext.getResources().getDimensionPixelSize(R.dimen.live_tracking_map_bottom_padding);
-        int right = mContext.getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-
-        if (HyperTrack.getConsumerClient().getActionIDs() == null) {
-            bottom = mContext.getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
-            return new int[]{0, 0, 0, bottom};
-        }
-
-        return new int[]{0, 0, right, bottom};
     }
 
     @Override

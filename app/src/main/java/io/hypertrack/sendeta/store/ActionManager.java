@@ -29,8 +29,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.text.TextUtils;
-
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -38,6 +36,10 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.hypertrack.lib.HyperTrack;
+
+import com.hypertrack.lib.internal.common.logging.HTLog;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
+
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 
@@ -46,14 +48,8 @@ import java.util.List;
 
 import io.hypertrack.sendeta.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.callback.ActionManagerListener;
-import io.hypertrack.sendeta.callback.ETACallback;
-import io.hypertrack.sendeta.model.ETAResponse;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.service.GeofenceTransitionsIntentService;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 
 /**
  * Created by piyush on 15/08/16.
@@ -66,11 +62,13 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     private static final int NOTIFICATION_RESPONSIVENESS_MS = 5000;
     private static final float GEOFENCE_RADIUS_IN_METERS = 100;
     private static final String GEOFENCE_REQUEST_ID = "io.hypertrack.meta:GeoFence";
-    private static ActionManager sharedManager;
     private GoogleApiClient mGoogleAPIClient;
     private GeofencingRequest geofencingRequest;
     private PendingIntent mGeofencePendingIntent;
     private boolean addGeofencingRequest;
+
+    private static ActionManager sharedManager;
+
     private Context mContext;
     private String actionID;
     private Action hyperTrackAction;
@@ -99,6 +97,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
             if (this.place != null) {
                 return true;
             }
+
         }
 
         if (actionCompletedListener != null)
@@ -106,43 +105,9 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         return false;
     }
 
-    public void getETA(double currentLocationLatitude, double currentLocationLongitude,
-                       double expectedPlaceLatitude, double expectedPlaceLongitude,
-                       String vehicleType, final ETACallback callback) {
-
-        String currentLocationQueryParam = currentLocationLatitude + "," + currentLocationLongitude;
-        String expectedPlaceQueryParam = expectedPlaceLatitude + "," + expectedPlaceLongitude;
-
-        HyperTrackService sendETAService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
-        Call<List<ETAResponse>> call = sendETAService.getTaskETA(currentLocationQueryParam,
-                expectedPlaceQueryParam, vehicleType);
-        call.enqueue(new Callback<List<ETAResponse>>() {
-            @Override
-            public void onResponse(Call<List<ETAResponse>> call, Response<List<ETAResponse>> response) {
-                List<ETAResponse> etaResponses = response.body();
-
-                if (etaResponses != null && etaResponses.size() > 0) {
-                    if (callback != null) {
-                        callback.OnSuccess(etaResponses.get(0));
-                    }
-                } else {
-                    if (callback != null) {
-                        callback.OnError();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<ETAResponse>> call, Throwable t) {
-                if (callback != null) {
-                    callback.OnError();
-                }
-            }
-        });
-    }
-
     public void completeAction(final ActionManagerCallback callback) {
-        if (TextUtils.isEmpty(this.getHyperTrackActionId())) {
+
+        if (HTTextUtils.isEmpty(this.getHyperTrackActionId())) {
             if (callback != null) {
                 callback.OnError();
             }
@@ -157,10 +122,10 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         }
 
         HyperTrack.completeAction(actionID);
-        clearState();
 
         if (callback != null)
             callback.OnSuccess();
+
     }
 
     public void onActionStart() {
@@ -203,6 +168,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
             }
         } catch (Exception exception) {
             exception.printStackTrace();
+            CrashlyticsWrapper.log(exception);
         }
     }
 
@@ -224,11 +190,19 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
             LocationServices.GeofencingApi.addGeofences(mGoogleAPIClient, geofencingRequest, mGeofencePendingIntent).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(@NonNull Status status) {
-                    addGeofencingRequest = !status.isSuccess();
+
+                    if (status.isSuccess()) {
+                        HTLog.i(TAG, "Geofence set at Expected Place");
+                        addGeofencingRequest = false;
+                    } else {
+                        HTLog.e(TAG, "Geofence error at Expected Place" + status.getStatusMessage());
+                        addGeofencingRequest = true;
+                    }
                 }
             });
         } catch (SecurityException | IllegalArgumentException exception) {
-            exception.printStackTrace();
+            HTLog.e(TAG, "Geofence error at Expected Place" + exception.getMessage());
+            CrashlyticsWrapper.log(exception);
         }
     }
 
@@ -263,10 +237,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         return builder.build();
     }
 
-    public void setGeofencingRequest(GeofencingRequest request) {
-        this.geofencingRequest = request;
-    }
-
     /**
      * Call this method once the task has been completed successfully on the SDK.
      */
@@ -298,11 +268,15 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public boolean isActionLive() {
-        return hyperTrackAction != null && !TextUtils.isEmpty(hyperTrackAction.getId());
+        return hyperTrackAction != null && !HTTextUtils.isEmpty(hyperTrackAction.getId());
     }
 
     private void clearListeners() {
         this.actionCompletedListener = null;
+    }
+
+    public void setGeofencingRequest(GeofencingRequest request) {
+        this.geofencingRequest = request;
     }
 
     public Place getPlace() {
@@ -338,7 +312,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         SharedPreferenceManager.setActionID(actionID);
     }
 
-    private String getHyperTrackActionId() {
+    public String getHyperTrackActionId() {
         if (this.actionID == null) {
             this.actionID = SharedPreferenceManager.getActionID(mContext);
         }
@@ -353,7 +327,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public String getHyperTrackActionLookupId() {
-        return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupID();
+        return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupId();
     }
 
     private void savePlace() {

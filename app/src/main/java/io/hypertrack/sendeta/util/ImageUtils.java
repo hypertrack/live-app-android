@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -38,7 +39,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 /**
  * Created by piyush on 30/06/16.
@@ -63,6 +63,9 @@ public class ImageUtils {
 
             return file;
         } catch (Exception e) {
+
+            CrashlyticsWrapper.log(e);
+            e.printStackTrace();
             return null;
         }
     }
@@ -101,22 +104,23 @@ public class ImageUtils {
             file.createNewFile();
             FileOutputStream outputStream = new FileOutputStream(file);
             selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-
             return file;
         } catch (Exception e) {
+            e.printStackTrace();
+            CrashlyticsWrapper.log(e);
             return null;
         }
     }
 
     public static Bitmap getRotatedBitMap(File imageFile) {
-        if (imageFile == null) {
+        if (imageFile == null || !imageFile.canRead() || !imageFile.exists()) {
             return null;
         }
 
         Bitmap rotatedBitmap = null;
-        Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
 
         try {
+            Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
             ExifInterface exif = new ExifInterface(imageFile.getName());
             String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
             int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
@@ -130,8 +134,9 @@ public class ImageUtils {
             matrix.setRotate(rotationAngle, (float) srcBitmap.getWidth() / 2, (float) srcBitmap.getHeight() / 2);
             rotatedBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            CrashlyticsWrapper.log(e);
         }
 
         return rotatedBitmap;
@@ -153,6 +158,7 @@ public class ImageUtils {
             view.draw(canvas);
         } catch (Exception e) {
             e.printStackTrace();
+            CrashlyticsWrapper.log(e);
         }
 
         return bitmap;

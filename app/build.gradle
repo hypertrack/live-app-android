@@ -1,14 +1,41 @@
 buildscript {
     repositories {
+        maven { url 'https://jitpack.io' }
+        maven { url 'https://maven.fabric.io/public' }
         mavenCentral()
     }
-}
 
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.22.0'
+        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
+    }
+}
 apply plugin: 'com.android.application'
+apply plugin: 'io.fabric'
+apply plugin: 'com.mindera.gradle.slack'
+apply plugin: 'realm-android'
 
 repositories {
-    // HyperTrack SDK Repository
+    maven { url 'https://maven.fabric.io/public' }
+    // HyperTrack Repository
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
+}
+
+ext {
+    hypertrackSDKVersion = computeHyperTrackSDKVersion()
+}
+
+def computeHyperTrackSDKVersion() {
+    def versionPropsFile = file('gradle.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+        versionProps.load(new FileInputStream(versionPropsFile))
+        return versionProps['HYPERTRACK_SDK_VERSION']
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
 }
 
 android {
@@ -18,29 +45,97 @@ android {
         abortOnError false
     }
 
+    /*Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
+    * Add your keystore file to app folder
+    * Create a new keystore.properties file
+    * inside root folder with values
+    * storePassword=
+    * keyPassword=
+    * keyAlias=
+    * storeFile=<File path of keystore file>
+    * */
+
+    /*def keystorePropertiesFile = rootProject.file("keystore.properties");
+    def keystoreProperties = new Properties()
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }*/
+
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
     keyProperties.load(new FileInputStream(keyPropertiesFile))
 
-    defaultConfig {
-        applicationId "io.hypertrack.sendeta"
-        versionCode 1
-        versionName "0.1.1"
-        minSdkVersion 19
-        targetSdkVersion 25
-        resValue "string", "app_name", "HyperTrack Live"
-        buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
-        buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
-        resValue "string", "deeplink_scheme", "com.hypertracklive"
-        resValue "string", "tracking_url", "www.trck.at"
-        manifestPlaceholders = [applicationLabel: "@string/app_name"]
-        multiDexEnabled true
+    /*
+    *   Set App version using gradle.properties file
+    * */
+    def versionPropsFile = file('gradle.properties')
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def value = 0
+
+        def runTasks = gradle.startParameter.taskNames
+        if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks
+                || 'cUDR' in runTasks || 'crashlyticsUploadDistributionRelease' in runTasks) {
+            value = 1;
+        }
+
+        def versionMajor = 1
+        def versionMinor = 7
+        def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
+        def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
+
+        versionProps['VERSION_PATCH'] = versionPatch.toString()
+        versionProps['VERSION_NUMBER'] = versionNumber.toString()
+        versionProps['version'] = versionMajor + "." + versionMinor + "." + versionPatch
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        defaultConfig {
+            applicationId "io.hypertrack.sendeta"
+            versionCode versionNumber
+            versionName "${versionMajor}.${versionMinor}.${versionPatch}"
+            minSdkVersion 16
+            targetSdkVersion 25
+            resValue "string", "app_name", "HyperTrack Live"
+            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
+            resValue "string", "deeplink_scheme", "com.hypertracklive"
+            resValue "string", "tracking_url", "www.trck.at"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            //Uncomment this code to sign your Release APK using keystore
+            //signingConfig signingConfigs.release
+            multiDexEnabled true
+        }
+
+    } else {
+        throw new GradleException("Could not read version.properties!")
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            def newFileName = "HyperTrackLive-${variant.versionName}.apk";
+            def apk = output.outputFile;
+            output.outputFile = new File(apk.parentFile, newFileName);
+        }
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            debuggable false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.enableCrashlytics = false
+        }
+        debug {
+            ext.enableCrashlytics = false
         }
     }
 }
@@ -48,22 +143,40 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.22'
-    testCompile 'org.robolectric:robolectric:3.0'
-    testCompile 'org.robolectric:shadows-support-v4:3.0'
 
-    compile("com.hypertrack:android:0.2.6:release@aar") {
-        transitive = true;
+    compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+        transitive = true
+    }
+   /* releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
     }
 
-    compile 'com.android.support:appcompat-v7:25.3.0'
-    compile 'com.android.support:design:25.3.0'
-
+    debugCompile(project(path: ':library', configuration: 'debug')) {
+        transitive = true
+    }*/
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+        transitive = true;
+    }
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:design:25.3.1'
+    compile 'com.android.support:cardview-v7:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
     compile 'com.github.tajchert:WaitingDots:0.4.0'
+    compile 'com.google.android.gms:play-services-gcm:10.2.0'
+    compile 'com.google.android.gms:play-services-places:10.2.0'
+    compile 'com.google.android.gms:play-services-location:10.2.0'
+    compile 'com.github.sundeepk:compact-calendar-view:1.9.2-beta'
+    compile 'com.github.rubensousa:gravitysnaphelper:1.1'
+    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
+    compile 'com.github.Q42:AndroidScrollingImageView:1.2'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    compile 'io.branch.sdk.android:library:2.+'
 }
 
 /**
@@ -72,4 +185,5 @@ dependencies {
  * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
+
 //apply plugin: 'com.google.gms.google-services'

@@ -34,7 +34,6 @@ import io.hypertrack.sendeta.store.ActionManager;
  */
 
 public interface IHomePresenter<V> extends Presenter<V> {
-    void getETAForExpectedPlace(final Place expectedPlace, final String selectedVehicleType, final ActionManager actionManager);
 
     void shareLiveLocation(final ActionManager actionManager, final String lookupID, final Place expectedPlace);
 

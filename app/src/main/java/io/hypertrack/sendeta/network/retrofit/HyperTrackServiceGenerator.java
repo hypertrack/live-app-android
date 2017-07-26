@@ -24,6 +24,7 @@ SOFTWARE.
 package io.hypertrack.sendeta.network.retrofit;
 
 import java.io.IOException;
+import java.util.TimeZone;
 
 import io.hypertrack.sendeta.BuildConfig;
 import okhttp3.Interceptor;
@@ -39,6 +40,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class HyperTrackServiceGenerator {
 
     public static final String API_BASE_URL = BuildConfig.HYPERTRACK_BASE_URL;
+    private static final String TAG = HyperTrackServiceGenerator.class.getSimpleName();
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
@@ -56,6 +58,8 @@ public class HyperTrackServiceGenerator {
                 // Request customization: add request headers
                 Request.Builder requestBuilder = original.newBuilder()
                         .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
+                        .header("User-Agent", "hypertrack-live-android")
+                        .header("timezone", TimeZone.getDefault().getID())
                         .method(original.method(), original.body());
 
                 Request request = requestBuilder.build();

@@ -2,8 +2,7 @@ package io.hypertrack.sendeta.util;
 
 import android.content.Context;
 import android.net.Uri;
-
-import com.hypertrack.lib.internal.common.util.TextUtils;
+import android.text.TextUtils;
 
 import org.junit.Before;
 import org.junit.Test;

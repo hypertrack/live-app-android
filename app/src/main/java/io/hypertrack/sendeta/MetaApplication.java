@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -26,8 +27,14 @@ package io.hypertrack.sendeta;
 import android.app.Application;
 import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.squareup.leakcanary.LeakCanary;
 
+import io.branch.referral.Branch;
+import io.fabric.sdk.android.Fabric;
+import io.fabric.sdk.android.services.common.ApiKey;
 import io.hypertrack.sendeta.util.DevDebugUtils;
 
 /**
@@ -37,6 +44,40 @@ public class MetaApplication extends Application {
 
     private static MetaApplication mInstance;
     private static boolean activityVisible;
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (LeakCanary.isInAnalyzerProcess(this)) {
+            // This process is dedicated to LeakCanary for heap analysis.
+            // You should not init your app in this process.
+            return;
+        }
+        LeakCanary.install(this);
+        try {
+            if (!HTTextUtils.isEmpty(ApiKey.getApiKey(this))) {
+                Fabric.with(this, new Crashlytics());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mInstance = this;
+
+        // Initialize HyperTrack SDK
+        HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
+        HyperTrack.enableMockLocations(true);
+        HyperTrack.disablePersistentNotification(true);
+
+        Branch.getAutoInstance(this);
+        // (NOTE: IFF current Build Variant is DEBUG)
+        // Initialize Stetho to debug Databases
+        //DevDebugUtils.installStetho(this);
+        // Enable HyperTrack Debug Logging
+        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
+        // Log HyperTrack SDK Version
+        DevDebugUtils.sdkVersionMessage();
+    }
 
     public static synchronized MetaApplication getInstance() {
         return mInstance;
@@ -54,18 +95,4 @@ public class MetaApplication extends Application {
         activityVisible = false;
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mInstance = this;
-
-        // Initialize HyperTrack SDK
-        HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
-        HyperTrack.enableMockLocations(false);
-
-        // Enable HyperTrack Debug Logging
-        DevDebugUtils.setHTLogLevel(Log.ERROR);
-        // Log HyperTrack SDK Version
-        DevDebugUtils.sdkVersionMessage();
-    }
 }

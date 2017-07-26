@@ -1,3 +1,4 @@
+
 /*
 The MIT License (MIT)
 
@@ -26,10 +27,10 @@ package io.hypertrack.sendeta.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
+import com.hypertrack.lib.internal.common.logging.HTLog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,19 +69,19 @@ public class GeofenceTransitionsIntentService extends IntentService {
             if (geofencingEvent.hasError()) {
                 String errorMessage = ErrorMessages.getGeofenceErrorString(this,
                         geofencingEvent.getErrorCode());
-                Log.e(TAG, errorMessage);
+                HTLog.e(TAG, errorMessage);
                 return;
             }
 
             // Get the transition type.
             int geofenceTransition = geofencingEvent.getGeofenceTransition();
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
-                Log.i(TAG, "User is dwelling in geo fence.");
+                HTLog.i(TAG, "User is dwelling in geo fence.");
                 ActionManager.getSharedManager(getApplicationContext()).OnGeoFenceSuccess();
 
             } else {
                 // Log the error.
-                Log.e(TAG, getString(R.string.geofence_transition_invalid_type,
+                HTLog.e(TAG, getString(R.string.geofence_transition_invalid_type,
                         geofenceTransition));
             }
 
@@ -89,16 +90,16 @@ public class GeofenceTransitionsIntentService extends IntentService {
             String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
                     geofencingEvent.getTriggeringGeofences());
 
-            Log.i(TAG, "GeoFenceTransition Details: " + geofenceTransitionDetails);
+            HTLog.i(TAG, "GeoFenceTransition Details: " + geofenceTransitionDetails);
         }
     }
 
     /**
      * Gets transition details and returns them as a formatted string.
      *
-     * @param geofenceTransition    The ID of the geofence transition.
-     * @param triggeringGeofences   The geofence(s) triggered.
-     * @return                      The transition details formatted as String.
+     * @param geofenceTransition  The ID of the geofence transition.
+     * @param triggeringGeofences The geofence(s) triggered.
+     * @return The transition details formatted as String.
      */
     private String getGeofenceTransitionDetails(int geofenceTransition,
                                                 List<Geofence> triggeringGeofences) {
@@ -110,7 +111,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
         for (Geofence geofence : triggeringGeofences) {
             triggeringGeofencesIdsList.add(geofence.getRequestId());
         }
-        String triggeringGeofencesIdsString = TextUtils.join(", ",  triggeringGeofencesIdsList);
+        String triggeringGeofencesIdsString = TextUtils.join(", ", triggeringGeofencesIdsList);
 
         return geofenceTransitionString + ": " + triggeringGeofencesIdsString;
     }
@@ -118,8 +119,8 @@ public class GeofenceTransitionsIntentService extends IntentService {
     /**
      * Maps geofence transition types to their human-readable equivalents.
      *
-     * @param transitionType    A transition type constant defined in Geofence
-     * @return                  A String indicating the type of transition
+     * @param transitionType A transition type constant defined in Geofence
+     * @return A String indicating the type of transition
      */
     private String getTransitionString(int transitionType) {
         switch (transitionType) {
