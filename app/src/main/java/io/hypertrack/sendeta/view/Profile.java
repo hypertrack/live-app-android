@@ -40,7 +40,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
-import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -56,7 +55,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
@@ -229,9 +227,6 @@ public class Profile extends BaseActivity implements ProfileView {
 
                 countryCodeTextView.setText("+ " + countries.get(position).mDialPrefix);
                 countryCodeTextView.setVisibility(View.VISIBLE);
-                int length = String.valueOf(PhoneNumberUtil.getInstance().
-                        getExampleNumber(isoCode).getNationalNumber()).length();
-                phoneNumberView.setFilters(new InputFilter[]{new InputFilter.LengthFilter(length)});
             }
 
             @Override
