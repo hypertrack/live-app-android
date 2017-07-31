@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
@@ -94,9 +95,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         // Check if current Task exists in Shared Preference or not
         if (this.hyperTrackAction != null) {
             // Start Refreshing the task without any delay
-            if (this.place != null) {
-                return true;
-            }
+            return true;
 
         }
 
