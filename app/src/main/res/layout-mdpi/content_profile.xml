@@ -141,7 +141,6 @@
                     android:hint="@string/enter_phone_number"
                     android:imeActionId="@+id/login"
                     android:inputType="phone"
-                    android:maxLength="10"
                     android:paddingRight="@dimen/padding_xxhigh"
                     android:textColorHint="@color/profile_detail_border"
                     android:textSize="@dimen/text_medium" />
