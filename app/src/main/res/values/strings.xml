@@ -97,4 +97,7 @@
     <string name="verify">Verify</string>
     <string name="resend_code">Resend Code</string>
     <string name="verification_description">Enter verification code to verify your contact number</string>
+
+    <string name="stop">STOP TRACKING</string>
+    <string name="share">SHARE</string>
 </resources>
