@@ -45,7 +45,8 @@ android {
         abortOnError false
     }
 
-    /*Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
+    /*
+    * Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
     * Add your keystore file to app folder
     * Create a new keystore.properties file
     * inside root folder with values
@@ -53,9 +54,10 @@ android {
     * keyPassword=
     * keyAlias=
     * storeFile=<File path of keystore file>
-    * */
+    */
 
-    /*def keystorePropertiesFile = rootProject.file("keystore.properties");
+    /*
+    def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     signingConfigs {
@@ -65,7 +67,8 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
         }
-    }*/
+    }
+    */
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
@@ -110,9 +113,12 @@ android {
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            //Uncomment this code to sign your Release APK using keystore
-            //signingConfig signingConfigs.release
             multiDexEnabled true
+
+            /**
+             * Uncomment this code to sign your Release APK using keystore
+             */
+            //signingConfig signingConfigs.release
         }
 
     } else {
@@ -134,7 +140,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             ext.enableCrashlytics = false
         }
+
         debug {
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.enableCrashlytics = false
+        }
+
+        staging {
             ext.enableCrashlytics = false
         }
     }
@@ -147,13 +161,7 @@ dependencies {
     compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
-   /* releaseCompile(project(path: ':library', configuration: 'release')) {
-        transitive = true
-    }
 
-    debugCompile(project(path: ':library', configuration: 'debug')) {
-        transitive = true
-    }*/
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
