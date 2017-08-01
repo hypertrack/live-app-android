@@ -40,9 +40,9 @@ import io.hypertrack.sendeta.util.DevDebugUtils;
 /**
  * Created by suhas on 11/11/15.
  */
-public class MetaApplication extends Application {
+public class MyApplication extends Application {
 
-    private static MetaApplication mInstance;
+    private static MyApplication mInstance;
     private static boolean activityVisible;
 
 
@@ -79,7 +79,7 @@ public class MetaApplication extends Application {
         DevDebugUtils.sdkVersionMessage();
     }
 
-    public static synchronized MetaApplication getInstance() {
+    public static synchronized MyApplication getInstance() {
         return mInstance;
     }
 

@@ -36,7 +36,7 @@ import android.widget.TextView;
 
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
-import io.hypertrack.sendeta.MetaApplication;
+import io.hypertrack.sendeta.MyApplication;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 
@@ -248,12 +248,12 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        MetaApplication.activityResumed();
+        MyApplication.activityResumed();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MetaApplication.activityPaused();
+        MyApplication.activityPaused();
     }
 }

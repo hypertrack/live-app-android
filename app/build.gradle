@@ -45,7 +45,8 @@ android {
         abortOnError false
     }
 
-    /*Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
+    /*
+    * Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
     * Add your keystore file to app folder
     * Create a new keystore.properties file
     * inside root folder with values
@@ -53,9 +54,9 @@ android {
     * keyPassword=
     * keyAlias=
     * storeFile=<File path of keystore file>
-    * */
+    */
 
-    /*def keystorePropertiesFile = rootProject.file("keystore.properties");
+    def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     signingConfigs {
@@ -65,7 +66,7 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
         }
-    }*/
+    }
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
@@ -110,9 +111,12 @@ android {
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            //Uncomment this code to sign your Release APK using keystore
-            //signingConfig signingConfigs.release
             multiDexEnabled true
+
+            /**
+             * Uncomment this code to sign your Release APK using keystore
+             */
+            signingConfig signingConfigs.release
         }
 
     } else {
@@ -132,9 +136,17 @@ android {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.enableCrashlytics = false
+            ext.enableCrashlytics = true
         }
+
         debug {
+            debuggable true
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.enableCrashlytics = true
+        }
+
+        staging {
             ext.enableCrashlytics = false
         }
     }
@@ -144,16 +156,10 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
 
-    compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
-   /* releaseCompile(project(path: ':library', configuration: 'release')) {
+    compile('com.hypertrack:android:' + '0.3.25' + ':release@aar') {
         transitive = true
     }
 
-    debugCompile(project(path: ':library', configuration: 'debug')) {
-        transitive = true
-    }*/
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
@@ -175,6 +181,7 @@ dependencies {
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
 }
@@ -186,4 +193,4 @@ dependencies {
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
 
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'

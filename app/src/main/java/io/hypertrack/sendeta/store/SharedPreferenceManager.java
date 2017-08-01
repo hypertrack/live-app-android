@@ -38,7 +38,7 @@ import com.hypertrack.lib.models.Place;
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import io.hypertrack.sendeta.MetaApplication;
+import io.hypertrack.sendeta.MyApplication;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
@@ -66,7 +66,7 @@ public class SharedPreferenceManager {
     private static final String PREVIOUS_USER_ID = "io.hypertrack.meta:PreviousUserID";
 
     private static SharedPreferences getSharedPreferences() {
-        Context context = MetaApplication.getInstance().getApplicationContext();
+        Context context = MyApplication.getInstance().getApplicationContext();
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
