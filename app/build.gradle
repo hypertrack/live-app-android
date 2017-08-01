@@ -167,7 +167,7 @@ dependencies {
     compile 'com.github.rubensousa:gravitysnaphelper:1.1'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    debugCompile  'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
