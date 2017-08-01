@@ -55,7 +55,7 @@ android {
     * storeFile=<File path of keystore file>
     * */
 
-    /*def keystorePropertiesFile = rootProject.file("keystore.properties");
+    def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     signingConfigs {
@@ -65,7 +65,7 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
         }
-    }*/
+    }
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
@@ -111,7 +111,7 @@ android {
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             //Uncomment this code to sign your Release APK using keystore
-            //signingConfig signingConfigs.release
+            signingConfig signingConfigs.release
             multiDexEnabled true
         }
 
@@ -129,10 +129,9 @@ android {
 
     buildTypes {
         release {
-            debuggable false
+            debuggable true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.enableCrashlytics = false
         }
         debug {
             ext.enableCrashlytics = false
@@ -144,16 +143,16 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
 
-    compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-        transitive = true
-    }
-   /* releaseCompile(project(path: ':library', configuration: 'release')) {
+    /* compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+         transitive = true
+     }*/
+    releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
 
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
-    }*/
+    }
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
@@ -166,7 +165,6 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     compile 'com.squareup.picasso:picasso:2.4.0'
-    compile 'com.github.tajchert:WaitingDots:0.4.0'
     compile 'com.google.android.gms:play-services-gcm:10.2.0'
     compile 'com.google.android.gms:play-services-places:10.2.0'
     compile 'com.google.android.gms:play-services-location:10.2.0'
@@ -186,4 +184,4 @@ dependencies {
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
 
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'
