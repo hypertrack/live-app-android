@@ -400,7 +400,7 @@ public class SplashScreen extends BaseActivity {
     private void requestForLocationSettings() {
         // Check for Location permission
         if (!HyperTrack.checkLocationPermission(this)) {
-            HyperTrack.requestPermissions(this, null);
+            HyperTrack.requestPermissions(this);
             return;
         }
 

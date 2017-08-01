@@ -8,10 +8,11 @@
     tools:context=".view.Home"
     tools:showIn="@layout/activity_home">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="visible">
 
         <android.support.design.widget.AppBarLayout
             android:id="@+id/app_bar_layout"
@@ -47,104 +48,82 @@
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/text_base" />
             </LinearLayout>
+
         </android.support.design.widget.AppBarLayout>
+
+        <RelativeLayout
+            android:id="@+id/live_tracking_action_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@color/white"
+            android:visibility="gone">
+
+            <View
+                android:id="@+id/separator"
+                android:layout_width="1dp"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
+                android:background="@color/divider_light" />
+
+            <com.hypertrack.lib.internal.consumer.view.RippleView
+                android:id="@+id/stop_tracking"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/separator"
+                app:rv_centered="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/stop"
+                    android:textSize="@dimen/text_medium" />
+            </com.hypertrack.lib.internal.consumer.view.RippleView>
+
+            <com.hypertrack.lib.internal.consumer.view.RippleView
+                android:id="@+id/share_link"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@id/separator"
+                app:rv_centered="true">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true"
+                    android:text="@string/share"
+                    android:textColor="@color/tracking_experience"
+                    android:textSize="@dimen/text_medium" />
+            </com.hypertrack.lib.internal.consumer.view.RippleView>
+        </RelativeLayout>
 
         <fragment
             android:id="@+id/htMapfragment"
             android:name="com.hypertrack.lib.HyperTrackMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@id/live_tracking_action_layout"
+            android:layout_below="@id/app_bar_layout"
             tools:layout="@layout/fragment_map_new" />
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone"
-        android:layout_gravity="bottom"
-        android:orientation="vertical">
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <io.hypertrack.sendeta.view.BottomButtonCard
+            android:id="@+id/bottom_card"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@null"
-            android:orientation="vertical">
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
+            android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/navigateButton"
-                android:layout_width="@dimen/cta_button_size"
-                android:layout_height="@dimen/cta_button_size"
-                android:layout_gravity="right|center"
-                android:layout_marginBottom="@dimen/margin_base"
-                android:layout_marginEnd="@dimen/margin_high"
-                android:background="@drawable/circle_primary_background"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:src="@drawable/ic_navigate_nocircle"
-                android:visibility="gone" />
 
-            <ImageButton
-                android:id="@+id/shareButton"
-                android:layout_width="@dimen/cta_button_size"
-                android:layout_height="@dimen/cta_button_size"
-                android:layout_gravity="right|center"
-                android:layout_marginEnd="@dimen/margin_high"
-                android:background="@drawable/circle_primary_background"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:src="@drawable/ic_share_nocircle"
-                android:visibility="gone" />
 
-            <FrameLayout
-                android:id="@+id/home.bottomButtonLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:foreground="?android:attr/selectableItemBackground"
-                android:visibility="visible">
+    </RelativeLayout>
 
-                <Button
-                    android:id="@+id/shareLiveLocation"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/cta_button_size"
-                    android:layout_gravity="center"
-                    android:layout_margin="@dimen/margin_high"
-                    android:background="@drawable/button_background"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:paddingLeft="@dimen/padding_xxxhigh"
-                    android:paddingRight="@dimen/padding_xxxhigh"
-                    android:textColor="@color/text_dark_bg_base"
-                    android:visibility="gone" />
 
-                <Button
-                    android:id="@+id/stopSharingButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/cta_button_size"
-                    android:layout_gravity="center"
-                    android:layout_margin="@dimen/margin_high"
-                    android:background="@drawable/stop_sharing_btn_bg"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:paddingLeft="@dimen/padding_xhigh"
-                    android:paddingRight="@dimen/padding_xhigh"
-                    android:text="@string/action_stop_sharing"
-                    android:textColor="@color/text_dark_bg_base"
-                    android:visibility="gone" />
-
-                <Button
-                    android:id="@+id/retryButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="@dimen/cta_button_size"
-                    android:layout_gravity="center"
-                    android:layout_margin="@dimen/margin_high"
-                    android:background="@drawable/button_background"
-                    android:foreground="?android:attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:paddingLeft="@dimen/padding_xhigh"
-                    android:paddingRight="@dimen/padding_xhigh"
-                    android:text="@string/action_retry"
-                    android:textColor="@color/text_dark_bg_base"
-                    android:visibility="gone" />
-
-            </FrameLayout>
-        </LinearLayout>
-    </LinearLayout>
 </FrameLayout>

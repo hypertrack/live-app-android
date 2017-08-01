@@ -23,6 +23,8 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
+import android.content.Context;
+
 import com.hypertrack.lib.models.Place;
 
 import java.util.List;
@@ -39,7 +41,9 @@ public interface IHomePresenter<V> extends Presenter<V> {
 
     void stopSharing(final ActionManager actionManager);
 
-    void shareTrackingUrl(final ActionManager actionManager);
+    void openCustomShareCard(Context context, final ActionManager actionManager);
+
+    void shareTrackingURL(ActionManager actionManager);
 
     void openNavigationForExpectedPlace(final ActionManager actionManager);
 

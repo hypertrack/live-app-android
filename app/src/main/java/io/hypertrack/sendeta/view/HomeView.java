@@ -40,9 +40,13 @@ public interface HomeView {
 
     void showStopSharingSuccess();
 
-    void showShareTrackingUrlError();
+    void showCustomShareCardError(String trackingURL);
 
-    void showShareTrackingUrlSuccess(String shareMessage);
+    void showCustomShareCardSuccess(String remainingTime, String trackingURL);
+
+    void showShareTrackingURLSuccess(String shareMessage);
+
+    void showShareTrackingURLError();
 
     void showOpenNavigationError();
 

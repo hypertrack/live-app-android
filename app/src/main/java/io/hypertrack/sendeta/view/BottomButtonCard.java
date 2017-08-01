@@ -139,12 +139,12 @@ public class BottomButtonCard extends RelativeLayout {
     public void showBottomCardLayout() {
         hideProgress();
         actionButtonText.setVisibility(VISIBLE);
-        //AnimationUtils.expand(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION);
+        AnimationUtils.expand(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION);
     }
 
     public void hideBottomCardLayout() {
         hideProgress();
-       // AnimationUtils.collapse(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION, trackingURLLayout);
+        AnimationUtils.collapse(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION, trackingURLLayout);
     }
 
     public void startProgress() {
