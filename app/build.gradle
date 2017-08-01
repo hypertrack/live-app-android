@@ -21,23 +21,6 @@ repositories {
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
-ext {
-    hypertrackSDKVersion = computeHyperTrackSDKVersion()
-}
-
-def computeHyperTrackSDKVersion() {
-    def versionPropsFile = file('gradle.properties')
-
-    if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
-        versionProps.load(new FileInputStream(versionPropsFile))
-        return versionProps['HYPERTRACK_SDK_VERSION']
-
-    } else {
-        throw new GradleException("Could not read version.properties!")
-    }
-}
-
 android {
     compileSdkVersion 25
     buildToolsVersion '25.0.2'
@@ -156,7 +139,11 @@ dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
 
-    compile('com.hypertrack:android:' + '0.3.25' + ':release@aar') {
+    releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
+
+    debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
 
