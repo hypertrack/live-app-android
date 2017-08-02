@@ -98,7 +98,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                     actionManager.onActionStart();
 
                     HyperTrack.clearServiceNotificationParams();
-                    Log.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
+                    HTLog.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
 
                     if (view != null)
                         view.showShareLiveLocationSuccess(action);
@@ -125,7 +125,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             @Override
             public void OnSuccess() {
                 HyperTrack.clearServiceNotificationParams();
-                Log.i(TAG, "Stopped sharing live location successfully.");
+                HTLog.i(TAG, "Stopped sharing live location successfully.");
                 if (view != null) {
                     view.showStopSharingSuccess();
                 }
@@ -133,7 +133,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
             @Override
             public void OnError() {
-                Log.i(TAG, "Error occurred while trying to stop sharing.");
+                HTLog.i(TAG, "Error occurred while trying to stop sharing.");
                 if (view != null)
                     view.showStopSharingError();
             }

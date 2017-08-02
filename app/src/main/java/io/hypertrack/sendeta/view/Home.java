@@ -873,11 +873,13 @@ public class Home extends BaseActivity implements HomeView {
      * Method to update State Variables & UI to reflect Task Ended
      */
     private void OnStopSharing() {
+
         if (SharedPreferenceManager.isTrackingON()) {
             startHyperTrackTracking(true);
         } else {
             stopHyperTrackTracking();
         }
+
         ActionManager.getSharedManager(Home.this).clearState();
         expectedPlace = null;
         AnimationUtils.collapse(liveTrackingActionLayout);

@@ -18,6 +18,6 @@ public class DevDebugUtils {
     }
 
     public static void sdkVersionMessage() {
-        Log.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
+        HTLog.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
     }
 }
