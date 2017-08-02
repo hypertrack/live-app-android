@@ -7,13 +7,10 @@ buildscript {
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.22.0'
-        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'com.mindera.gradle.slack'
-apply plugin: 'realm-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -23,7 +20,7 @@ repositories {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
     lintOptions {
         abortOnError false
     }
@@ -44,6 +41,12 @@ android {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     signingConfigs {
         release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+        debug {
             storeFile file(keystoreProperties['storeFile'])
             storePassword keystoreProperties['storePassword']
             keyAlias keystoreProperties['keyAlias']
@@ -95,11 +98,7 @@ android {
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             multiDexEnabled true
-
-            /**
-             * Uncomment this code to sign your Release APK using keystore
-             */
-            signingConfig signingConfigs.release
+            ext.enableCrashlytics = false
         }
 
     } else {
@@ -125,12 +124,19 @@ android {
         debug {
             debuggable true
             minifyEnabled false
+            versionNameSuffix '-debug'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             ext.enableCrashlytics = true
         }
 
         staging {
-            ext.enableCrashlytics = false
+            debuggable true
+            minifyEnabled false
+            applicationIdSuffix '.staging'
+            versionNameSuffix '-staging'
+            resValue "string", "app_name", "Staging HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
         }
     }
 }
@@ -143,7 +149,11 @@ dependencies {
         transitive = true
     }
 
-    debugCompile(project(path: ':library', configuration: 'debug')) {
+    debugCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
+
+    stagingCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
 
