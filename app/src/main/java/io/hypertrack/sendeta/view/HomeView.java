@@ -55,4 +55,6 @@ public interface HomeView {
     void showTrackActionsOnMapSuccess(List<Action> actions);
 
     void showTrackActionsOnMapError(ErrorResponse errorResponse);
+
+    void showShareBackCard(String remainingTime);
 }

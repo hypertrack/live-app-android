@@ -288,7 +288,7 @@ public class SplashScreen extends BaseActivity {
                 List<Action> actions = (List<Action>) response.getResponseObject();
                 if (actions != null && !actions.isEmpty()) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actions.get(0).getId());
+                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupId(), actions.get(0).getId());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -329,8 +329,10 @@ public class SplashScreen extends BaseActivity {
                 .putExtra(Track.KEY_TRACK_DEEPLINK, true)
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+        Action action = SharedPreferenceManager.getTrackingAction(this);
         // Check if current user is sharing location or not
-        if (SharedPreferenceManager.getActionID(this) == null) {
+        if (SharedPreferenceManager.getActionID(this) == null ||
+                (action != null && actionId.equalsIgnoreCase(action.getId()))) {
             intent.setClass(SplashScreen.this, Home.class)
                     .putExtra(Track.KEY_LOOKUP_ID, lookupId);
         } else {

@@ -46,6 +46,7 @@ import java.util.UUID;
 import io.hypertrack.sendeta.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.OnboardingManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.HomeView;
 
 /**
@@ -201,7 +202,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
     @Override
     public void trackActionsOnMap(final String lookupID, final List<String> actionIDs,
-                                  final ActionManager actionManager) {
+                                  final ActionManager actionManager, final Context context) {
         if (!HTTextUtils.isEmpty(lookupID)) {
             HyperTrack.trackActionByLookupId(lookupID, new HyperTrackCallback() {
                 @Override
@@ -211,10 +212,26 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                         Action action = actions.get(0);
                         Place expectedPlace = action.getExpectedPlace();
                         actionManager.setPlace(expectedPlace);
-
-                        if (view != null)
+                        String remainingTime = null;
+                        if (action.getActionDisplay() != null &&
+                                !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+                            Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
+                            remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
+                        }
+                        if (view != null) {
+                            if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
+                                view.showShareBackCard(remainingTime);
+                                SharedPreferenceManager.setTrackingAction(action);
+                                return;
+                            } else if (actions.size() > 1 && actions.contains(actionManager.getHyperTrackActionId())) {
+                                if (actions.get(0).getId().equalsIgnoreCase(actionIDs.get(0)))
+                                    SharedPreferenceManager.setTrackingAction(action);
+                                else {
+                                    SharedPreferenceManager.setTrackingAction(actions.get(1));
+                                }
+                            }
                             view.showTrackActionsOnMapSuccess(actions);
-
+                        }
                     } else {
                         if (view != null)
                             view.showTrackActionsOnMapError(new ErrorResponse());
@@ -234,9 +251,32 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 HyperTrack.trackAction(actionIDs, new HyperTrackCallback() {
                     @Override
                     public void onSuccess(@NonNull SuccessResponse response) {
-                        if (response.getResponseObject() != null) {
-                            if (view != null)
-                                view.showTrackActionsOnMapSuccess((List<Action>) response.getResponseObject());
+
+                        List<Action> actions = (List<Action>) response.getResponseObject();
+                        if (actions != null && !actions.isEmpty()) {
+                            Action action = actions.get(0);
+                            Place expectedPlace = action.getExpectedPlace();
+                            actionManager.setPlace(expectedPlace);
+                            String remainingTime = null;
+                            if (action.getActionDisplay() != null &&
+                                    !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+                                Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
+                                remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
+                            }
+                            if (view != null) {
+                                if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
+                                    SharedPreferenceManager.setTrackingAction(action);
+                                    view.showShareBackCard(remainingTime);
+                                    return;
+                                } else if (actions.size() > 1 && actions.contains(actionManager.getHyperTrackActionId())) {
+                                    if (actions.get(0).getId().equalsIgnoreCase(actionIDs.get(0)))
+                                        SharedPreferenceManager.setTrackingAction(action);
+                                    else {
+                                        SharedPreferenceManager.setTrackingAction(actions.get(1));
+                                    }
+                                }
+                                view.showTrackActionsOnMapSuccess(actions);
+                            }
 
                         } else {
                             if (view != null)

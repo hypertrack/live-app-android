@@ -47,5 +47,5 @@ public interface IHomePresenter<V> extends Presenter<V> {
 
     void openNavigationForExpectedPlace(final ActionManager actionManager);
 
-    void trackActionsOnMap(String lookupID, List<String> actionIDs, ActionManager actionManager);
+    void trackActionsOnMap(String lookupID, List<String> actionIDs, ActionManager actionManager,Context context);
 }
