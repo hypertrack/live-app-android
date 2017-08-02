@@ -58,6 +58,7 @@ public class SharedPreferenceManager {
     private static final String HYPERTRACK_LIVE_USER = "io.hypertrack.meta:OnboardedUser";
     private static final String LAST_KNOWN_LOCATION = "io.hypertrack.meta:LastKnownLocation";
     private static final String GEOFENCING_REQUEST = "io.hypertrack.meta:GeofencingRequest";
+    private static final String TRACKING_ACTION = "io.hypertrack.meta:TrackingAction";
 
     private static final String CURRENT_ACTION = "io.hypertrack.meta:CurrentAction";
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
@@ -111,6 +112,8 @@ public class SharedPreferenceManager {
         editor.remove(CURRENT_PLACE);
         editor.apply();
     }
+
+
 
     public static String getActionID(Context context) {
         return getSharedPreferences().getString(CURRENT_ACTION_ID, null);
@@ -174,6 +177,39 @@ public class SharedPreferenceManager {
     public static void deleteAction() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_ACTION);
+        editor.apply();
+    }
+
+    public static Action getTrackingAction(Context context) {
+        String actionJson = getSharedPreferences().getString(TRACKING_ACTION, null);
+        if (actionJson == null)
+            return null;
+        try {
+            Gson gson = getGson();
+            Type type = new TypeToken<Action>() {
+            }.getType();
+
+            return gson.fromJson(actionJson, type);
+        } catch (Exception e) {
+            e.printStackTrace();
+            CrashlyticsWrapper.log(e);
+        }
+        return null;
+    }
+
+    public static void setTrackingAction(Action action) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = getGson();
+        String actionJSON = gson.toJson(action);
+
+        editor.putString(TRACKING_ACTION, actionJSON);
+        editor.apply();
+    }
+
+    public static void deleteTrackingAction() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(TRACKING_ACTION);
         editor.apply();
     }
 
