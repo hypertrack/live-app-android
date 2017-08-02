@@ -33,7 +33,8 @@ public class BottomButtonCard extends RelativeLayout {
     public enum ActionType {
         START_TRACKING,
         CONFIRM_LOCATION,
-        SHARE_TRACKING_URL
+        SHARE_TRACKING_URL,
+        SHARE_BACK_LOCATION
     }
 
     public BottomButtonCard(Context context) {
@@ -156,6 +157,14 @@ public class BottomButtonCard extends RelativeLayout {
         actionLoader.startAnimation(rotationAnim);
     }
 
+    public void hideActionButton(){
+        AnimationUtils.collapse(actionButton);
+    }
+
+    public void showActionButton(){
+        AnimationUtils.expand(actionButton);
+    }
+
     public void hideProgress() {
         actionLoader.setVisibility(View.GONE);
         actionLoader.clearAnimation();
@@ -179,6 +188,10 @@ public class BottomButtonCard extends RelativeLayout {
 
     public boolean isActionTypeShareTrackingLink() {
         return type == ActionType.SHARE_TRACKING_URL;
+    }
+
+    public boolean isActionTypeShareBackLocation() {
+        return type == ActionType.SHARE_BACK_LOCATION;
     }
 
     public void hideTitle() {
