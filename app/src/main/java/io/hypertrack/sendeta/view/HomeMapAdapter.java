@@ -90,4 +90,9 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     public boolean showLocationDoneButton() {
         return false;
     }
+
+    @Override
+    public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return false;
+    }
 }
