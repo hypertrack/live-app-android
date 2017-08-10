@@ -27,7 +27,9 @@ package io.hypertrack.sendeta.view;
 
 import android.Manifest;
 import android.animation.Animator;
+import android.animation.IntEvaluator;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -42,6 +44,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -54,11 +59,15 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +75,10 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -77,6 +89,7 @@ import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
+import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.consumer.utils.AnimationUtils;
 import com.hypertrack.lib.internal.consumer.view.MarkerAnimation;
@@ -124,7 +137,7 @@ public class Home extends BaseActivity implements HomeView {
     private Place expectedPlace;
     private ProgressDialog mProgressDialog;
     private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
-    private float zoomLevel = 15.0f;
+    private float zoomLevel = 16.0f;
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
     private CoordinatorLayout rootLayout;
@@ -134,8 +147,12 @@ public class Home extends BaseActivity implements HomeView {
     LinearLayout liveTrackingActionLayout;
     RippleView trackingToggle, shareLink;
     TextView trackingText;
-    boolean isChooseOnMap;
     Marker currentLocationMarker, destinationLocationMarker;
+    private RelativeLayout expectedPlaceMarkerView;
+    private TextView expectedPlaceName;
+    GroundOverlay circle;
+    ValueAnimator valueAnimator = null;
+    int circleRadius = 160;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -157,6 +174,22 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         @Override
+        public void onCameraIdleCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
+            float zoom = map.getCameraPosition().zoom;
+            float roundZoom = (float) ((5 * (Math.round(zoom * 10 / 5))) / 10.0);
+            if (roundZoom == (int) roundZoom) {
+                circleRadius = (int) (10 * Math.pow(2, 20 - roundZoom));
+            } else {
+                circleRadius = (int) (10 * Math.pow(2, (20 - (int) roundZoom)));
+                circleRadius -= circleRadius / 4;
+            }
+            if (circle != null) {
+                startPulse(true);
+            }
+
+        }
+
+        @Override
         public void onExpectedPlaceSelected(Place expectedPlace) {
             // Check if destination place was selected
             if (expectedPlace != null) {
@@ -167,7 +200,7 @@ public class Home extends BaseActivity implements HomeView {
         @Override
         public void onMapLoadedCallback(HyperTrackMapFragment hyperTrackMapFragment, GoogleMap map) {
             isMapLoaded = true;
-            updateMapView();
+            updateCurrentLocationMarker(null);
         }
 
         @Override
@@ -291,8 +324,6 @@ public class Home extends BaseActivity implements HomeView {
                 if (bottomButtonCard.isActionTypeConfirmLocation()) {
                     htMapFragment.doneLocationChosen();
                     initBottomButtonCard();
-                    updateMapPadding();
-                    isChooseOnMap = false;
                     return;
                 } else if (bottomButtonCard.isActionTypeShareTrackingLink()) {
                     presenter.shareTrackingURL(ActionManager.getSharedManager(Home.this));
@@ -596,46 +627,6 @@ public class Home extends BaseActivity implements HomeView {
         updateMapPadding();
     }
 
-    private void updateMapView() {
-        if (mMap == null || !isMapLoaded) {
-            return;
-        }
-
-        if (currentLocationMarker == null && destinationLocationMarker == null) {
-            return;
-        }
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
-        if (currentLocationMarker != null) {
-            LatLng current = currentLocationMarker.getPosition();
-            builder.include(current);
-        }
-
-        if (destinationLocationMarker != null) {
-            LatLng destination = destinationLocationMarker.getPosition();
-            builder.include(destination);
-        }
-
-        LatLngBounds bounds = builder.build();
-
-        try {
-            CameraUpdate cameraUpdate;
-            if (destinationLocationMarker != null && currentLocationMarker != null) {
-                cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
-            } else {
-                LatLng latLng = currentLocationMarker != null ?
-                        currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
-                cameraUpdate = CameraUpdateFactory.newLatLng(latLng);
-            }
-
-            mMap.animateCamera(cameraUpdate);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-    }
-
     private void updateDestinationMarker(Place expectedPlace) {
 
         if (expectedPlace == null || expectedPlace.getLocation() == null ||
@@ -644,21 +635,76 @@ public class Home extends BaseActivity implements HomeView {
 
         LatLng latLng = expectedPlace.getLocation().getLatLng();
 
-        if (destinationLocationMarker == null) {
-            destinationLocationMarker = mMap.addMarker(new MarkerOptions().
-                    position(latLng).
-                    icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker)));
+        BitmapDescriptor icon = null;
+
+        String placeName = expectedPlace.getName();
+
+        if (HTTextUtils.isEmpty(placeName)) {
+            placeName = expectedPlace.getAddress();
+        }
+
+        if (destinationLocationMarker == null || expectedPlaceMarkerView == null) {
+
+            expectedPlaceMarkerView = (RelativeLayout) ((LayoutInflater)
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE))
+                    .inflate(R.layout.expectedplace_marker_layout, null);
+
+            expectedPlaceName = (TextView) expectedPlaceMarkerView.findViewById(R.id.expected_place_name);
+            icon = getExpectedPlaceMarkerIcon(placeName);
+            destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng).icon(icon)
+                    .anchor(0.5f, 1f));
+
         } else {
+            destinationLocationMarker.setIcon(getExpectedPlaceMarkerIcon(placeName));
             destinationLocationMarker.setPosition(latLng);
             destinationLocationMarker.setVisible(true);
+            destinationLocationMarker.setAnchor(0.5f, 1f);
             ObjectAnimator.ofFloat(destinationLocationMarker, "alpha", 0f, 1f).setDuration(500).start();
         }
     }
 
-    private void updateCurrentLocationMarker(HyperTrackLocation location) {
+    private BitmapDescriptor getExpectedPlaceMarkerIcon(String placeName) {
+        Bitmap bitmap;
+        if (HTTextUtils.isEmpty(placeName)) {
+            return BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker);
+        }
+
+        expectedPlaceName.setText(placeName);
+        bitmap = createDrawableFromView(expectedPlaceMarkerView);
+        if (bitmap != null) {
+            return BitmapDescriptorFactory.fromBitmap(bitmap);
+        } else {
+            return BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker);
+        }
+    }
+
+    private Bitmap createDrawableFromView(View view) {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        Bitmap bitmap = null;
+        if (!isFinishing()) {
+            try {
+                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
+                view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
+                view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
+                view.buildDrawingCache();
+                bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+                Canvas canvas = new Canvas(bitmap);
+                view.draw(canvas);
+            } catch (Exception e) {
+                e.printStackTrace();
+                HTLog.e(TAG, "Exception occurred while createDrawableFromView: " + e);
+            }
+        }
+
+        return bitmap;
+    }
+
+    private void updateCurrentLocationMarker(final HyperTrackLocation location) {
         if (ActionManager.getSharedManager(this).isActionLive()) {
-            if (currentLocationMarker != null)
-                currentLocationMarker.setVisible(false);
+            if (circle != null) {
+                stopPulse();
+            }
             return;
         }
 
@@ -668,7 +714,10 @@ public class Home extends BaseActivity implements HomeView {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
                     Log.d(TAG, "onSuccess: Current Location Recieved");
-                    updateCurrentLocationMarker(new HyperTrackLocation((Location) response.getResponseObject()));
+                    HyperTrackLocation hyperTrackLocation =
+                            new HyperTrackLocation((Location) response.getResponseObject());
+                    SharedPreferenceManager.setLastKnownLocation((Location) response.getResponseObject());
+                    updateCurrentLocationMarker(hyperTrackLocation);
                 }
 
                 @Override
@@ -683,14 +732,105 @@ public class Home extends BaseActivity implements HomeView {
         if (currentLocationMarker == null) {
             currentLocationMarker = mMap.addMarker(new MarkerOptions().
                     position(latLng).
-                    icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_source_place_marker)));
+                    icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_source_place_marker))
+                    .anchor(0.5f, 0.5f));
+            addPulseRing(latLng);
         } else {
+            currentLocationMarker.setVisible(true);
+            circle.setPosition(latLng);
+            circle.setVisible(true);
             MarkerAnimation.animateMarker(currentLocationMarker, latLng);
+        }
+        startPulse(false);
+        updateMapView();
+    }
+
+    private void addPulseRing(LatLng latLng) {
+        GradientDrawable d = new GradientDrawable();
+        d.setShape(GradientDrawable.OVAL);
+        d.setSize(500, 500);
+        d.setColor(ContextCompat.getColor(this, R.color.pulse_color));
+
+        Bitmap bitmap = Bitmap.createBitmap(d.getIntrinsicWidth()
+                , d.getIntrinsicHeight()
+                , Bitmap.Config.ARGB_8888);
+
+        // Convert the drawable to bitmap
+        Canvas canvas = new Canvas(bitmap);
+        d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        d.draw(canvas);
+
+        // Radius of the circle
+        final int radius = 100;
+
+        // Add the circle to the map
+        circle = mMap.addGroundOverlay(new GroundOverlayOptions()
+                .position(latLng, 2 * radius).image(BitmapDescriptorFactory.fromBitmap(bitmap)));
+    }
+
+    private void startPulse(boolean reset) {
+
+        if (valueAnimator == null || reset) {
+            if (valueAnimator != null)
+                valueAnimator.end();
+            final int[] radius = {circleRadius};
+            valueAnimator = new ValueAnimator();
+            valueAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            valueAnimator.setRepeatMode(ValueAnimator.RESTART);
+            valueAnimator.setIntValues(0, (int) radius[0]);
+            valueAnimator.setDuration(2000);
+            valueAnimator.setEvaluator(new IntEvaluator());
+            valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
+            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    float animatedFraction = valueAnimator.getAnimatedFraction();
+                    circle.setDimensions(animatedFraction * (int) radius[0]);
+                    circle.setTransparency(animatedFraction);
+                }
+            });
+            valueAnimator.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    circle.setTransparency(1f);
+                    circle.setVisible(true);
+                    if (currentLocationMarker != null)
+                        currentLocationMarker.setVisible(true);
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    ObjectAnimator.ofFloat(circle, "transparency", 1f, 0f).setDuration(500).start();
+                    circle.setVisible(false);
+                    if (currentLocationMarker != null)
+                        currentLocationMarker.setVisible(false);
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animation) {
+                    //radius[0] = circleRadius;
+                }
+            });
+        }
+
+
+        valueAnimator.start();
+    }
+
+    private void stopPulse() {
+        if (valueAnimator != null) {
+            valueAnimator.cancel();
         }
     }
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setMaxZoomPreference(18f);
         LatLng latLng;
 
         if (SharedPreferenceManager.getActionID(Home.this) == null) {
@@ -719,18 +859,61 @@ public class Home extends BaseActivity implements HomeView {
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
-
         checkForLocationSettings();
     }
 
     private void updateMapPadding() {
         if (mMap != null) {
-            int top = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+            int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
+            int right = expectedPlaceMarkerView == null ? getResources().getDimensionPixelSize(R.dimen.map_side_padding) :
+                    expectedPlaceMarkerView.getMeasuredWidth() / 2;
             int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding) + bottomButtonCard.getMeasuredHeight();
-            if (lookupId == null)
-                bottom = getResources().getDimensionPixelSize(R.dimen.home_map_bottom_padding);
-            mMap.setPadding(left, top, 0, bottom);
+            mMap.setPadding(left, top, right, bottom);
+        }
+    }
+
+    private void updateMapView() {
+        if (mMap == null || !isMapLoaded) {
+            return;
+        }
+
+        if (currentLocationMarker == null && destinationLocationMarker == null) {
+            return;
+        }
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        if (currentLocationMarker != null) {
+            LatLng current = currentLocationMarker.getPosition();
+            builder.include(current);
+        }
+
+        if (destinationLocationMarker != null) {
+            LatLng destination = destinationLocationMarker.getPosition();
+            builder.include(destination);
+        }
+
+        LatLngBounds bounds = builder.build();
+
+        try {
+            CameraUpdate cameraUpdate;
+            if (destinationLocationMarker != null && currentLocationMarker != null) {
+                int width = getResources().getDisplayMetrics().widthPixels;
+                int height = getResources().getDisplayMetrics().heightPixels;
+                int padding = (int) (width * 0.12);
+                cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+            } else {
+                LatLng latLng = currentLocationMarker != null ?
+                        currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
+                cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel);
+            }
+
+            mMap.animateCamera(cameraUpdate, 1000, null);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Crashlytics.logException(e);
         }
     }
 
@@ -831,6 +1014,10 @@ public class Home extends BaseActivity implements HomeView {
                         mProgressDialog.dismiss();
                     }
                     AnimationUtils.expand(liveTrackingActionLayout);
+                    if (currentLocationMarker != null)
+                        currentLocationMarker.remove();
+                    if (destinationLocationMarker != null)
+                        destinationLocationMarker.remove();
                     currentLocationMarker = null;
                     destinationLocationMarker = null;
                     updateMapPadding();
@@ -1012,7 +1199,7 @@ public class Home extends BaseActivity implements HomeView {
 
                 if (mMap != null) {
                     if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
-                        zoomLevel = 4.0f;
+                        zoomLevel = 17.0f;
 
                     // Check if any Location Data is available, meaning Country zoom level need not be used
                     Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
@@ -1055,8 +1242,6 @@ public class Home extends BaseActivity implements HomeView {
 
         // Check if Location & Network are Enabled
         updateInfoMessageView();
-
-        updateCurrentLocationMarker(null);
 
         // Re-register BroadcastReceiver for Location_Change, Network_Change & GCM
         LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
