@@ -157,11 +157,11 @@ public class BottomButtonCard extends RelativeLayout {
         actionLoader.startAnimation(rotationAnim);
     }
 
-    public void hideActionButton(){
+    public void hideActionButton() {
         AnimationUtils.collapse(actionButton);
     }
 
-    public void showActionButton(){
+    public void showActionButton() {
         AnimationUtils.expand(actionButton);
     }
 

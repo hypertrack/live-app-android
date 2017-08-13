@@ -74,6 +74,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
                     android:text="@string/stop"
+                    android:textAllCaps="true"
                     android:textSize="@dimen/text_medium" />
             </com.hypertrack.lib.internal.consumer.view.RippleView>
 
@@ -96,6 +97,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_centerVertical="true"
                     android:text="@string/share"
+                    android:textAllCaps="true"
                     android:textColor="@color/tracking_experience"
                     android:textSize="@dimen/text_medium" />
             </com.hypertrack.lib.internal.consumer.view.RippleView>
