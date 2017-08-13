@@ -186,6 +186,10 @@ public class SplashScreen extends BaseActivity {
         // if started through deep link
         if (intent != null && !HTTextUtils.isEmpty(intent.getDataString())) {
             Log.d(TAG, "deeplink " + intent.getDataString());
+            int flags = intent.getFlags();
+            if ((flags & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
+                return;
+            }
             appDeepLink = DeepLinkUtil.prepareAppDeepLink(SplashScreen.this, intent.getData());
         }
     }
