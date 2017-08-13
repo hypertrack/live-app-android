@@ -90,7 +90,7 @@
     <!--Toolbar Title-->
     <string name="location_permission_detail">We need your location permission to capture your location and activity through the day, and to let you share your live location with your friends when you are on the way</string>
     <string name="background_tracking_permission_msg">We will enable the background tracking by default. Do you want to enable it?</string>
-    <string name="your_placeline">Placeline TM</string>
+    <string name="your_placeline">Placeline</string>
     <string name="cancel">Cancel</string>
     <string name="edit_profile">Edit Profile</string>
     <string name="name">Name</string>

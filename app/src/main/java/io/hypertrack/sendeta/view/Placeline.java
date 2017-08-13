@@ -18,10 +18,6 @@ import android.support.v7.widget.LinearSnapHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SnapHelper;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.SuperscriptSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -100,7 +96,6 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
     private int FETCH_TIME = 30 * 1000;
     private GoogleMap mMap;
     private DashedLine dashedLine;
-    private TextView placelineText;
     private TextView dateSelector;
     private RelativeLayout toolbarHeader;
 
@@ -180,11 +175,11 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
         dateSelector = (TextView) findViewById(R.id.date_selector);
         arrow = (ImageView) findViewById(R.id.arrow);
 
-        placelineText = (TextView) findViewById(R.id.placeline_text);
+      /*  placelineText = (TextView) findViewById(R.id.placeline_text);
         SpannableStringBuilder cs = new SpannableStringBuilder(getString(R.string.your_placeline));
         cs.setSpan(new SuperscriptSpan(), 10, 12, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         cs.setSpan(new RelativeSizeSpan(0.4f), 10, 12, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        placelineText.setText(cs);
+        placelineText.setText(cs);*/
     }
 
     //Initialize Calendar View
