@@ -57,4 +57,6 @@ public interface HomeView {
     void showTrackActionsOnMapError(ErrorResponse errorResponse);
 
     void showShareBackCard(String remainingTime);
+
+    void hideBottomCard();
 }

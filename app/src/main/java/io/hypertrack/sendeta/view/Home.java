@@ -128,7 +128,6 @@ public class Home extends BaseActivity implements HomeView {
 
     private static final String TAG = Home.class.getSimpleName();
     private GoogleMap mMap;
-    private Marker expectedPlaceMarker;
     private String lookupId = null;
     private Location defaultLocation = new Location("default");
 
@@ -147,12 +146,13 @@ public class Home extends BaseActivity implements HomeView {
     LinearLayout liveTrackingActionLayout;
     RippleView trackingToggle, shareLink;
     TextView trackingText;
-    Marker currentLocationMarker, destinationLocationMarker;
+    Marker currentLocationMarker, expectedPlaceMarker;
     private RelativeLayout expectedPlaceMarkerView;
     private TextView expectedPlaceName;
     GroundOverlay circle;
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
+    boolean showCurrentLocationMarker = true;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -228,15 +228,17 @@ public class Home extends BaseActivity implements HomeView {
                                 (refreshedActions.get(Math.abs(index - 1)));
                     }
                 }
-
+                if (refreshedActions.size() > 1) {
+                    shareLink.setVisibility(View.GONE);
+                }
             }
         }
 
         @Override
         public void onChooseOnMapSelected() {
 
-            if (destinationLocationMarker != null)
-                destinationLocationMarker.setVisible(false);
+            if (expectedPlaceMarker != null)
+                expectedPlaceMarker.setVisible(false);
 
             bottomButtonCard.setActionType(BottomButtonCard.ActionType.CONFIRM_LOCATION);
             bottomButtonCard.hideTitle();
@@ -258,6 +260,17 @@ public class Home extends BaseActivity implements HomeView {
                 }
             }, 200);
 
+        }
+
+        @Override
+        public void onLiveLocationSharingSummaryDoneButtonClicked() {
+            HyperTrack.removeActions(null);
+            OnStopSharing();
+            if (!fromPlaceline) {
+                startActivity(new Intent(Home.this, Placeline.class));
+            }
+            finish();
+            overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
         }
     };
 
@@ -375,7 +388,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setActionType(BottomButtonCard.ActionType.START_TRACKING);
         bottomButtonCard.hideTrackingURLLayout();
         bottomButtonCard.setTitleText("Looks Good?");
-        bottomButtonCard.setActionButtonText("Start Tracking");
+        bottomButtonCard.setActionButtonText("Start Sharing");
         bottomButtonCard.showTitle();
         bottomButtonCard.showBottomCardLayout();
     }
@@ -383,7 +396,7 @@ public class Home extends BaseActivity implements HomeView {
     private void stopTracking() {
         if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Stop Tracking");
+            builder.setTitle("Stop Sharing");
             builder.setMessage("Are you sure?");
             builder.setPositiveButton("Stop", new DialogInterface.OnClickListener() {
                 @Override
@@ -587,6 +600,20 @@ public class Home extends BaseActivity implements HomeView {
     }
 
     @Override
+    public void hideBottomCard() {
+        if (currentLocationMarker != null)
+            currentLocationMarker.remove();
+        currentLocationMarker = null;
+        showCurrentLocationMarker = false;
+        stopPulse();
+        if (mProgressDialog != null) {
+            mProgressDialog.cancel();
+        }
+        bottomButtonCard.hideBottomCardLayout();
+
+    }
+
+    @Override
     public void showShareBackCard(String remainingTime) {
         if (mProgressDialog != null) {
             mProgressDialog.cancel();
@@ -643,7 +670,7 @@ public class Home extends BaseActivity implements HomeView {
             placeName = expectedPlace.getAddress();
         }
 
-        if (destinationLocationMarker == null || expectedPlaceMarkerView == null) {
+        if (expectedPlaceMarker == null || expectedPlaceMarkerView == null) {
 
             expectedPlaceMarkerView = (RelativeLayout) ((LayoutInflater)
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE))
@@ -651,15 +678,15 @@ public class Home extends BaseActivity implements HomeView {
 
             expectedPlaceName = (TextView) expectedPlaceMarkerView.findViewById(R.id.expected_place_name);
             icon = getExpectedPlaceMarkerIcon(placeName);
-            destinationLocationMarker = mMap.addMarker(new MarkerOptions().position(latLng).icon(icon)
+            expectedPlaceMarker = mMap.addMarker(new MarkerOptions().position(latLng).icon(icon)
                     .anchor(0.5f, 1f));
 
         } else {
-            destinationLocationMarker.setIcon(getExpectedPlaceMarkerIcon(placeName));
-            destinationLocationMarker.setPosition(latLng);
-            destinationLocationMarker.setVisible(true);
-            destinationLocationMarker.setAnchor(0.5f, 1f);
-            ObjectAnimator.ofFloat(destinationLocationMarker, "alpha", 0f, 1f).setDuration(500).start();
+            expectedPlaceMarker.setIcon(getExpectedPlaceMarkerIcon(placeName));
+            expectedPlaceMarker.setPosition(latLng);
+            expectedPlaceMarker.setVisible(true);
+            expectedPlaceMarker.setAnchor(0.5f, 1f);
+            ObjectAnimator.ofFloat(expectedPlaceMarker, "alpha", 0f, 1f).setDuration(500).start();
         }
     }
 
@@ -701,6 +728,12 @@ public class Home extends BaseActivity implements HomeView {
     }
 
     private void updateCurrentLocationMarker(final HyperTrackLocation location) {
+        if (!showCurrentLocationMarker) {
+            if (currentLocationMarker != null)
+                currentLocationMarker.remove();
+            currentLocationMarker = null;
+            return;
+        }
         if (ActionManager.getSharedManager(this).isActionLive()) {
             if (circle != null) {
                 stopPulse();
@@ -830,7 +863,7 @@ public class Home extends BaseActivity implements HomeView {
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMaxZoomPreference(18f);
+        mMap.setMaxZoomPreference(17f);
         LatLng latLng;
 
         if (SharedPreferenceManager.getActionID(Home.this) == null) {
@@ -878,7 +911,7 @@ public class Home extends BaseActivity implements HomeView {
             return;
         }
 
-        if (currentLocationMarker == null && destinationLocationMarker == null) {
+        if (currentLocationMarker == null && expectedPlaceMarker == null) {
             return;
         }
 
@@ -889,8 +922,8 @@ public class Home extends BaseActivity implements HomeView {
             builder.include(current);
         }
 
-        if (destinationLocationMarker != null) {
-            LatLng destination = destinationLocationMarker.getPosition();
+        if (expectedPlaceMarker != null) {
+            LatLng destination = expectedPlaceMarker.getPosition();
             builder.include(destination);
         }
 
@@ -898,14 +931,14 @@ public class Home extends BaseActivity implements HomeView {
 
         try {
             CameraUpdate cameraUpdate;
-            if (destinationLocationMarker != null && currentLocationMarker != null) {
+            if (expectedPlaceMarker != null && currentLocationMarker != null) {
                 int width = getResources().getDisplayMetrics().widthPixels;
                 int height = getResources().getDisplayMetrics().heightPixels;
                 int padding = (int) (width * 0.12);
                 cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
             } else {
                 LatLng latLng = currentLocationMarker != null ?
-                        currentLocationMarker.getPosition() : destinationLocationMarker.getPosition();
+                        currentLocationMarker.getPosition() : expectedPlaceMarker.getPosition();
                 cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel);
             }
 
@@ -933,7 +966,7 @@ public class Home extends BaseActivity implements HomeView {
     public void showShareLiveLocationSuccess(Action action) {
         // bottomButtonCard.hideBottomCardLayout();
         onShareLiveLocation();
-        trackingText.setText("Stop Tracking");
+        trackingText.setText("Stop Sharing");
         trackingToggle.setTag("stop");
         presenter.openCustomShareCard(Home.this, ActionManager.getSharedManager(Home.this));
     }
@@ -944,7 +977,7 @@ public class Home extends BaseActivity implements HomeView {
         String title = "You'r " + remainingTime + " away";
         bottomButtonCard.setTitleText(title);
         if (getTrackingAction(Home.this) == null) {
-            bottomButtonCard.setDescriptionText("Share your live location link");
+            bottomButtonCard.setDescriptionText("Share your live location link:");
             bottomButtonCard.setActionButtonText("Share Link");
             bottomButtonCard.setTrackingURL(trackingURL);
             bottomButtonCard.showTrackingURLLayout();
@@ -961,7 +994,7 @@ public class Home extends BaseActivity implements HomeView {
     public void showCustomShareCardError(String trackingURL) {
         bottomButtonCard.hideTitle();
         if (getTrackingAction(Home.this) == null) {
-            bottomButtonCard.setDescriptionText("Share your live location link");
+            bottomButtonCard.setDescriptionText("Share your live location link:");
             bottomButtonCard.setActionButtonText("Share Link");
             bottomButtonCard.setTrackingURL(trackingURL);
             bottomButtonCard.showTrackingURLLayout();
@@ -1016,10 +1049,10 @@ public class Home extends BaseActivity implements HomeView {
                     AnimationUtils.expand(liveTrackingActionLayout);
                     if (currentLocationMarker != null)
                         currentLocationMarker.remove();
-                    if (destinationLocationMarker != null)
-                        destinationLocationMarker.remove();
+                    if (expectedPlaceMarker != null)
+                        expectedPlaceMarker.remove();
                     currentLocationMarker = null;
-                    destinationLocationMarker = null;
+                    expectedPlaceMarker = null;
                     updateMapPadding();
                 }
 
@@ -1082,6 +1115,7 @@ public class Home extends BaseActivity implements HomeView {
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
         startActivityForResult(Intent.createChooser(sharingIntent, "Share via"),
                 Constants.SHARE_REQUEST_CODE);
+        bottomButtonCard.hideBottomCardLayout();
     }
 
     @Override
@@ -1299,10 +1333,11 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             return;
         }
-        super.onBackPressed();
+
         if (!fromPlaceline) {
             startActivity(new Intent(Home.this, Placeline.class));
         }
+        super.onBackPressed();
         overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
     }
 

@@ -220,6 +220,10 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                         }
                         if (view != null) {
                             if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
+                                if (action.hasActionFinished()) {
+                                    view.hideBottomCard();
+                                    return;
+                                }
                                 view.showShareBackCard(remainingTime);
                                 SharedPreferenceManager.setTrackingAction(action);
                                 return;
@@ -229,6 +233,8 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                                 else {
                                     SharedPreferenceManager.setTrackingAction(actions.get(1));
                                 }
+                            } else if (actions.size() > 1) {
+                                view.hideBottomCard();
                             }
                             view.showTrackActionsOnMapSuccess(actions);
                         }
