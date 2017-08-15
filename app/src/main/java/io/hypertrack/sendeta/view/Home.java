@@ -219,10 +219,7 @@ public class Home extends BaseActivity implements HomeView {
                     //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
 
-                    //If action has completed hide stop sharing button
-                    if (action.hasActionFinished()) {
 
-                    }
                     if (refreshedActionIds.size() > 1) {
                         SharedPreferenceManager.setTrackingAction
                                 (refreshedActions.get(Math.abs(index - 1)));
@@ -230,6 +227,12 @@ public class Home extends BaseActivity implements HomeView {
                 }
                 if (refreshedActions.size() > 1) {
                     shareLink.setVisibility(View.GONE);
+                }
+
+                //If action has completed hide stop sharing button
+                if (refreshedActions.get(0).hasActionFinished() && refreshedActionIds.size() == 1) {
+                    bottomButtonCard.hideBottomCardLayout();
+
                 }
             }
         }
@@ -863,7 +866,7 @@ public class Home extends BaseActivity implements HomeView {
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMaxZoomPreference(17f);
+        mMap.setMaxZoomPreference(16.9f);
         LatLng latLng;
 
         if (SharedPreferenceManager.getActionID(Home.this) == null) {
@@ -1233,7 +1236,7 @@ public class Home extends BaseActivity implements HomeView {
 
                 if (mMap != null) {
                     if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
-                        zoomLevel = 17.0f;
+                        zoomLevel = 16.9f;
 
                     // Check if any Location Data is available, meaning Country zoom level need not be used
                     Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation();
