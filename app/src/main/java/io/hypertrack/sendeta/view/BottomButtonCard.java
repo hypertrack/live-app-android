@@ -109,6 +109,7 @@ public class BottomButtonCard extends RelativeLayout {
 
     public void setTitleText(String title) {
         this.titleText.setText(title);
+        titleText.setVisibility(VISIBLE);
     }
 
     public void setDescriptionText(String description) {
