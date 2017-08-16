@@ -161,7 +161,7 @@ public class Home extends BaseActivity implements HomeView {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    presenter.stopSharing(ActionManager.getSharedManager(Home.this));
+                    presenter.stopSharing(ActionManager.getSharedManager(Home.this), true);
                 }
             });
         }
@@ -186,7 +186,6 @@ public class Home extends BaseActivity implements HomeView {
             if (circle != null) {
                 startPulse(true);
             }
-
         }
 
         @Override
@@ -219,21 +218,19 @@ public class Home extends BaseActivity implements HomeView {
                     //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
 
-
                     if (refreshedActionIds.size() > 1) {
                         SharedPreferenceManager.setTrackingAction
                                 (refreshedActions.get(Math.abs(index - 1)));
                     }
                 }
-                if (refreshedActions.size() > 1) {
-                    shareLink.setVisibility(View.GONE);
-                }
+            }
+            if (refreshedActions.size() > 1) {
+                shareLink.setVisibility(View.GONE);
+            }
 
-                //If action has completed hide stop sharing button
-                if (refreshedActions.get(0).hasActionFinished() && refreshedActionIds.size() == 1) {
-                    bottomButtonCard.hideBottomCardLayout();
-
-                }
+            //If action has completed hide stop sharing button
+            if (refreshedActions.get(0).hasActionFinished() && refreshedActionIds.size() == 1) {
+                hideBottomCard();
             }
         }
 
@@ -314,11 +311,19 @@ public class Home extends BaseActivity implements HomeView {
         // Set callback for HyperTrackEvent updates
         setCallbackForHyperTrackEvents();
 
+        boolean isRestoreLocationSharing = false, isHandlerTrackingUrlDeeplink = false;
+
         // Check if location is being shared currently
-        restoreLocationSharingIfNeeded();
+        if (restoreLocationSharingIfNeeded())
+            isRestoreLocationSharing = true;
 
         // Handles Tracking Url deeplink
-        handleTrackingUrlDeeplink();
+        if (handleTrackingUrlDeeplink())
+            isHandlerTrackingUrlDeeplink = true;
+
+        if (!isRestoreLocationSharing && !isHandlerTrackingUrlDeeplink) {
+            htMapFragment.openPlacePickerView();
+        }
 
         // Attach View Presenter to View
         presenter.attachView(this);
@@ -404,7 +409,7 @@ public class Home extends BaseActivity implements HomeView {
             builder.setPositiveButton("Stop", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    presenter.stopSharing(ActionManager.getSharedManager(Home.this));
+                    presenter.stopSharing(ActionManager.getSharedManager(Home.this), false);
                     lookupId = null;
                     HyperTrack.removeActions(null);
                 }
@@ -545,7 +550,7 @@ public class Home extends BaseActivity implements HomeView {
     /*
      * Method to restore app's state in case of ongoing location sharing for current user.
      */
-    private void restoreLocationSharingIfNeeded() {
+    private boolean restoreLocationSharingIfNeeded() {
         final ActionManager actionManager = ActionManager.getSharedManager(this);
 
         //Check if there is any existing task to be restored
@@ -559,13 +564,15 @@ public class Home extends BaseActivity implements HomeView {
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
             onShareLiveLocation();
+            return true;
         }
+        return false;
     }
 
     /**
      * Method to handle Tracking url deeplinks to enable live location sharing amongst friends
      */
-    private void handleTrackingUrlDeeplink() {
+    private boolean handleTrackingUrlDeeplink() {
         Intent intent = getIntent();
 
         if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
@@ -580,7 +587,9 @@ public class Home extends BaseActivity implements HomeView {
             List<String> actionIDs = intent.getStringArrayListExtra(Track.KEY_ACTION_ID_LIST);
             // Call trackActionsOnMap method
             presenter.trackActionsOnMap(lookupId, actionIDs, ActionManager.getSharedManager(this), this);
+            return true;
         }
+        return false;
     }
 
     @Override
@@ -613,7 +622,7 @@ public class Home extends BaseActivity implements HomeView {
             mProgressDialog.cancel();
         }
         bottomButtonCard.hideBottomCardLayout();
-
+        AnimationUtils.collapse(liveTrackingActionLayout);
     }
 
     @Override
@@ -634,7 +643,6 @@ public class Home extends BaseActivity implements HomeView {
         trackingText.setText("Share My Live Location");
         trackingToggle.setTag("start");
         AnimationUtils.expand(liveTrackingActionLayout);
-
     }
 
     /**
@@ -854,7 +862,6 @@ public class Home extends BaseActivity implements HomeView {
             });
         }
 
-
         valueAnimator.start();
     }
 
@@ -977,7 +984,7 @@ public class Home extends BaseActivity implements HomeView {
     @Override
     public void showCustomShareCardSuccess(String remainingTime, String trackingURL) {
 
-        String title = "You'r " + remainingTime + " away";
+        String title = "You're " + remainingTime + " away";
         bottomButtonCard.setTitleText(title);
         if (getTrackingAction(Home.this) == null) {
             bottomButtonCard.setDescriptionText("Share your live location link:");

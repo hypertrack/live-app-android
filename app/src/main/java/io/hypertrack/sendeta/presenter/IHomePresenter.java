@@ -39,7 +39,7 @@ public interface IHomePresenter<V> extends Presenter<V> {
 
     void shareLiveLocation(final ActionManager actionManager, final String lookupID, final Place expectedPlace);
 
-    void stopSharing(final ActionManager actionManager);
+    void stopSharing(final ActionManager actionManager, boolean fromGeofence);
 
     void openCustomShareCard(Context context, final ActionManager actionManager);
 

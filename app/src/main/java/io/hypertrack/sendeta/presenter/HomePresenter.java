@@ -120,14 +120,19 @@ public class HomePresenter implements IHomePresenter<HomeView> {
     }
 
     @Override
-    public void stopSharing(final ActionManager actionManager) {
+    public void stopSharing(final ActionManager actionManager, final boolean fromGeofence) {
+
         actionManager.completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 HyperTrack.clearServiceNotificationParams();
-                HTLog.i(TAG, "Stopped sharing live location successfully.");
+                HTLog.i(TAG, "Stopped sharing live location successfully " + (fromGeofence ? " by geofence." : "."));
                 if (view != null) {
-                    view.showStopSharingSuccess();
+                    if (!fromGeofence)
+                        view.showStopSharingSuccess();
+                    else {
+                        view.hideBottomCard();
+                    }
                 }
             }
 
@@ -137,6 +142,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 if (view != null)
                     view.showStopSharingError();
             }
+
         });
     }
 
