@@ -42,7 +42,7 @@ public class Verify extends BaseActivity implements VerifyView {
     TextView timerText;
     IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
     static final int RESEND_CODE_TIMER = 30 * 1000;
-    SMSReceiver smsReceiver;
+    //SMSReceiver smsReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,7 +51,7 @@ public class Verify extends BaseActivity implements VerifyView {
         initView();
         presenter.attachView(this);
         countDownTimer.start();
-        smsReceiver = new SMSReceiver();
+        //smsReceiver = new SMSReceiver();
     }
 
     @Override
@@ -59,13 +59,13 @@ public class Verify extends BaseActivity implements VerifyView {
         super.onResume();
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.provider.Telephony.SMS_RECEIVED");
-        registerReceiver(smsReceiver, filter);
+        //registerReceiver(smsReceiver, filter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(smsReceiver);
+        //unregisterReceiver(smsReceiver);
     }
 
     private void initView() {
