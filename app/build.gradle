@@ -129,7 +129,7 @@ android {
 
     buildTypes {
         release {
-            debuggable true
+            debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
@@ -142,15 +142,15 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-     compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-             transitive = true
-         }
-    /*releaseCompile(project(path: ':library', configuration: 'release')) {
+    compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
         transitive = true
     }
-    debugCompile(project(path: ':library', configuration: 'debug')) {
-        transitive = true
-    }*/
+    /*releaseCompile(project(path: ':library', configuration: 'release')) {
+            transitive = true
+        }
+        debugCompile(project(path: ':library', configuration: 'debug')) {
+            transitive = true
+        }*/
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
@@ -173,7 +173,6 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
-    compile project(':library')
 }
 
 /**
