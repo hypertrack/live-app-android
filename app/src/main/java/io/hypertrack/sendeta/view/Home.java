@@ -508,7 +508,8 @@ public class Home extends BaseActivity implements HomeView {
             });
             circularReveal.setDuration(600);
             circularReveal.start();
-        } else*/ {
+        } else*/
+        {
             super.onBackPressed();
         }
 
@@ -1174,6 +1175,7 @@ public class Home extends BaseActivity implements HomeView {
         expectedPlace = null;
         AnimationUtils.collapse(liveTrackingActionLayout);
         updateCurrentLocationMarker(null);
+        showCurrentLocationMarker = true;
         updateMapView();
         initBottomButtonCard(true);
     }
@@ -1185,7 +1187,13 @@ public class Home extends BaseActivity implements HomeView {
         sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, shareMessage);
         startActivityForResult(Intent.createChooser(sharingIntent, "Share via"),
                 Constants.SHARE_REQUEST_CODE);
-        bottomButtonCard.hideBottomCardLayout();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                bottomButtonCard.hideBottomCardLayout();
+            }
+        }, 1000);
+
     }
 
     @Override
