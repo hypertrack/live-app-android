@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -207,7 +208,11 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void OnGeoFenceSuccess() {
         if (actionCompletedListener != null) {
+            Log.d(TAG, "OnGeoFenceSuccess: ");
             actionCompletedListener.OnCallback();
+        }
+        else{
+            Log.d(TAG, "OnGeoFenceSuccess: action completed listener is null");
         }
     }
 

@@ -161,6 +161,7 @@ public class Home extends BaseActivity implements HomeView {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    HTLog.i(TAG, "Inside runOnUIThread: ");
                     presenter.stopSharing(ActionManager.getSharedManager(Home.this), true);
                 }
             });

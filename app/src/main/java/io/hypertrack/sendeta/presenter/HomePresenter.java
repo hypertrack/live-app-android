@@ -126,7 +126,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             @Override
             public void OnSuccess() {
                 HyperTrack.clearServiceNotificationParams();
-                HTLog.i(TAG, "Stopped sharing live location successfully " + (fromGeofence ? " by geofence." : "."));
+                HTLog.i(TAG, "Stopped sharing live location successfully" + (fromGeofence ? " by geofence." : "."));
                 if (view != null) {
                     if (!fromGeofence)
                         view.showStopSharingSuccess();
