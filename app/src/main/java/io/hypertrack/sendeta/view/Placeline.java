@@ -253,7 +253,7 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
                 Intent intent = new Intent(Placeline.this, Home.class);
                 intent.putExtra("class_from", Placeline.class.getSimpleName());
                 startActivity(intent);
-                overridePendingTransition(R.anim.enter, R.anim.exit);
+                //overridePendingTransition(R.anim.enter, R.anim.exit);
             }
         });
     }

@@ -114,7 +114,6 @@ public class SharedPreferenceManager {
     }
 
 
-
     public static String getActionID(Context context) {
         return getSharedPreferences().getString(CURRENT_ACTION_ID, null);
     }
