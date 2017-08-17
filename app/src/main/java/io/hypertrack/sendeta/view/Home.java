@@ -264,13 +264,22 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         @Override
+        public void onBackButtonIconPressed() {
+            if (expectedPlace == null) {
+                //finish();
+                closeActivityWithCircularRevealAnimation();
+            }
+        }
+
+        @Override
         public void onLiveLocationSharingSummaryDoneButtonClicked() {
             HyperTrack.removeActions(null);
             OnStopSharing();
             if (!fromPlaceline) {
                 startActivity(new Intent(Home.this, Placeline.class));
             }
-            finish();
+            //finish();
+            closeActivityWithCircularRevealAnimation();
             overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
         }
     };
@@ -285,7 +294,7 @@ public class Home extends BaseActivity implements HomeView {
                     equalsIgnoreCase(Placeline.class.getSimpleName()))
                 fromPlaceline = true;
         }
-        //  startAnimation();
+        startAnimation();
         // Initialize UI Views
         initializeUIViews();
 
@@ -325,6 +334,7 @@ public class Home extends BaseActivity implements HomeView {
         if (!isRestoreLocationSharing && !isHandlerTrackingUrlDeeplink) {
             htMapFragment.openPlacePickerView();
         }
+        initBottomButtonCard(false);
 
         // Attach View Presenter to View
         presenter.attachView(this);
@@ -345,7 +355,7 @@ public class Home extends BaseActivity implements HomeView {
             public void OnActionButtonClick() {
                 if (bottomButtonCard.isActionTypeConfirmLocation()) {
                     htMapFragment.doneLocationChosen();
-                    initBottomButtonCard();
+                    initBottomButtonCard(true);
                     return;
                 } else if (bottomButtonCard.isActionTypeShareTrackingLink()) {
                     presenter.shareTrackingURL(ActionManager.getSharedManager(Home.this));
@@ -363,9 +373,6 @@ public class Home extends BaseActivity implements HomeView {
                         setPrimaryClip(ClipData.newPlainText("tracking_url", trackingURL));
             }
         });
-
-        if (!ActionManager.getSharedManager(this).isActionLive())
-            initBottomButtonCard();
 
         liveTrackingActionLayout = (LinearLayout) findViewById(R.id.live_tracking_action_layout);
         trackingToggle = (RippleView) findViewById(R.id.tracking_toogle);
@@ -391,7 +398,7 @@ public class Home extends BaseActivity implements HomeView {
         });
     }
 
-    private void initBottomButtonCard() {
+    private void initBottomButtonCard(boolean show) {
         bottomButtonCard.hideCloseButton();
         bottomButtonCard.setDescriptionText("");
         bottomButtonCard.setActionType(BottomButtonCard.ActionType.START_TRACKING);
@@ -399,13 +406,14 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setTitleText("Looks Good?");
         bottomButtonCard.setActionButtonText("Start Sharing");
         bottomButtonCard.showTitle();
-        bottomButtonCard.showBottomCardLayout();
+        if (show)
+            bottomButtonCard.showBottomCardLayout();
     }
 
     private void stopTracking() {
         if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Stop Sharing");
+            builder.setTitle(getString(R.string.stop));
             builder.setMessage("Are you sure?");
             builder.setPositiveButton("Stop", new DialogInterface.OnClickListener() {
                 @Override
@@ -413,6 +421,7 @@ public class Home extends BaseActivity implements HomeView {
                     presenter.stopSharing(ActionManager.getSharedManager(Home.this), false);
                     lookupId = null;
                     HyperTrack.removeActions(null);
+                    htMapFragment.openPlacePickerView();
                 }
             });
             builder.setNegativeButton("No", null);
@@ -449,18 +458,61 @@ public class Home extends BaseActivity implements HomeView {
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void circularRevealActivity() {
 
-        int cx = (rootLayout.getLeft() + rootLayout.getRight());
-        int cy = (rootLayout.getTop() + rootLayout.getBottom());
+        int cx = (rootLayout.getLeft() + rootLayout.getRight()) - getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh);
+        int cy = (rootLayout.getTop() + rootLayout.getBottom()) - getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh);
 
         int finalRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
-
+        int initialRadius = getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
         // create the animator for this view (the start radius is zero)
-        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, 0, finalRadius);
+        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, initialRadius, finalRadius);
         circularReveal.setDuration(600);
 
         // make the view visible and start the animation
         rootLayout.setVisibility(View.VISIBLE);
         circularReveal.start();
+    }
+
+    private void closeActivityWithCircularRevealAnimation() {
+       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            int cx = rootLayout.getWidth()- getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
+            int cy = rootLayout.getHeight() - getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
+            int initialRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
+            int finalRadius = getResources().getDimensionPixelSize(R.dimen.margin_huge);
+
+            Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, initialRadius, finalRadius);
+
+            circularReveal.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    rootLayout.setVisibility(View.INVISIBLE);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        finishAfterTransition();
+                    } else {
+                        finish();
+                    }
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            circularReveal.setDuration(600);
+            circularReveal.start();
+        } else*/ {
+            super.onBackPressed();
+        }
+
     }
 
     private void shareLiveLocation() {
@@ -661,7 +713,7 @@ public class Home extends BaseActivity implements HomeView {
         updateDestinationMarker(place);
         expectedPlace = place;
         ActionManager.getSharedManager(this).setPlace(expectedPlace);
-        initBottomButtonCard();
+        initBottomButtonCard(true);
         updateMapView();
         updateMapPadding();
     }
@@ -985,7 +1037,7 @@ public class Home extends BaseActivity implements HomeView {
     public void showShareLiveLocationSuccess(Action action) {
         // bottomButtonCard.hideBottomCardLayout();
         onShareLiveLocation();
-        trackingText.setText("Stop Sharing");
+        trackingText.setText(getString(R.string.stop));
         trackingToggle.setTag("stop");
         presenter.openCustomShareCard(Home.this, ActionManager.getSharedManager(Home.this));
     }
@@ -1124,7 +1176,7 @@ public class Home extends BaseActivity implements HomeView {
         AnimationUtils.collapse(liveTrackingActionLayout);
         updateCurrentLocationMarker(null);
         updateMapView();
-        initBottomButtonCard();
+        initBottomButtonCard(true);
     }
 
     @Override
@@ -1356,8 +1408,8 @@ public class Home extends BaseActivity implements HomeView {
         if (!fromPlaceline) {
             startActivity(new Intent(Home.this, Placeline.class));
         }
-        super.onBackPressed();
-        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+        //finish();
+        closeActivityWithCircularRevealAnimation();
     }
 
     @Override
