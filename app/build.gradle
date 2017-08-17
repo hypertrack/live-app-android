@@ -142,15 +142,15 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    /* compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
+     compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
              transitive = true
-         }*/
-    releaseCompile(project(path: ':library', configuration: 'release')) {
+         }
+    /*releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
     debugCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
-    }
+    }*/
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
