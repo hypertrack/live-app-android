@@ -815,6 +815,14 @@ public class Home extends BaseActivity implements HomeView {
 
     private void startPulse(boolean reset) {
 
+        if (!HyperTrackUtils.isInternetConnected(this)) {
+            if (circle != null) {
+                circle.remove();
+            }
+            if (valueAnimator != null) {
+                valueAnimator.cancel();
+            }
+        }
         if (valueAnimator == null || reset) {
             if (valueAnimator != null)
                 valueAnimator.end();
@@ -1020,7 +1028,7 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void showShareLiveLocationError(ErrorResponse errorResponse) {
-        bottomButtonCard.setTitleText("RETRY");
+        bottomButtonCard.setActionButtonText("RETRY");
         bottomButtonCard.hideProgress();
         switch (errorResponse.getErrorCode()) {
             case HyperTrackError.Code.PUBLISHABLE_KEY_NOT_CONFIGURED:

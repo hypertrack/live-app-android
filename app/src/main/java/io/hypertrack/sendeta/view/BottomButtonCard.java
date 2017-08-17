@@ -135,6 +135,7 @@ public class BottomButtonCard extends RelativeLayout {
     }
 
     public void setActionButtonText(String actionText) {
+        actionButtonText.setVisibility(VISIBLE);
         actionButtonText.setText(actionText);
     }
 
