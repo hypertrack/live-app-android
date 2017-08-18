@@ -179,37 +179,6 @@ public class Home extends BaseActivity implements HomeView {
                 }
             }
         }
-
-        @Override
-        public void onLiveLocationShareButtonClicked(Action action) {
-            if (action != null) {
-                expectedPlace = action.getExpectedPlace();
-                lookupId = action.getLookupId();
-            }
-            shareLiveLocation();
-        }
-
-        @Override
-        public void onLiveLocationStopButtonClicked(Action action) {
-            if (HyperTrack.checkLocationPermission(Home.this) && HyperTrack.checkLocationServices(Home.this)) {
-              /*  mProgressDialog = new ProgressDialog(Home.this);
-                mProgressDialog.setMessage(getString(R.string.stop_sharing_message));
-                mProgressDialog.setCancelable(false);
-                mProgressDialog.show();*/
-                presenter.stopSharing(ActionManager.getSharedManager(Home.this));
-            } else {
-                if (!HyperTrack.checkLocationServices(Home.this)) {
-                    HyperTrack.requestLocationServices(Home.this);
-                } else {
-                    HyperTrack.requestPermissions(Home.this);
-                }
-            }
-        }
-
-        @Override
-        public void onShareLinkButtonClicked(Action action) {
-            presenter.shareTrackingUrl(ActionManager.getSharedManager(Home.this));
-        }
     };
 
     @Override

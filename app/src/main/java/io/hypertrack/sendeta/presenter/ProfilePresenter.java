@@ -28,12 +28,14 @@ import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
 
+import com.google.i18n.phonenumbers.NumberParseException;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
+import com.hypertrack.lib.models.UserParams;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -99,9 +101,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         view = null;
     }
 
-    @Override
-    public void attemptLogin(final String userName, final String phone, String ISOCode,
-                             final File profileImage, final boolean verifyPhone) {
+    private UserParams getUserParams(String name, final String number, String ISOCode, File profileImage)
+            throws NumberParseException {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
@@ -119,26 +120,36 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
         HyperTrackLiveUser.setHyperTrackLiveUser();
 
-        try {
-            HyperTrack.getOrCreateUser(userName, user.getInternationalNumber(phone),
-                    encodedImage, user.getInternationalNumber(phone),
-                    new HyperTrackCallback() {
-                        @Override
-                        public void onSuccess(@NonNull SuccessResponse successResponse) {
-                            Log.d(TAG, "onSuccess: User Created");
-                            if (verifyPhone) {
-                                sendVerificationCode();
-                            } else
-                                view.navigateToPlacelineScreen();
-                        }
+        String phoneNumber = user.getInternationalNumber(number);
+        return new UserParams()
+                .setName(name)
+                .setPhone(phoneNumber)
+                .setPhoto(encodedImage)
+                .setLookupId(phoneNumber);
+    }
 
-                        @Override
-                        public void onError(@NonNull ErrorResponse errorResponse) {
-                            if (view != null) {
-                                view.showErrorMessage();
-                            }
-                        }
-                    });
+    @Override
+    public void attemptLogin(final String userName, final String phone, String ISOCode,
+                             final File profileImage, final boolean verifyPhone) {
+        try {
+            UserParams userParams = getUserParams(userName, phone, ISOCode, profileImage);
+            HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse successResponse) {
+                    Log.d(TAG, "onSuccess: User Created");
+                    if (verifyPhone) {
+                        sendVerificationCode();
+                    } else
+                        view.navigateToPlacelineScreen();
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (view != null) {
+                        view.showErrorMessage();
+                    }
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {
@@ -150,41 +161,25 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     @Override
     public void updateProfile(String name, final String number, String ISOCode, File profileImage,
                               final boolean verifyPhone) {
-        final HyperTrackLiveUser user = this.onboardingManager.getUser();
-
-        // Update Country Code from device's current location
-        if (!HTTextUtils.isEmpty(ISOCode))
-            user.setCountryCode(ISOCode);
-
-        String encodedImage = null;
-        // Set user's profile image
-        if (profileImage != null && profileImage.length() > 0) {
-            user.setPhotoImage(profileImage);
-            byte[] bytes = convertFiletoByteArray(profileImage);
-            if (bytes != null && bytes.length > 0)
-                encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
-        }
-
-        HyperTrackLiveUser.setHyperTrackLiveUser();
         try {
-            HyperTrack.updateUser(name, user.getInternationalNumber(number), encodedImage, user.getInternationalNumber(number),
-                    new HyperTrackCallback() {
-                        @Override
-                        public void onSuccess(@NonNull SuccessResponse successResponse) {
-                            Log.d(TAG, "onSuccess: User Profile Updated");
-                            if (verifyPhone) {
-                                sendVerificationCode();
-                            } else
-                                view.navigateToPlacelineScreen();
-                        }
+            UserParams userParams = getUserParams(name, number, ISOCode, profileImage);
+            HyperTrack.updateUser(userParams, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse successResponse) {
+                    Log.d(TAG, "onSuccess: User Profile Updated");
+                    if (verifyPhone) {
+                        sendVerificationCode();
+                    } else
+                        view.navigateToPlacelineScreen();
+                }
 
-                        @Override
-                        public void onError(@NonNull ErrorResponse errorResponse) {
-                            if (view != null) {
-                                view.showErrorMessage();
-                            }
-                        }
-                    });
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (view != null) {
+                        view.showErrorMessage();
+                    }
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {
@@ -232,5 +227,3 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         return b;
     }
 }
-
-
