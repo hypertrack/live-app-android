@@ -82,7 +82,6 @@ public class CrashlyticsWrapper {
                 Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !HTTextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
             }
         }
-
     }
 
     protected static String getApiKeyFromStrings(Context context) {

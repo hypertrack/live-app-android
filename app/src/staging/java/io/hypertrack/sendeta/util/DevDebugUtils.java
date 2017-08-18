@@ -13,7 +13,7 @@ public class DevDebugUtils {
     private static final String TAG = DevDebugUtils.class.getSimpleName();
 
     public static void installStetho(Application application) {
-        //do nothing
+        Stetho.initializeWithDefaults(application);
     }
 
     public static void setHTLogLevel(int logLevel) {

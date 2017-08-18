@@ -7,13 +7,10 @@ buildscript {
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.22.0'
-        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'com.mindera.gradle.slack'
-apply plugin: 'realm-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -23,7 +20,7 @@ repositories {
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
     lintOptions {
         abortOnError false
     }
@@ -39,7 +36,6 @@ android {
     * storeFile=<File path of keystore file>
     */
 
-    /*
     def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
@@ -50,8 +46,14 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
         }
+
+        debug {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
     }
-    */
 
     def keyPropertiesFile = rootProject.file("key.properties");
     def keyProperties = new Properties()
@@ -97,6 +99,7 @@ android {
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             multiDexEnabled true
+            ext.enableCrashlytics = false
 
             /**
              * Uncomment this code to sign your Release APK using keystore
@@ -121,18 +124,25 @@ android {
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.enableCrashlytics = false
+            ext.enableCrashlytics = true
         }
 
         debug {
             debuggable true
             minifyEnabled false
+            versionNameSuffix '-debug'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.enableCrashlytics = false
+            ext.enableCrashlytics = true
         }
 
         staging {
-            ext.enableCrashlytics = false
+            debuggable true
+            minifyEnabled false
+            applicationIdSuffix '.staging'
+            versionNameSuffix '-staging'
+            resValue "string", "app_name", "Staging HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
         }
     }
 }
@@ -140,8 +150,17 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    compile 'com.facebook.stetho:stetho:1.5.0'
 
-    compile('com.hypertrack:android:0.3.25:release@aar') {
+    releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
+
+    debugCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
+
+    stagingCompile(project(path: ':library', configuration: 'debug')) {
         transitive = true
     }
 
@@ -165,7 +184,8 @@ dependencies {
     compile 'com.github.rubensousa:gravitysnaphelper:1.1'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    debugCompile  'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
 }
@@ -177,4 +197,4 @@ dependencies {
  * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
  */
 
-//apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.google.gms.google-services'

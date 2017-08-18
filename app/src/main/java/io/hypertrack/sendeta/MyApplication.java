@@ -40,21 +40,23 @@ import io.hypertrack.sendeta.util.DevDebugUtils;
 /**
  * Created by suhas on 11/11/15.
  */
-public class MetaApplication extends Application {
+public class MyApplication extends Application {
 
-    private static MetaApplication mInstance;
-    private static boolean activityVisible;
-
+    private static MyApplication mInstance;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        mInstance = this;
+
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
             // You should not init your app in this process.
             return;
         }
+
         LeakCanary.install(this);
+
         try {
             if (!HTTextUtils.isEmpty(ApiKey.getApiKey(this))) {
                 Fabric.with(this, new Crashlytics());
@@ -62,37 +64,25 @@ public class MetaApplication extends Application {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        mInstance = this;
 
         // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
         HyperTrack.enableMockLocations(true);
         HyperTrack.disablePersistentNotification(true);
 
+        // Initialize Branch.io
         Branch.getAutoInstance(this);
+
         // (NOTE: IFF current Build Variant is DEBUG)
         // Initialize Stetho to debug Databases
-        //DevDebugUtils.installStetho(this);
+        DevDebugUtils.installStetho(this);
         // Enable HyperTrack Debug Logging
         DevDebugUtils.setHTLogLevel(Log.VERBOSE);
         // Log HyperTrack SDK Version
         DevDebugUtils.sdkVersionMessage();
     }
 
-    public static synchronized MetaApplication getInstance() {
+    public static synchronized MyApplication getInstance() {
         return mInstance;
     }
-
-    public static boolean isActivityVisible() {
-        return activityVisible;
-    }
-
-    public static void activityResumed() {
-        activityVisible = true;
-    }
-
-    public static void activityPaused() {
-        activityVisible = false;
-    }
-
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="io.hypertrack.sendeta">
+          xmlns:tools="http://schemas.android.com/tools"
+          package="io.hypertrack.sendeta">
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <!--
@@ -9,22 +9,22 @@
          Google Maps Android API v2, but you must specify either coarse or fine
          location permissions for the 'MyLocation' functionality.
     -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
-    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS"/>
 
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
     <application
-        android:name=".MetaApplication"
+        android:name=".MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="${applicationLabel}"
@@ -42,35 +42,35 @@
 
             <!-- Intent Filter to make this Screen as the launcher screen -->
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
             <!-- Intent Filter to handle browsable deeplinks -->
             <intent-filter android:label="@string/filter_title_track">
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
 
-                <data android:scheme="@string/deeplink_scheme" />
+                <data android:scheme="@string/deeplink_scheme"/>
             </intent-filter>
 
 
             <!-- Intent Filter to handle trck.at link  -->
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
 
-                <data android:scheme="http" />
-                <data android:scheme="https" />
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
 
                 <!-- Add trck.at DeepLink URL -->
                 <data
                     android:host="@string/tracking_url"
-                    android:pathPrefix="/" />
+                    android:pathPrefix="/"/>
             </intent-filter>
 
 
@@ -78,11 +78,11 @@
             <intent-filter>
                 <data
                     android:host="open"
-                    android:scheme="hypertrack.io" />
-                <action android:name="android.intent.action.VIEW" />
+                    android:scheme="hypertrack.io"/>
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
             </intent-filter>
 
         </activity>
@@ -91,44 +91,44 @@
             android:name=".view.Home"
             android:label="${applicationLabel}"
             android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".view.Profile"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustPan"/>
 
         <activity
             android:name=".view.Track"
             android:parentActivityName=".view.Home"
 
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".view.Placeline"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".view.Invite"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <activity
             android:name=".view.Verify"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"/>
 
         <!-- Register Receivers here -->
 
         <receiver android:name=".receiver.GpsLocationReceiver">
             <intent-filter>
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.location.PROVIDERS_CHANGED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
             </intent-filter>
         </receiver>
 
         <receiver android:name=".receiver.NetworkChangeReceiver">
             <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
+                <action android:name="android.net.wifi.WIFI_STATE_CHANGED"/>
             </intent-filter>
         </receiver>
 
@@ -137,7 +137,7 @@
             android:name="io.branch.referral.InstallListener"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
             </intent-filter>
         </receiver>
 
@@ -146,7 +146,7 @@
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
@@ -161,10 +161,10 @@
        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/GoogleMapsKey" />
+            android:value="@string/GoogleMapsKey"/>
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:value="@integer/google_play_services_version"/>
 
         <!--Add your fabric crashlytics API key and
          uncomment line from 171 to 173 to use Crashlytics-->
@@ -177,24 +177,24 @@
 
         <meta-data
             android:name="io.branch.sdk.BranchKey"
-            android:value="@string/branch_live" />
+            android:value="@string/branch_live"/>
         <meta-data
             android:name="io.branch.sdk.BranchKey.test"
-            android:value="@string/branch_test" />
+            android:value="@string/branch_test"/>
 
         <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
         <meta-data
             android:name="io.branch.sdk.TestMode"
-            android:value="false" />
+            android:value="false"/>
 
         <!-- Register Services here -->
         <service
             android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <service
             android:name=".service.FetchLocationIntentService"
-            android:exported="false" />
+            android:exported="false"/>
 
         <!--
        * - Uncomment `HyperTrackLiveFCMListenerService` service tag in the <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L161">AndroidManifest.xml</a> file.
@@ -202,13 +202,13 @@
        * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
        * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
        -->
-        <!-- <service
-             android:name=".service.HyperTrackLiveFCMListenerService"
-             android:exported="false">
-             <intent-filter>
-                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
-             </intent-filter>
-         </service>-->
+        <service
+            android:name=".service.HyperTrackLiveFCMListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

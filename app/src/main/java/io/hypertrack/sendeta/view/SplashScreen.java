@@ -288,7 +288,7 @@ public class SplashScreen extends BaseActivity {
                 List<Action> actions = (List<Action>) response.getResponseObject();
                 if (actions != null && !actions.isEmpty()) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupID(), actions.get(0).getId());
+                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupId(), actions.get(0).getId());
 
                 } else {
                     // Handle getActionForShortCode API error
