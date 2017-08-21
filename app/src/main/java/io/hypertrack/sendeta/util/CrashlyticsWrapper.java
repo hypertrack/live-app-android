@@ -86,7 +86,6 @@ public class CrashlyticsWrapper {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     protected static String getApiKeyFromStrings(Context context) {

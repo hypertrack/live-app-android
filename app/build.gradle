@@ -7,13 +7,10 @@ buildscript {
 
     dependencies {
         classpath 'io.fabric.tools:gradle:1.22.0'
-        classpath 'com.github.Mindera:gradle-slack-plugin:1.0.4'
     }
 }
 apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
-apply plugin: 'com.mindera.gradle.slack'
-apply plugin: 'realm-android'
 
 repositories {
     maven { url 'https://maven.fabric.io/public' }
@@ -21,31 +18,15 @@ repositories {
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
-ext {
-    hypertrackSDKVersion = computeHyperTrackSDKVersion()
-}
-
-def computeHyperTrackSDKVersion() {
-    def versionPropsFile = file('gradle.properties')
-
-    if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
-        versionProps.load(new FileInputStream(versionPropsFile))
-        return versionProps['HYPERTRACK_SDK_VERSION']
-
-    } else {
-        throw new GradleException("Could not read version.properties!")
-    }
-}
-
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.2'
+    buildToolsVersion '25.0.3'
     lintOptions {
         abortOnError false
     }
 
-    /*Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
+    /*
+    * Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
     * Add your keystore file to app folder
     * Create a new keystore.properties file
     * inside root folder with values
@@ -53,13 +34,20 @@ android {
     * keyPassword=
     * keyAlias=
     * storeFile=<File path of keystore file>
-    * */
+    */
 
     def keystorePropertiesFile = rootProject.file("keystore.properties");
     def keystoreProperties = new Properties()
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
     signingConfigs {
         release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+
+        debug {
             storeFile file(keystoreProperties['storeFile'])
             storePassword keystoreProperties['storePassword']
             keyAlias keystoreProperties['keyAlias']
@@ -110,9 +98,13 @@ android {
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            //Uncomment this code to sign your Release APK using keystore
-            signingConfig signingConfigs.release
             multiDexEnabled true
+            ext.enableCrashlytics = false
+
+            /**
+             * Uncomment this code to sign your Release APK using keystore
+             */
+            //signingConfig signingConfigs.release
         }
 
     } else {
@@ -132,9 +124,25 @@ android {
             debuggable true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.enableCrashlytics = true
         }
+
         debug {
-            ext.enableCrashlytics = false
+            debuggable true
+            minifyEnabled false
+            versionNameSuffix '-debug'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            ext.enableCrashlytics = true
+        }
+
+        staging {
+            debuggable true
+            minifyEnabled false
+            applicationIdSuffix '.staging'
+            versionNameSuffix '-staging'
+            resValue "string", "app_name", "Staging HyperTrack Live"
+            manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
         }
     }
 }
@@ -142,15 +150,21 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    /* compile('com.hypertrack:android:' + hypertrackSDKVersion + ':release@aar') {
-         transitive = true
-     }*/
+
+    compile 'com.facebook.stetho:stetho:1.5.0'
+
     releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
-    debugCompile(project(path: ':library', configuration: 'debug')) {
+
+    debugCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
+
+    stagingCompile(project(path: ':library', configuration: 'debug')) {
+        transitive = true
+    }
+
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
@@ -170,7 +184,8 @@ dependencies {
     compile 'com.github.rubensousa:gravitysnaphelper:1.1'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    debugCompile  'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
     compile project(':library')

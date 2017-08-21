@@ -1,5 +1,10 @@
 package io.hypertrack.sendeta.util;
 
+
+import android.app.Application;
+import android.util.Log;
+
+import com.facebook.stetho.Stetho;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 
@@ -11,8 +16,11 @@ public class DevDebugUtils {
 
     private static final String TAG = DevDebugUtils.class.getSimpleName();
 
-    public static void setHTLogLevel(int logLevel) {
+    public static void installStetho(Application application) {
+        Stetho.initializeWithDefaults(application);
+    }
 
+    public static void setHTLogLevel(int logLevel) {
         HyperTrack.enableDebugLogging(logLevel);
     }
 
