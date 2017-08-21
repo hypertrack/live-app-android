@@ -225,14 +225,21 @@ public class Home extends BaseActivity implements HomeView {
                     }
                 }
             }
-            if (refreshedActions.size() > 1) {
+
+          /*  if (refreshedActions.size() > 1) {
                 shareLink.setVisibility(View.GONE);
+            }*/
+            boolean check = true;
+            for (Action action : refreshedActions) {
+                if (!action.hasActionFinished()) {
+                    check = false;
+                    break;
+                }
+            }
+            if (check) {
+                bottomButtonCard.hideBottomCardLayout();
             }
 
-            //If action has completed hide stop sharing button
-            if (refreshedActions.get(0).hasActionFinished() && refreshedActionIds.size() == 1) {
-                hideBottomCard();
-            }
         }
 
         @Override
@@ -273,13 +280,14 @@ public class Home extends BaseActivity implements HomeView {
 
         @Override
         public void onLiveLocationSharingSummaryDoneButtonClicked() {
-            HyperTrack.removeActions(null);
-            OnStopSharing();
-            if (!fromPlaceline) {
-                startActivity(new Intent(Home.this, Placeline.class));
-            }
-            //finish();
-            closeActivityWithCircularRevealAnimation();
+
+        }
+
+        @Override
+        public void onLiveLocationSharingSummaryCardShown() {
+            shareLink.setVisibility(View.GONE);
+            trackingText.setText("Show Summary");
+            trackingToggle.setTag("summary");
         }
     };
 
@@ -383,6 +391,8 @@ public class Home extends BaseActivity implements HomeView {
             public void onComplete(RippleView rippleView) {
                 if (trackingToggle.getTag().equals("stop"))
                     stopTracking();
+                else if (trackingToggle.getTag().equals("summary"))
+                    htMapFragment.showLiveLocationSharingSummaryView();
                 else
                     bottomButtonCard.showBottomCardLayout();
 
@@ -404,6 +414,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.hideTrackingURLLayout();
         bottomButtonCard.setTitleText("Looks Good?");
         bottomButtonCard.setActionButtonText("Start Sharing");
+        bottomButtonCard.showActionButton();
         bottomButtonCard.showTitle();
         if (show)
             bottomButtonCard.showBottomCardLayout();
@@ -692,7 +703,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setActionButtonText("Share my live location");
         bottomButtonCard.showCloseButton();
         bottomButtonCard.showBottomCardLayout();
-        shareLink.setVisibility(View.GONE);
+//        shareLink.setVisibility(View.GONE);
         trackingText.setText("Share My Live Location");
         trackingToggle.setTag("start");
         AnimationUtils.expand(liveTrackingActionLayout);
@@ -1192,7 +1203,7 @@ public class Home extends BaseActivity implements HomeView {
             public void run() {
                 bottomButtonCard.hideBottomCardLayout();
             }
-        }, 1000);
+        }, 2000);
 
     }
 
@@ -1422,6 +1433,16 @@ public class Home extends BaseActivity implements HomeView {
     @Override
     protected void onStop() {
 
+
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        // Detach View from Presenter
+        presenter.detachView();
+        if (SharedPreferenceManager.getAction(this) == null)
+            SharedPreferenceManager.deleteTrackingAction();
         ActionManager actionManager = ActionManager.getSharedManager(this);
 
         //If tracking action has completed and summary view is visible then on back press clear the view
@@ -1433,17 +1454,8 @@ public class Home extends BaseActivity implements HomeView {
             lookupId = null;
 
             OnStopSharing();
-            ActionManager.getSharedManager(this).clearState();
+            HyperTrack.removeActions(null);
         }
-        super.onStop();
-    }
-
-    @Override
-    protected void onDestroy() {
-        // Detach View from Presenter
-        presenter.detachView();
-        if (SharedPreferenceManager.getAction(this) == null)
-            SharedPreferenceManager.deleteTrackingAction();
         super.onDestroy();
     }
 }
