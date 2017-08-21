@@ -93,3 +93,6 @@ crashlytics-build.properties
 /crashlytics.properties
 /app/sendeta-release.jks
 /app/google-services.json
+/app/src/main/res/values/api-keys.xml
+/app/fabric.properties
+/key.properties

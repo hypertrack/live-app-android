@@ -1,8 +1,7 @@
 package io.hypertrack.sendeta.util;
 
-import android.util.Log;
-
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.internal.common.logging.HTLog;
 
 
 /**
@@ -18,6 +17,6 @@ public class DevDebugUtils {
     }
 
     public static void sdkVersionMessage() {
-        Log.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
+        HTLog.i(TAG, "HyperTrack Live: SDK Version " + HyperTrack.getSDKVersion());
     }
 }

@@ -16,7 +16,7 @@
         android:paddingBottom="@dimen/padding_medium"
         android:paddingLeft="@dimen/padding_medium"
         android:paddingRight="@dimen/padding_medium"
-        android:visibility="visible"
+        android:visibility="gone"
         app:rv_centered="true"
         app:rv_color="@color/light_black">
 
@@ -72,7 +72,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:text="Start Tracking"
+            android:text="Start Sharing"
             android:textColor="#000000"
             android:textSize="@dimen/text_large"
             android:visibility="visible" />
@@ -98,14 +98,14 @@
         android:layout_marginTop="@dimen/margin_medium"
         android:background="@drawable/tracking_link_share_sheet"
         android:padding="@dimen/padding_very_low"
-        android:visibility="visible">
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tracking_url"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/margin_high"
+            android:layout_marginLeft="@dimen/margin_xxhigh"
             android:text="https://www.trck.at/asdad"
             android:textColor="@color/white"
             android:textIsSelectable="true" />

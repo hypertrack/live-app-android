@@ -155,7 +155,7 @@ public class Profile extends BaseActivity implements ProfileView {
         // Attach View Presenter to View
         presenter.attachView(this);
 
-        requestSmsPermission();
+        //requestSmsPermission();
     }
 
     private void requestSmsPermission() {

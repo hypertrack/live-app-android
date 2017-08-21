@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
+
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -30,6 +32,7 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.internal.consumer.utils.ActionUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ActionParamsBuilder;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -41,9 +44,9 @@ import java.util.List;
 import java.util.UUID;
 
 import io.hypertrack.sendeta.callback.ActionManagerCallback;
-
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.OnboardingManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.HomeView;
 
 /**
@@ -78,7 +81,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT);
 
-        if ((expectedPlace == null)) {
+        if (expectedPlace == null) {
         } else if (!HTTextUtils.isEmpty(expectedPlace.getId())) {
             builder.setExpectedPlaceId(expectedPlace.getId());
         } else {
@@ -95,7 +98,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                     actionManager.onActionStart();
 
                     HyperTrack.clearServiceNotificationParams();
-                    Log.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
+                    HTLog.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
 
                     if (view != null)
                         view.showShareLiveLocationSuccess(action);
@@ -103,6 +106,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 } else {
                     if (view != null)
                         view.showShareLiveLocationError(new ErrorResponse());
+                    Log.e(TAG, "onSuccess: Response Object is null", null);
                 }
             }
 
@@ -116,41 +120,68 @@ public class HomePresenter implements IHomePresenter<HomeView> {
     }
 
     @Override
-    public void stopSharing(final ActionManager actionManager) {
+    public void stopSharing(final ActionManager actionManager, final boolean fromGeofence) {
+
         actionManager.completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 HyperTrack.clearServiceNotificationParams();
-                Log.i(TAG, "Stopped sharing live location successfully.");
+                HTLog.i(TAG, "Stopped sharing live location successfully" + (fromGeofence ? " by geofence." : "."));
                 if (view != null) {
-                    view.showStopSharingSuccess();
+                    if (!fromGeofence)
+                        view.showStopSharingSuccess();
+                    else {
+                        view.hideBottomCard();
+                    }
                 }
             }
 
             @Override
             public void OnError() {
-                Log.i(TAG, "Error occurred while trying to stop sharing.");
-
+                HTLog.i(TAG, "Error occurred while trying to stop sharing.");
                 if (view != null)
                     view.showStopSharingError();
             }
+
         });
     }
 
     @Override
-    public void shareTrackingUrl(ActionManager actionManager) {
+    public void openCustomShareCard(Context context, ActionManager actionManager) {
+        if (actionManager.getHyperTrackAction() == null)
+            return;
+
+        Action action = actionManager.getHyperTrackAction();
+        if (action.getActionDisplay() != null &&
+                !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+            Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
+            String remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
+            if (HTTextUtils.isEmpty(remainingTime)) {
+                if (view != null)
+                    view.showCustomShareCardError(action.getTrackingURL());
+            } else {
+                if (view != null)
+                    view.showCustomShareCardSuccess(remainingTime,
+                            action.getTrackingURL());
+            }
+
+        } else if (view != null)
+            view.showCustomShareCardError(action.getTrackingURL());
+    }
+
+    @Override
+    public void shareTrackingURL(ActionManager actionManager) {
         if (actionManager.getHyperTrackAction() == null)
             return;
 
         String shareMessage = actionManager.getHyperTrackAction().getShareMessage();
-        if (shareMessage == null) {
-            if (view != null)
-                view.showShareTrackingUrlError();
-            return;
+        if (view != null) {
+            if (!HTTextUtils.isEmpty(shareMessage))
+                view.showShareTrackingURLSuccess(shareMessage);
+            else
+                view.showShareTrackingURLError();
         }
 
-        if (view != null)
-            view.showShareTrackingUrlSuccess(actionManager.getHyperTrackAction().getShareMessage());
     }
 
     @Override
@@ -177,7 +208,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
     @Override
     public void trackActionsOnMap(final String lookupID, final List<String> actionIDs,
-                                  final ActionManager actionManager) {
+                                  final ActionManager actionManager, final Context context) {
         if (!HTTextUtils.isEmpty(lookupID)) {
             HyperTrack.trackActionByLookupId(lookupID, new HyperTrackCallback() {
                 @Override
@@ -187,10 +218,32 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                         Action action = actions.get(0);
                         Place expectedPlace = action.getExpectedPlace();
                         actionManager.setPlace(expectedPlace);
-
-                        if (view != null)
+                        String remainingTime = null;
+                        if (action.getActionDisplay() != null &&
+                                !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+                            Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
+                            remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
+                        }
+                        if (view != null) {
+                            if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
+                                if (action.hasActionFinished()) {
+                                    view.hideBottomCard();
+                                    return;
+                                }
+                                view.showShareBackCard(remainingTime);
+                                SharedPreferenceManager.setTrackingAction(action);
+                                return;
+                            } else if (actions.size() > 1 && actions.contains(actionManager.getHyperTrackActionId())) {
+                                if (actions.get(0).getId().equalsIgnoreCase(actionIDs.get(0)))
+                                    SharedPreferenceManager.setTrackingAction(action);
+                                else {
+                                    SharedPreferenceManager.setTrackingAction(actions.get(1));
+                                }
+                            } else if (actions.size() > 1) {
+                                view.hideBottomCard();
+                            }
                             view.showTrackActionsOnMapSuccess(actions);
-
+                        }
                     } else {
                         if (view != null)
                             view.showTrackActionsOnMapError(new ErrorResponse());
@@ -210,9 +263,32 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 HyperTrack.trackAction(actionIDs, new HyperTrackCallback() {
                     @Override
                     public void onSuccess(@NonNull SuccessResponse response) {
-                        if (response.getResponseObject() != null) {
-                            if (view != null)
-                                view.showTrackActionsOnMapSuccess((List<Action>) response.getResponseObject());
+
+                        List<Action> actions = (List<Action>) response.getResponseObject();
+                        if (actions != null && !actions.isEmpty()) {
+                            Action action = actions.get(0);
+                            Place expectedPlace = action.getExpectedPlace();
+                            actionManager.setPlace(expectedPlace);
+                            String remainingTime = null;
+                            if (action.getActionDisplay() != null &&
+                                    !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
+                                Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
+                                remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
+                            }
+                            if (view != null) {
+                                if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
+                                    SharedPreferenceManager.setTrackingAction(action);
+                                    view.showShareBackCard(remainingTime);
+                                    return;
+                                } else if (actions.size() > 1 && actions.contains(actionManager.getHyperTrackActionId())) {
+                                    if (actions.get(0).getId().equalsIgnoreCase(actionIDs.get(0)))
+                                        SharedPreferenceManager.setTrackingAction(action);
+                                    else {
+                                        SharedPreferenceManager.setTrackingAction(actions.get(1));
+                                    }
+                                }
+                                view.showTrackActionsOnMapSuccess(actions);
+                            }
 
                         } else {
                             if (view != null)

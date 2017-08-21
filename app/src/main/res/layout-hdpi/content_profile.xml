@@ -90,7 +90,7 @@
                     android:gravity="center"
                     android:hint="@string/name"
                     android:imeOptions="actionNext"
-                    android:inputType="textNoSuggestions"
+                    android:inputType="textNoSuggestions|textCapWords"
                     android:maxLines="1"
                     android:textColorHint="@color/profile_detail_border" />
 

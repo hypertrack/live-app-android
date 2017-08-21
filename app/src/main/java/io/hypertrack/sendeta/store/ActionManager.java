@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -37,10 +38,8 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.hypertrack.lib.HyperTrack;
-
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
-
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 
@@ -206,8 +205,13 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     }
 
     public void OnGeoFenceSuccess() {
+
         if (actionCompletedListener != null) {
+            Log.d(TAG, "OnGeoFenceSuccess: ");
             actionCompletedListener.OnCallback();
+        } else {
+            completeAction(null);
+            Log.d(TAG, "OnGeoFenceSuccess: action completed listener is null");
         }
     }
 

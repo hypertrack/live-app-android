@@ -65,7 +65,7 @@ public class DashedLine extends View {
         mPaint.setColor(color);
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setStrokeWidth(dashThickness);
-        mPaint.setPathEffect(new DashPathEffect(new float[] { dashLength, dashGap, }, 0));
+        mPaint.setPathEffect(new DashPathEffect(new float[]{dashLength, dashGap,}, 0));
     }
 
     public DashedLine(Context context) {
