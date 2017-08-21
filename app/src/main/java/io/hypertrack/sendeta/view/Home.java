@@ -1432,8 +1432,6 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     protected void onStop() {
-
-
         super.onStop();
     }
 
