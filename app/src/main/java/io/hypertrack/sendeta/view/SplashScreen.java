@@ -165,7 +165,7 @@ public class SplashScreen extends BaseActivity {
                     prepareAppDeepLink();
                     proceedToNextScreen();
                 } else {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.INVISIBLE);
                     permissionText.setVisibility(View.VISIBLE);
                     enableLocation.setVisibility(View.VISIBLE);
                 }
@@ -215,6 +215,7 @@ public class SplashScreen extends BaseActivity {
                             HyperTrack.setUserId(userID);
                             registerIntent.putExtra("branch_params", branchParams.toString());
                         }
+                        registerIntent.putExtra("class_from", SplashScreen.class.getSimpleName());
                         registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(registerIntent);
                         finish();
