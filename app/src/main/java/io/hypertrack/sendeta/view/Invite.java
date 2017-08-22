@@ -124,7 +124,10 @@ public class Invite extends BaseActivity implements InviteView {
         SharedPreferenceManager.deletePlace();
         SharedPreferenceManager.deletePreviousUserId();
         HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
-        startActivity(new Intent(Invite.this, Placeline.class));
+        TaskStackBuilder.create(Invite.this)
+                .addNextIntentWithParentStack(new Intent(Invite.this, Placeline.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                .startActivities();
         finish();
     }
 
