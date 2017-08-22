@@ -33,7 +33,8 @@ public class BottomButtonCard extends RelativeLayout {
     public enum ActionType {
         START_TRACKING,
         CONFIRM_LOCATION,
-        SHARE_TRACKING_URL
+        SHARE_TRACKING_URL,
+        SHARE_BACK_LOCATION
     }
 
     public BottomButtonCard(Context context) {
@@ -108,6 +109,7 @@ public class BottomButtonCard extends RelativeLayout {
 
     public void setTitleText(String title) {
         this.titleText.setText(title);
+        titleText.setVisibility(VISIBLE);
     }
 
     public void setDescriptionText(String description) {
@@ -133,18 +135,19 @@ public class BottomButtonCard extends RelativeLayout {
     }
 
     public void setActionButtonText(String actionText) {
+        actionButtonText.setVisibility(VISIBLE);
         actionButtonText.setText(actionText);
     }
 
     public void showBottomCardLayout() {
         hideProgress();
         actionButtonText.setVisibility(VISIBLE);
-        //AnimationUtils.expand(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION);
+        AnimationUtils.expand(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION);
     }
 
     public void hideBottomCardLayout() {
         hideProgress();
-       // AnimationUtils.collapse(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION, trackingURLLayout);
+        AnimationUtils.collapse(this, AnimationUtils.DURATION_DEFAULT_VALUE_ANIMATION, trackingURLLayout);
     }
 
     public void startProgress() {
@@ -154,6 +157,14 @@ public class BottomButtonCard extends RelativeLayout {
                 R.anim.rotate);
         rotationAnim.setFillAfter(true);
         actionLoader.startAnimation(rotationAnim);
+    }
+
+    public void hideActionButton() {
+        AnimationUtils.collapse(actionButton);
+    }
+
+    public void showActionButton() {
+        AnimationUtils.expand(actionButton);
     }
 
     public void hideProgress() {
@@ -179,6 +190,10 @@ public class BottomButtonCard extends RelativeLayout {
 
     public boolean isActionTypeShareTrackingLink() {
         return type == ActionType.SHARE_TRACKING_URL;
+    }
+
+    public boolean isActionTypeShareBackLocation() {
+        return type == ActionType.SHARE_BACK_LOCATION;
     }
 
     public void hideTitle() {

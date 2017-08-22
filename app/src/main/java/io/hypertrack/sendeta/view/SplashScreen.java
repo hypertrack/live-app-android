@@ -165,7 +165,7 @@ public class SplashScreen extends BaseActivity {
                     prepareAppDeepLink();
                     proceedToNextScreen();
                 } else {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar.setVisibility(View.INVISIBLE);
                     permissionText.setVisibility(View.VISIBLE);
                     enableLocation.setVisibility(View.VISIBLE);
                 }
@@ -186,6 +186,10 @@ public class SplashScreen extends BaseActivity {
         // if started through deep link
         if (intent != null && !HTTextUtils.isEmpty(intent.getDataString())) {
             Log.d(TAG, "deeplink " + intent.getDataString());
+            int flags = intent.getFlags();
+            if ((flags & Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0) {
+                return;
+            }
             appDeepLink = DeepLinkUtil.prepareAppDeepLink(SplashScreen.this, intent.getData());
         }
     }
@@ -211,6 +215,7 @@ public class SplashScreen extends BaseActivity {
                             HyperTrack.setUserId(userID);
                             registerIntent.putExtra("branch_params", branchParams.toString());
                         }
+                        registerIntent.putExtra("class_from", SplashScreen.class.getSimpleName());
                         registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(registerIntent);
                         finish();
@@ -329,8 +334,10 @@ public class SplashScreen extends BaseActivity {
                 .putExtra(Track.KEY_TRACK_DEEPLINK, true)
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
+        Action action = SharedPreferenceManager.getTrackingAction(this);
         // Check if current user is sharing location or not
-        if (SharedPreferenceManager.getActionID(this) == null) {
+        if (SharedPreferenceManager.getActionID(this) == null ||
+                (action != null && actionId.equalsIgnoreCase(action.getId()))) {
             intent.setClass(SplashScreen.this, Home.class)
                     .putExtra(Track.KEY_LOOKUP_ID, lookupId);
         } else {
@@ -400,7 +407,7 @@ public class SplashScreen extends BaseActivity {
     private void requestForLocationSettings() {
         // Check for Location permission
         if (!HyperTrack.checkLocationPermission(this)) {
-            HyperTrack.requestPermissions(this, null);
+            HyperTrack.requestPermissions(this);
             return;
         }
 

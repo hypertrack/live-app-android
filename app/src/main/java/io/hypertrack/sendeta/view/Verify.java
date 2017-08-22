@@ -28,6 +28,7 @@ import io.hypertrack.sendeta.presenter.IVerifyPresenter;
 import io.hypertrack.sendeta.presenter.VerifyPresenter;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
+import io.hypertrack.sendeta.util.Utils;
 
 /**
  * Created by Aman on 19/07/17.
@@ -42,7 +43,7 @@ public class Verify extends BaseActivity implements VerifyView {
     TextView timerText;
     IVerifyPresenter<VerifyView> presenter = new VerifyPresenter();
     static final int RESEND_CODE_TIMER = 30 * 1000;
-    SMSReceiver smsReceiver;
+    //SMSReceiver smsReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,7 +52,7 @@ public class Verify extends BaseActivity implements VerifyView {
         initView();
         presenter.attachView(this);
         countDownTimer.start();
-        smsReceiver = new SMSReceiver();
+        //smsReceiver = new SMSReceiver();
     }
 
     @Override
@@ -59,13 +60,13 @@ public class Verify extends BaseActivity implements VerifyView {
         super.onResume();
         IntentFilter filter = new IntentFilter();
         filter.addAction("android.provider.Telephony.SMS_RECEIVED");
-        registerReceiver(smsReceiver, filter);
+        //registerReceiver(smsReceiver, filter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(smsReceiver);
+        //unregisterReceiver(smsReceiver);
     }
 
     private void initView() {
@@ -99,6 +100,7 @@ public class Verify extends BaseActivity implements VerifyView {
         });
         otpEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
         otpEditText.requestFocus();
+        Utils.showKeyboard(this, otpEditText);
     }
 
     @Override

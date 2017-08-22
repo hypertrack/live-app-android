@@ -30,7 +30,6 @@ import android.support.v7.widget.Toolbar;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.HyperTrackMapFragment;
 
@@ -63,16 +62,6 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     }
 
     @Override
-    public boolean setMyLocationEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return HyperTrack.getConsumerClient().getActionIDs() == null;
-    }
-
-    @Override
-    public boolean setMyLocationButtonEnabled(HyperTrackMapFragment hyperTrackMapFragment) {
-        return HyperTrack.getConsumerClient().getActionIDs() == null;
-    }
-
-    @Override
     public boolean showPlaceSelectorView() {
         return true;
     }
@@ -95,5 +84,20 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     @Override
     public int getResetBoundsButtonIcon(HyperTrackMapFragment hyperTrackMapFragment) {
         return R.drawable.ic_reset_bounds_button;
+    }
+
+    @Override
+    public boolean showLocationDoneButton() {
+        return false;
+    }
+
+    @Override
+    public boolean showSourceMarkerForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return false;
+    }
+
+    @Override
+    public boolean showLiveLocationSharingSummaryView() {
+        return true;
     }
 }

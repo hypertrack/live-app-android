@@ -62,25 +62,29 @@ public class CrashlyticsWrapper {
 
     public static void setCrashlyticsKeys(Context mContext) {
         context = mContext;
-        HyperTrackLiveUser user = OnboardingManager.sharedManager().getUser();
-        String apiKey = ApiKey.getApiKey(context);
-        if (!HTTextUtils.isEmpty(apiKey)) {
-            if (user != null) {
-                // Set UserID
-                String userID = user.getId() != null ? user.getId().toString() : "NULL";
-                Crashlytics.setUserIdentifier(userID);
-                Crashlytics.setString(CrashlyticsKeys.USER_ID, userID);
+        try {
+            HyperTrackLiveUser user = OnboardingManager.sharedManager().getUser();
+            String apiKey = ApiKey.getApiKey(context);
+            if (!HTTextUtils.isEmpty(apiKey)) {
+                if (user != null) {
+                    // Set UserID
+                    String userID = user.getId() != null ? user.getId().toString() : "NULL";
+                    Crashlytics.setUserIdentifier(userID);
+                    Crashlytics.setString(CrashlyticsKeys.USER_ID, userID);
 
-                // Set UserName
-                String userName = !HTTextUtils.isEmpty(user.getName()) ? user.getName() : "NULL";
-                Crashlytics.setUserName(userName);
-                Crashlytics.setString(CrashlyticsKeys.USER_NAME, userName);
+                    // Set UserName
+                    String userName = !HTTextUtils.isEmpty(user.getName()) ? user.getName() : "NULL";
+                    Crashlytics.setUserName(userName);
+                    Crashlytics.setString(CrashlyticsKeys.USER_NAME, userName);
 
-                // Set UserPhone & UserDeviceID
-                Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !HTTextUtils.isEmpty(user.getPhone()) ? user.getPhone() : "NULL");
-                String deviceUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-                Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !HTTextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
+                    // Set UserPhone & UserDeviceID
+                    Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !HTTextUtils.isEmpty(user.getPhone()) ? user.getPhone() : "NULL");
+                    String deviceUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !HTTextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -100,6 +100,7 @@ public class Profile extends BaseActivity implements ProfileView {
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
     private boolean showSkip = true;
     private String previousPhone = "";
+    private boolean fromSplashScreen;
 
     private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
@@ -154,8 +155,12 @@ public class Profile extends BaseActivity implements ProfileView {
 
         // Attach View Presenter to View
         presenter.attachView(this);
-
-        requestSmsPermission();
+        if (getIntent() != null && getIntent().hasExtra("class_from")) {
+            if (getIntent().getStringExtra("class_from").
+                    equalsIgnoreCase(SplashScreen.class.getSimpleName()))
+                fromSplashScreen = true;
+        }
+        //requestSmsPermission();
     }
 
     private void requestSmsPermission() {
@@ -254,6 +259,10 @@ public class Profile extends BaseActivity implements ProfileView {
 
     public void onSkipButtonClicked(View view) {
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+            if (fromSplashScreen) {
+                navigateToPlacelineScreen();
+                return;
+            }
             finish();
             return;
         }

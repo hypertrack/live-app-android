@@ -56,22 +56,24 @@
                 android:layout_marginRight="@dimen/margin_xxxxhigh"
                 android:layout_marginTop="@dimen/margin_xxhigh"
                 android:gravity="center"
-                android:visibility="invisible"
                 android:text="@string/location_permission_detail"
-                android:textSize="@dimen/text_medium" />
+                android:textSize="@dimen/text_medium"
+                android:visibility="invisible" />
 
             <ProgressBar
                 android:id="@+id/progress_bar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_huge" />
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_margin="@dimen/margin_medium" />
 
             <Button
                 android:id="@+id/enable_location"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/margin_huge"
+                android:layout_gravity="bottom|center_horizontal"
                 android:background="@drawable/button_background"
+                android:gravity="center"
                 android:paddingBottom="@dimen/padding_medium"
                 android:paddingLeft="@dimen/margin_xxhigh"
                 android:paddingRight="@dimen/margin_xxhigh"
