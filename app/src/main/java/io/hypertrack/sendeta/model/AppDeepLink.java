@@ -46,6 +46,8 @@ public class AppDeepLink {
     public String shortCode;
     public String lookupId;
 
+
+
     public AppDeepLink(int mId) {
         this.mId = mId;
     }

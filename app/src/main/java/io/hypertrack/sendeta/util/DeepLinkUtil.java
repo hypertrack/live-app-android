@@ -41,6 +41,7 @@ public class DeepLinkUtil {
     //DeepLink Ids
     private static final int HOME = 1;
     public static final int TRACK = 2;
+    public static final int BRANCH = 3;
     public static final int DEFAULT = HOME;
 
     //deeplink mapping keys
@@ -69,6 +70,12 @@ public class DeepLinkUtil {
     }
 
     private static void parsePathParams(Context context, AppDeepLink appDeepLink, Uri uri) {
+        if(uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("hypertrack.io")
+                && !HTTextUtils.isEmpty(uri.getHost())
+                && uri.getHost().contains("open")) {
+            appDeepLink.mId = DeepLinkUtil.BRANCH;
+        }
+
         if (uri.getScheme() != null
                 && uri.getScheme().equalsIgnoreCase(context.getString(R.string.deeplink_scheme))
                 && !HTTextUtils.isEmpty(uri.getHost())
