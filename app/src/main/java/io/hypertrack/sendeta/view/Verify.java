@@ -28,6 +28,7 @@ import io.hypertrack.sendeta.presenter.IVerifyPresenter;
 import io.hypertrack.sendeta.presenter.VerifyPresenter;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
+import io.hypertrack.sendeta.util.Utils;
 
 /**
  * Created by Aman on 19/07/17.
@@ -99,6 +100,7 @@ public class Verify extends BaseActivity implements VerifyView {
         });
         otpEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
         otpEditText.requestFocus();
+        Utils.showKeyboard(this, otpEditText);
     }
 
     @Override

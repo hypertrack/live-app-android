@@ -111,6 +111,7 @@
 
         <activity
             android:name=".view.Verify"
+            android:windowSoftInputMode = "stateVisible"
             android:screenOrientation="portrait"/>
 
         <!-- Register Receivers here -->
