@@ -646,14 +646,12 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
 
         getMenuInflater().inflate(R.menu.menu_placeline, menu);
         MenuItem menuItem = menu.findItem(R.id.tracking_toogle);
-        if (SharedPreferenceManager.isTrackingON()) {
+        if (HyperTrack.isTracking()) {
+            SharedPreferenceManager.setTrackingOFF();
             menuItem.setTitle(getString(R.string.stop_tracking));
-            if (!HyperTrack.isTracking())
-                startHyperTrackTracking(false);
         } else {
+            SharedPreferenceManager.setTrackingOFF();
             menuItem.setTitle(getString(R.string.start_tracking));
-            if (HyperTrack.isTracking())
-                stopHyperTrackTracking();
         }
 
         // Hide menu items if user is on an Action
