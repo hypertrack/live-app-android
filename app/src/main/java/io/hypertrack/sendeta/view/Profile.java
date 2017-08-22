@@ -444,7 +444,8 @@ public class Profile extends BaseActivity implements ProfileView {
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
         } else {
-            mProgressDialog.dismiss();
+            if (mProgressDialog != null)
+                mProgressDialog.dismiss();
         }
     }
 
