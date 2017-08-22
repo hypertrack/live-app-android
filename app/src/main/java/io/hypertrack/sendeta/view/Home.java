@@ -153,6 +153,7 @@ public class Home extends BaseActivity implements HomeView {
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
     boolean showCurrentLocationMarker = true;
+    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -301,6 +302,7 @@ public class Home extends BaseActivity implements HomeView {
                     equalsIgnoreCase(Placeline.class.getSimpleName()))
                 fromPlaceline = true;
         }
+
         startAnimation();
         // Initialize UI Views
         initializeUIViews();
@@ -328,17 +330,15 @@ public class Home extends BaseActivity implements HomeView {
         // Set callback for HyperTrackEvent updates
         setCallbackForHyperTrackEvents();
 
-        boolean isRestoreLocationSharing = false, isHandlerTrackingUrlDeeplink = false;
-
         // Check if location is being shared currently
         if (restoreLocationSharingIfNeeded())
             isRestoreLocationSharing = true;
 
         // Handles Tracking Url deeplink
         if (handleTrackingUrlDeeplink())
-            isHandlerTrackingUrlDeeplink = true;
+            isHandleTrackingUrlDeeplink = true;
 
-        if (!isRestoreLocationSharing && !isHandlerTrackingUrlDeeplink) {
+        if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink) {
             htMapFragment.openPlacePickerView();
         }
         initBottomButtonCard(false);
@@ -454,7 +454,10 @@ public class Home extends BaseActivity implements HomeView {
             viewTreeObserver.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
                 @Override
                 public void onGlobalLayout() {
-                    circularRevealActivity();
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                        circularRevealActivity();
+                    else
+                        rootLayout.setVisibility(View.VISIBLE);
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                         rootLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
                     } else {
@@ -850,7 +853,8 @@ public class Home extends BaseActivity implements HomeView {
             MarkerAnimation.animateMarker(currentLocationMarker, latLng);
         }
         startPulse(false);
-        updateMapView();
+        if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink)
+            updateMapView();
     }
 
     private void addPulseRing(LatLng latLng) {
@@ -1185,8 +1189,10 @@ public class Home extends BaseActivity implements HomeView {
         ActionManager.getSharedManager(Home.this).clearState();
         expectedPlace = null;
         AnimationUtils.collapse(liveTrackingActionLayout);
-        updateCurrentLocationMarker(null);
         showCurrentLocationMarker = true;
+        isRestoreLocationSharing = false;
+        isHandleTrackingUrlDeeplink = false;
+        updateCurrentLocationMarker(null);
         updateMapView();
         initBottomButtonCard(true);
     }
