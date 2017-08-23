@@ -133,7 +133,7 @@ public class Invite extends BaseActivity implements InviteView {
 
     @Override
     public void showError() {
-        Toast.makeText(this, "Error Occured", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
     }
 
     @Override

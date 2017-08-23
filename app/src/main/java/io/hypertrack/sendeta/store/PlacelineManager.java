@@ -46,24 +46,26 @@ public class PlacelineManager {
         call.enqueue(new Callback<PlacelineData>() {
             @Override
             public void onResponse(Call<PlacelineData> call, Response<PlacelineData> response) {
-                PlacelineData placelineData = response.body();
-                Log.d(TAG, "onResponse: " + "from placeline");
-                if (placelineData != null) {
-
-                    if (callback != null) {
-                        callback.onSuccess(new SuccessResponse(placelineData));
-                    }
-
-                } else {
-                    if (callback != null) {
-                        try {
-                            callback.onError(new ErrorResponse(response.code(), response.errorBody().string()));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            Toast.makeText(mContext, "Error occured. Pls try again.", Toast.LENGTH_SHORT).show();
+                if (response.isSuccessful()) {
+                    PlacelineData placelineData = response.body();
+                    Log.d(TAG, "onResponse: " + "from placeline");
+                    if (placelineData != null) {
+                        if (callback != null) {
+                            callback.onSuccess(new SuccessResponse(placelineData));
                         }
+                        return;
                     }
                 }
+
+                if (callback != null) {
+                    try {
+                        callback.onError(new ErrorResponse(response.code(), response.errorBody().string()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Toast.makeText(mContext, "Error occured. Pls try again.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
             }
 
             @Override

@@ -194,9 +194,15 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                Log.d(TAG, "onResponse: Verification Code Sent");
-                if (view != null)
-                    view.navigateToVerifyCodeScreen();
+                if(response.isSuccessful()) {
+                    Log.d(TAG, "onResponse: Verification Code Sent");
+                    if (view != null)
+                        view.navigateToVerifyCodeScreen();
+                }
+                else {
+                    if (view != null)
+                        view.showErrorMessage();
+                }
             }
 
             @Override

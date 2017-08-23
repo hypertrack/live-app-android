@@ -40,12 +40,14 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                Log.d(TAG, "onResponse: Code Verified");
-                if (verifyView != null) {
-                    if (response.isSuccessful())
-                        verifyView.codeVerified();
-                    else {
-                        verifyView.showError(ERROR_INCORRECT_CODE);
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "onResponse: Code Verified");
+                    if (verifyView != null) {
+                        if (response.isSuccessful())
+                            verifyView.codeVerified();
+                        else {
+                            verifyView.showError(ERROR_INCORRECT_CODE);
+                        }
                     }
                 }
             }
@@ -66,14 +68,13 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                Log.d(TAG, "onResponse: Code Resend Successfully");
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
+                    Log.d(TAG, "onResponse: Code Resend Successfully");
                     if (verifyView != null)
                         verifyView.codeResent();
-                }
-                else {
+                } else {
                     if (verifyView != null)
-                        verifyView.showError("Error Occured");
+                        verifyView.showError("There is some error occurred. Please try again");
                 }
             }
 
