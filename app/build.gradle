@@ -136,7 +136,8 @@ android {
             versionNameSuffix '-staging'
             resValue "string", "app_name", "Staging HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            buildConfigField "String", "HYPERTRACK_PK", keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY']
+            if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null)
+                buildConfigField "String", "HYPERTRACK_PK", keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY']
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
             signingConfig signingConfigs.release
         }
@@ -180,7 +181,7 @@ dependencies {
     compile 'com.github.rubensousa:gravitysnaphelper:1.1'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
-    debugCompile  'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
