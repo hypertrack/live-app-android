@@ -46,13 +46,6 @@ android {
             keyAlias keystoreProperties['keyAlias']
             keyPassword keystoreProperties['keyPassword']
         }
-
-        debug {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
-        }
     }
 
     def keyPropertiesFile = rootProject.file("key.properties");
@@ -133,6 +126,7 @@ android {
             versionNameSuffix '-debug'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             ext.enableCrashlytics = true
+            signingConfig signingConfigs.release
         }
 
         staging {
@@ -142,7 +136,9 @@ android {
             versionNameSuffix '-staging'
             resValue "string", "app_name", "Staging HyperTrack Live"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
+            buildConfigField "String", "HYPERTRACK_PK", keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY']
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
+            signingConfig signingConfigs.release
         }
     }
 }
