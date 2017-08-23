@@ -102,6 +102,7 @@ public class Profile extends BaseActivity implements ProfileView {
     private String previousPhone = "";
     private boolean fromSplashScreen;
 
+
     private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -484,10 +485,12 @@ public class Profile extends BaseActivity implements ProfileView {
                 profileImage = ImageUtils.getScaledFile(imageFile);
 
                 updatedProfileImage = ImageUtils.getRotatedBitMap(imageFile);
-                if (updatedProfileImage == null) {
-                    updatedProfileImage = BitmapFactory.decodeFile(imageFile.getPath());
-                }
 
+                if (updatedProfileImage == null) {
+                    updatedProfileImage = BitmapFactory.decodeFile(profileImage.getPath());
+                } else {
+                    profileImage = ImageUtils.getFileFromBitmap(Profile.this, updatedProfileImage);
+                }
                 if (updatedProfileImage != null) {
                     mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
