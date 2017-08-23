@@ -40,6 +40,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
@@ -61,6 +62,7 @@ import io.branch.referral.BranchError;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.AppDeepLink;
+import io.hypertrack.sendeta.network.retrofit.CallUtils;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.store.ActionManager;
@@ -174,7 +176,7 @@ public class SplashScreen extends BaseActivity {
         Branch branch = Branch.getInstance();
         branch.initSession(new Branch.BranchReferralInitListener() {
             @Override
-            public void onInitFinished(JSONObject referringParams, BranchError error) {
+            public void onInitFinished(final JSONObject referringParams, BranchError error) {
                 if (error == null) {
                     Log.d(TAG, "onInitFinished: Data: " + referringParams.toString());
                     try {
@@ -197,14 +199,20 @@ public class SplashScreen extends BaseActivity {
                 if (autoAccept) {
                     HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
                     Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
-                    call.enqueue(new Callback<User>() {
+
+                    CallUtils.enqueueWithRetry(call, new Callback<User>() {
                         @Override
                         public void onResponse(Call<User> call, Response<User> response) {
-                            HTLog.d(TAG, "Invite Accepted");
-                            SharedPreferenceManager.deleteAction();
-                            SharedPreferenceManager.deletePlace();
-                            SharedPreferenceManager.deletePreviousUserId();
-                            HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
+                            if (response.isSuccessful()) {
+                                HTLog.d(TAG, "Invite Accepted");
+                                SharedPreferenceManager.deleteAction();
+                                SharedPreferenceManager.deletePlace();
+                                SharedPreferenceManager.deletePreviousUserId();
+                                HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
+                            } else {
+                                Log.d(TAG, "onResponse: There is some error occurred. Please try again");
+                                Toast.makeText(SplashScreen.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                            }
                             proceedToNextScreen();
                         }
 
@@ -212,6 +220,7 @@ public class SplashScreen extends BaseActivity {
                         public void onFailure(Call<User> call, Throwable t) {
                             Log.d(TAG, "onInviteFailure: " + t.getMessage());
                             t.printStackTrace();
+                            Toast.makeText(SplashScreen.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
                             proceedToNextScreen();
                         }
                     });
