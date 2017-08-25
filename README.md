@@ -20,12 +20,12 @@ This open source repo uses HyperTrack for Live Location Sharing and Activity Tra
 ## Activity Tracking
 One of the two core features of Hypertrack Live is Placeline. Placeline is useful in tracking your daily activity with near-zero battery impact. We automagically use the combination of device sensors - GPS, WiFi, network, accelerometer, pedometer, gyroscope, compass - to deliver accuracy. Placeline is powered by the HyperTrack SDK which collects location and activity data for your users. It includes segments like stop 🛑, walk 🚶‍♀️,run 🏃‍♀️,drive 🏎️ and cycling 🚴. 
 
-![Placeline](assets/placeline.gif)
+![Placeline](asset/placeline.gif)
 
 ## Live Location Sharing
 The other core feature of Hypertrack Live is Live Location Sharing. Live Location Sharing is useful for consumer apps like messengers and social apps where two or more people want to share their Live Location with each other when on the way to meet up. It is also useful for marketplace aggregators where the transaction starts online 💻📱 but requires people to meet offline for fulfillment. It helps you solve the consumer's anxiety of “where are you⁉️”.
 
-![Live Location Sharing](assets/live_location.gif) 
+![Live Location Sharing](asset/live_location_sharing.gif) 
 
 ## Usage
 #### To use this app
