@@ -1,1 +1,5 @@
 /build
+/sendeta-release.jks
+/google-services.json
+/fabric.properties
+/src/main/res/values/api-keys.xml
