@@ -419,7 +419,7 @@ To release the app on the Play Store, you will have to change the app's package 
 
 2. Refactor the name of your package with right click → Refactor → Rename in the tree view, then Android Studio will display a window, select "Rename package" option.
 
-3. Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L60) file. Once done, clean and rebuild the project.
+3. Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L102) file. Once done, clean and rebuild the project.
    - Add `release key store file` in app level folder.
    - Create a `keystore.properties` file in root or project level folder with key-values pair.
     ```properties
