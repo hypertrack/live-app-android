@@ -278,93 +278,94 @@ public class Placeline extends AppCompatActivity implements OnMapReadyCallback {
 
     //Animate Map with polyline and marker when item scrolls in recyclerview
     private void animateMap(int index) {
-        if (previousIndex != index && index >= 0 && index < sanitizeSegments.size()) {
+        if (mMap != null) {
+            if (previousIndex != index && index >= 0 && index < sanitizeSegments.size()) {
+                mMap.clear();
+                Segment segment = sanitizeSegments.get(index);
 
-            mMap.clear();
-            Segment segment = sanitizeSegments.get(index);
+                //Check segment if trip show polyline, source and expected markers on map
+                // if stop then show stop marker.
+                if (segment.isTrip()) {
+                    List<LatLng> latLngList = new ArrayList<LatLng>();
 
-            //Check segment if trip show polyline, source and expected markers on map
-            // if stop then show stop marker.
-            if (segment.isTrip()) {
-                List<LatLng> latLngList = new ArrayList<LatLng>();
+                    if (!HTTextUtils.isEmpty(segment.getTimeAwarePolyline())) {
 
-                if (!HTTextUtils.isEmpty(segment.getTimeAwarePolyline())) {
+                        latLngList = TimeAwarePolylineUtils.
+                                getLatLngList(segment.getTimeAwarePolyline());
 
-                    latLngList = TimeAwarePolylineUtils.
-                            getLatLngList(segment.getTimeAwarePolyline());
+                    } else {
+                        if (segment.getStartLocation() != null &&
+                                segment.getStartLocation().getGeoJSONLocation() != null) {
 
-                } else {
-                    if (segment.getStartLocation() != null &&
-                            segment.getStartLocation().getGeoJSONLocation() != null) {
+                            latLngList.add(segment.getStartLocation().getGeoJSONLocation().getLatLng());
 
-                        latLngList.add(segment.getStartLocation().getGeoJSONLocation().getLatLng());
+                        }
+                        if (segment.getEndLocation() != null &&
+                                segment.getEndLocation().getGeoJSONLocation() != null) {
 
+                            latLngList.add(segment.getEndLocation().getGeoJSONLocation().getLatLng());
+                        }
                     }
-                    if (segment.getEndLocation() != null &&
-                            segment.getEndLocation().getGeoJSONLocation() != null) {
 
-                        latLngList.add(segment.getEndLocation().getGeoJSONLocation().getLatLng());
+                    //Add all lat lng of polyline to LatLngBounds
+                    LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                    for (LatLng latLng : latLngList) {
+                        builder.include(latLng);
                     }
+
+                    // Set bounds for map
+                    LatLngBounds bounds = builder.build();
+                    int width = getResources().getDisplayMetrics().widthPixels;
+                    int height = getResources().getDisplayMetrics().heightPixels / 2;
+                    int padding = (int) (width * 0.12);
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+
+                    //Set width of polyline according to device screen density
+                    float density = getResources().getDisplayMetrics().density;
+                    int polylineWidth = (int) (3 * density);
+
+                    //Add polyline to map
+                    PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).
+                            color(Color.BLACK).width(polylineWidth);
+                    mMap.addPolyline(polylineOptions);
+                    mMap.animateCamera(cameraUpdate, 1500, null);
+
+                    float[] anchors = new float[]{0.5f, 0.5f};
+
+                    //Add source and expected place marker to map
+                    if (latLngList.size() > 0) {
+
+                        MarkerOptions startMarkerOption = new MarkerOptions().
+                                position(latLngList.get(0)).
+                                icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_source_place_marker)).
+                                anchor(anchors[0], anchors[1]);
+                        mMap.addMarker(startMarkerOption);
+
+                        MarkerOptions endMarkerOptions = new MarkerOptions().
+                                position(latLngList.get(latLngList.size() - 1)).
+                                icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker)).
+                                anchor(anchors[0], anchors[1]);
+                        mMap.addMarker(endMarkerOptions);
+                    }
+
+                } else if (segment.isStop()) {
+
+                    LatLng latLng = segment.getPlace().getLocation().getLatLng();
+
+                    MarkerOptions markerOptions = new MarkerOptions().
+                            position(latLng).
+                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop_point));
+                    mMap.addMarker(markerOptions);
+
+                    float zoom = mMap.getCameraPosition().zoom;
+                    if (zoom < 16f)
+                        zoom = 16f;
+
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
                 }
 
-                //Add all lat lng of polyline to LatLngBounds
-                LatLngBounds.Builder builder = new LatLngBounds.Builder();
-                for (LatLng latLng : latLngList) {
-                    builder.include(latLng);
-                }
-
-                // Set bounds for map
-                LatLngBounds bounds = builder.build();
-                int width = getResources().getDisplayMetrics().widthPixels;
-                int height = getResources().getDisplayMetrics().heightPixels / 2;
-                int padding = (int) (width * 0.12);
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
-
-                //Set width of polyline according to device screen density
-                float density = getResources().getDisplayMetrics().density;
-                int polylineWidth = (int) (3 * density);
-
-                //Add polyline to map
-                PolylineOptions polylineOptions = new PolylineOptions().addAll(latLngList).
-                        color(Color.BLACK).width(polylineWidth);
-                mMap.addPolyline(polylineOptions);
-                mMap.animateCamera(cameraUpdate, 1500, null);
-
-                float[] anchors = new float[]{0.5f, 0.5f};
-
-                //Add source and expected place marker to map
-                if (latLngList.size() > 0) {
-
-                    MarkerOptions startMarkerOption = new MarkerOptions().
-                            position(latLngList.get(0)).
-                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_source_place_marker)).
-                            anchor(anchors[0], anchors[1]);
-                    mMap.addMarker(startMarkerOption);
-
-                    MarkerOptions endMarkerOptions = new MarkerOptions().
-                            position(latLngList.get(latLngList.size() - 1)).
-                            icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker)).
-                            anchor(anchors[0], anchors[1]);
-                    mMap.addMarker(endMarkerOptions);
-                }
-
-            } else if (segment.isStop()) {
-
-                LatLng latLng = segment.getPlace().getLocation().getLatLng();
-
-                MarkerOptions markerOptions = new MarkerOptions().
-                        position(latLng).
-                        icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_stop_point));
-                mMap.addMarker(markerOptions);
-
-                float zoom = mMap.getCameraPosition().zoom;
-                if (zoom < 16f)
-                    zoom = 16f;
-
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoom));
+                previousIndex = index;
             }
-
-            previousIndex = index;
         }
     }
 
