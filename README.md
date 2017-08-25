@@ -51,7 +51,7 @@ HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
  - [Setup HyperTrack SDK](#setup-hypertrack-sdk)
  - [Create Hypertrack user](#create-hypertrack-user)
  - [Start tracking](#start-tracking)
- - [Get Placeline in your app](#get-placeline-in-your-app)
+ - [Get Placeline in your app](#get-placeline-data-in-your-app)
 
 #### Placeline format
 Placeline object contains detailed information about the activity like the start time, end time, location, steps and more.
@@ -105,7 +105,7 @@ placelineManager.getPlacelineData(userID, date, new HyperTrackCallback() {
         }
         @Override
         public void onError(@NonNull ErrorResponse errorResponse) {
-            Log.d("Placeline", "onError: ");
+            Log.d("Placeline", "onError: " + errorResponse.getErrorMessage());
         }
 }
 ```
@@ -123,7 +123,7 @@ Let's get started ðŸ˜Š . Strap yourself in and get ready for an exciting ride ðŸ
 
 - [Basic setup](#basic-setup)
   - [Get API keys](#step-1-get-api-keys)
-  - [Use starter project](#step-2-use-starter-project)
+  - [Use this project](#step-2-use-this-project)
   - [Setup HyperTrack SDK](#step-3-setup-hypertrack-sdk)
   - [Create HyperTrack user](#step-4-create-hypertrack-user)
 - [Start a Live Location trip](#start-a-live-location-trip)
@@ -209,7 +209,7 @@ Are you ready to rock and roll?
 #### Step 1. Show Live Location view
 Now to start a Live Location trip, the first thing that you need to do is to add a destination. For this, we will need a location picker. The good news is that HyperTrack Location View has a location picker within it. Once the user selects a location with the help of our inbuilt location picker, than the sdk gives a callback to the app with the selected location so that the app can start a trip.
 
-For  starter project, Check ```Home.java``` embedding the HyperTrackMapFragment view in  ```content_home.xml``` view. Initialize the HyperTrackMapFragment inside ```oncreate``` method of ```Home``` activity and set [HyperTrackMapAdapter](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/view/HomeMapAdapter.java), [MapFragmentCallback](https://github.com/hypertrack/hypertrack-live-android/blob/6c801e65a628769cd160ef7b0b4f77fd68df7818/app/src/main/java/io/hypertrack/sendeta/view/Home.java#L137-L213) for HyperTrackMapFragment.
+For  starter project, Check ```Home.java``` embedding the HyperTrackMapFragment view in  ```content_home.xml``` view. Initialize the HyperTrackMapFragment inside ```oncreate``` method of ```Home``` activity and set your implementation of [HyperTrackMapAdapter](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/view/HomeMapAdapter.java), [MapFragmentCallback](https://github.com/hypertrack/hypertrack-live-android/blob/6c801e65a628769cd160ef7b0b4f77fd68df7818/app/src/main/java/io/hypertrack/sendeta/view/Home.java#L137-L213) for HyperTrackMapFragment.
 
 ```java
 MapFragmentCallback callback = new MapFragmentCallback(){
