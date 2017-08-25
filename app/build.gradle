@@ -173,13 +173,17 @@ dependencies {
 
     compile 'com.facebook.stetho:stetho:1.5.0'
 
-    releaseCompile(project(path: ':library', configuration: 'release')) {
+    compile("com.hypertrack:android:0.4.6:release@aar") {
+        transitive = true;
+    }
+
+    /*releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
 
     debugCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
-    }
+    }*/
 
     if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
