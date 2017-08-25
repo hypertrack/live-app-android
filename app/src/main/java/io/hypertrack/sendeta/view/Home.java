@@ -228,7 +228,7 @@ public class Home extends BaseActivity implements HomeView {
             }
 
           /*  if (refreshedActions.size() > 1) {
-                shareLink.setVisibility(View.GONE);
+
             }*/
             boolean check = true;
             for (Action action : refreshedActions) {
@@ -706,8 +706,10 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setActionButtonText("Share my live location");
         bottomButtonCard.showCloseButton();
         bottomButtonCard.showBottomCardLayout();
-//        shareLink.setVisibility(View.GONE);
-        trackingText.setText(R.string.stop);
+        if(!ActionManager.getSharedManager(Home.this).isActionLive()) {
+            shareLink.setVisibility(View.GONE);
+        }
+        trackingText.setText("Share my live location");
         trackingToggle.setTag("start");
         AnimationUtils.expand(liveTrackingActionLayout);
     }
