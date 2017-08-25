@@ -25,7 +25,6 @@ SOFTWARE.
 package io.hypertrack.sendeta.view;
 
 import android.content.Context;
-import android.support.v7.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -43,12 +42,10 @@ import io.hypertrack.sendeta.store.SharedPreferenceManager;
 public class HomeMapAdapter extends HyperTrackMapAdapter {
 
     public Context mContext;
-    private Toolbar toolbar;
 
-    public HomeMapAdapter(Context mContext, Toolbar toolbar) {
+    public HomeMapAdapter(Context mContext) {
         super(mContext);
         this.mContext = mContext;
-        this.toolbar = toolbar;
     }
 
     @Override

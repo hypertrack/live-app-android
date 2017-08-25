@@ -312,7 +312,7 @@ public class Home extends BaseActivity implements HomeView {
         htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
 
-        adapter = new HomeMapAdapter(this, getToolbar());
+        adapter = new HomeMapAdapter(this);
         htMapFragment.setHTMapAdapter(adapter);
         htMapFragment.setMapFragmentCallback(callback);
 
