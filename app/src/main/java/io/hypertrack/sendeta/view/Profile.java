@@ -315,7 +315,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                skip.setText(R  .string.cancel);
+                skip.setText(R.string.cancel);
             }
         } else if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             skip.setText(R.string.cancel);
