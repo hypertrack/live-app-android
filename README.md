@@ -25,7 +25,7 @@ One of the two core features of Hypertrack Live is Placeline. Placeline is usefu
 ## Live Location Sharing
 The other core feature of Hypertrack Live is Live Location Sharing. Live Location Sharing is useful for consumer apps like messengers and social apps where two or more people want to share their Live Location with each other when on the way to meet up. It is also useful for marketplace aggregators where the transaction starts online 💻📱 but requires people to meet offline for fulfillment. It helps you solve the consumer's anxiety of “where are you⁉️”.
 
-![Live Location Sharing](asset/live_location_sharing.gif) 
+![Live Location Sharing](asset/live_location.gif) 
 
 ## Usage
 #### To use this app
