@@ -18,7 +18,12 @@ repositories {
     maven { url 'http://hypertrack-android-sdk.s3-website-us-west-2.amazonaws.com/' }
 }
 
+def keyPropertiesFile = rootProject.file("key.properties");
+def keyProperties = new Properties();
+keyProperties.load(new FileInputStream(keyPropertiesFile));
+
 android {
+
     compileSdkVersion 25
     buildToolsVersion '25.0.3'
     lintOptions {
@@ -26,31 +31,45 @@ android {
     }
 
     /*
-    * Uncomment bottom code and code under defaultConfig to sign your Release APK using keystore file
+    * Release Build Variant
     * Add your keystore file to app folder
     * Create a new keystore.properties file
     * inside root folder with values
-    * storePassword=
-    * keyPassword=
-    * keyAlias=
     * storeFile=<File path of keystore file>
+    * storePassword=
+    * keyAlias=
+    * keyPassword=
     */
 
-    def keystorePropertiesFile = rootProject.file("keystore.properties");
-    def keystoreProperties = new Properties()
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-    signingConfigs {
-        release {
-            storeFile file(keystoreProperties['storeFile'])
-            storePassword keystoreProperties['storePassword']
-            keyAlias keystoreProperties['keyAlias']
-            keyPassword keystoreProperties['keyPassword']
+    File keystorePropertiesFile = rootProject.file("keystore.properties");
+    if (keystorePropertiesFile.exists()) {
+        def keystoreProperties = new Properties()
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+        signingConfigs {
+            release {
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
         }
     }
 
-    def keyPropertiesFile = rootProject.file("key.properties");
-    def keyProperties = new Properties()
-    keyProperties.load(new FileInputStream(keyPropertiesFile))
+    //Check if Fabric crashlyitcs is configured or not.
+    def fabricCheck = false;
+    File fabricPropertiesFile = rootProject.file("app/fabric.properties");
+    if (fabricPropertiesFile.exists()) {
+        System.out.println("Fabric File Exist");
+        def fabricProperties = new Properties()
+        fabricProperties.load(new FileInputStream(fabricPropertiesFile))
+        String apiSecret = fabricProperties['apiSecret'];
+        if (apiSecret != null && !apiSecret.isEmpty() && !apiSecret.equalsIgnoreCase("CRASHLYTICS_API_SECRET")) {
+            System.out.println("Key Exist");
+            fabricCheck = true;
+        } else {
+            System.out.println("Key Doesnt Exist");
+        }
+    }
 
     /*
     *   Set App version using gradle.properties file
@@ -92,10 +111,8 @@ android {
             resValue "string", "tracking_url", "www.trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             multiDexEnabled true
-            /**
-             * Uncomment this code to sign your Release APK using keystore
-             */
-            signingConfig signingConfigs.release
+            if (keystorePropertiesFile.exists())
+                signingConfig signingConfigs.release
         }
 
     } else {
@@ -112,10 +129,12 @@ android {
 
     buildTypes {
         release {
-            debuggable false
-            minifyEnabled true
+            debuggable true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.enableCrashlytics = true
+            if (!fabricCheck) {
+                ext.enableCrashlytics = false
+            }
         }
 
         debug {
@@ -123,21 +142,27 @@ android {
             minifyEnabled false
             versionNameSuffix '-debug'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            ext.enableCrashlytics = true
-            signingConfig signingConfigs.release
-        }
+            if (!fabricCheck) {
+                ext.enableCrashlytics = false
+            }
 
-        staging {
-            debuggable true
-            minifyEnabled false
-            applicationIdSuffix '.staging'
-            versionNameSuffix '-staging'
-            resValue "string", "app_name", "Staging HyperTrack Live"
-            manifestPlaceholders = [applicationLabel: "@string/app_name"]
-            if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null)
+        }
+        if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+            staging {
+                debuggable true
+                minifyEnabled false
+                applicationIdSuffix '.staging'
+                versionNameSuffix '-staging'
+                resValue "string", "app_name", "Staging HyperTrack Live"
+                manifestPlaceholders = [applicationLabel: "@string/app_name"]
                 buildConfigField "String", "HYPERTRACK_PK", keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY']
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
-            signingConfig signingConfigs.release
+                buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
+                if (keystorePropertiesFile.exists())
+                    signingConfig signingConfigs.release
+                if (!fabricCheck) {
+                    ext.enableCrashlytics = false
+                }
+            }
         }
     }
 }
@@ -156,8 +181,10 @@ dependencies {
         transitive = true
     }
 
-    stagingCompile(project(path: ':library', configuration: 'debug')) {
-        transitive = true
+    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+        stagingCompile(project(path: ':library', configuration: 'debug')) {
+            transitive = true
+        }
     }
 
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
@@ -180,17 +207,22 @@ dependencies {
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
     debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
-    stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+        stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+    }
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
     compile project(':library')
 }
 
-/**
- * - Uncomment `HyperTrackLiveFCMListenerService` service tag in the <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L161">AndroidManifest.xml</a> file.
- * - Uncomment <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/service/HyperTrackLiveFCMListenerService.java#L36">HyperTrackLiveFCMListenerService.java</a> file.
- * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
- * - Uncomment `apply google-services plugin` in <a href="https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L75">build.gradle</a> file.
- */
+/*
+* Enable FCM integration for real time tracking by adding a google-services.json
+* Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
+*/
+File googleServicesFile = rootProject.file("app/google-services.json");
+if (googleServicesFile.exists()) {
+    System.out.println("Google Service File Exist");
+    apply plugin: 'com.google.gms.google-services'
+}
 
-apply plugin: 'com.google.gms.google-services'
+
