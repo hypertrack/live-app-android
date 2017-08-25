@@ -25,6 +25,7 @@ SOFTWARE.
 package io.hypertrack.sendeta.view;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -32,6 +33,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.TaskStackBuilder;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -56,6 +58,7 @@ import java.util.List;
 
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.store.ActionManager;
@@ -100,6 +103,20 @@ public class SplashScreen extends BaseActivity {
             progressBar.setVisibility(View.INVISIBLE);
             permissionText.setVisibility(View.VISIBLE);
             enableLocation.setVisibility(View.VISIBLE);
+        }
+
+        if (HTTextUtils.isEmpty(BuildConfig.HYPERTRACK_PK)
+                || BuildConfig.HYPERTRACK_PK.equalsIgnoreCase("YOUR_HYPERTRACK_PUBLISHABLE_KEY")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("HyperTrack Publishable Key is not configured!")
+                    .setMessage("Add HyperTrack Publishable Key to keys.properties file")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            System.exit(0);
+                        }
+                    })
+                    .show();
         }
     }
 
