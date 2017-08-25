@@ -707,7 +707,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.showCloseButton();
         bottomButtonCard.showBottomCardLayout();
 //        shareLink.setVisibility(View.GONE);
-        trackingText.setText("Share My Live Location");
+        trackingText.setText(R.string.stop);
         trackingToggle.setTag("start");
         AnimationUtils.expand(liveTrackingActionLayout);
     }
