@@ -37,6 +37,9 @@ import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 import com.hypertrack.lib.models.UserParams;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -145,15 +148,16 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
+                    Log.d(TAG, "onError: User Created:" + errorResponse.getErrorMessage());
                     if (view != null) {
-                        view.showErrorMessage();
+                        view.showErrorMessage(errorResponse.getErrorMessage());
                     }
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {
-                view.showErrorMessage();
+                view.showErrorMessage(e.getMessage());
             }
         }
     }
@@ -175,15 +179,16 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
+                    Log.d(TAG, "onError: UpdateUser:" + errorResponse.getErrorMessage());
                     if (view != null) {
-                        view.showErrorMessage();
+                        view.showErrorMessage(errorResponse.getErrorMessage());
                     }
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
             if (view != null) {
-                view.showErrorMessage();
+                view.showErrorMessage(e.getMessage());
             }
         }
     }
@@ -199,8 +204,16 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     if (view != null)
                         view.navigateToVerifyCodeScreen();
                 } else {
-                    if (view != null)
-                        view.showErrorMessage();
+                    if (view != null) {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            view.showErrorMessage(jObjError.getString("message"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
 
@@ -208,7 +221,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             public void onFailure(Call<User> call, Throwable t) {
                 t.printStackTrace();
                 if (view != null)
-                    view.showErrorMessage();
+                    view.showErrorMessage(t.getMessage());
             }
         });
     }

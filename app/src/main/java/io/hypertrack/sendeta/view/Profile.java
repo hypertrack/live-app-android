@@ -315,9 +315,9 @@ public class Profile extends BaseActivity implements ProfileView {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                skip.setText(R.string.cancel);
+                skip.setText(R  .string.cancel);
             }
-        } else {
+        } else if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             skip.setText(R.string.cancel);
         }
         String nameFromAccount = getName();
@@ -494,9 +494,9 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void showErrorMessage() {
+    public void showErrorMessage(String errorMessage) {
         showProgress(false);
-        Toast.makeText(Profile.this, R.string.profile_update_failed, Toast.LENGTH_SHORT).show();
+        Toast.makeText(Profile.this, "Error Occured: " + errorMessage, Toast.LENGTH_SHORT).show();
     }
 
     private void showProgress(boolean show) {

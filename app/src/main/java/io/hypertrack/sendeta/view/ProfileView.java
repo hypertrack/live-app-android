@@ -30,7 +30,7 @@ package io.hypertrack.sendeta.view;
 public interface ProfileView {
 
     void onProfileUpdateSuccess();
-    void showErrorMessage();
+    void showErrorMessage(String errorMessage);
 
     void updateViews(String name,String phone,String ISOCode ,String profileURL);
 
