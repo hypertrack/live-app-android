@@ -404,6 +404,23 @@ HyperTrack.createAndAssignAction(actionParams, new HyperTrackCallback() {
 
 We hope you’ve enjoyed yourself on your epic quest to build a Live Location feature. If you have any problems or suggestions for the tutorial, please do not hestitate to buzz 🐝 us [here](#support).
 
+## Releasing to PlayStore
+To release the app on the Play Store, you will have to change the app's package name.
+
+1. Change the package name in the [AndroidManifest.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/AndroidManifest.xml#L4) file.
+
+2. Refactor the name of your package with right click → Refactor → Rename in the tree view, then Android Studio will display a window, select "Rename package" option.
+
+3. Change the application id in the [build.gradle](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/build.gradle#L60) file. Once done, clean and rebuild the project.
+   - Add `release key store file` in app level folder.
+   - Create a `keystore.properties` file in root or project level folder with key-values pair.
+    ```properties
+        storeFile=<File path of keystore file>
+        storePassword=<Key Store Password>
+        keyAlias=<Key Alias>
+        keyPassword=<Key Password>
+   ```
+
 ## Usage
 ### To build live location sharing within your own app
 
