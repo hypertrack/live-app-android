@@ -5,7 +5,7 @@ This open source repo uses HyperTrack for Live Location Sharing and Activity Tra
 
 | Usecase       |  Description  |  Tutorial     |
 | ------------- | ------------- | ------------- |
-| Activity Tracking  | Track your activities chronologicaly through the day. [Description](#activity-tracking) | [Build yourself 👩‍💻](#build-placeline-in-your-app) |
+| Activity Tracking  | Track your activities chronologicaly through the day. [Description](#activity-tracking) | [Build yourself 👩‍💻](#build-activity-tracking-in-your-app) |
 | Live Location Sharing  | Share your Live Location with friends and see theirs. [Description](#live-location-sharing) | [Build yourself 👩‍💻](#build-live-location-sharing-using-hypertrack)|
 
 - [Activity Tracking](#activity-tracking)
