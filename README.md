@@ -92,7 +92,7 @@ HyperTrack.startTracking();
 ```
 
 #### Get Placeline Data in your app
-Once tracking has started, implement the following function [placelineManager.getPlacelineData()](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/store/PlacelineManager.java#L43) and get [PlacelineData](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/model/PlacelineData.java) and you are all set to use the rich activity data in your app.
+Once tracking has started, implement the following function [placelineManager.getPlacelineData()](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/store/PlacelineManager.java#L43) and get [PlacelineData](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/model/PlacelineData.java). You are all set to use the rich activity data in your app.
 
 ```java
 PlacelineManager placelineManager = PlacelineManager.getPlacelineManager(this);
@@ -126,6 +126,8 @@ Let's get started ðŸ˜Š . Strap yourself in and get ready for an exciting ride ðŸ
   - [Use this project](#step-2-use-this-project)
   - [Setup HyperTrack SDK](#step-3-setup-hypertrack-sdk)
   - [Create HyperTrack user](#step-4-create-hypertrack-user)
+  - [FCM Integration](#step-5-fcm-integration)
+  - [Crashlytics Setup (optional)](#step-6-crashlytics-setup--optional--)
 - [Start a Live Location trip](#start-a-live-location-trip)
   - [Show Live Location view](#step-1-show-live-location-view)
   - [Create and track action](#step-2-create-and-track-action)
@@ -202,6 +204,20 @@ HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
                 }
             });
 ```
+
+#### Step 5. FCM Integration
+The HyperTrack SDK requires FCM for a battery efficient real-time tracking experience. 
+
+1. Refer to the [FCM Integration guide](https://docs.hypertrack.com/sdks/android/gcm-integration.html#locate-your-gcmfcm-key). 
+
+2. After setting up your account on the [Firebase console](https://console.firebase.google.com), you will need to add the [google-services.json](https://support.google.com/firebase/answer/7015592) file to your [app folder](https://github.com/hypertrack/hypertrack-live-android/tree/master/app).
+
+#### Step 6. Crashlytics Setup (Optional)
+You can also enable the crashlytics crash reporting tool. This is optional and if you choose to skip this won't affect your integration.
+
+1. Get your Crashlytics key, see the section Add Your API Key from [here](https://fabric.io/kits/android/crashlytics/install) and you can copy your API Key.
+
+2. Paste the key to [fabric.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/fabric.properties). Create a new fabric.properties file, if it doesn't exist already.
 
 ### Start a Live Location trip
 Are you ready to rock and roll?
