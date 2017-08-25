@@ -58,27 +58,37 @@ import android.widget.Toast;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.models.User;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.Country;
 import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
+import io.hypertrack.sendeta.network.retrofit.CallUtils;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
-import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.ImageUtils;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Profile extends BaseActivity implements ProfileView {
 
@@ -103,51 +113,6 @@ public class Profile extends BaseActivity implements ProfileView {
     private boolean fromSplashScreen;
 
 
-    private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (v.getId() == nameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT) {
-                phoneNumberView.requestFocus();
-                return true;
-            }
-
-            return false;
-        }
-    };
-
-    private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                Utils.hideKeyboard(Profile.this, phoneNumberView);
-                return true;
-            }
-
-            return false;
-        }
-    };
-
-    private TextWatcher mTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (HTTextUtils.isEmpty(nameView.getText().toString()) && HTTextUtils.isEmpty(phoneNumberView.getText().toString())) {
-                showSkip = true;
-                toggleRegisterButton();
-            } else if (showSkip && !HTTextUtils.isEmpty(s.toString())) {
-                showSkip = false;
-                toggleRegisterButton();
-            }
-        }
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,6 +126,7 @@ public class Profile extends BaseActivity implements ProfileView {
                     equalsIgnoreCase(SplashScreen.class.getSimpleName()))
                 fromSplashScreen = true;
         }
+        //Request SMS permission to read the OTP automatically from SMS
         //requestSmsPermission();
     }
 
@@ -241,6 +207,53 @@ public class Profile extends BaseActivity implements ProfileView {
         });
     }
 
+    private TextView.OnEditorActionListener mNameEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (v.getId() == nameView.getId() && actionId == EditorInfo.IME_ACTION_NEXT) {
+                phoneNumberView.requestFocus();
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private TextView.OnEditorActionListener mEditorActionListener = new TextView.OnEditorActionListener() {
+        @Override
+        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                Utils.hideKeyboard(Profile.this, phoneNumberView);
+                return true;
+            }
+
+            return false;
+        }
+    };
+
+    private TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (HTTextUtils.isEmpty(nameView.getText().toString())
+                    && HTTextUtils.isEmpty(phoneNumberView.getText().toString())) {
+                showSkip = true;
+                toggleRegisterButton();
+            } else if (showSkip && !HTTextUtils.isEmpty(s.toString())) {
+                showSkip = false;
+                toggleRegisterButton();
+            }
+        }
+    };
+
+
     public void onProfileImageViewClicked(View view) {
         // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -257,11 +270,11 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     }
 
-
     public void onSkipButtonClicked(View view) {
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             if (fromSplashScreen) {
-                navigateToPlacelineScreen();
+                showProgress(true);
+                onProfileUpdateSuccess();
                 return;
             }
             finish();
@@ -294,7 +307,17 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void updateViews(String name, String phone, String ISOCode, String profileURL) {
 
-        if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
+            try {
+                JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
+                if (!branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
+                    skip.setText(R.string.cancel);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                skip.setText(R.string.cancel);
+            }
+        } else {
             skip.setText(R.string.cancel);
         }
         String nameFromAccount = getName();
@@ -305,11 +328,15 @@ public class Profile extends BaseActivity implements ProfileView {
             toggleRegisterButton();
 
         }
-        if (!HTTextUtils.isEmpty(name)) {
+        if (!HTTextUtils.isEmpty(name))
+
+        {
             nameView.setText(name);
         }
 
-        if (!HTTextUtils.isEmpty(ISOCode)) {
+        if (!HTTextUtils.isEmpty(ISOCode))
+
+        {
             CountryMaster cm = CountryMaster.getInstance(this);
             final ArrayList<Country> countries = cm.getCountries();
             for (Country c : countries) {
@@ -320,13 +347,17 @@ public class Profile extends BaseActivity implements ProfileView {
             }
         }
 
-        if (!HTTextUtils.isEmpty(phone)) {
+        if (!HTTextUtils.isEmpty(phone))
+
+        {
             phone = phone.replaceAll("\\s", "");
             phoneNumberView.setText(phone);
             previousPhone = phone;
         }
 
-        if (profileURL != null && !profileURL.isEmpty()) {
+        if (profileURL != null && !profileURL.isEmpty())
+
+        {
             profileImageDownloadTarget = new Target() {
                 @Override
                 public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
@@ -360,6 +391,7 @@ public class Profile extends BaseActivity implements ProfileView {
                     .into(profileImageDownloadTarget);
             mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
         }
+
     }
 
     private String getName() {
@@ -380,34 +412,39 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void showProfilePicUploadSuccess() {
-        Toast.makeText(Profile.this, R.string.profile_upload_success, Toast.LENGTH_SHORT).show();
-        if (updatedProfileImage != null) {
-            setToolbarIcon(updatedProfileImage);
-        }
-    }
-
-    @Override
-    public void showProfilePicUploadError() {
-        Toast.makeText(Profile.this, ErrorMessages.PROFILE_PIC_UPLOAD_FAILED, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void navigateToPlacelineScreen() {
+    public void onProfileUpdateSuccess() {
 
         if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
-            Intent intent = new Intent(Profile.this, Invite.class);
-            intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
-            startActivity(intent);
-            return;
+            try {
+                //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
+                JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
+                if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
+                    HyperTrack.startTracking();
+                    SharedPreferenceManager.setRequestedForBackgroundTracking();
+                    acceptInvite(branchParams.getString(Invite.USER_ID_KEY), branchParams.getString(Invite.ACCOUNT_ID_KEY));
+
+                } else {
+                    Intent intent = new Intent(Profile.this, Invite.class);
+                    intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
+                    startActivity(intent);
+                }
+                return;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
+        startPlacelineScreen();
+    }
+
+    private void startPlacelineScreen() {
         CrashlyticsWrapper.setCrashlyticsKeys(this);
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
+        SharedPreferenceManager.deletePreviousUserId();
 
         HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
         Intent intent = new Intent(Profile.this, Placeline.class);
@@ -416,6 +453,34 @@ public class Profile extends BaseActivity implements ProfileView {
                 .addNextIntentWithParentStack(intent)
                 .startActivities();
         finish();
+    }
+
+    private void acceptInvite(String userID, String accountID) {
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
+
+        CallUtils.enqueueWithRetry(call, new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    HTLog.d(TAG, "Invite Accepted");
+
+                } else {
+                    Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
+                    Toast.makeText(Profile.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                }
+                startPlacelineScreen();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d(TAG, "onInviteFailure: " + t.getMessage());
+                t.printStackTrace();
+                Log.d(TAG, "onFailure: There is some error occurred in accept invite. Please try again");
+                Toast.makeText(Profile.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                startPlacelineScreen();
+            }
+        });
     }
 
     @Override

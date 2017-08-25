@@ -12,6 +12,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsMessage;
 import android.text.InputFilter;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -20,15 +21,27 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.models.User;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.AcceptInviteModel;
+import io.hypertrack.sendeta.network.retrofit.CallUtils;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.presenter.IVerifyPresenter;
 import io.hypertrack.sendeta.presenter.VerifyPresenter;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.Utils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by Aman on 19/07/17.
@@ -114,18 +127,37 @@ public class Verify extends BaseActivity implements VerifyView {
 
     @Override
     public void codeVerified() {
+
         if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
-            Intent intent = new Intent(Verify.this, Invite.class);
-            intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
-            startActivity(intent);
-            finish();
-            return;
+            try {
+                //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
+                JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
+                if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
+                    HyperTrack.startTracking();
+                    SharedPreferenceManager.setRequestedForBackgroundTracking();
+                    acceptInvite(branchParams.getString(Invite.USER_ID_KEY), branchParams.getString(Invite.ACCOUNT_ID_KEY));
+
+                } else {
+                    Intent intent = new Intent(Verify.this, Invite.class);
+                    intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
+                    startActivity(intent);
+                }
+                return;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
-        SharedPreferenceManager.deletePreviousUserId();
+        startPlacelineScreen();
+    }
+
+    private void startPlacelineScreen() {
         CrashlyticsWrapper.setCrashlyticsKeys(this);
+        showProgress(false);
+
         // Clear Existing running trip on Registration Successful
         SharedPreferenceManager.deleteAction();
         SharedPreferenceManager.deletePlace();
+        SharedPreferenceManager.deletePreviousUserId();
 
         HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
         Intent intent = new Intent(Verify.this, Placeline.class);
@@ -134,7 +166,34 @@ public class Verify extends BaseActivity implements VerifyView {
                 .addNextIntentWithParentStack(intent)
                 .startActivities();
         finish();
-        showProgress(false);
+    }
+
+    private void acceptInvite(String userID, String accountID) {
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
+
+        CallUtils.enqueueWithRetry(call, new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    HTLog.d(TAG, "Invite Accepted");
+
+                } else {
+                    Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
+                    Toast.makeText(Verify.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                }
+                startPlacelineScreen();
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d(TAG, "onInviteFailure: " + t.getMessage());
+                t.printStackTrace();
+                Log.d(TAG, "onFailure: There is some error occurred in accept invite. Please try again");
+                Toast.makeText(Verify.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                startPlacelineScreen();
+            }
+        });
     }
 
     private void showProgress(boolean show) {

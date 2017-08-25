@@ -36,11 +36,12 @@ public class Invite extends BaseActivity implements InviteView {
     private Button accept;
     private ProgressBar progressBar;
     private IInvitePresenter<InviteView> presenter = new InvitePresenter();
-    private String ACCOUNT_ID_KEY = "account_id";
-    private String USER_ID_KEY = "user_id";
-    private String HAS_ACCEPTED_KEY = "has_accepted";
-    private String ACCOUNT_NAME_KEY = "account_name";
-    private String accountID, userID, accountName;
+    public static String ACCOUNT_ID_KEY = "account_id";
+    public static String USER_ID_KEY = "user_id";
+    public static String HAS_ACCEPTED_KEY = "has_accepted";
+    public static String ACCOUNT_NAME_KEY = "account_name";
+    public static String AUTO_ACCEPT_KEY = "auto_accept";
+    private static String accountID, userID, accountName;
     private boolean hasAccepted;
 
     @Override

@@ -140,7 +140,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     if (verifyPhone) {
                         sendVerificationCode();
                     } else
-                        view.navigateToPlacelineScreen();
+                        view.onProfileUpdateSuccess();
                 }
 
                 @Override
@@ -170,7 +170,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     if (verifyPhone) {
                         sendVerificationCode();
                     } else
-                        view.navigateToPlacelineScreen();
+                        view.onProfileUpdateSuccess();
                 }
 
                 @Override
@@ -194,12 +194,11 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                if(response.isSuccessful()) {
+                if (response.isSuccessful()) {
                     Log.d(TAG, "onResponse: Verification Code Sent");
                     if (view != null)
                         view.navigateToVerifyCodeScreen();
-                }
-                else {
+                } else {
                     if (view != null)
                         view.showErrorMessage();
                 }
