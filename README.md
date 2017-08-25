@@ -6,7 +6,7 @@ This open source repo uses HyperTrack for Live Location Sharing and Activity Tra
 | Usecase       |  Description  |  Tutorial     |
 | ------------- | ------------- | ------------- |
 | Activity Tracking  | Track your activities chronologicaly through the day. [Description](#activity-tracking) | [Build yourself 👩‍💻](#build-activity-tracking-in-your-app) |
-| Live Location Sharing  | Share your Live Location with friends and see theirs. [Description](#live-location-sharing) | [Build yourself 👩‍💻](#build-live-location-sharing-using-hypertrack)|
+| Live Location Sharing  | Share your Live Location with friends and see theirs. [Description](#live-location-sharing) | [Build yourself 👩‍💻](#build-live-location-sharing-in-your-app)|
 
 - [Activity Tracking](#activity-tracking)
 - [Live Location Sharing](#live-location-sharing)
@@ -127,7 +127,7 @@ Let's get started 😊 . Strap yourself in and get ready for an exciting ride �
   - [Setup HyperTrack SDK](#step-3-setup-hypertrack-sdk)
   - [Create HyperTrack user](#step-4-create-hypertrack-user)
   - [FCM Integration](#step-5-fcm-integration)
-  - [Crashlytics Setup (optional)](#step-6-crashlytics-setup--optional--)
+  - [Crashlytics Setup (optional)](#step-6-crashlytics-setup-optional)
 - [Start a Live Location trip](#start-a-live-location-trip)
   - [Show Live Location view](#step-1-show-live-location-view)
   - [Create and track action](#step-2-create-and-track-action)
