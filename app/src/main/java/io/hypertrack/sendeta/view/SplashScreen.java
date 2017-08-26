@@ -200,11 +200,6 @@ public class SplashScreen extends BaseActivity {
         }, this.getIntent().getData(), this);
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        this.onNewIntent(intent);
-    }
-
     // Method to handle DeepLink Params
     private void prepareAppDeepLink() {
         appDeepLink = new AppDeepLink(DeepLinkUtil.DEFAULT);
