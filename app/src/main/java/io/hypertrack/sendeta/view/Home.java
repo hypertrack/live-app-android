@@ -59,15 +59,12 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,7 +72,6 @@ import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
@@ -146,9 +142,7 @@ public class Home extends BaseActivity implements HomeView {
     LinearLayout liveTrackingActionLayout;
     RippleView trackingToggle, shareLink;
     TextView trackingText;
-    Marker currentLocationMarker, expectedPlaceMarker;
-    private RelativeLayout expectedPlaceMarkerView;
-    private TextView expectedPlaceName;
+    Marker currentLocationMarker;
     GroundOverlay circle;
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
@@ -240,19 +234,15 @@ public class Home extends BaseActivity implements HomeView {
             if (check) {
                 bottomButtonCard.hideBottomCardLayout();
             }
-
         }
 
         @Override
         public void onChooseOnMapSelected() {
-
-            if (expectedPlaceMarker != null)
-                expectedPlaceMarker.setVisible(false);
-
             bottomButtonCard.setActionType(BottomButtonCard.ActionType.CONFIRM_LOCATION);
             bottomButtonCard.hideTitle();
             bottomButtonCard.setActionButtonText("Confirm Location");
             bottomButtonCard.setDescriptionText("Move map to adjust marker");
+            bottomButtonCard.showBottomCardLayout();
         }
 
         @Override
@@ -277,11 +267,6 @@ public class Home extends BaseActivity implements HomeView {
                 //finish();
                 closeActivityWithCircularRevealAnimation();
             }
-        }
-
-        @Override
-        public void onLiveLocationSharingSummaryDoneButtonClicked() {
-
         }
 
         @Override
@@ -706,7 +691,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setActionButtonText("Share my live location");
         bottomButtonCard.showCloseButton();
         bottomButtonCard.showBottomCardLayout();
-        if(!ActionManager.getSharedManager(Home.this).isActionLive()) {
+        if (!ActionManager.getSharedManager(Home.this).isActionLive()) {
             shareLink.setVisibility(View.GONE);
         }
         trackingText.setText("Share my live location");
@@ -726,85 +711,11 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         updateCurrentLocationMarker(null);
-        updateDestinationMarker(place);
         expectedPlace = place;
         ActionManager.getSharedManager(this).setPlace(expectedPlace);
         initBottomButtonCard(true);
         updateMapView();
         updateMapPadding();
-    }
-
-    private void updateDestinationMarker(Place expectedPlace) {
-
-        if (expectedPlace == null || expectedPlace.getLocation() == null ||
-                expectedPlace.getLocation().getLatLng() == null)
-            return;
-
-        LatLng latLng = expectedPlace.getLocation().getLatLng();
-
-        BitmapDescriptor icon = null;
-
-        String placeName = expectedPlace.getName();
-
-        if (HTTextUtils.isEmpty(placeName)) {
-            placeName = expectedPlace.getAddress();
-        }
-
-        if (expectedPlaceMarker == null || expectedPlaceMarkerView == null) {
-
-            expectedPlaceMarkerView = (RelativeLayout) ((LayoutInflater)
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE))
-                    .inflate(R.layout.expectedplace_marker_layout, null);
-
-            expectedPlaceName = (TextView) expectedPlaceMarkerView.findViewById(R.id.expected_place_name);
-            icon = getExpectedPlaceMarkerIcon(placeName);
-            expectedPlaceMarker = mMap.addMarker(new MarkerOptions().position(latLng).icon(icon)
-                    .anchor(0.5f, 1f));
-
-        } else {
-            expectedPlaceMarker.setIcon(getExpectedPlaceMarkerIcon(placeName));
-            expectedPlaceMarker.setPosition(latLng);
-            expectedPlaceMarker.setVisible(true);
-            expectedPlaceMarker.setAnchor(0.5f, 1f);
-            ObjectAnimator.ofFloat(expectedPlaceMarker, "alpha", 0f, 1f).setDuration(500).start();
-        }
-    }
-
-    private BitmapDescriptor getExpectedPlaceMarkerIcon(String placeName) {
-        Bitmap bitmap;
-        if (HTTextUtils.isEmpty(placeName)) {
-            return BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker);
-        }
-
-        expectedPlaceName.setText(placeName);
-        bitmap = createDrawableFromView(expectedPlaceMarkerView);
-        if (bitmap != null) {
-            return BitmapDescriptorFactory.fromBitmap(bitmap);
-        } else {
-            return BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_expected_place_marker);
-        }
-    }
-
-    private Bitmap createDrawableFromView(View view) {
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        Bitmap bitmap = null;
-        if (!isFinishing()) {
-            try {
-                getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                view.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
-                view.measure(displayMetrics.widthPixels, displayMetrics.heightPixels);
-                view.layout(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels);
-                view.buildDrawingCache();
-                bitmap = Bitmap.createBitmap(view.getMeasuredWidth(), view.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
-                Canvas canvas = new Canvas(bitmap);
-                view.draw(canvas);
-            } catch (Exception e) {
-                e.printStackTrace();
-                HTLog.e(TAG, "Exception occurred while createDrawableFromView: " + e);
-            }
-        }
-
-        return bitmap;
     }
 
     private void updateCurrentLocationMarker(final HyperTrackLocation location) {
@@ -987,8 +898,8 @@ public class Home extends BaseActivity implements HomeView {
         if (mMap != null) {
             int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
             int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            int right = expectedPlaceMarkerView == null ? getResources().getDimensionPixelSize(R.dimen.map_side_padding) :
-                    expectedPlaceMarkerView.getMeasuredWidth() / 2;
+            int right = expectedPlace == null ? getResources().getDimensionPixelSize(R.dimen.map_side_padding) :
+                    getResources().getDimensionPixelSize(R.dimen.map_side_padding);
             int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding) + bottomButtonCard.getMeasuredHeight();
             mMap.setPadding(left, top, right, bottom);
         }
@@ -999,7 +910,7 @@ public class Home extends BaseActivity implements HomeView {
             return;
         }
 
-        if (currentLocationMarker == null && expectedPlaceMarker == null) {
+        if (currentLocationMarker == null && expectedPlace == null) {
             return;
         }
 
@@ -1010,8 +921,8 @@ public class Home extends BaseActivity implements HomeView {
             builder.include(current);
         }
 
-        if (expectedPlaceMarker != null) {
-            LatLng destination = expectedPlaceMarker.getPosition();
+        if (expectedPlace != null) {
+            LatLng destination = expectedPlace.getLocation().getLatLng();
             builder.include(destination);
         }
 
@@ -1019,14 +930,14 @@ public class Home extends BaseActivity implements HomeView {
 
         try {
             CameraUpdate cameraUpdate;
-            if (expectedPlaceMarker != null && currentLocationMarker != null) {
+            if (expectedPlace != null && currentLocationMarker != null) {
                 int width = getResources().getDisplayMetrics().widthPixels;
                 int height = getResources().getDisplayMetrics().heightPixels;
                 int padding = (int) (width * 0.12);
                 cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
             } else {
                 LatLng latLng = currentLocationMarker != null ?
-                        currentLocationMarker.getPosition() : expectedPlaceMarker.getPosition();
+                        currentLocationMarker.getPosition() : expectedPlace.getLocation().getLatLng();
                 cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel);
             }
 
@@ -1137,10 +1048,7 @@ public class Home extends BaseActivity implements HomeView {
                     AnimationUtils.expand(liveTrackingActionLayout);
                     if (currentLocationMarker != null)
                         currentLocationMarker.remove();
-                    if (expectedPlaceMarker != null)
-                        expectedPlaceMarker.remove();
                     currentLocationMarker = null;
-                    expectedPlaceMarker = null;
                     updateMapPadding();
                 }
 
@@ -1156,11 +1064,6 @@ public class Home extends BaseActivity implements HomeView {
                     bottomButtonCard.hideProgress();
                 }
             });
-
-            expectedPlaceMarker = null;
-
-/*            shareButton.setVisibility(View.VISIBLE);
-            navigateButton.setVisibility(View.VISIBLE);*/
         }
     }
 
