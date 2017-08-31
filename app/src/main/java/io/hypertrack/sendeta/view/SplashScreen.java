@@ -42,13 +42,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
+import com.hypertrack.lib.models.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,11 +63,18 @@ import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
+import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.AppDeepLink;
+import io.hypertrack.sendeta.network.retrofit.CallUtils;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.DeepLinkUtil;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by piyush on 23/07/16.
@@ -80,7 +90,7 @@ public class SplashScreen extends BaseActivity {
     private ProgressBar progressBar;
     private JSONObject branchParams = new JSONObject();
     private boolean autoAccept;
-    private String userID;
+    private String userID, accountID;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -184,8 +194,13 @@ public class SplashScreen extends BaseActivity {
                 if (error == null) {
                     Log.d(TAG, "onInitFinished: Data: " + referringParams.toString());
                     try {
-                        userID = referringParams.getString(Invite.USER_ID_KEY);
-                        autoAccept = referringParams.getBoolean(Invite.AUTO_ACCEPT_KEY);
+                        if (referringParams.has(Invite.USER_ID_KEY))
+                            userID = referringParams.getString(Invite.USER_ID_KEY);
+                        if (referringParams.has(Invite.AUTO_ACCEPT_KEY))
+                            autoAccept = referringParams.getBoolean(Invite.AUTO_ACCEPT_KEY);
+                        if (referringParams.has(Invite.ACCOUNT_ID_KEY)) {
+                            accountID = referringParams.getString(Invite.ACCOUNT_ID_KEY);
+                        }
                         branchParams = referringParams;
 
                     } catch (JSONException e) {
@@ -221,30 +236,52 @@ public class SplashScreen extends BaseActivity {
         boolean isUserOnboard = !HTTextUtils.isEmpty(HyperTrack.getUserId());
 
         //Open profile screen when user is new or clicked on branch deep link and user id from branch payload is not equal to current userID
-        if (!isUserOnboard || (!HTTextUtils.isEmpty(userID) &&
+        if (!isUserOnboard || (HTTextUtils.isEmpty(userID) && autoAccept) || (!HTTextUtils.isEmpty(userID) &&
                 !userID.equalsIgnoreCase(HyperTrack.getUserId()))) {
 
             if (HyperTrack.checkLocationPermission(SplashScreen.this)
                     && HyperTrack.checkLocationServices(SplashScreen.this)) {
 
-                Intent registerIntent = new Intent(SplashScreen.this, Profile.class);
+                final Intent[] registerIntent = {new Intent(SplashScreen.this, Profile.class)};
 
                 //If clicked on branch deep link then stop tracking for current userID and set userID from branch payload
-                if (!HTTextUtils.isEmpty(userID)) {
+                if (!HTTextUtils.isEmpty(userID) || autoAccept) {
 
                     if (isUserOnboard) {
-                        SharedPreferenceManager.setPreviousUserId(HyperTrack.getUserId());
-                        HyperTrack.stopTracking();
-                        SharedPreferenceManager.resetBackgroundTracking();
-                    }
+                        if (!HTTextUtils.isEmpty(userID)) {
+                            SharedPreferenceManager.setPreviousUserId(HyperTrack.getUserId());
+                            HyperTrack.stopTracking();
+                            SharedPreferenceManager.resetBackgroundTracking();
+                            HyperTrack.setUserId(userID);
+                        } else {
+                            acceptInvite(HyperTrack.getUserId(), accountID, new HyperTrackCallback() {
+                                @Override
+                                public void onSuccess(@NonNull SuccessResponse response) {
+                                    registerIntent[0] = new Intent(SplashScreen.this, Placeline.class);
+                                    registerIntent[0].putExtra("class_from", SplashScreen.class.getSimpleName());
+                                    registerIntent[0].setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(registerIntent[0]);
+                                    finish();
+                                }
 
-                    HyperTrack.setUserId(userID);
-                    registerIntent.putExtra("branch_params", branchParams.toString());
+                                @Override
+                                public void onError(@NonNull ErrorResponse errorResponse) {
+                                    registerIntent[0] = new Intent(SplashScreen.this, Placeline.class);
+                                    registerIntent[0].putExtra("class_from", SplashScreen.class.getSimpleName());
+                                    registerIntent[0].setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                    startActivity(registerIntent[0]);
+                                    finish();
+                                }
+                            });
+                            return;
+                        }
+                    }
+                    registerIntent[0].putExtra("branch_params", branchParams.toString());
                 }
 
-                registerIntent.putExtra("class_from", SplashScreen.class.getSimpleName());
-                registerIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(registerIntent);
+                registerIntent[0].putExtra("class_from", SplashScreen.class.getSimpleName());
+                registerIntent[0].setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(registerIntent[0]);
                 finish();
             }
 
@@ -262,6 +299,33 @@ public class SplashScreen extends BaseActivity {
         }
     }
 
+    private void acceptInvite(String userID, String accountID, final HyperTrackCallback callback) {
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
+
+        CallUtils.enqueueWithRetry(call, new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful()) {
+                    HTLog.d(TAG, "Invite Accepted");
+
+                } else {
+                    Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
+                    Toast.makeText(SplashScreen.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                }
+                callback.onSuccess(null);
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                Log.d(TAG, "onInviteFailure: " + t.getMessage());
+                t.printStackTrace();
+                Log.d(TAG, "onFailure: There is some error occurred in accept invite. Please try again");
+                Toast.makeText(SplashScreen.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
+                callback.onError(null);
+            }
+        });
+    }
 
     // Method to proceed to next screen with deepLink params
     private void processAppDeepLink(final AppDeepLink appDeepLink) {
