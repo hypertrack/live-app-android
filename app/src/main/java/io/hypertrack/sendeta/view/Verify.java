@@ -11,7 +11,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.widget.Toolbar;
 import android.telephony.SmsMessage;
+import android.text.Editable;
 import android.text.InputFilter;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -113,11 +115,41 @@ public class Verify extends BaseActivity implements VerifyView {
         });
         otpEditText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(4)});
         otpEditText.requestFocus();
+        otpEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(!HTTextUtils.isEmpty(otpEditText.getText().toString())){
+                    if(otpEditText.getText().length()==4){
+                        showProgress(true);
+                        presenter.verifyOTP(otpEditText.getText().toString());
+                        verifyOTP.setText("Verifying...");
+                    }
+                    else{
+                        verifyOTP.setText("Verify");
+                    }
+                }
+                else{
+                    verifyOTP.setText("Verify");
+                }
+
+            }
+        });
         Utils.showKeyboard(this, otpEditText);
     }
 
     @Override
     public void showError(String message) {
+        verifyOTP.setText("Verify");
         if (message.equalsIgnoreCase(presenter.ERROR_INCORRECT_CODE)) {
             timerText.setClickable(true);
             showProgress(false);
@@ -135,7 +167,7 @@ public class Verify extends BaseActivity implements VerifyView {
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
                     HyperTrack.startTracking();
                     SharedPreferenceManager.setRequestedForBackgroundTracking();
-                    acceptInvite(branchParams.getString(Invite.USER_ID_KEY), branchParams.getString(Invite.ACCOUNT_ID_KEY));
+                    acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
 
                 } else {
                     Intent intent = new Intent(Verify.this, Invite.class);
