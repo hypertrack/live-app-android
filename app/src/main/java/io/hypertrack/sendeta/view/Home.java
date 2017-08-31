@@ -246,12 +246,12 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         @Override
-        public void onPlacePickerViewShown() {
+        public void onPlaceSelectorViewShown() {
             bottomButtonCard.hideBottomCardLayout();
         }
 
         @Override
-        public void onPlacePickerViewClosed() {
+        public void onPlaceSelectorViewClosed() {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -324,7 +324,7 @@ public class Home extends BaseActivity implements HomeView {
             isHandleTrackingUrlDeeplink = true;
 
         if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink) {
-            htMapFragment.openPlacePickerView();
+            htMapFragment.openPlaceSelectorView();
         }
         initBottomButtonCard(false);
 
@@ -416,7 +416,7 @@ public class Home extends BaseActivity implements HomeView {
                     presenter.stopSharing(ActionManager.getSharedManager(Home.this), false);
                     lookupId = null;
                     HyperTrack.removeActions(null);
-                    htMapFragment.openPlacePickerView();
+                    htMapFragment.openPlaceSelectorView();
                 }
             });
             builder.setNegativeButton("No", null);
@@ -1149,13 +1149,12 @@ public class Home extends BaseActivity implements HomeView {
 
     private void startHyperTrackTracking(final boolean byUser) {
         // HACK: Check if user is tracking currently or not
-        // Only for exisitng users because Permission and Location Settings have been checked here
+        // Only for existing users because Permission and Location Settings have been checked here
         if (!HyperTrack.isTracking()) {
             HyperTrack.startTracking();
             if (byUser) {
                 SharedPreferenceManager.setTrackingON();
             }
-
         } else if (byUser) {
             SharedPreferenceManager.setTrackingON();
         }
