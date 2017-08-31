@@ -22,7 +22,7 @@ One of the two core features of Hypertrack Live is Placeline. Placeline is usefu
 
 <p align="center">
 <kbd>
-<img align="centre" src="asset/placeline.gif" alt="Placeline" width="380" height="633">
+<img src="asset/placeline.gif" alt="Placeline" width="380" height="633">
 </kbd>
 </p>
 
