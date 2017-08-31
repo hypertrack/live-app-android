@@ -253,7 +253,6 @@ public class Profile extends BaseActivity implements ProfileView {
         }
     };
 
-
     public void onProfileImageViewClicked(View view) {
         // Create Image Chooser Intent if READ_EXTERNAL_STORAGE permission is granted
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
@@ -294,8 +293,7 @@ public class Profile extends BaseActivity implements ProfileView {
 
         Utils.hideKeyboard(Profile.this, register);
         boolean verifyPhone = false;
-        if (!previousPhone.equalsIgnoreCase(number) ||
-                getIntent().getStringExtra("branch_params") != null) {
+        if (!previousPhone.equalsIgnoreCase(number)) {
             verifyPhone = true;
         }
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
@@ -421,7 +419,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
                     HyperTrack.startTracking();
                     SharedPreferenceManager.setRequestedForBackgroundTracking();
-                    acceptInvite(branchParams.getString(Invite.USER_ID_KEY), branchParams.getString(Invite.ACCOUNT_ID_KEY));
+                    acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
 
                 } else {
                     Intent intent = new Intent(Profile.this, Invite.class);
