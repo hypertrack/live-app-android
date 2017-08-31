@@ -34,7 +34,7 @@
             android:name=".view.SplashScreen"
             android:allowTaskReparenting="false"
             android:label="${applicationLabel}"
-            android:launchMode="singleTop"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait">
 
             <!-- Intent Filter to make this Screen as the launcher screen -->
