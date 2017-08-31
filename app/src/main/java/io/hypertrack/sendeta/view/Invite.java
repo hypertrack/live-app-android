@@ -59,13 +59,15 @@ public class Invite extends BaseActivity implements InviteView {
                 JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
                 hasAccepted = branchParams.getBoolean(HAS_ACCEPTED_KEY);
                 accountID = branchParams.getString(ACCOUNT_ID_KEY);
-                userID = branchParams.getString(USER_ID_KEY);
+                userID = HyperTrack.getUserId();
                 accountName = branchParams.getString(ACCOUNT_NAME_KEY);
                 if (!hasAccepted) {
                     accept.setVisibility(View.VISIBLE);
                     cancel.setVisibility(View.VISIBLE);
-                    SpannableStringBuilder str = new SpannableStringBuilder(accountName + " wants access to your location data collected on HyperTrack Live");
-                    str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0, accountName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    SpannableStringBuilder str = new SpannableStringBuilder(accountName +
+                            " wants access to your location data collected on HyperTrack Live");
+                    str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), 0,
+                            accountName.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     permissionText.setText(str);
                 } else {
                     cancel.setVisibility(View.INVISIBLE);
@@ -73,7 +75,8 @@ public class Invite extends BaseActivity implements InviteView {
                     accept.setVisibility(View.VISIBLE);
                     String temp = "You are already sharing your location with ";
                     SpannableStringBuilder str = new SpannableStringBuilder(temp + accountName);
-                    str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), temp.length(), accountName.length() + temp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                    str.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), temp.length(),
+                            accountName.length() + temp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                     permissionText.setText(str);
                 }
                 progressBar.setVisibility(View.GONE);
