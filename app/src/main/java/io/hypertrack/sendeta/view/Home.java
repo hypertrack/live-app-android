@@ -246,12 +246,12 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         @Override
-        public void onPlaceSelectorViewShown() {
+        public void onPlacePickerViewShown() {
             bottomButtonCard.hideBottomCardLayout();
         }
 
         @Override
-        public void onPlaceSelectorViewClosed() {
+        public void onPlacePickerViewClosed() {
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -324,7 +324,7 @@ public class Home extends BaseActivity implements HomeView {
             isHandleTrackingUrlDeeplink = true;
 
         if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink) {
-            htMapFragment.openPlaceSelectorView();
+            htMapFragment.openPlacePickerView();
         }
         initBottomButtonCard(false);
 
@@ -416,7 +416,7 @@ public class Home extends BaseActivity implements HomeView {
                     presenter.stopSharing(ActionManager.getSharedManager(Home.this), false);
                     lookupId = null;
                     HyperTrack.removeActions(null);
-                    htMapFragment.openPlaceSelectorView();
+                    htMapFragment.openPlacePickerView();
                 }
             });
             builder.setNegativeButton("No", null);
