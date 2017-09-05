@@ -129,8 +129,8 @@ android {
 
     buildTypes {
         release {
-            debuggable false
-            minifyEnabled true
+            debuggable true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
@@ -170,20 +170,22 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
+    testCompile 'org.mockito:mockito-core:2.7.22'
+    testCompile 'org.robolectric:robolectric:3.4.2'
 
     compile 'com.facebook.stetho:stetho:1.5.0'
 
-    /* compile("com.hypertrack:android:0.4.7:release@aar") {
-         transitive = true;
+    compile("com.hypertrack:android:0.4.8:release@aar") {
+        transitive = true;
+    }
+
+    /* releaseCompile(project(path: ':library', configuration: 'release')) {
+         transitive = true
+     }
+
+     debugCompile(project(path: ':library', configuration: 'release')) {
+         transitive = true
      }*/
-
-    releaseCompile(project(path: ':library', configuration: 'release')) {
-        transitive = true
-    }
-
-    debugCompile(project(path: ':library', configuration: 'release')) {
-        transitive = true
-    }
 
     if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
@@ -216,7 +218,7 @@ dependencies {
     }
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
-    compile project(':library')
+    //compile project(':library')
 }
 
 /*
