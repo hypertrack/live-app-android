@@ -98,7 +98,6 @@
         <activity
             android:name=".view.Track"
             android:parentActivityName=".view.Home"
-
             android:screenOrientation="portrait" />
 
         <activity

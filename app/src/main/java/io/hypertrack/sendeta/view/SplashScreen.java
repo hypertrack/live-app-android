@@ -83,7 +83,6 @@ public class SplashScreen extends BaseActivity {
 
     private static final String TAG = SplashScreen.class.getSimpleName();
 
-
     private AppDeepLink appDeepLink;
     private Button enableLocation;
     private TextView permissionText;

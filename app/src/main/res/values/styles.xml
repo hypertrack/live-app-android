@@ -11,7 +11,7 @@
 
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-
+        <item name="android:windowContentOverlay">@null</item>
         <item name="actionMenuTextColor">@color/colorAccent</item>
         <item name="android:actionMenuTextColor">@color/colorAccent</item>
     </style>

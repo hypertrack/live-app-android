@@ -1,150 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/app_bar_layout"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:fitsSystemWindows="true"
-        app:expanded="false"
-        app:layout_behavior="io.hypertrack.sendeta.view.ScrollingCalendarBehavior"
-        app:theme="@style/Toolbar">
+        android:layout_height="match_parent">
 
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/collapsingToolbarLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fitsSystemWindows="true"
-            android:minHeight="?attr/actionBarSize"
-            app:contentScrim="?attr/colorPrimary"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
-            app:statusBarScrim="?attr/colorPrimaryDark"
-            app:titleEnabled="false">
-
-            <LinearLayout
-                android:id="@+id/compactcalendar_view_container"
-                android:layout_width="match_parent"
-                android:layout_height="270dp"
-                android:orientation="vertical"
-                android:paddingTop="?attr/actionBarSize"
-                app:layout_collapseMode="parallax"
-                app:layout_collapseParallaxMultiplier="1.0">
-
-                <com.github.sundeepk.compactcalendarview.CompactCalendarView
-                    android:id="@+id/compactcalendar_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:visibility="visible"
-
-                    app:compactCalendarBackgroundColor="@android:color/white"
-                    app:compactCalendarCurrentDayBackgroundColor="@color/tracking_experience"
-                    app:compactCalendarCurrentSelectedDayBackgroundColor="@android:color/darker_gray"
-                    app:compactCalendarTargetHeight="250dp"
-                    app:compactCalendarTextColor="#1e1b1b"
-                    app:compactCalendarTextSize="12sp" />
-
-            </LinearLayout>
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                style="@style/ToolbarStyle"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="@color/colorPrimary"
-                app:layout_collapseMode="pin"
-                app:popupTheme="@style/Toolbar"
-                app:titleTextColor="@android:color/white">
-
-                <include layout="@layout/placeline_toolbar" />
-
-            </android.support.v7.widget.Toolbar>
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-
-    </android.support.design.widget.AppBarLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <fragment
-            android:id="@+id/map_view"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:id="@+id/placeline_fragment"
+            android:name="com.hypertrack.lib.internal.consumer.view.Placeline.PlacelineFragment"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="match_parent"
+            tools:layout="@layout/placeline_fragment" />
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_below="@id/map_view"
-            android:layout_weight="1"
-            android:background="@android:color/white">
-
-            <io.hypertrack.sendeta.view.DashedLine
-                android:id="@+id/dashed_line"
-                android:layout_width="20dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="117dp"
-                android:layerType="software"
-                android:visibility="gone"
-                app:color="@color/gray"
-                app:dashGap="5dp"
-                app:dashLength="5dp"
-                app:dashThickness="1dp"
-                app:orientation="vertical" />
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/placeline_recycler_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="visible" />
-
-            <TextView
-                android:id="@+id/placeline_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="No Placeline Activity"
-                android:visibility="gone" />
-
-        </FrameLayout>
-    </LinearLayout>
-
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/floatingActionButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|left"
-        android:layout_margin="@dimen/margin_high"
-        android:src="@drawable/ic_share_white_24dp"
-        app:backgroundTint="@color/tracking_experience"
-        app:fabSize="auto"
-        app:layout_anchor="@+id/linearLayout2"
-        app:layout_anchorGravity="bottom|right" />
-
-    <FrameLayout
-        android:id="@+id/progress_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:background="#6b000000">
-
-        <ProgressBar
-            android:id="@+id/progress_bar"
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/floatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:visibility="visible" />
-
+            android:layout_gravity="right|bottom"
+            android:layout_margin="@dimen/margin_high"
+            android:src="@drawable/ic_share_white_24dp"
+            app:backgroundTint="@color/tracking_experience"
+            app:elevation="4dp"
+            app:fabSize="auto"
+            app:layout_anchorGravity="bottom|right" />
     </FrameLayout>
+
+
 </android.support.design.widget.CoordinatorLayout>

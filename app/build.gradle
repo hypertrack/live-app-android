@@ -175,17 +175,17 @@ dependencies {
 
     compile 'com.facebook.stetho:stetho:1.5.0'
 
-    compile("com.hypertrack:android:0.4.8:release@aar") {
+   /* compile("com.hypertrack:android:0.4.8:release@aar") {
         transitive = true;
-    }
+    }*/
 
-    /* releaseCompile(project(path: ':library', configuration: 'release')) {
+     releaseCompile(project(path: ':library', configuration: 'release')) {
          transitive = true
      }
 
      debugCompile(project(path: ':library', configuration: 'release')) {
          transitive = true
-     }*/
+     }
 
     if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
@@ -218,7 +218,7 @@ dependencies {
     }
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
-    //compile project(':library')
+    compile project(':library')
 }
 
 /*
