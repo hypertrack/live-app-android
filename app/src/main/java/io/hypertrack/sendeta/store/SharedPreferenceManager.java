@@ -37,6 +37,7 @@ import com.hypertrack.lib.models.Place;
 
 import java.lang.reflect.Type;
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 import io.hypertrack.sendeta.MyApplication;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
@@ -65,6 +66,8 @@ public class SharedPreferenceManager {
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
     private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
     private static final String PREVIOUS_USER_ID = "io.hypertrack.meta:PreviousUserID";
+
+    private static final String FEEDBACK_ACTIVITY_LIST = "io.hypertrack.meta:FeedbackActivityList";
 
     private static SharedPreferences getSharedPreferences() {
         Context context = MyApplication.getInstance().getApplicationContext();
@@ -320,5 +323,38 @@ public class SharedPreferenceManager {
 
     public static boolean isTrackingON() {
         return getSharedPreferences().getBoolean(TRACKING_SETTING, false);
+    }
+
+    public static void setActivityFeedbackLookupId(String lookupId, String feedbackType) {
+        LinkedHashMap<String, String> lookupIds = getActivityFeedbackLookupId();
+        lookupIds.put(lookupId, feedbackType);
+        if(lookupIds.size()>30){
+            lookupIds.remove(lookupIds.size()-1);
+        }
+        String json = new GsonBuilder().create().toJson(lookupIds);
+        SharedPreferences.Editor editor = getEditor();
+        editor.putString(FEEDBACK_ACTIVITY_LIST, json);
+        editor.apply();
+    }
+
+    public static LinkedHashMap<String, String> getActivityFeedbackLookupId() {
+
+        String json = getSharedPreferences().getString(FEEDBACK_ACTIVITY_LIST, "");
+        Type type = new TypeToken<LinkedHashMap<String, String>>() {
+        }.getType();
+
+        LinkedHashMap<String, String> lookupIds = null;
+
+        try {
+            lookupIds = new GsonBuilder().create().fromJson(json, type);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (lookupIds == null) {
+            lookupIds = new LinkedHashMap<>();
+        }
+
+        return lookupIds;
     }
 }

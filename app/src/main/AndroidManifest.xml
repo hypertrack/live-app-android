@@ -105,6 +105,15 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".view.FeedbackPlaceline"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".view.EditFeedbackItem"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
             android:name=".view.Invite"
             android:screenOrientation="portrait" />
 
