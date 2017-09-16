@@ -299,14 +299,26 @@ public class FeedbackPlaceline extends AppCompatActivity {
             public void onSuccess(@NonNull SuccessResponse response) {
 
                 hideProgress();
-                if (response != null) {
-                    activitySegmentList.clear();
-                    activitySegmentList.addAll((List<ActivitySegment>) response.getResponseObject());
-                    for (ActivitySegment activitySegment : activitySegmentList) {
-                        activitySegment.setFeedbackType(activityFeedbackLookupIds.get(activitySegment.getLookupId()));
-                    }
-                    feedbackPlacelineAdapter.notifyDataSetChanged();
+
+                if (response.getResponseObject() == null) {
+                    Toast.makeText(FeedbackPlaceline.this, "No Activity", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                List<ActivitySegment> activitySegments = (List<ActivitySegment>) response.getResponseObject();
+
+                if (activitySegments.isEmpty()) {
+                    Toast.makeText(FeedbackPlaceline.this, "No Activity", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                activitySegmentList.clear();
+                activitySegmentList.addAll(activitySegments);
+                for (ActivitySegment activitySegment : activitySegmentList) {
+                    activitySegment.setFeedbackType(activityFeedbackLookupIds.get(activitySegment.getLookupId()));
+                }
+                feedbackPlacelineAdapter.notifyDataSetChanged();
+
             }
 
             @Override
