@@ -23,6 +23,10 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.network.retrofit;
 
+import android.content.Context;
+
+import com.hypertrack.lib.internal.common.util.Utils;
+
 import java.io.IOException;
 import java.util.TimeZone;
 
@@ -41,6 +45,7 @@ public class HyperTrackServiceGenerator {
 
     public static final String API_BASE_URL = BuildConfig.HYPERTRACK_BASE_URL;
     private static final String TAG = HyperTrackServiceGenerator.class.getSimpleName();
+    private static Context mContext;
 
     private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
@@ -49,7 +54,8 @@ public class HyperTrackServiceGenerator {
                     .baseUrl(API_BASE_URL)
                     .addConverterFactory(GsonConverterFactory.create());
 
-    public static <S> S createService(Class<S> serviceClass) {
+    public static <S> S createService(Class<S> serviceClass, Context context) {
+        mContext = context;
         httpClient.interceptors().add(new Interceptor() {
             @Override
             public Response intercept(Interceptor.Chain chain) throws IOException {
@@ -60,6 +66,8 @@ public class HyperTrackServiceGenerator {
                         .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
                         .header("User-Agent", "hypertrack-live-android")
                         .header("timezone", TimeZone.getDefault().getID())
+                        .header("Device-id", Utils.getDeviceId(mContext))
+                        .header("app-id", mContext.getPackageName())
                         .method(original.method(), original.body());
 
                 Request request = requestBuilder.build();
