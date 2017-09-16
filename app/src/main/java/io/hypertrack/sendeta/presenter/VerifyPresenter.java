@@ -1,5 +1,6 @@
 package io.hypertrack.sendeta.presenter;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.hypertrack.lib.HyperTrack;
@@ -33,9 +34,9 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     }
 
     @Override
-    public void verifyOTP(String OTP) {
+    public void verifyOTP(String OTP, Context context) {
         VerifyCodeModel verifyCodeModel = new VerifyCodeModel(OTP);
-        HyperTrackService getVerifyCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        HyperTrackService getVerifyCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
         Call<User> call = getVerifyCodeService.validateCode(HyperTrack.getUserId(), verifyCodeModel);
         call.enqueue(new Callback<User>() {
             @Override
@@ -63,8 +64,8 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     }
 
     @Override
-    public void resendOTP() {
-        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+    public void resendOTP(Context context) {
+        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override

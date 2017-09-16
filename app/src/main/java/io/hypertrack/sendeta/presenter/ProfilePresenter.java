@@ -24,6 +24,7 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Base64;
 import android.util.Log;
@@ -193,8 +194,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         }
     }
 
-    private void sendVerificationCode() {
-        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+    private void sendVerificationCode(Context context) {
+        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override

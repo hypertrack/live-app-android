@@ -111,7 +111,7 @@ public class Invite extends BaseActivity implements InviteView {
                         progressBar.setVisibility(View.VISIBLE);
                     Log.d(TAG, "onClick: Accept");
                     presenter.acceptInvite(userID, accountID,
-                            SharedPreferenceManager.getPreviousUserId(Invite.this));
+                            SharedPreferenceManager.getPreviousUserId(Invite.this),Invite.this);
                 } else {
                     Log.d(TAG, "onClick: Continue");
                     HyperTrack.setUserId(userID);

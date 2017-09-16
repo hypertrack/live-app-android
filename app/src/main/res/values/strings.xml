@@ -100,4 +100,5 @@
 
     <string name="stop">STOP</string>
     <string name="share">SHARE</string>
+    <string name="review_placeline">Review Placeline</string>
 </resources>

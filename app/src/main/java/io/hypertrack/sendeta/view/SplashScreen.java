@@ -299,7 +299,7 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void acceptInvite(String userID, String accountID, final HyperTrackCallback callback) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class,this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {

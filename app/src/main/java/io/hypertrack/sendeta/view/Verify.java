@@ -101,14 +101,14 @@ public class Verify extends BaseActivity implements VerifyView {
                     return;
                 }
                 showProgress(true);
-                presenter.verifyOTP(otpEditText.getText().toString());
+                presenter.verifyOTP(otpEditText.getText().toString(),Verify.this);
             }
         });
         timerText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (timerText.isClickable()) {
-                    presenter.resendOTP();
+                    presenter.resendOTP(Verify.this);
                     showProgress(true);
                 }
             }
@@ -131,7 +131,7 @@ public class Verify extends BaseActivity implements VerifyView {
                 if(!HTTextUtils.isEmpty(otpEditText.getText().toString())){
                     if(otpEditText.getText().length()==4){
                         showProgress(true);
-                        presenter.verifyOTP(otpEditText.getText().toString());
+                        presenter.verifyOTP(otpEditText.getText().toString(),Verify.this);
                         verifyOTP.setText("Verifying...");
                     }
                     else{
@@ -201,7 +201,7 @@ public class Verify extends BaseActivity implements VerifyView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class,this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {

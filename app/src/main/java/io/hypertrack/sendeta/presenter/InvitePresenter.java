@@ -1,5 +1,6 @@
 package io.hypertrack.sendeta.presenter;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.hypertrack.lib.models.User;
@@ -31,8 +32,8 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
     }
 
     @Override
-    public void acceptInvite(String userID, String accountID, String previousUserId) {
-        HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+    public void acceptInvite(String userID, String accountID, String previousUserId, Context context) {
+        HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
         Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, previousUserId));
         call.enqueue(new Callback<User>() {
             @Override

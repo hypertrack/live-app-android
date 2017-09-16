@@ -454,7 +454,7 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class);
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class, this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
