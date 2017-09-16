@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/placeline_fragment"
+            android:name="com.hypertrack.lib.internal.consumer.view.Placeline.PlacelineFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout="@layout/placeline_fragment" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/floatingActionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|bottom"
+            android:layout_margin="@dimen/margin_high"
+            android:src="@drawable/ic_share_white_24dp"
+            app:backgroundTint="@color/tracking_experience"
+            app:elevation="4dp"
+            app:fabSize="auto"
+            app:layout_anchorGravity="bottom|right" />
+    </FrameLayout>
+
+
+</android.support.design.widget.CoordinatorLayout>
