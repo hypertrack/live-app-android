@@ -129,8 +129,8 @@ android {
 
     buildTypes {
         release {
-            debuggable true
-            minifyEnabled false
+            debuggable false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
@@ -140,13 +140,17 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            versionNameSuffix '-debug'
+            applicationIdSuffix '.activity_test'
+            versionNameSuffix '-activity_test'
+            resValue "string", "app_name", "HTActivity test"
+            resValue "string", "deeplink_scheme", ""
+            resValue "string", "tracking_url", ""
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
             }
-
         }
+
         if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
             staging {
                 debuggable true

@@ -68,7 +68,7 @@ public class MyApplication extends Application {
         // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
         HyperTrack.enableMockLocations(true);
-        HyperTrack.disablePersistentNotification(true);
+        HyperTrack.disablePersistentNotification(false);
 
         // Initialize Branch.io
         Branch.getAutoInstance(this);

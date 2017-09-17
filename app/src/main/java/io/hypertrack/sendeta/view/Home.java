@@ -313,7 +313,7 @@ public class Home extends BaseActivity implements HomeView {
         }
 
         // Set callback for HyperTrackEvent updates
-        setCallbackForHyperTrackEvents();
+//        setCallbackForHyperTrackEvents();
 
         // Check if location is being shared currently
         if (restoreLocationSharingIfNeeded())

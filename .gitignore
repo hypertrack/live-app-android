@@ -96,3 +96,4 @@ crashlytics-build.properties
 /app/fabric.properties
 /app/src/main/res/values/api-keys.xml
 /key.properties
+/fastlane/
