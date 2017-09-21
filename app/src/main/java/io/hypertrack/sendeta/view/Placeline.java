@@ -26,6 +26,7 @@ import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.store.ActionManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
 /**
  * Created by Aman Jain on 24/05/17.
@@ -94,11 +95,13 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
     private void startHyperTrackTracking() {
         if (!HyperTrack.isTracking()) {
             HyperTrack.startTracking();
+            SharedPreferenceManager.setTrackingON();
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
             Toast.makeText(this, "Tracking started successfully.", Toast.LENGTH_SHORT).show();
 
         } else {
             HyperTrack.stopTracking();
+            SharedPreferenceManager.setTrackingOFF();
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.start_tracking);
             Toast.makeText(this, "Tracking stopped successfully.", Toast.LENGTH_SHORT).show();
         }
