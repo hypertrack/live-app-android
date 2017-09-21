@@ -1342,11 +1342,14 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     protected void onStop() {
+        Log.d(TAG, "onStop: ");
         super.onStop();
+        HyperTrack.removeActions(null);
     }
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onDestroy: ");
         // Detach View from Presenter
         presenter.detachView();
         if (SharedPreferenceManager.getAction(this) == null)
