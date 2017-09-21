@@ -299,7 +299,7 @@ public class Profile extends BaseActivity implements ProfileView {
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             presenter.updateProfile(name, number, isoCode, profileImage, verifyPhone);
         } else
-            presenter.attemptLogin(name, number, isoCode, profileImage, verifyPhone);
+            presenter.attemptLogin(name, number, isoCode, profileImage, verifyPhone,this);
     }
 
     @Override

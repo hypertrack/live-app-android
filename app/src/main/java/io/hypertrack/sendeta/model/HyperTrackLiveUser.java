@@ -31,11 +31,7 @@ import com.google.i18n.phonenumbers.Phonenumber;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
@@ -50,9 +46,6 @@ public class HyperTrackLiveUser extends User {
     private String countryCode;
 
     private File photoImage;
-
-    @SerializedName("photoData")
-    private byte[] photoData;
 
     public static HyperTrackLiveUser sharedHyperTrackLiveUser() {
         if (hyperTrackLiveUser == null) {
@@ -108,21 +101,5 @@ public class HyperTrackLiveUser extends User {
 
         Phonenumber.PhoneNumber number = phoneUtil.parse(phoneNo, getCountryCode());
         return phoneUtil.format(number, PhoneNumberUtil.PhoneNumberFormat.INTERNATIONAL);
-    }
-
-    public void saveFileAsBitmap(File file) {
-        int size = (int) file.length();
-        byte[] bytes = new byte[size];
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            buf.read(bytes, 0, bytes.length);
-            buf.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        this.photoData = bytes;
     }
 }

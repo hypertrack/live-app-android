@@ -9,6 +9,7 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -69,6 +70,13 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
                 startActivity(intent);
             }
         });
+        placelineFragment.setToolbarIconOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawer.openDrawer(Gravity.LEFT);
+            }
+        });
+
     }
 
     @Override

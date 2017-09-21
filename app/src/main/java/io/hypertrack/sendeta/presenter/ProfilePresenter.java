@@ -56,6 +56,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static io.hypertrack.sendeta.store.OnboardingManager.sharedManager;
+
 /**
  * Created by suhas on 24/02/16.
  */
@@ -63,7 +65,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private static final String TAG = Profile.class.getSimpleName();
     private ProfileView view;
-    private OnboardingManager onboardingManager = OnboardingManager.sharedManager();
+    private OnboardingManager onboardingManager = sharedManager();
 
     @Override
     public void attachView(final ProfileView view) {
@@ -134,17 +136,17 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void attemptLogin(final String userName, final String phone, String ISOCode,
-                             final File profileImage, final boolean verifyPhone) {
+                             final File profileImage, final boolean verifyPhone, final Context context) {
         try {
             UserParams userParams = getUserParams(userName, phone, ISOCode, profileImage);
             HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     Log.d(TAG, "onSuccess: User Created");
-                    /*if (verifyPhone) {
-                        sendVerificationCode();
-                    } else*/
-                    view.onProfileUpdateSuccess();
+                    if (verifyPhone) {
+                        sendVerificationCode(context);
+                    } else
+                        view.onProfileUpdateSuccess();
                 }
 
                 @Override

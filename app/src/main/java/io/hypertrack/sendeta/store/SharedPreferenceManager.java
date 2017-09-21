@@ -328,8 +328,8 @@ public class SharedPreferenceManager {
     public static void setActivityFeedbackLookupId(String lookupId, String feedbackType) {
         LinkedHashMap<String, String> lookupIds = getActivityFeedbackLookupId();
         lookupIds.put(lookupId, feedbackType);
-        if(lookupIds.size()>30){
-            lookupIds.remove(lookupIds.size()-1);
+        if (lookupIds.size() > 30) {
+            lookupIds.remove(lookupIds.size() - 1);
         }
         String json = new GsonBuilder().create().toJson(lookupIds);
         SharedPreferences.Editor editor = getEditor();
