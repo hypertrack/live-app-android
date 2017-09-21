@@ -156,4 +156,16 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        if (drawer.isDrawerOpen(Gravity.LEFT)) {
+            drawer.closeDrawers();
+            return;
+        }
+
+        if (placelineFragment.onBackPressed())
+            return;
+        super.onBackPressed();
+    }
 }
