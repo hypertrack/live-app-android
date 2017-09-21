@@ -1,8 +1,5 @@
 package io.hypertrack.sendeta.view;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -12,23 +9,19 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
-import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.consumer.view.Placeline.PlacelineFragment;
 import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
-import com.hypertrack.lib.internal.transmitter.models.UserActivity;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.ServiceNotificationParams;
 import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.store.ActionManager;
@@ -83,9 +76,8 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
         drawer.closeDrawers();
         if (item.getItemId() == R.id.edit_profile)
             startActivity(new Intent(this, Profile.class));
-        else if (item.getItemId() == R.id.edit_activity) {
-            startActivity(new Intent(this, FeedbackPlaceline.class));
-        } else if (item.getItemId() == R.id.start_tracking_toggle) {
+
+        else if (item.getItemId() == R.id.start_tracking_toggle) {
             startHyperTrackTracking();
         }
         return true;
@@ -146,10 +138,7 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
                     case HyperTrackEvent.EventType.STOP_STARTED_EVENT:
                         HyperTrack.clearServiceNotificationParams();
                         break;
-                    case HyperTrackEvent.EventType.ACTIVITY_CHANGED_EVENT:
 
-                        showActivityChangedNotification(Placeline.this, getActivityChangedMessage((UserActivity) event.getData()));
-                        break;
                 }
             }
 
@@ -158,35 +147,5 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
                 // do nothing
             }
         });
-    }
-
-    private String getActivityChangedMessage(UserActivity activity) {
-        return activity.getActivityString();
-    }
-
-    private void showActivityChangedNotification(Context context, String message) {
-        try {
-            HTLog.i(TAG, "ACTIVITY_CHANGED_EVENT received, activity = " + message);
-
-            // Gets an instance of notification builder object
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(context);
-
-            // Sets the parameters required for standard notification
-            String title = "You are " + message;
-            builder.setContentTitle(title)
-                    .setSmallIcon(R.drawable.ic_ht_service_notification_small)
-                    .setColor(ContextCompat.getColor(Placeline.this, R.color.colorAccent))
-                    .setPriority(Notification.PRIORITY_MAX)
-                    .setGroup("activities")
-                    .setAutoCancel(true);
-
-            // Send the Notification with the specified parameters
-            NotificationManager notificationManager =
-                    (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-            notificationManager.notify(UUID.randomUUID().hashCode() /* ID of notification */, builder.build());
-        } catch (Exception e) {
-            e.printStackTrace();
-            HTLog.exception(TAG, e);
-        }
     }
 }

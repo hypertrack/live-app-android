@@ -63,7 +63,6 @@ public class HyperTrackLiveUser extends User {
                 }
             }
         }
-
         return hyperTrackLiveUser;
     }
 

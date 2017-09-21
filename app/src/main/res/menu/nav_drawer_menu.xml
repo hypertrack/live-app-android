@@ -6,10 +6,6 @@
             android:id="@+id/edit_profile"
             android:title="@string/edit_profile" />
 
-        <item
-            android:id="@+id/edit_activity"
-            android:title="@string/review_placeline" />
-
         <item android:id="@+id/start_tracking_toggle"
               android:title="@string/start_tracking"/>
     </group>

@@ -144,7 +144,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     /*if (verifyPhone) {
                         sendVerificationCode();
                     } else*/
-                        view.onProfileUpdateSuccess();
+                    view.onProfileUpdateSuccess();
                 }
 
                 @Override
@@ -175,7 +175,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                    /* if (verifyPhone) {
                         sendVerificationCode();
                     } else*/
-                        view.onProfileUpdateSuccess();
+                    view.onProfileUpdateSuccess();
                 }
 
                 @Override
@@ -195,7 +195,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     private void sendVerificationCode(Context context) {
-        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
+        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class, context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override
