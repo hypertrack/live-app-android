@@ -143,9 +143,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     Log.d(TAG, "onSuccess: User Created");
-                    if (verifyPhone) {
+                   /* if (verifyPhone) {
                         sendVerificationCode(context);
-                    } else
+                    } else*/
                         view.onProfileUpdateSuccess();
                 }
 
