@@ -129,6 +129,11 @@ android {
 
     buildTypes {
         release {
+            System.out.println(keyProperties['HYPERTRACK_PUBLISHABLE_KEY']);
+            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY']=="\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\""){
+                throw new GradleException("Publishable Key is Missing in key.properties file");
+                return;
+            }
             debuggable false
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -176,11 +181,11 @@ dependencies {
 
     compile 'com.facebook.stetho:stetho:1.5.0'
 
-    compile("com.hypertrack:android:0.4.12:release@aar") {
+    /*compile("com.hypertrack:android:0.4.12:release@aar") {
         transitive = true;
-    }
+    }*/
 
-    /*releaseCompile(project(path: ':library', configuration: 'release')) {
+    releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
 
@@ -192,7 +197,7 @@ dependencies {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
             transitive = true
         }
-    }*/
+    }
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
