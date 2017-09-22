@@ -265,7 +265,7 @@ public class Home extends BaseActivity implements HomeView {
         public void onBackButtonIconPressed() {
             if (expectedPlace == null) {
                 //finish();
-                closeActivityWithCircularRevealAnimation();
+                onBackPressed();
             }
         }
 
@@ -312,8 +312,11 @@ public class Home extends BaseActivity implements HomeView {
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
         }
 
-        // Set callback for HyperTrackEvent updates
-//        setCallbackForHyperTrackEvents();
+        // Attach View Presenter to View
+        presenter.attachView(this);
+
+        // Set callback for HyperTrackEvent update  s
+        setHyperTrackCallbackForActivityUpdates();
 
         // Check if location is being shared currently
         if (restoreLocationSharingIfNeeded())
@@ -326,10 +329,30 @@ public class Home extends BaseActivity implements HomeView {
         if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink) {
             htMapFragment.openPlaceSelectorView();
         }
-        initBottomButtonCard(false);
 
-        // Attach View Presenter to View
-        presenter.attachView(this);
+        initBottomButtonCard(false);
+    }
+
+    /**
+     * Method to set callback for HyperTrackEvents to update notification with relevant information.
+     * Note: Show share tracking url message on Stop_Ended/Trip_Started event and reset it in other cases.
+     */
+    private void setHyperTrackCallbackForActivityUpdates() {
+        HyperTrack.setCallback(new HyperTrackEventCallback() {
+            @Override
+            public void onEvent(@NonNull final HyperTrackEvent event) {
+                switch (event.getEventType()) {
+                    case HyperTrackEvent.EventType.LOCATION_CHANGED_EVENT:
+                        updateCurrentLocationMarker(event.getLocation());
+                        break;
+                }
+            }
+
+            @Override
+            public void onError(@NonNull final ErrorResponse errorResponse) {
+                // do nothing
+            }
+        });
     }
 
     private void initializeUIViews() {
@@ -453,23 +476,6 @@ public class Home extends BaseActivity implements HomeView {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    private void circularRevealActivity() {
-
-        int cx = (rootLayout.getLeft() + rootLayout.getRight()) - getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh);
-        int cy = (rootLayout.getTop() + rootLayout.getBottom()) - getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh);
-
-        int finalRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
-        int initialRadius = getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
-        // create the animator for this view (the start radius is zero)
-        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, initialRadius, finalRadius);
-        circularReveal.setDuration(600);
-
-        // make the view visible and start the animation
-        rootLayout.setVisibility(View.VISIBLE);
-        circularReveal.start();
-    }
-
     private void closeActivityWithCircularRevealAnimation() {
        /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             int cx = rootLayout.getWidth()- getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
@@ -509,9 +515,26 @@ public class Home extends BaseActivity implements HomeView {
             circularReveal.start();
         } else*/
         {
-            super.onBackPressed();
+            onBackPressed();
         }
 
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    private void circularRevealActivity() {
+
+        int cx = (rootLayout.getLeft() + rootLayout.getRight()) - getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh);
+        int cy = (rootLayout.getTop() + rootLayout.getBottom()) - getResources().getDimensionPixelSize(R.dimen.margin_xxxhigh);
+
+        int finalRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
+        int initialRadius = getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
+        // create the animator for this view (the start radius is zero)
+        Animator circularReveal = ViewAnimationUtils.createCircularReveal(rootLayout, cx, cy, initialRadius, finalRadius);
+        circularReveal.setDuration(600);
+
+        // make the view visible and start the animation
+        rootLayout.setVisibility(View.VISIBLE);
+        circularReveal.start();
     }
 
     private void shareLiveLocation() {
@@ -1041,6 +1064,9 @@ public class Home extends BaseActivity implements HomeView {
             HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
+                    if (htMapFragment != null) {
+                        htMapFragment.notifyChanged();
+                    }
                     // do nothing
                     if (mProgressDialog != null) {
                         mProgressDialog.dismiss();
@@ -1270,7 +1296,19 @@ public class Home extends BaseActivity implements HomeView {
             actionManager.setActionComletedListener(actionCompletedListener);
 
             lookupId = actionManager.getHyperTrackAction().getLookupId();
-            HyperTrack.trackActionByLookupId(lookupId, null);
+            HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (htMapFragment != null) {
+                        htMapFragment.notifyChanged();
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+
+                }
+            });
         }
 
         // Check if Location & Network are Enabled
@@ -1307,6 +1345,7 @@ public class Home extends BaseActivity implements HomeView {
     @Override
     protected void onPause() {
         super.onPause();
+        HyperTrack.removeActions(null);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
     }
@@ -1337,14 +1376,13 @@ public class Home extends BaseActivity implements HomeView {
             startActivity(new Intent(Home.this, Placeline.class));
         }
         //finish();
-        closeActivityWithCircularRevealAnimation();
+        super.onBackPressed();
     }
 
     @Override
     protected void onStop() {
         Log.d(TAG, "onStop: ");
         super.onStop();
-        HyperTrack.removeActions(null);
     }
 
     @Override
