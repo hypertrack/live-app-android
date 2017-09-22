@@ -191,12 +191,11 @@ dependencies {
          transitive = true
      }*/
 
-    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+    /*if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
             transitive = true
         }
-    }
-
+    }*/
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
