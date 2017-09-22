@@ -418,7 +418,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
                     HyperTrack.startTracking();
-                    SharedPreferenceManager.setRequestedForBackgroundTracking();
+                    SharedPreferenceManager.setTrackingON();
                     acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
 
                 } else {

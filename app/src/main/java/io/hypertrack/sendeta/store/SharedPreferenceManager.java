@@ -64,7 +64,6 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION = "io.hypertrack.meta:CurrentAction";
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
-    private static final String TRACKING_DIALOG = "io.hypertrack.meta:TrackingDialog";
     private static final String PREVIOUS_USER_ID = "io.hypertrack.meta:PreviousUserID";
 
     private static final String FEEDBACK_ACTIVITY_LIST = "io.hypertrack.meta:FeedbackActivityList";
@@ -297,20 +296,10 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void setRequestedForBackgroundTracking() {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putBoolean(TRACKING_DIALOG, true);
-        editor.apply();
-    }
-
     public static void resetBackgroundTracking() {
         SharedPreferences.Editor editor = getEditor();
-        editor.putBoolean(TRACKING_DIALOG, false);
+        editor.remove(TRACKING_SETTING);
         editor.apply();
-    }
-
-    public static boolean hasRequestedForBackgroundTracking() {
-        return getSharedPreferences().getBoolean(TRACKING_DIALOG, false);
     }
 
     public static void setTrackingON() {
@@ -321,7 +310,9 @@ public class SharedPreferenceManager {
         setTrackingSetting(false);
     }
 
-    public static boolean isTrackingON() {
+    public static Boolean isTrackingON() {
+        if (!getSharedPreferences().contains(TRACKING_SETTING))
+            return null;
         return getSharedPreferences().getBoolean(TRACKING_SETTING, false);
     }
 
