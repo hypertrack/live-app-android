@@ -140,15 +140,12 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            applicationIdSuffix '.activity_test'
-            versionNameSuffix '-activity_test'
-            resValue "string", "app_name", "HTActivity test"
-            resValue "string", "deeplink_scheme", ""
-            resValue "string", "tracking_url", ""
+            versionNameSuffix '-debug'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
             }
+
         }
 
         if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
@@ -179,23 +176,23 @@ dependencies {
 
     compile 'com.facebook.stetho:stetho:1.5.0'
 
-    compile("com.hypertrack:android:0.4.12:release@aar") {
+    /*compile("com.hypertrack:android:0.4.12:release@aar") {
         transitive = true;
-    }
+    }*/
 
-    /* releaseCompile(project(path: ':library', configuration: 'release')) {
+     releaseCompile(project(path: ':library', configuration: 'release')) {
          transitive = true
      }
 
      debugCompile(project(path: ':library', configuration: 'release')) {
          transitive = true
-     }*/
+     }
 
-    /*if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
             transitive = true
         }
-    }*/
+    }
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
