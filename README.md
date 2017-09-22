@@ -123,7 +123,7 @@ HyperTrack.getPlaceline(date, new HyperTrackCallback() {
 
 #### Get Placeline View in your Android App
 
-##### Step 1: Setup Activity
+#### Step 1: Setup Activity
 
 * **Firstly**, add the following xml snippet in your view layout to enable `PlacelineFragment`.
 
@@ -158,7 +158,7 @@ protected void onCreate(Bundle savedInstanceState) {
 }
 ```
 
-##### Step 2: Disable ActionBar
+#### Step 2: Disable ActionBar
 
 In case your AppTheme adds an ActionBar by default, disable the default Action Bar for the activity containing PlacelineFragment by adding the following under your Activity's theme style-tag in styles.xml file. Refer to Android documentation on [Setting up the AppBar](https://developer.android.com/training/appbar/setting-up.html).
 
@@ -183,7 +183,7 @@ Add the `android:theme` attribute to the `<activity>` tag in `AndroidManifest.xm
 ```
 
 
-##### Step 3: Start Placeline Activity
+#### Step 3: Start Placeline Activity
 
 Placeline Activity can be the `Launcher activity` or it can start from some other activity as normal activity.
 
