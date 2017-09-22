@@ -140,15 +140,12 @@ android {
         debug {
             debuggable true
             minifyEnabled false
-            applicationIdSuffix '.activity_test'
-            versionNameSuffix '-activity_test'
-            resValue "string", "app_name", "HTActivity test"
-            resValue "string", "deeplink_scheme", ""
-            resValue "string", "tracking_url", ""
+            versionNameSuffix '-debug'
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
             }
+
         }
 
         if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
@@ -183,15 +180,15 @@ dependencies {
         transitive = true;
     }
 
-    /* releaseCompile(project(path: ':library', configuration: 'release')) {
-         transitive = true
-     }
+    /*releaseCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
 
-     debugCompile(project(path: ':library', configuration: 'release')) {
-         transitive = true
-     }*/
+    debugCompile(project(path: ':library', configuration: 'release')) {
+        transitive = true
+    }
 
-    /*if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile(project(path: ':library', configuration: 'debug')) {
             transitive = true
         }
