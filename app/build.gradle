@@ -185,7 +185,7 @@ dependencies {
         transitive = true;
     }
 
-   /* releaseCompile(project(path: ':library', configuration: 'release')) {
+    /*releaseCompile(project(path: ':library', configuration: 'release')) {
         transitive = true
     }
 
@@ -223,7 +223,7 @@ dependencies {
     }
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
-    compile project(':library')
+   // compile project(':library')
 }
 
 /*
