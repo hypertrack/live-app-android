@@ -19,6 +19,10 @@ repositories {
 }
 
 def keyPropertiesFile = rootProject.file("key.properties");
+if(keyPropertiesFile == null || !keyPropertiesFile.exists()){
+    throw new GradleException("key.properties file is missing that contains HyperTrack Publishable Key." +
+            "\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
+}
 def keyProperties = new Properties();
 keyProperties.load(new FileInputStream(keyPropertiesFile));
 
@@ -129,9 +133,8 @@ android {
 
     buildTypes {
         release {
-            System.out.println(keyProperties['HYPERTRACK_PUBLISHABLE_KEY']);
-            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY']=="\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\""){
-                throw new GradleException("Publishable Key is Missing in key.properties file");
+            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
+                throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
                 return;
             }
             debuggable false
@@ -181,23 +184,26 @@ dependencies {
 
     compile 'com.facebook.stetho:stetho:1.5.0'
 
-    compile("com.hypertrack:android:0.4.14:release@aar") {
-        transitive = true;
-    }
-
-    /*releaseCompile(project(path: ':library', configuration: 'release')) {
-        transitive = true
-    }
-
-    debugCompile(project(path: ':library', configuration: 'release')) {
-        transitive = true
-    }
-
-    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
-        stagingCompile(project(path: ':library', configuration: 'debug')) {
+    if (findProject(':library') != null) {
+        releaseCompile(project(path: ':library', configuration: 'release')) {
             transitive = true
         }
-    }*/
+
+        debugCompile(project(path: ':library', configuration: 'release')) {
+            transitive = true
+        }
+
+        if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
+            stagingCompile(project(path: ':library', configuration: 'debug')) {
+                transitive = true
+            }
+        }
+    } else {
+        compile("com.hypertrack:android:0.4.14:release@aar") {
+            transitive = true;
+        }
+    }
+
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
@@ -223,7 +229,14 @@ dependencies {
     }
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
     compile 'io.branch.sdk.android:library:2.+'
-   // compile project(':library')
+
+    //Check if SDK library exist or not
+    if (findProject(':library') != null) {
+        println("Library Exist");
+        compile project(':library')
+    } else {
+        println("Library Doesn't Exist");
+    }
 }
 
 /*
