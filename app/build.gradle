@@ -117,6 +117,10 @@ android {
             multiDexEnabled true
             if (keystorePropertiesFile.exists())
                 signingConfig signingConfigs.release
+            if (findProject(':library') != null)
+                buildConfigField "String", "isHyperTrackLive", '"exist"'
+            else
+                buildConfigField "String", "isHyperTrackLive",'""'
         }
 
     } else {

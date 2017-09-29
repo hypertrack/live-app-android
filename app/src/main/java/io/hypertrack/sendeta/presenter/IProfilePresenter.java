@@ -34,5 +34,5 @@ import java.io.File;
 public interface IProfilePresenter<V> extends Presenter<V> {
     void attemptLogin(String userName, String number, String deviceID, File profileImageFile, boolean verifyPhone, Context context);
 
-    void updateProfile(String name, String number, String isoCode, File profileImage, boolean verifyPhone);
+    void updateProfile(String name, String number, String isoCode, File profileImage, boolean verifyPhone, Context context);
 }

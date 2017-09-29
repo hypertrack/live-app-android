@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
@@ -143,9 +144,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     Log.d(TAG, "onSuccess: User Created");
-                   /* if (verifyPhone) {
+                    if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
                         sendVerificationCode(context);
-                    } else*/
+                    } else
                         view.onProfileUpdateSuccess();
                 }
 
@@ -167,16 +168,16 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void updateProfile(String name, final String number, String ISOCode, File profileImage,
-                              final boolean verifyPhone) {
+                              final boolean verifyPhone, final Context context) {
         try {
             UserParams userParams = getUserParams(name, number, ISOCode, profileImage);
             HyperTrack.updateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     Log.d(TAG, "onSuccess: User Profile Updated");
-                   /* if (verifyPhone) {
-                        sendVerificationCode();
-                    } else*/
+                    if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
+                        sendVerificationCode(context);
+                    } else
                     view.onProfileUpdateSuccess();
                 }
 
