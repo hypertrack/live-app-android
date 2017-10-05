@@ -44,9 +44,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
+import android.content.pm.ShortcutManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Icon;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
@@ -125,6 +128,7 @@ public class Home extends BaseActivity implements HomeView {
     private static final String TAG = Home.class.getSimpleName();
     private GoogleMap mMap;
     private String lookupId = null;
+    private String collectionId = null;
     private Location defaultLocation = new Location("default");
 
     private TextView infoMessageViewText;
@@ -147,7 +151,7 @@ public class Home extends BaseActivity implements HomeView {
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
     boolean showCurrentLocationMarker = true;
-    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false;
+    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -189,6 +193,7 @@ public class Home extends BaseActivity implements HomeView {
             // Check if destination place was selected
             if (expectedPlace != null) {
                 onSelectPlace(expectedPlace);
+                addDynamicShortcut(expectedPlace);
             }
         }
 
@@ -213,6 +218,10 @@ public class Home extends BaseActivity implements HomeView {
                             actionManager.getHyperTrackActionId()));
                     //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
+
+                    if (action.getExpectedPlace() != null && action.getExpectedPlace().getLocation() != null) {
+                        SharedPreferenceManager.setShortcutPlace(action.getExpectedPlace());
+                    }
 
                     if (refreshedActionIds.size() > 1) {
                         SharedPreferenceManager.setTrackingAction
@@ -277,6 +286,22 @@ public class Home extends BaseActivity implements HomeView {
         }
     };
 
+    @TargetApi(Build.VERSION_CODES.N_MR1)
+    private void addDynamicShortcut(Place place) {
+        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+        String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
+        List<ShortcutInfo> shortcut = new ArrayList<>();
+        shortcut.add(new ShortcutInfo.Builder(this, "id1")
+                .setShortLabel(name)
+                .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
+                .setIntent(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("share.location://hypertrack")))
+                .build());
+
+        shortcutManager.setDynamicShortcuts(shortcut);
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -326,7 +351,10 @@ public class Home extends BaseActivity implements HomeView {
         if (handleTrackingUrlDeeplink())
             isHandleTrackingUrlDeeplink = true;
 
-        if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink) {
+        if (handleShortcut())
+            isShortcut = true;
+
+        if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink && !isShortcut) {
             htMapFragment.openPlaceSelectorView();
         }
 
@@ -438,6 +466,7 @@ public class Home extends BaseActivity implements HomeView {
                 public void onClick(DialogInterface dialog, int which) {
                     presenter.stopSharing(ActionManager.getSharedManager(Home.this), false);
                     lookupId = null;
+                    collectionId = null;
                     HyperTrack.removeActions(null);
                     htMapFragment.openPlaceSelectorView();
                 }
@@ -476,8 +505,8 @@ public class Home extends BaseActivity implements HomeView {
         }
     }
 
-    private void closeActivityWithCircularRevealAnimation() {
-       /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    /*private void closeActivityWithCircularRevealAnimation() {
+       *//* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             int cx = rootLayout.getWidth()- getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
             int cy = rootLayout.getHeight() - getResources().getDimensionPixelSize(R.dimen.margin_xxhigh);
             int initialRadius = (int) Math.hypot(rootLayout.getRight(), rootLayout.getBottom());
@@ -513,12 +542,12 @@ public class Home extends BaseActivity implements HomeView {
             });
             circularReveal.setDuration(600);
             circularReveal.start();
-        } else*/
+        } else*//*
         {
             onBackPressed();
         }
 
-    }
+    }*/
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     private void circularRevealActivity() {
@@ -659,9 +688,36 @@ public class Home extends BaseActivity implements HomeView {
             mProgressDialog.show();
             // Get required parameters for tracking Actions on map
             lookupId = intent.getStringExtra(Track.KEY_LOOKUP_ID);
+            collectionId = intent.getStringExtra(Track.KEY_COLLECTION_ID);
             List<String> actionIDs = intent.getStringArrayListExtra(Track.KEY_ACTION_ID_LIST);
             // Call trackActionsOnMap method
-            presenter.trackActionsOnMap(lookupId, actionIDs, ActionManager.getSharedManager(this), this);
+            presenter.trackActionsOnMap(collectionId,lookupId, actionIDs, ActionManager.getSharedManager(this), this);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean handleShortcut() {
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("shortcut", false)) {
+
+            if (isRestoreLocationSharing) {
+                Toast.makeText(this, "Previous trip is already active.", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            if (mProgressDialog != null)
+                mProgressDialog.cancel();
+
+            Place shortcutPlace = SharedPreferenceManager.getShortcutPlace();
+            if (shortcutPlace == null || shortcutPlace.getLocation() == null) {
+                return false;
+            }
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage(getString(R.string.sharing_live_location_message));
+            mProgressDialog.setCancelable(false);
+            mProgressDialog.show();
+            expectedPlace = shortcutPlace;
+            shareLiveLocation();
             return true;
         }
         return false;
@@ -944,7 +1000,7 @@ public class Home extends BaseActivity implements HomeView {
             builder.include(current);
         }
 
-        if (expectedPlace != null) {
+        if (expectedPlace != null && expectedPlace.getLocation() != null) {
             LatLng destination = expectedPlace.getLocation().getLatLng();
             builder.include(destination);
         }
@@ -979,9 +1035,10 @@ public class Home extends BaseActivity implements HomeView {
         Action trackingAction = SharedPreferenceManager.getTrackingAction(Home.this);
         if (trackingAction != null) {
             lookupId = trackingAction.getLookupId();
+            collectionId = trackingAction.getCollectionId();
             expectedPlace = trackingAction.getExpectedPlace();
         }
-        presenter.shareLiveLocation(ActionManager.getSharedManager(this), lookupId, expectedPlace);
+        presenter.shareLiveLocation(ActionManager.getSharedManager(this),collectionId, lookupId, expectedPlace);
     }
 
     @Override
@@ -1059,8 +1116,39 @@ public class Home extends BaseActivity implements HomeView {
 
         ActionManager.getSharedManager(this).setActionComletedListener(actionCompletedListener);
         lookupId = ActionManager.getSharedManager(this).getHyperTrackAction().getLookupId();
+        collectionId = ActionManager.getSharedManager(this).getHyperTrackAction().getCollectionId();
 
-        if (!HTTextUtils.isEmpty(lookupId)) {
+        if (!HTTextUtils.isEmpty(collectionId)) {
+            HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (htMapFragment != null) {
+                        htMapFragment.notifyChanged();
+                    }
+                    // do nothing
+                    if (mProgressDialog != null) {
+                        mProgressDialog.dismiss();
+                    }
+                    AnimationUtils.expand(liveTrackingActionLayout);
+                    if (currentLocationMarker != null)
+                        currentLocationMarker.remove();
+                    currentLocationMarker = null;
+                    updateMapPadding();
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (htMapFragment != null) {
+                        htMapFragment.notifyChanged();
+                    }
+                    Toast.makeText(Home.this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                    if (mProgressDialog != null) {
+                        mProgressDialog.dismiss();
+                    }
+                    bottomButtonCard.hideProgress();
+                }
+            });
+        } else if (!HTTextUtils.isEmpty(lookupId)) {
             HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
@@ -1296,19 +1384,37 @@ public class Home extends BaseActivity implements HomeView {
             actionManager.setActionComletedListener(actionCompletedListener);
 
             lookupId = actionManager.getHyperTrackAction().getLookupId();
-            HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse response) {
-                    if (htMapFragment != null) {
-                        htMapFragment.notifyChanged();
+            collectionId = actionManager.getHyperTrackAction().getCollectionId();
+            if(!HTTextUtils.isEmpty(collectionId)){
+                HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
+                    @Override
+                    public void onSuccess(@NonNull SuccessResponse response) {
+                        if (htMapFragment != null) {
+                            htMapFragment.notifyChanged();
+                        }
                     }
-                }
 
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
+                    @Override
+                    public void onError(@NonNull ErrorResponse errorResponse) {
 
-                }
-            });
+                    }
+                });
+            }
+            else if(!HTTextUtils.isEmpty(lookupId)){
+                HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+                    @Override
+                    public void onSuccess(@NonNull SuccessResponse response) {
+                        if (htMapFragment != null) {
+                            htMapFragment.notifyChanged();
+                        }
+                    }
+
+                    @Override
+                    public void onError(@NonNull ErrorResponse errorResponse) {
+
+                    }
+                });
+            }
         }
 
         // Check if Location & Network are Enabled
@@ -1361,8 +1467,9 @@ public class Home extends BaseActivity implements HomeView {
         if (actionManager.getHyperTrackAction() != null &&
                 actionManager.getHyperTrackAction().hasActionFinished()) {
 
-            // Reset lookupId variable
+            // Reset lookupId and collectionId variable
             lookupId = null;
+            collectionId = null;
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
             return;
@@ -1399,8 +1506,9 @@ public class Home extends BaseActivity implements HomeView {
         if (actionManager.getHyperTrackAction() != null &&
                 actionManager.getHyperTrackAction().hasActionFinished()) {
 
-            // Reset lookupId variable
+            // Reset lookupId and collectionId variable
             lookupId = null;
+            collectionId = null;
 
             OnStopSharing();
             HyperTrack.removeActions(null);
@@ -1408,4 +1516,3 @@ public class Home extends BaseActivity implements HomeView {
         super.onDestroy();
     }
 }
-
