@@ -65,6 +65,7 @@ public class SharedPreferenceManager {
     private static final String CURRENT_ACTION_ID = "io.hypertrack.meta:CurrentActionID";
     private static final String TRACKING_SETTING = "io.hypertrack.meta:TrackingSetting";
     private static final String PREVIOUS_USER_ID = "io.hypertrack.meta:PreviousUserID";
+    private static final String SHORTCUT_PLACE = "io.hypertrack.meta:ShortcutPlace";
 
     private static final String FEEDBACK_ACTIVITY_LIST = "io.hypertrack.meta:FeedbackActivityList";
 
@@ -112,6 +113,35 @@ public class SharedPreferenceManager {
     public static void deletePlace() {
         SharedPreferences.Editor editor = getEditor();
         editor.remove(CURRENT_PLACE);
+        editor.apply();
+    }
+
+    public static void setShortcutPlace(Place place) {
+        SharedPreferences.Editor editor = getEditor();
+
+        Gson gson = new Gson();
+        String placeJson = gson.toJson(place);
+
+        editor.putString(SHORTCUT_PLACE, placeJson);
+        editor.apply();
+    }
+
+    public static Place getShortcutPlace() {
+        String placeJson = getSharedPreferences().getString(SHORTCUT_PLACE, null);
+        if (placeJson == null) {
+            return null;
+        }
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Place>() {
+        }.getType();
+
+        return gson.fromJson(placeJson, type);
+    }
+
+    public static void deleteShortcutPlace() {
+        SharedPreferences.Editor editor = getEditor();
+        editor.remove(SHORTCUT_PLACE);
         editor.apply();
     }
 

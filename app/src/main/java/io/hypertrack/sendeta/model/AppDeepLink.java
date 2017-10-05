@@ -45,8 +45,7 @@ public class AppDeepLink {
     public String taskID;
     public String shortCode;
     public String lookupId;
-
-
+    public String collectionId;
 
     public AppDeepLink(int mId) {
         this.mId = mId;

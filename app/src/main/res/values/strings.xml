@@ -39,7 +39,7 @@
     <string name="enter_phone_number">Phone Number</string>
 
     <string name="calculating_eta_message">Calculating ETA…</string>
-    <string name="sharing_live_location_message">Sharing your live location…</string>
+    <string name="sharing_live_location_message">Sharing your location ...</string>
     <string name="fetching_details_msg">Fetching details…</string>
     <string name="stop_sharing_message">Completing your visit</string>
 
