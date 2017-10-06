@@ -425,9 +425,11 @@ public class Home extends BaseActivity implements HomeView {
         trackingToggle.setOnRippleCompleteListener(new RippleView.OnRippleCompleteListener() {
             @Override
             public void onComplete(RippleView rippleView) {
-                if (trackingToggle.getTag().equals("stop"))
+                if (trackingToggle.getTag().equals("stop")) {
+                    SharedPreferenceManager.deleteTrackingAction();
+                    shareLink.setVisibility(View.VISIBLE);
                     stopTracking();
-                else if (trackingToggle.getTag().equals("summary"))
+                } else if (trackingToggle.getTag().equals("summary"))
                     htMapFragment.showLiveLocationSharingSummaryView();
                 else
                     bottomButtonCard.showBottomCardLayout();
@@ -691,7 +693,7 @@ public class Home extends BaseActivity implements HomeView {
             collectionId = intent.getStringExtra(Track.KEY_COLLECTION_ID);
             List<String> actionIDs = intent.getStringArrayListExtra(Track.KEY_ACTION_ID_LIST);
             // Call trackActionsOnMap method
-            presenter.trackActionsOnMap(collectionId,lookupId, actionIDs, ActionManager.getSharedManager(this), this);
+            presenter.trackActionsOnMap(collectionId, lookupId, actionIDs, ActionManager.getSharedManager(this), this);
             return true;
         }
         return false;
@@ -766,7 +768,7 @@ public class Home extends BaseActivity implements HomeView {
             bottomButtonCard.setTitleText("Your friend shared his location");
         } else
             bottomButtonCard.setTitleText("Your friend is " + remainingTime + " away!");
-        bottomButtonCard.setDescriptionText("Share your location back so they can see you");
+        bottomButtonCard.setDescriptionText("Share your location back with your friend");
         bottomButtonCard.setActionButtonText("Share my live location");
         bottomButtonCard.showCloseButton();
         bottomButtonCard.showBottomCardLayout();
@@ -1038,7 +1040,7 @@ public class Home extends BaseActivity implements HomeView {
             collectionId = trackingAction.getCollectionId();
             expectedPlace = trackingAction.getExpectedPlace();
         }
-        presenter.shareLiveLocation(ActionManager.getSharedManager(this),collectionId, lookupId, expectedPlace);
+        presenter.shareLiveLocation(ActionManager.getSharedManager(this), collectionId, lookupId, expectedPlace);
     }
 
     @Override
@@ -1385,7 +1387,7 @@ public class Home extends BaseActivity implements HomeView {
 
             lookupId = actionManager.getHyperTrackAction().getLookupId();
             collectionId = actionManager.getHyperTrackAction().getCollectionId();
-            if(!HTTextUtils.isEmpty(collectionId)){
+            if (!HTTextUtils.isEmpty(collectionId)) {
                 HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
                     @Override
                     public void onSuccess(@NonNull SuccessResponse response) {
@@ -1399,8 +1401,7 @@ public class Home extends BaseActivity implements HomeView {
 
                     }
                 });
-            }
-            else if(!HTTextUtils.isEmpty(lookupId)){
+            } else if (!HTTextUtils.isEmpty(lookupId)) {
                 HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
                     @Override
                     public void onSuccess(@NonNull SuccessResponse response) {
