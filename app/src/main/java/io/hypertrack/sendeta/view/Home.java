@@ -135,7 +135,7 @@ public class Home extends BaseActivity implements HomeView {
     private LinearLayout infoMessageView;
     private Place expectedPlace;
     private ProgressDialog mProgressDialog;
-    private boolean isMapLoaded = false, isvehicleTypeTabLayoutVisible = false;
+    private boolean isMapLoaded = false;
     private float zoomLevel = 16.0f;
     private HomeMapAdapter adapter;
     private IHomePresenter<HomeView> presenter = new HomePresenter();
@@ -1213,7 +1213,7 @@ public class Home extends BaseActivity implements HomeView {
         isHandleTrackingUrlDeeplink = false;
         updateCurrentLocationMarker(null);
         updateMapView();
-        initBottomButtonCard(true);
+        initBottomButtonCard(false);
     }
 
     @Override
@@ -1474,9 +1474,6 @@ public class Home extends BaseActivity implements HomeView {
             ActionManager.getSharedManager(this).clearState();
             return;
 
-        } else if (isvehicleTypeTabLayoutVisible) {
-            OnStopSharing();
-            return;
         }
 
         if (!fromPlaceline) {
