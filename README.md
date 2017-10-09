@@ -374,12 +374,12 @@ public void onExpectedPlaceSelected(Place expectedPlace) {
 When the user selects a location, you will get a callback in the ```onExpectedPlaceSelected``` function of your ```MapFragmentCallback``` instance. This is the right time to start a trip. For starting a trip, you need to create a session. This can be achieved by creating a 'visit' [action](https://docs.hypertrack.com/api/entities/action.html).  
 You will need two things to create an action. 
 1. ```expectedPlace``` - This is the destination for the visit. You have it after you select the destination.
-2. ```lookupId``` - A ```lookpupId``` is an identifier created by you for the Live Location trip. A ```lookupId``` is what needs to be shared with the friend, so they can join your trip and share their location. We chose it to be the UUID. You can use your own internal identifiers. 
+2. ```collectionId``` - A ```collectionId``` is an identifier created by you for the Live Location trip. A ```collectionId``` is what needs to be shared with the friend, so they can join your trip and share their location. We chose it to be the UUID. You can use your own internal identifiers. 
 
 For starter project, go to [Home.java](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/view/Home.java#L194-L199) and add the following code when you get a callback of place selection ```onExpectedPlaceSelected```.
 ```java
 ActionParams actionParams = new ActionParamsBuilder()
-                .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
+                .setCollectionId(collectionId != null ? collectionId : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT)
                 .setExpectedPlace(expectedPlace)
                 .build();
@@ -411,12 +411,12 @@ HyperTrack.completeAction(actionID);
 ```
 
 #### Step 3. Share your trip
-As described earlier, a ```lookpupId``` is an identifier which identifies a Live Location trip. When you want to share your trip, your trip's ```lookupId``` needs to be shared.
+As described earlier, a ```collectionId``` is an identifier which identifies a Live Location trip. When you want to share your trip, your trip's ```collectionId``` needs to be shared.
 
-You can share your ```lookupId``` to the other person in different ways. 
+You can share your ```collectionId``` to the other person in different ways. 
 
 1. You can use the Android's ShareCard Intent to share it through messaging apps.
-2. You can use your backend to send the ```lookupId```. 
+2. You can use your backend to send the ```collectionId```. 
 
 For starter project, let us keep it simple and use Android's ShareCard to do the job for us.
 ```java
@@ -428,28 +428,28 @@ startActivityForResult(Intent.createChooser(sharingIntent, "Share via"),
 ```
 
 ### Track or join an ongoing trip
-If you have completed the steps in above section, you have a user who has started a Live Location session. Once their friend receives a ```lookupId``` (either through your own backend or through a messaging app), she can use it to track the user and optionally join the trip if you add a few lines of code as described in the following steps.
+If you have completed the steps in above section, you have a user who has started a Live Location session. Once their friend receives a ```collectionId``` (either through your own backend or through a messaging app), she can use it to track the user and optionally join the trip if you add a few lines of code as described in the following steps.
 
 #### Step 1. Track ongoing trip
 To track the user, use the following function. Although the tracking has started in the SDK, visualizing it requires you to embed HyperTrack's map fragment in your activity containing hypertrack map view. 
 ```java
-HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
     @Override
     public void onSuccess(@NonNull SuccessResponse response) {
-        // Handle trackActionByLookupId API success here
+        // Handle trackActionByCollectionId API success here
     }
  
     @Override
     public void onError(@NonNull ErrorResponse errorResponse) {
-        // Handle trackActionByLookupId API error here
+        // Handle trackActionByCollectionId API error here
     });
 ```
  
-For starter project, you have to enter the ```lookupId``` in the text field that you have received from the user who has started the session. Add the following code in the click of track button ```onTrackSharedLinkButtonClick()```.
+For starter project, you have to enter the ```collectionId``` in the text field that you have received from the user who has started the session. Add the following code in the click of track button ```onTrackSharedLinkButtonClick()```.
  
 ```java
 ActionParams actionParams = new ActionParamsBuilder()
-                .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
+                .setCollectionId(collectionId != null ? collectionId : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT)
                 .setExpectedPlace(expectedPlace)
                 .build();
@@ -474,15 +474,15 @@ HyperTrack.createAndAssignAction(actionParams, new HyperTrackCallback() {
 });
 ```
  
-Now to see the result, go to the other device and set up the user. After that click on 'Track a Live Location trip' and paste/enter the ```lookupId``` which you received from the user. 
+Now to see the result, go to the other device and set up the user. After that click on 'Track a Live Location trip' and paste/enter the ```collectionId``` which you received from the user. 
  
 #### Step 2. Join ongoing trip
-In this step, we will see how the friend can share her Live Location and join the trip. To join the trip, an action with the same lookupId needs to be created. This step is similar to Step 6. But this time it is a lookupId of an existing trip and NOT a new one in Step 6.
+In this step, we will see how the friend can share her Live Location and join the trip. To join the trip, an action with the same collectionId needs to be created. This step is similar to Step 6. But this time it is a collectionId of an existing trip and NOT a new one in Step 6.
 
 For starter project, add this code to `onShareLiveLocationBack()` when the user taps the 'Share Live Location' button. It creates and assign action for your friends Live Location session.
 ```java
 ActionParams actionParams = new ActionParamsBuilder()
-                .setLookupId(lookupID != null ? lookupID : UUID.randomUUID().toString())
+                .setCollectionId(collectionId != null ? collectionId : UUID.randomUUID().toString())
                 .setType(Action.ACTION_TYPE_VISIT)
                 .setExpectedPlace(expectedPlace)
                 .build();
