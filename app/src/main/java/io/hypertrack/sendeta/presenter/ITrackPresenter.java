@@ -28,6 +28,7 @@ import android.support.annotation.NonNull;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.SuccessResponse;
 
@@ -53,25 +54,43 @@ public class ITrackPresenter implements TrackPresenter {
     }
 
     @Override
-    public void trackAction(String lookupId) {
+    public void trackAction(String collectionId, String lookupId) {
         if (trackView != null)
             trackView.showLoader(true);
 
-        HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
-            @Override
-            public void onSuccess(@NonNull SuccessResponse response) {
-                if (trackView != null) {
-                    trackView.showTrackingDetail();
-                    trackView.showLoader(false);
+        if (!HTTextUtils.isEmpty(collectionId)) {
+            HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (trackView != null) {
+                        trackView.showTrackingDetail();
+                        trackView.showLoader(false);
+                    }
                 }
-            }
 
-            @Override
-            public void onError(@NonNull ErrorResponse errorResponse) {
-                if (trackView != null)
-                    trackView.showError();
-            }
-        });
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (trackView != null)
+                        trackView.showError();
+                }
+            });
+        } else {
+            HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (trackView != null) {
+                        trackView.showTrackingDetail();
+                        trackView.showLoader(false);
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (trackView != null)
+                        trackView.showError();
+                }
+            });
+        }
     }
 
     @Override

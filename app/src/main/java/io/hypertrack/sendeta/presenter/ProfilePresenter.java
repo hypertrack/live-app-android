@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
 import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
@@ -96,7 +97,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 }
             });
         } else {
-            HyperTrackLiveUser user = this.onboardingManager.getUser();
+            if (onboardingManager == null)
+                onboardingManager = sharedManager();
+            HyperTrackLiveUser user = onboardingManager.getUser();
             this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(),
                     user.getPhoto());
         }
@@ -109,7 +112,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private UserParams getUserParams(String name, final String number, String ISOCode, File profileImage)
             throws NumberParseException {
-        final HyperTrackLiveUser user = this.onboardingManager.getUser();
+        final HyperTrackLiveUser user = onboardingManager.getUser();
 
         // Update Country Code from device's current location
         if (!HTTextUtils.isEmpty(ISOCode))
@@ -143,9 +146,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     Log.d(TAG, "onSuccess: User Created");
-                   /* if (verifyPhone) {
+                    if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
                         sendVerificationCode(context);
-                    } else*/
+                    } else
                         view.onProfileUpdateSuccess();
                 }
 
@@ -167,17 +170,17 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     @Override
     public void updateProfile(String name, final String number, String ISOCode, File profileImage,
-                              final boolean verifyPhone) {
+                              final boolean verifyPhone, final Context context) {
         try {
             UserParams userParams = getUserParams(name, number, ISOCode, profileImage);
             HyperTrack.updateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
                     Log.d(TAG, "onSuccess: User Profile Updated");
-                   /* if (verifyPhone) {
-                        sendVerificationCode();
-                    } else*/
-                    view.onProfileUpdateSuccess();
+                    if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
+                        sendVerificationCode(context);
+                    } else if (view != null)
+                        view.onProfileUpdateSuccess();
                 }
 
                 @Override

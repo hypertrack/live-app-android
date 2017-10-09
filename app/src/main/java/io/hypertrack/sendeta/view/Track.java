@@ -46,6 +46,7 @@ public class Track extends BaseActivity implements TrackView {
     public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
     public static final String KEY_ACTION_ID_LIST = "action_id_list";
     public static final String KEY_LOOKUP_ID = "lookup_id";
+    public static final String KEY_COLLECTION_ID = "collection_id";
 
     private Intent intent;
     private Button retryButton;
@@ -81,10 +82,19 @@ public class Track extends BaseActivity implements TrackView {
         // Check if Intent has a valid TASK_ID_LIST extra
         if (intent != null) {
             String lookupId = intent.getStringExtra(KEY_LOOKUP_ID);
+            String collectionId = intent.getStringExtra(KEY_COLLECTION_ID);
+            if(!HTTextUtils.isEmpty(collectionId))
+            {
+                if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
+                    // Add lookupId being tracked by this user
+                    trackPresenter.trackAction(collectionId,null);
+                }
+                return true;
+            }
             if (!HTTextUtils.isEmpty(lookupId)) {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
                     // Add lookupId being tracked by this user
-                    trackPresenter.trackAction(lookupId);
+                    trackPresenter.trackAction(null,lookupId);
                 }
                 return true;
 

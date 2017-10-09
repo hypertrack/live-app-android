@@ -97,4 +97,14 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
     public boolean showLiveLocationSharingSummaryView() {
         return true;
     }
+
+    @Override
+    public boolean showActionSummaryForActionID(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+        return false;
+    }
+
+   /* @Override
+    public boolean showBackButton() {
+        return true;
+    }*/
 }
