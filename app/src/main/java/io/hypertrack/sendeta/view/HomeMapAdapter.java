@@ -103,8 +103,8 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
         return false;
     }
 
-    @Override
+   /* @Override
     public boolean showBackButton() {
         return true;
-    }
+    }*/
 }

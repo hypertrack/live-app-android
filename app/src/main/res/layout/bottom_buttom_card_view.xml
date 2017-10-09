@@ -57,14 +57,16 @@
     <com.hypertrack.lib.internal.consumer.view.RippleView
         android:id="@+id/action_button"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/description_text"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/margin_low"
         android:layout_marginLeft="@dimen/margin_huge"
         android:layout_marginRight="@dimen/margin_huge"
         android:layout_marginTop="@dimen/margin_high"
-        android:background="@drawable/action_button_background">
+        android:background="@drawable/action_button_background"
+        android:paddingBottom="@dimen/padding_base"
+        android:paddingTop="@dimen/padding_base">
 
         <TextView
             android:id="@+id/action_button_text"
@@ -72,6 +74,8 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:layout_marginBottom="@dimen/margin_low"
+            android:layout_marginTop="@dimen/margin_low"
             android:text="Start Sharing"
             android:textColor="#000000"
             android:textSize="@dimen/text_large"
@@ -91,7 +95,7 @@
     <RelativeLayout
         android:id="@+id/tracking_url_layout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:layout_below="@id/action_button"
         android:layout_marginLeft="@dimen/margin_medium"
         android:layout_marginRight="@dimen/margin_medium"
@@ -118,7 +122,7 @@
             android:layout_margin="@dimen/margin_low"
             android:background="@drawable/copy_button_background"
             android:foreground="?attr/selectableItemBackground"
-            android:padding="@dimen/padding_base"
+            android:padding="@dimen/padding_low"
             android:text="Copy Link"
             android:textAllCaps="false"
             android:textColor="#000000"

@@ -37,7 +37,7 @@ import io.hypertrack.sendeta.store.ActionManager;
 
 public interface IHomePresenter<V> extends Presenter<V> {
 
-    void shareLiveLocation(final ActionManager actionManager, final String lookupID, final Place expectedPlace);
+    void shareLiveLocation(final ActionManager actionManager,final String collectionID, final String lookupID, final Place expectedPlace);
 
     void stopSharing(final ActionManager actionManager, boolean fromGeofence);
 
@@ -47,5 +47,5 @@ public interface IHomePresenter<V> extends Presenter<V> {
 
     void openNavigationForExpectedPlace(final ActionManager actionManager);
 
-    void trackActionsOnMap(String lookupID, List<String> actionIDs, ActionManager actionManager,Context context);
+    void trackActionsOnMap(String collectionId,String lookupID, List<String> actionIDs, ActionManager actionManager,Context context);
 }

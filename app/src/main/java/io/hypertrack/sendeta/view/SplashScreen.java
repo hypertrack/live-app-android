@@ -98,7 +98,8 @@ public class SplashScreen extends BaseActivity {
         //Check if location permission and location service is ON
         if (isLocationOn()) {
             //If app is open without clicking any link don't show splash screen except app first launch.
-            if (appDeepLink.mId == DeepLinkUtil.DEFAULT && SharedPreferenceManager.getHyperTrackLiveUser() != null) {
+            if ((appDeepLink.mId == DeepLinkUtil.DEFAULT || appDeepLink.mId == DeepLinkUtil.SHORTCUT)
+                    && SharedPreferenceManager.getHyperTrackLiveUser() != null) {
                 proceedToNextScreen();
                 finish();
                 return;
@@ -299,7 +300,7 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void acceptInvite(String userID, String accountID, final HyperTrackCallback callback) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class,this);
+        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class, this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
@@ -329,10 +330,17 @@ public class SplashScreen extends BaseActivity {
     // Method to proceed to next screen with deepLink params
     private void processAppDeepLink(final AppDeepLink appDeepLink) {
         switch (appDeepLink.mId) {
+            case DeepLinkUtil.SHORTCUT:
+                Intent intent = new Intent(this, Home.class);
+                intent.putExtra("shortcut", true);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                TaskStackBuilder.create(this)
+                        .addNextIntentWithParentStack(intent)
+                        .startActivities();
+                break;
             case DeepLinkUtil.TRACK:
                 processTrackingDeepLink(appDeepLink);
                 break;
-
             case DeepLinkUtil.DEFAULT:
             default:
                 final ActionManager actionManager = ActionManager.getSharedManager(this);
@@ -353,22 +361,30 @@ public class SplashScreen extends BaseActivity {
         }
     }
 
-    private void processTrackingDeepLink(AppDeepLink appDeepLink) {
+    private void processTrackingDeepLink(final AppDeepLink appDeepLink) {
+
+
+        // Check if collection_id is available from deeplink
+        if (!HTTextUtils.isEmpty(appDeepLink.collectionId)) {
+            handleTrackingDeepLinkSuccess(appDeepLink.collectionId, null, appDeepLink.taskID);
+            return;
+        }
+
         // Check if lookup_id is available from deeplink
         if (!HTTextUtils.isEmpty(appDeepLink.lookupId)) {
-            handleTrackingDeepLinkSuccess(appDeepLink.lookupId, appDeepLink.taskID);
+            handleTrackingDeepLinkSuccess(null, appDeepLink.lookupId, appDeepLink.taskID);
             return;
         }
 
         // Check if shortCode is empty and taskId is available
         if (HTTextUtils.isEmpty(appDeepLink.shortCode) && !HTTextUtils.isEmpty(appDeepLink.taskID)) {
-            handleTrackingDeepLinkSuccess(null, appDeepLink.taskID);
+            handleTrackingDeepLinkSuccess(null, null, appDeepLink.taskID);
             return;
         }
 
         displayLoader(true);
 
-        // Fetch Action details (lookupId) for given short code
+        // Fetch Action details (collectionId or lookupId) for given short code
         HyperTrack.getActionForShortCode(appDeepLink.shortCode, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
@@ -385,7 +401,7 @@ public class SplashScreen extends BaseActivity {
                 List<Action> actions = (List<Action>) response.getResponseObject();
                 if (actions != null && !actions.isEmpty()) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.get(0).getLookupId(), actions.get(0).getId());
+                    handleTrackingDeepLinkSuccess(actions.get(0).getCollectionId(), actions.get(0).getLookupId(), actions.get(0).getId());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -405,7 +421,18 @@ public class SplashScreen extends BaseActivity {
         });
     }
 
-    private void handleTrackingDeepLinkSuccess(String lookupId, String actionId) {
+    private void handleTrackingDeepLinkSuccess(String collectionId, String lookupId, String actionId) {
+        // Check if current collectionId is same as the one active currently
+        if (!HTTextUtils.isEmpty(collectionId) &&
+                collectionId.equals(ActionManager.getSharedManager(this).getHyperTrackActionCollectionId())) {
+            TaskStackBuilder.create(this)
+                    .addNextIntentWithParentStack(new Intent(this, Home.class)
+                            .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
+                    .startActivities();
+            finish();
+            return;
+        }
+
         // Check if current lookupId is same as the one active currently
         if (!HTTextUtils.isEmpty(lookupId) &&
                 lookupId.equals(ActionManager.getSharedManager(this).getHyperTrackActionLookupId())) {
@@ -413,6 +440,7 @@ public class SplashScreen extends BaseActivity {
                     .addNextIntentWithParentStack(new Intent(this, Home.class)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                     .startActivities();
+            HTLog.i(TAG, "Collection ID is null & Lookup ID: " + lookupId);
             finish();
             return;
         }
@@ -430,8 +458,11 @@ public class SplashScreen extends BaseActivity {
         // Check if current user is sharing location or not
         if (SharedPreferenceManager.getActionID(this) == null ||
                 (action != null && actionId.equalsIgnoreCase(action.getId()))) {
-            intent.setClass(SplashScreen.this, Home.class)
-                    .putExtra(Track.KEY_LOOKUP_ID, lookupId);
+            intent.setClass(SplashScreen.this, Home.class);
+            if (!HTTextUtils.isEmpty(collectionId))
+                intent.putExtra(Track.KEY_COLLECTION_ID, collectionId);
+            else
+                intent.putExtra(Track.KEY_LOOKUP_ID, lookupId);
         } else {
             intent.setClass(SplashScreen.this, Track.class);
         }

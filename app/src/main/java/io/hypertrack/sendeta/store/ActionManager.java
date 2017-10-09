@@ -288,11 +288,12 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void setPlace(Place place) {
         this.place = place;
-        this.savePlace();
+        SharedPreferenceManager.setPlace(place);
+        SharedPreferenceManager.setShortcutPlace(place);
     }
 
     private void clearPlace() {
-        this.deletePlace();
+        SharedPreferenceManager.deletePlace();
         this.place = null;
     }
 
@@ -333,12 +334,8 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupId();
     }
 
-    private void savePlace() {
-        SharedPreferenceManager.setPlace(this.place);
-    }
-
-    private void deletePlace() {
-        SharedPreferenceManager.deletePlace();
+    public String getHyperTrackActionCollectionId() {
+        return getHyperTrackAction() == null ? null : getHyperTrackAction().getCollectionId();
     }
 
     private void clearAction() {

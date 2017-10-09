@@ -42,6 +42,7 @@ public class DeepLinkUtil {
     private static final int HOME = 1;
     public static final int TRACK = 2;
     public static final int BRANCH = 3;
+    public static final int SHORTCUT = 4;
     public static final int DEFAULT = HOME;
 
     //deeplink mapping keys
@@ -50,7 +51,7 @@ public class DeepLinkUtil {
     private static final String KEY_SHORT_CODE = "short_code";
     private static final String KEY_LOOKUP_ID = "lookup_id";
     private static final String KEY_ORDER_ID = "order_id";
-
+    private static final String KEY_COLLECTION_ID = "collection_id";
 
     //private static AppDeepLink appDeepLink;
     public static AppDeepLink prepareAppDeepLink(Context context, Uri uri) {
@@ -70,10 +71,16 @@ public class DeepLinkUtil {
     }
 
     private static void parsePathParams(Context context, AppDeepLink appDeepLink, Uri uri) {
-        if(uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("hypertrack.io")
+        if (uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("hypertrack.io")
                 && !HTTextUtils.isEmpty(uri.getHost())
                 && uri.getHost().contains("open")) {
             appDeepLink.mId = DeepLinkUtil.BRANCH;
+        }
+
+        if (uri.getScheme() != null && uri.getScheme().equalsIgnoreCase("share.location")
+                && !HTTextUtils.isEmpty(uri.getHost())
+                && uri.getHost().contains("hypertrack")) {
+            appDeepLink.mId = DeepLinkUtil.SHORTCUT;
         }
 
         if (uri.getScheme() != null
@@ -118,6 +125,13 @@ public class DeepLinkUtil {
                     }
                     break;
 
+                case KEY_COLLECTION_ID:
+                    try {
+                        appDeepLink.collectionId = uri.getQueryParameter(paramName);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
                 case KEY_ORDER_ID:
                 case KEY_LOOKUP_ID:
                     try {
@@ -126,6 +140,7 @@ public class DeepLinkUtil {
                         e.printStackTrace();
                     }
                     break;
+
             }
         }
 

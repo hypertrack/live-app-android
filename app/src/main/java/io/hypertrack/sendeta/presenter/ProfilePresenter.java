@@ -97,7 +97,9 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 }
             });
         } else {
-            HyperTrackLiveUser user = this.onboardingManager.getUser();
+            if (onboardingManager == null)
+                onboardingManager = sharedManager();
+            HyperTrackLiveUser user = onboardingManager.getUser();
             this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(),
                     user.getPhoto());
         }
@@ -110,7 +112,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private UserParams getUserParams(String name, final String number, String ISOCode, File profileImage)
             throws NumberParseException {
-        final HyperTrackLiveUser user = this.onboardingManager.getUser();
+        final HyperTrackLiveUser user = onboardingManager.getUser();
 
         // Update Country Code from device's current location
         if (!HTTextUtils.isEmpty(ISOCode))
@@ -177,8 +179,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     Log.d(TAG, "onSuccess: User Profile Updated");
                     if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
                         sendVerificationCode(context);
-                    } else
-                    view.onProfileUpdateSuccess();
+                    } else if (view != null)
+                        view.onProfileUpdateSuccess();
                 }
 
                 @Override
