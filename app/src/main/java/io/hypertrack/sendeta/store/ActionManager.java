@@ -289,7 +289,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     public void setPlace(Place place) {
         this.place = place;
         SharedPreferenceManager.setPlace(place);
-        SharedPreferenceManager.setShortcutPlace(place);
     }
 
     private void clearPlace() {

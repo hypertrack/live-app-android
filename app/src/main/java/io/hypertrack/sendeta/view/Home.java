@@ -219,7 +219,8 @@ public class Home extends BaseActivity implements HomeView {
                     //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
 
-                    if (action.getExpectedPlace() != null && action.getExpectedPlace().getLocation() != null) {
+                    if (action.getExpectedPlace() != null && action.getExpectedPlace().getLocation() != null &&
+                            action.getUser().getId().equalsIgnoreCase(HyperTrack.getUserId())) {
                         SharedPreferenceManager.setShortcutPlace(action.getExpectedPlace());
                     }
 
@@ -794,6 +795,7 @@ public class Home extends BaseActivity implements HomeView {
         updateCurrentLocationMarker(null);
         expectedPlace = place;
         ActionManager.getSharedManager(this).setPlace(expectedPlace);
+        SharedPreferenceManager.setShortcutPlace(place);
         initBottomButtonCard(true);
         updateMapView();
         updateMapPadding();
