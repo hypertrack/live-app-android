@@ -2,10 +2,12 @@ package io.hypertrack.sendeta.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -40,6 +42,15 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
 
         // Start Tracking, Only first time
         if (SharedPreferenceManager.isTrackingON() == null || (SharedPreferenceManager.isTrackingON() && !HyperTrack.isTracking())) {
+            final Snackbar snackbar = Snackbar.make(findViewById(R.id.parent_layout), "Hang on. Placeline is generating...", Snackbar.LENGTH_INDEFINITE);
+            snackbar.show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (this != null && !isFinishing())
+                        snackbar.dismiss();
+                }
+            }, 60 * 1000);
             startHyperTrackTracking();
         }
     }
