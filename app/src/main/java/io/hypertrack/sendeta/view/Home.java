@@ -1002,7 +1002,8 @@ public class Home extends BaseActivity implements HomeView {
             builder.include(current);
         }
 
-        if (expectedPlace != null && expectedPlace.getLocation() != null) {
+        if (expectedPlace != null && expectedPlace.getLocation() != null &&
+                expectedPlace.getLocation().getLatLng() != null) {
             LatLng destination = expectedPlace.getLocation().getLatLng();
             builder.include(destination);
         }
