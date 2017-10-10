@@ -230,10 +230,6 @@ public class Home extends BaseActivity implements HomeView {
                     }
                 }
             }
-
-          /*  if (refreshedActions.size() > 1) {
-
-            }*/
             boolean check = true;
             for (Action action : refreshedActions) {
                 if (!action.hasActionFinished()) {
@@ -243,6 +239,7 @@ public class Home extends BaseActivity implements HomeView {
             }
             if (check) {
                 bottomButtonCard.hideBottomCardLayout();
+                hideBottomCard();
             }
         }
 
@@ -282,25 +279,28 @@ public class Home extends BaseActivity implements HomeView {
         @Override
         public void onLiveLocationSharingSummaryCardShown() {
             shareLink.setVisibility(View.GONE);
-            trackingText.setText("Show Summary");
+            trackingText.setText(R.string.show_summary);
             trackingToggle.setTag("summary");
         }
     };
 
-    @TargetApi(Build.VERSION_CODES.N_MR1)
+
     private void addDynamicShortcut(Place place) {
-        ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-        String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
-        List<ShortcutInfo> shortcut = new ArrayList<>();
-        shortcut.add(new ShortcutInfo.Builder(this, "id1")
-                .setShortLabel(name)
-                .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
-                .setIntent(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("share.location://hypertrack")))
-                .build());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+            String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
+            List<ShortcutInfo> shortcut = new ArrayList<>();
 
-        shortcutManager.setDynamicShortcuts(shortcut);
+            shortcut.add(new ShortcutInfo.Builder(this, "id1")
+                    .setShortLabel(name)
+                    .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
+                    .setIntent(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("share.location://hypertrack")))
+                    .build());
 
+
+            shortcutManager.setDynamicShortcuts(shortcut);
+        }
     }
 
     @Override
@@ -319,7 +319,6 @@ public class Home extends BaseActivity implements HomeView {
         initializeUIViews();
 
         // Initialize Map Fragment added in Activity Layout to getMapAsync
-
         htMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.htMapfragment);
 
@@ -747,11 +746,11 @@ public class Home extends BaseActivity implements HomeView {
 
     @Override
     public void hideBottomCard() {
+        stopPulse();
         if (currentLocationMarker != null)
             currentLocationMarker.remove();
         currentLocationMarker = null;
         showCurrentLocationMarker = false;
-        stopPulse();
         if (mProgressDialog != null) {
             mProgressDialog.cancel();
         }
