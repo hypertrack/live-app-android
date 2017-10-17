@@ -284,22 +284,24 @@ public class Home extends BaseActivity implements HomeView {
         }
     };
 
-
     private void addDynamicShortcut(Place place) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-            String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
-            List<ShortcutInfo> shortcut = new ArrayList<>();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+                String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
+                List<ShortcutInfo> shortcut = new ArrayList<>();
 
-            shortcut.add(new ShortcutInfo.Builder(this, "id1")
-                    .setShortLabel(name)
-                    .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
-                    .setIntent(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("share.location://hypertrack")))
-                    .build());
+                shortcut.add(new ShortcutInfo.Builder(this, "id1")
+                        .setShortLabel(name)
+                        .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
+                        .setIntent(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("share.location://hypertrack")))
+                        .build());
 
-
-            shortcutManager.setDynamicShortcuts(shortcut);
+                shortcutManager.setDynamicShortcuts(shortcut);
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
@@ -1454,7 +1456,6 @@ public class Home extends BaseActivity implements HomeView {
     @Override
     protected void onPause() {
         super.onPause();
-        HyperTrack.removeActions(null);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
     }
@@ -1513,6 +1514,7 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             HyperTrack.removeActions(null);
         }
+        HyperTrack.removeActions(null);
         super.onDestroy();
     }
 }
