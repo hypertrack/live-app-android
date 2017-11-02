@@ -151,7 +151,7 @@ public class Home extends BaseActivity implements HomeView {
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
     boolean showCurrentLocationMarker = true;
-    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false;
+    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false, isEditing = false;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -281,6 +281,33 @@ public class Home extends BaseActivity implements HomeView {
             shareLink.setVisibility(View.GONE);
             trackingText.setText(R.string.show_summary);
             trackingToggle.setTag("summary");
+        }
+
+        @Override
+        public void onBeginEditingExpectedPlace(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            isEditing = true;
+            liveTrackingActionLayout.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onCanceledEditingExpectedPlace(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            isEditing = false;
+            liveTrackingActionLayout.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onEndEditingExpectedPlace(HyperTrackMapFragment hyperTrackMapFragment, String actionID, Place chooseOnMapDestinationPlace) {
+            isEditing = false;
+            liveTrackingActionLayout.setVisibility(View.VISIBLE);
+            ActionManager actionManager = ActionManager.getSharedManager(Home.this);
+            actionManager.setPlace(chooseOnMapDestinationPlace);
+            actionManager.onActionStart();
+        }
+
+        @Override
+        public void onReceiveEditExpectedPlaceError(HyperTrackMapFragment hyperTrackMapFragment, String actionID, String errorMessage) {
+            isEditing = false;
+            liveTrackingActionLayout.setVisibility(View.VISIBLE);
         }
     };
 
@@ -456,7 +483,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setActionButtonText("Start Sharing");
         bottomButtonCard.showActionButton();
         bottomButtonCard.showTitle();
-        if (show)
+        if (show && !isEditing)
             bottomButtonCard.showBottomCardLayout();
     }
 
