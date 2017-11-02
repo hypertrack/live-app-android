@@ -316,16 +316,26 @@ public class Home extends BaseActivity implements HomeView {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
                 String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
+                int count = 0;
+                if (shortcutManager.getDynamicShortcuts() != null) {
+                    count = shortcutManager.getDynamicShortcuts().size();
+                }
+                if (count > 2) {
+                    String id = shortcutManager.getDynamicShortcuts().get(0).getId();
+                    List<String> shortcutIds = new ArrayList<>();
+                    shortcutIds.add(id);
+                    shortcutManager.removeDynamicShortcuts(shortcutIds);
+                }
+
                 List<ShortcutInfo> shortcut = new ArrayList<>();
 
-                shortcut.add(new ShortcutInfo.Builder(this, "id1")
+                shortcut.add(0, new ShortcutInfo.Builder(this, place.getLocation().getLatLng().toString())
                         .setShortLabel(name)
                         .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
                         .setIntent(new Intent(Intent.ACTION_VIEW,
                                 Uri.parse("share.location://hypertrack")))
                         .build());
-
-                shortcutManager.setDynamicShortcuts(shortcut);
+                shortcutManager.addDynamicShortcuts(shortcut);
             }
         } catch (Exception e) {
             Crashlytics.logException(e);
