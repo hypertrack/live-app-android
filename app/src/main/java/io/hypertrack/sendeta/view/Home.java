@@ -151,7 +151,7 @@ public class Home extends BaseActivity implements HomeView {
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
     boolean showCurrentLocationMarker = true;
-    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false;
+    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false, isEditing = false;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -282,24 +282,63 @@ public class Home extends BaseActivity implements HomeView {
             trackingText.setText(R.string.show_summary);
             trackingToggle.setTag("summary");
         }
+
+        @Override
+        public void onBeginEditingExpectedPlace(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            isEditing = true;
+            liveTrackingActionLayout.setVisibility(View.GONE);
+        }
+
+        @Override
+        public void onCanceledEditingExpectedPlace(HyperTrackMapFragment hyperTrackMapFragment, String actionID) {
+            isEditing = false;
+            liveTrackingActionLayout.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onEndEditingExpectedPlace(HyperTrackMapFragment hyperTrackMapFragment, String actionID, Place chooseOnMapDestinationPlace) {
+            isEditing = false;
+            liveTrackingActionLayout.setVisibility(View.VISIBLE);
+            ActionManager actionManager = ActionManager.getSharedManager(Home.this);
+            actionManager.setPlace(chooseOnMapDestinationPlace);
+            actionManager.onActionStart();
+        }
+
+        @Override
+        public void onReceiveEditExpectedPlaceError(HyperTrackMapFragment hyperTrackMapFragment, String actionID, String errorMessage) {
+            isEditing = false;
+            liveTrackingActionLayout.setVisibility(View.VISIBLE);
+        }
     };
 
-
     private void addDynamicShortcut(Place place) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-            ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-            String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
-            List<ShortcutInfo> shortcut = new ArrayList<>();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
+                String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
+                int count = 0;
+                if (shortcutManager.getDynamicShortcuts() != null) {
+                    count = shortcutManager.getDynamicShortcuts().size();
+                }
+                if (count > 2) {
+                    String id = shortcutManager.getDynamicShortcuts().get(0).getId();
+                    List<String> shortcutIds = new ArrayList<>();
+                    shortcutIds.add(id);
+                    shortcutManager.removeDynamicShortcuts(shortcutIds);
+                }
 
-            shortcut.add(new ShortcutInfo.Builder(this, "id1")
-                    .setShortLabel(name)
-                    .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
-                    .setIntent(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse("share.location://hypertrack")))
-                    .build());
+                List<ShortcutInfo> shortcut = new ArrayList<>();
 
-
-            shortcutManager.setDynamicShortcuts(shortcut);
+                shortcut.add(0, new ShortcutInfo.Builder(this, place.getLocation().getLatLng().toString())
+                        .setShortLabel(name)
+                        .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
+                        .setIntent(new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("share.location://hypertrack")))
+                        .build());
+                shortcutManager.addDynamicShortcuts(shortcut);
+            }
+        } catch (Exception e) {
+            Crashlytics.logException(e);
         }
     }
 
@@ -454,7 +493,7 @@ public class Home extends BaseActivity implements HomeView {
         bottomButtonCard.setActionButtonText("Start Sharing");
         bottomButtonCard.showActionButton();
         bottomButtonCard.showTitle();
-        if (show)
+        if (show && !isEditing)
             bottomButtonCard.showBottomCardLayout();
     }
 
@@ -1454,7 +1493,6 @@ public class Home extends BaseActivity implements HomeView {
     @Override
     protected void onPause() {
         super.onPause();
-        HyperTrack.removeActions(null);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
     }
@@ -1513,6 +1551,7 @@ public class Home extends BaseActivity implements HomeView {
             OnStopSharing();
             HyperTrack.removeActions(null);
         }
+        HyperTrack.removeActions(null);
         super.onDestroy();
     }
 }

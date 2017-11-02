@@ -202,7 +202,7 @@ dependencies {
             }
         }
     } else {
-        compile("com.hypertrack:android:0.4.18:release@aar") {
+        compile("com.hypertrack:android:0.4.22:release@aar") {
             transitive = true;
         }
     }
