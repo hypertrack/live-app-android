@@ -24,18 +24,99 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
+import android.support.annotation.NonNull;
+
+import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.SuccessResponse;
+
 import java.util.List;
+
+import io.hypertrack.sendeta.view.TrackView;
 
 /**
  * Created by Aman Jain on 04/04/17.
  */
 
-public interface TrackPresenter {
-    void removeTrackingAction();
+public class TrackPresenter implements ITrackPresenter {
 
-    void trackAction(String id, String lookupId);
+    private TrackView trackView;
 
-    void trackAction(List<String> actionsIDList);
+    public TrackPresenter(TrackView trackView) {
+        this.trackView = trackView;
+    }
 
-    void destroy();
+    @Override
+    public void removeTrackingAction() {
+        HyperTrack.removeActions(null);
+    }
+
+    @Override
+    public void trackAction(String collectionId, String lookupId) {
+        if (trackView != null)
+            trackView.showLoader(true);
+
+        if (!HTTextUtils.isEmpty(collectionId)) {
+            HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (trackView != null) {
+                        trackView.showTrackingDetail();
+                        trackView.showLoader(false);
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (trackView != null)
+                        trackView.showError();
+                }
+            });
+        } else {
+            HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    if (trackView != null) {
+                        trackView.showTrackingDetail();
+                        trackView.showLoader(false);
+                    }
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (trackView != null)
+                        trackView.showError();
+                }
+            });
+        }
+    }
+
+    @Override
+    public void trackAction(final List<String> actionsIDList) {
+        if (trackView != null)
+            trackView.showLoader(true);
+
+        HyperTrack.trackAction(actionsIDList, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (trackView != null) {
+                    trackView.showTrackingDetail();
+                    trackView.showLoader(false);
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                if (trackView != null)
+                    trackView.showError();
+            }
+        });
+    }
+
+    @Override
+    public void destroy() {
+        trackView = null;
+    }
 }
