@@ -48,8 +48,8 @@ import java.io.IOException;
 
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.view.Profile;
 import io.hypertrack.sendeta.view.ProfileView;
@@ -200,7 +200,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     private void sendVerificationCode(Context context) {
-        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class, context);
+        HyperTrackLiveService getResendCodeService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override

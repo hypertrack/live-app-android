@@ -30,7 +30,7 @@ import android.text.TextUtils;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.hypertrack.lib.internal.common.logging.HTLog;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,19 +69,19 @@ public class GeofenceTransitionsIntentService extends IntentService {
             if (geofencingEvent.hasError()) {
                 String errorMessage = ErrorMessages.getGeofenceErrorString(this,
                         geofencingEvent.getErrorCode());
-                HTLog.e(TAG, errorMessage);
+                HyperLog.e(TAG, errorMessage);
                 return;
             }
 
             // Get the transition type.
             int geofenceTransition = geofencingEvent.getGeofenceTransition();
             if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
-                HTLog.i(TAG, "User is dwelling in geo fence.");
+                HyperLog.i(TAG, "User is dwelling in geo fence.");
                 ActionManager.getSharedManager(getApplicationContext()).OnGeoFenceSuccess();
 
             } else {
                 // Log the error.
-                HTLog.e(TAG, getString(R.string.geofence_transition_invalid_type,
+                HyperLog.e(TAG, getString(R.string.geofence_transition_invalid_type,
                         geofenceTransition));
             }
 
@@ -90,7 +90,7 @@ public class GeofenceTransitionsIntentService extends IntentService {
             String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
                     geofencingEvent.getTriggeringGeofences());
 
-            HTLog.i(TAG, "GeoFenceTransition Details: " + geofenceTransitionDetails);
+            HyperLog.i(TAG, "GeoFenceTransition Details: " + geofenceTransitionDetails);
         }
     }
 

@@ -38,7 +38,7 @@ import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.internal.common.logging.HTLog;
+
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
@@ -190,16 +190,16 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
                 public void onResult(@NonNull Status status) {
 
                     if (status.isSuccess()) {
-                        HTLog.i(TAG, "Geofence set at Expected Place");
+                        HyperLog.i(TAG, "Geofence set at Expected Place");
                         addGeofencingRequest = false;
                     } else {
-                        HTLog.e(TAG, "Geofence error at Expected Place" + status.getStatusMessage());
+                        HyperLog.e(TAG, "Geofence error at Expected Place" + status.getStatusMessage());
                         addGeofencingRequest = true;
                     }
                 }
             });
         } catch (SecurityException | IllegalArgumentException exception) {
-            HTLog.e(TAG, "Geofence error at Expected Place" + exception.getMessage());
+            HyperLog.e(TAG, "Geofence error at Expected Place" + exception.getMessage());
             CrashlyticsWrapper.log(exception);
         }
     }

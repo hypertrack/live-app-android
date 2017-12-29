@@ -56,7 +56,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.internal.common.logging.HTLog;
+
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 import com.squareup.picasso.Picasso;
@@ -74,8 +74,8 @@ import io.hypertrack.sendeta.model.Country;
 import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
 import io.hypertrack.sendeta.network.retrofit.CallUtils;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
@@ -444,7 +444,7 @@ public class Profile extends BaseActivity implements ProfileView {
         SharedPreferenceManager.deletePlace();
         SharedPreferenceManager.deletePreviousUserId();
 
-        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
+        HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
         Intent intent = new Intent(Profile.this, Placeline.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Profile.this)
@@ -454,14 +454,14 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class, this);
+        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
-                    HTLog.d(TAG, "Invite Accepted");
+                    HyperLog.d(TAG, "Invite Accepted");
 
                 } else {
                     Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");

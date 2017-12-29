@@ -6,8 +6,8 @@ import android.util.Log;
 import com.hypertrack.lib.models.User;
 
 import io.hypertrack.sendeta.model.AcceptInviteModel;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.view.InviteView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -33,7 +33,7 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
 
     @Override
     public void acceptInvite(String userID, String accountID, String previousUserId, Context context) {
-        HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
+        HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,context);
         Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, previousUserId));
         call.enqueue(new Callback<User>() {
             @Override

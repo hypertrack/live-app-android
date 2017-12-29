@@ -28,9 +28,9 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.consumer.utils.ActionUtils;
 import com.hypertrack.lib.models.Action;
@@ -108,7 +108,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                     }
 
                     HyperTrack.clearServiceNotificationParams();
-                    HTLog.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
+                    HyperLog.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
 
                     if (view != null)
                         view.showShareLiveLocationSuccess(action);
@@ -124,7 +124,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             public void onError(@NonNull ErrorResponse errorResponse) {
                 if (view != null)
                     view.showShareLiveLocationError(errorResponse);
-                HTLog.e(TAG, "Share Live Location failed with error: " + errorResponse.getErrorMessage());
+                HyperLog.e(TAG, "Share Live Location failed with error: " + errorResponse.getErrorMessage());
             }
         });
     }
@@ -136,7 +136,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             @Override
             public void OnSuccess() {
                 HyperTrack.clearServiceNotificationParams();
-                HTLog.i(TAG, "Stopped sharing live location successfully" + (fromGeofence ? " by geofence." : "."));
+                HyperLog.i(TAG, "Stopped sharing live location successfully" + (fromGeofence ? " by geofence." : "."));
                 if (view != null) {
                     if (!fromGeofence)
                         view.showStopSharingSuccess();
@@ -148,7 +148,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
             @Override
             public void OnError() {
-                HTLog.i(TAG, "Error occurred while trying to stop sharing.");
+                HyperLog.i(TAG, "Error occurred while trying to stop sharing.");
                 if (view != null)
                     view.showStopSharingError();
             }
@@ -158,7 +158,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
     @Override
     public void openCustomShareCard(Context context, ActionManager actionManager) {
-        if (actionManager.getHyperTrackAction() == null)
+        if (actionManager.getHyperTrackAction() == null || view == null)
             return;
 
         Action action = actionManager.getHyperTrackAction();
@@ -166,17 +166,16 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
             Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
             String remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
-            if (HTTextUtils.isEmpty(remainingTime)) {
-                if (view != null)
-                    view.showCustomShareCardError(action.getTrackingURL());
-            } else {
-                if (view != null)
-                    view.showCustomShareCardSuccess(remainingTime,
-                            action.getTrackingURL());
-            }
 
-        } else if (view != null)
-            view.showCustomShareCardError(action.getTrackingURL());
+            if (HTTextUtils.isEmpty(remainingTime)) {
+                view.showCustomShareCardError(action.getTrackingURL());
+            } else {
+                view.showCustomShareCardSuccess(remainingTime,
+                        action.getTrackingURL());
+            }
+            return;
+        }
+        view.showCustomShareCardError(action.getTrackingURL());
     }
 
     @Override

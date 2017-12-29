@@ -46,7 +46,7 @@ import android.widget.Toast;
 
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.internal.common.logging.HTLog;
+
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -66,8 +66,8 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.AppDeepLink;
 import io.hypertrack.sendeta.network.retrofit.CallUtils;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
@@ -300,14 +300,14 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void acceptInvite(String userID, String accountID, final HyperTrackCallback callback) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class, this);
+        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
-                    HTLog.d(TAG, "Invite Accepted");
+                    HyperLog.d(TAG, "Invite Accepted");
 
                 } else {
                     Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
@@ -440,7 +440,7 @@ public class SplashScreen extends BaseActivity {
                     .addNextIntentWithParentStack(new Intent(this, Home.class)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                     .startActivities();
-            HTLog.i(TAG, "Collection ID is null & Lookup ID: " + lookupId);
+            HyperLog.i(TAG, "Collection ID is null & Lookup ID: " + lookupId);
             finish();
             return;
         }

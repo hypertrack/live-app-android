@@ -82,25 +82,21 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
-import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.consumer.utils.AnimationUtils;
 import com.hypertrack.lib.internal.consumer.view.MarkerAnimation;
 import com.hypertrack.lib.internal.consumer.view.RippleView;
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
-import com.hypertrack.lib.models.ServiceNotificationParams;
-import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 import com.hypertrack.lib.models.SuccessResponse;
 
 import java.util.ArrayList;
@@ -160,7 +156,7 @@ public class Home extends BaseActivity implements HomeView {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    HTLog.i(TAG, "Inside runOnUIThread: ");
+                    HyperLog.i(TAG, "Inside runOnUIThread: ");
                     presenter.stopSharing(ActionManager.getSharedManager(Home.this), true);
                 }
             });
@@ -405,7 +401,7 @@ public class Home extends BaseActivity implements HomeView {
      * Note: Show share tracking url message on Stop_Ended/Trip_Started event and reset it in other cases.
      */
     private void setHyperTrackCallbackForActivityUpdates() {
-        HyperTrack.setCallback(new HyperTrackEventCallback() {
+        /*HyperTrack.setCallback(new HyperTrackEventCallback() {
             @Override
             public void onEvent(@NonNull final HyperTrackEvent event) {
                 switch (event.getEventType()) {
@@ -419,7 +415,7 @@ public class Home extends BaseActivity implements HomeView {
             public void onError(@NonNull final ErrorResponse errorResponse) {
                 // do nothing
             }
-        });
+        });*/
     }
 
     private void initializeUIViews() {
@@ -643,7 +639,7 @@ public class Home extends BaseActivity implements HomeView {
      * Note: Show share tracking url message on Stop_Ended/Trip_Started event and reset it in other cases.
      */
     private void setCallbackForHyperTrackEvents() {
-        HyperTrack.setCallback(new HyperTrackEventCallback() {
+        /*HyperTrack.setCallback(new HyperTrackEventCallback() {
             @Override
             public void onEvent(@NonNull final HyperTrackEvent event) {
                 switch (event.getEventType()) {
@@ -689,7 +685,7 @@ public class Home extends BaseActivity implements HomeView {
             public void onError(@NonNull final ErrorResponse errorResponse) {
                 // do nothing
             }
-        });
+        });*/
     }
 
     /*

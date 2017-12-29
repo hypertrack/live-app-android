@@ -7,8 +7,8 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.models.User;
 
 import io.hypertrack.sendeta.model.VerifyCodeModel;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.view.VerifyView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,7 +36,7 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
     @Override
     public void verifyOTP(String OTP, Context context) {
         VerifyCodeModel verifyCodeModel = new VerifyCodeModel(OTP);
-        HyperTrackService getVerifyCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
+        HyperTrackLiveService getVerifyCodeService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,context);
         Call<User> call = getVerifyCodeService.validateCode(HyperTrack.getUserId(), verifyCodeModel);
         call.enqueue(new Callback<User>() {
             @Override
@@ -65,7 +65,7 @@ public class VerifyPresenter implements IVerifyPresenter<VerifyView> {
 
     @Override
     public void resendOTP(Context context) {
-        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
+        HyperTrackLiveService getResendCodeService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override
