@@ -23,8 +23,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
-
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 
@@ -166,7 +166,7 @@ public class Verify extends BaseActivity implements VerifyView {
                 JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
                     HyperTrack.startTracking();
-                    SharedPreferenceManager.setTrackingON();
+                    SharedPreferenceManager.setTrackingON(this);
                     acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
 
                 } else {
@@ -187,9 +187,8 @@ public class Verify extends BaseActivity implements VerifyView {
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
-        SharedPreferenceManager.deleteAction();
-        SharedPreferenceManager.deletePlace();
-        SharedPreferenceManager.deletePreviousUserId();
+        SharedPreferenceManager.deleteAction(this);
+        SharedPreferenceManager.deletePlace(this);
 
         HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
         Intent intent = new Intent(Verify.this, Placeline.class);

@@ -45,7 +45,8 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
         initUI();
 
         // Start Tracking, Only first time
-        if (SharedPreferenceManager.isTrackingON() == null || (SharedPreferenceManager.isTrackingON() && !HyperTrack.isTracking())) {
+        if (SharedPreferenceManager.isTrackingON(this) == null ||
+                (SharedPreferenceManager.isTrackingON(this) && !HyperTrack.isTracking())) {
             final Snackbar snackbar = Snackbar.make(findViewById(R.id.parent_layout), "Hang on. Placeline is generating...", Snackbar.LENGTH_INDEFINITE);
             snackbar.show();
             new Handler().postDelayed(new Runnable() {
@@ -116,13 +117,13 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
     private void startHyperTrackTracking() {
         if (!HyperTrack.isTracking()) {
             HyperTrack.startTracking();
-            SharedPreferenceManager.setTrackingON();
+            SharedPreferenceManager.setTrackingON(this);
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
             Toast.makeText(this, "Tracking started successfully.", Toast.LENGTH_SHORT).show();
 
         } else {
             HyperTrack.stopTracking();
-            SharedPreferenceManager.setTrackingOFF();
+            SharedPreferenceManager.setTrackingOFF(this);
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.start_tracking);
             Toast.makeText(this, "Tracking stopped successfully.", Toast.LENGTH_SHORT).show();
         }

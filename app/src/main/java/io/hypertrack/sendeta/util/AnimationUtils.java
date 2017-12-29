@@ -23,9 +23,11 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.util;
 
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.view.animation.Transformation;
 
 /**
@@ -142,5 +144,48 @@ public class AnimationUtils {
         if (startAnim)
             v.startAnimation(a);
         return a;
+    }
+
+    public static void ripple(@NonNull final View view) {
+        final ScaleAnimation growAnim = new ScaleAnimation(0.9f, 1.05f, 0.9f, 1.05f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+        final ScaleAnimation shrinkAnim = new ScaleAnimation(1.05f, 0.9f, 1.05f, 0.9f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+
+        growAnim.setDuration(800);
+        shrinkAnim.setDuration(800);
+
+        view.setAnimation(growAnim);
+        growAnim.start();
+
+        growAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setAnimation(shrinkAnim);
+                shrinkAnim.start();
+            }
+        });
+
+        shrinkAnim.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                view.setAnimation(growAnim);
+                growAnim.start();
+            }
+        });
     }
 }

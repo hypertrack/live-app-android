@@ -39,7 +39,7 @@ import io.hypertrack.sendeta.model.AppDeepLink;
 public class DeepLinkUtil {
 
     //DeepLink Ids
-    private static final int HOME = 1;
+    public static final int HOME = 1;
     public static final int TRACK = 2;
     public static final int BRANCH = 3;
     public static final int SHORTCUT = 4;

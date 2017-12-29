@@ -32,18 +32,19 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
     }
 
     @Override
-    public void acceptInvite(String userID, String accountID, String previousUserId, Context context) {
+    public void acceptInvite(String userID, String accountID, Context context) {
         HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,context);
-        Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, previousUserId));
+        Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, userID));
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
+                if (inviteView == null)
+                    return;
+
                 if (response.isSuccessful()) {
-                    if (inviteView != null)
-                        inviteView.inviteAccepted();
+                    inviteView.inviteAccepted();
                 } else {
-                    if (inviteView != null)
-                        inviteView.showError();
+                    inviteView.showError();
                 }
             }
 

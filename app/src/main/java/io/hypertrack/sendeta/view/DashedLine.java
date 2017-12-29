@@ -38,8 +38,7 @@ import io.hypertrack.sendeta.R;
  */
 
 public class DashedLine extends View {
-    static public int ORIENTATION_HORIZONTAL = 0;
-    static public int ORIENTATION_VERTICAL = 1;
+    static public final int ORIENTATION_HORIZONTAL = 0;
     private Paint mPaint;
     private int orientation;
 

@@ -41,33 +41,44 @@ import java.util.UUID;
  */
 class EasyImageFiles {
 
-    public static String DEFAULT_FOLDER_NAME = "EasyImage";
-    public static String TEMP_FOLDER_NAME = "Temp";
+    private static final String DEFAULT_FOLDER_NAME = "EasyImage";
+    private static final String TEMP_FOLDER_NAME = "Temp";
 
-
-    public static String getFolderName(Context context) {
+    private static String getFolderName(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context).getString(BundleKeys.FOLDER_NAME, DEFAULT_FOLDER_NAME);
     }
 
-    public static File tempImageDirectory(Context context) {
+    private static File tempImageDirectory(Context context) {
         boolean publicTemp = PreferenceManager.getDefaultSharedPreferences(context).getBoolean(BundleKeys.PUBLIC_TEMP, false);
         File dir = publicTemp ? publicTemplDir(context) : privateTemplDir(context);
-        if (!dir.exists()) dir.mkdirs();
+
+        if (dir != null && !dir.exists()) {
+            boolean result = dir.mkdirs();
+            if (!result)
+                return null;
+        }
+
         return dir;
     }
 
-    public static File publicRootDir(Context context) {
+    static File publicRootDir() {
         return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
     }
 
-    public static File publicAppExternalDir(Context context) {
+    static File publicAppExternalDir(Context context) {
         return context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
     }
 
-    public static File publicTemplDir(Context context) {
+    static File publicTemplDir(Context context) {
         File cameraPicturesDir = new File(EasyImageFiles.getFolderLocation(context), EasyImageFiles.getFolderName(context));
         File publicTempDir = new File(cameraPicturesDir, TEMP_FOLDER_NAME);
-        if (!publicTempDir.exists()) publicTempDir.mkdirs();
+
+        if (!publicTempDir.exists()) {
+            boolean result = publicTempDir.mkdirs();
+            if (!result)
+                return null;
+        }
+
         return publicTempDir;
     }
 
@@ -75,7 +86,7 @@ class EasyImageFiles {
         return new File(context.getApplicationContext().getCacheDir(), getFolderName(context));
     }
 
-    public static void writeToFile(InputStream in, File file) {
+    private static void writeToFile(InputStream in, File file) {
         try {
             OutputStream out = new FileOutputStream(file);
             byte[] buf = new byte[1024];
@@ -92,13 +103,17 @@ class EasyImageFiles {
         }
     }
 
-    public static File pickedExistingPicture(Context context, Uri photoUri) throws IOException {
+    static File pickedExistingPicture(Context context, Uri photoUri) throws IOException {
         InputStream pictureInputStream = context.getContentResolver().openInputStream(photoUri);
         File directory = tempImageDirectory(context);
         File photoFile = new File(directory, UUID.randomUUID().toString());
-        photoFile.createNewFile();
-        writeToFile(pictureInputStream, photoFile);
-        return photoFile;
+        boolean result = photoFile.createNewFile();
+        if (result) {
+            writeToFile(pictureInputStream, photoFile);
+            return photoFile;
+        }
+
+        return null;
     }
 
     /**
@@ -106,15 +121,19 @@ class EasyImageFiles {
      *
      * @param context context
      */
-    public static String getFolderLocation(Context context) {
+    private static String getFolderLocation(Context context) {
         String defaultFolderLocation = publicAppExternalDir(context).getPath();
         return PreferenceManager.getDefaultSharedPreferences(context).getString(BundleKeys.FOLDER_LOCATION, defaultFolderLocation);
     }
 
-    public static File getCameraPicturesLocation(Context context) throws IOException {
+    static File getCameraPicturesLocation(Context context) throws IOException {
         File dir = new File(EasyImageFiles.getFolderLocation(context), EasyImageFiles.getFolderName(context));
-        if (!dir.exists()) dir.mkdirs();
-        File imageFile = File.createTempFile(UUID.randomUUID().toString(), ".jpg", dir);
-        return imageFile;
+        if (!dir.exists()) {
+            boolean result = dir.mkdirs();
+            if (!result)
+                return null;
+        }
+
+        return File.createTempFile(UUID.randomUUID().toString(), ".jpg", dir);
     }
 }

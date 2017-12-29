@@ -30,7 +30,7 @@ import android.text.TextUtils;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-
+import com.hypertrack.hyperlog.HyperLog;
 
 import java.util.ArrayList;
 import java.util.List;

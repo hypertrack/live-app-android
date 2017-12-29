@@ -23,7 +23,11 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.view;
 
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -36,6 +40,7 @@ import android.widget.TextView;
 
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
 
@@ -219,6 +224,25 @@ public class BaseActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (HTTextUtils.isEmpty(BuildConfig.HYPERTRACK_PK)
+                || BuildConfig.HYPERTRACK_PK.equalsIgnoreCase("YOUR_HYPERTRACK_PUBLISHABLE_KEY")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("HyperTrack Publishable Key is not configured!")
+                    .setMessage("Add HyperTrack Publishable Key to keys.properties file")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            System.exit(0);
+                        }
+                    })
+                    .show();
+        }
     }
 
     @Override

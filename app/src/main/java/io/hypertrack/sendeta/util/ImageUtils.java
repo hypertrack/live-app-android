@@ -101,15 +101,17 @@ public class ImageUtils {
             inputStream.close();
 
             // here i override the original image file
-            file.createNewFile();
-            FileOutputStream outputStream = new FileOutputStream(file);
-            selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-            return file;
+            if (file.createNewFile()) {
+                FileOutputStream outputStream = new FileOutputStream(file);
+                selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
+                return file;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             CrashlyticsWrapper.log(e);
-            return null;
         }
+
+        return null;
     }
 
     public static Bitmap getRotatedBitMap(File imageFile) {

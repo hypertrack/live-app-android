@@ -15,7 +15,6 @@ public class AcceptInviteModel implements Serializable {
     @SerializedName("existing_user_id")
     private String existingUserID;
 
-
     public AcceptInviteModel(String accountID, String previousUserId) {
         this.accountID = accountID;
         existingUserID = previousUserId;

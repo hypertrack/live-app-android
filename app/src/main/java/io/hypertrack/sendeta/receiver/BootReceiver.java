@@ -28,7 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-
+import com.hypertrack.hyperlog.HyperLog;
 
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
@@ -44,9 +44,9 @@ public class BootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         HyperLog.i(TAG, "HyperTrackLive Boot receiver onReceive");
 
-        if (SharedPreferenceManager.getGeofencingRequest() != null) {
+        if (SharedPreferenceManager.getGeofencingRequest(context) != null) {
             // Add Geofencing Request
-            ActionManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
+            ActionManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest(context));
             ActionManager.getSharedManager(context).addGeofencingRequest();
         }
     }
