@@ -24,7 +24,8 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta;
 
-import android.app.Application;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -40,11 +41,12 @@ import io.hypertrack.sendeta.util.DevDebugUtils;
 /**
  * Created by suhas on 11/11/15.
  */
-public class MyApplication extends Application {
+public class MyApplication extends MultiDexApplication {
 
     @Override
     public void onCreate() {
         super.onCreate();
+        MultiDex.install(this   );
 
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.

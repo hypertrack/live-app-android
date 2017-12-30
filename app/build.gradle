@@ -224,10 +224,11 @@ dependencies {
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
     compile 'io.branch.sdk.android:library:2.+'
-    implementation 'com.hypertrack:hyperlog:0.0.7'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
+
+    compile 'com.android.support:multidex:1.0.2'
 
     // Leak Canary dependency for Debug builds
     debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
@@ -237,7 +238,6 @@ dependencies {
     }
 
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-    compile 'io.branch.sdk.android:library:2.+'
 
     //Check if SDK library exist or not
     if (findProject(':library') != null) {
