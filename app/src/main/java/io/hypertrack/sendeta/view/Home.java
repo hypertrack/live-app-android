@@ -88,19 +88,15 @@ import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
-import com.hypertrack.lib.callbacks.HyperTrackEventCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.internal.consumer.utils.AnimationUtils;
 import com.hypertrack.lib.internal.consumer.view.MarkerAnimation;
 import com.hypertrack.lib.internal.consumer.view.RippleView;
-import com.hypertrack.lib.internal.transmitter.models.HyperTrackEvent;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
-import com.hypertrack.lib.models.ServiceNotificationParams;
-import com.hypertrack.lib.models.ServiceNotificationParamsBuilder;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 
@@ -1081,8 +1077,8 @@ public class Home extends BaseActivity implements HomeView {
             expectedPlace = trackingAction.getExpectedPlace();
         }
         User user = OnboardingManager.sharedManager(this).getUser();
-        presenter.shareLiveLocation(user, ActionManager.getSharedManager(this), collectionId,
-                lookupId, expectedPlace);
+        presenter.shareLiveLocation(user, ActionManager.getSharedManager(this), lookupId,
+                collectionId, expectedPlace);
     }
 
     @Override
