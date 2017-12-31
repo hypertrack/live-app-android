@@ -24,7 +24,8 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta;
 
-import android.app.Application;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
@@ -40,14 +41,12 @@ import io.hypertrack.sendeta.util.DevDebugUtils;
 /**
  * Created by suhas on 11/11/15.
  */
-public class MyApplication extends Application {
-
-    private static MyApplication mInstance;
+public class MyApplication extends MultiDexApplication {
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mInstance = this;
+        MultiDex.install(this   );
 
         if (LeakCanary.isInAnalyzerProcess(this)) {
             // This process is dedicated to LeakCanary for heap analysis.
@@ -68,7 +67,7 @@ public class MyApplication extends Application {
         // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
         HyperTrack.enableMockLocations(true);
-        HyperTrack.disablePersistentNotification(true);
+        HyperTrack.disablePersistentNotification(false);
 
         // Initialize Branch.io
         Branch.getAutoInstance(this);
@@ -77,12 +76,8 @@ public class MyApplication extends Application {
         // Initialize Stetho to debug Databases
         DevDebugUtils.installStetho(this);
         // Enable HyperTrack Debug Logging
-        DevDebugUtils.setHTLogLevel(Log.VERBOSE);
+        DevDebugUtils.setHyperLogLevel(Log.VERBOSE);
         // Log HyperTrack SDK Version
         DevDebugUtils.sdkVersionMessage();
-    }
-
-    public static synchronized MyApplication getInstance() {
-        return mInstance;
     }
 }

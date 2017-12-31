@@ -39,7 +39,6 @@ import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.LinkedHashMap;
 
-import io.hypertrack.sendeta.MyApplication;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
@@ -69,13 +68,12 @@ public class SharedPreferenceManager {
 
     private static final String FEEDBACK_ACTIVITY_LIST = "io.hypertrack.meta:FeedbackActivityList";
 
-    private static SharedPreferences getSharedPreferences() {
-        Context context = MyApplication.getInstance().getApplicationContext();
+    private static SharedPreferences getSharedPreferences(Context context) {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 
-    private static SharedPreferences.Editor getEditor() {
-        return getSharedPreferences().edit();
+    private static SharedPreferences.Editor getEditor(Context context) {
+        return getSharedPreferences(context).edit();
     }
 
     private static Gson getGson() {
@@ -87,8 +85,8 @@ public class SharedPreferenceManager {
         return gsonBuilder.create();
     }
 
-    public static void setPlace(Place place) {
-        SharedPreferences.Editor editor = getEditor();
+    static void setPlace(Context context, Place place) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = new Gson();
         String placeJson = gson.toJson(place);
@@ -97,8 +95,8 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static Place getActionPlace() {
-        String placeJson = getSharedPreferences().getString(CURRENT_PLACE, null);
+    static Place getActionPlace(Context context) {
+        String placeJson = getSharedPreferences(context).getString(CURRENT_PLACE, null);
         if (placeJson == null) {
             return null;
         }
@@ -110,14 +108,14 @@ public class SharedPreferenceManager {
         return gson.fromJson(placeJson, type);
     }
 
-    public static void deletePlace() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void deletePlace(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(CURRENT_PLACE);
         editor.apply();
     }
 
-    public static void setShortcutPlace(Place place) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setShortcutPlace(Context context,Place place) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = new Gson();
         String placeJson = gson.toJson(place);
@@ -126,8 +124,8 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static Place getShortcutPlace() {
-        String placeJson = getSharedPreferences().getString(SHORTCUT_PLACE, null);
+    public static Place getShortcutPlace(Context context) {
+        String placeJson = getSharedPreferences(context).getString(SHORTCUT_PLACE, null);
         if (placeJson == null) {
             return null;
         }
@@ -139,47 +137,31 @@ public class SharedPreferenceManager {
         return gson.fromJson(placeJson, type);
     }
 
-    public static void deleteShortcutPlace() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void deleteShortcutPlace(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(SHORTCUT_PLACE);
         editor.apply();
     }
 
 
     public static String getActionID(Context context) {
-        return getSharedPreferences().getString(CURRENT_ACTION_ID, null);
+        return getSharedPreferences(context).getString(CURRENT_ACTION_ID, null);
     }
 
-    public static void setActionID(String actionID) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setActionID(Context context, String actionID) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.putString(CURRENT_ACTION_ID, actionID);
         editor.apply();
     }
 
-    public static void deleteActionID() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void deleteActionID(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(CURRENT_ACTION_ID);
         editor.apply();
     }
 
-    public static String getPreviousUserId(Context context) {
-        return getSharedPreferences().getString(PREVIOUS_USER_ID, null);
-    }
-
-    public static void setPreviousUserId(String previousUserId) {
-        SharedPreferences.Editor editor = getEditor();
-        editor.putString(PREVIOUS_USER_ID, previousUserId);
-        editor.apply();
-    }
-
-    public static void deletePreviousUserId() {
-        SharedPreferences.Editor editor = getEditor();
-        editor.remove(PREVIOUS_USER_ID);
-        editor.apply();
-    }
-
     public static Action getAction(Context context) {
-        String actionJson = getSharedPreferences().getString(CURRENT_ACTION, null);
+        String actionJson = getSharedPreferences(context).getString(CURRENT_ACTION, null);
         if (actionJson == null)
             return null;
         try {
@@ -195,8 +177,8 @@ public class SharedPreferenceManager {
         return null;
     }
 
-    public static void setAction(Action action) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setAction(Context context, Action action) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = getGson();
         String actionJSON = gson.toJson(action);
@@ -205,14 +187,14 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void deleteAction() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void deleteAction(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(CURRENT_ACTION);
         editor.apply();
     }
 
     public static Action getTrackingAction(Context context) {
-        String actionJson = getSharedPreferences().getString(TRACKING_ACTION, null);
+        String actionJson = getSharedPreferences(context).getString(TRACKING_ACTION, null);
         if (actionJson == null)
             return null;
         try {
@@ -228,8 +210,8 @@ public class SharedPreferenceManager {
         return null;
     }
 
-    public static void setTrackingAction(Action action) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setTrackingAction(Context context, Action action) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = getGson();
         String actionJSON = gson.toJson(action);
@@ -238,14 +220,14 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void deleteTrackingAction() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void deleteTrackingAction(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(TRACKING_ACTION);
         editor.apply();
     }
 
-    public static HyperTrackLiveUser getHyperTrackLiveUser() {
-        String userJSON = getSharedPreferences().getString(HYPERTRACK_LIVE_USER, null);
+    public static HyperTrackLiveUser getHyperTrackLiveUser(Context context) {
+        String userJSON = getSharedPreferences(context).getString(HYPERTRACK_LIVE_USER, null);
 
         if (userJSON == null) {
             return null;
@@ -258,8 +240,8 @@ public class SharedPreferenceManager {
         return gson.fromJson(userJSON, type);
     }
 
-    public static void setHyperTrackLiveUser(HyperTrackLiveUser user) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setHyperTrackLiveUser(Context context, HyperTrackLiveUser user) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = new Gson();
         String userJSON = gson.toJson(user);
@@ -268,8 +250,8 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static Location getLastKnownLocation() {
-        String lastKnownLocationJSON = getSharedPreferences().getString(LAST_KNOWN_LOCATION, null);
+    public static Location getLastKnownLocation(Context context) {
+        String lastKnownLocationJSON = getSharedPreferences(context).getString(LAST_KNOWN_LOCATION, null);
         if (lastKnownLocationJSON == null) {
             return null;
         }
@@ -281,8 +263,8 @@ public class SharedPreferenceManager {
         return gson.fromJson(lastKnownLocationJSON, type);
     }
 
-    public static void setLastKnownLocation(Location lastKnownLocation) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setLastKnownLocation(Context context, Location lastKnownLocation) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = new Gson();
         String lastKnownLocationJSON = gson.toJson(lastKnownLocation);
@@ -291,8 +273,8 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static GeofencingRequest getGeofencingRequest() {
-        String geofencingRequestJSON = getSharedPreferences().getString(GEOFENCING_REQUEST, null);
+    public static GeofencingRequest getGeofencingRequest(Context context) {
+        String geofencingRequestJSON = getSharedPreferences(context).getString(GEOFENCING_REQUEST, null);
         if (geofencingRequestJSON == null) {
             return null;
         }
@@ -304,8 +286,8 @@ public class SharedPreferenceManager {
         return gson.fromJson(geofencingRequestJSON, type);
     }
 
-    public static void setGeofencingRequest(GeofencingRequest request) {
-        SharedPreferences.Editor editor = getEditor();
+    public static void setGeofencingRequest(Context context, GeofencingRequest request) {
+        SharedPreferences.Editor editor = getEditor(context);
 
         Gson gson = new Gson();
         String geofencingRequestJSON = gson.toJson(request);
@@ -314,53 +296,53 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void removeGeofencingRequest() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void removeGeofencingRequest(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(GEOFENCING_REQUEST);
         editor.apply();
     }
 
-    private static void setTrackingSetting(boolean flag) {
-        SharedPreferences.Editor editor = getEditor();
+    private static void setTrackingSetting(Context context, boolean flag) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.putBoolean(TRACKING_SETTING, flag);
         editor.apply();
     }
 
-    public static void resetBackgroundTracking() {
-        SharedPreferences.Editor editor = getEditor();
+    public static void resetBackgroundTracking(Context context) {
+        SharedPreferences.Editor editor = getEditor(context);
         editor.remove(TRACKING_SETTING);
         editor.apply();
     }
 
-    public static void setTrackingON() {
-        setTrackingSetting(true);
+    public static void setTrackingON(Context context) {
+        setTrackingSetting(context, true);
     }
 
-    public static void setTrackingOFF() {
-        setTrackingSetting(false);
+    public static void setTrackingOFF(Context context) {
+        setTrackingSetting(context, false);
     }
 
-    public static Boolean isTrackingON() {
-        if (!getSharedPreferences().contains(TRACKING_SETTING))
+    public static Boolean isTrackingON(Context context) {
+        if (!getSharedPreferences(context).contains(TRACKING_SETTING))
             return null;
-        return getSharedPreferences().getBoolean(TRACKING_SETTING, false);
+        return getSharedPreferences(context).getBoolean(TRACKING_SETTING, false);
     }
 
-    public static void setActivityFeedbackLookupId(String lookupId, String feedbackType) {
-        LinkedHashMap<String, String> lookupIds = getActivityFeedbackLookupId();
+    public static void setActivityFeedbackLookupId(Context context, String lookupId, String feedbackType) {
+        LinkedHashMap<String, String> lookupIds = getActivityFeedbackLookupId(context);
         lookupIds.put(lookupId, feedbackType);
         if (lookupIds.size() > 30) {
             lookupIds.remove(lookupIds.size() - 1);
         }
         String json = new GsonBuilder().create().toJson(lookupIds);
-        SharedPreferences.Editor editor = getEditor();
+        SharedPreferences.Editor editor = getEditor(context);
         editor.putString(FEEDBACK_ACTIVITY_LIST, json);
         editor.apply();
     }
 
-    public static LinkedHashMap<String, String> getActivityFeedbackLookupId() {
+    public static LinkedHashMap<String, String> getActivityFeedbackLookupId(Context context) {
 
-        String json = getSharedPreferences().getString(FEEDBACK_ACTIVITY_LIST, "");
+        String json = getSharedPreferences(context).getString(FEEDBACK_ACTIVITY_LIST, "");
         Type type = new TypeToken<LinkedHashMap<String, String>>() {
         }.getType();
 

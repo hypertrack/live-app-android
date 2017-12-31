@@ -26,14 +26,11 @@ SOFTWARE.
 package io.hypertrack.sendeta.util;
 
 import android.content.Context;
-import android.provider.Settings;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 
-import io.fabric.sdk.android.Fabric;
 import io.fabric.sdk.android.services.common.ApiKey;
-import io.fabric.sdk.android.services.common.CommonUtils;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 import io.hypertrack.sendeta.store.OnboardingManager;
 
@@ -43,14 +40,17 @@ import io.hypertrack.sendeta.store.OnboardingManager;
 
 public class CrashlyticsWrapper {
 
-    static Context context;
-
     public static void log(Exception e) {
-        String apiKey = null;
-        apiKey = ApiKey.getApiKey(context);
-        if (!HTTextUtils.isEmpty(apiKey)) {
+        // TODO: 27/09/17 Check if context can be passed here
+//        String apiKey = null;
+//        apiKey = ApiKey.getApiKey(context);
+//        if (!HTTextUtils.isEmpty(apiKey)) {
+        try {
             Crashlytics.logException(e);
+        } catch (Exception e1) {
+            // do nothing
         }
+//        }
     }
 
     private class CrashlyticsKeys {
@@ -61,14 +61,13 @@ public class CrashlyticsWrapper {
     }
 
     public static void setCrashlyticsKeys(Context mContext) {
-        context = mContext;
         try {
-            HyperTrackLiveUser user = OnboardingManager.sharedManager().getUser();
-            String apiKey = ApiKey.getApiKey(context);
+            HyperTrackLiveUser user = OnboardingManager.sharedManager(mContext).getUser();
+            String apiKey = ApiKey.getApiKey(mContext);
             if (!HTTextUtils.isEmpty(apiKey)) {
                 if (user != null) {
                     // Set UserID
-                    String userID = user.getId() != null ? user.getId().toString() : "NULL";
+                    String userID = user.getId() != null ? user.getId() : "NULL";
                     Crashlytics.setUserIdentifier(userID);
                     Crashlytics.setString(CrashlyticsKeys.USER_ID, userID);
 
@@ -79,27 +78,12 @@ public class CrashlyticsWrapper {
 
                     // Set UserPhone & UserDeviceID
                     Crashlytics.setString(CrashlyticsKeys.USER_PHONE, !HTTextUtils.isEmpty(user.getPhone()) ? user.getPhone() : "NULL");
-                    String deviceUUID = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+                    String deviceUUID = com.hypertrack.lib.internal.common.util.Utils.getDeviceId(mContext);
                     Crashlytics.setString(CrashlyticsKeys.USER_DEVICE_ID, !HTTextUtils.isEmpty(deviceUUID) ? deviceUUID : "NULL");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    protected static String getApiKeyFromStrings(Context context) {
-        String apiKey = null;
-        int id = CommonUtils.getResourcesIdentifier(context, "io.fabric.ApiKey", "string");
-        if (id == 0) {
-            Fabric.getLogger().d("Fabric", "Falling back to Crashlytics key lookup from Strings");
-            id = CommonUtils.getResourcesIdentifier(context, "com.crashlytics.ApiKey", "string");
-        }
-
-        if (id != 0) {
-            apiKey = context.getResources().getString(id);
-        }
-
-        return apiKey;
     }
 }

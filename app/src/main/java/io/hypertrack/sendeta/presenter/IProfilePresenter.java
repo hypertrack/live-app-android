@@ -28,10 +28,14 @@ import android.content.Context;
 
 import java.io.File;
 
+import io.hypertrack.sendeta.store.OnboardingManager;
+
 /**
  * Created by ulhas on 19/05/16.
  */
 public interface IProfilePresenter<V> extends Presenter<V> {
+    void setOnboardingManager(final OnboardingManager onboardingManager);
+
     void attemptLogin(String userName, String number, String deviceID, File profileImageFile, boolean verifyPhone, Context context);
 
     void updateProfile(String name, String number, String isoCode, File profileImage, boolean verifyPhone, Context context);

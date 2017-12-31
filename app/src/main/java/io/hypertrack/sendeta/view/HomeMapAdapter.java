@@ -39,20 +39,20 @@ import io.hypertrack.sendeta.store.SharedPreferenceManager;
  * Created by piyush on 03/05/17.
  */
 
-public class HomeMapAdapter extends HyperTrackMapAdapter {
+class HomeMapAdapter extends HyperTrackMapAdapter {
 
-    public Context mContext;
+    private Context context;
 
-    public HomeMapAdapter(Context mContext) {
+    HomeMapAdapter(Context mContext) {
         super(mContext);
-        this.mContext = mContext;
+        context = mContext;
     }
 
     @Override
     public CameraUpdate getMapFragmentInitialState(HyperTrackMapFragment hyperTrackMapFragment) {
-        if (SharedPreferenceManager.getLastKnownLocation() != null) {
-            LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation().getLatitude(),
-                    SharedPreferenceManager.getLastKnownLocation().getLongitude());
+        if (SharedPreferenceManager.getLastKnownLocation(context) != null) {
+            LatLng latLng = new LatLng(SharedPreferenceManager.getLastKnownLocation(context).getLatitude(),
+                    SharedPreferenceManager.getLastKnownLocation(context).getLongitude());
             return CameraUpdateFactory.newLatLngZoom(latLng, 15.0f);
         }
         return super.getMapFragmentInitialState(hyperTrackMapFragment);
@@ -103,8 +103,8 @@ public class HomeMapAdapter extends HyperTrackMapAdapter {
         return false;
     }
 
-   /* @Override
+    @Override
     public boolean showBackButton() {
         return true;
-    }*/
+    }
 }

@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'io.fabric.tools:gradle:1.22.0'
+        classpath 'io.fabric.tools:gradle:1.25.1'
     }
 }
 apply plugin: 'com.android.application'
@@ -19,7 +19,7 @@ repositories {
 }
 
 def keyPropertiesFile = rootProject.file("key.properties");
-if(keyPropertiesFile == null || !keyPropertiesFile.exists()){
+if (keyPropertiesFile == null || !keyPropertiesFile.exists()) {
     throw new GradleException("key.properties file is missing that contains HyperTrack Publishable Key." +
             "\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
 }
@@ -29,7 +29,7 @@ keyProperties.load(new FileInputStream(keyPropertiesFile));
 android {
 
     compileSdkVersion 25
-    buildToolsVersion '25.0.3'
+    buildToolsVersion '26.0.3'
     lintOptions {
         abortOnError false
     }
@@ -92,8 +92,8 @@ android {
             value = 1;
         }
 
-        def versionMajor = 1
-        def versionMinor = 9
+        def versionMajor = 3
+        def versionMinor = 0
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -120,7 +120,7 @@ android {
             if (findProject(':library') != null)
                 buildConfigField "String", "isHyperTrackLive", '"exist"'
             else
-                buildConfigField "String", "isHyperTrackLive",'""'
+                buildConfigField "String", "isHyperTrackLive", '""'
         }
 
     } else {
@@ -131,7 +131,7 @@ android {
         variant.outputs.each { output ->
             def newFileName = "HyperTrackLive-${variant.versionName}.apk";
             def apk = output.outputFile;
-            output.outputFile = new File(apk.parentFile, newFileName);
+            output.outputFileName = new File(apk.parent, newFileName);
         }
     }
 
@@ -139,9 +139,10 @@ android {
         release {
             if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
                 throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
+                return;
             }
-            debuggable false
-            minifyEnabled true
+            debuggable true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
@@ -149,14 +150,19 @@ android {
         }
 
         debug {
+            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
+                throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
+                return;
+            }
             debuggable true
             minifyEnabled false
             versionNameSuffix '-debug'
+            applicationIdSuffix '.debug'
+            resValue "string", "app_name", "Debug HyperTrack Live"
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
             }
-
         }
 
         if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
@@ -182,27 +188,25 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.22'
+    testCompile 'org.mockito:mockito-core:2.8.9'
     testCompile 'org.robolectric:robolectric:3.4.2'
+    debugCompile 'com.facebook.stetho:stetho:1.5.0'
+//    stagingCompile 'com.facebook.stetho:stetho:1.5.0'
 
+    // Other dependencies
+    compile 'com.android.support:appcompat-v7:25.4.0'
+    compile 'com.android.support:design:25.4.0'
+    compile 'com.android.support:cardview-v7:25.4.0'
+    compile 'com.android.support:recyclerview-v7:25.4.0'
     compile 'com.facebook.stetho:stetho:1.5.0'
 
     if (findProject(':library') != null) {
-        releaseCompile(project(path: ':library', configuration: 'release')) {
+        // HyperTrack SDK dependency
+        implementation(project(':library')) {
             transitive = true
-        }
-
-        debugCompile(project(path: ':library', configuration: 'release')) {
-            transitive = true
-        }
-
-        if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
-            stagingCompile(project(path: ':library', configuration: 'debug')) {
-                transitive = true
-            }
         }
     } else {
-        compile("com.hypertrack:android:0.4.22:release@aar") {
+        implementation("com.hypertrack:android:0.5.6@aar") {
             transitive = true;
         }
     }
@@ -210,28 +214,30 @@ dependencies {
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true;
     }
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-    compile 'com.android.support:cardview-v7:25.3.1'
-    compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
+    compile 'com.squareup.retrofit2:retrofit:2.2.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.squareup.picasso:picasso:2.4.0'
-    compile 'com.google.android.gms:play-services-gcm:10.2.0'
-    compile 'com.google.android.gms:play-services-places:10.2.0'
-    compile 'com.google.android.gms:play-services-location:10.2.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.github.sundeepk:compact-calendar-view:1.9.2-beta'
     compile 'com.github.rubensousa:gravitysnaphelper:1.1'
     compile 'com.skyfishjy.ripplebackground:library:1.0.1'
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
-    debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
+    compile 'io.branch.sdk.android:library:2.+'
+    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+        transitive = true;
+    }
+
+    compile 'com.android.support:multidex:1.0.2'
+
+    // Leak Canary dependency for Debug builds
+    debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+
     if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     }
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.1'
-    compile 'io.branch.sdk.android:library:2.+'
+
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     //Check if SDK library exist or not
     if (findProject(':library') != null) {

@@ -7,5 +7,5 @@ import android.content.Context;
  */
 
 public interface IInvitePresenter<V>  extends Presenter<V>{
-    public void acceptInvite(String userID, String accountID, String previousUserId, Context context);
+    void acceptInvite(String userID, String accountID, Context context);
 }

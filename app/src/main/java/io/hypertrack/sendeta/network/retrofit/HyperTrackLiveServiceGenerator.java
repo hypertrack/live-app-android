@@ -41,21 +41,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
 /**
  * Created by piyush on 22/10/16.
  */
-public class HyperTrackServiceGenerator {
+public class HyperTrackLiveServiceGenerator {
 
-    public static final String API_BASE_URL = BuildConfig.HYPERTRACK_BASE_URL;
-    private static final String TAG = HyperTrackServiceGenerator.class.getSimpleName();
-    private static Context mContext;
-
-    private static OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-
-    private static Retrofit.Builder builder =
-            new Retrofit.Builder()
-                    .baseUrl(API_BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create());
-
-    public static <S> S createService(Class<S> serviceClass, Context context) {
-        mContext = context;
+    public static <S> S createService(final Class<S> serviceClass, final Context context) {
+        final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         httpClient.interceptors().add(new Interceptor() {
             @Override
             public Response intercept(Interceptor.Chain chain) throws IOException {
@@ -66,8 +55,8 @@ public class HyperTrackServiceGenerator {
                         .header("Authorization", "Token " + BuildConfig.HYPERTRACK_PK)
                         .header("User-Agent", "hypertrack-live-android")
                         .header("timezone", TimeZone.getDefault().getID())
-                        .header("Device-id", Utils.getDeviceId(mContext))
-                        .header("app-id", mContext.getPackageName())
+                        .header("Device-id", Utils.getDeviceId(context))
+                        .header("app-id", context.getPackageName())
                         .method(original.method(), original.body());
 
                 Request request = requestBuilder.build();
@@ -76,7 +65,12 @@ public class HyperTrackServiceGenerator {
         });
 
         OkHttpClient client = httpClient.build();
-        Retrofit retrofit = builder.client(client).build();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BuildConfig.HYPERTRACK_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
         return retrofit.create(serviceClass);
     }
 }

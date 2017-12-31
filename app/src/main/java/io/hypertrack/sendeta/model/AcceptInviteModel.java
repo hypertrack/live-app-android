@@ -10,11 +10,10 @@ import java.io.Serializable;
 
 public class AcceptInviteModel implements Serializable {
     @SerializedName("account_id")
-    String accountID;
+    private String accountID;
 
     @SerializedName("existing_user_id")
-    String existingUserID;
-
+    private String existingUserID;
 
     public AcceptInviteModel(String accountID, String previousUserId) {
         this.accountID = accountID;

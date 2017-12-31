@@ -318,7 +318,7 @@ public class EasyImage implements EasyImageConfig {
         try {
             File photoFile = EasyImage.takenCameraPicture(activity);
             callbacks.onImagePicked(photoFile, ImageSource.CAMERA);
-            PreferenceManager.getDefaultSharedPreferences(activity).edit().remove(KEY_LAST_CAMERA_PHOTO).commit();
+            PreferenceManager.getDefaultSharedPreferences(activity).edit().remove(KEY_LAST_CAMERA_PHOTO).apply();
         } catch (Exception e) {
             e.printStackTrace();
             callbacks.onImagePickerError(e, ImageSource.CAMERA);
@@ -361,21 +361,21 @@ public class EasyImage implements EasyImageConfig {
         public Configuration setImagesFolderName(String folderName) {
             PreferenceManager.getDefaultSharedPreferences(context)
                     .edit().putString(BundleKeys.FOLDER_NAME, folderName)
-                    .commit();
+                    .apply();
             return this;
         }
 
         public Configuration saveInRootPicturesDirectory() {
             PreferenceManager.getDefaultSharedPreferences(context).edit()
-                    .putString(BundleKeys.FOLDER_LOCATION, EasyImageFiles.publicRootDir(context).toString())
-                    .commit();
+                    .putString(BundleKeys.FOLDER_LOCATION, EasyImageFiles.publicRootDir().toString())
+                    .apply();
             return this;
         }
 
         public Configuration saveInAppExternalFilesDir() {
             PreferenceManager.getDefaultSharedPreferences(context).edit()
                     .putString(BundleKeys.FOLDER_LOCATION, EasyImageFiles.publicAppExternalDir(context).toString())
-                    .commit();
+                    .apply();
             return this;
         }
 
@@ -390,7 +390,7 @@ public class EasyImage implements EasyImageConfig {
         public Configuration setCopyExistingPicturesToPublicLocation(boolean copyToPublicLocation) {
             PreferenceManager.getDefaultSharedPreferences(context).edit()
                     .putBoolean(BundleKeys.PUBLIC_TEMP, copyToPublicLocation)
-                    .commit();
+                    .apply();
             return this;
         }
     }

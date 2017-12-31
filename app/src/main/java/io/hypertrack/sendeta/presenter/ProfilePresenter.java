@@ -48,8 +48,8 @@ import java.io.IOException;
 
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.view.Profile;
 import io.hypertrack.sendeta.view.ProfileView;
@@ -57,16 +57,14 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-import static io.hypertrack.sendeta.store.OnboardingManager.sharedManager;
-
 /**
- * Created by suhas on 24/02/16.
+ * Created by Aman on 24/12/17.
  */
 public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private static final String TAG = Profile.class.getSimpleName();
     private ProfileView view;
-    private OnboardingManager onboardingManager = sharedManager();
+    private OnboardingManager onboardingManager;
 
     @Override
     public void attachView(final ProfileView view) {
@@ -97,8 +95,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 }
             });
         } else {
-            if (onboardingManager == null)
-                onboardingManager = sharedManager();
+
             HyperTrackLiveUser user = onboardingManager.getUser();
             this.view.updateViews(user.getName(), user.getPhone(), user.getCountryCode(),
                     user.getPhoto());
@@ -106,13 +103,18 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     @Override
+    public void setOnboardingManager(OnboardingManager onboardingManager) {
+        this.onboardingManager = onboardingManager;
+    }
+
+    @Override
     public void detachView() {
         view = null;
     }
 
-    private UserParams getUserParams(String name, final String number, String ISOCode, File profileImage)
+    private UserParams getUserParams(final Context context, final String name, final String number, String ISOCode, File profileImage)
             throws NumberParseException {
-        final HyperTrackLiveUser user = onboardingManager.getUser();
+        final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
         // Update Country Code from device's current location
         if (!HTTextUtils.isEmpty(ISOCode))
@@ -127,7 +129,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 encodedImage = Base64.encodeToString(bytes, Base64.DEFAULT);
         }
 
-        HyperTrackLiveUser.setHyperTrackLiveUser();
+        HyperTrackLiveUser.setHyperTrackLiveUser(context);
 
         String phoneNumber = user.getInternationalNumber(number);
         return new UserParams()
@@ -141,7 +143,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     public void attemptLogin(final String userName, final String phone, String ISOCode,
                              final File profileImage, final boolean verifyPhone, final Context context) {
         try {
-            UserParams userParams = getUserParams(userName, phone, ISOCode, profileImage);
+            UserParams userParams = getUserParams(context, userName, phone, ISOCode, profileImage);
             HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -155,24 +157,22 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
                     Log.d(TAG, "onError: User Created:" + errorResponse.getErrorMessage());
-                    if (view != null) {
+                    if (view != null)
                         view.showErrorMessage(errorResponse.getErrorMessage());
-                    }
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
-            if (view != null) {
+            if (view != null)
                 view.showErrorMessage(e.getMessage());
-            }
         }
     }
 
     @Override
-    public void updateProfile(String name, final String number, String ISOCode, File profileImage,
+    public void updateProfile(final String name, final String number, String ISOCode, File profileImage,
                               final boolean verifyPhone, final Context context) {
         try {
-            UserParams userParams = getUserParams(name, number, ISOCode, profileImage);
+            UserParams userParams = getUserParams(context, name, number, ISOCode, profileImage);
             HyperTrack.updateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -186,21 +186,19 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
                     Log.d(TAG, "onError: UpdateUser:" + errorResponse.getErrorMessage());
-                    if (view != null) {
+                    if (view != null)
                         view.showErrorMessage(errorResponse.getErrorMessage());
-                    }
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
-            if (view != null) {
+            if (view != null)
                 view.showErrorMessage(e.getMessage());
-            }
         }
     }
 
     private void sendVerificationCode(Context context) {
-        HyperTrackService getResendCodeService = HyperTrackServiceGenerator.createService(HyperTrackService.class, context);
+        HyperTrackLiveService getResendCodeService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override
@@ -214,9 +212,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             view.showErrorMessage(jObjError.getString("message"));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
+                        } catch (JSONException | IOException e) {
                             e.printStackTrace();
                         }
                     }
@@ -237,9 +233,6 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             fileInputStream.read(b);
-           /* for (int i = 0; i < b.length; i++) {
-                System.out.print((char) b[i]);
-            }*/
             return b;
         } catch (FileNotFoundException e) {
             System.out.println("File Not Found.");

@@ -55,8 +55,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.internal.common.logging.HTLog;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 import com.squareup.picasso.Picasso;
@@ -74,10 +74,11 @@ import io.hypertrack.sendeta.model.Country;
 import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
 import io.hypertrack.sendeta.network.retrofit.CallUtils;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
+import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.ImageUtils;
@@ -111,32 +112,25 @@ public class Profile extends BaseActivity implements ProfileView {
     private boolean showSkip = true;
     private String previousPhone = "";
     private boolean fromSplashScreen;
-
+    private CountryMaster cm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
+
+        // Initialize UI Views
         initUIViews();
 
-        // Attach View Presenter to View
+        // Set Onboarding manager and attach presenter to view
+        presenter.setOnboardingManager(OnboardingManager.sharedManager(this));
         presenter.attachView(this);
+
+        // Retrieve deeplink parameters from intent
         if (getIntent() != null && getIntent().hasExtra("class_from")) {
             if (getIntent().getStringExtra("class_from").
                     equalsIgnoreCase(SplashScreen.class.getSimpleName()))
                 fromSplashScreen = true;
-        }
-        //Request SMS permission to read the OTP automatically from SMS
-        //requestSmsPermission();
-    }
-
-    private void requestSmsPermission() {
-        String permission = Manifest.permission.RECEIVE_SMS;
-        int grant = ContextCompat.checkSelfPermission(this, permission);
-        if (grant != PackageManager.PERMISSION_GRANTED) {
-            String[] permission_list = new String[1];
-            permission_list[0] = permission;
-            ActivityCompat.requestPermissions(this, permission_list, 1);
         }
     }
 
@@ -174,7 +168,7 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     private void initCountryFlagSpinner() {
-        CountryMaster cm = CountryMaster.getInstance(this);
+        cm = new CountryMaster(this);
         final ArrayList<Country> countries = cm.getCountries();
 
         adapter = new CountrySpinnerAdapter(this, R.layout.view_country_list_item, countries);
@@ -297,9 +291,9 @@ public class Profile extends BaseActivity implements ProfileView {
             verifyPhone = true;
         }
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
-            presenter.updateProfile(name, number, isoCode, profileImage, verifyPhone,this);
+            presenter.updateProfile(name, number, isoCode, profileImage, verifyPhone, this);
         } else
-            presenter.attemptLogin(name, number, isoCode, profileImage, verifyPhone,this);
+            presenter.attemptLogin(name, number, isoCode, profileImage, verifyPhone, this);
     }
 
     @Override
@@ -332,10 +326,7 @@ public class Profile extends BaseActivity implements ProfileView {
             nameView.setText(name);
         }
 
-        if (!HTTextUtils.isEmpty(ISOCode))
-
-        {
-            CountryMaster cm = CountryMaster.getInstance(this);
+        if (!HTTextUtils.isEmpty(ISOCode)) {
             final ArrayList<Country> countries = cm.getCountries();
             for (Country c : countries) {
                 if (c.mCountryIso.equalsIgnoreCase(ISOCode)) {
@@ -411,14 +402,13 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void onProfileUpdateSuccess() {
-
         if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
             try {
                 //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
                 JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
                     HyperTrack.startTracking();
-                    SharedPreferenceManager.setTrackingON();
+                    SharedPreferenceManager.setTrackingON(this);
                     acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
 
                 } else {
@@ -440,11 +430,10 @@ public class Profile extends BaseActivity implements ProfileView {
         showProgress(false);
 
         // Clear Existing running trip on Registration Successful
-        SharedPreferenceManager.deleteAction();
-        SharedPreferenceManager.deletePlace();
-        SharedPreferenceManager.deletePreviousUserId();
+        SharedPreferenceManager.deleteAction(this);
+        SharedPreferenceManager.deletePlace(this);
 
-        HTLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
+        HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
         Intent intent = new Intent(Profile.this, Placeline.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Profile.this)
@@ -454,14 +443,14 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackService acceptInviteService = HyperTrackServiceGenerator.createService(HyperTrackService.class, this);
+        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
-                    HTLog.d(TAG, "Invite Accepted");
+                    HyperLog.d(TAG, "Invite Accepted");
 
                 } else {
                     Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
@@ -484,8 +473,8 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void navigateToVerifyCodeScreen() {
         showProgress(false);
-        SharedPreferenceManager.deleteAction();
-        SharedPreferenceManager.deletePlace();
+        SharedPreferenceManager.deleteAction(this);
+        SharedPreferenceManager.deletePlace(this);
         Intent intent = new Intent(Profile.this, Verify.class);
         intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
         startActivity(intent);
@@ -494,22 +483,20 @@ public class Profile extends BaseActivity implements ProfileView {
     @Override
     public void showErrorMessage(String errorMessage) {
         showProgress(false);
-        Toast.makeText(Profile.this, "Error Occured: " + errorMessage, Toast.LENGTH_SHORT).show();
+        Toast.makeText(Profile.this, "Error Occurred: " + errorMessage, Toast.LENGTH_SHORT).show();
     }
 
     private void showProgress(boolean show) {
         if (show) {
+            String progressDialogMessage = HTTextUtils.isEmpty(HyperTrack.getUserId()) ?
+                    getString(R.string.create_profile_message) : getString(R.string.update_profile_message);
             mProgressDialog = new ProgressDialog(this);
-            if (HTTextUtils.isEmpty(HyperTrack.getUserId()))
-                mProgressDialog.setMessage(getString(R.string.create_profile_message));
-            else {
-                mProgressDialog.setMessage(getString(R.string.update_profile_message));
-            }
+            mProgressDialog.setMessage(progressDialogMessage);
             mProgressDialog.setCancelable(false);
             mProgressDialog.show();
-        } else {
-            if (mProgressDialog != null)
-                mProgressDialog.dismiss();
+
+        } else if (mProgressDialog != null) {
+            mProgressDialog.dismiss();
         }
     }
 
@@ -553,10 +540,9 @@ public class Profile extends BaseActivity implements ProfileView {
                     updatedProfileImage = BitmapFactory.decodeFile(profileImage.getPath());
                 } else {
                     profileImage = ImageUtils.getFileFromBitmap(Profile.this, updatedProfileImage);
-                }
-                if (updatedProfileImage != null) {
                     mProfileImageView.setImageBitmap(updatedProfileImage);
                 }
+
                 mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
         });

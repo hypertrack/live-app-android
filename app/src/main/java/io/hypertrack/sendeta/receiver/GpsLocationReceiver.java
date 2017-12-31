@@ -45,9 +45,9 @@ public class GpsLocationReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().matches("android.location.PROVIDERS_CHANGED")) {
 
-            if (HyperTrack.checkLocationServices(context) && SharedPreferenceManager.getGeofencingRequest() != null) {
+            if (HyperTrack.checkLocationServices(context) && SharedPreferenceManager.getGeofencingRequest(context) != null) {
                 // Add Geofencing Request
-                ActionManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest());
+                ActionManager.getSharedManager(context).setGeofencingRequest(SharedPreferenceManager.getGeofencingRequest(context));
                 ActionManager.getSharedManager(context).addGeofencingRequest();
             }
 

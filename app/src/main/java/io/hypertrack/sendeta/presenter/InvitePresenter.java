@@ -6,8 +6,8 @@ import android.util.Log;
 import com.hypertrack.lib.models.User;
 
 import io.hypertrack.sendeta.model.AcceptInviteModel;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackServiceGenerator;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
+import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.view.InviteView;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -32,18 +32,19 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
     }
 
     @Override
-    public void acceptInvite(String userID, String accountID, String previousUserId, Context context) {
-        HyperTrackService getPlacelineService = HyperTrackServiceGenerator.createService(HyperTrackService.class,context);
-        Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, previousUserId));
+    public void acceptInvite(String userID, String accountID, Context context) {
+        HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,context);
+        Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, userID));
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
+                if (inviteView == null)
+                    return;
+
                 if (response.isSuccessful()) {
-                    if (inviteView != null)
-                        inviteView.inviteAccepted();
+                    inviteView.inviteAccepted();
                 } else {
-                    if (inviteView != null)
-                        inviteView.showError();
+                    inviteView.showError();
                 }
             }
 

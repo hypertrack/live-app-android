@@ -17,7 +17,7 @@ public class DevDebugUtils {
         Stetho.initializeWithDefaults(application);
     }
 
-    public static void setHTLogLevel(int logLevel) {
+    public static void setHyperLogLevel(int logLevel) {
         HyperTrack.enableDebugLogging(Log.VERBOSE);
     }
 

@@ -5,7 +5,6 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CallUtils {
-
     public static <T> void enqueueWithRetry(Call<T> call, final Callback<T> callback) {
         call.enqueue(new CallbackWithRetry<T>(call) {
             @Override

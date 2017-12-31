@@ -24,6 +24,8 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.model;
 
+import android.content.Context;
+
 import com.google.gson.annotations.SerializedName;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
@@ -47,23 +49,23 @@ public class HyperTrackLiveUser extends User {
 
     private File photoImage;
 
-    public static HyperTrackLiveUser sharedHyperTrackLiveUser() {
+    public static HyperTrackLiveUser sharedHyperTrackLiveUser(Context context) {
         if (hyperTrackLiveUser == null) {
 
             synchronized (HyperTrackLiveUser.class) {
                 if (hyperTrackLiveUser == null) {
-                    hyperTrackLiveUser = getHyperTrackLiveUser();
+                    hyperTrackLiveUser = getHyperTrackLiveUser(context);
                 }
             }
         }
         return hyperTrackLiveUser;
     }
 
-    private static HyperTrackLiveUser getHyperTrackLiveUser() {
+    private static HyperTrackLiveUser getHyperTrackLiveUser(Context context) {
         HyperTrackLiveUser hyperTrackLiveUser = new HyperTrackLiveUser();
 
-        if (SharedPreferenceManager.getHyperTrackLiveUser() != null) {
-            hyperTrackLiveUser = SharedPreferenceManager.getHyperTrackLiveUser();
+        if (SharedPreferenceManager.getHyperTrackLiveUser(context) != null) {
+            hyperTrackLiveUser = SharedPreferenceManager.getHyperTrackLiveUser(context);
         }
 
         return hyperTrackLiveUser;
@@ -73,8 +75,8 @@ public class HyperTrackLiveUser extends User {
      * IMPORTANT: Call this method on every update to setHyperTrackLiveUser data to get the changes
      * reflected in the SharedPreferences for future reference.
      */
-    public static void setHyperTrackLiveUser() {
-        SharedPreferenceManager.setHyperTrackLiveUser(hyperTrackLiveUser);
+    public static void setHyperTrackLiveUser(Context context) {
+        SharedPreferenceManager.setHyperTrackLiveUser(context, hyperTrackLiveUser);
     }
 
     public String getCountryCode() {

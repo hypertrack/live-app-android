@@ -25,6 +25,8 @@ SOFTWARE.
 
 package io.hypertrack.sendeta.store;
 
+import android.content.Context;
+
 import io.hypertrack.sendeta.model.HyperTrackLiveUser;
 
 /**
@@ -35,13 +37,13 @@ public class OnboardingManager {
     private static OnboardingManager sSharedManager = null;
     private HyperTrackLiveUser hyperTrackLiveUser;
 
-    private OnboardingManager() {
-        this.hyperTrackLiveUser = HyperTrackLiveUser.sharedHyperTrackLiveUser();
+    private OnboardingManager(Context context) {
+        this.hyperTrackLiveUser = HyperTrackLiveUser.sharedHyperTrackLiveUser(context);
     }
 
-    public static OnboardingManager sharedManager() {
+    public static OnboardingManager sharedManager(Context context) {
         if (sSharedManager == null) {
-            sSharedManager = new OnboardingManager();
+            sSharedManager = new OnboardingManager(context);
         }
 
         return sSharedManager;

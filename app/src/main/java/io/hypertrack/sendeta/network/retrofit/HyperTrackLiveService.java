@@ -36,7 +36,7 @@ import retrofit2.http.Path;
 /**
  * Created by piyush on 22/10/16.
  */
-public interface HyperTrackService {
+public interface HyperTrackLiveService {
 
     @POST("users/{id}/accept_invite/")
     Call<User> acceptInvite(@Path("id") String id, @Body AcceptInviteModel acceptInviteModel);

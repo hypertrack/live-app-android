@@ -25,6 +25,7 @@ SOFTWARE.
 package io.hypertrack.sendeta.model;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,8 +42,8 @@ import io.hypertrack.sendeta.R;
  */
 public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
 
-    LayoutInflater inflater;
-    ArrayList<Country> countries;
+    private LayoutInflater inflater;
+    private ArrayList<Country> countries;
 
     public CountrySpinnerAdapter(Context context, int resource, ArrayList<Country> list) {
         super(context, resource, list);
@@ -50,9 +51,7 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
         countries = list;
     }
 
-    public View getCustomDialogView(int position, View convertView,
-                                    ViewGroup parent) {
-
+    private View getCustomDialogView(int position, ViewGroup parent) {
         View layout = inflater.inflate(R.layout.view_country_list_item, parent, false);
 
         TextView countryName = (TextView)layout.findViewById(R.id.tv_country_name);
@@ -68,19 +67,18 @@ public class CountrySpinnerAdapter extends ArrayAdapter<Country> {
     // It gets a View that displays in the drop down popup the data at the specified position
     @Override
     public View getDropDownView(int position, View convertView,
-                                ViewGroup parent) {
-        return getCustomDialogView(position, convertView, parent);
+                                @NonNull ViewGroup parent) {
+        return getCustomDialogView(position, parent);
     }
 
     // It gets a View that displays the data at the specified position
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        return getCustomSelectionView(position, convertView, parent);
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        return getCustomSelectionView(position, parent);
     }
 
-    public View getCustomSelectionView(int position, View convertView,
-                                       ViewGroup parent) {
-
+    private View getCustomSelectionView(int position, ViewGroup parent) {
         View layout = inflater.inflate(R.layout.view_country_list_item, parent, false);
 
         TextView countryName = (TextView)layout.findViewById(R.id.tv_country_name);
