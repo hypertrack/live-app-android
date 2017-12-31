@@ -206,7 +206,7 @@ dependencies {
             transitive = true
         }
     } else {
-        compile("com.hypertrack:android:0.4.22:release@aar") {
+        implementation("com.hypertrack:android:0.5.6@aar") {
             transitive = true;
         }
     }
