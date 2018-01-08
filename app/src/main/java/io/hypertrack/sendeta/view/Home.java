@@ -209,7 +209,6 @@ public class Home extends BaseActivity implements HomeView {
                 int index = refreshedActionIds.indexOf(actionManager.getHyperTrackActionId());
 
                 if (index >= 0) {
-
                     //Get refreshed action Data
                     Action action = refreshedActions.get(refreshedActionIds.indexOf(
                             actionManager.getHyperTrackActionId()));
@@ -218,7 +217,7 @@ public class Home extends BaseActivity implements HomeView {
 
                     if (action.getExpectedPlace() != null && action.getExpectedPlace().getLocation() != null &&
                             action.getUser().getId().equalsIgnoreCase(HyperTrack.getUserId())) {
-                        SharedPreferenceManager.setShortcutPlace(Home.this,action.getExpectedPlace());
+                        SharedPreferenceManager.setShortcutPlace(Home.this, action.getExpectedPlace());
                     }
 
                     if (refreshedActionIds.size() > 1) {
@@ -728,7 +727,7 @@ public class Home extends BaseActivity implements HomeView {
             collectionId = intent.getStringExtra(Track.KEY_COLLECTION_ID);
             List<String> actionIDs = intent.getStringArrayListExtra(Track.KEY_ACTION_ID_LIST);
             // Call trackActionsOnMap method
-            presenter.trackActionsOnMap(collectionId,lookupId, actionIDs, ActionManager.getSharedManager(this), this);
+            presenter.trackActionsOnMap(collectionId, lookupId, actionIDs, ActionManager.getSharedManager(this), this);
             return true;
         }
         return false;
@@ -828,7 +827,7 @@ public class Home extends BaseActivity implements HomeView {
         updateCurrentLocationMarker(null);
         expectedPlace = place;
         ActionManager.getSharedManager(this).setPlace(expectedPlace);
-        SharedPreferenceManager.setShortcutPlace(this,place);
+        SharedPreferenceManager.setShortcutPlace(this, place);
         initBottomButtonCard(true);
         updateMapView();
         updateMapPadding();
@@ -1509,7 +1508,7 @@ public class Home extends BaseActivity implements HomeView {
             lookupId = null;
             OnStopSharing();
             ActionManager.getSharedManager(this).clearState();
-        }else if (!fromPlaceline) {
+        } else if (!fromPlaceline) {
             startActivity(new Intent(Home.this, Placeline.class));
         }
         //finish();
