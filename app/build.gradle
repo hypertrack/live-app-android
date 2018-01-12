@@ -268,5 +268,3 @@ if (googleServicesFile.exists()) {
     System.out.println("Google Service File Exist");
     apply plugin: 'com.google.gms.google-services'
 }
-
-
