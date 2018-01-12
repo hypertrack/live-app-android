@@ -67,7 +67,7 @@ public class MyApplication extends MultiDexApplication {
         // Initialize HyperTrack SDK
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
         HyperTrack.enableMockLocations(true);
-        HyperTrack.disablePersistentNotification(false);
+        HyperTrack.disablePersistentNotification(true);
 
         // Initialize Branch.io
         Branch.getAutoInstance(this);
