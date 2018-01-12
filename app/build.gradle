@@ -217,7 +217,7 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.6.2@aar") {
+        implementation("com.hypertrack:android:0.6.3@aar") {
             transitive = true;
         }
     }
@@ -268,5 +268,3 @@ if (googleServicesFile.exists()) {
     System.out.println("Google Service File Exist");
     apply plugin: 'com.google.gms.google-services'
 }
-
-
