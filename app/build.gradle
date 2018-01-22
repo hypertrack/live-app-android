@@ -217,7 +217,7 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.6.5@aar") {
+        implementation("com.hypertrack:android:0.6.6@aar") {
             transitive = true;
         }
     }
