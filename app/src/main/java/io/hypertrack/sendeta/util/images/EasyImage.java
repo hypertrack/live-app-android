@@ -248,7 +248,11 @@ public class EasyImage implements EasyImageConfig {
 
 
     public static void handleActivityResult(int requestCode, int resultCode, Intent data, Activity activity, Callbacks callbacks) {
-        if (requestCode == EasyImageConfig.REQ_SOURCE_CHOOSER || requestCode == EasyImageConfig.REQ_PICK_PICTURE_FROM_GALLERY || requestCode == EasyImageConfig.REQ_TAKE_PICTURE || requestCode == EasyImageConfig.REQ_PICK_PICTURE_FROM_DOCUMENTS) {
+        if (requestCode == EasyImageConfig.REQ_SOURCE_CHOOSER
+                || requestCode == EasyImageConfig.REQ_PICK_PICTURE_FROM_GALLERY
+                || requestCode == EasyImageConfig.REQ_TAKE_PICTURE
+                || requestCode == EasyImageConfig.REQ_PICK_PICTURE_FROM_DOCUMENTS) {
+
             if (resultCode == Activity.RESULT_OK) {
                 if (requestCode == EasyImageConfig.REQ_PICK_PICTURE_FROM_DOCUMENTS) {
                     onPictureReturnedFromDocuments(data, activity, callbacks);

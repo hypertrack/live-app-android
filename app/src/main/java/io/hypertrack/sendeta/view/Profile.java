@@ -29,11 +29,10 @@ import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.Drawable;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -41,6 +40,7 @@ import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -48,7 +48,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -60,7 +59,6 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,7 +95,6 @@ public class Profile extends BaseActivity implements ProfileView {
     public EditText nameView;
     public RoundedImageView mProfileImageView;
     public ProgressBar mProfileImageLoader;
-    public Bitmap oldProfileImage = null, updatedProfileImage = null;
     private ProgressDialog mProgressDialog;
     private EditText phoneNumberView;
     private TextView countryCodeTextView, skip;
@@ -106,7 +103,6 @@ public class Profile extends BaseActivity implements ProfileView {
     private Button register;
     private LinearLayout loadingLayout;
     private String isoCode;
-    private Target profileImageDownloadTarget;
     private File profileImage;
     private IProfilePresenter<ProfileView> presenter = new ProfilePresenter();
     private boolean showSkip = true;
@@ -336,52 +332,35 @@ public class Profile extends BaseActivity implements ProfileView {
             }
         }
 
-        if (!HTTextUtils.isEmpty(phone))
-
-        {
+        if (!HTTextUtils.isEmpty(phone)) {
             phone = phone.replaceAll("\\s", "");
             phoneNumberView.setText(phone);
             previousPhone = phone;
         }
 
-        if (profileURL != null && !profileURL.isEmpty())
-
-        {
-            profileImageDownloadTarget = new Target() {
-                @Override
-                public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                    Log.d("Profile", "onBitmapLoaded called!");
-
-                    oldProfileImage = bitmap;
-
-                    profileImage = ImageUtils.getFileFromBitmap(Profile.this, bitmap);
-                    mProfileImageView.setImageBitmap(bitmap);
-                    mProfileImageLoader.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onBitmapFailed(Drawable errorDrawable) {
-                    Log.d("Profile", "onBitmapFailed called!");
-
-                    mProfileImageLoader.setVisibility(View.GONE);
-                }
-
-                @Override
-                public void onPrepareLoad(Drawable placeHolderDrawable) {
-                    Log.d("Profile", "onPrepareLoad called!");
-                }
-            };
-
+        if (!HTTextUtils.isEmpty(profileURL)) {
             mProfileImageLoader.setVisibility(View.VISIBLE);
+            int pixel = (int) convertDpToPixel(getResources().getDimension(R.dimen.profile_image_size), Profile.this);
             Picasso.with(this)
                     .load(profileURL)
                     .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
-                    .into(profileImageDownloadTarget);
-            mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        }
+                    .centerCrop()
+                    .resize(pixel, pixel)
+                    .into(mProfileImageView, new com.squareup.picasso.Callback() {
+                        @Override
+                        public void onSuccess() {
+                            mProfileImageLoader.setVisibility(View.GONE);
+                        }
 
+                        @Override
+                        public void onError() {
+                            mProfileImageLoader.setVisibility(View.GONE);
+                        }
+                    });
+        }
     }
+
 
     private String getName() {
         AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
@@ -529,23 +508,20 @@ public class Profile extends BaseActivity implements ProfileView {
                     return;
                 }
 
-                // Cancel Profile Pic Download Request from Server & Hide Image Download Loader
-                Picasso.with(Profile.this).cancelRequest(profileImageDownloadTarget);
                 mProfileImageLoader.setVisibility(View.GONE);
-                profileImage = ImageUtils.getScaledFile(imageFile);
+                profileImage = ImageUtils.getScaledFile(Profile.this,imageFile);
 
-                updatedProfileImage = ImageUtils.getRotatedBitMap(imageFile);
-
-                if (updatedProfileImage == null) {
-                    updatedProfileImage = BitmapFactory.decodeFile(profileImage.getPath());
-                } else {
-                    profileImage = ImageUtils.getFileFromBitmap(Profile.this, updatedProfileImage);
-                    mProfileImageView.setImageBitmap(updatedProfileImage);
-                }
-
-                mProfileImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                int pixel = (int) convertDpToPixel(getResources().getDimension(R.dimen.profile_image_size), Profile.this);
+                Picasso.with(Profile.this).load(profileImage).centerCrop().resize(pixel, pixel).into(mProfileImageView);
             }
         });
+    }
+
+    public static float convertDpToPixel(float dp, Context context) {
+        Resources resources = context.getResources();
+        DisplayMetrics metrics = resources.getDisplayMetrics();
+        float px = dp * ((float) metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
+        return px;
     }
 
     @Override

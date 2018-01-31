@@ -34,6 +34,7 @@ import android.media.ExifInterface;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -70,8 +71,18 @@ public class ImageUtils {
         }
     }
 
-    public static File getScaledFile(File file) {
+    public static File getScaledFile(Context context, File file) {
         try {
+
+            ExifInterface exif = new ExifInterface(file.getAbsolutePath());
+            String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
+            int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
+
+            int rotationAngle = 0;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
+
             // BitmapFactory options to downsize the image
             BitmapFactory.Options o = new BitmapFactory.Options();
             o.inJustDecodeBounds = true;
@@ -84,7 +95,7 @@ public class ImageUtils {
             inputStream.close();
 
             // The new size we want to scale to
-            final int REQUIRED_SIZE = 75;
+            final int REQUIRED_SIZE = 50;
 
             // Find the correct scale value. It should be the power of 2.
             int scale = 1;
@@ -100,21 +111,24 @@ public class ImageUtils {
             Bitmap selectedBitmap = BitmapFactory.decodeStream(inputStream, null, o2);
             inputStream.close();
 
+            // File file2 = new File();
             // here i override the original image file
-            if (file.createNewFile()) {
-                FileOutputStream outputStream = new FileOutputStream(file);
-                selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-                return file;
-            }
+
+            FileOutputStream outputStream = new FileOutputStream(file);
+            selectedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
+            return getRotatedBitMap(file,rotationAngle);
+
         } catch (Exception e) {
             e.printStackTrace();
             CrashlyticsWrapper.log(e);
+            Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
+
         }
 
         return null;
     }
 
-    public static Bitmap getRotatedBitMap(File imageFile) {
+    public static File getRotatedBitMap(File imageFile, int rotationAngle) {
         if (imageFile == null || !imageFile.canRead() || !imageFile.exists()) {
             return null;
         }
@@ -123,25 +137,21 @@ public class ImageUtils {
 
         try {
             Bitmap srcBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath());
-            ExifInterface exif = new ExifInterface(imageFile.getName());
-            String orientString = exif.getAttribute(ExifInterface.TAG_ORIENTATION);
-            int orientation = orientString != null ? Integer.parseInt(orientString) : ExifInterface.ORIENTATION_NORMAL;
-
-            int rotationAngle = 0;
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) rotationAngle = 90;
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_180) rotationAngle = 180;
-            if (orientation == ExifInterface.ORIENTATION_ROTATE_270) rotationAngle = 270;
 
             Matrix matrix = new Matrix();
             matrix.setRotate(rotationAngle, (float) srcBitmap.getWidth() / 2, (float) srcBitmap.getHeight() / 2);
             rotatedBitmap = Bitmap.createBitmap(srcBitmap, 0, 0, srcBitmap.getWidth(), srcBitmap.getHeight(), matrix, true);
+
+            FileOutputStream outputStream = new FileOutputStream(imageFile);
+            rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+            outputStream.close();
 
         } catch (Exception e) {
             e.printStackTrace();
             CrashlyticsWrapper.log(e);
         }
 
-        return rotatedBitmap;
+        return imageFile;
     }
 
     public static Bitmap getBitMapForView(Context context, View view) {
