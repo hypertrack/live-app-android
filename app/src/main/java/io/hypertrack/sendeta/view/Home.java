@@ -148,7 +148,8 @@ public class Home extends BaseActivity implements HomeView {
     ValueAnimator valueAnimator = null;
     int circleRadius = 160;
     boolean showCurrentLocationMarker = true;
-    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false, isEditing = false;
+    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false, isShortcut = false,
+            isEditing = false;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -311,6 +312,12 @@ public class Home extends BaseActivity implements HomeView {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
                 ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
                 String name = HTTextUtils.isEmpty(place.getName()) ? place.getAddress() : place.getName();
+
+                //If there is no address or name in place model then don't add as dynamic shortcut
+                // because shortlabel couldn't be empty.
+                if (HTTextUtils.isEmpty(name))
+                    return;
+
                 int count = 0;
                 if (shortcutManager.getDynamicShortcuts() != null) {
                     count = shortcutManager.getDynamicShortcuts().size();
