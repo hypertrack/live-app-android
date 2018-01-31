@@ -44,7 +44,7 @@ The other core feature of Hypertrack Live is Live Location Sharing. Live Locatio
 $ git clone https://github.com/hypertrack/hypertrack-live-android.git
 ```
 
-2. Get your HyperTrack API keys [here](https://dashboard.hypertrack.com/signup), and add the publishable key to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file.
+2. Get your HyperTrack API keys [here](https://www.hypertrack.com/signup?utm_source=github&utm_campaign=ht_live_android), and add the publishable key to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file.
 ```java
 HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
 ```
