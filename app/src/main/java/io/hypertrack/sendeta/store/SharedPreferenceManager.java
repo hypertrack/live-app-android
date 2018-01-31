@@ -143,7 +143,6 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-
     public static String getActionID(Context context) {
         return getSharedPreferences(context).getString(CURRENT_ACTION_ID, null);
     }
