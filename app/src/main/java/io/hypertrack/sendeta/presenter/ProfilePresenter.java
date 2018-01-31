@@ -150,7 +150,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     Log.d(TAG, "onSuccess: User Created");
                     if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
                         sendVerificationCode(context);
-                    } else
+                    } else if(view != null)
                         view.onProfileUpdateSuccess();
                 }
 
