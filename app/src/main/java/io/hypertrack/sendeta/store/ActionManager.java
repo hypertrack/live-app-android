@@ -198,7 +198,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
                     }
                 }
             });
-        } catch (SecurityException | IllegalArgumentException exception) {
+        } catch (Exception exception) {
             HyperLog.e(TAG, "Geofence error at Expected Place" + exception.getMessage());
             CrashlyticsWrapper.log(exception);
         }
@@ -288,7 +288,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
     public void setPlace(Place place) {
         this.place = place;
-        SharedPreferenceManager.setPlace(mContext,place);
+        SharedPreferenceManager.setPlace(mContext, place);
     }
 
     private void clearPlace() {
