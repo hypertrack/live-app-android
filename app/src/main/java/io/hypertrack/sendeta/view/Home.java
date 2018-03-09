@@ -84,6 +84,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.HyperTrackConstants;
 import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
@@ -381,9 +382,6 @@ public class Home extends BaseActivity implements HomeView {
         // Attach View Presenter to View
         presenter.attachView(this);
 
-        // Set callback for HyperTrackEvent update  s
-        setHyperTrackCallbackForActivityUpdates();
-
         // Check if location is being shared currently
         if (restoreLocationSharingIfNeeded())
             isRestoreLocationSharing = true;
@@ -402,27 +400,29 @@ public class Home extends BaseActivity implements HomeView {
         initBottomButtonCard(false);
     }
 
-    /**
-     * Method to set callback for HyperTrackEvents to update notification with relevant information.
-     * Note: Show share tracking url message on Stop_Ended/Trip_Started event and reset it in other cases.
-     */
-    private void setHyperTrackCallbackForActivityUpdates() {
-       /* HyperTrack.setCallback(new HyperTrackEventCallback() {
-            @Override
-            public void onEvent(@NonNull final HyperTrackEvent event) {
-                switch (event.getEventType()) {
-                    case HyperTrackEvent.EventType.LOCATION_CHANGED_EVENT:
-                        updateCurrentLocationMarker(event.getLocation());
-                        break;
+    private void registerBroadcastReceiver() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(HyperTrackConstants.HT_USER_CURRENT_ACTIVITY_INTENT);
+        intentFilter.addAction(HyperTrackConstants.HT_USER_CURRENT_LOCATION_INTENT);
+        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, intentFilter);
+    }
+
+    private void unRegisterBroadcastReceiver() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
+    }
+
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null && intent.getAction() != null) {
+                if (intent.getAction().equals(HyperTrackConstants.HT_USER_CURRENT_LOCATION_INTENT)) {
+                    HyperTrackLocation location = (HyperTrackLocation)
+                            intent.getSerializableExtra(HyperTrackConstants.HT_USER_CURRENT_LOCATION_KEY);
+                    updateCurrentLocationMarker(location);
                 }
             }
-
-            @Override
-            public void onError(@NonNull final ErrorResponse errorResponse) {
-                // do nothing
-            }
-        });*/
-    }
+        }
+    };
 
     private void initializeUIViews() {
         // Setup Info message view layouts
@@ -638,60 +638,6 @@ public class Home extends BaseActivity implements HomeView {
         if (!HyperTrack.checkLocationServices(this)) {
             HyperTrack.requestLocationServices(this);
         }
-    }
-
-    /**
-     * Method to set callback for HyperTrackEvents to update notification with relevant information.
-     * Note: Show share tracking url message on Stop_Ended/Trip_Started event and reset it in other cases.
-     */
-    private void setCallbackForHyperTrackEvents() {
-        /*HyperTrack.setCallback(new HyperTrackEventCallback() {
-            @Override
-            public void onEvent(@NonNull final HyperTrackEvent event) {
-                switch (event.getEventType()) {
-                    case HyperTrackEvent.EventType.STOP_ENDED_EVENT:
-
-                        //Check if user has shared his tracking link
-                        if (ActionManager.getSharedManager(Home.this).isActionLive()) {
-                            return;
-                        }
-
-                        Home.this.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                ServiceNotificationParamsBuilder builder = new ServiceNotificationParamsBuilder();
-                                ArrayList<String> action = new ArrayList<>();
-                                action.add("Set Destination Address");
-                                ServiceNotificationParams notificationParams = builder
-                                        .setSmallIcon(R.drawable.ic_ht_service_notification_small)
-                                        .setSmallIconBGColor(ContextCompat.getColor(Home.this, R.color.colorAccent))
-                                        .setContentTitle(getString(R.string.notification_share_tracking_link))
-                                        .setContextText(getString(R.string.notification_set_destination))
-                                        .setContentIntentActivityClass(SplashScreen.class)
-                                        .setContentIntentExtras(action)
-                                        .build();
-                                HyperTrack.setServiceNotificationParams(notificationParams);
-                            }
-                        });
-                        break;
-                    case HyperTrackEvent.EventType.TRACKING_STOPPED_EVENT:
-                    case HyperTrackEvent.EventType.ACTION_ASSIGNED_EVENT:
-                    case HyperTrackEvent.EventType.ACTION_COMPLETED_EVENT:
-                    case HyperTrackEvent.EventType.STOP_STARTED_EVENT:
-                        HyperTrack.clearServiceNotificationParams();
-                        break;
-                    case HyperTrackEvent.EventType.LOCATION_CHANGED_EVENT:
-                        Log.d(TAG, "onEvent: Location Changed");
-                        updateCurrentLocationMarker(event.getLocation());
-                        break;
-                }
-            }
-
-            @Override
-            public void onError(@NonNull final ErrorResponse errorResponse) {
-                // do nothing
-            }
-        });*/
     }
 
     /*
@@ -1191,7 +1137,8 @@ public class Home extends BaseActivity implements HomeView {
                     if (mProgressDialog != null) {
                         mProgressDialog.dismiss();
                     }
-                    bottomButtonCard.hideProgress();
+                    if (bottomButtonCard != null)
+                        bottomButtonCard.hideProgress();
                 }
             });
         } else if (!HTTextUtils.isEmpty(lookupId)) {
@@ -1470,6 +1417,8 @@ public class Home extends BaseActivity implements HomeView {
                 new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
         LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
                 new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
+
+        registerBroadcastReceiver();
     }
 
     private void updateInfoMessageView() {
@@ -1498,6 +1447,7 @@ public class Home extends BaseActivity implements HomeView {
         super.onPause();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
+        unRegisterBroadcastReceiver();
     }
 
     @Override
