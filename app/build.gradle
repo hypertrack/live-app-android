@@ -120,7 +120,7 @@ android {
             versionCode versionNumber
             versionName "${versionMajor}.${versionMinor}.${versionPatch}"
             minSdkVersion 16
-            targetSdkVersion 25
+            targetSdkVersion 26
             resValue "string", "app_name", "HyperTrack Live"
             buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
@@ -217,12 +217,12 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.6.8@aar") {
+        implementation("com.hypertrack:android:0.6.20@aar") {
             transitive = true;
         }
     }
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
         transitive = true;
     }
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
@@ -239,7 +239,7 @@ dependencies {
         transitive = true;
     }
 
-    compile 'com.android.support:multidex:1.0.2'
+    compile 'com.android.support:multidex:1.0.3'
 
     // Leak Canary dependency for Debug builds
     debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
