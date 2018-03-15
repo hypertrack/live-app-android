@@ -32,13 +32,18 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
     }
 
     @Override
+    public boolean isViewAttached() {
+        return inviteView != null;
+    }
+
+    @Override
     public void acceptInvite(String userID, String accountID, Context context) {
-        HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,context);
+        HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
         Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, userID));
         call.enqueue(new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
-                if (inviteView == null)
+                if (!isViewAttached())
                     return;
 
                 if (response.isSuccessful()) {
@@ -52,7 +57,7 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
             public void onFailure(Call<User> call, Throwable t) {
                 Log.d(TAG, "onFailure: " + t.getMessage());
                 t.printStackTrace();
-                if (inviteView != null)
+                if (isViewAttached())
                     inviteView.showError();
             }
         });

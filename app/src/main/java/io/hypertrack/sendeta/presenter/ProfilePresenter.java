@@ -112,6 +112,11 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         view = null;
     }
 
+    @Override
+    public boolean isViewAttached() {
+        return view != null;
+    }
+
     private UserParams getUserParams(final Context context, final String name, final String number, String ISOCode, File profileImage)
             throws NumberParseException {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
@@ -150,20 +155,20 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     Log.d(TAG, "onSuccess: User Created");
                     if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
                         sendVerificationCode(context);
-                    } else if(view != null)
+                    } else if (isViewAttached())
                         view.onProfileUpdateSuccess();
                 }
 
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
                     Log.d(TAG, "onError: User Created:" + errorResponse.getErrorMessage());
-                    if (view != null)
+                    if (isViewAttached())
                         view.showErrorMessage(errorResponse.getErrorMessage());
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
-            if (view != null)
+            if (isViewAttached())
                 view.showErrorMessage(e.getMessage());
         }
     }
@@ -179,20 +184,20 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                     Log.d(TAG, "onSuccess: User Profile Updated");
                     if (verifyPhone && !HTTextUtils.isEmpty(BuildConfig.isHyperTrackLive)) {
                         sendVerificationCode(context);
-                    } else if (view != null)
+                    } else if (isViewAttached())
                         view.onProfileUpdateSuccess();
                 }
 
                 @Override
                 public void onError(@NonNull ErrorResponse errorResponse) {
                     Log.d(TAG, "onError: UpdateUser:" + errorResponse.getErrorMessage());
-                    if (view != null)
+                    if (isViewAttached())
                         view.showErrorMessage(errorResponse.getErrorMessage());
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
-            if (view != null)
+            if (isViewAttached())
                 view.showErrorMessage(e.getMessage());
         }
     }
@@ -205,10 +210,10 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
                     Log.d(TAG, "onResponse: Verification Code Sent");
-                    if (view != null)
+                    if (isViewAttached())
                         view.navigateToVerifyCodeScreen();
                 } else {
-                    if (view != null) {
+                    if (isViewAttached()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             view.showErrorMessage(jObjError.getString("message"));
@@ -222,7 +227,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
             @Override
             public void onFailure(Call<User> call, Throwable t) {
                 t.printStackTrace();
-                if (view != null)
+                if (isViewAttached())
                     view.showErrorMessage(t.getMessage());
             }
         });
