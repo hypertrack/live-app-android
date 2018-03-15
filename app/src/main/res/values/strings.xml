@@ -102,4 +102,5 @@
     <string name="share">SHARE</string>
     <string name="review_placeline">Review Placeline</string>
     <string name="show_summary">Show Summary</string>
+    <string name="share_eta">SHARE ETA</string>
 </resources>
