@@ -51,75 +51,13 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <LinearLayout
-            android:id="@+id/live_tracking_action_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@color/white"
-            android:visibility="gone">
-
-            <com.hypertrack.lib.internal.consumer.view.RippleView
-                android:id="@+id/tracking_toogle"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                android:tag="stop"
-                app:rv_centered="true">
-
-                <TextView
-                    android:id="@+id/tracking_text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/stop"
-                    android:textAllCaps="true"
-                    android:textSize="@dimen/text_medium" />
-            </com.hypertrack.lib.internal.consumer.view.RippleView>
-
-            <View
-                android:id="@+id/separator"
-                android:layout_width="1dp"
-                android:layout_height="40dp"
-                android:background="@color/divider_light" />
-
-            <com.hypertrack.lib.internal.consumer.view.RippleView
-                android:id="@+id/share_link"
-                android:layout_width="0dp"
-                android:layout_height="40dp"
-                android:layout_weight="1"
-                app:rv_centered="true">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true"
-                    android:text="@string/share"
-                    android:textAllCaps="true"
-                    android:textColor="@color/tracking_experience"
-                    android:textSize="@dimen/text_medium" />
-            </com.hypertrack.lib.internal.consumer.view.RippleView>
-        </LinearLayout>
-
         <fragment
             android:id="@+id/htMapfragment"
-            android:name="com.hypertrack.lib.HyperTrackMapFragment"
+            android:name="com.hypertrack.lib.tracking.MapProvider.GoogleMapFragmentView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/live_tracking_action_layout"
             android:layout_below="@id/app_bar_layout"
-            tools:layout="@layout/fragment_map_new" />
-
-        <io.hypertrack.sendeta.view.BottomButtonCard
-            android:id="@+id/bottom_card"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_gravity="bottom"
-            android:visibility="gone" />
-
+            tools:layout="@layout/map_fragment" />
 
     </RelativeLayout>
 
