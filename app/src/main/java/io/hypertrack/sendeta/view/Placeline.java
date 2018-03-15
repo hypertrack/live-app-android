@@ -83,7 +83,6 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
                 drawer.openDrawer(Gravity.LEFT);
             }
         });
-
     }
 
     @Override
@@ -98,14 +97,19 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
                 builder.setTitle("Can't do stop tracking.");
                 builder.setMessage("Ongoing location sharing trip is active. Stop trip first.");
                 builder.setNegativeButton("No", null);
-                builder.setPositiveButton("Goto live trip", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        TaskStackBuilder.create(Placeline.this)
-                                .addNextIntentWithParentStack(new Intent(Placeline.this, Home.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
-                                .startActivities();
-                    }
-                });
+                builder.setPositiveButton("Goto live trip",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                Intent intent = new Intent(Placeline.this, Home.class).
+                                        setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                                TaskStackBuilder.create(Placeline.this)
+                                        .addNextIntentWithParentStack(intent)
+                                        .startActivities();
+                            }
+                        });
                 builder.show();
                 return true;
             }
