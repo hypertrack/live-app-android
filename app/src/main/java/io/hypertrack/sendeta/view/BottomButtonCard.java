@@ -48,7 +48,7 @@ public class BottomButtonCard extends RelativeLayout {
     public BottomButtonCard(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs);
         mContext = context;
-        LayoutInflater.from(mContext).inflate(R.layout.bottom_buttom_card_view, this, true);
+        LayoutInflater.from(mContext).inflate(R.layout.bottom_card_view, this, true);
         initiateView();
         type = ActionType.START_TRACKING;
     }
