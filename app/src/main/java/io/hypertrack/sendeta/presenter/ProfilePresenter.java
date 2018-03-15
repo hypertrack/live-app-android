@@ -141,7 +141,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                 .setName(name)
                 .setPhone(phoneNumber)
                 .setPhoto(encodedImage)
-                .setLookupId(phoneNumber);
+                .setUniqueId(phoneNumber);
     }
 
     @Override

@@ -41,7 +41,7 @@ public class DeepLinkUtilTest {
         assertNotNull(appDeepLink);
         assertEquals(DeepLinkUtil.DEFAULT, appDeepLink.mId);
         assertNull(appDeepLink.taskID);
-        assertNull(appDeepLink.lookupId);
+        assertNull(appDeepLink.uniqueId);
         assertNull(appDeepLink.shortCode);
     }
 
@@ -53,7 +53,7 @@ public class DeepLinkUtilTest {
         assertNotNull(appDeepLink);
         assertEquals(DeepLinkUtil.TRACK, appDeepLink.mId);
         assertNull(appDeepLink.taskID);
-        assertNull(appDeepLink.lookupId);
+        assertNull(appDeepLink.uniqueId);
         assertNotNull(appDeepLink.shortCode);
     }
 

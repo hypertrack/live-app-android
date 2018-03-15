@@ -50,7 +50,7 @@ public class DeepLinkUtil {
     private static final String KEY_ACTION_ID = "action_id";
     private static final String KEY_SHORT_CODE = "short_code";
     private static final String KEY_LOOKUP_ID = "lookup_id";
-    private static final String KEY_ORDER_ID = "order_id";
+    private static final String KEY_UNIQUE_ID = "unique_id";
     private static final String KEY_COLLECTION_ID = "collection_id";
 
     //private static AppDeepLink appDeepLink;
@@ -132,10 +132,10 @@ public class DeepLinkUtil {
                         e.printStackTrace();
                     }
                     break;
-                case KEY_ORDER_ID:
                 case KEY_LOOKUP_ID:
+                case KEY_UNIQUE_ID:
                     try {
-                        appDeepLink.lookupId = uri.getQueryParameter(paramName);
+                        appDeepLink.uniqueId = uri.getQueryParameter(paramName);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
