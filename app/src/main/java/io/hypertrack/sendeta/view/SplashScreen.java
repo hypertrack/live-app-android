@@ -52,7 +52,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
@@ -276,10 +275,10 @@ public class SplashScreen extends BaseActivity {
                     return;
                 }
 
-                List<Action> actions = (List<Action>) response.getResponseObject();
-                if (actions != null && !actions.isEmpty()) {
+                Action actions = (Action) response.getResponseObject();
+                if (actions != null) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.get(0).getCollectionId(), actions.get(0).getLookupId(), actions.get(0).getId());
+                    handleTrackingDeepLinkSuccess(actions.getCollectionId(), actions.getUniqueId(),actions.getId());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -313,7 +312,7 @@ public class SplashScreen extends BaseActivity {
 
         // Check if current lookupId is same as the one active currently
         if (!HTTextUtils.isEmpty(lookupId) &&
-                lookupId.equals(ActionManager.getSharedManager(this).getHyperTrackActionLookupId())) {
+                lookupId.equals(ActionManager.getSharedManager(this).getHyperTrackActionUniqueId())) {
             TaskStackBuilder.create(this)
                     .addNextIntentWithParentStack(new Intent(this, Home.class)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
@@ -339,7 +338,7 @@ public class SplashScreen extends BaseActivity {
             if (!HTTextUtils.isEmpty(collectionId))
                 intent.putExtra(Track.KEY_COLLECTION_ID, collectionId);
             else
-                intent.putExtra(Track.KEY_LOOKUP_ID, lookupId);
+                intent.putExtra(Track.KEY_UNIQUE_ID, lookupId);
         } else {
             intent.setClass(SplashScreen.this, Track.class);
         }
