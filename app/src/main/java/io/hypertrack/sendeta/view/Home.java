@@ -26,15 +26,12 @@ SOFTWARE.
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -60,9 +57,7 @@ import android.widget.Toast;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackConstants;
@@ -101,17 +96,10 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
     private static final String TAG = Home.class.getSimpleName();
     private GoogleMap mMap;
-    Marker currentLocationMarker;
-    GroundOverlay circle;
-    ValueAnimator valueAnimator = null;
     private Location defaultLocation = new Location("default");
     private Place expectedPlace;
 
     private float zoomLevel = 16.0f;
-    int circleRadius = 160;
-
-    private boolean isMapLoaded = false;
-    private boolean fromPlaceline = false;
 
     GoogleMapFragmentView googleMapFragmentView;
     private HomeMapAdapter adapter;
@@ -174,11 +162,6 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
                 onSelectPlace(expectedPlace);
                 addDynamicShortcut(expectedPlace);
             }
-        }
-
-        @Override
-        public void onMapLoadedCallback(Context context, GoogleMap map) {
-            isMapLoaded = true;
         }
 
         @Override
@@ -260,6 +243,12 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         public void onReceiveEditExpectedPlaceError(Context context, String actionID, String errorMessage) {
             isEditing = false;
         }
+
+        @Override
+        public void onHeaderActionButtonClicked(String metaData) {
+            super.onHeaderActionButtonClicked(metaData);
+            presenter.getShareMessage();
+        }
     };
 
     private void addDynamicShortcut(Place place) {
@@ -306,8 +295,9 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
         if (getIntent() != null && getIntent().hasExtra("class_from")) {
             if (getIntent().getStringExtra("class_from").
-                    equalsIgnoreCase(Placeline.class.getSimpleName()))
-                fromPlaceline = true;
+                    equalsIgnoreCase(Placeline.class.getSimpleName())) {
+                //fromPlaceline = true;
+            }
         }
 
         //Initialize Map Fragment added in Activity Layout to getMapAsync
@@ -316,7 +306,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
         adapter = new HomeMapAdapter(this);
         googleMapFragmentView.setMapAdapter(adapter);
-        googleMapFragmentView.setCallback(callback);
+        googleMapFragmentView.setMapCallback(callback);
 
         googleMapFragmentView.setUseCaseType(BaseTrackingView.Type.LIVE_LOCATION_SHARING);
 
@@ -352,6 +342,30 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink && !isShortcut) {
             setTopButtonToCreateAction();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActionManager actionManager = ActionManager.getSharedManager(this);
+        Action action = actionManager.getHyperTrackAction();
+
+        if (action != null && !action.isCompleted()) {
+            actionManager.setActionComletedListener(actionCompletedListener);
+            collectionId = action.getCollectionId();
+            presenter.trackActionsOnMap(collectionId, false);
+        }
+
+        // Check if Location & Network are Enabled
+        updateInfoMessageView();
+
+        // Re-register BroadcastReceiver for Location_Change, Network_Change & GCM
+        LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
+                new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
+                new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
+
+        registerBroadcastReceiver();
     }
 
     public void setTopButtonToCreateAction() {
@@ -408,19 +422,9 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     private void stopTracking() {
         if (HyperTrack.checkLocationPermission(Home.this)
                 && HyperTrack.checkLocationServices(Home.this)) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle(getString(R.string.stop));
-            builder.setMessage("Are you sure?");
-            builder.setPositiveButton("Stop", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    presenter.stopSharing(false);
-                    collectionId = null;
-                    HyperTrack.removeActions(null);
-                }
-            });
-            builder.setNegativeButton("No", null);
-            builder.show();
+            presenter.stopSharing(false);
+            collectionId = null;
+            HyperTrack.removeActions(null);
         } else {
             if (!HyperTrack.checkLocationServices(Home.this)) {
                 HyperTrack.requestLocationServices(Home.this);
@@ -468,7 +472,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
             // Get required parameters for tracking Actions on map
             collectionId = intent.getStringExtra(Track.KEY_COLLECTION_ID);
             // Call trackActionsOnMap method
-            presenter.trackActionsOnMap(collectionId,true);
+            presenter.trackActionsOnMap(collectionId, true);
             return true;
         }
         return false;
@@ -548,9 +552,13 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
     @Override
     public void hidePlacePickerButton() {
-        updateExpectedPlaceButton.setVisibility(View.GONE);
         if (isUpdateExpectedPlace)
             googleMapFragmentView.hideTopButton();
+    }
+
+    @Override
+    public void hideBottomPlacePickerButton() {
+        updateExpectedPlaceButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -777,17 +785,6 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         checkForLocationSettings();
     }
 
-    private void updateMapPadding() {
-        if (mMap != null) {
-            int top = getResources().getDimensionPixelSize(R.dimen.map_top_padding);
-            int left = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            int right = expectedPlace == null ? getResources().getDimensionPixelSize(R.dimen.map_side_padding) :
-                    getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            int bottom = getResources().getDimensionPixelSize(R.dimen.map_side_padding);
-            mMap.setPadding(left, top, right, bottom);
-        }
-    }
-
     /*private void updateMapView() {
         if (mMap == null || !isMapLoaded) {
             return;
@@ -841,7 +838,8 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     @Override
     public void showShareLiveLocationSuccess(Action action) {
         // bottomButtonCard.hideBottomCardLayout();
-        presenter.trackActionsOnMap(action.getCollectionId(), false);
+        if (ActionManager.getSharedManager(this).getTrackingAction() == null)
+            presenter.trackActionsOnMap(action.getCollectionId(), false);
         presenter.getShareMessage();
     }
 
@@ -1036,30 +1034,6 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
             updateInfoMessageView();
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        ActionManager actionManager = ActionManager.getSharedManager(this);
-        Action action = actionManager.getHyperTrackAction();
-
-        if (action != null && !action.isCompleted()) {
-            actionManager.setActionComletedListener(actionCompletedListener);
-            collectionId = action.getCollectionId();
-            presenter.trackActionsOnMap(collectionId, false);
-        }
-
-        // Check if Location & Network are Enabled
-        updateInfoMessageView();
-
-        // Re-register BroadcastReceiver for Location_Change, Network_Change & GCM
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
-                new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
-                new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
-
-        registerBroadcastReceiver();
-    }
 
     private void updateInfoMessageView() {
         if (!HyperTrackUtils.isLocationEnabled(Home.this)) {

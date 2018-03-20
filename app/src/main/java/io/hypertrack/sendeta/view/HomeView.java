@@ -68,4 +68,6 @@ public interface HomeView {
     void updateExpectedPlaceFailure(String s);
 
     void hidePlacePickerButton();
+
+    void hideBottomPlacePickerButton();
 }
