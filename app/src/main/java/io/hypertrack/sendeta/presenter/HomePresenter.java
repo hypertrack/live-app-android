@@ -255,7 +255,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                             mView.showPlacePickerButtonAtBottom();
                     } else {
                         if (expectedPlace == null) {
-                            mView.hidePlacePickerButton();
+                            mView.hideBottomPlacePickerButton();
                             mView.showPlacePickerButton();
                         }
                         mView.showStopSharingButton();
@@ -284,10 +284,6 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             return false;
 
         mView.showLoading();
-
-        String collectionId = actionManager.getHyperTrackActionCollectionId();
-
-        trackActionsOnMap(collectionId, false);
 
         return true;
     }
@@ -325,6 +321,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 if (!isViewAttached())
                     return;
 
+                mView.hideBottomPlacePickerButton();
                 mView.hidePlacePickerButton();
                 mView.hideLoading();
             }
