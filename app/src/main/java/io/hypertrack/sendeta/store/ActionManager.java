@@ -96,7 +96,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.hyperTrackAction != null) {
             // Start Refreshing the task without any delay
             return true;
-
         }
 
         if (actionCompletedListener != null)
@@ -306,7 +305,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.hyperTrackAction == null) {
             this.hyperTrackAction = SharedPreferenceManager.getAction(mContext);
         }
-
         return this.hyperTrackAction;
     }
 
