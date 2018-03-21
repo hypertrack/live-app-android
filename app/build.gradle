@@ -176,6 +176,21 @@ android {
             }
         }
 
+        tracking{
+            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
+                throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
+            }
+            debuggable true
+            minifyEnabled false
+            versionNameSuffix '-tracking'
+            applicationIdSuffix '.tracking'
+            resValue "string", "app_name", "New Tracking HyperTrack Live"
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (!fabricCheck) {
+                ext.enableCrashlytics = false
+            }
+        }
+
         if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
             staging {
                 debuggable true
@@ -243,6 +258,7 @@ dependencies {
 
     // Leak Canary dependency for Debug builds
     debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    trackingCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
         stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
