@@ -474,9 +474,14 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         Intent intent = getIntent();
 
         if (intent != null && intent.getBooleanExtra(Track.KEY_TRACK_DEEPLINK, false)) {
-            showLoading(getString(R.string.fetching_details_msg));
             // Get required parameters for tracking Actions on map
             collectionId = intent.getStringExtra(Track.KEY_COLLECTION_ID);
+            if (HTTextUtils.isEmpty(collectionId)) {
+                HyperLog.e(TAG, "handleDeepLinkTrackingUrl: CollectionId is empty");
+                Toast.makeText(this, "Tracking Url is corrupt", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+            showLoading(getString(R.string.fetching_details_msg));
             // Call trackActionsOnMap method
             presenter.trackActionsOnMap(collectionId, true);
             return true;
@@ -844,8 +849,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     @Override
     public void showShareLiveLocationSuccess(Action action) {
         // bottomButtonCard.hideBottomCardLayout();
-        if (ActionManager.getSharedManager(this).getTrackingAction() == null)
-            presenter.trackActionsOnMap(action.getCollectionId(), false);
+        presenter.trackActionsOnMap(action.getCollectionId(), false);
         presenter.getShareMessage();
     }
 

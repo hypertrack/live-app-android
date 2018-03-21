@@ -103,4 +103,5 @@
     <string name="review_placeline">Review Placeline</string>
     <string name="show_summary">Show Summary</string>
     <string name="share_eta">SHARE ETA</string>
+    <string name="tracking_eta_fyi">eta.fyi</string>
 </resources>

@@ -68,6 +68,13 @@
                 <data
                     android:host="@string/tracking_url"
                     android:pathPrefix="/" />
+
+                <data
+                    android:host="trck.at"
+                    android:scheme="https" />
+                <data
+                    android:host="eta.fyi"
+                    android:scheme="http" />
             </intent-filter>
 
 

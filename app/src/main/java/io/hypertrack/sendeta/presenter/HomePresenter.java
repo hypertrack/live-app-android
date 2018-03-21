@@ -110,7 +110,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             }
         }
 
-        mView.showLoading();
+        mView.showLoading("Sharing your location...");
 
         // Call assignAction to start the tracking action
         HyperTrack.createAndAssignAction(actionParamsBuilder.build(), new HyperTrackCallback() {

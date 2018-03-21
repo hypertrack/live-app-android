@@ -98,6 +98,15 @@ public class DeepLinkUtil {
                 appDeepLink.shortCode = pathParams[1];
             }
         }
+
+        if (uri.getHost() != null && uri.getHost().contains(context.getString(R.string.tracking_eta_fyi))) {
+            appDeepLink.mId = DeepLinkUtil.TRACK;
+            String[] pathParams = uri.getPath().split("/");
+            // Check if pathParams is of the format "/abCSKD"
+            if (pathParams.length == 2 && !pathParams[1].contains("/")) {
+                appDeepLink.shortCode = pathParams[1];
+            }
+        }
     }
 
     private static AppDeepLink parseAppDeepLinkURI(Context context, AppDeepLink appDeepLink, Uri uri) {

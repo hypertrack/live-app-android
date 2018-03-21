@@ -125,7 +125,7 @@ android {
             buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
             buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
             resValue "string", "deeplink_scheme", "com.hypertracklive"
-            resValue "string", "tracking_url", "www.trck.at"
+            resValue "string", "tracking_url", "trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
             multiDexEnabled true
             if (keystorePropertiesFile.exists())
