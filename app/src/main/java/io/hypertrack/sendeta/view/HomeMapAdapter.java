@@ -37,4 +37,9 @@ class HomeMapAdapter extends HyperTrackMapAdapter {
     public HomeMapAdapter(Context mContext) {
         super(mContext);
     }
+
+    @Override
+    public boolean showTrailingPolyline() {
+        return false;
+    }
 }
