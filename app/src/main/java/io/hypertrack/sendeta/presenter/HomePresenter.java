@@ -180,10 +180,17 @@ public class HomePresenter implements IHomePresenter<HomeView> {
         if (actionManager == null || !isViewAttached())
             return;
 
-        if (actionManager.getHyperTrackAction() == null)
+        Action action;
+
+
+        action = actionManager.getHyperTrackAction();
+
+        if (action == null)
+            action = actionManager.getTrackingAction();
+
+        if (action == null)
             return;
 
-        Action action = actionManager.getHyperTrackAction();
         String shareMessage = action.getShareMessage();
         mView.showShareCard(shareMessage);
     }
