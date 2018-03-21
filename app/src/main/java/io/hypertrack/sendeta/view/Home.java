@@ -249,6 +249,12 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
             super.onHeaderActionButtonClicked(metaData);
             presenter.getShareMessage();
         }
+
+        @Override
+        public void onCallButtonClicked(Context context, String actionID) {
+            super.onCallButtonClicked(context, actionID);
+            Toast.makeText(context, "Call Button Clicked " + actionID, Toast.LENGTH_SHORT).show();
+        }
     };
 
     private void addDynamicShortcut(Place place) {
