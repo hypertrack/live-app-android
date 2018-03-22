@@ -117,6 +117,8 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
             isShortcut = false, isEditing = false, isCreateAction = false,
             isUpdateExpectedPlace = false;
 
+    private boolean isPlaceUpdating;
+
     BottomCardItemView stopLocationSharingButton;
     BottomCardItemView updateExpectedPlaceButton;
 
@@ -165,7 +167,9 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         }
 
         @Override
-        public void onActionRefreshed(List<String> refreshedActionIds, List<Action> refreshedActions) {
+        public void onActionRefreshed(List<String> refreshedActionIds,
+                                      final List<Action> refreshedActions) {
+
             ActionManager actionManager = ActionManager.getSharedManager(Home.this);
 
             if (actionManager.getHyperTrackAction() != null) {
@@ -179,7 +183,8 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
                     //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
 
-                    if (action.getExpectedPlace() != null && action.getExpectedPlace().getLocation() != null &&
+                    if (action.getExpectedPlace() != null &&
+                            action.getExpectedPlace().getLocation() != null &&
                             action.getUser().getId().equalsIgnoreCase(HyperTrack.getUserId())) {
                         actionManager.setShortcutPlace(action.getExpectedPlace());
                     }
@@ -188,6 +193,20 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
                         actionManager.setTrackingAction(refreshedActions.get(Math.abs(index - 1)));
                     }
                 }
+            }
+
+            if (isPlaceUpdating) {
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (presenter != null) {
+                            presenter.refreshView(refreshedActions, false);
+                        }
+                        hideLoading();
+
+                    }
+                }, 1500);
+                isPlaceUpdating = false;
             }
         }
 
@@ -570,6 +589,11 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     @Override
     public void hideBottomPlacePickerButton() {
         updateExpectedPlaceButton.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void showUpdatePlaceLoading() {
+        isPlaceUpdating = true;
     }
 
     @Override

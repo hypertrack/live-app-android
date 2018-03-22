@@ -70,4 +70,6 @@ public interface HomeView {
     void hidePlacePickerButton();
 
     void hideBottomPlacePickerButton();
+
+    void showUpdatePlaceLoading();
 }

@@ -23,8 +23,11 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
+import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.User;
+
+import java.util.List;
 
 import io.hypertrack.sendeta.store.ActionManager;
 
@@ -45,6 +48,8 @@ public interface IHomePresenter<V> extends Presenter<V> {
     void openNavigationForExpectedPlace(final ActionManager actionManager);
 
     void trackActionsOnMap(String collectionId, boolean isDeepLinkTrackingAction);
+
+    void refreshView(List<Action> actions, boolean isDeepLinkTrackingAction);
 
     /*
      * Method to restore app's state in case of ongoing location sharing for current user.

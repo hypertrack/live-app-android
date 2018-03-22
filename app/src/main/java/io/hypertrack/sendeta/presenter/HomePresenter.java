@@ -240,33 +240,8 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
                     List<Action> actions = (List<Action>) response.getResponseObject();
-                    Action action = actions.get(0);
-                    Place expectedPlace = action.getExpectedPlace();
-                    actionManager.setPlace(expectedPlace);
 
-                    if (!isViewAttached())
-                        return;
-
-                    boolean isSameUser = false;
-                    for (Action tempAction : actions) {
-                        if (tempAction.getUser().getId().equalsIgnoreCase(userId) && !tempAction.hasFinished()) {
-                            isSameUser = true;
-                        } else if (isDeepLinkTrackingAction) {
-                            actionManager.setTrackingAction(action);
-                        }
-                    }
-
-                    if (!isSameUser) {
-                        mView.showShareLocationButton();
-                        if (expectedPlace == null)
-                            mView.showPlacePickerButtonAtBottom();
-                    } else {
-                        if (expectedPlace == null) {
-                            mView.hideBottomPlacePickerButton();
-                            mView.showPlacePickerButton();
-                        }
-                        mView.showStopSharingButton();
-                    }
+                    refreshView(actions, isDeepLinkTrackingAction);
 
                     mView.hideLoading();
                 }
@@ -279,6 +254,39 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                     mView.hideLoading();
                 }
             });
+        }
+    }
+
+    @Override
+    public void refreshView(List<Action> actions, boolean isDeepLinkTrackingAction) {
+        Action action = actions.get(0);
+        Place expectedPlace = action.getExpectedPlace();
+        actionManager.setPlace(expectedPlace);
+
+        if (!isViewAttached())
+            return;
+
+        boolean isSameUser = false;
+        for (Action tempAction : actions) {
+            if (tempAction.getUser().getId().equalsIgnoreCase(userId) && !tempAction.hasFinished()) {
+                isSameUser = true;
+            } else if (isDeepLinkTrackingAction) {
+                actionManager.setTrackingAction(action);
+            }
+        }
+
+        if (!isSameUser) {
+            mView.showShareLocationButton();
+            if (expectedPlace == null)
+                mView.showPlacePickerButtonAtBottom();
+        } else {
+            if (expectedPlace == null) {
+                mView.showPlacePickerButton();
+            } else {
+                mView.hidePlacePickerButton();
+            }
+            mView.hideBottomPlacePickerButton();
+            mView.showStopSharingButton();
         }
     }
 
@@ -330,7 +338,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
                 mView.hideBottomPlacePickerButton();
                 mView.hidePlacePickerButton();
-                mView.hideLoading();
+                mView.showUpdatePlaceLoading();
             }
 
             @Override
@@ -340,6 +348,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
                 mView.updateExpectedPlaceFailure(errorResponse.getErrorMessage());
                 mView.hideLoading();
+                mView.showUpdatePlaceLoading();
             }
         });
     }
