@@ -122,6 +122,8 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     BottomCardItemView stopLocationSharingButton;
     BottomCardItemView updateExpectedPlaceButton;
 
+    private boolean fromPlaceline = false;
+
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
         public void OnCallback() {
@@ -178,8 +180,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
                 if (index >= 0) {
                     //Get refreshed action Data
-                    Action action = refreshedActions.get(refreshedActionIds.indexOf(
-                            actionManager.getHyperTrackActionId()));
+                    Action action = refreshedActions.get(index);
                     //Update action data to Shared Preference
                     actionManager.setHyperTrackAction(action);
 
@@ -321,7 +322,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         if (getIntent() != null && getIntent().hasExtra("class_from")) {
             if (getIntent().getStringExtra("class_from").
                     equalsIgnoreCase(Placeline.class.getSimpleName())) {
-                //fromPlaceline = true;
+                fromPlaceline = true;
             }
         }
 
@@ -375,7 +376,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         ActionManager actionManager = ActionManager.getSharedManager(this);
         Action action = actionManager.getHyperTrackAction();
 
-        if (action != null && !action.isCompleted()) {
+        if (action != null) {
             actionManager.setActionComletedListener(actionCompletedListener);
             collectionId = action.getCollectionId();
             presenter.trackActionsOnMap(collectionId, false);
@@ -1102,7 +1103,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     public void onBackPressed() {
         HyperTrack.removeActions(null);
 
-       /* ActionManager actionManager = ActionManager.getSharedManager(this);
+        ActionManager actionManager = ActionManager.getSharedManager(this);
         //If tracking action has completed and summary view is visible then on back press clear the view
         // so that user can share new tracking url without reopening the app.
         if (actionManager.getHyperTrackAction() != null &&
@@ -1110,10 +1111,9 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
             // Reset uniqueId variable
             stopSharingLiveLocation();
-            ActionManager.getSharedManager(this).clearState();
         } else if (!fromPlaceline) {
             startActivity(new Intent(Home.this, Placeline.class));
-        }*/
+        }
         //finish();
         super.onBackPressed();
     }
