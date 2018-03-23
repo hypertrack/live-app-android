@@ -40,7 +40,7 @@ class HomeMapAdapter extends HyperTrackMapAdapter {
 
     @Override
     public boolean showTrailingPolyline() {
-        return false;
+        return true;
     }
 
 }
