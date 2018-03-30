@@ -413,7 +413,7 @@ public class Profile extends BaseActivity implements ProfileView {
         SharedPreferenceManager.deletePlace(this);
 
         HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
-        Intent intent = new Intent(Profile.this, Placeline.class);
+        Intent intent = new Intent(Profile.this, Home.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Profile.this)
                 .addNextIntentWithParentStack(intent)
