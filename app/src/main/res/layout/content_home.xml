@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".view.Home"
     tools:showIn="@layout/activity_home">
@@ -11,6 +12,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
         android:orientation="vertical"
         android:visibility="visible">
 
@@ -56,8 +58,51 @@
             android:name="com.hypertrack.lib.tracking.MapProvider.GoogleMapFragmentView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@id/location_sharing_active"
             android:layout_below="@id/app_bar_layout"
             tools:layout="@layout/map_fragment" />
+
+        <RelativeLayout
+            android:id="@+id/location_sharing_active"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="@color/info_box_normal"
+            android:orientation="horizontal"
+            android:padding="@dimen/padding_high"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/description"
+                style="@style/ActionDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@id/action_text"
+                android:layout_toStartOf="@id/action_text"
+                android:paddingEnd="@dimen/padding_high"
+                android:paddingRight="@dimen/padding_high"
+                android:text="LOCATION SHARING ACTIVE"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_base" />
+
+            <TextView
+                android:id="@+id/action_text"
+                style="@style/ActionButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:paddingBottom="@dimen/padding_base"
+                android:paddingLeft="@dimen/padding_high"
+                android:paddingRight="@dimen/padding_high"
+                android:paddingTop="@dimen/padding_base"
+                android:text="VIEW"
+                android:textColor="@color/info_box_normal"
+                android:visibility="visible" />
+        </RelativeLayout>
 
     </RelativeLayout>
 
