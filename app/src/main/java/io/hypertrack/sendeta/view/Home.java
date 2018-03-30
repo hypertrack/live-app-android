@@ -70,9 +70,11 @@ import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.User;
-import com.hypertrack.lib.tracking.BaseMVP.BaseTrackingView;
+import com.hypertrack.lib.placeline.PlacelineNew;
 import com.hypertrack.lib.tracking.BottomCardItemView;
+import com.hypertrack.lib.tracking.CTAButton;
 import com.hypertrack.lib.tracking.MapProvider.GoogleMapFragmentView;
+import com.hypertrack.lib.tracking.MapProvider.MapFragmentView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,7 +94,7 @@ import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.Utils;
 
-public class Home extends BaseActivity implements HomeView, View.OnClickListener {
+public class Home extends BaseActivity implements HomeView, CTAButton.OnClickListener, PlacelineNew.PlacelineViewListener {
 
     private static final String TAG = Home.class.getSimpleName();
     private GoogleMap mMap;
@@ -334,8 +336,8 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
         googleMapFragmentView.setMapAdapter(adapter);
         googleMapFragmentView.setMapCallback(callback);
 
-        googleMapFragmentView.setUseCaseType(BaseTrackingView.Type.LIVE_LOCATION_SHARING);
-
+        googleMapFragmentView.setUseCaseType(MapFragmentView.Type.PLACELINE);
+        googleMapFragmentView.setPlacelineViewListener(this);
         // Initialize UI Views
         initializeUIViews();
 
@@ -395,16 +397,16 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     }
 
     public void setTopButtonToCreateAction() {
-        googleMapFragmentView.setTopButtonText(getString(R.string.share_your_location));
-        googleMapFragmentView.setTopButtonClickListener(this);
-        googleMapFragmentView.showTopButton();
+        googleMapFragmentView.setCTAButtonTitle(getString(R.string.share_your_location));
+        googleMapFragmentView.setCTAButtonClickListener(this);
+        googleMapFragmentView.setCTAButtonVisibility(true);
         isCreateAction = true;
     }
 
     public void setTopButtonToUpdateExpectedPlace() {
-        googleMapFragmentView.setTopButtonText(getString(R.string.share_eta));
-        googleMapFragmentView.setTopButtonClickListener(this);
-        googleMapFragmentView.showTopButton();
+        googleMapFragmentView.setCTAButtonTitle(getString(R.string.share_eta));
+        googleMapFragmentView.setCTAButtonClickListener(this);
+        googleMapFragmentView.setCTAButtonVisibility(true);
         isCreateAction = false;
         isUpdateExpectedPlace = true;
     }
@@ -424,7 +426,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
             @Override
             public void onClick(View v) {
                 googleMapFragmentView.openPlacePicker();
-                googleMapFragmentView.hideTopButton();
+                googleMapFragmentView.setCTAButtonVisibility(false);
             }
         });
 
@@ -584,7 +586,7 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     @Override
     public void hidePlacePickerButton() {
         if (isUpdateExpectedPlace)
-            googleMapFragmentView.hideTopButton();
+            googleMapFragmentView.setCTAButtonVisibility(false);
     }
 
     @Override
@@ -1012,15 +1014,45 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
     }
 
     @Override
-    public void onClick(View topButton) {
+    public void onTitleButtonClick() {
         if (isCreateAction) {
             shareLiveLocation();
         } else if (isUpdateExpectedPlace) {
             if (googleMapFragmentView != null) {
                 googleMapFragmentView.openPlacePicker();
-                googleMapFragmentView.hideTopButton();
+                googleMapFragmentView.setCTAButtonVisibility(false);
             }
         }
+    }
+
+    @Override
+    public void onLeftButtonClick() {
+
+    }
+
+    @Override
+    public void onRightButtonClick() {
+
+    }
+
+    @Override
+    public void onPlacelineViewShown() {
+
+    }
+
+    @Override
+    public void onPlacelineViewExpanded() {
+
+    }
+
+    @Override
+    public void onPlacelineViewCollapsed() {
+        setTopButtonToCreateAction();
+    }
+
+    @Override
+    public void onPlacelineViewClosed() {
+
     }
 
     @SuppressLint("ParcelCreator")
@@ -1111,9 +1143,9 @@ public class Home extends BaseActivity implements HomeView, View.OnClickListener
 
             // Reset uniqueId variable
             stopSharingLiveLocation();
-        } else if (!fromPlaceline) {
+        }/* else if (!fromPlaceline) {
             startActivity(new Intent(Home.this, Placeline.class));
-        }
+        }*/
         //finish();
         super.onBackPressed();
     }
