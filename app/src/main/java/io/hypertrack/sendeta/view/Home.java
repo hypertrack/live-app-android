@@ -51,6 +51,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -89,6 +90,7 @@ import io.hypertrack.sendeta.service.FetchLocationIntentService;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
+import io.hypertrack.sendeta.util.AnimationUtils;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
@@ -123,6 +125,10 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     BottomCardItemView stopLocationSharingButton;
     BottomCardItemView updateExpectedPlaceButton;
+    RelativeLayout locationSharingActiveButton;
+    TextView mActionText;
+
+    List<BottomCardItemView> bottomCardItemViews;
 
     private boolean fromPlaceline = false;
 
@@ -277,6 +283,22 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             super.onCallButtonClicked(context, actionID);
             Toast.makeText(context, "Call Button Clicked " + actionID, Toast.LENGTH_SHORT).show();
         }
+
+        @Override
+        public boolean onBackButtonPressed() {
+            if (googleMapFragmentView == null)
+                return false;
+
+            if (googleMapFragmentView.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
+                googleMapFragmentView.setUseCaseType(MapFragmentView.Type.PLACELINE);
+                googleMapFragmentView.setPlacelineViewListener(Home.this);
+                AnimationUtils.expand(locationSharingActiveButton);
+                HyperTrack.removeActions(null);
+                return true;
+            }
+
+            return false;
+        }
     };
 
     private void addDynamicShortcut(Place place) {
@@ -336,8 +358,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         googleMapFragmentView.setMapAdapter(adapter);
         googleMapFragmentView.setMapCallback(callback);
 
-        googleMapFragmentView.setUseCaseType(MapFragmentView.Type.PLACELINE);
-        googleMapFragmentView.setPlacelineViewListener(this);
         // Initialize UI Views
         initializeUIViews();
 
@@ -357,18 +377,26 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
         presenter.setActionManager(ActionManager.getSharedManager(this));
 
-        // Check if location is already being shared
-        isRestoreLocationSharing = presenter.restoreLocationSharing();
-
-        //Check if user click on someone else tracking link
-        isHandleTrackingUrlDeeplink = handleDeepLinkTrackingUrl();
-
         //Check if user clicked on shortcut icon to share location
         if (handleShortcut())
             isShortcut = true;
 
-        if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink && !isShortcut) {
-            setTopButtonToCreateAction();
+        //Check if user click on someone else tracking link
+        isHandleTrackingUrlDeeplink = handleDeepLinkTrackingUrl();
+
+        // Check if location is already being shared
+        isRestoreLocationSharing = presenter.restoreLocationSharing();
+
+        if (isHandleTrackingUrlDeeplink || isShortcut) {
+            googleMapFragmentView.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+        } else if (!isShortcut) {
+            if (isRestoreLocationSharing) {
+                AnimationUtils.expand(locationSharingActiveButton);
+            } else {
+                setTopButtonToCreateAction();
+            }
+            googleMapFragmentView.setUseCaseType(MapFragmentView.Type.PLACELINE);
+            googleMapFragmentView.setPlacelineViewListener(this);
         }
     }
 
@@ -379,6 +407,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         Action action = actionManager.getHyperTrackAction();
 
         if (action != null) {
+            googleMapFragmentView.addBottomViewItems(bottomCardItemViews);
             actionManager.setActionComletedListener(actionCompletedListener);
             collectionId = action.getCollectionId();
             presenter.trackActionsOnMap(collectionId, false);
@@ -416,6 +445,19 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         infoMessageView = (LinearLayout) findViewById(R.id.home_info_message_view);
         infoMessageViewText = (TextView) findViewById(R.id.home_info_message_text);
 
+        locationSharingActiveButton = findViewById(R.id.location_sharing_active);
+        mActionText = findViewById(R.id.action_text);
+        mActionText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                googleMapFragmentView.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+                googleMapFragmentView.addBottomViewItems(bottomCardItemViews);
+                presenter.trackActionsOnMap(ActionManager.getSharedManager(Home.this).getHyperTrackActionCollectionId(),
+                        false);
+                AnimationUtils.collapse(locationSharingActiveButton);
+            }
+        });
+
         updateExpectedPlaceButton = new BottomCardItemView(this);
         updateExpectedPlaceButton.setDescription("Share meeting location");
         updateExpectedPlaceButton.setDescriptionTextColor(R.color.info_box_destination);
@@ -441,10 +483,9 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             }
         });
 
-        List<BottomCardItemView> bottomCardItemViews = new ArrayList<>();
+        bottomCardItemViews = new ArrayList<>();
         bottomCardItemViews.add(updateExpectedPlaceButton);
         bottomCardItemViews.add(stopLocationSharingButton);
-        googleMapFragmentView.addBottomViewItems(bottomCardItemViews);
     }
 
     private void stopTracking() {
@@ -453,6 +494,8 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             presenter.stopSharing(false);
             collectionId = null;
             HyperTrack.removeActions(null);
+            googleMapFragmentView.setUseCaseType(MapFragmentView.Type.PLACELINE);
+            googleMapFragmentView.setPlacelineViewListener(this);
         } else {
             if (!HyperTrack.checkLocationServices(Home.this)) {
                 HyperTrack.requestLocationServices(Home.this);
@@ -876,6 +919,8 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     @Override
     public void showShareLiveLocationSuccess(Action action) {
         // bottomButtonCard.hideBottomCardLayout();
+        googleMapFragmentView.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+        googleMapFragmentView.addBottomViewItems(bottomCardItemViews);
         presenter.trackActionsOnMap(action.getCollectionId(), false);
         presenter.getShareMessage();
     }
@@ -1042,12 +1087,17 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     @Override
     public void onPlacelineViewExpanded() {
-
+        AnimationUtils.collapse(locationSharingActiveButton);
     }
 
     @Override
     public void onPlacelineViewCollapsed() {
-        setTopButtonToCreateAction();
+        if (!isRestoreLocationSharing)
+            setTopButtonToCreateAction();
+        else {
+            googleMapFragmentView.setCTAButtonVisibility(false);
+            AnimationUtils.expand(locationSharingActiveButton);
+        }
     }
 
     @Override
