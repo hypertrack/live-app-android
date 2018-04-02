@@ -165,7 +165,7 @@ public class Verify extends BaseActivity implements VerifyView {
                 //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
                 JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
-                    HyperTrack.startTracking();
+                    HyperTrack.resumeTracking();
                     SharedPreferenceManager.setTrackingON(this);
                     acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
 
