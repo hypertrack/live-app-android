@@ -66,10 +66,10 @@ Placeline object contains detailed information about the activity like the start
 An example JSON representation is given [here](https://docs.hypertrack.com/gettingstarted/activities.html#placeline).
 
 #### Setup HyperTrack SDK
-Set up the HyperTrack SDK by following these [instructions](https://docs.hypertrack.com/sdks/android/setup.html).
+Set up the HyperTrack SDK by following these [instructions](https://dashboard.hypertrack.com/setup).
 
 #### Create HyperTrack user
-The next thing that you need to do is create a HyperTrack User. This would tag the location/activity data to the user and help you get useful filtered data in the form of Placeline. More details about the function [here](https://docs.hypertrack.com/sdks/android/basic.html#step-1-create-sdk-user). 
+The next thing that you need to do is create a HyperTrack User. This would tag the location/activity data to the user and help you get useful filtered data in the form of Placeline. More details about the function [here](https://dashboard.hypertrack.com/setup). 
 
 ```java
 UserParams userParams = new UserParams()
@@ -263,7 +263,7 @@ HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
 3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to [api-keys.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/res/values/api-keys.xml).
 
 #### Step 3. Setup HyperTrack SDK
-If you are NOT using the starter project, set up the HyperTrack SDK by following these [instructions](https://docs.hypertrack.com/sdks/android/setup.html). Else, initialize the SDK by putting the following code in [MyApplication.java](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/MyApplication.java) file.
+If you are NOT using the starter project, set up the HyperTrack SDK by following these [instructions](https://dashboard.hypertrack.com/setup). Else, initialize the SDK by putting the following code in [MyApplication.java](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/java/io/hypertrack/sendeta/MyApplication.java) file.
 
 ```java
 public class MyApplication extends Application {
@@ -281,7 +281,7 @@ public class MyApplication extends Application {
 ```
 
 #### Step 4. Create HyperTrack user
-The next thing that you need to do is to create a HyperTrack user. It helps us tag the location/activity data with the user and share their Live Location status with friends. More details about the function [here](https://docs.hypertrack.com/sdks/android/basic.html#step-1-create-sdk-user). 
+The next thing that you need to do is to create a HyperTrack user. It helps us tag the location/activity data with the user and share their Live Location status with friends. More details about the function [here](https://dashboard.hypertrack.com/setup). 
 
 When the user is created, we need to start tracking his location and activity. Call the following method to do so ```HyperTrack.startTracking()```
 
