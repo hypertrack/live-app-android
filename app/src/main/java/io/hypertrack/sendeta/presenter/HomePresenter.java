@@ -299,8 +299,6 @@ public class HomePresenter implements IHomePresenter<HomeView> {
         if (!actionManager.shouldRestoreState())
             return false;
 
-        mView.showLoading();
-
         return true;
     }
 

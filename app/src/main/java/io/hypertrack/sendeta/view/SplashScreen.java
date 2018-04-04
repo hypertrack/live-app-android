@@ -261,24 +261,33 @@ public class SplashScreen extends BaseActivity {
         displayLoader(true);
 
         // Fetch Action details (collectionId or uniqueId) for given short code
-        HyperTrack.getActionForShortCode(appDeepLink.shortCode, new HyperTrackCallback() {
+        HyperTrackLiveService getResendCodeService =
+                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
+        Call<Action> call = getResendCodeService.getActionForShortCode(appDeepLink.shortCode);
+        call.enqueue(new Callback<Action>() {
             @Override
-            public void onSuccess(@NonNull SuccessResponse response) {
+            public void onResponse(Call<Action> call, Response<Action> response) {
                 if (SplashScreen.this.isFinishing())
                     return;
 
                 displayLoader(false);
 
-                if (response.getResponseObject() == null) {
+                if (!response.isSuccessful()) {
+                    handleTrackingDeepLinkError();
+                    return;
+                }
+
+                if (response.body() == null) {
                     // Handle getActionForShortCode API error
                     handleTrackingDeepLinkError();
                     return;
                 }
 
-                Action actions = (Action) response.getResponseObject();
-                if (actions != null) {
+                Action action = response.body();
+                if (action != null) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.getCollectionId(), actions.getUniqueId(),actions.getId());
+                    handleTrackingDeepLinkSuccess(action.getCollectionId(),
+                            action.getUniqueId(), action.getId());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -287,9 +296,10 @@ public class SplashScreen extends BaseActivity {
             }
 
             @Override
-            public void onError(@NonNull ErrorResponse errorResponse) {
+            public void onFailure(Call<Action> call, Throwable t) {
                 if (SplashScreen.this.isFinishing())
                     return;
+
                 displayLoader(false);
 
                 // Handle getActionForShortCode API error
@@ -435,7 +445,7 @@ public class SplashScreen extends BaseActivity {
 
         // Location Permissions and Settings have been enabled
         // Proceed with your app logic here
-        if ((appDeepLink.mId == DeepLinkUtil.DEFAULT || appDeepLink.mId == DeepLinkUtil.SHORTCUT )
+        if ((appDeepLink.mId == DeepLinkUtil.DEFAULT || appDeepLink.mId == DeepLinkUtil.SHORTCUT)
                 && SharedPreferenceManager.getHyperTrackLiveUser(this) != null)
             acceptInviteAndProceed();
         else {

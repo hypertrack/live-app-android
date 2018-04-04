@@ -71,29 +71,31 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         this.view = view;
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             view.showProfileLoading(true);
-            HyperTrack.getUser(new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse response) {
-                    Log.d(TAG, "onSuccess: Data get from getUser");
-                    User userModel = (User) response.getResponseObject();
-                    String ISOcode = null;
-                    String phoneNo = null;
-                    if (userModel != null) {
-                        if (!HTTextUtils.isEmpty(userModel.getPhone())) {
-                            int index = userModel.getPhone().indexOf(" ");
-                            ISOcode = userModel.getPhone().substring(0, index + 1);
-                            phoneNo = userModel.getPhone().substring(index + 1);
+            HyperTrack.getOrCreateUser(new UserParams().setUserId(HyperTrack.getUserId()),
+                    new HyperTrackCallback() {
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse response) {
+                            Log.d(TAG, "onSuccess: Data get from getUser");
+                            User userModel = (User) response.getResponseObject();
+                            String ISOcode = null;
+                            String phoneNo = null;
+                            if (userModel != null) {
+                                if (!HTTextUtils.isEmpty(userModel.getPhone())) {
+                                    int index = userModel.getPhone().indexOf(" ");
+                                    ISOcode = userModel.getPhone().substring(0, index + 1);
+                                    phoneNo = userModel.getPhone().substring(index + 1);
+                                }
+                                view.updateViews(userModel.getName(), phoneNo, ISOcode,
+                                        userModel.getPhoto());
+                                view.showProfileLoading(false);
+                            }
                         }
-                        view.updateViews(userModel.getName(), phoneNo, ISOcode, userModel.getPhoto());
-                        view.showProfileLoading(false);
-                    }
-                }
 
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    view.showProfileLoading(false);
-                }
-            });
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            view.showProfileLoading(false);
+                        }
+                    });
         } else {
 
             HyperTrackLiveUser user = onboardingManager.getUser();
@@ -117,7 +119,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         return view != null;
     }
 
-    private UserParams getUserParams(final Context context, final String name, final String number, String ISOCode, File profileImage)
+    private UserParams getUserParams(final Context context, final String name, final String number,
+                                     String ISOCode, File profileImage)
             throws NumberParseException {
         final HyperTrackLiveUser user = this.onboardingManager.getUser();
 
@@ -203,7 +206,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     }
 
     private void sendVerificationCode(Context context) {
-        HyperTrackLiveService getResendCodeService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
+        HyperTrackLiveService getResendCodeService =
+                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override
