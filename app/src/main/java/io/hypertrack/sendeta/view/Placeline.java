@@ -120,13 +120,13 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
 
     private void startHyperTrackTracking() {
         if (!HyperTrack.isTracking()) {
-            HyperTrack.startTracking();
+            HyperTrack.resumeTracking();
             SharedPreferenceManager.setTrackingON(this);
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
             Toast.makeText(this, "Tracking started successfully.", Toast.LENGTH_SHORT).show();
 
         } else {
-            HyperTrack.stopTracking();
+            HyperTrack.pauseTracking();
             SharedPreferenceManager.setTrackingOFF(this);
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.start_tracking);
             Toast.makeText(this, "Tracking stopped successfully.", Toast.LENGTH_SHORT).show();
