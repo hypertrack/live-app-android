@@ -2,6 +2,7 @@ package io.hypertrack.sendeta.view;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.text.Spannable;
@@ -16,6 +17,10 @@ import android.widget.Toast;
 
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.SuccessResponse;
+import com.hypertrack.lib.models.UserParams;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -113,9 +118,21 @@ public class Invite extends BaseActivity implements InviteView {
                     presenter.acceptInvite(userID, accountID, Invite.this);
                 } else {
                     Log.d(TAG, "onClick: Continue");
-                    HyperTrack.setUserId(userID);
                     if (progressBar != null)
                         progressBar.setVisibility(View.VISIBLE);
+
+                    HyperTrack.getOrCreateUser(new UserParams().setUserId(userID), new HyperTrackCallback() {
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse response) {
+
+                        }
+
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+                            if (progressBar != null)
+                                progressBar.setVisibility(View.GONE);
+                        }
+                    });
                 }
             }
         });

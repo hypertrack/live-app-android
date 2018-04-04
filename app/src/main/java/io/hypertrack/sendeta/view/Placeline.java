@@ -18,8 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.consumer.view.Placeline.PlacelineFragment;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.SuccessResponse;
 
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.store.ActionManager;
@@ -120,11 +124,21 @@ public class Placeline extends AppCompatActivity implements NavigationView.OnNav
 
     private void startHyperTrackTracking() {
         if (!HyperTrack.isTracking()) {
-            HyperTrack.resumeTracking();
-            SharedPreferenceManager.setTrackingON(this);
-            navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
-            Toast.makeText(this, "Tracking started successfully.", Toast.LENGTH_SHORT).show();
+            HyperTrack.resumeTracking(new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    SharedPreferenceManager.setTrackingON(Placeline.this);
+                    navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
+                    Toast.makeText(Placeline.this, "Tracking started successfully.", Toast.LENGTH_SHORT).show();
+                }
 
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    HyperLog.e(TAG, errorResponse.getErrorMessage());
+                    Toast.makeText(Placeline.this, "Tracking started Failed." +
+                            errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
         } else {
             HyperTrack.pauseTracking();
             SharedPreferenceManager.setTrackingOFF(this);
