@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.widget.Toolbar;
@@ -25,7 +26,10 @@ import android.widget.Toast;
 
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 
 import org.json.JSONException;
@@ -163,11 +167,25 @@ public class Verify extends BaseActivity implements VerifyView {
         if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
             try {
                 //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
-                JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
+                final JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
                 if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
-                    HyperTrack.resumeTracking();
-                    SharedPreferenceManager.setTrackingON(this);
-                    acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
+                    HyperTrack.resumeTracking(new HyperTrackCallback() {
+                        @Override
+                        public void onSuccess(@NonNull SuccessResponse response) {
+                            SharedPreferenceManager.setTrackingON(Verify.this);
+                            try {
+                                acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+
+                        @Override
+                        public void onError(@NonNull ErrorResponse errorResponse) {
+
+                        }
+                    });
 
                 } else {
                     Intent intent = new Intent(Verify.this, Invite.class);
