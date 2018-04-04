@@ -57,6 +57,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static io.hypertrack.sendeta.BuildConfig.HYPERTRACK_BASE_URL_V1;
+
 /**
  * Created by Aman on 24/12/17.
  */
@@ -152,6 +154,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                              final File profileImage, final boolean verifyPhone, final Context context) {
         try {
             UserParams userParams = getUserParams(context, userName, phone, ISOCode, profileImage);
+//            UserParams userParams = new UserParams().setUserId("01d14981-4888-447c-88cb-81b076de0d90");
             HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {
@@ -207,7 +210,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
 
     private void sendVerificationCode(Context context) {
         HyperTrackLiveService getResendCodeService =
-                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
+                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context, HYPERTRACK_BASE_URL_V1);
         Call<User> call = getResendCodeService.sendCode(HyperTrack.getUserId());
         call.enqueue(new Callback<User>() {
             @Override

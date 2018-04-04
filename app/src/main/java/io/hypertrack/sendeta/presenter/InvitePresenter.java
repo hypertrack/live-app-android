@@ -13,6 +13,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static io.hypertrack.sendeta.BuildConfig.HYPERTRACK_BASE_URL_V1;
+
 /**
  * Created by Aman on 19/07/17.
  */
@@ -38,7 +40,7 @@ public class InvitePresenter implements IInvitePresenter<InviteView> {
 
     @Override
     public void acceptInvite(String userID, String accountID, Context context) {
-        HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context);
+        HyperTrackLiveService getPlacelineService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, context, HYPERTRACK_BASE_URL_V1);
         Call<User> call = getPlacelineService.acceptInvite(userID, new AcceptInviteModel(accountID, userID));
         call.enqueue(new Callback<User>() {
             @Override

@@ -55,6 +55,7 @@ import java.util.ArrayList;
 
 import io.branch.referral.Branch;
 import io.branch.referral.BranchError;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.AppDeepLink;
@@ -261,8 +262,9 @@ public class SplashScreen extends BaseActivity {
         displayLoader(true);
 
         // Fetch Action details (collectionId or uniqueId) for given short code
-        HyperTrackLiveService getResendCodeService =
-                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
+       /* HyperTrackLiveService getResendCodeService =
+                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this,
+                        BuildConfig.HYPERTRACK_BASE_URL_V2);
         Call<Action> call = getResendCodeService.getActionForShortCode(appDeepLink.shortCode);
         call.enqueue(new Callback<Action>() {
             @Override
@@ -300,6 +302,41 @@ public class SplashScreen extends BaseActivity {
                 if (SplashScreen.this.isFinishing())
                     return;
 
+                displayLoader(false);
+
+                // Handle getActionForShortCode API error
+                handleTrackingDeepLinkError();
+            }
+        });*/
+        HyperTrack.getActionForShortCode(appDeepLink.shortCode, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (SplashScreen.this.isFinishing())
+                    return;
+
+                displayLoader(false);
+
+                if (response.getResponseObject() == null) {
+                    // Handle getActionForShortCode API error
+                    handleTrackingDeepLinkError();
+                    return;
+                }
+
+                Action action = (Action) response.getResponseObject();
+                if (action != null) {
+                    // Handle getActionForShortCode API success
+                    handleTrackingDeepLinkSuccess(action.getCollectionId(), action.getLookupId(), action.getId());
+
+                } else {
+                    // Handle getActionForShortCode API error
+                    handleTrackingDeepLinkError();
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                if (SplashScreen.this.isFinishing())
+                    return;
                 displayLoader(false);
 
                 // Handle getActionForShortCode API error
@@ -379,7 +416,7 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void acceptInvite(String userID, String accountID, final HyperTrackCallback callback) {
-        HyperTrackLiveService service = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
+        HyperTrackLiveService service = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this, BuildConfig.HYPERTRACK_BASE_URL_V1);
         Call<User> call = service.acceptInvite(userID, new AcceptInviteModel(accountID, userID));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {

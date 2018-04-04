@@ -31,6 +31,7 @@ import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.VerifyCodeModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -49,6 +50,6 @@ public interface HyperTrackLiveService {
     @POST("users/{id}/send_verification/")
     Call<User> sendCode(@Path("id") String id);
 
-    @POST("actions/")
+    @GET("actions/")
     Call<Action> getActionForShortCode(@Query("short_code") String shortCode );
 }

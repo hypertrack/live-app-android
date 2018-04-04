@@ -123,7 +123,9 @@ android {
             targetSdkVersion 26
             resValue "string", "app_name", "HyperTrack Live"
             buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
-            buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://api.hypertrack.com/api/v1/"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL_V1", '"https://api.hypertrack.com/api/v1/"'
+            buildConfigField "String", "HYPERTRACK_BASE_URL_V2", '"https://api.hypertrack.com/api/v2/"'
+
             resValue "string", "deeplink_scheme", "com.hypertracklive"
             resValue "string", "tracking_url", "trck.at"
             manifestPlaceholders = [applicationLabel: "@string/app_name"]
@@ -200,7 +202,8 @@ android {
                 resValue "string", "app_name", "Staging HyperTrack Live"
                 manifestPlaceholders = [applicationLabel: "@string/app_name"]
                 buildConfigField "String", "HYPERTRACK_PK", keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY']
-                buildConfigField "String", "HYPERTRACK_BASE_URL", '"https://staging-api.hypertrack.com/api/v1/"'
+                buildConfigField "String", "HYPERTRACK_BASE_URL_V2", '"https://staging-api.hypertrack.com/api/v1/"'
+                buildConfigField "String", "HYPERTRACK_BASE_URL_V2", '"https://staging-api.hypertrack.com/api/v2/"'
                 if (keystorePropertiesFile.exists())
                     signingConfig signingConfigs.release
                 if (!fabricCheck) {

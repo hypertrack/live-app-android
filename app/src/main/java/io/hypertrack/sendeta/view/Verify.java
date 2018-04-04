@@ -35,6 +35,7 @@ import com.hypertrack.lib.models.User;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.network.retrofit.CallUtils;
@@ -218,7 +219,7 @@ public class Verify extends BaseActivity implements VerifyView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,this);
+        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,this, BuildConfig.HYPERTRACK_BASE_URL_V1);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {

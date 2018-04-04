@@ -92,6 +92,8 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static io.hypertrack.sendeta.BuildConfig.HYPERTRACK_BASE_URL_V1;
+
 public class Profile extends BaseActivity implements ProfileView {
 
     private final static String TAG = Profile.class.getSimpleName();
@@ -439,7 +441,7 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
+        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this, HYPERTRACK_BASE_URL_V1);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
