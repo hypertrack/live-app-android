@@ -220,7 +220,7 @@ dependencies {
     testCompile 'org.mockito:mockito-core:2.8.9'
     testCompile 'org.robolectric:robolectric:3.6.1'
     debugCompile 'com.facebook.stetho:stetho:1.5.0'
-//    stagingCompile 'com.facebook.stetho:stetho:1.5.0'
+    trackingCompile 'com.facebook.stetho:stetho:1.5.0'
 
     // Other dependencies
     compile 'com.android.support:appcompat-v7:26.1.0'

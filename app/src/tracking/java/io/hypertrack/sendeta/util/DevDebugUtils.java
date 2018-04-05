@@ -3,6 +3,7 @@ package io.hypertrack.sendeta.util;
 import android.app.Application;
 import android.util.Log;
 
+import com.facebook.stetho.Stetho;
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
 
@@ -16,6 +17,7 @@ public class DevDebugUtils {
 
     public static void installStetho(Application application) {
         //do nothing
+        Stetho.initializeWithDefaults(application);
     }
 
     public static void setHyperLogLevel(int logLevel) {
