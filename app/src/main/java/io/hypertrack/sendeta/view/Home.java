@@ -70,12 +70,14 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.HyperTrackConstants;
 import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
+import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 import com.hypertrack.lib.placeline.PlacelineNew;
 import com.hypertrack.lib.tracking.BaseMVP.BaseView;
@@ -384,12 +386,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        if (getIntent() != null && getIntent().hasExtra("class_from")) {
-            if (getIntent().getStringExtra("class_from").
-                    equalsIgnoreCase(Placeline.class.getSimpleName())) {
-                fromPlaceline = true;
-            }
-        }
 
         //Initialize Map Fragment added in Activity Layout to getMapAsync
         googleMapFragmentView = (GoogleMapFragmentView)
@@ -1210,13 +1206,37 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 builder.show();
                 return true;
             }
-            HyperTrack.resumeTracking(null);
+           startHyperTrackTracking();
         } else if (item.getItemId() == R.id.push_logs) {
             HyperTrack.pushDeviceLogs();
-
             return true;
         }
         return true;
+    }
+
+    private void startHyperTrackTracking() {
+        if (!HyperTrack.isTracking()) {
+            HyperTrack.resumeTracking(new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
+                    Toast.makeText(Home.this, "Tracking resumed successfully.", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    HyperLog.e(TAG, errorResponse.getErrorMessage());
+                    Toast.makeText(Home.this, "Tracking resumed Failed." +
+                            errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        } else {
+            HyperTrack.pauseTracking();
+            navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.start_tracking);
+            Toast.makeText(this, "Tracking paused successfully.", Toast.LENGTH_SHORT).show();
+        }
+
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @SuppressLint("ParcelCreator")

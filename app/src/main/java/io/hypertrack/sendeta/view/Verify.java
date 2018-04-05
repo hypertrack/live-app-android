@@ -173,7 +173,6 @@ public class Verify extends BaseActivity implements VerifyView {
                     HyperTrack.resumeTracking(new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse response) {
-                            SharedPreferenceManager.setTrackingON(Verify.this);
                             try {
                                 acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
                             } catch (JSONException e) {
@@ -210,7 +209,7 @@ public class Verify extends BaseActivity implements VerifyView {
         SharedPreferenceManager.deletePlace(this);
 
         HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
-        Intent intent = new Intent(Verify.this, Placeline.class);
+        Intent intent = new Intent(Verify.this, Home.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Verify.this)
                 .addNextIntentWithParentStack(intent)

@@ -394,7 +394,6 @@ public class Profile extends BaseActivity implements ProfileView {
                     HyperTrack.resumeTracking(new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse response) {
-                            SharedPreferenceManager.setTrackingON(Profile.this);
                             try {
                                 acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
                             } catch (JSONException e) {

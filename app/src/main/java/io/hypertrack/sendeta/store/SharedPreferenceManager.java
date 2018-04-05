@@ -313,20 +313,6 @@ public class SharedPreferenceManager {
         editor.apply();
     }
 
-    public static void setTrackingON(Context context) {
-        setTrackingSetting(context, true);
-    }
-
-    public static void setTrackingOFF(Context context) {
-        setTrackingSetting(context, false);
-    }
-
-    public static Boolean isTrackingON(Context context) {
-        if (!getSharedPreferences(context).contains(TRACKING_SETTING))
-            return null;
-        return getSharedPreferences(context).getBoolean(TRACKING_SETTING, false);
-    }
-
     public static void setActivityFeedbackLookupId(Context context, String lookupId, String feedbackType) {
         LinkedHashMap<String, String> lookupIds = getActivityFeedbackLookupId(context);
         lookupIds.put(lookupId, feedbackType);
