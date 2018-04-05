@@ -1,110 +1,119 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/parent_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".view.Home"
-    tools:showIn="@layout/activity_home">
+    android:background="@android:color/transparent"
+    android:fitsSystemWindows="true"
+    tools:context=".view.Home">
 
-    <RelativeLayout
+    <FrameLayout
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        android:visibility="visible">
-
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/app_bar_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:theme="@style/AppTheme.AppBarOverlay">
-
-            <LinearLayout
-                android:id="@+id/home.info_message_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="#d89d3b"
-                android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:padding="@dimen/padding_medium"
-                android:visibility="gone"
-                tools:visibility="visible">
-
-                <ImageView
-                    android:id="@+id/home.info_message_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/margin_medium" />
-
-                <TextView
-                    android:id="@+id/home.info_message_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@null"
-                    android:fontFamily="sans-serif-medium"
-                    android:gravity="center"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/text_base" />
-            </LinearLayout>
-
-        </android.support.design.widget.AppBarLayout>
-
-        <fragment
-            android:id="@+id/htMapfragment"
-            android:name="com.hypertrack.lib.tracking.MapProvider.GoogleMapFragmentView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@id/location_sharing_active"
-            android:layout_below="@id/app_bar_layout"
-            tools:layout="@layout/map_fragment" />
+        tools:showIn="@layout/activity_home">
 
         <RelativeLayout
-            android:id="@+id/location_sharing_active"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:background="@color/info_box_normal"
-            android:orientation="horizontal"
-            android:padding="@dimen/padding_high"
-            android:visibility="gone">
+            android:layout_height="match_parent"
+            android:animateLayoutChanges="true"
+            android:orientation="vertical"
+            android:visibility="visible">
 
-            <TextView
-                android:id="@+id/description"
-                style="@style/ActionDescription"
-                android:layout_width="wrap_content"
+            <android.support.design.widget.AppBarLayout
+                android:id="@+id/app_bar_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:layout_toLeftOf="@id/action_text"
-                android:layout_toStartOf="@id/action_text"
-                android:paddingEnd="@dimen/padding_high"
-                android:paddingRight="@dimen/padding_high"
-                android:text="LOCATION SHARING ACTIVE"
-                android:textColor="@color/white"
-                android:textSize="@dimen/text_base" />
+                android:layout_gravity="top"
+                android:theme="@style/AppTheme.AppBarOverlay">
 
-            <TextView
-                android:id="@+id/action_text"
-                style="@style/ActionButton"
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/home.info_message_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#d89d3b"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="@dimen/padding_medium"
+                    android:visibility="gone"
+                    tools:visibility="visible">
+
+                    <ImageView
+                        android:id="@+id/home.info_message_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="@dimen/margin_medium" />
+
+                    <TextView
+                        android:id="@+id/home.info_message_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:fontFamily="sans-serif-medium"
+                        android:gravity="center"
+                        android:textColor="@android:color/white"
+                        android:textSize="@dimen/text_base" />
+                </LinearLayout>
+
+            </android.support.design.widget.AppBarLayout>
+
+            <fragment
+                android:id="@+id/htMapfragment"
+                android:name="com.hypertrack.lib.tracking.MapProvider.GoogleMapFragmentView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/location_sharing_active"
+                android:layout_below="@id/app_bar_layout"
+                tools:layout="@layout/map_fragment" />
+
+            <RelativeLayout
+                android:id="@+id/location_sharing_active"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
-                android:paddingBottom="@dimen/padding_base"
-                android:paddingLeft="@dimen/padding_high"
-                android:paddingRight="@dimen/padding_high"
-                android:paddingTop="@dimen/padding_base"
-                android:text="VIEW"
-                android:textColor="@color/info_box_normal"
-                android:visibility="visible" />
+                android:layout_alignParentBottom="true"
+                android:background="@color/info_box_normal"
+                android:orientation="horizontal"
+                android:padding="@dimen/padding_high"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/description"
+                    style="@style/ActionDescription"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/action_text"
+                    android:layout_toStartOf="@id/action_text"
+                    android:paddingEnd="@dimen/padding_high"
+                    android:paddingRight="@dimen/padding_high"
+                    android:text="LOCATION SHARING ACTIVE"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/text_base" />
+
+                <TextView
+                    android:id="@+id/action_text"
+                    style="@style/ActionButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:paddingBottom="@dimen/padding_base"
+                    android:paddingLeft="@dimen/padding_high"
+                    android:paddingRight="@dimen/padding_high"
+                    android:paddingTop="@dimen/padding_base"
+                    android:text="VIEW"
+                    android:textColor="@color/info_box_normal"
+                    android:visibility="visible" />
+            </RelativeLayout>
+
         </RelativeLayout>
 
-    </RelativeLayout>
 
-
-</FrameLayout>
+    </FrameLayout>
+</android.support.design.widget.CoordinatorLayout>

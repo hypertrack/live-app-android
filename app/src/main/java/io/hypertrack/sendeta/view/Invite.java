@@ -121,7 +121,7 @@ public class Invite extends BaseActivity implements InviteView {
                     if (progressBar != null)
                         progressBar.setVisibility(View.VISIBLE);
 
-                    HyperTrack.getOrCreateUser(new UserParams().setUserId(userID), new HyperTrackCallback() {
+                    HyperTrack.getOrCreateUser(new UserParams().setId(userID), new HyperTrackCallback() {
                         @Override
                         public void onSuccess(@NonNull SuccessResponse response) {
 

@@ -8,5 +8,8 @@
 
         <item android:id="@+id/start_tracking_toggle"
               android:title="@string/start_tracking"/>
+
+        <item android:id="@+id/push_logs"
+            android:title="Push Logs"/>
     </group>
 </menu>

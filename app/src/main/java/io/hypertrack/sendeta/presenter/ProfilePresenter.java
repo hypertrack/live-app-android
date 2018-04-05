@@ -73,31 +73,29 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
         this.view = view;
         if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             view.showProfileLoading(true);
-            HyperTrack.getOrCreateUser(new UserParams().setUserId(HyperTrack.getUserId()),
-                    new HyperTrackCallback() {
-                        @Override
-                        public void onSuccess(@NonNull SuccessResponse response) {
-                            Log.d(TAG, "onSuccess: Data get from getUser");
-                            User userModel = (User) response.getResponseObject();
-                            String ISOcode = null;
-                            String phoneNo = null;
-                            if (userModel != null) {
-                                if (!HTTextUtils.isEmpty(userModel.getPhone())) {
-                                    int index = userModel.getPhone().indexOf(" ");
-                                    ISOcode = userModel.getPhone().substring(0, index + 1);
-                                    phoneNo = userModel.getPhone().substring(index + 1);
-                                }
-                                view.updateViews(userModel.getName(), phoneNo, ISOcode,
-                                        userModel.getPhoto());
-                                view.showProfileLoading(false);
-                            }
+            HyperTrack.getUser(new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    Log.d(TAG, "onSuccess: Data get from getUser");
+                    User userModel = (User) response.getResponseObject();
+                    String ISOcode = null;
+                    String phoneNo = null;
+                    if (userModel != null) {
+                        if (!HTTextUtils.isEmpty(userModel.getPhone())) {
+                            int index = userModel.getPhone().indexOf(" ");
+                            ISOcode = userModel.getPhone().substring(0, index + 1);
+                            phoneNo = userModel.getPhone().substring(index + 1);
                         }
+                        view.updateViews(userModel.getName(), phoneNo, ISOcode, userModel.getPhoto());
+                        view.showProfileLoading(false);
+                    }
+                }
 
-                        @Override
-                        public void onError(@NonNull ErrorResponse errorResponse) {
-                            view.showProfileLoading(false);
-                        }
-                    });
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    view.showProfileLoading(false);
+                }
+            });
         } else {
 
             HyperTrackLiveUser user = onboardingManager.getUser();
@@ -154,7 +152,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                              final File profileImage, final boolean verifyPhone, final Context context) {
         try {
             UserParams userParams = getUserParams(context, userName, phone, ISOCode, profileImage);
-//            UserParams userParams = new UserParams().setUserId("01d14981-4888-447c-88cb-81b076de0d90");
+//           UserParams userParams = new UserParams().setId("efe8bfb8-6203-4ff1-8eb2-d3a62efcfe57");
+//           userParams.setName("Aman Jain New");
             HyperTrack.getOrCreateUser(userParams, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse successResponse) {

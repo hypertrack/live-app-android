@@ -28,10 +28,12 @@ package io.hypertrack.sendeta.view;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -45,10 +47,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -96,7 +102,7 @@ import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.Utils;
 
-public class Home extends BaseActivity implements HomeView, CTAButton.OnClickListener, PlacelineNew.PlacelineViewListener {
+public class Home extends BaseActivity implements HomeView, CTAButton.OnClickListener, PlacelineNew.PlacelineViewListener, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = Home.class.getSimpleName();
     private GoogleMap mMap;
@@ -132,6 +138,9 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     BaseView mSummaryView, mLocationSharingView, mSelectExpectedPlaceView;
 
     private boolean fromPlaceline = false;
+
+    private DrawerLayout drawer;
+    NavigationView navigationView;
 
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
@@ -495,6 +504,14 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     }
 
     private void initializeUIViews() {
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (HyperTrack.isTracking()) {
+            navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
+        }
+        navigationView.setNavigationItemSelectedListener(this);
+
         infoMessageView = (LinearLayout) findViewById(R.id.home_info_message_view);
         infoMessageViewText = (TextView) findViewById(R.id.home_info_message_text);
 
@@ -1171,6 +1188,37 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        drawer.closeDrawers();
+        if (item.getItemId() == R.id.edit_profile)
+            startActivity(new Intent(this, Profile.class));
+
+        else if (item.getItemId() == R.id.start_tracking_toggle) {
+            if (ActionManager.getSharedManager(this).shouldRestoreState()) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Can't do pause tracking.");
+                builder.setMessage("Ongoing location sharing trip is active. Stop trip first.");
+                builder.setNegativeButton("No", null);
+                builder.setPositiveButton("Goto live trip",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                locationSharingActiveButton.performClick();
+                            }
+                        });
+                builder.show();
+                return true;
+            }
+            HyperTrack.resumeTracking(null);
+        } else if (item.getItemId() == R.id.push_logs) {
+            HyperTrack.pushDeviceLogs();
+
+            return true;
+        }
+        return true;
+    }
+
     @SuppressLint("ParcelCreator")
     private class GeocodingResultReceiver extends ResultReceiver {
         GeocodingResultReceiver(Handler handler) {
@@ -1249,6 +1297,11 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     @Override
     public void onBackPressed() {
+        if (drawer.isDrawerOpen(Gravity.LEFT)) {
+            drawer.closeDrawers();
+            return;
+        }
+
         HyperTrack.removeActions(null);
 
         ActionManager actionManager = ActionManager.getSharedManager(this);
