@@ -75,7 +75,7 @@
                 android:layout_height="15dp"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/ic_circle_pink" />
+                />
         </RelativeLayout>
 
         <ImageView
@@ -126,7 +126,7 @@
             android:paddingBottom="@dimen/padding_xhigh"
             android:paddingTop="@dimen/padding_very_low"
             android:scaleType="fitCenter"
-            android:src="@drawable/ic_ht_edit_expected_place" />
+            android:src="@drawable/ic_destination_edit" />
 
     </RelativeLayout>
 

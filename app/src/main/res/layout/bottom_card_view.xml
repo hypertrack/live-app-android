@@ -23,7 +23,7 @@
         <ImageView
             android:layout_width="15dp"
             android:layout_height="15dp"
-            android:src="@drawable/ic_navigation_close" />
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
     </com.hypertrack.lib.internal.consumer.view.RippleView>
 
@@ -87,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_live_location_loading"
+            android:src="@drawable/ic_location_loading_black"
             android:visibility="gone" />
 
     </com.hypertrack.lib.internal.consumer.view.RippleView>

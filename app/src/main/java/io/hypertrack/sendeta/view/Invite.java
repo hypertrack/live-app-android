@@ -100,7 +100,7 @@ public class Invite extends BaseActivity implements InviteView {
             @Override
             public void onClick(View v) {
                 TaskStackBuilder.create(Invite.this)
-                        .addNextIntentWithParentStack(new Intent(Invite.this, Placeline.class)
+                        .addNextIntentWithParentStack(new Intent(Invite.this, Home.class)
                                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                         .startActivities();
                 finish();
@@ -144,7 +144,7 @@ public class Invite extends BaseActivity implements InviteView {
         SharedPreferenceManager.deletePlace(this);
         HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
         TaskStackBuilder.create(Invite.this)
-                .addNextIntentWithParentStack(new Intent(Invite.this, Placeline.class)
+                .addNextIntentWithParentStack(new Intent(Invite.this, Home.class)
                         .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                 .startActivities();
         finish();

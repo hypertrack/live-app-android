@@ -66,7 +66,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_edit"
+                android:drawableLeft="@drawable/ic_destination_edit"
                 android:drawablePadding="@dimen/padding_high"
                 android:text="Were you here?"
                 android:textSize="@dimen/text_medium" />
@@ -87,7 +87,7 @@
             android:layout_height="40dp"
             android:layout_margin="@dimen/margin_medium"
             android:background="@drawable/ht_corner_radius"
-            android:drawableLeft="@drawable/ic_edit"
+            android:drawableLeft="@drawable/ic_destination_edit"
             android:drawablePadding="@dimen/padding_medium"
             android:padding="@dimen/padding_base"
             android:text="--"

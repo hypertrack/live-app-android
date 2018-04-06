@@ -118,10 +118,6 @@
             android:screenOrientation="portrait" />
 
         <activity
-            android:name=".view.Placeline"
-            android:screenOrientation="portrait" />
-
-        <activity
             android:name=".view.Invite"
             android:screenOrientation="portrait" />
 

@@ -370,7 +370,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
                 shortcut.add(0, new ShortcutInfo.Builder(this, place.getLocation().getLatLng().toString())
                         .setShortLabel(name)
-                        .setIcon(Icon.createWithResource(this, R.drawable.ic_marker_gray))
+                        .setIcon(Icon.createWithResource(this, R.drawable.ic_result_place))
                         .setIntent(new Intent(Intent.ACTION_VIEW,
                                 Uri.parse("share.location://hypertrack")))
                         .build());
@@ -533,7 +533,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         updateExpectedPlaceButton = new BottomCardItemView(this);
         updateExpectedPlaceButton.setDescription("Share meeting location");
         updateExpectedPlaceButton.setDescriptionTextColor(R.color.info_box_destination);
-        updateExpectedPlaceButton.setActionButtonIcon(R.drawable.ic_keyboard_arrow_right_black_18dp);
+        updateExpectedPlaceButton.setActionButtonIcon(R.drawable.ic_chevron_right);
         updateExpectedPlaceButton.showOnlyActionButtonIcon();
         updateExpectedPlaceButton.setVisibility(View.GONE);
         updateExpectedPlaceButton.setActionButtonOnClickListener(new View.OnClickListener() {
