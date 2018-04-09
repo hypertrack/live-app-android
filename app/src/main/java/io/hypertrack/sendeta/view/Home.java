@@ -79,7 +79,7 @@ import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
-import com.hypertrack.lib.placeline.PlacelineNew;
+import com.hypertrack.lib.placeline.Placeline;
 import com.hypertrack.lib.tracking.BaseMVP.BaseView;
 import com.hypertrack.lib.tracking.BottomCardItemView;
 import com.hypertrack.lib.tracking.CTAButton;
@@ -104,7 +104,7 @@ import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
 import io.hypertrack.sendeta.util.Utils;
 
-public class Home extends BaseActivity implements HomeView, CTAButton.OnClickListener, PlacelineNew.PlacelineViewListener, NavigationView.OnNavigationItemSelectedListener {
+public class Home extends BaseActivity implements HomeView, CTAButton.OnClickListener, Placeline.PlacelineViewListener, NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = Home.class.getSimpleName();
     private GoogleMap mMap;
@@ -303,7 +303,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 return false;
 
             if (googleMapFragmentView.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-
+                googleMapFragmentView.hideBackButton();
                 if (mSummaryView == null)
                     mSummaryView = googleMapFragmentView.setUseCaseType(MapFragmentView.Type.PLACELINE_SUMMARY);
                 else
@@ -426,6 +426,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
         if (isHandleTrackingUrlDeeplink || isShortcut) {
             mLocationSharingView = googleMapFragmentView.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+            googleMapFragmentView.showBackButton();
             if (isShortcut) {
                 showLoading(getString(R.string.sharing_live_location_message));
                 shareLiveLocation();
@@ -482,6 +483,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             collectionId = null;
             ActionManager.getSharedManager(this).deleteTrackingAction();
         } else if (googleMapFragmentView.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
+            googleMapFragmentView.showBackButton();
             mLocationSharingView.setCTAButtonTitle(getString(R.string.share_your_location));
             mLocationSharingView.setCTAButtonClickListener(this);
             mLocationSharingView.showCTAButton();
@@ -491,6 +493,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     public void setTopButtonToUpdateExpectedPlace() {
         if (googleMapFragmentView.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
+            googleMapFragmentView.showBackButton();
             mLocationSharingView.setCTAButtonTitle(getString(R.string.share_eta));
             mLocationSharingView.setCTAButtonClickListener(this);
             mLocationSharingView.showCTAButton();
@@ -1379,6 +1382,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     void setLocationSharingView() {
         mLocationSharingView = googleMapFragmentView.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+        googleMapFragmentView.showBackButton();
         mLocationSharingView.addBottomItemViews(bottomCardItemViews);
     }
 }
