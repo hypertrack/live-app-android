@@ -144,12 +144,12 @@ android {
 
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
-            def newFileName = "HyperTrackLive-${variant.versionName}.apk";
-            def apk = output.outputFile;
-            output.outputFileName = new File(apk.parent, newFileName);
+            def newFileName = "HyperTrackLive-${variant.versionName}.apk"
+            def apk = output.outputFile
+            //System.out.println(apk.parent + ", newfilename: " + newFileName)
+            output.outputFileName = new File("../", newFileName)
         }
     }
-
     buildTypes {
         release {
             if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
@@ -222,7 +222,7 @@ dependencies {
     debugCompile 'com.facebook.stetho:stetho:1.5.0'
     trackingCompile 'com.facebook.stetho:stetho:1.5.0'
 
-    // Other dependencies
+    // Other dependencie
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:design:26.1.0'
     compile 'com.android.support:cardview-v7:26.1.0'
@@ -235,7 +235,7 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.7.1@aar") {
+        implementation("com.hypertrack:android:0.7.30@aar") {
             transitive = true;
         }
     }
@@ -254,7 +254,7 @@ dependencies {
     compile 'com.github.Q42:AndroidScrollingImageView:1.2'
     compile 'io.branch.sdk.android:library:2.+'
     compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
-        transitive = true;
+        transitive = true
     }
 
     compile 'com.android.support:multidex:1.0.3'
