@@ -63,7 +63,7 @@
 
             <fragment
                 android:id="@+id/htMapfragment"
-                android:name="com.hypertrack.lib.tracking.MapProvider.GoogleMapFragmentView"
+                android:name="com.hypertrack.lib.tracking.MapProvider.HyperTrackMapFragment"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_above="@id/location_sharing_active"
