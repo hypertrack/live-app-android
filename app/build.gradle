@@ -106,7 +106,7 @@ android {
         }
 
         def versionMajor = 3
-        def versionMinor = 1
+        def versionMinor = 4
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
@@ -217,7 +217,7 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.6.24@aar") {
+        implementation("com.hypertrack:android:0.6.28@aar") {
             transitive = true;
         }
     }
