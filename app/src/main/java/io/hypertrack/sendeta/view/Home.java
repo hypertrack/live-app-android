@@ -85,6 +85,7 @@ import com.hypertrack.lib.tracking.BottomCardItemView;
 import com.hypertrack.lib.tracking.CTAButton;
 import com.hypertrack.lib.tracking.MapProvider.HyperTrackMapFragment;
 import com.hypertrack.lib.tracking.MapProvider.MapFragmentView;
+import com.hypertrack.lib.tracking.UseCase.LocationSharing.LocationSharingView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -138,7 +139,8 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     TextView mActionText;
 
     List<BottomCardItemView> bottomCardItemViews;
-    BaseView mSummaryView, mLocationSharingView, mSelectExpectedPlaceView;
+    BaseView mSummaryView, mSelectExpectedPlaceView;
+    LocationSharingView mLocationSharingView;
 
     private boolean fromPlaceline = false;
 
@@ -223,15 +225,15 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
         @Override
         public void onPlaceSelectorViewShown() {
-
+            Log.d(TAG, "onPlaceSelectorViewShown: ");
         }
 
         @Override
         public void onPlaceSelectorViewClosed() {
             setLocationSharingView();
-            if (isUpdateExpectedPlace) {
-                setTopButtonToUpdateExpectedPlace();
-            }
+//            if (isUpdateExpectedPlace) {
+//                setTopButtonToUpdateExpectedPlace();
+//            }
 
         }
 
@@ -268,15 +270,9 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 hyperTrackMapFragment.hideBackButton();
                 if (mSummaryView == null)
                     mSummaryView = hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACELINE_SUMMARY);
-                else
+                else {
+                    mSummaryView.setType(MapFragmentView.Type.PLACELINE_SUMMARY);
                     hyperTrackMapFragment.setUseCase(mSummaryView);
-                //AnimationUtils.expand(locationSharingActiveButton);
-                if (!isRestoreLocationSharing) {
-                    setTopButtonToCreateAction();
-                } else {
-                    locationSharingActiveButton.setVisibility(View.VISIBLE);
-                    mSummaryView.hideCTAButton();
-                    // AnimationUtils.expand(locationSharingActiveButton);
                 }
                 HyperTrack.removeActions(null);
                 mLocationSharingView = null;
@@ -287,13 +283,8 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
         @Override
         public boolean onPlacelineViewClosed() {
+            mSummaryView.setType(MapFragmentView.Type.PLACELINE_SUMMARY);
             hyperTrackMapFragment.setUseCase(mSummaryView);
-            if (!isRestoreLocationSharing) {
-                setTopButtonToCreateAction();
-            } else {
-                locationSharingActiveButton.setVisibility(View.VISIBLE);
-                // AnimationUtils.expand(locationSharingActiveButton);
-            }
             return true;
         }
 
@@ -304,7 +295,55 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 //AnimationUtils.collapse(locationSharingActiveButton);
             }
         }
+
+        @Override
+        public void onBottomBaseViewCreated(@MapFragmentView.Type int useCaseType) {
+            switch (useCaseType) {
+                case MapFragmentView.Type.LIVE_LOCATION_SHARING:
+                    updateLiveLocationSharingView();
+                    break;
+                case MapFragmentView.Type.PLACELINE_SUMMARY:
+                    if (!isRestoreLocationSharing) {
+                        setTopButtonToCreateAction();
+                        locationSharingActiveButton.setVisibility(View.VISIBLE);
+                    } else {
+                        mSummaryView.hideCTAButton();
+                        locationSharingActiveButton.setVisibility(View.VISIBLE);
+                    }
+                    hyperTrackMapFragment.hideBackButton();
+                    break;
+            }
+        }
     };
+
+    private void updateLiveLocationSharingView() {
+        hyperTrackMapFragment.showBackButton();
+        if (mLocationSharingView == null && !mLocationSharingView.isViewCreated()) {
+            mLocationSharingView = (LocationSharingView)
+                    hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+            return;
+        }
+        // ActionManager actionManager = ActionManager.getSharedManager(this);
+        if (isRestoreLocationSharing) {
+            if (expectedPlace != null) {
+                mLocationSharingView.hideCTAButton();
+            } else {
+                setTopButtonToUpdateExpectedPlace();
+            }
+            stopLocationSharingButton.setVisibility(View.VISIBLE);
+            updateExpectedPlaceButton.setVisibility(View.GONE);
+        } else {
+            if (expectedPlace != null) {
+                updateExpectedPlaceButton.setVisibility(View.GONE);
+            } else {
+                updateExpectedPlaceButton.setVisibility(View.VISIBLE);
+            }
+            stopLocationSharingButton.setVisibility(View.GONE);
+            setTopButtonToCreateAction();
+        }
+
+        mLocationSharingView.addBottomViewItems(bottomCardItemViews);
+    }
 
     private void addDynamicShortcut(Place place) {
         try {
@@ -385,14 +424,16 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         // Check if location is already being shared
         isRestoreLocationSharing = presenter.restoreLocationSharing();
 
+        //If user clicked on deep-link url or clicked on shortcut then set tracking view as
+        // LiveLocationSharing View
         if (isHandleTrackingUrlDeeplink || isShortcut) {
-            mLocationSharingView = hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-            hyperTrackMapFragment.showBackButton();
+            mLocationSharingView = (LocationSharingView) hyperTrackMapFragment.
+                    setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+
             if (isShortcut) {
                 showLoading(getString(R.string.sharing_live_location_message));
                 shareLiveLocation();
             } else if (isHandleTrackingUrlDeeplink) {
-                mLocationSharingView.addBottomItemViews(bottomCardItemViews);
                 showLoading(getString(R.string.fetching_details_msg));
                 // Call trackActionsOnMap method
                 presenter.trackActionsOnMap(collectionId, true);
@@ -402,8 +443,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             if (isRestoreLocationSharing) {
                 locationSharingActiveButton.setVisibility(View.VISIBLE);
                 //AnimationUtils.expand(locationSharingActiveButton);
-            } else {
-                setTopButtonToCreateAction();
             }
         }
     }
@@ -417,7 +456,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         if (action != null
                 && hyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
 
-            mLocationSharingView.addBottomItemViews(bottomCardItemViews);
+            mLocationSharingView.addBottomViewItems(bottomCardItemViews);
             actionManager.setActionComletedListener(actionCompletedListener);
             collectionId = action.getCollectionId();
             presenter.trackActionsOnMap(collectionId, false);
@@ -436,25 +475,18 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     }
 
     public void setTopButtonToCreateAction() {
+        mSummaryView.setCTAButtonTitle(getString(R.string.share_your_location));
+        mSummaryView.setCTAButtonClickListener(this);
+        mSummaryView.showCTAButton();
+        isCreateAction = true;
         if (hyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.PLACELINE_SUMMARY) {
-            mSummaryView.setCTAButtonTitle(getString(R.string.share_your_location));
-            mSummaryView.setCTAButtonClickListener(this);
-            mSummaryView.showCTAButton();
-            isCreateAction = true;
             collectionId = null;
             ActionManager.getSharedManager(this).deleteTrackingAction();
-        } else if (hyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-            hyperTrackMapFragment.showBackButton();
-            mLocationSharingView.setCTAButtonTitle(getString(R.string.share_your_location));
-            mLocationSharingView.setCTAButtonClickListener(this);
-            mLocationSharingView.showCTAButton();
-            isCreateAction = true;
         }
     }
 
     public void setTopButtonToUpdateExpectedPlace() {
         if (hyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-            hyperTrackMapFragment.showBackButton();
             mLocationSharingView.setCTAButtonTitle(getString(R.string.share_eta));
             mLocationSharingView.setCTAButtonClickListener(this);
             mLocationSharingView.showCTAButton();
@@ -465,15 +497,15 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     private void initializeUIViews() {
 
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        drawer = findViewById(R.id.drawer_layout);
+        navigationView = findViewById(R.id.nav_view);
         if (HyperTrack.isTracking()) {
             navigationView.getMenu().findItem(R.id.start_tracking_toggle).setTitle(R.string.stop_tracking);
         }
         navigationView.setNavigationItemSelectedListener(this);
 
-        infoMessageView = (LinearLayout) findViewById(R.id.home_info_message_view);
-        infoMessageViewText = (TextView) findViewById(R.id.home_info_message_text);
+        infoMessageView = findViewById(R.id.home_info_message_view);
+        infoMessageViewText = findViewById(R.id.home_info_message_text);
 
         locationSharingActiveButton = findViewById(R.id.location_sharing_active);
         mActionText = findViewById(R.id.action_text);
@@ -483,6 +515,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 if (mLocationSharingView == null) {
                     setLocationSharingView();
                 } else {
+                    mLocationSharingView.setType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
                     hyperTrackMapFragment.setUseCase(mLocationSharingView);
                 }
 
@@ -507,6 +540,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                     mSelectExpectedPlaceView =
                             hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACE_SELECTOR);
                 } else {
+                    mSelectExpectedPlaceView.setType(MapFragmentView.Type.PLACE_SELECTOR);
                     hyperTrackMapFragment.setUseCase(mSelectExpectedPlaceView);
                 }
                 mLocationSharingView = null;
@@ -538,8 +572,10 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             HyperTrack.removeActions(null);
             if (mSummaryView == null)
                 mSummaryView = hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACELINE_SUMMARY);
-            else
+            else {
+                mSummaryView.setType(MapFragmentView.Type.PLACELINE_SUMMARY);
                 hyperTrackMapFragment.setUseCase(mSummaryView);
+            }
             setTopButtonToCreateAction();
             mLocationSharingView = null;
             hyperTrackMapFragment.setPlacelineViewListener(this);
@@ -684,6 +720,13 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     }
 
     @Override
+    public void onActionRefreshed() {
+        expectedPlace = ActionManager.getSharedManager(this).getPlace();
+        isRestoreLocationSharing = !HTTextUtils.isEmpty(ActionManager.getSharedManager(this).getHyperTrackActionId());
+        updateLiveLocationSharingView();
+    }
+
+    @Override
     public void showShareLocationButton() {
         setTopButtonToCreateAction();
     }
@@ -727,151 +770,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         presenter.updateExpectedPlace(place);
         ActionManager.getSharedManager(this).setPlace(expectedPlace);
         ActionManager.getSharedManager(this).setShortcutPlace(place);
-        //updateMapView();
-        //updateMapPadding();
     }
-
-    /*private void updateCurrentLocationMarker(final HyperTrackLocation location) {
-        if (!showCurrentLocationMarker) {
-            if (currentLocationMarker != null)
-                currentLocationMarker.remove();
-            currentLocationMarker = null;
-            return;
-        }
-        if (ActionManager.getSharedManager(this).isActionLive()) {
-            if (circle != null) {
-                stopPulse();
-            }
-            return;
-        }
-
-        if (location == null || location.getGeoJSONLocation() == null ||
-                location.getGeoJSONLocation().getLatLng() == null) {
-            HyperTrack.getCurrentLocation(new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse response) {
-                    Log.d(TAG, "onSuccess: Current Location Recieved");
-                    HyperTrackLocation hyperTrackLocation =
-                            new HyperTrackLocation((Location) response.getResponseObject());
-                    SharedPreferenceManager.setLastKnownLocation(Home.this, (Location) response.getResponseObject());
-                    updateCurrentLocationMarker(hyperTrackLocation);
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    Log.d(TAG, "onError: Current Location Receiving error");
-                    Log.d(TAG, "onError: " + errorResponse.getErrorMessage());
-                }
-            });
-            return;
-        }
-        LatLng latLng = location.getGeoJSONLocation().getLatLng();
-        if (currentLocationMarker == null) {
-            currentLocationMarker = mMap.addMarker(new MarkerOptions().
-                    position(latLng).
-                    icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_ht_source_place_marker))
-                    .anchor(0.5f, 0.5f));
-            addPulseRing(latLng);
-        } else {
-            currentLocationMarker.setVisible(true);
-            circle.setPosition(latLng);
-            circle.setVisible(true);
-//            MarkerAnimation.animateMarker(currentLocationMarker, latLng);
-        }
-        startPulse(false);
-        if (!isRestoreLocationSharing && !isHandleTrackingUrlDeeplink)
-            updateMapView();
-    }*/
-
-    /*private void addPulseRing(LatLng latLng) {
-        GradientDrawable d = new GradientDrawable();
-        d.setShape(GradientDrawable.OVAL);
-        d.setSize(500, 500);
-        d.setColor(ContextCompat.getColor(this, R.color.pulse_color));
-
-        Bitmap bitmap = Bitmap.createBitmap(d.getIntrinsicWidth()
-                , d.getIntrinsicHeight()
-                , Bitmap.Config.ARGB_8888);
-
-        // Convert the drawable to bitmap
-        Canvas canvas = new Canvas(bitmap);
-        d.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        d.draw(canvas);
-
-        // Radius of the circle
-        final int radius = 100;
-
-        // Add the circle to the map
-        circle = mMap.addGroundOverlay(new GroundOverlayOptions()
-                .position(latLng, 2 * radius).image(BitmapDescriptorFactory.fromBitmap(bitmap)));
-    }
-*/
-   /* private void startPulse(boolean reset) {
-
-        if (!HyperTrackUtils.isInternetConnected(this)) {
-            if (circle != null) {
-                circle.remove();
-            }
-            if (valueAnimator != null) {
-                valueAnimator.cancel();
-            }
-        }
-        if (valueAnimator == null || reset) {
-            if (valueAnimator != null)
-                valueAnimator.end();
-            final int[] radius = {circleRadius};
-            valueAnimator = new ValueAnimator();
-            valueAnimator.setRepeatCount(ValueAnimator.INFINITE);
-            valueAnimator.setRepeatMode(ValueAnimator.RESTART);
-            valueAnimator.setIntValues(0, (int) radius[0]);
-            valueAnimator.setDuration(2000);
-            valueAnimator.setEvaluator(new IntEvaluator());
-            valueAnimator.setInterpolator(new AccelerateDecelerateInterpolator());
-            valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                    float animatedFraction = valueAnimator.getAnimatedFraction();
-                    circle.setDimensions(animatedFraction * (int) radius[0]);
-                    circle.setTransparency(animatedFraction);
-                }
-            });
-            valueAnimator.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    circle.setTransparency(1f);
-                    circle.setVisible(true);
-                    if (currentLocationMarker != null)
-                        currentLocationMarker.setVisible(true);
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-                    ObjectAnimator.ofFloat(circle, "transparency", 1f, 0f).setDuration(500).start();
-                    circle.setVisible(false);
-                    if (currentLocationMarker != null)
-                        currentLocationMarker.setVisible(false);
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-                    //radius[0] = circleRadius;
-                }
-            });
-        }
-
-        valueAnimator.start();
-    }
-
-    private void stopPulse() {
-        if (valueAnimator != null) {
-            valueAnimator.cancel();
-        }
-    }*/
 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
@@ -963,8 +862,10 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         isRestoreLocationSharing = true;
         if (mLocationSharingView == null) {
             setLocationSharingView();
-        } else
+        } else {
+            mLocationSharingView.setType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
             hyperTrackMapFragment.setUseCase(mLocationSharingView);
+        }
 
         presenter.trackActionsOnMap(action.getCollectionId(), false);
         presenter.getShareMessage();
@@ -1112,6 +1013,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 mSelectExpectedPlaceView =
                         hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACE_SELECTOR);
             } else {
+                mSelectExpectedPlaceView.setType(MapFragmentView.Type.PLACE_SELECTOR);
                 hyperTrackMapFragment.setUseCase(mSelectExpectedPlaceView);
             }
         }
@@ -1170,7 +1072,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 builder.show();
                 return true;
             }
-           startHyperTrackTracking();
+            startHyperTrackTracking();
         } else if (item.getItemId() == R.id.push_logs) {
             HyperTrack.pushDeviceLogs();
             return true;
@@ -1342,8 +1244,13 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     };
 
     void setLocationSharingView() {
-        mLocationSharingView = hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-        hyperTrackMapFragment.showBackButton();
-        mLocationSharingView.addBottomItemViews(bottomCardItemViews);
+        if (mLocationSharingView == null) {
+            mLocationSharingView = (LocationSharingView) hyperTrackMapFragment.
+                    setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+        } else {
+            mLocationSharingView.setType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+            hyperTrackMapFragment.setUseCase(mLocationSharingView);
+        }
+
     }
 }
