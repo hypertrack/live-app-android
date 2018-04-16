@@ -72,4 +72,6 @@ public interface HomeView {
     void hideBottomPlacePickerButton();
 
     void showUpdatePlaceLoading();
+
+    void onActionRefreshed();
 }

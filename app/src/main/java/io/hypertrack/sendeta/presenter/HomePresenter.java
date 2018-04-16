@@ -265,29 +265,14 @@ public class HomePresenter implements IHomePresenter<HomeView> {
         if (!isViewAttached())
             return;
 
-        boolean isSameUser = false;
         for (Action tempAction : actions) {
             if (tempAction.getUser().getId().equalsIgnoreCase(userId) && !tempAction.hasFinished()) {
-                isSameUser = true;
                 actionManager.setHyperTrackAction(tempAction);
             } else if (isDeepLinkTrackingAction) {
                 actionManager.setTrackingAction(tempAction);
             }
         }
-
-        if (!isSameUser) {
-            mView.showShareLocationButton();
-            if (expectedPlace == null)
-                mView.showPlacePickerButtonAtBottom();
-        } else {
-            if (expectedPlace == null) {
-                mView.showPlacePickerButton();
-            } else {
-                mView.hidePlacePickerButton();
-            }
-            mView.hideBottomPlacePickerButton();
-            mView.showStopSharingButton();
-        }
+        mView.onActionRefreshed();
     }
 
     @Override
