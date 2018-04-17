@@ -42,7 +42,7 @@ keyProperties.load(new FileInputStream(keyPropertiesFile));
 android {
 
     compileSdkVersion 26
-    buildToolsVersion '26.0.3'
+    buildToolsVersion '27.0.3'
     lintOptions {
         abortOnError false
     }
@@ -215,19 +215,19 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.8.9'
-    testCompile 'org.robolectric:robolectric:3.6.1'
-    debugCompile 'com.facebook.stetho:stetho:1.5.0'
-    trackingCompile 'com.facebook.stetho:stetho:1.5.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.mockito:mockito-core:2.8.9'
+    testImplementation 'org.robolectric:robolectric:3.6.1'
+    debugImplementation 'com.facebook.stetho:stetho:1.5.0'
+    trackingImplementation 'com.facebook.stetho:stetho:1.5.0'
 
     // Other dependencie
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.android.support:cardview-v7:26.1.0'
-    compile 'com.android.support:recyclerview-v7:26.1.0'
-    compile 'com.facebook.stetho:stetho:1.5.0'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.android.support:cardview-v7:26.1.0'
+    implementation 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'com.facebook.stetho:stetho:1.5.0'
 
     if (findProject(':library') != null) {
         // HyperTrack SDK dependency
@@ -240,39 +240,39 @@ dependencies {
         }
     }
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.9.1@aar') {
         transitive = true;
     }
-    compile 'com.android.support.constraint:constraint-layout:1.0.2'
-    compile 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
-    compile 'com.squareup.retrofit2:retrofit:2.2.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile 'com.github.sundeepk:compact-calendar-view:1.9.2-beta'
-    compile 'com.github.rubensousa:gravitysnaphelper:1.1'
-    compile 'com.skyfishjy.ripplebackground:library:1.0.1'
-    compile 'com.github.Q42:AndroidScrollingImageView:1.2'
-    compile 'io.branch.sdk.android:library:2.+'
-    compile('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation 'com.googlecode.libphonenumber:libphonenumber:8.4.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.2.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'com.squareup.picasso:picasso:2.5.2'
+    implementation 'com.github.sundeepk:compact-calendar-view:1.9.2-beta'
+    implementation 'com.github.rubensousa:gravitysnaphelper:1.1'
+    implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
+    implementation 'com.github.Q42:AndroidScrollingImageView:1.2'
+    implementation 'io.branch.sdk.android:library:2.+'
+    implementation('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true
     }
 
-    compile 'com.android.support:multidex:1.0.3'
+    implementation 'com.android.support:multidex:1.0.3'
 
     // Leak Canary dependency for Debug builds
-    debugCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-    trackingCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    trackingImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
-        stagingCompile 'com.squareup.leakcanary:leakcanary-android:1.5.1'
+        stagingImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
     }
 
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
     //Check if SDK library exist or not
     if (findProject(':library') != null) {
         println("Library Exist");
-        compile project(':library')
+        implementation project(':library')
     } else {
         println("Library Doesn't Exist");
     }
