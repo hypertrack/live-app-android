@@ -34,6 +34,7 @@ import android.widget.Button;
 import com.hypertrack.lib.HyperTrackMapAdapter;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.tracking.MapProvider.HyperTrackMapFragment;
+import com.hypertrack.lib.tracking.MapProvider.MapFragmentView;
 
 import java.util.List;
 
@@ -73,7 +74,8 @@ public class Track extends BaseActivity implements TrackView {
         HyperTrackMapFragment hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment);
         hyperTrackMapFragment.setMapAdapter(new TrackMapAdapter(this));
-
+        hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.ORDER_TRACKING);
+        hyperTrackMapFragment.showBackButton();
         // Initialize UI buttons
         retryButton = (Button) findViewById(R.id.retryButton);
     }

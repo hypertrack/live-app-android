@@ -42,5 +42,4 @@ class HomeMapAdapter extends HyperTrackMapAdapter {
     public boolean showTrailingPolyline() {
         return true;
     }
-
 }
