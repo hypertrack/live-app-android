@@ -1,6 +1,14 @@
 
 # Build live location sharing within your app
-Following this tutorial to build live location share within your app. The tutorial is divided into three sections.
+Following this tutorial to build live location share within your app. 
+
+<p align="center">
+<kbd>
+<img src="http://res.cloudinary.com/hypertrack/image/upload/v1524554407/HyperTrack_Live_Android.gif" alt="Live Location Sharing" width="300">
+</kbd>
+</p>
+
+The tutorial is divided into three sections.
 1. In the first section, we will do a basic setup of Hypertrack SDK. 
 2. In the second section, we will select a destination and start a Live Location trip to that place. 
 3. In the last section, we will get your friend to join the trip started by you. 
