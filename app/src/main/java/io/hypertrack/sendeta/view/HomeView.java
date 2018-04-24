@@ -26,6 +26,7 @@ package io.hypertrack.sendeta.view;
 
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
+
 /**
  * Created by suhas on 25/02/16.
  */
@@ -55,17 +56,11 @@ public interface HomeView {
 
     void hideLoading();
 
-    void showPlacePickerButton();
-
-    void showShareLocationButton();
-
-    void showPlacePickerButtonAtBottom();
-
-    void showStopSharingButton();
-
     void showShareCard(String shareMessage);
 
     void updateExpectedPlaceFailure(String s);
+
+    void showPlacePickerButtonAtBottom();
 
     void hidePlacePickerButton();
 

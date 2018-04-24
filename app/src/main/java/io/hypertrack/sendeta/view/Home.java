@@ -26,67 +26,46 @@ SOFTWARE.
 package io.hypertrack.sendeta.view;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.ShortcutInfo;
-import android.content.pm.ShortcutManager;
-import android.graphics.drawable.Icon;
-import android.location.Location;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.crashlytics.android.Crashlytics;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.HyperTrackConstants;
 import com.hypertrack.lib.HyperTrackUtils;
 import com.hypertrack.lib.MapFragmentCallback;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
-import com.hypertrack.lib.internal.consumer.utils.AnimationUtils;
+import com.hypertrack.lib.internal.consumer.view.PlaceSelector.PlaceSelector;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
 import com.hypertrack.lib.models.HyperTrackError;
-import com.hypertrack.lib.models.HyperTrackLocation;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
-import com.hypertrack.lib.placeline.Placeline;
 import com.hypertrack.lib.tracking.BottomCardItemView;
 import com.hypertrack.lib.tracking.CTAButton;
 import com.hypertrack.lib.tracking.MapProvider.HyperTrackMapFragment;
 import com.hypertrack.lib.tracking.MapProvider.MapFragmentView;
 import com.hypertrack.lib.tracking.UseCase.LocationSharing.LocationSharingView;
-import com.hypertrack.lib.tracking.basemvp.BaseView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,55 +74,38 @@ import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.callback.ActionManagerListener;
 import io.hypertrack.sendeta.presenter.HomePresenter;
 import io.hypertrack.sendeta.presenter.IHomePresenter;
-import io.hypertrack.sendeta.receiver.GpsLocationReceiver;
-import io.hypertrack.sendeta.receiver.NetworkChangeReceiver;
-import io.hypertrack.sendeta.service.FetchLocationIntentService;
 import io.hypertrack.sendeta.store.ActionManager;
 import io.hypertrack.sendeta.store.OnboardingManager;
-import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.Constants;
 import io.hypertrack.sendeta.util.ErrorMessages;
 import io.hypertrack.sendeta.util.PermissionUtils;
-import io.hypertrack.sendeta.util.Utils;
 
-public class Home extends BaseActivity implements HomeView, CTAButton.OnClickListener,
-        Placeline.PlacelineViewListener, NavigationView.OnNavigationItemSelectedListener {
+public class Home extends AppCompatActivity implements HomeView, CTAButton.OnClickListener,
+        NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = Home.class.getSimpleName();
-    private GoogleMap mMap;
-    private Location defaultLocation = new Location("default");
     private Place expectedPlace;
-
-    private float zoomLevel = 16.0f;
 
     HyperTrackMapFragment mHyperTrackMapFragment;
     private HomeMapAdapter mMapAdapter;
 
     private String collectionId = null;
 
-    private TextView infoMessageViewText;
-    private LinearLayout infoMessageView;
     private ProgressDialog mProgressDialog;
 
     private IHomePresenter<HomeView> presenter = new HomePresenter();
 
-    boolean showCurrentLocationMarker = true;
-    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false,
-            isShortcut = false, isEditing = false, isCreateAction = false,
-            isUpdateExpectedPlace = false;
+    boolean isRestoreLocationSharing = false, isHandleTrackingUrlDeeplink = false;
 
-    private boolean isPlaceUpdating;
+    private boolean isPlaceUpdating, isCreateAction, isUpdateExpectedPlace;
 
     BottomCardItemView stopLocationSharingButton;
     BottomCardItemView updateExpectedPlaceButton;
-    RelativeLayout locationSharingActiveButton;
-    TextView mActionText;
 
     List<BottomCardItemView> bottomCardItemViews;
-    BaseView mSummaryView, mSelectExpectedPlaceView;
+    PlaceSelector mSelectExpectedPlaceView;
+    StartView mStartView;
     LocationSharingView mLocationSharingView;
-
-    private boolean fromPlaceline = false;
 
     private DrawerLayout drawer;
     NavigationView navigationView;
@@ -163,17 +125,12 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     };
 
     public MapFragmentCallback callback = new MapFragmentCallback() {
-        @Override
-        public void onMapReadyCallback(Context context, GoogleMap map) {
-            onMapReady(map);
-        }
 
         @Override
         public void onExpectedPlaceSelected(Place expectedPlace) {
             // Check if destination place was selected
             if (expectedPlace != null) {
                 onSelectPlace(expectedPlace);
-                addDynamicShortcut(expectedPlace);
             }
         }
 
@@ -220,33 +177,9 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         }
 
         @Override
-        public void onChooseOnMapSelected() {
-
-        }
-
-        @Override
-        public void onPlaceSelectorViewShown() {
-            Log.d(TAG, "onPlaceSelectorViewShown: ");
-        }
-
-        @Override
-        public void onPlaceSelectorViewClosed() {
-            //  setLocationSharingView();
-//            if (isUpdateExpectedPlace) {
-//                setTopButtonToUpdateExpectedPlace();
-//            }
-        }
-
-        @Override
         public void onHeaderActionButtonClicked(String metaData) {
             super.onHeaderActionButtonClicked(metaData);
             presenter.getShareMessage();
-        }
-
-        @Override
-        public void onCallButtonClicked(Context context, String actionID) {
-            super.onCallButtonClicked(context, actionID);
-            Toast.makeText(context, "Call Button Clicked " + actionID, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -254,38 +187,12 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             if (mHyperTrackMapFragment == null)
                 return false;
 
-            if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-                mHyperTrackMapFragment.hideBackButton();
-                if (mSummaryView == null)
-                    mSummaryView = mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACELINE_SUMMARY);
-                else {
-                    mSummaryView.setType(MapFragmentView.Type.PLACELINE_SUMMARY);
-                    mHyperTrackMapFragment.setUseCase(mSummaryView);
-                }
-                HyperTrack.removeActions(null);
-                mLocationSharingView = null;
-                return true;
-            } else if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.PLACE_SELECTOR) {
+            if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.PLACE_SELECTOR) {
                 setLocationSharingView();
                 return true;
-            } else if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.PLACELINE)
-                return true;
-            return false;
-        }
-
-        @Override
-        public boolean onPlacelineViewClosed() {
-            mSummaryView.setType(MapFragmentView.Type.PLACELINE_SUMMARY);
-            mHyperTrackMapFragment.setUseCase(mSummaryView);
-            return true;
-        }
-
-        @Override
-        public void onPlacelineViewShown() {
-            if (isRestoreLocationSharing) {
-                //locationSharingActiveButton.setVisibility(View.GONE);
-                AnimationUtils.collapse(locationSharingActiveButton);
             }
+
+            return false;
         }
 
         @Override
@@ -293,100 +200,15 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             switch (useCaseType) {
                 case MapFragmentView.Type.LIVE_LOCATION_SHARING:
                     updateLiveLocationSharingView();
-                    mHyperTrackMapFragment.showResetBoundButton();
-                    break;
-                case MapFragmentView.Type.PLACELINE_SUMMARY:
-                    if (!isRestoreLocationSharing) {
-                        setTopButtonToCreateAction();
-                        //locationSharingActiveButton.setVisibility(View.GONE);
-                        AnimationUtils.collapse(locationSharingActiveButton);
-                    } else {
-                        mSummaryView.hideCTAButton();
-//                        locationSharingActiveButton.setVisibility(View.VISIBLE);
-                        AnimationUtils.expand(locationSharingActiveButton);
-                    }
-
-                    mHyperTrackMapFragment.hideBackButton();
                     break;
                 case MapFragmentView.Type.PLACE_SELECTOR:
-                    mHyperTrackMapFragment.hideBackButton();
                     mHyperTrackMapFragment.hideResetBoundButton();
                     break;
+                case MapFragmentView.Type.CUSTOM:
+                    setTopButtonToCreateAction();
             }
         }
-
-
     };
-
-    private void updateLiveLocationSharingView() {
-        mHyperTrackMapFragment.showBackButton();
-        if (mLocationSharingView == null) {
-            mLocationSharingView = (LocationSharingView)
-                    mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-            return;
-        }
-
-        if (!mLocationSharingView.isViewCreated()) {
-            return;
-        }
-        // ActionManager actionManager = ActionManager.getSharedManager(this);
-        if (isRestoreLocationSharing) {
-            if (expectedPlace != null) {
-                mLocationSharingView.hideCTAButton();
-            } else {
-                setTopButtonToUpdateExpectedPlace();
-            }
-            stopLocationSharingButton.setVisibility(View.VISIBLE);
-            updateExpectedPlaceButton.setVisibility(View.GONE);
-        } else {
-            if (expectedPlace != null) {
-                updateExpectedPlaceButton.setVisibility(View.GONE);
-            } else {
-                updateExpectedPlaceButton.setVisibility(View.VISIBLE);
-            }
-            stopLocationSharingButton.setVisibility(View.GONE);
-            setTopButtonToCreateAction();
-        }
-
-        mLocationSharingView.addBottomViewItems(bottomCardItemViews);
-    }
-
-    private void addDynamicShortcut(Place place) {
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                ShortcutManager shortcutManager = getSystemService(ShortcutManager.class);
-                String name = place.getPlaceDisplayString();
-
-                //If there is no address or name in place model then don't add as dynamic shortcut
-                // because shortlabel couldn't be empty.
-                if (HTTextUtils.isEmpty(name))
-                    return;
-
-                int count = 0;
-                if (shortcutManager.getDynamicShortcuts() != null) {
-                    count = shortcutManager.getDynamicShortcuts().size();
-                }
-                if (count > 2) {
-                    String id = shortcutManager.getDynamicShortcuts().get(0).getId();
-                    List<String> shortcutIds = new ArrayList<>();
-                    shortcutIds.add(id);
-                    shortcutManager.removeDynamicShortcuts(shortcutIds);
-                }
-
-                List<ShortcutInfo> shortcut = new ArrayList<>();
-
-                shortcut.add(0, new ShortcutInfo.Builder(this, place.getLocation().getLatLng().toString())
-                        .setShortLabel(name)
-                        .setIcon(Icon.createWithResource(this, R.drawable.ic_result_place))
-                        .setIntent(new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("share.location://hypertrack")))
-                        .build());
-                shortcutManager.addDynamicShortcuts(shortcut);
-            }
-        } catch (Exception e) {
-            Crashlytics.logException(e);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -404,12 +226,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         // Initialize UI Views
         initializeUIViews();
 
-        // Get Default User Location from his CountryCode
-        // SKIP: if Location Permission is Granted and Location is Enabled
-        if (!HyperTrack.checkLocationServices(this) || !HyperTrack.checkLocationPermission(this)) {
-            geocodeUserCountryName();
-        }
-
         // Check & Prompt User if Internet is Not Connected
         if (!HyperTrackUtils.isInternetConnected(this)) {
             Toast.makeText(this, R.string.network_issue, Toast.LENGTH_SHORT).show();
@@ -420,10 +236,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
         presenter.setActionManager(ActionManager.getSharedManager(this));
 
-        //Check if user clicked on shortcut icon to share location
-        if (handleShortcut())
-            isShortcut = true;
-
         //Check if user click on someone else tracking link
         isHandleTrackingUrlDeeplink = handleDeepLinkTrackingUrl();
 
@@ -432,77 +244,16 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
         //If user clicked on deep-link url or clicked on shortcut then set tracking view as
         // LiveLocationSharing View
-        if (isHandleTrackingUrlDeeplink || isShortcut) {
-            mLocationSharingView = (LocationSharingView) mHyperTrackMapFragment.
-                    setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+        if (isHandleTrackingUrlDeeplink || isRestoreLocationSharing) {
+            expectedPlace = ActionManager.getSharedManager(this).getPlace();
 
-            if (isShortcut) {
-                showLoading(getString(R.string.sharing_live_location_message));
-                shareLiveLocation();
-            } else if (isHandleTrackingUrlDeeplink) {
-                showLoading(getString(R.string.fetching_details_msg));
-                // Call trackActionsOnMap method
-                presenter.trackActionsOnMap(collectionId, true);
-            }
-        } else if (!isShortcut) {
-            mSummaryView = mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACELINE_SUMMARY);
-            if (isRestoreLocationSharing) {
-//                locationSharingActiveButton.setVisibility(View.VISIBLE);
-                AnimationUtils.expand(locationSharingActiveButton);
-            }
-        }
-    }
+            setLocationSharingView();
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        ActionManager actionManager = ActionManager.getSharedManager(this);
-        Action action = actionManager.getHyperTrackAction();
-
-        if (action != null
-                && mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-
-            mLocationSharingView.addBottomViewItems(bottomCardItemViews);
-            actionManager.setActionComletedListener(actionCompletedListener);
-            collectionId = action.getCollectionId();
-            presenter.trackActionsOnMap(collectionId, false);
-        }
-
-        // Check if Location & Network are Enabled
-        updateInfoMessageView();
-
-        // Re-register BroadcastReceiver for Location_Change, Network_Change & GCM
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLocationChangeReceiver,
-                new IntentFilter(GpsLocationReceiver.LOCATION_CHANGED));
-        LocalBroadcastManager.getInstance(this).registerReceiver(mConnectivityChangeReceiver,
-                new IntentFilter(NetworkChangeReceiver.NETWORK_CHANGED));
-
-        registerBroadcastReceiver();
-    }
-
-    public void setTopButtonToCreateAction() {
-        if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.PLACELINE_SUMMARY) {
-            mSummaryView.setCTAButtonTitle(getString(R.string.share_your_location));
-            mSummaryView.setCTAButtonClickListener(this);
-            mSummaryView.showCTAButton();
-            isCreateAction = true;
-            collectionId = null;
-            ActionManager.getSharedManager(this).deleteTrackingAction();
-        } else if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-            mLocationSharingView.setCTAButtonTitle(getString(R.string.share_your_location));
-            mLocationSharingView.setCTAButtonClickListener(this);
-            mLocationSharingView.showCTAButton();
-            isCreateAction = true;
-        }
-    }
-
-    public void setTopButtonToUpdateExpectedPlace() {
-        if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
-            mLocationSharingView.setCTAButtonTitle(getString(R.string.share_eta));
-            mLocationSharingView.setCTAButtonClickListener(this);
-            mLocationSharingView.showCTAButton();
-            isCreateAction = false;
-            isUpdateExpectedPlace = true;
+            showLoading(getString(R.string.fetching_details_msg));
+            // Call trackActionsOnMap method
+            presenter.trackActionsOnMap(collectionId, true);
+        } else {
+            setStartViewUseCase();
         }
     }
 
@@ -515,28 +266,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         }
         navigationView.setNavigationItemSelectedListener(this);
 
-        infoMessageView = findViewById(R.id.home_info_message_view);
-        infoMessageViewText = findViewById(R.id.home_info_message_text);
-
-        locationSharingActiveButton = findViewById(R.id.location_sharing_active);
-        mActionText = findViewById(R.id.action_text);
-        mActionText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mLocationSharingView == null) {
-                    setLocationSharingView();
-                } else {
-                    mLocationSharingView.setType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-                    mHyperTrackMapFragment.setUseCase(mLocationSharingView);
-                }
-
-                presenter.trackActionsOnMap(ActionManager.getSharedManager(Home.this).getHyperTrackActionCollectionId(),
-                        false);
-//                locationSharingActiveButton.setVisibility(View.GONE);
-                AnimationUtils.collapse(locationSharingActiveButton);
-            }
-        });
-
         updateExpectedPlaceButton = new BottomCardItemView(this);
         updateExpectedPlaceButton.setDescription("Share meeting location");
         updateExpectedPlaceButton.setDescriptionTextColor(R.color.info_box_destination);
@@ -548,9 +277,9 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             public void onClick(View v) {
                 if (mSelectExpectedPlaceView == null) {
                     mSelectExpectedPlaceView =
-                            mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACE_SELECTOR);
+                            (PlaceSelector) mHyperTrackMapFragment.setUseCaseType(
+                                    MapFragmentView.Type.PLACE_SELECTOR);
                 } else {
-                    mSelectExpectedPlaceView.setType(MapFragmentView.Type.PLACE_SELECTOR);
                     mHyperTrackMapFragment.setUseCase(mSelectExpectedPlaceView);
                 }
                 mLocationSharingView = null;
@@ -573,28 +302,49 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         bottomCardItemViews.add(stopLocationSharingButton);
     }
 
-    private void stopTracking() {
-        if (HyperTrack.checkLocationPermission(Home.this)
-                && HyperTrack.checkLocationServices(Home.this)) {
-            isRestoreLocationSharing = false;
-            presenter.stopSharing(false);
+    private void initializeProgressDialog() {
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setMessage(getString(R.string.loading));
+        mProgressDialog.setCancelable(false);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ActionManager actionManager = ActionManager.getSharedManager(this);
+        Action action = actionManager.getHyperTrackAction();
+
+        if (action != null
+                && mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
+
+            mLocationSharingView.addBottomViewItems(bottomCardItemViews);
+            actionManager.setActionComletedListener(actionCompletedListener);
+            collectionId = action.getCollectionId();
+            presenter.trackActionsOnMap(collectionId, false);
+        }
+    }
+
+    public void setTopButtonToCreateAction() {
+        if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.CUSTOM) {
+            mStartView.setCTAButtonClickListener(this);
+            isCreateAction = true;
             collectionId = null;
-            HyperTrack.removeActions(null);
-            if (mSummaryView == null)
-                mSummaryView = mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACELINE_SUMMARY);
-            else {
-                mSummaryView.setType(MapFragmentView.Type.PLACELINE_SUMMARY);
-                mHyperTrackMapFragment.setUseCase(mSummaryView);
-            }
-            setTopButtonToCreateAction();
-            mLocationSharingView = null;
-            mHyperTrackMapFragment.setPlacelineViewListener(this);
-        } else {
-            if (!HyperTrack.checkLocationServices(Home.this)) {
-                HyperTrack.requestLocationServices(Home.this);
-            } else {
-                HyperTrack.requestPermissions(Home.this);
-            }
+            ActionManager.getSharedManager(this).deleteTrackingAction();
+        } else if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
+            mLocationSharingView.setCTAButtonTitle(getString(R.string.share_your_location));
+            mLocationSharingView.setCTAButtonClickListener(this);
+            mLocationSharingView.showCTAButton();
+            isCreateAction = true;
+        }
+    }
+
+    public void setTopButtonToUpdateExpectedPlace() {
+        if (mHyperTrackMapFragment.getUseCaseType() == MapFragmentView.Type.LIVE_LOCATION_SHARING) {
+            mLocationSharingView.setCTAButtonTitle(getString(R.string.share_eta));
+            mLocationSharingView.setCTAButtonClickListener(this);
+            mLocationSharingView.showCTAButton();
+            isCreateAction = false;
+            isUpdateExpectedPlace = true;
         }
     }
 
@@ -611,6 +361,41 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         } else {
             checkForLocationSettings();
         }
+    }
+
+    /**
+     * Method to be called when user selects an expected place to be used for
+     * sharing his live location via the tracking url.
+     *
+     * @param place Expected place for the user
+     */
+    private void onSelectPlace(final Place place) {
+        if (place == null || place.getLocation() == null || this.isFinishing()) {
+            return;
+        }
+        //updateCurrentLocationMarker(null);
+        presenter.updateExpectedPlace(place);
+        ActionManager.getSharedManager(this).setPlace(expectedPlace);
+        ActionManager.getSharedManager(this).setShortcutPlace(place);
+        setLocationSharingView();
+    }
+
+    private void createAction() {
+        User user = OnboardingManager.sharedManager(this).getUser();
+        presenter.shareLiveLocation(user);
+    }
+
+    /**
+     * Method to update State Variables & UI to reflect Task Ended
+     */
+    private void stopSharingLiveLocation() {
+
+        ActionManager.getSharedManager(Home.this).clearState();
+        expectedPlace = null;
+        isRestoreLocationSharing = false;
+        isHandleTrackingUrlDeeplink = false;
+        isUpdateExpectedPlace = false;
+        setTopButtonToCreateAction();
     }
 
     private void checkForLocationSettings() {
@@ -644,32 +429,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         return false;
     }
 
-    private boolean handleShortcut() {
-        Intent intent = getIntent();
-        if (intent != null && intent.getBooleanExtra("shortcut", false)) {
-
-            if (isRestoreLocationSharing) {
-                Toast.makeText(this, "Previous trip is already active.",
-                        Toast.LENGTH_SHORT).show();
-                return false;
-            }
-
-            Place shortcutPlace = ActionManager.getSharedManager(this).getShortcutPlace();
-
-            if (shortcutPlace == null || shortcutPlace.getLocation() == null) {
-                return false;
-            }
-            expectedPlace = shortcutPlace;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void showTrackActionsOnMapError(ErrorResponse errorResponse) {
-        Toast.makeText(this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     public void showLoading() {
         if (mProgressDialog == null)
@@ -691,12 +450,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         showLoading();
     }
 
-    private void initializeProgressDialog() {
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setMessage(getString(R.string.loading));
-        mProgressDialog.setCancelable(false);
-    }
-
     @Override
     public void hideLoading() {
         if (mProgressDialog != null)
@@ -704,8 +457,8 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     }
 
     @Override
-    public void showPlacePickerButton() {
-        setTopButtonToUpdateExpectedPlace();
+    public void showTrackActionsOnMapError(ErrorResponse errorResponse) {
+        Toast.makeText(this, errorResponse.getErrorMessage(), Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -737,16 +490,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     }
 
     @Override
-    public void showShareLocationButton() {
-        setTopButtonToCreateAction();
-    }
-
-    @Override
-    public void showStopSharingButton() {
-        stopLocationSharingButton.setVisibility(View.VISIBLE);
-    }
-
-    @Override
     public void showShareCard(String shareMessage) {
         Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
         sharingIntent.setType("text/plain");
@@ -766,117 +509,10 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         }
     }
 
-    /**
-     * Method to be called when user selects an expected place to be used for
-     * sharing his live location via the tracking url.
-     *
-     * @param place Expected place for the user
-     */
-    private void onSelectPlace(final Place place) {
-        if (place == null || place.getLocation() == null || this.isFinishing()) {
-            return;
-        }
-        //updateCurrentLocationMarker(null);
-        presenter.updateExpectedPlace(place);
-        ActionManager.getSharedManager(this).setPlace(expectedPlace);
-        ActionManager.getSharedManager(this).setShortcutPlace(place);
-    }
-
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        mMap.setMaxZoomPreference(16.9f);
-        LatLng latLng;
-        ActionManager actionManager = ActionManager.getSharedManager(this);
-        if (actionManager.getHyperTrackActionId() == null) {
-
-            if (googleMap != null && googleMap.isMyLocationEnabled() && googleMap.getMyLocation() != null) {
-                SharedPreferenceManager.setLastKnownLocation(Home.this, googleMap.getMyLocation());
-                latLng = new LatLng(googleMap.getMyLocation().getLatitude(), googleMap.getMyLocation().getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-
-            } else {
-                // Set Default View for map according to User's LastKnownLocation
-                if (SharedPreferenceManager.getLastKnownLocation(Home.this) != null) {
-                    defaultLocation = SharedPreferenceManager.getLastKnownLocation(Home.this);
-                }
-
-                // Else Set Default View for map according to either User's Default Location
-                // (If Country Info was available) or (0.0, 0.0)
-                if (defaultLocation != null && defaultLocation.getLatitude() != 0.0
-                        && defaultLocation.getLongitude() != 0.0) {
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(defaultLocation.getLatitude(), defaultLocation.getLongitude()), zoomLevel));
-                }
-            }
-        }
-
-        mMap.getUiSettings().setMapToolbarEnabled(false);
-        mMap.getUiSettings().setZoomControlsEnabled(false);
-        mMap.getUiSettings().setCompassEnabled(false);
-        checkForLocationSettings();
-    }
-
-    /*private void updateMapView() {
-        if (mMap == null || !isMapLoaded) {
-            return;
-        }
-
-        if (currentLocationMarker == null && expectedPlace == null) {
-            return;
-        }
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
-        if (currentLocationMarker != null) {
-            LatLng current = currentLocationMarker.getPosition();
-            builder.include(current);
-        }
-
-        if (expectedPlace != null && expectedPlace.getLocation() != null &&
-                expectedPlace.getLocation().getLatLng() != null) {
-            LatLng destination = expectedPlace.getLocation().getLatLng();
-            builder.include(destination);
-        }
-
-        LatLngBounds bounds = builder.build();
-
-        try {
-            CameraUpdate cameraUpdate;
-            if (expectedPlace != null && currentLocationMarker != null) {
-                int width = getResources().getDisplayMetrics().widthPixels;
-                int height = getResources().getDisplayMetrics().heightPixels;
-                int padding = (int) (width * 0.12);
-                cameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
-            } else {
-                LatLng latLng = currentLocationMarker != null ?
-                        currentLocationMarker.getPosition() : expectedPlace.getLocation().getLatLng();
-                cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel);
-            }
-
-            mMap.animateCamera(cameraUpdate, 1000, null);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Crashlytics.logException(e);
-        }
-    }*/
-
-    private void createAction() {
-        User user = OnboardingManager.sharedManager(this).getUser();
-        presenter.shareLiveLocation(user);
-    }
-
     @Override
     public void showShareLiveLocationSuccess(Action action) {
-        // bottomButtonCard.hideBottomCardLayout();
         isRestoreLocationSharing = true;
-        if (mLocationSharingView == null) {
-            setLocationSharingView();
-        } else {
-            mLocationSharingView.setType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-            mHyperTrackMapFragment.setUseCase(mLocationSharingView);
-        }
-
+        setLocationSharingView();
         presenter.trackActionsOnMap(action.getCollectionId(), false);
         presenter.getShareMessage();
     }
@@ -903,28 +539,11 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     @Override
     public void showStopSharingError() {
         Toast.makeText(this, getString(R.string.stop_sharing_failed), Toast.LENGTH_SHORT).show();
-//        if (htMapFragment != null) {
-//            htMapFragment.notifyChanged();
-//        }
     }
 
     @Override
     public void showStopSharingSuccess() {
         stopSharingLiveLocation();
-    }
-
-    /**
-     * Method to update State Variables & UI to reflect Task Ended
-     */
-    private void stopSharingLiveLocation() {
-
-        ActionManager.getSharedManager(Home.this).clearState();
-        expectedPlace = null;
-        showCurrentLocationMarker = true;
-        isRestoreLocationSharing = false;
-        isHandleTrackingUrlDeeplink = false;
-        isUpdateExpectedPlace = false;
-        setTopButtonToCreateAction();
     }
 
     @Override
@@ -966,55 +585,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                checkForLocationSettings();
-
-            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
-                        getString(R.string.location_permission_never_allow));
-            }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_SERVICES) {
-            if (resultCode == Activity.RESULT_OK) {
-                checkForLocationSettings();
-            } else {
-                // Handle Location services request denied error
-                Snackbar.make(findViewById(R.id.parent_layout), R.string.location_services_snackbar_msg,
-                        Snackbar.LENGTH_INDEFINITE).setAction("Enable Location", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        checkForLocationSettings();
-                    }
-                }).show();
-            }
-        }
-    }
-
-    private void geocodeUserCountryName() {
-        // Fetch Country Level Location only if no cached location is available
-        Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation(this);
-        if (lastKnownCachedLocation == null || lastKnownCachedLocation.getLatitude() == 0.0
-                || lastKnownCachedLocation.getLongitude() == 0.0) {
-
-            OnboardingManager onboardingManager = OnboardingManager.sharedManager(this);
-            String countryName = Utils.getCountryName(onboardingManager.getUser().getCountryCode());
-            if (!HTTextUtils.isEmpty(countryName)) {
-                Intent intent = new Intent(this, FetchLocationIntentService.class);
-                intent.putExtra(FetchLocationIntentService.RECEIVER, new GeocodingResultReceiver(new Handler()));
-                intent.putExtra(FetchLocationIntentService.ADDRESS_DATA_EXTRA, countryName);
-                startService(intent);
-            }
-        }
-    }
-
-    @Override
     public void onTitleButtonClick() {
         if (isCreateAction) {
             shareLiveLocation();
@@ -1022,9 +592,9 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
             if (mSelectExpectedPlaceView == null) {
                 mHyperTrackMapFragment.hideResetBoundButton();
                 mSelectExpectedPlaceView =
-                        mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.PLACE_SELECTOR);
+                        (PlaceSelector) mHyperTrackMapFragment.setUseCaseType(
+                                MapFragmentView.Type.PLACE_SELECTOR);
             } else {
-                mSelectExpectedPlaceView.setType(MapFragmentView.Type.PLACE_SELECTOR);
                 mHyperTrackMapFragment.setUseCase(mSelectExpectedPlaceView);
             }
         }
@@ -1037,27 +607,6 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
 
     @Override
     public void onRightButtonClick() {
-
-    }
-
-    @Override
-    public void onPlacelineViewShown() {
-
-
-    }
-
-    @Override
-    public void onPlacelineViewExpanded() {
-
-    }
-
-    @Override
-    public void onPlacelineViewCollapsed() {
-
-    }
-
-    @Override
-    public void onPlacelineViewClosed() {
 
     }
 
@@ -1077,7 +626,7 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                locationSharingActiveButton.performClick();
+                                setLocationSharingView();
                             }
                         });
                 builder.show();
@@ -1116,80 +665,106 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-    @SuppressLint("ParcelCreator")
-    private class GeocodingResultReceiver extends ResultReceiver {
-        GeocodingResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            if (resultCode == FetchLocationIntentService.SUCCESS_RESULT) {
-                LatLng latLng = resultData.getParcelable(FetchLocationIntentService.RESULT_DATA_KEY);
-                if (latLng == null)
-                    return;
-                defaultLocation.setLatitude(latLng.latitude);
-                defaultLocation.setLongitude(latLng.longitude);
-                Log.d(TAG, "Geocoding for Country Name Successful: " + latLng.toString());
-
-                if (mMap != null) {
-                    if (defaultLocation.getLatitude() != 0.0 || defaultLocation.getLongitude() != 0.0)
-                        zoomLevel = 16.9f;
-
-                    // Check if any Location Data is available, meaning Country zoom level need not be used
-                    Location lastKnownCachedLocation = SharedPreferenceManager.getLastKnownLocation(Home.this);
-                    if (lastKnownCachedLocation != null && lastKnownCachedLocation.getLatitude() != 0.0
-                            && lastKnownCachedLocation.getLongitude() != 0.0) {
-                        return;
-                    }
-
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, zoomLevel));
-                }
+    private void stopTracking() {
+        if (HyperTrack.checkLocationPermission(Home.this)
+                && HyperTrack.checkLocationServices(Home.this)) {
+            isRestoreLocationSharing = false;
+            presenter.stopSharing(false);
+            collectionId = null;
+            HyperTrack.removeActions(null);
+            setStartViewUseCase();
+            setTopButtonToCreateAction();
+            mLocationSharingView = null;
+        } else {
+            if (!HyperTrack.checkLocationServices(Home.this)) {
+                HyperTrack.requestLocationServices(Home.this);
+            } else {
+                HyperTrack.requestPermissions(Home.this);
             }
         }
     }
 
-    BroadcastReceiver mLocationChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
-    BroadcastReceiver mConnectivityChangeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateInfoMessageView();
-        }
-    };
-
-    private void updateInfoMessageView() {
-        if (!HyperTrackUtils.isLocationEnabled(Home.this)) {
-            infoMessageView.setVisibility(View.VISIBLE);
-
-            if (!HyperTrackUtils.isInternetConnected(this)) {
-                infoMessageViewText.setText(R.string.location_off_info_message);
-            } else {
-                infoMessageViewText.setText(R.string.location_off_info_message);
-            }
+    private void setLocationSharingView() {
+        if (mLocationSharingView == null) {
+            mLocationSharingView = (LocationSharingView) mHyperTrackMapFragment.
+                    setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
         } else {
-            infoMessageView.setVisibility(View.VISIBLE);
+            mHyperTrackMapFragment.setUseCase(mLocationSharingView);
+        }
+    }
 
-            if (!HyperTrackUtils.isInternetConnected(this)) {
-                infoMessageViewText.setText(R.string.internet_off_info_message);
+    private void setStartViewUseCase() {
+        if (mStartView == null) {
+            mStartView = StartView.newInstance();
+            mHyperTrackMapFragment.setUseCase(mStartView);
+        } else {
+            mHyperTrackMapFragment.setUseCase(mStartView);
+        }
+    }
+
+    private void updateLiveLocationSharingView() {
+        if (mLocationSharingView == null) {
+            mLocationSharingView = (LocationSharingView)
+                    mHyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+            return;
+        }
+
+        if (!mLocationSharingView.isViewCreated()) {
+            return;
+        }
+
+        if (isRestoreLocationSharing) {
+            if (expectedPlace != null) {
+                mLocationSharingView.hideCTAButton();
             } else {
-                // Both Location & Network Enabled, Hide the Info Message View
-                infoMessageView.setVisibility(View.GONE);
+                setTopButtonToUpdateExpectedPlace();
+            }
+            stopLocationSharingButton.setVisibility(View.VISIBLE);
+            updateExpectedPlaceButton.setVisibility(View.GONE);
+        } else {
+            if (expectedPlace != null) {
+                updateExpectedPlaceButton.setVisibility(View.GONE);
+            } else {
+                updateExpectedPlaceButton.setVisibility(View.VISIBLE);
+            }
+            stopLocationSharingButton.setVisibility(View.GONE);
+            setTopButtonToCreateAction();
+        }
+
+        mLocationSharingView.addBottomViewItems(bottomCardItemViews);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[],
+                                           @NonNull int[] grantResults) {
+        if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                checkForLocationSettings();
+
+            } else if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                PermissionUtils.showPermissionDeclineDialog(this, Manifest.permission.ACCESS_FINE_LOCATION,
+                        getString(R.string.location_permission_never_allow));
             }
         }
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mConnectivityChangeReceiver);
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocationChangeReceiver);
-        unRegisterBroadcastReceiver();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == HyperTrack.REQUEST_CODE_LOCATION_SERVICES) {
+            if (resultCode == Activity.RESULT_OK) {
+                checkForLocationSettings();
+            } else {
+                // Handle Location services request denied error
+                Snackbar.make(findViewById(R.id.parent_layout), R.string.location_services_snackbar_msg,
+                        Snackbar.LENGTH_INDEFINITE).setAction("Enable Location", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        checkForLocationSettings();
+                    }
+                }).show();
+            }
+        }
     }
 
     @Override
@@ -1208,17 +783,8 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
                 actionManager.getHyperTrackAction().hasFinished()) {
             // Reset uniqueId variable
             stopSharingLiveLocation();
-        }/* else if (!fromPlaceline) {
-            startActivity(new Intent(Home.this, Placeline.class));
-        }*/
-        //finish();
+        }
         super.onBackPressed();
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d(TAG, "onStop: ");
-        super.onStop();
     }
 
     @Override
@@ -1228,40 +794,5 @@ public class Home extends BaseActivity implements HomeView, CTAButton.OnClickLis
         // Detach View from Presenter
         presenter.detachView();
         super.onDestroy();
-    }
-
-    private void registerBroadcastReceiver() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(HyperTrackConstants.HT_USER_CURRENT_ACTIVITY_INTENT);
-        intentFilter.addAction(HyperTrackConstants.HT_USER_CURRENT_LOCATION_INTENT);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver, intentFilter);
-    }
-
-    private void unRegisterBroadcastReceiver() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mMessageReceiver);
-    }
-
-    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent != null && intent.getAction() != null) {
-                if (intent.getAction().equals(HyperTrackConstants.HT_USER_CURRENT_LOCATION_INTENT)) {
-                    HyperTrackLocation location = (HyperTrackLocation)
-                            intent.getSerializableExtra(HyperTrackConstants.HT_USER_CURRENT_LOCATION_KEY);
-                    //updateCurrentLocationMarker(location);
-                }
-            }
-        }
-    };
-
-    void setLocationSharingView() {
-        if (mLocationSharingView == null) {
-            mLocationSharingView = (LocationSharingView) mHyperTrackMapFragment.
-                    setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-        } else {
-            mLocationSharingView.setType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
-            mHyperTrackMapFragment.setUseCase(mLocationSharingView);
-        }
-
     }
 }
