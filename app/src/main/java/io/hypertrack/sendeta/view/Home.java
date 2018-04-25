@@ -110,6 +110,8 @@ public class Home extends AppCompatActivity implements HomeView, CTAButton.OnCli
     private DrawerLayout drawer;
     NavigationView navigationView;
 
+    private Boolean isExpectedPlaceAdded = null;
+
     private ActionManagerListener actionCompletedListener = new ActionManagerListener() {
         @Override
         public void OnCallback() {
@@ -138,6 +140,17 @@ public class Home extends AppCompatActivity implements HomeView, CTAButton.OnCli
         public void onActionRefreshed(List<String> refreshedActionIds,
                                       final List<Action> refreshedActions) {
             ActionManager actionManager = ActionManager.getSharedManager(Home.this);
+
+            if (actionManager.getTrackingAction() != null && !isPlaceUpdating &&
+                    (isExpectedPlaceAdded == null || !isExpectedPlaceAdded)) {
+                int index = refreshedActionIds.indexOf(actionManager.getTrackingAction().getId());
+                if (index >= 0) {
+                    isExpectedPlaceAdded = refreshedActions.get(index).getExpectedPlace() != null;
+                    if (isExpectedPlaceAdded && presenter != null) {
+                        presenter.refreshView(refreshedActions, true);
+                    }
+                }
+            }
 
             if (actionManager.getHyperTrackAction() != null) {
                 //Get the index of active action from refreshed action Ids
@@ -169,7 +182,6 @@ public class Home extends AppCompatActivity implements HomeView, CTAButton.OnCli
                             presenter.refreshView(refreshedActions, false);
                         }
                         hideLoading();
-
                     }
                 }, 1500);
                 isPlaceUpdating = false;
@@ -389,12 +401,12 @@ public class Home extends AppCompatActivity implements HomeView, CTAButton.OnCli
      * Method to update State Variables & UI to reflect Task Ended
      */
     private void stopSharingLiveLocation() {
-
         ActionManager.getSharedManager(Home.this).clearState();
         expectedPlace = null;
         isRestoreLocationSharing = false;
         isHandleTrackingUrlDeeplink = false;
         isUpdateExpectedPlace = false;
+        isExpectedPlaceAdded = null;
         setTopButtonToCreateAction();
     }
 
