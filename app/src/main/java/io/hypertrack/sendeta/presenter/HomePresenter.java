@@ -195,44 +195,6 @@ public class HomePresenter implements IHomePresenter<HomeView> {
     }
 
     @Override
-    public void shareTrackingURL(ActionManager actionManager) {
-        if (actionManager == null || !isViewAttached())
-            return;
-
-        if (actionManager.getHyperTrackAction() == null)
-            return;
-
-        String shareMessage = actionManager.getHyperTrackAction().getShareMessage();
-        if (!HTTextUtils.isEmpty(shareMessage))
-            mView.showShareTrackingURLSuccess(shareMessage);
-        else
-            mView.showShareTrackingURLError();
-    }
-
-    @Override
-    public void openNavigationForExpectedPlace(ActionManager actionManager) {
-
-        if (!isViewAttached())
-            return;
-
-        Place place = actionManager.getPlace();
-        if (place == null || place.getLocation() == null) {
-            mView.showOpenNavigationError();
-            return;
-        }
-
-        double latitude = place.getLocation().getLatitude();
-        double longitude = place.getLocation().getLongitude();
-
-        if (latitude == 0.0 || longitude == 0.0) {
-            mView.showOpenNavigationError();
-            return;
-        }
-
-        mView.showOpenNavigationSuccess(latitude, longitude);
-    }
-
-    @Override
     public void trackActionsOnMap(String collectionId, final boolean isDeepLinkTrackingAction) {
         if (!HTTextUtils.isEmpty(collectionId)) {
             HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
@@ -277,13 +239,8 @@ public class HomePresenter implements IHomePresenter<HomeView> {
 
     @Override
     public boolean restoreLocationSharing() {
-        if (actionManager == null || !isViewAttached())
-            return false;
+        return actionManager != null && isViewAttached() && actionManager.shouldRestoreState();
 
-        if (!actionManager.shouldRestoreState())
-            return false;
-
-        return true;
     }
 
     @Override
@@ -294,7 +251,6 @@ public class HomePresenter implements IHomePresenter<HomeView> {
     @Override
     public void updateExpectedPlace(Place place) {
         if (actionManager != null) {
-            actionManager.setShortcutPlace(place);
             actionManager.setPlace(place);
         }
 
@@ -319,8 +275,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 if (!isViewAttached())
                     return;
 
-                mView.hideBottomPlacePickerButton();
-                mView.hidePlacePickerButton();
+                mView.onActionRefreshed();
                 mView.showUpdatePlaceLoading();
             }
 

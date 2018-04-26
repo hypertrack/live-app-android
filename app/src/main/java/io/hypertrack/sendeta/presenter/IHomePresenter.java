@@ -43,10 +43,6 @@ public interface IHomePresenter<V> extends Presenter<V> {
 
     void getShareMessage();
 
-    void shareTrackingURL(ActionManager actionManager);
-
-    void openNavigationForExpectedPlace(final ActionManager actionManager);
-
     void trackActionsOnMap(String collectionId, boolean isDeepLinkTrackingAction);
 
     void refreshView(List<Action> actions, boolean isDeepLinkTrackingAction);

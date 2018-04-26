@@ -40,14 +40,6 @@ public interface HomeView {
 
     void showStopSharingSuccess();
 
-    void showShareTrackingURLSuccess(String shareMessage);
-
-    void showShareTrackingURLError();
-
-    void showOpenNavigationError();
-
-    void showOpenNavigationSuccess(double latitude, double longitude);
-
     void showTrackActionsOnMapError(ErrorResponse errorResponse);
 
     void showLoading();
@@ -59,12 +51,6 @@ public interface HomeView {
     void showShareCard(String shareMessage);
 
     void updateExpectedPlaceFailure(String s);
-
-    void showPlacePickerButtonAtBottom();
-
-    void hidePlacePickerButton();
-
-    void hideBottomPlacePickerButton();
 
     void showUpdatePlaceLoading();
 

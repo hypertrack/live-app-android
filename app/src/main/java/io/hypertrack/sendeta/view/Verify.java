@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.TaskStackBuilder;
 import android.support.v7.widget.Toolbar;
@@ -26,14 +25,8 @@ import android.widget.Toast;
 
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
-import com.hypertrack.lib.models.ErrorResponse;
-import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
@@ -164,43 +157,10 @@ public class Verify extends BaseActivity implements VerifyView {
 
     @Override
     public void codeVerified() {
-
-        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
-            try {
-                //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
-                final JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
-                if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
-                    HyperTrack.resumeTracking(new HyperTrackCallback() {
-                        @Override
-                        public void onSuccess(@NonNull SuccessResponse response) {
-                            try {
-                                acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-
-                        @Override
-                        public void onError(@NonNull ErrorResponse errorResponse) {
-
-                        }
-                    });
-
-                } else {
-                    Intent intent = new Intent(Verify.this, Invite.class);
-                    intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
-                    startActivity(intent);
-                }
-                return;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        startPlacelineScreen();
+        startHomeScreen();
     }
 
-    private void startPlacelineScreen() {
+    private void startHomeScreen() {
         CrashlyticsWrapper.setCrashlyticsKeys(this);
         showProgress(false);
 
@@ -231,7 +191,7 @@ public class Verify extends BaseActivity implements VerifyView {
                     Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
                     Toast.makeText(Verify.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
                 }
-                startPlacelineScreen();
+                startHomeScreen();
             }
 
             @Override
@@ -240,7 +200,7 @@ public class Verify extends BaseActivity implements VerifyView {
                 t.printStackTrace();
                 Log.d(TAG, "onFailure: There is some error occurred in accept invite. Please try again");
                 Toast.makeText(Verify.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
-                startPlacelineScreen();
+                startHomeScreen();
             }
         });
     }

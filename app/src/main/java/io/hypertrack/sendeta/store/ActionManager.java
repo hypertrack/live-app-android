@@ -353,18 +353,10 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         SharedPreferenceManager.setTrackingAction(mContext, trackingAction);
     }
 
-    public Place getShortcutPlace() {
-        return SharedPreferenceManager.getShortcutPlace(mContext);
-    }
-
     public Action getTrackingAction() {
         if (trackingAction == null)
             trackingAction = SharedPreferenceManager.getTrackingAction(mContext);
         return trackingAction;
-    }
-
-    public void setShortcutPlace(Place place) {
-        SharedPreferenceManager.setShortcutPlace(mContext, place);
     }
 
     public void deleteTrackingAction() {

@@ -48,13 +48,8 @@ import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
 
-import io.branch.referral.Branch;
-import io.branch.referral.BranchError;
 import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
@@ -139,52 +134,6 @@ public class SplashScreen extends BaseActivity {
                 return;
             }
             appDeepLink = DeepLinkUtil.prepareAppDeepLink(this, intent.getData());
-        }
-    }
-
-    private void initiateBranch() {
-        Branch branch = Branch.getInstance();
-        branch.initSession(new Branch.BranchReferralInitListener() {
-            @Override
-            public void onInitFinished(final JSONObject referringParams, BranchError error) {
-                if (error == null) {
-                    try {
-                        if (referringParams.has(Invite.USER_ID_KEY))
-                            userID = referringParams.getString(Invite.USER_ID_KEY);
-
-                        if (referringParams.has(Invite.AUTO_ACCEPT_KEY))
-                            autoAccept = referringParams.getBoolean(Invite.AUTO_ACCEPT_KEY);
-
-                        if (referringParams.has(Invite.ACCOUNT_ID_KEY))
-                            accountID = referringParams.getString(Invite.ACCOUNT_ID_KEY);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    Log.d(TAG, "onInitFinished: Error " + error.getMessage());
-                }
-                acceptInviteAndProceed();
-            }
-        }, this.getIntent().getData(), this);
-    }
-
-    private void acceptInviteAndProceed() {
-        if (autoAccept) {
-            acceptInvite(userID, accountID, new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    proceedToNextScreen();
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    proceedToNextScreen();
-                }
-            });
-        } else {
-            proceedToNextScreen();
         }
     }
 
@@ -482,13 +431,7 @@ public class SplashScreen extends BaseActivity {
 
         // Location Permissions and Settings have been enabled
         // Proceed with your app logic here
-        if ((appDeepLink.mId == DeepLinkUtil.DEFAULT || appDeepLink.mId == DeepLinkUtil.SHORTCUT)
-                && SharedPreferenceManager.getHyperTrackLiveUser(this) != null)
-            acceptInviteAndProceed();
-        else {
-            progressBar.setVisibility(View.VISIBLE);
-            initiateBranch();
-        }
+        proceedToNextScreen();
     }
 
     private void showSnackBar() {

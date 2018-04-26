@@ -56,30 +56,21 @@ import android.widget.Toast;
 
 import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
-import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
-import com.hypertrack.lib.models.ErrorResponse;
-import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.Country;
 import io.hypertrack.sendeta.model.CountryMaster;
 import io.hypertrack.sendeta.model.CountrySpinnerAdapter;
-import io.hypertrack.sendeta.network.retrofit.CallUtils;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveService;
-import io.hypertrack.sendeta.network.retrofit.HyperTrackLiveServiceGenerator;
 import io.hypertrack.sendeta.presenter.IProfilePresenter;
 import io.hypertrack.sendeta.presenter.ProfilePresenter;
-import io.hypertrack.sendeta.store.OnboardingManager;
 import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.util.CrashlyticsWrapper;
 import io.hypertrack.sendeta.util.ImageUtils;
@@ -88,11 +79,6 @@ import io.hypertrack.sendeta.util.Utils;
 import io.hypertrack.sendeta.util.images.DefaultCallback;
 import io.hypertrack.sendeta.util.images.EasyImage;
 import io.hypertrack.sendeta.util.images.RoundedImageView;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
-import static io.hypertrack.sendeta.BuildConfig.HYPERTRACK_BASE_URL_V1;
 
 public class Profile extends BaseActivity implements ProfileView {
 
@@ -124,7 +110,6 @@ public class Profile extends BaseActivity implements ProfileView {
         initUIViews();
 
         // Set Onboarding manager and attach presenter to view
-        presenter.setOnboardingManager(OnboardingManager.sharedManager(this));
         presenter.attachView(this);
 
         // Retrieve deeplink parameters from intent
@@ -298,33 +283,20 @@ public class Profile extends BaseActivity implements ProfileView {
     }
 
     @Override
-    public void updateViews(String name, String phone, String ISOCode, String profileURL) {
-
-        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
-            try {
-                JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
-                if (!branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
-                    skip.setText(R.string.cancel);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                skip.setText(R.string.cancel);
-            }
-        } else if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
+    public void updateViews(User user,  String ISOCode, String phone) {
+        if (!HTTextUtils.isEmpty(HyperTrack.getUserId())) {
             skip.setText(R.string.cancel);
         }
         String nameFromAccount = getName();
 
-        if (name != null) {
+        if (user.getName() != null) {
             nameView.setText(nameFromAccount);
             showSkip = false;
             toggleRegisterButton();
 
         }
-        if (!HTTextUtils.isEmpty(name))
-
-        {
-            nameView.setText(name);
+        if (!HTTextUtils.isEmpty(user.getName())) {
+            nameView.setText(user.getName());
         }
 
         if (!HTTextUtils.isEmpty(ISOCode)) {
@@ -343,11 +315,11 @@ public class Profile extends BaseActivity implements ProfileView {
             previousPhone = phone;
         }
 
-        if (!HTTextUtils.isEmpty(profileURL)) {
+        if (!HTTextUtils.isEmpty(user.getPhoto())) {
             mProfileImageLoader.setVisibility(View.VISIBLE);
             int pixel = (int) convertDpToPixel(getResources().getDimension(R.dimen.profile_image_size), Profile.this);
             Picasso.with(this)
-                    .load(profileURL)
+                    .load(user.getPhoto())
                     .placeholder(R.drawable.default_profile_pic)
                     .error(R.drawable.default_profile_pic)
                     .centerCrop()
@@ -365,7 +337,6 @@ public class Profile extends BaseActivity implements ProfileView {
                     });
         }
     }
-
 
     private String getName() {
         AccountManager manager = (AccountManager) getSystemService(ACCOUNT_SERVICE);
@@ -386,43 +357,10 @@ public class Profile extends BaseActivity implements ProfileView {
 
     @Override
     public void onProfileUpdateSuccess() {
-        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
-            try {
-                //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
-                final JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
-                if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
-                    HyperTrack.resumeTracking(new HyperTrackCallback() {
-                        @Override
-                        public void onSuccess(@NonNull SuccessResponse response) {
-                            try {
-                                acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onError(@NonNull ErrorResponse errorResponse) {
-
-                        }
-                    });
-
-
-                } else {
-                    Intent intent = new Intent(Profile.this, Invite.class);
-                    intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
-                    startActivity(intent);
-                }
-                return;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        startPlacelineScreen();
+        startHomeScreen();
     }
 
-    private void startPlacelineScreen() {
+    private void startHomeScreen() {
         CrashlyticsWrapper.setCrashlyticsKeys(this);
         showProgress(false);
 
@@ -437,34 +375,6 @@ public class Profile extends BaseActivity implements ProfileView {
                 .addNextIntentWithParentStack(intent)
                 .startActivities();
         finish();
-    }
-
-    private void acceptInvite(String userID, String accountID) {
-        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this, HYPERTRACK_BASE_URL_V1);
-        Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
-
-        CallUtils.enqueueWithRetry(call, new Callback<User>() {
-            @Override
-            public void onResponse(Call<User> call, Response<User> response) {
-                if (response.isSuccessful()) {
-                    HyperLog.d(TAG, "Invite Accepted");
-
-                } else {
-                    Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
-                    Toast.makeText(Profile.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
-                }
-                startPlacelineScreen();
-            }
-
-            @Override
-            public void onFailure(Call<User> call, Throwable t) {
-                Log.d(TAG, "onInviteFailure: " + t.getMessage());
-                t.printStackTrace();
-                Log.d(TAG, "onFailure: There is some error occurred in accept invite. Please try again");
-                Toast.makeText(Profile.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
-                startPlacelineScreen();
-            }
-        });
     }
 
     @Override
@@ -527,7 +437,7 @@ public class Profile extends BaseActivity implements ProfileView {
                 }
 
                 mProfileImageLoader.setVisibility(View.GONE);
-                profileImage = ImageUtils.getScaledFile(Profile.this,imageFile);
+                profileImage = ImageUtils.getScaledFile(Profile.this, imageFile);
 
                 int pixel = (int) convertDpToPixel(getResources().getDimension(R.dimen.profile_image_size), Profile.this);
                 Picasso.with(Profile.this).load(profileImage).centerCrop().resize(pixel, pixel).into(mProfileImageView);
