@@ -30,7 +30,7 @@ In case you are using iOS, refer to our open source iOS [repository](https://git
 $ git clone https://github.com/hypertrack/hypertrack-live-android.git
 ```
 
-2. [Signup](https://www.hypertrack.com/signup?utm_source=github&utm_campaign=ht_placeline_android) to get your [HyperTrack API keys](https://dashboard.hypertrack.com/settings). Add the **publishable key** to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file.
+2. [Signup](https://www.hypertrack.com/signup?utm_source=github&utm_campaign=ht_live_android) to get your [HyperTrack API keys](https://dashboard.hypertrack.com/settings). Add the **publishable key** to [key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/key.properties) file.
 ```java
 HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
 ```
