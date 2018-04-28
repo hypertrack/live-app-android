@@ -112,7 +112,7 @@ public class HomePresenter implements IHomePresenter<HomeView> {
         mView.showLoading("Sharing your location...");
 
         // Call assignAction to start the tracking action
-        HyperTrack.createAction(actionParamsBuilder.build(), new HyperTrackCallback() {
+        HyperTrack.createMockAction(actionParamsBuilder.build(), new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
@@ -201,7 +201,11 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
                     List<Action> actions = (List<Action>) response.getResponseObject();
-
+                    if (actions == null || actions.isEmpty()) {
+                        mView.showTrackActionsOnMapError(new ErrorResponse("Error Occurred"));
+                        mView.hideLoading();
+                        return;
+                    }
                     refreshView(actions, isDeepLinkTrackingAction);
 
                     mView.hideLoading();
@@ -228,7 +232,9 @@ public class HomePresenter implements IHomePresenter<HomeView> {
             return;
 
         for (Action tempAction : actions) {
-            if (tempAction.getUser().getId().equalsIgnoreCase(userId) && !tempAction.hasFinished()) {
+            if ((tempAction.getUser().getId().equalsIgnoreCase(userId) && !tempAction.hasFinished())
+                    || (actionManager.getHyperTrackAction() != null &&
+                    actionManager.getHyperTrackAction().getId().equalsIgnoreCase(tempAction.getId()))) {
                 actionManager.setHyperTrackAction(tempAction);
             } else if (isDeepLinkTrackingAction) {
                 actionManager.setTrackingAction(tempAction);
