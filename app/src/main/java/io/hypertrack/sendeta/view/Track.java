@@ -74,7 +74,7 @@ public class Track extends BaseActivity implements TrackView {
         HyperTrackMapFragment hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment);
         hyperTrackMapFragment.setMapAdapter(new TrackMapAdapter(this));
-        hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.ORDER_TRACKING);
+        hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
         hyperTrackMapFragment.showBackButton();
         // Initialize UI buttons
         retryButton = (Button) findViewById(R.id.retryButton);
