@@ -164,13 +164,14 @@ android {
         }
 
         debug {
-            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
+            if (keyProperties['HYPERTRACK_DEBUG_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
                 throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
             }
             debuggable true
             minifyEnabled false
             versionNameSuffix '-debug'
             applicationIdSuffix '.debug'
+            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_DEBUG_PUBLISHABLE_KEY']
             resValue "string", "app_name", "Debug HyperTrack Live"
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
