@@ -12,6 +12,11 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.hypertrack.lib.HyperTrack;
+import com.hypertrack.lib.callbacks.HyperTrackCallback;
+import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.models.ErrorResponse;
+import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 import com.hypertrack.lib.tracking.MapProvider.MapFragmentView;
 import com.hypertrack.lib.tracking.basemvp.BaseView;
@@ -58,8 +63,23 @@ public class StartView extends BaseView {
         addBottomView(mParent);
         setCTAButtonTitle("SHARE YOUR LOCATION");
         User user = SharedPreferenceManager.getHyperTrackLiveUser(getContext());
-        if (user != null)
+        if (user != null && !HTTextUtils.isEmpty(user.getName()))
             mUserName.setText(String.format("Howdy %s!", user.getName()));
+        else {
+            HyperTrack.getUser(new HyperTrackCallback() {
+                @Override
+                public void onSuccess(@NonNull SuccessResponse response) {
+                    User user = (User) response.getResponseObject();
+                    SharedPreferenceManager.setHyperTrackLiveUser(mContext, user);
+                    mUserName.setText(String.format("Howdy %s!", user.getName()));
+                }
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+
+                }
+            });
+        }
         mSummaryTitle.setText(R.string.summary_title);
         showCTAButton();
     }

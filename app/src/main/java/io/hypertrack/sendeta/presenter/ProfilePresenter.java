@@ -69,7 +69,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
     private ProfileView view;
 
     @Override
-    public void  attachView(final ProfileView view) {
+    public void attachView(final ProfileView view) {
         this.view = view;
         final String[] ISOcode = {null};
         final String[] phoneNo = {null};
@@ -86,7 +86,7 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                             ISOcode[0] = user.getPhone().substring(0, index + 1);
                             phoneNo[0] = user.getPhone().substring(index + 1);
                         }
-                        view.updateViews(user,ISOcode[0],phoneNo[0]);
+                        view.updateViews(user, ISOcode[0], phoneNo[0]);
                         view.showProfileLoading(false);
                     }
                 }
@@ -182,6 +182,8 @@ public class ProfilePresenter implements IProfilePresenter<ProfileView> {
                         sendVerificationCode(context);
                     } else if (isViewAttached())
                         view.onProfileUpdateSuccess();
+                    SharedPreferenceManager.setHyperTrackLiveUser(context,
+                            (User) successResponse.getResponseObject());
                 }
 
                 @Override
