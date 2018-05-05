@@ -102,11 +102,11 @@ android {
         def runTasks = gradle.startParameter.taskNames
         if ('cUDD' in runTasks || 'crashlyticsUploadDistributionDebug' in runTasks
                 || 'cUDR' in runTasks || 'crashlyticsUploadDistributionRelease' in runTasks) {
-            value = 1;
+            value = 1
         }
 
-        def versionMajor = 3
-        def versionMinor = 4
+        def versionMajor = 4
+        def versionMinor = 0
         def versionPatch = versionProps['VERSION_PATCH'].toInteger() + value
         def versionNumber = versionProps['VERSION_NUMBER'].toInteger() + value
 
