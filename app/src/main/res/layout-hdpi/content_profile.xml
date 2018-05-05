@@ -40,13 +40,6 @@
                     android:indeterminate="true"
                     android:visibility="gone" />
 
-                <ImageView
-                    android:id="@+id/profile.camera_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end"
-                    android:layout_margin="@dimen/margin_low"
-                    android:src="@drawable/profile_camera_icon" />
             </FrameLayout>
 
             <TextView

@@ -32,20 +32,21 @@ import android.view.View;
 import android.widget.Button;
 
 import com.hypertrack.lib.HyperTrackMapAdapter;
-import com.hypertrack.lib.HyperTrackMapFragment;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.tracking.MapProvider.HyperTrackMapFragment;
+import com.hypertrack.lib.tracking.MapProvider.MapFragmentView;
 
 import java.util.List;
 
 import io.hypertrack.sendeta.R;
-import io.hypertrack.sendeta.presenter.TrackPresenter;
 import io.hypertrack.sendeta.presenter.ITrackPresenter;
+import io.hypertrack.sendeta.presenter.TrackPresenter;
 
 public class Track extends BaseActivity implements TrackView {
 
     public static final String KEY_TRACK_DEEPLINK = "track_deeplink";
     public static final String KEY_ACTION_ID_LIST = "action_id_list";
-    public static final String KEY_LOOKUP_ID = "lookup_id";
+    public static final String KEY_UNIQUE_ID = "unique_id";
     public static final String KEY_COLLECTION_ID = "collection_id";
 
     private Intent intent;
@@ -72,8 +73,9 @@ public class Track extends BaseActivity implements TrackView {
         // Initialize HyperTrackMapFragment, adapter and callback
         HyperTrackMapFragment hyperTrackMapFragment = (HyperTrackMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_fragment);
-        hyperTrackMapFragment.setHTMapAdapter(new TrackMapAdapter(this));
-
+        hyperTrackMapFragment.setMapAdapter(new TrackMapAdapter(this));
+        hyperTrackMapFragment.setUseCaseType(MapFragmentView.Type.LIVE_LOCATION_SHARING);
+        hyperTrackMapFragment.showBackButton();
         // Initialize UI buttons
         retryButton = (Button) findViewById(R.id.retryButton);
     }
@@ -81,20 +83,19 @@ public class Track extends BaseActivity implements TrackView {
     private boolean processIntentParams(Intent intent) {
         // Check if Intent has a valid TASK_ID_LIST extra
         if (intent != null) {
-            String lookupId = intent.getStringExtra(KEY_LOOKUP_ID);
+            String uniqueId = intent.getStringExtra(KEY_UNIQUE_ID);
             String collectionId = intent.getStringExtra(KEY_COLLECTION_ID);
-            if(!HTTextUtils.isEmpty(collectionId))
-            {
+            if (!HTTextUtils.isEmpty(collectionId)) {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
-                    // Add lookupId being tracked by this user
-                    presenter.trackAction(collectionId,null);
+                    // Add uniqueId being tracked by this user
+                    presenter.trackAction(collectionId, null);
                 }
                 return true;
             }
-            if (!HTTextUtils.isEmpty(lookupId)) {
+            if (!HTTextUtils.isEmpty(uniqueId)) {
                 if (intent.getBooleanExtra(KEY_TRACK_DEEPLINK, false)) {
-                    // Add lookupId being tracked by this user
-                    presenter.trackAction(null,lookupId);
+                    // Add uniqueId being tracked by this user
+                    presenter.trackAction(null, uniqueId);
                 }
                 return true;
 

@@ -28,9 +28,7 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.hypertrack.lib.models.User;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.network.retrofit.CallUtils;
@@ -159,30 +157,10 @@ public class Verify extends BaseActivity implements VerifyView {
 
     @Override
     public void codeVerified() {
-
-        if (getIntent() != null && getIntent().getStringExtra("branch_params") != null) {
-            try {
-                //If clicked on branch link and branch payload has auto_accept key set then don't show Invite Screen and accept invite
-                JSONObject branchParams = new JSONObject(getIntent().getStringExtra("branch_params"));
-                if (branchParams.getBoolean(Invite.AUTO_ACCEPT_KEY)) {
-                    HyperTrack.startTracking();
-                    SharedPreferenceManager.setTrackingON(this);
-                    acceptInvite(HyperTrack.getUserId(), branchParams.getString(Invite.ACCOUNT_ID_KEY));
-
-                } else {
-                    Intent intent = new Intent(Verify.this, Invite.class);
-                    intent.putExtra("branch_params", getIntent().getStringExtra("branch_params"));
-                    startActivity(intent);
-                }
-                return;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-        startPlacelineScreen();
+        startHomeScreen();
     }
 
-    private void startPlacelineScreen() {
+    private void startHomeScreen() {
         CrashlyticsWrapper.setCrashlyticsKeys(this);
         showProgress(false);
 
@@ -191,7 +169,7 @@ public class Verify extends BaseActivity implements VerifyView {
         SharedPreferenceManager.deletePlace(this);
 
         HyperLog.i(TAG, "User Registration successful: Clearing Active Trip, if any");
-        Intent intent = new Intent(Verify.this, Placeline.class);
+        Intent intent = new Intent(Verify.this, Home.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         TaskStackBuilder.create(Verify.this)
                 .addNextIntentWithParentStack(intent)
@@ -200,7 +178,7 @@ public class Verify extends BaseActivity implements VerifyView {
     }
 
     private void acceptInvite(String userID, String accountID) {
-        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,this);
+        HyperTrackLiveService acceptInviteService = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class,this, BuildConfig.HYPERTRACK_BASE_URL_V1);
         Call<User> call = acceptInviteService.acceptInvite(userID, new AcceptInviteModel(accountID, HyperTrack.getUserId()));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
@@ -213,7 +191,7 @@ public class Verify extends BaseActivity implements VerifyView {
                     Log.d(TAG, "onResponse: There is some error occurred in accept invite. Please try again");
                     Toast.makeText(Verify.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
                 }
-                startPlacelineScreen();
+                startHomeScreen();
             }
 
             @Override
@@ -222,7 +200,7 @@ public class Verify extends BaseActivity implements VerifyView {
                 t.printStackTrace();
                 Log.d(TAG, "onFailure: There is some error occurred in accept invite. Please try again");
                 Toast.makeText(Verify.this, "There is some error occurred. Please try again", Toast.LENGTH_SHORT).show();
-                startPlacelineScreen();
+                startHomeScreen();
             }
         });
     }

@@ -24,14 +24,17 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.network.retrofit;
 
+import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.User;
 
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.VerifyCodeModel;
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 /**
  * Created by piyush on 22/10/16.
@@ -46,4 +49,7 @@ public interface HyperTrackLiveService {
 
     @POST("users/{id}/send_verification/")
     Call<User> sendCode(@Path("id") String id);
+
+    @GET("actions/")
+    Call<Action> getActionForShortCode(@Query("short_code") String shortCode );
 }

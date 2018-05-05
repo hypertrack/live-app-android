@@ -54,7 +54,7 @@ public class TrackPresenter implements ITrackPresenter {
     }
 
     @Override
-    public void trackAction(String collectionId, String lookupId) {
+    public void trackAction(String collectionId, String uniqueId) {
         if (trackView != null)
             trackView.showLoader(true);
 
@@ -75,7 +75,7 @@ public class TrackPresenter implements ITrackPresenter {
                 }
             });
         } else {
-            HyperTrack.trackActionByLookupId(lookupId, new HyperTrackCallback() {
+            HyperTrack.trackActionByUniqueId(uniqueId, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
                     if (trackView != null) {

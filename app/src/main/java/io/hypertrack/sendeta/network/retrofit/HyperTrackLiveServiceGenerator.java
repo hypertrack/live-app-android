@@ -43,7 +43,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 public class HyperTrackLiveServiceGenerator {
 
-    public static <S> S createService(final Class<S> serviceClass, final Context context) {
+    public static <S> S createService(final Class<S> serviceClass, final Context context,
+                                      String baseURL) {
         final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         httpClient.interceptors().add(new Interceptor() {
             @Override
@@ -67,7 +68,7 @@ public class HyperTrackLiveServiceGenerator {
         OkHttpClient client = httpClient.build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BuildConfig.HYPERTRACK_BASE_URL)
+                .baseUrl(baseURL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();

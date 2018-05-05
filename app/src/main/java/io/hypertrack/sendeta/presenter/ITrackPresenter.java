@@ -33,7 +33,7 @@ import java.util.List;
 public interface ITrackPresenter {
     void removeTrackingAction();
 
-    void trackAction(String collectionId, String lookupId);
+    void trackAction(String collectionId, String uniqueId);
 
     void trackAction(List<String> actionsIDList);
 

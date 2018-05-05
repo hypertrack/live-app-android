@@ -48,14 +48,9 @@ import com.hypertrack.lib.models.HyperTrackError;
 import com.hypertrack.lib.models.SuccessResponse;
 import com.hypertrack.lib.models.User;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.List;
 
-import io.branch.referral.Branch;
-import io.branch.referral.BranchError;
+import io.hypertrack.sendeta.BuildConfig;
 import io.hypertrack.sendeta.R;
 import io.hypertrack.sendeta.model.AcceptInviteModel;
 import io.hypertrack.sendeta.model.AppDeepLink;
@@ -142,52 +137,6 @@ public class SplashScreen extends BaseActivity {
         }
     }
 
-    private void initiateBranch() {
-        Branch branch = Branch.getInstance();
-        branch.initSession(new Branch.BranchReferralInitListener() {
-            @Override
-            public void onInitFinished(final JSONObject referringParams, BranchError error) {
-                if (error == null) {
-                    try {
-                        if (referringParams.has(Invite.USER_ID_KEY))
-                            userID = referringParams.getString(Invite.USER_ID_KEY);
-
-                        if (referringParams.has(Invite.AUTO_ACCEPT_KEY))
-                            autoAccept = referringParams.getBoolean(Invite.AUTO_ACCEPT_KEY);
-
-                        if (referringParams.has(Invite.ACCOUNT_ID_KEY))
-                            accountID = referringParams.getString(Invite.ACCOUNT_ID_KEY);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                } else {
-                    Log.d(TAG, "onInitFinished: Error " + error.getMessage());
-                }
-                acceptInviteAndProceed();
-            }
-        }, this.getIntent().getData(), this);
-    }
-
-    private void acceptInviteAndProceed() {
-        if (autoAccept) {
-            acceptInvite(userID, accountID, new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse successResponse) {
-                    proceedToNextScreen();
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    proceedToNextScreen();
-                }
-            });
-        } else {
-            proceedToNextScreen();
-        }
-    }
-
     private void proceedToNextScreen() {
         CrashlyticsWrapper.setCrashlyticsKeys(SplashScreen.this);
 
@@ -231,7 +180,7 @@ public class SplashScreen extends BaseActivity {
                             .startActivities();
                 } else {
                     TaskStackBuilder.create(this)
-                            .addNextIntentWithParentStack(new Intent(this, Placeline.class)
+                            .addNextIntentWithParentStack(new Intent(this, Home.class)
                                     .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                             .startActivities();
                 }
@@ -247,9 +196,9 @@ public class SplashScreen extends BaseActivity {
             return;
         }
 
-        // Check if lookup_id is available from deeplink
-        if (!HTTextUtils.isEmpty(appDeepLink.lookupId)) {
-            handleTrackingDeepLinkSuccess(null, appDeepLink.lookupId, appDeepLink.taskID);
+        // Check if unique_id is available from deeplink
+        if (!HTTextUtils.isEmpty(appDeepLink.uniqueId)) {
+            handleTrackingDeepLinkSuccess(null, appDeepLink.uniqueId, appDeepLink.taskID);
             return;
         }
 
@@ -261,7 +210,53 @@ public class SplashScreen extends BaseActivity {
 
         displayLoader(true);
 
-        // Fetch Action details (collectionId or lookupId) for given short code
+        // Fetch Action details (collectionId or uniqueId) for given short code
+       /* HyperTrackLiveService getResendCodeService =
+                HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this,
+                        BuildConfig.HYPERTRACK_BASE_URL_V2);
+        Call<Action> call = getResendCodeService.getActionForShortCode(appDeepLink.shortCode);
+        call.enqueue(new Callback<Action>() {
+            @Override
+            public void onResponse(Call<Action> call, Response<Action> response) {
+                if (SplashScreen.this.isFinishing())
+                    return;
+
+                displayLoader(false);
+
+                if (!response.isSuccessful()) {
+                    handleTrackingDeepLinkError();
+                    return;
+                }
+
+                if (response.body() == null) {
+                    // Handle getActionForShortCode API error
+                    handleTrackingDeepLinkError();
+                    return;
+                }
+
+                Action action = response.body();
+                if (action != null) {
+                    // Handle getActionForShortCode API success
+                    handleTrackingDeepLinkSuccess(action.getCollectionId(),
+                            action.getUniqueId(), action.getId());
+
+                } else {
+                    // Handle getActionForShortCode API error
+                    handleTrackingDeepLinkError();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Action> call, Throwable t) {
+                if (SplashScreen.this.isFinishing())
+                    return;
+
+                displayLoader(false);
+
+                // Handle getActionForShortCode API error
+                handleTrackingDeepLinkError();
+            }
+        });*/
         HyperTrack.getActionForShortCode(appDeepLink.shortCode, new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
@@ -276,10 +271,10 @@ public class SplashScreen extends BaseActivity {
                     return;
                 }
 
-                List<Action> actions = (List<Action>) response.getResponseObject();
-                if (actions != null && !actions.isEmpty()) {
+                Action action = (Action) response.getResponseObject();
+                if (action != null) {
                     // Handle getActionForShortCode API success
-                    handleTrackingDeepLinkSuccess(actions.get(0).getCollectionId(), actions.get(0).getLookupId(), actions.get(0).getId());
+                    handleTrackingDeepLinkSuccess(action.getCollectionId(), action.getLookupId(), action.getId());
 
                 } else {
                     // Handle getActionForShortCode API error
@@ -299,7 +294,7 @@ public class SplashScreen extends BaseActivity {
         });
     }
 
-    private void handleTrackingDeepLinkSuccess(String collectionId, String lookupId, String actionId) {
+    private void handleTrackingDeepLinkSuccess(String collectionId, String uniqueId, String actionId) {
         // Check if current collectionId is same as the one active currently
         if (!HTTextUtils.isEmpty(collectionId) &&
                 collectionId.equals(ActionManager.getSharedManager(this).getHyperTrackActionCollectionId())) {
@@ -311,9 +306,9 @@ public class SplashScreen extends BaseActivity {
             return;
         }
 
-        // Check if current lookupId is same as the one active currently
-        if (!HTTextUtils.isEmpty(lookupId) &&
-                lookupId.equals(ActionManager.getSharedManager(this).getHyperTrackActionLookupId())) {
+        // Check if current uniqueId is same as the one active currently
+        if (!HTTextUtils.isEmpty(uniqueId) &&
+                uniqueId.equals(ActionManager.getSharedManager(this).getHyperTrackActionUniqueId())) {
             TaskStackBuilder.create(this)
                     .addNextIntentWithParentStack(new Intent(this, Home.class)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
@@ -339,7 +334,7 @@ public class SplashScreen extends BaseActivity {
             if (!HTTextUtils.isEmpty(collectionId))
                 intent.putExtra(Track.KEY_COLLECTION_ID, collectionId);
             else
-                intent.putExtra(Track.KEY_LOOKUP_ID, lookupId);
+                intent.putExtra(Track.KEY_UNIQUE_ID, uniqueId);
         } else {
             intent.setClass(SplashScreen.this, Track.class);
         }
@@ -361,7 +356,7 @@ public class SplashScreen extends BaseActivity {
                     .startActivities();
         } else {
             TaskStackBuilder.create(this)
-                    .addNextIntentWithParentStack(new Intent(this, Placeline.class)
+                    .addNextIntentWithParentStack(new Intent(this, Home.class)
                             .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP))
                     .startActivities();
         }
@@ -370,7 +365,7 @@ public class SplashScreen extends BaseActivity {
     }
 
     private void acceptInvite(String userID, String accountID, final HyperTrackCallback callback) {
-        HyperTrackLiveService service = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this);
+        HyperTrackLiveService service = HyperTrackLiveServiceGenerator.createService(HyperTrackLiveService.class, this, BuildConfig.HYPERTRACK_BASE_URL_V1);
         Call<User> call = service.acceptInvite(userID, new AcceptInviteModel(accountID, userID));
 
         CallUtils.enqueueWithRetry(call, new Callback<User>() {
@@ -436,13 +431,7 @@ public class SplashScreen extends BaseActivity {
 
         // Location Permissions and Settings have been enabled
         // Proceed with your app logic here
-        if ((appDeepLink.mId == DeepLinkUtil.DEFAULT || appDeepLink.mId == DeepLinkUtil.SHORTCUT )
-                && SharedPreferenceManager.getHyperTrackLiveUser(this) != null)
-            acceptInviteAndProceed();
-        else {
-            progressBar.setVisibility(View.VISIBLE);
-            initiateBranch();
-        }
+        proceedToNextScreen();
     }
 
     private void showSnackBar() {

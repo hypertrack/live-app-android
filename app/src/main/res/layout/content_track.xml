@@ -11,10 +11,10 @@
 
         <fragment
             android:id="@+id/map_fragment"
-            android:name="com.hypertrack.lib.HyperTrackMapFragment"
+            android:name="com.hypertrack.lib.tracking.MapProvider.HyperTrackMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            tools:layout="@layout/fragment_map_new" />
+            tools:layout="@layout/map_fragment_content" />
     </FrameLayout>
 
     <Button
