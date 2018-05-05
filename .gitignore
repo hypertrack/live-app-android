@@ -85,3 +85,4 @@ crashlytics.properties
 /app/src/release/java/io/hypertrack/placeline/google-services.json
 /app/src/release/java/io/hypertrack/placeline/key.properties
 /app/src/debug/java/io/hypertrack/sendeta/key.properties
+/app/src/debug/java/io/hypertrack/sendeta/util/key.properties
