@@ -24,6 +24,8 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.view;
 
+import com.hypertrack.lib.models.User;
+
 /**
  * Created by suhas on 24/02/16.
  */
@@ -32,7 +34,7 @@ public interface ProfileView {
     void onProfileUpdateSuccess();
     void showErrorMessage(String errorMessage);
 
-    void updateViews(String name,String phone,String ISOCode ,String profileURL);
+    void updateViews(User user,String isoCode, String phone);
 
     void showProfileLoading(boolean show);
 

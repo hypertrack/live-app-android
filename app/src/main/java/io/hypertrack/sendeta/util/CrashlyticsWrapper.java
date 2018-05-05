@@ -29,10 +29,10 @@ import android.content.Context;
 
 import com.crashlytics.android.Crashlytics;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
+import com.hypertrack.lib.models.User;
 
 import io.fabric.sdk.android.services.common.ApiKey;
-import io.hypertrack.sendeta.model.HyperTrackLiveUser;
-import io.hypertrack.sendeta.store.OnboardingManager;
+import io.hypertrack.sendeta.store.SharedPreferenceManager;
 
 /**
  * Created by Aman on 12/07/17.
@@ -62,7 +62,7 @@ public class CrashlyticsWrapper {
 
     public static void setCrashlyticsKeys(Context mContext) {
         try {
-            HyperTrackLiveUser user = OnboardingManager.sharedManager(mContext).getUser();
+            User user = SharedPreferenceManager.getHyperTrackLiveUser(mContext);
             String apiKey = ApiKey.getApiKey(mContext);
             if (!HTTextUtils.isEmpty(apiKey)) {
                 if (user != null) {

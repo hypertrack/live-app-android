@@ -68,6 +68,13 @@
                 <data
                     android:host="@string/tracking_url"
                     android:pathPrefix="/" />
+
+                <data
+                    android:host="trck.at"
+                    android:scheme="https" />
+                <data
+                    android:host="eta.fyi"
+                    android:scheme="http" />
             </intent-filter>
 
 
@@ -108,14 +115,6 @@
         <activity
             android:name=".view.Track"
             android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".view.Placeline"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".view.Invite"
             android:screenOrientation="portrait" />
 
         <activity

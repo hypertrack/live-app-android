@@ -44,7 +44,7 @@ public class AppDeepLink {
     // Used for Track feature
     public String taskID;
     public String shortCode;
-    public String lookupId;
+    public String uniqueId;
     public String collectionId;
 
     public AppDeepLink(int mId) {

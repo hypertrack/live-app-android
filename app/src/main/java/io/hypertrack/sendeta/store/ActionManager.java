@@ -72,6 +72,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
     private Context mContext;
     private String actionID;
     private Action hyperTrackAction;
+    private Action trackingAction;
     private Place place;
     private ActionManagerListener actionCompletedListener;
 
@@ -95,7 +96,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.hyperTrackAction != null) {
             // Start Refreshing the task without any delay
             return true;
-
         }
 
         if (actionCompletedListener != null)
@@ -248,6 +248,7 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         this.clearListeners();
         this.clearPlace();
         this.clearAction();
+        this.deleteTrackingAction();
         // Remove GeoFencingRequest from SharedPreferences
         SharedPreferenceManager.removeGeofencingRequest(mContext);
     }
@@ -304,7 +305,6 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         if (this.hyperTrackAction == null) {
             this.hyperTrackAction = SharedPreferenceManager.getAction(mContext);
         }
-
         return this.hyperTrackAction;
     }
 
@@ -329,8 +329,8 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
         return actionID;
     }
 
-    public String getHyperTrackActionLookupId() {
-        return getHyperTrackAction() == null ? null : getHyperTrackAction().getLookupId();
+    public String getHyperTrackActionUniqueId() {
+        return getHyperTrackAction() == null ? null : getHyperTrackAction().getUniqueId();
     }
 
     public String getHyperTrackActionCollectionId() {
@@ -346,5 +346,21 @@ public class ActionManager implements GoogleApiClient.ConnectionCallbacks {
 
     @Override
     public void onConnectionSuspended(int i) {
+    }
+
+    public void setTrackingAction(Action trackingAction) {
+        this.trackingAction = trackingAction;
+        SharedPreferenceManager.setTrackingAction(mContext, trackingAction);
+    }
+
+    public Action getTrackingAction() {
+        if (trackingAction == null)
+            trackingAction = SharedPreferenceManager.getTrackingAction(mContext);
+        return trackingAction;
+    }
+
+    public void deleteTrackingAction() {
+        trackingAction = null;
+        SharedPreferenceManager.deleteTrackingAction(mContext);
     }
 }

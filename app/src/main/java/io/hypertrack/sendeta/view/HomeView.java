@@ -26,7 +26,7 @@ package io.hypertrack.sendeta.view;
 
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ErrorResponse;
-import java.util.List;
+
 /**
  * Created by suhas on 25/02/16.
  */
@@ -40,23 +40,19 @@ public interface HomeView {
 
     void showStopSharingSuccess();
 
-    void showCustomShareCardError(String trackingURL);
-
-    void showCustomShareCardSuccess(String remainingTime, String trackingURL);
-
-    void showShareTrackingURLSuccess(String shareMessage);
-
-    void showShareTrackingURLError();
-
-    void showOpenNavigationError();
-
-    void showOpenNavigationSuccess(double latitude, double longitude);
-
-    void showTrackActionsOnMapSuccess(List<Action> actions);
-
     void showTrackActionsOnMapError(ErrorResponse errorResponse);
 
-    void showShareBackCard(String remainingTime);
+    void showLoading();
 
-    void hideBottomCard();
+    void showLoading(String message);
+
+    void hideLoading();
+
+    void showShareCard(String shareMessage);
+
+    void updateExpectedPlaceFailure(String s);
+
+    void showUpdatePlaceLoading();
+
+    void onActionRefreshed();
 }

@@ -23,8 +23,7 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
-import android.content.Context;
-
+import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.Place;
 import com.hypertrack.lib.models.User;
 
@@ -38,16 +37,24 @@ import io.hypertrack.sendeta.store.ActionManager;
 
 public interface IHomePresenter<V> extends Presenter<V> {
 
-    void shareLiveLocation(final User user, final ActionManager actionManager, final String lookupID,
-                           final String collectionId, final Place expectedPlace);
+    void shareLiveLocation(final User user);
 
-    void stopSharing(final ActionManager actionManager, boolean fromGeofence);
+    void stopSharing(boolean fromGeofence);
 
-    void openCustomShareCard(Context context, final ActionManager actionManager);
+    void getShareMessage();
 
-    void shareTrackingURL(ActionManager actionManager);
+    void trackActionsOnMap(String collectionId, boolean isDeepLinkTrackingAction);
 
-    void openNavigationForExpectedPlace(final ActionManager actionManager);
+    void refreshView(List<Action> actions, boolean isDeepLinkTrackingAction);
 
-    void trackActionsOnMap(String collectionId, String lookupID, List<String> actionIDs, ActionManager actionManager, Context context);
+    /*
+     * Method to restore app's state in case of ongoing location sharing for current user.
+     */
+    boolean restoreLocationSharing();
+
+    void setActionManager(ActionManager actionManager);
+
+    void updateExpectedPlace(Place place);
+
+    void clearTrackingAction();
 }

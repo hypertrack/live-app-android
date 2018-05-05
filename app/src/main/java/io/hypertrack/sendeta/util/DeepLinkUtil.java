@@ -50,7 +50,7 @@ public class DeepLinkUtil {
     private static final String KEY_ACTION_ID = "action_id";
     private static final String KEY_SHORT_CODE = "short_code";
     private static final String KEY_LOOKUP_ID = "lookup_id";
-    private static final String KEY_ORDER_ID = "order_id";
+    private static final String KEY_UNIQUE_ID = "unique_id";
     private static final String KEY_COLLECTION_ID = "collection_id";
 
     //private static AppDeepLink appDeepLink;
@@ -98,6 +98,15 @@ public class DeepLinkUtil {
                 appDeepLink.shortCode = pathParams[1];
             }
         }
+
+        if (uri.getHost() != null && uri.getHost().contains(context.getString(R.string.tracking_eta_fyi))) {
+            appDeepLink.mId = DeepLinkUtil.TRACK;
+            String[] pathParams = uri.getPath().split("/");
+            // Check if pathParams is of the format "/abCSKD"
+            if (pathParams.length == 2 && !pathParams[1].contains("/")) {
+                appDeepLink.shortCode = pathParams[1];
+            }
+        }
     }
 
     private static AppDeepLink parseAppDeepLinkURI(Context context, AppDeepLink appDeepLink, Uri uri) {
@@ -132,10 +141,10 @@ public class DeepLinkUtil {
                         e.printStackTrace();
                     }
                     break;
-                case KEY_ORDER_ID:
                 case KEY_LOOKUP_ID:
+                case KEY_UNIQUE_ID:
                     try {
-                        appDeepLink.lookupId = uri.getQueryParameter(paramName);
+                        appDeepLink.uniqueId = uri.getQueryParameter(paramName);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

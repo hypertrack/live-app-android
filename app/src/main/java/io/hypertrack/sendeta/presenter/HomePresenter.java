@@ -1,4 +1,3 @@
-
 /*
 The MIT License (MIT)
 
@@ -24,7 +23,6 @@ SOFTWARE.
 */
 package io.hypertrack.sendeta.presenter;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
@@ -32,7 +30,6 @@ import com.hypertrack.hyperlog.HyperLog;
 import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.callbacks.HyperTrackCallback;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
-import com.hypertrack.lib.internal.consumer.utils.ActionUtils;
 import com.hypertrack.lib.models.Action;
 import com.hypertrack.lib.models.ActionParamsBuilder;
 import com.hypertrack.lib.models.ErrorResponse;
@@ -45,7 +42,6 @@ import java.util.UUID;
 
 import io.hypertrack.sendeta.callback.ActionManagerCallback;
 import io.hypertrack.sendeta.store.ActionManager;
-import io.hypertrack.sendeta.store.SharedPreferenceManager;
 import io.hypertrack.sendeta.view.HomeView;
 
 /**
@@ -55,45 +51,68 @@ import io.hypertrack.sendeta.view.HomeView;
 public class HomePresenter implements IHomePresenter<HomeView> {
 
     private static final String TAG = HomePresenter.class.getSimpleName();
-    private HomeView view;
+    private HomeView mView;
+    private ActionManager actionManager;
+    String userId = "";
+
+    public HomePresenter() {
+        userId = HyperTrack.getUserId();
+        if (HTTextUtils.isEmpty(userId))
+            userId = "";
+    }
 
     @Override
     public void attachView(HomeView view) {
-        this.view = view;
+        this.mView = view;
     }
 
     @Override
     public void detachView() {
-        this.view = null;
+        this.mView = null;
     }
 
     @Override
-    public void shareLiveLocation(final User user, final ActionManager actionManager, final String lookupID, String collectionId, final Place expectedPlace) {
+    public boolean isViewAttached() {
+        return mView != null;
+    }
 
-        if (user == null || expectedPlace == null) {
-            if (view != null)
-                view.showShareLiveLocationError(new ErrorResponse());
+    @Override
+    public void shareLiveLocation(final User user) {
+
+        if (!isViewAttached())
+            return;
+
+        if (user == null) {
+            mView.showShareLiveLocationError(new ErrorResponse("User is not configured"));
             return;
         }
 
-        ActionParamsBuilder builder = new ActionParamsBuilder();
-
-        if (!HTTextUtils.isEmpty(collectionId) || HTTextUtils.isEmpty(lookupID)) {
-            builder.setCollectionId(collectionId != null ? collectionId : UUID.randomUUID().toString());
-        } else {
-            builder.setLookupId(lookupID);
+        String collectionId = null;
+        Place expectedPlace = null;
+        Action trackingAction = actionManager.getTrackingAction();
+        if (trackingAction != null) {
+            collectionId = trackingAction.getCollectionId();
+            expectedPlace = trackingAction.getExpectedPlace();
         }
-        builder.setType(Action.ACTION_TYPE_VISIT);
 
-        if (expectedPlace == null) {
-        } else if (!HTTextUtils.isEmpty(expectedPlace.getId())) {
-            builder.setExpectedPlaceId(expectedPlace.getId());
-        } else {
-            builder.setExpectedPlace(expectedPlace);
+        ActionParamsBuilder actionParamsBuilder = new ActionParamsBuilder();
+        actionParamsBuilder.setCollectionId(collectionId != null ?
+                collectionId : UUID.randomUUID().toString());
+
+        actionParamsBuilder.setType(Action.TYPE_MEETUP);
+
+        if (expectedPlace != null) {
+            if (!HTTextUtils.isEmpty(expectedPlace.getId())) {
+                actionParamsBuilder.setExpectedPlaceId(expectedPlace.getId());
+            } else {
+                actionParamsBuilder.setExpectedPlace(expectedPlace);
+            }
         }
+
+        mView.showLoading("Sharing your location...");
 
         // Call assignAction to start the tracking action
-        HyperTrack.createAndAssignAction(builder.build(), new HyperTrackCallback() {
+        HyperTrack.createAction(actionParamsBuilder.build(), new HyperTrackCallback() {
             @Override
             public void onSuccess(@NonNull SuccessResponse response) {
                 if (response.getResponseObject() != null) {
@@ -101,243 +120,188 @@ public class HomePresenter implements IHomePresenter<HomeView> {
                     actionManager.setHyperTrackAction(action);
                     actionManager.onActionStart();
 
-                    if (action.getUser().getPendingActions().size() > 1) {
-                        String previousActionID = action.getUser().getPendingActions().get(0);
-                        HyperTrack.completeAction(previousActionID);
-                    }
-
                     HyperTrack.clearServiceNotificationParams();
-                    HyperLog.i(TAG, "Share Live Location successful for userID: " + HyperTrack.getUserId());
+                    HyperLog.i(TAG, "Share Live Location successful for userID: " +
+                            HyperTrack.getUserId());
 
-                    if (view != null)
-                        view.showShareLiveLocationSuccess(action);
+                    if (!isViewAttached())
+                        return;
+
+                    mView.showShareLiveLocationSuccess(action);
 
                 } else {
                     Log.e(TAG, "onSuccess: Response Object is null", null);
-                    if (view != null)
-                        view.showShareLiveLocationError(new ErrorResponse());
+                    if (mView != null)
+                        mView.showShareLiveLocationError(new ErrorResponse());
                 }
             }
 
             @Override
             public void onError(@NonNull ErrorResponse errorResponse) {
-                HyperLog.e(TAG, "Share Live Location failed with error: " + errorResponse.getErrorMessage());
-                if (view != null)
-                    view.showShareLiveLocationError(errorResponse);
+                HyperLog.e(TAG, "Share Live Location failed with error: " +
+                        errorResponse.getErrorMessage());
+                if (!isViewAttached())
+                    return;
+
+                mView.hideLoading();
+                mView.showShareLiveLocationError(errorResponse);
             }
         });
     }
 
     @Override
-    public void stopSharing(final ActionManager actionManager, final boolean fromGeofence) {
+    public void stopSharing(final boolean fromGeofence) {
         actionManager.completeAction(new ActionManagerCallback() {
             @Override
             public void OnSuccess() {
                 HyperTrack.clearServiceNotificationParams();
-                HyperLog.i(TAG, "Stopped sharing live location successfully" + (fromGeofence ? " by geofence." : "."));
-                if (view != null) {
-                    if (!fromGeofence)
-                        view.showStopSharingSuccess();
-                    else {
-                        view.hideBottomCard();
-                    }
-                }
+                HyperLog.i(TAG, "Stopped sharing live location successfully"
+                        + (fromGeofence ? " by geofence." : "."));
+                if (!isViewAttached())
+                    return;
+
+                if (!fromGeofence)
+                    mView.showStopSharingSuccess();
             }
 
             @Override
             public void OnError() {
-                HyperLog.i(TAG, "Error occurred while trying to stop sharing.");
-                if (view != null)
-                    view.showStopSharingError();
+                HyperLog.e(TAG, "Error occurred while trying to stop sharing.");
+                if (isViewAttached())
+                    mView.showStopSharingError();
             }
 
         });
     }
 
     @Override
-    public void openCustomShareCard(Context context, ActionManager actionManager) {
-        if (actionManager.getHyperTrackAction() == null)
+    public void getShareMessage() {
+        if (actionManager == null || !isViewAttached())
             return;
 
-        Action action = actionManager.getHyperTrackAction();
-        if (action.getActionDisplay() != null &&
-                !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
-            Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
-            String remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
+        Action action;
 
-            if (view != null) {
-                if (HTTextUtils.isEmpty(remainingTime)) {
-                    view.showCustomShareCardError(action.getTrackingURL());
-                } else {
-                    view.showCustomShareCardSuccess(remainingTime,
-                                action.getTrackingURL());
-                }
-            }
+
+        action = actionManager.getHyperTrackAction();
+
+        if (action == null)
+            action = actionManager.getTrackingAction();
+
+        if (action == null)
             return;
-        }
 
-        if (view != null)
-            view.showCustomShareCardError(action.getTrackingURL());
+        String shareMessage = action.getShareMessage();
+        mView.showShareCard(shareMessage);
     }
 
     @Override
-    public void shareTrackingURL(ActionManager actionManager) {
-        if (actionManager.getHyperTrackAction() == null)
-            return;
-
-        String shareMessage = actionManager.getHyperTrackAction().getShareMessage();
-        if (view != null) {
-            if (!HTTextUtils.isEmpty(shareMessage))
-                view.showShareTrackingURLSuccess(shareMessage);
-            else
-                view.showShareTrackingURLError();
-        }
-
-    }
-
-    @Override
-    public void openNavigationForExpectedPlace(ActionManager actionManager) {
-        Place place = actionManager.getPlace();
-        if (place == null || place.getLocation() == null) {
-            if (view != null)
-                view.showOpenNavigationError();
-            return;
-        }
-
-        double latitude = place.getLocation().getLatitude();
-        double longitude = place.getLocation().getLongitude();
-
-        if (latitude == 0.0 || longitude == 0.0) {
-            if (view != null)
-                view.showOpenNavigationError();
-            return;
-        }
-
-        if (view != null)
-            view.showOpenNavigationSuccess(latitude, longitude);
-    }
-
-    @Override
-    public void trackActionsOnMap(String collectionId, final String lookupID, final List<String> actionIDs,
-                                  final ActionManager actionManager, final Context context) {
+    public void trackActionsOnMap(String collectionId, final boolean isDeepLinkTrackingAction) {
         if (!HTTextUtils.isEmpty(collectionId)) {
             HyperTrack.trackActionByCollectionId(collectionId, new HyperTrackCallback() {
                 @Override
                 public void onSuccess(@NonNull SuccessResponse response) {
-                    onTrackActionSuccess(context, actionManager, actionIDs, response);
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    onTrackActionError(errorResponse);
-                }
-            });
-        } else if (!HTTextUtils.isEmpty(lookupID)) {
-            HyperTrack.trackActionByLookupId(lookupID, new HyperTrackCallback() {
-                @Override
-                public void onSuccess(@NonNull SuccessResponse response) {
-                    onTrackActionSuccess(context, actionManager, actionIDs, response);
-                }
-
-                @Override
-                public void onError(@NonNull ErrorResponse errorResponse) {
-                    onTrackActionError(errorResponse);
-                }
-            });
-
-        } else {
-            // Check if a valid ActionID list is available
-            if (actionIDs != null && !actionIDs.isEmpty()) {
-                HyperTrack.trackAction(actionIDs, new HyperTrackCallback() {
-                    @Override
-                    public void onSuccess(@NonNull SuccessResponse response) {
-
-                        List<Action> actions = (List<Action>) response.getResponseObject();
-                        if (actions != null && !actions.isEmpty()) {
-                            Action action = actions.get(0);
-                            Place expectedPlace = action.getExpectedPlace();
-                            actionManager.setPlace(expectedPlace);
-                            String remainingTime = null;
-                            if (action.getActionDisplay() != null &&
-                                    !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
-                                Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
-                                remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
-                            }
-                            if (view != null) {
-                                if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
-                                    SharedPreferenceManager.setTrackingAction(context,action);
-                                    view.showShareBackCard(remainingTime);
-                                    return;
-                                } else if (actions.size() > 1 && actions.contains(actionManager.getHyperTrackActionId())) {
-                                    if (actions.get(0).getId().equalsIgnoreCase(actionIDs.get(0)))
-                                        SharedPreferenceManager.setTrackingAction(context,action);
-                                    else {
-                                        SharedPreferenceManager.setTrackingAction(context,actions.get(1));
-                                    }
-                                }
-                                view.showTrackActionsOnMapSuccess(actions);
-                            }
-
-                        } else {
-                            if (view != null)
-                                view.showTrackActionsOnMapError(new ErrorResponse());
-                        }
-                    }
-
-                    @Override
-                    public void onError(@NonNull ErrorResponse errorResponse) {
-                        if (view != null)
-                            view.showTrackActionsOnMapError(new ErrorResponse());
-                    }
-                });
-
-            } else {
-                if (view != null)
-                    view.showTrackActionsOnMapError(new ErrorResponse());
-            }
-        }
-    }
-
-    private void onTrackActionSuccess(Context context, ActionManager actionManager, List<String> actionIDs, SuccessResponse response) {
-        List<Action> actions = (List<Action>) response.getResponseObject();
-        if (actions != null && !actions.isEmpty()) {
-            Action action = actions.get(0);
-            Place expectedPlace = action.getExpectedPlace();
-            actionManager.setPlace(expectedPlace);
-            String remainingTime = null;
-            if (action.getActionDisplay() != null &&
-                    !HTTextUtils.isEmpty(action.getActionDisplay().getDurationRemaining())) {
-                Integer eta = Integer.parseInt(action.getActionDisplay().getDurationRemaining());
-                remainingTime = ActionUtils.getFormattedTimeString(context, Double.valueOf(eta));
-            }
-            if (view != null) {
-                if (actions.size() == 1 && !actions.contains(actionManager.getHyperTrackActionId())) {
-                    if (action.hasActionFinished()) {
-                        view.hideBottomCard();
+                    List<Action> actions = (List<Action>) response.getResponseObject();
+                    if (actions == null || actions.isEmpty()) {
+                        mView.showTrackActionsOnMapError(new ErrorResponse("Error Occurred"));
+                        mView.hideLoading();
                         return;
                     }
-                    view.showShareBackCard(remainingTime);
-                    SharedPreferenceManager.setTrackingAction(context,action);
-                    return;
-                } else if (actions.size() > 1 && actions.contains(actionManager.getHyperTrackActionId())) {
-                    if (actions.get(0).getId().equalsIgnoreCase(actionIDs.get(0)))
-                        SharedPreferenceManager.setTrackingAction(context,action);
-                    else {
-                        SharedPreferenceManager.setTrackingAction(context,actions.get(1));
-                    }
-                } else if (actions.size() > 1) {
-                    view.hideBottomCard();
+                    refreshView(actions, isDeepLinkTrackingAction);
+
+                    mView.hideLoading();
                 }
-                view.showTrackActionsOnMapSuccess(actions);
-            }
-        } else {
-            if (view != null)
-                view.showTrackActionsOnMapError(new ErrorResponse());
+
+                @Override
+                public void onError(@NonNull ErrorResponse errorResponse) {
+                    if (!isViewAttached())
+                        return;
+                    mView.showTrackActionsOnMapError(errorResponse);
+                    mView.hideLoading();
+                }
+            });
         }
     }
 
-    private void onTrackActionError(ErrorResponse errorResponse) {
-        if (view != null)
-            view.showTrackActionsOnMapError(errorResponse);
+    @Override
+    public void refreshView(List<Action> actions, boolean isDeepLinkTrackingAction) {
+        Action action = actions.get(0);
+        Place expectedPlace = action.getExpectedPlace();
+        actionManager.setPlace(expectedPlace);
+
+        if (!isViewAttached())
+            return;
+
+        for (Action tempAction : actions) {
+            if ((tempAction.getUser().getId().equalsIgnoreCase(userId) && !tempAction.hasFinished())
+                    || (actionManager.getHyperTrackAction() != null &&
+                    actionManager.getHyperTrackAction().getId().equalsIgnoreCase(tempAction.getId()))) {
+                actionManager.setHyperTrackAction(tempAction);
+            } else if (isDeepLinkTrackingAction) {
+                actionManager.setTrackingAction(tempAction);
+            }
+        }
+        mView.onActionRefreshed();
+    }
+
+    @Override
+    public boolean restoreLocationSharing() {
+        return actionManager != null && isViewAttached() && actionManager.shouldRestoreState();
+
+    }
+
+    @Override
+    public void setActionManager(ActionManager actionManager) {
+        this.actionManager = actionManager;
+    }
+
+    @Override
+    public void updateExpectedPlace(Place place) {
+        if (actionManager != null) {
+            actionManager.setPlace(place);
+        }
+
+        if (!isViewAttached())
+            return;
+
+        String collectionId = actionManager.getHyperTrackActionCollectionId();
+        if (HTTextUtils.isEmpty(collectionId) && actionManager.getTrackingAction() != null) {
+            collectionId = actionManager.getTrackingAction().getCollectionId();
+        }
+
+        if (HTTextUtils.isEmpty(collectionId)) {
+            mView.updateExpectedPlaceFailure("Collection Id is empty");
+            return;
+        }
+
+        mView.showLoading("Sharing ETA...");
+
+        HyperTrack.updateActionPlaceByCollectionId(collectionId, place, new HyperTrackCallback() {
+            @Override
+            public void onSuccess(@NonNull SuccessResponse response) {
+                if (!isViewAttached())
+                    return;
+
+                mView.onActionRefreshed();
+                mView.showUpdatePlaceLoading();
+            }
+
+            @Override
+            public void onError(@NonNull ErrorResponse errorResponse) {
+                if (!isViewAttached())
+                    return;
+
+                mView.updateExpectedPlaceFailure(errorResponse.getErrorMessage());
+                mView.hideLoading();
+                mView.showUpdatePlaceLoading();
+            }
+        });
+    }
+
+    @Override
+    public void clearTrackingAction() {
+        if (actionManager == null)
+            return;
+
+        actionManager.deleteTrackingAction();
     }
 }

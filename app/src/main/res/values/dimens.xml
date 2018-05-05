@@ -51,14 +51,6 @@
     <dimen name="card_radius_low">2dp</dimen>
 
     <!-- Map Padding -->
-    <dimen name="map_side_padding">16dp</dimen>
-    <dimen name="map_top_padding">192dp</dimen>
-    <dimen name="map_top_padding_with_vehicle_type_layout">240dp</dimen>
-    <dimen name="map_bottom_padding">120dp</dimen>
-    <dimen name="home_map_bottom_padding">72dp</dimen>
-    <dimen name="live_tracking_map_bottom_padding">72dp</dimen>
-    <dimen name="live_tracking_map_top_padding">48dp</dimen>
-
     <dimen name="image_view_size">125dp</dimen>
     <dimen name="image_view_size_half">50dp</dimen>
 
@@ -69,4 +61,5 @@
 
     <dimen name="icon_size">24dp</dimen>
     <dimen name="toolbar_user_icon">30dp</dimen>
+    <dimen name="margin_xxxxhigh">56dp</dimen>
 </resources>
