@@ -31,14 +31,6 @@ sentry {
     autoUpload true
 }
 
-def keyPropertiesFile = rootProject.file("app/src/release/java/io/hypertrack/sendeta/key.properties")
-if (keyPropertiesFile == null || !keyPropertiesFile.exists()) {
-    throw new GradleException("key.properties file is missing that contains HyperTrack Publishable Key." +
-            "\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
-}
-def keyProperties = new Properties();
-keyProperties.load(new FileInputStream(keyPropertiesFile));
-
 android {
 
     compileSdkVersion 26
@@ -122,7 +114,6 @@ android {
             minSdkVersion 16
             targetSdkVersion 26
             resValue "string", "app_name", "HyperTrack Live"
-            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
             buildConfigField "String", "HYPERTRACK_BASE_URL_V1", '"https://api.hypertrack.com/api/v1/"'
             buildConfigField "String", "HYPERTRACK_BASE_URL_V2", '"https://api.hypertrack.com/api/v2/"'
 
@@ -151,12 +142,21 @@ android {
         }
     }
     buildTypes {
+
         release {
+            def keyPropertiesFile = rootProject.file("app/src/release/java/io/hypertrack/sendeta/key.properties")
+            if (keyPropertiesFile == null || !keyPropertiesFile.exists()) {
+                throw new GradleException("key.properties file is missing that contains HyperTrack Publishable Key." +
+                        "\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
+            }
+            def keyProperties = new Properties();
+            keyProperties.load(new FileInputStream(keyPropertiesFile));
             if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
                 throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
             }
             debuggable false
             minifyEnabled true
+            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
                 ext.enableCrashlytics = false
@@ -164,6 +164,13 @@ android {
         }
 
         debug {
+            def keyPropertiesFile = rootProject.file("app/src/debug/java/io/hypertrack/sendeta/key.properties")
+            if (keyPropertiesFile == null || !keyPropertiesFile.exists()) {
+                throw new GradleException("key.properties file is missing that contains HyperTrack Publishable Key." +
+                        "\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
+            }
+            def keyProperties = new Properties();
+            keyProperties.load(new FileInputStream(keyPropertiesFile));
             if (keyProperties['HYPERTRACK_DEBUG_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
                 throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
             }
@@ -178,40 +185,6 @@ android {
                 ext.enableCrashlytics = false
             }
         }
-
-        tracking{
-            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
-                throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
-            }
-            debuggable true
-            minifyEnabled false
-            versionNameSuffix '-tracking'
-            applicationIdSuffix '.tracking'
-            resValue "string", "app_name", "New Tracking HyperTrack Live"
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            if (!fabricCheck) {
-                ext.enableCrashlytics = false
-            }
-        }
-
-        if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
-            staging {
-                debuggable true
-                minifyEnabled false
-                applicationIdSuffix '.staging'
-                versionNameSuffix '-staging'
-                resValue "string", "app_name", "Staging HyperTrack Live"
-                manifestPlaceholders = [applicationLabel: "@string/app_name"]
-                buildConfigField "String", "HYPERTRACK_PK", keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY']
-                buildConfigField "String", "HYPERTRACK_BASE_URL_V2", '"https://staging-api.hypertrack.com/api/v1/"'
-                buildConfigField "String", "HYPERTRACK_BASE_URL_V2", '"https://staging-api.hypertrack.com/api/v2/"'
-                if (keystorePropertiesFile.exists())
-                    signingConfig signingConfigs.release
-                if (!fabricCheck) {
-                    ext.enableCrashlytics = false
-                }
-            }
-        }
     }
 }
 
@@ -221,7 +194,6 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:2.8.9'
     testImplementation 'org.robolectric:robolectric:3.8'
     debugImplementation 'com.facebook.stetho:stetho:1.5.0'
-    trackingImplementation 'com.facebook.stetho:stetho:1.5.0'
 
     // Other dependencie
     implementation 'com.android.support:appcompat-v7:26.1.0'
@@ -262,11 +234,6 @@ dependencies {
 
     // Leak Canary dependency for Debug builds
     debugImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-    trackingImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-
-    if (keyProperties['STAGING_HYPERTRACK_PUBLISHABLE_KEY'] != null) {
-        stagingImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.1'
-    }
 
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
