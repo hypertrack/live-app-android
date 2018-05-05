@@ -31,7 +31,7 @@ sentry {
     autoUpload true
 }
 
-def keyPropertiesFile = rootProject.file("key.properties");
+def keyPropertiesFile = rootProject.file("app/src/release/java/io/hypertrack/sendeta/key.properties")
 if (keyPropertiesFile == null || !keyPropertiesFile.exists()) {
     throw new GradleException("key.properties file is missing that contains HyperTrack Publishable Key." +
             "\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
@@ -236,7 +236,7 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.7.30@aar") {
+        implementation("com.hypertrack:android:0.7.16@aar") {
             transitive = true;
         }
     }

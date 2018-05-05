@@ -61,4 +61,5 @@
 
     <dimen name="icon_size">24dp</dimen>
     <dimen name="toolbar_user_icon">30dp</dimen>
+    <dimen name="margin_xxxxhigh">56dp</dimen>
 </resources>
