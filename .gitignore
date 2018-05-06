@@ -77,12 +77,8 @@ crashlytics.properties
 /keystore.properties
 /app/fabric.properties
 /app/src/main/res/values/api-keys.xml
-/src/release/java/io/hypertrack/sendeta/key.properties
 /fastlane/
 /fastlane.zip
 /app/src/release/java/io/hypertrack/sendeta/google-services.json
-/app/src/release/java/io/hypertrack/sendeta/key.properties
 /app/src/release/java/io/hypertrack/placeline/google-services.json
 /app/src/release/java/io/hypertrack/placeline/key.properties
-/app/src/debug/java/io/hypertrack/sendeta/key.properties
-/app/src/debug/java/io/hypertrack/sendeta/util/key.properties
