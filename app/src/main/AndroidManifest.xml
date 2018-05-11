@@ -77,18 +77,6 @@
                     android:scheme="http" />
             </intent-filter>
 
-
-            <!--Intent filter to handle Branch Deep Link-->
-            <intent-filter>
-                <data
-                    android:host="open"
-                    android:scheme="hypertrack.io" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-
             <intent-filter>
                 <data
                     android:host="hypertrack"
@@ -138,15 +126,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Branch install referrer tracking -->
-        <receiver
-            android:name="io.branch.referral.InstallListener"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.android.vending.INSTALL_REFERRER" />
-            </intent-filter>
-        </receiver>
-
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
@@ -178,20 +157,6 @@
         <!--   <meta-data
                android:name="io.fabric.ApiKey"
                android:value="YOUR_CRASHLYTICS_API_KEY" />-->
-
-        <!-- Branch init -->
-
-        <meta-data
-            android:name="io.branch.sdk.BranchKey"
-            android:value="@string/branch_live" />
-        <meta-data
-            android:name="io.branch.sdk.BranchKey.test"
-            android:value="@string/branch_test" />
-
-        <!-- Branch testing (TestMode "true" to simulate fresh installs on dev environment) -->
-        <meta-data
-            android:name="io.branch.sdk.TestMode"
-            android:value="false" />
 
         <!-- Register Services here -->
         <service

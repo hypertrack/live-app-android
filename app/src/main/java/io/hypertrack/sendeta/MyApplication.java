@@ -33,7 +33,6 @@ import com.hypertrack.lib.HyperTrack;
 import com.hypertrack.lib.internal.common.util.HTTextUtils;
 import com.squareup.leakcanary.LeakCanary;
 
-import io.branch.referral.Branch;
 import io.fabric.sdk.android.Fabric;
 import io.fabric.sdk.android.services.common.ApiKey;
 import io.hypertrack.sendeta.util.DevDebugUtils;
@@ -68,9 +67,6 @@ public class MyApplication extends MultiDexApplication {
         HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
         HyperTrack.enableMockLocations(true);
         HyperTrack.disablePersistentNotification(true);
-
-        // Initialize Branch.io
-        Branch.getAutoInstance(this);
 
         // (NOTE: IFF current Build Variant is DEBUG)
         // Initialize Stetho to debug Databases

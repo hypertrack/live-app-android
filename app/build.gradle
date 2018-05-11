@@ -151,7 +151,7 @@ android {
             }
             def keyProperties = new Properties();
             keyProperties.load(new FileInputStream(keyPropertiesFile));
-            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
+            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"HYPERTRACK_PUBLISHABLE_KEY\"") {
                 throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
             }
             debuggable false
@@ -171,14 +171,14 @@ android {
             }
             def keyProperties = new Properties();
             keyProperties.load(new FileInputStream(keyPropertiesFile));
-            if (keyProperties['HYPERTRACK_DEBUG_PUBLISHABLE_KEY'] == "\"YOUR_HYPERTRACK_PUBLISHABLE_KEY\"") {
+            if (keyProperties['HYPERTRACK_PUBLISHABLE_KEY'] == "\"HYPERTRACK_PUBLISHABLE_KEY\"") {
                 throw new GradleException("Publishable Key is Missing in key.properties file.\nRefer Step 2 at https://github.com/hypertrack/hypertrack-live-android#to-use-this-app for more info.");
             }
             debuggable true
             minifyEnabled false
             versionNameSuffix '-debug'
             applicationIdSuffix '.debug'
-            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_DEBUG_PUBLISHABLE_KEY']
+            buildConfigField "String", "HYPERTRACK_PK", keyProperties['HYPERTRACK_PUBLISHABLE_KEY']
             resValue "string", "app_name", "Debug HyperTrack Live"
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             if (!fabricCheck) {
@@ -208,7 +208,7 @@ dependencies {
             transitive = true
         }
     } else {
-        implementation("com.hypertrack:android:0.7.17@aar") {
+        implementation("com.hypertrack:android:0.7.21@aar") {
             transitive = true;
         }
     }
@@ -225,7 +225,6 @@ dependencies {
     implementation 'com.github.rubensousa:gravitysnaphelper:1.1'
     implementation 'com.skyfishjy.ripplebackground:library:1.0.1'
     implementation 'com.github.Q42:AndroidScrollingImageView:1.2'
-    implementation 'io.branch.sdk.android:library:2.+'
     implementation('com.crashlytics.sdk.android:crashlytics:2.6.2@aar') {
         transitive = true
     }
