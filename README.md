@@ -30,12 +30,12 @@ In case you are using iOS, refer to our open source iOS [repository](https://git
 $ git clone https://github.com/hypertrack/hypertrack-live-android.git
 ```
 
-2. [Signup](https://www.hypertrack.com/signup?utm_source=github&utm_campaign=ht_live_android) to get your [HyperTrack API keys](https://dashboard.hypertrack.com/settings). Add the **publishable key** to [release key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/release/java/io/hypertrack/sendeta/key.properties) and [debug key.properties](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/debug/java/io/hypertrack/sendeta/key.properties) file.
+2. [Signup](https://www.hypertrack.com/signup?utm_source=github&utm_campaign=ht_live_android) to get your [HyperTrack API keys](https://dashboard.hypertrack.com/settings). Add the **publishable key** to [release key.properties](app/src/release/java/io/hypertrack/sendeta/key.properties) and [debug key.properties](app/src/debug/java/io/hypertrack/sendeta/key.properties) file.
 ```java
 HyperTrack.initialize(this.getApplicationContext(), BuildConfig.HYPERTRACK_PK);
 ```
 
-3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to [api-keys.xml](https://github.com/hypertrack/hypertrack-live-android/blob/master/app/src/main/res/values/api-keys.xml).
+3. Get the [Google Maps API key](https://developers.google.com/maps/documentation/android-api/signup) and add it to [api-keys.xml](app/src/main/res/values/api-keys.xml).
 
 ## Build within your app
 [Follow this step-by-step tutorial](https://github.com/hypertrack/hypertrack-live-android/blob/master/TUTORIAL.md) to build live location sharing within your own app.
