@@ -1,7 +1,7 @@
 # Live Location Sharing
 [![Build Status](https://travis-ci.org/hypertrack/hypertrack-live-android.svg?branch=master)](https://travis-ci.org/hypertrack/hypertrack-live-android) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/4fad0c93fd3749d690571a7a728ce047)](https://www.codacy.com/app/piyushguptaece/hypertrack-live-android?utm_source=github.com&utm_medium=referral&utm_content=hypertrack/hypertrack-live-android&utm_campaign=badger) [![Slack Status](http://slack.hypertrack.com/badge.svg)](http://slack.hypertrack.com) [![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-HyperTrack%20Live-brightgreen.svg?style=flat)](https://android-arsenal.com/details/3/5754) [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/licenses/MIT) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**🛑WARNING: THIS OPEN SOURCE REPO ISN'T A WORKING REPO. WE ARE ACTIVELY WORKING TO UPDATE THIS REPO. WE EXPECTED TO GET IT BACK IN A WORKING STATE BY NOV 2018.**
+**🛑WARNING: THIS OPEN SOURCE REPO ISN'T A WORKING REPO. WE ARE ACTIVELY WORKING TO UPDATE THIS REPO. WE EXPECT TO GET IT BACK IN A WORKING STATE BY DEC 2018.**
 
 Billions of trips happen on the planet every day. These trips lead to people meeting each other at home, work or some place else. Friends, family and colleagues use their phones to check where the other has reached, often coordinating when and where to meet. Whether you are a messaging app or a marketplace with messaging capability, your users are likely messaging each other about this. It’s time to solve their problem better. 
 
