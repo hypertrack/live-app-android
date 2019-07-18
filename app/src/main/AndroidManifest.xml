@@ -1,183 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:dist="http://schemas.android.com/apk/distribution"
     xmlns:tools="http://schemas.android.com/tools"
-    package="io.hypertrack.sendeta">
+    package="com.hypertrack.live">
 
-    <!-- To auto-complete the email text field in the login form with the user's emails -->
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the 'MyLocation' functionality.
-    -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.nfc" android:required="false"/>
+    <uses-feature android:name="android.hardware.wifi" android:required="false"/>
+    <uses-feature android:name="android.hardware.telephony" android:required="false"/>
+
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <dist:module dist:instant="true" />
 
     <application
-        android:name=".MyApplication"
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="${applicationLabel}"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:taskAffinity="com.hypertrack.live"
         android:theme="@style/AppTheme"
-        tools:replace="android:label">
+        tools:ignore="GoogleAppIndexingWarning">
 
-        <!-- Register UserActivities here -->
         <activity
-            android:name=".view.SplashScreen"
-            android:allowTaskReparenting="false"
-            android:label="${applicationLabel}"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait">
-
-            <!-- Intent Filter to make this Screen as the launcher screen -->
+            android:name=".LaunchActivity"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <!-- Intent Filter to handle browsable deeplinks -->
-            <intent-filter android:label="@string/filter_title_track">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="@string/deeplink_scheme" />
-            </intent-filter>
-
-
-            <!-- Intent Filter to handle trck.at link  -->
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data android:scheme="http" />
-                <data android:scheme="https" />
-
-                <!-- Add trck.at DeepLink URL -->
-                <data
-                    android:host="@string/tracking_url"
-                    android:pathPrefix="/" />
-
-                <data
-                    android:host="trck.at"
-                    android:scheme="https" />
-                <data
-                    android:host="eta.fyi"
-                    android:scheme="http" />
-            </intent-filter>
-
-            <intent-filter>
-                <data
-                    android:host="hypertrack"
-                    android:scheme="share.location" />
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-            </intent-filter>
-
         </activity>
-
         <activity
-            android:name=".view.Home"
-            android:label="${applicationLabel}"
-            android:launchMode="singleTask"
-            android:screenOrientation="portrait" />
-
+            android:name=".ui.MainActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".view.Profile"
+            android:name=".ui.VerificationActivity"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan" />
-
-        <activity
-            android:name=".view.Track"
-            android:parentActivityName=".view.Home"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".view.Verify"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="stateVisible" />
-
-        <!-- Register Receivers here -->
-
-        <receiver android:name=".receiver.GpsLocationReceiver">
-            <intent-filter>
-                <action android:name="android.location.PROVIDERS_CHANGED" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name=".receiver.NetworkChangeReceiver">
-            <intent-filter>
-                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
-                <action android:name="android.net.wifi.WIFI_STATE_CHANGED" />
-            </intent-filter>
-        </receiver>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <receiver
-            android:name=".receiver.BootReceiver"
-            android:enabled="true"
-            android:exported="false">
+            android:name=".InstallReferrerReceiver"
+            android:exported="true"
+            android:permission="android.permission.INSTALL_PACKAGES">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
 
-        <!-- Register meta-data here -->
-        <!--
-            The API key for Google Maps-based APIs is defined as a string resource.
-            (See the file "res/values/google_maps_api.xml").
-            Note that the API key is linked to the encryption key used to sign the APK.
-            You need a different API key for each encryption key, including the release key that is used to
-            sign the APK for publishing.
-            You can define the keys for the debug and release targets in src/debug/ and src/release/.
-       -->
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/GoogleMapsKey" />
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!--Add your fabric crashlytics API key and
-         uncomment line from 171 to 173 to use Crashlytics-->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBckOZNwmofhaLs9spRv40suiVGlSv1liA" />
 
-        <!--   <meta-data
-               android:name="io.fabric.ApiKey"
-               android:value="YOUR_CRASHLYTICS_API_KEY" />-->
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="9edfb246c6078a42caf8249e414e4f8b7f6c1dc0" />
 
-        <!-- Register Services here -->
-        <service
-            android:name=".service.GeofenceTransitionsIntentService"
-            android:exported="false" />
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
 
-        <service
-            android:name=".service.FetchLocationIntentService"
-            android:exported="false" />
-
-        <!--
-        * Enable FCM integration for real time tracking by adding a google-services.json
-        * - Once you have either an existing account on <a href="https://console.developers.google.com/">Google Developer</a> or a new account <a href="https://console.firebase.google.com">Firebase console</a>, you will need to add <a href="https://support.google.com/firebase/answer/7015592">google-services.json</a> file for your app to remove the below compilation failure.
-        -->
-        <service
-            android:name=".service.HyperTrackLiveFCMListenerService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
     </application>
-
 </manifest>

@@ -1,28 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.Verify">
+    android:background="@color/colorBackground"
+    android:padding="@dimen/content_padding"
+    tools:context=".ui.VerificationActivity">
 
-    <include layout="@layout/content_verify" />
-
-    <android.support.design.widget.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <TextView
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/Toolbar"
-            app:title="Verify"
-            android:navigationIcon="@drawable/ic_arrow_back_white_24dp"
-            app:titleTextColor="@color/white" />
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="@string/verify_your_publishable_key"
+            android:textSize="16sp" />
 
-    </android.support.design.widget.AppBarLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/this_will_help_us_link_your_device_to_your_hypertrack_account"
+            android:textColor="#aeaeae"
+            android:textSize="12sp" />
 
-</android.support.design.widget.CoordinatorLayout>
+        <EditText
+            android:id="@+id/verifyEditText"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
+            android:background="#f5f5f5"
+            android:hint="@string/paste_key_here"
+            android:padding="8dp"
+            android:textColorHint="#000000" />
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/you_can_copy_the_key_from_your_welcome_email_or_hypertrack_dashboard"
+            android:textColor="#00ce5b" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/verifyButton"
+        style="@style/ButtonStyle"
+        android:text="@string/verify"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
