@@ -1,7 +1,1 @@
 include ':app'
-File projectFile = new File(settingsDir, '../hypertrack-android-v2/library')
-//Check if SDK library exist or not
-if (projectFile != null && projectFile.exists()) {
-    include ':library'
-    project(':library').projectDir = projectFile
-}
