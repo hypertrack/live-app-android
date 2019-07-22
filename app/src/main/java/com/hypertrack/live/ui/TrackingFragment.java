@@ -1,17 +1,13 @@
 package com.hypertrack.live.ui;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +17,6 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.AuthFailureError;
@@ -32,7 +27,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
@@ -42,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.hypertrack.live.GpsWorkStatusObserver;
 import com.hypertrack.live.R;
 import com.hypertrack.live.map.mylocation.MyLocationGoogleMap;
+import com.hypertrack.live.map.mylocation.ViewsSdkMyLocationProvider;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingInitDelegate;
 import com.hypertrack.sdk.TrackingInitError;
@@ -70,6 +65,10 @@ public class TrackingFragment extends SupportMapFragment
         @Override
         public void onError(@NonNull TrackingInitError trackingInitError) {
             Log.e(TAG, "Initialization failed with error");
+            if (trackingInitError instanceof TrackingInitError.AuthorizationError
+                    || trackingInitError instanceof TrackingInitError.InvalidPublishableKeyError) {
+                hyperTrackPublicKey = null;
+            }
         }
 
         @Override
@@ -95,6 +94,7 @@ public class TrackingFragment extends SupportMapFragment
         if (bundle != null) {
             hyperTrackPublicKey = bundle.getString("HYPER_TRACK_PUBLIC_KEY");
         }
+
     }
 
     @Nullable
@@ -118,7 +118,9 @@ public class TrackingFragment extends SupportMapFragment
         trackingButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SharedPreferences.Editor editor = getActivity().getSharedPreferences(getString(R.string.app_name), Activity.MODE_PRIVATE).edit();
+                SharedPreferences.Editor editor = getActivity()
+                        .getSharedPreferences(getString(R.string.app_name), Activity.MODE_PRIVATE)
+                        .edit();
                 if (HyperTrack.isTracking()) {
                     HyperTrack.stopTracking();
                     onStopTracking();
@@ -202,7 +204,11 @@ public class TrackingFragment extends SupportMapFragment
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 updateMap(googleMap);
-                myLocationGoogleMap.addTo(googleMap);
+                if (TextUtils.isEmpty(hyperTrackPublicKey)) {
+                    myLocationGoogleMap.addTo(googleMap);
+                } else {
+                    myLocationGoogleMap.addTo(googleMap, new ViewsSdkMyLocationProvider(getContext(), hyperTrackPublicKey));
+                }
             }
         });
     }

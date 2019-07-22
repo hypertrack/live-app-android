@@ -30,7 +30,7 @@ public class MyLocationGoogleMap {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Context mContext;
-    private MyLocationProvider myLocationProvider;
+    private MyLocationProvider mLocationProvider;
     private boolean isMyLocationCentered = false;
     private final float accuracyStrokeWidth;
 
@@ -52,7 +52,7 @@ public class MyLocationGoogleMap {
 
     @SuppressLint("MissingPermission")
     public void moveToMyLocation(GoogleMap googleMap) {
-        Location location = myLocationProvider.getLastKnownLocation();
+        Location location = mLocationProvider.getLastKnownLocation();
         if (googleMap != null && location != null) {
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
@@ -61,8 +61,12 @@ public class MyLocationGoogleMap {
     }
 
     public void addTo(final GoogleMap googleMap) {
-        if (myLocationProvider == null) myLocationProvider = new GpsMyLocationProvider(mContext);
-        myLocationProvider.startLocationProvider(new MyLocationConsumer() {
+        addTo(googleMap, new GpsMyLocationProvider(mContext));
+    }
+
+    public void addTo(final GoogleMap googleMap, MyLocationProvider myCustomLocationProvider) {
+        if (mLocationProvider == null) mLocationProvider = myCustomLocationProvider;
+        mLocationProvider.startLocationProvider(new MyLocationConsumer() {
             @Override
             public void onLocationChanged(final Location location, MyLocationProvider source) {
                 handler.post(new Runnable() {
@@ -103,7 +107,7 @@ public class MyLocationGoogleMap {
                                 bearingMarker = null;
                             }
                         } else {
-                            float bearing = Math.round(location.getBearing() / 360 + 180);
+                            float bearing = Math.round(location.getBearing() / 360 - 180);
                             if (bearingMarker == null) {
                                 bearingMarker = googleMap.addMarker(new MarkerOptions()
                                         .position(center)
@@ -140,9 +144,9 @@ public class MyLocationGoogleMap {
             bearingMarker.remove();
             bearingMarker = null;
         }
-        if (myLocationProvider != null) {
-            myLocationProvider.destroy();
-            myLocationProvider = null;
+        if (mLocationProvider != null) {
+            mLocationProvider.destroy();
+            mLocationProvider = null;
         }
         isMyLocationCentered = false;
     }
