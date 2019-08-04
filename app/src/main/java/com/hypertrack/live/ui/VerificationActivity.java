@@ -76,6 +76,7 @@ public class VerificationActivity extends AppCompatActivity {
             }
         });
         loader = new LoaderDecorator(this);
+        verifyEditText.setText("uvIAA8xJANxUxDgINOX62-LINLuLeymS6JbGieJ9PegAPITcr9fgUpROpfSMdL9kv-qFjl17NeAuBHse8Qu9sw");
     }
 
     private void initializationFailed() {

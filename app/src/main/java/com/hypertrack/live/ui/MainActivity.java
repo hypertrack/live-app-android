@@ -24,9 +24,13 @@ import androidx.fragment.app.FragmentTransaction;
 import com.crashlytics.android.Crashlytics;
 import com.hypertrack.live.AppUtils;
 import com.hypertrack.live.R;
+import com.hypertrack.live.TrackingStateListener;
+import com.hypertrack.sdk.Config;
 import com.hypertrack.sdk.HyperTrack;
+import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingInitDelegate;
 import com.hypertrack.sdk.TrackingInitError;
+import com.hypertrack.sdk.TrackingStateObserver;
 
 import java.util.Collections;
 
@@ -49,42 +53,64 @@ public class MainActivity extends AppCompatActivity {
         loader = new LoaderDecorator(this);
 
         final SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        final String installReferrer = sharedPreferences.getString("_install_referrer", "");
-        if (!TextUtils.isEmpty(installReferrer)) {
-            HyperTrack.initialize(this, installReferrer,
-                    false, false, new TrackingInitDelegate() {
-                        @Override
-                        public void onError(@NonNull TrackingInitError error) {
-                            sharedPreferences.edit()
-                                    .remove("_install_referrer")
-                                    .commit();
-                            addFragment(WelcomeFragment.newInstance(false));
-                        }
+        String installReferrer = sharedPreferences.getString("_install_referrer", "");
+        String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
+        boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
 
-                        @Override
-                        public void onSuccess() {
-                            sharedPreferences.edit()
-                                    .remove("_install_referrer")
-                                    .putString("pub_key", installReferrer)
-                                    .putBoolean("is_tracking", true)
-                                    .commit();
-                            if (PackageManager.PERMISSION_GRANTED
-                                    == ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                                initializeHyperTrack(installReferrer, true);
-                            } else {
-                                addFragment(WelcomeFragment.newInstance(true));
-                            }
-                        }
-                    });
-        } else {
-            String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-            boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-            if (TextUtils.isEmpty(hyperTrackPublicKey) ||
-                    PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                addFragment(WelcomeFragment.newInstance(!TextUtils.isEmpty(hyperTrackPublicKey)));
-            } else {
-                initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+        HyperTrack.addTrackingStateListener(new TrackingStateListener() {
+            @Override
+            public void onError(TrackingError trackingError) {
+                loader.stop();
+                switch (trackingError.getCode()) {
+                    case TrackingError.INVALID_PUBLISHABLE_KEY_ERROR:
+                        Log.e(TAG, "Need to check publish key");
+                        sharedPreferences.edit()
+                                .remove("pub_key")
+                                .remove("is_tracking")
+                                .commit();
+                        addFragment(WelcomeFragment.newInstance(false));
+                        break;
+                    case TrackingError.AUTHORIZATION_ERROR:
+                        Log.e(TAG, "Need to check account or renew subscription");
+                        break;
+                    case TrackingError.PERMISSION_DENIED_ERROR:
+                        //permission was denied by user
+                        AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
+                                .setNegativeButton(android.R.string.cancel, null)
+                                .setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        Intent intent = new Intent();
+                                        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                        intent.setData(uri);
+                                        startActivityForResult(intent, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                                    }
+                                })
+                                .setTitle(R.string.app_settings)
+                                .setMessage(R.string.you_can_allow)
+                                .create();
+                        alertDialog.show();
+                        break;
+                }
             }
+        });
+        if (!TextUtils.isEmpty(installReferrer)) {
+            hyperTrackPublicKey = installReferrer;
+            shouldStartTracking = true;
+            sharedPreferences.edit()
+                    .remove("_install_referrer")
+                    .putString("pub_key", hyperTrackPublicKey)
+                    .putBoolean("is_tracking", true)
+                    .apply();
+        }
+
+        if (TextUtils.isEmpty(hyperTrackPublicKey) ||
+                PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+            addFragment(WelcomeFragment.newInstance(!TextUtils.isEmpty(hyperTrackPublicKey)));
+        } else {
+            initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
         }
     }
 
@@ -105,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                         .putString("pub_key", hyperTrackPublicKey)
                         .putBoolean("is_tracking", true)
                         .apply();
-                initializeHyperTrack(hyperTrackPublicKey, true);
+                addFragment(WelcomeFragment.newInstance(true));
             }
         } else if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -169,56 +195,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeHyperTrack(final String hyperTrackPublicKey, boolean shouldStartTracking) {
-        loader.start();
-        HyperTrack.initialize(this, hyperTrackPublicKey, shouldStartTracking, true,
-                new TrackingInitDelegate() {
-                    @Override
-                    public void onError(@NonNull TrackingInitError error) {
-                        loader.stop();
-                        if (error instanceof TrackingInitError.AuthorizationError) {
-                            Log.e(TAG, "Need to check account or renew subscription");
-                        } else if (error instanceof TrackingInitError.InvalidPublishableKeyError) {
-                            Log.e(TAG, "Need to check publish key");
-                        } else if (error instanceof TrackingInitError.PermissionDeniedError) {
-                            //permission was denied by user
-                            AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
-                                    .setNegativeButton(android.R.string.cancel, null)
-                                    .setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            Intent intent = new Intent();
-                                            intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                            Uri uri = Uri.fromParts("package", getPackageName(), null);
-                                            intent.setData(uri);
-                                            startActivityForResult(intent, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                                        }
-                                    })
-                                    .setTitle(R.string.app_settings)
-                                    .setMessage(R.string.you_can_allow)
-                                    .create();
-                            alertDialog.show();
-                        } else {
-                            //any other reason which could not be determined
-                            LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-                            if(!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)){
-                                //Tell a user to turn on location in settings
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onSuccess() {
-                        HyperTrack.setNameAndMetadataForDevice(
-                                AppUtils.getDeviceName(),
-                                Collections.<String, Object>emptyMap());
-
-                        loader.stop();
-                        addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
-                    }
-                });
+        Config config = new Config.Builder()
+                .enableAutoStartTracking(shouldStartTracking)
+                .build();
+        HyperTrack.initialize(this, hyperTrackPublicKey, config);
         HyperTrack.addNotificationIconsAndTitle(
                 R.drawable.ic_status_bar,
                 R.drawable.ic_notification,
                 null, null);
+        addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
     }
 }
