@@ -33,6 +33,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.hypertrack.live.AppUtils;
 import com.hypertrack.live.GpsWorkStatusObserver;
 import com.hypertrack.live.R;
 import com.hypertrack.live.map.mylocation.MyLocationGoogleMap;
@@ -193,7 +194,6 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     private void onStartTracking() {
-        Log.e("onStartTracking", "call");
         trackingButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
         trackingButton.setImageResource(R.drawable.ic_on);
         locationButton.show();
@@ -204,7 +204,7 @@ public class TrackingFragment extends SupportMapFragment
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 updateMap(googleMap);
-                if (TextUtils.isEmpty(hyperTrackPublicKey)) {
+                if (TextUtils.isEmpty(hyperTrackPublicKey) || !AppUtils.isNetworkConnected(getContext())) {
                     myLocationGoogleMap.addTo(googleMap);
                 } else {
                     myLocationGoogleMap.addTo(googleMap, new ViewsSdkMyLocationProvider(getContext(), hyperTrackPublicKey));
@@ -214,7 +214,6 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     private void onStopTracking() {
-        Log.e("onStopTracking", "call");
         trackingButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
         trackingButton.setImageResource(R.drawable.ic_on_disabled);
         locationButton.hide();
