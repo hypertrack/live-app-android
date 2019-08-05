@@ -7,17 +7,17 @@ import androidx.annotation.NonNull;
 
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.views.DeviceUpdatesHandler;
-import com.hypertrack.sdk.views.HyperTrackData;
+import com.hypertrack.sdk.views.HyperTrackViews;
 import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
 
 public class ViewsSdkMyLocationProvider implements MyLocationProvider {
 
-    private HyperTrackData hypertrackView;
+    private HyperTrackViews hypertrackView;
     private static Location lastKnownLocation;
 
     public ViewsSdkMyLocationProvider(Context context, String hyperTrackPublicKey) {
-        hypertrackView = HyperTrackData.getInstance(context, hyperTrackPublicKey);
+        hypertrackView = HyperTrackViews.getInstance(context, hyperTrackPublicKey);
     }
 
     public static Location convertFrom(@NonNull com.hypertrack.sdk.views.dao.Location locationModel) {
