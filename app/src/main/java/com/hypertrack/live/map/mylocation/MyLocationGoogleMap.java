@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -52,11 +53,13 @@ public class MyLocationGoogleMap {
 
     @SuppressLint("MissingPermission")
     public void moveToMyLocation(GoogleMap googleMap) {
-        Location location = mLocationProvider.getLastKnownLocation();
-        if (googleMap != null && location != null) {
-            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
-            googleMap.animateCamera(cameraUpdate, 1000, null);
+        if (mLocationProvider != null) {
+            Location location = mLocationProvider.getLastKnownLocation();
+            if (googleMap != null && location != null) {
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
+                googleMap.animateCamera(cameraUpdate, 1000, null);
+            }
         }
     }
 
@@ -65,13 +68,18 @@ public class MyLocationGoogleMap {
     }
 
     public void addTo(final GoogleMap googleMap, MyLocationProvider myCustomLocationProvider) {
-        if (mLocationProvider == null) mLocationProvider = myCustomLocationProvider;
+        mLocationProvider = myCustomLocationProvider;
         mLocationProvider.startLocationProvider(new MyLocationConsumer() {
             @Override
             public void onLocationChanged(final Location location, MyLocationProvider source) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        Log.e("VSDK.onLocationChanged",
+                                location.getLatitude()+" | "+
+                                location.getLongitude()+" | "+
+                                location.getBearing());
+
                         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
                         final float radius = location.getAccuracy()
                                 / (float) TileSystem.GroundResolution(location.getLatitude(),
@@ -101,23 +109,23 @@ public class MyLocationGoogleMap {
                             locationMarker.setPosition(center);
                         }
 
-                        if (location.getBearing() == 0.0f) {
+                        if (location.getBearing() == 0.0) {
                             if (bearingMarker != null) {
                                 bearingMarker.remove();
                                 bearingMarker = null;
                             }
                         } else {
-                            float bearing = Math.round(location.getBearing() / 360 - 180);
                             if (bearingMarker == null) {
                                 bearingMarker = googleMap.addMarker(new MarkerOptions()
                                         .position(center)
+                                        .flat(true)
                                         .anchor(0.5f, 0.5f)
-                                        .rotation(bearing)
+                                        .rotation(location.getBearing())
                                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.bearing_arrow_green))
                                 );
                             } else {
                                 bearingMarker.setPosition(center);
-                                bearingMarker.setRotation(bearing);
+                                bearingMarker.setRotation(location.getBearing());
                             }
                         }
 

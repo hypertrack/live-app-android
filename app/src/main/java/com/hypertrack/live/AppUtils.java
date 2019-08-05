@@ -1,6 +1,7 @@
 package com.hypertrack.live;
 
 import android.content.Context;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
@@ -47,26 +48,29 @@ public class AppUtils {
     }
 
     public static boolean isNetworkConnected(Context context) {
-        ConnectivityManager cm =
-                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (context != null) {
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            Network[] activeNetworks = cm.getAllNetworks();
-            for (Network n: activeNetworks) {
-                NetworkInfo nInfo = cm.getNetworkInfo(n);
-                if(nInfo.isConnectedOrConnecting())
-                    return true;
+            boolean isConnected = false;
+            if (connectivityManager != null) {
+                NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+                isConnected = (activeNetwork != null) && (activeNetwork.isConnectedOrConnecting());
             }
-        } else {
-            NetworkInfo[] info = cm.getAllNetworkInfo();
-            if (info != null)
-                for (NetworkInfo anInfo : info)
-                    if (anInfo.getState() == NetworkInfo.State.CONNECTED) {
-                        return true;
-                    }
+
+            return isConnected;
         }
 
-        return false;
+        return true;
+    }
+
+    public static boolean isGpsProviderEnabled(Context context) {
+        if (context != null) {
+            LocationManager cm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+            return cm != null && cm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }
+
+        return true;
     }
 
     public static String getReadableModVersion(Context context) {

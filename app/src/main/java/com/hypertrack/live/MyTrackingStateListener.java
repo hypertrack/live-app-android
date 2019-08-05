@@ -3,19 +3,19 @@ package com.hypertrack.live;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
 
-public class TrackingStateListener implements TrackingStateObserver.OnTrackingStateChangeListener {
+public class MyTrackingStateListener implements TrackingStateObserver.OnTrackingStateChangeListener {
     @Override
     public void onError(TrackingError trackingError) {
 
     }
 
     @Override
-    public void onStart() {
+    public void onTrackingStart() {
 
     }
 
     @Override
-    public void onStop() {
+    public void onTrackingStop() {
 
     }
 }

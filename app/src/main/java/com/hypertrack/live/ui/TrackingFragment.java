@@ -1,11 +1,13 @@
 package com.hypertrack.live.ui;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.android.volley.AuthFailureError;
@@ -33,13 +36,13 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.hypertrack.live.GpsWorkStatusObserver;
+import com.hypertrack.live.AppUtils;
 import com.hypertrack.live.R;
 import com.hypertrack.live.map.mylocation.MyLocationGoogleMap;
 import com.hypertrack.live.map.mylocation.ViewsSdkMyLocationProvider;
 import com.hypertrack.sdk.HyperTrack;
-import com.hypertrack.sdk.TrackingInitDelegate;
-import com.hypertrack.sdk.TrackingInitError;
+import com.hypertrack.sdk.TrackingError;
+import com.hypertrack.sdk.TrackingStateObserver;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -47,8 +50,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TrackingFragment extends SupportMapFragment
-        implements GpsWorkStatusObserver.OnStatusChangedListener {
+public class TrackingFragment extends SupportMapFragment implements TrackingStateObserver.OnTrackingStateChangeListener {
     private static final String TAG = TrackingFragment.class.getSimpleName();
 
     private Snackbar turnOnLocationSnackbar;
@@ -59,23 +61,7 @@ public class TrackingFragment extends SupportMapFragment
     private LoaderDecorator loader;
 
     private GoogleMap mMap;
-    private GpsWorkStatusObserver gpsWorkStatusObserver;
     private MyLocationGoogleMap myLocationGoogleMap;
-    private TrackingInitDelegate trackingInitDelegate = new TrackingInitDelegate() {
-        @Override
-        public void onError(@NonNull TrackingInitError trackingInitError) {
-            Log.e(TAG, "Initialization failed with error");
-            if (trackingInitError instanceof TrackingInitError.AuthorizationError
-                    || trackingInitError instanceof TrackingInitError.InvalidPublishableKeyError) {
-                hyperTrackPublicKey = null;
-            }
-        }
-
-        @Override
-        public void onSuccess() {
-            onStartTracking();
-        }
-    };
 
     private String hyperTrackPublicKey;
 
@@ -109,8 +95,6 @@ public class TrackingFragment extends SupportMapFragment
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        gpsWorkStatusObserver = new GpsWorkStatusObserver(getContext());
-        gpsWorkStatusObserver.register(this);
 
         myLocationGoogleMap = new MyLocationGoogleMap(getActivity());
 
@@ -123,14 +107,13 @@ public class TrackingFragment extends SupportMapFragment
                         .edit();
                 if (HyperTrack.isTracking()) {
                     HyperTrack.stopTracking();
-                    onStopTracking();
                     editor.putBoolean("is_tracking", false).commit();
                 } else {
-                    if (gpsWorkStatusObserver.isGpsEnabled()) {
-                        HyperTrack.startTracking(true, trackingInitDelegate);
+                    if (AppUtils.isGpsProviderEnabled(getActivity())) {
+                        HyperTrack.startTracking();
                         editor.putBoolean("is_tracking", true).commit();
                     } else {
-                        onGpsStopped();
+                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
                     }
                 }
             }
@@ -153,29 +136,78 @@ public class TrackingFragment extends SupportMapFragment
 
         loader = new LoaderDecorator(getContext());
 
-        if (gpsWorkStatusObserver.isGpsEnabled()) {
-            if (HyperTrack.isTracking()) {
-                onStartTracking();
-            } else {
-                onStopTracking();
-            }
+        HyperTrack.addTrackingStateListener(this);
+        if (HyperTrack.isTracking()) {
+            onTrackingStart();
         } else {
-            onGpsStopped();
+            onTrackingStop();
         }
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            ActivityCompat.requestPermissions(getActivity(),
-//                    new String[]{Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS},
-//                    MainActivity.PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-//        }
+        if (!AppUtils.isGpsProviderEnabled(getActivity())) {
+            showTurnOnLocationSnackbar();
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS},
+                    MainActivity.PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+        }
+    }
+
+    @Override
+    public void onError(TrackingError trackingError) {
+        if (trackingError.getCode() == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
+            showTurnOnLocationSnackbar();
+        }
+    }
+
+    @Override
+    public void onTrackingStart() {
+        if (turnOnLocationSnackbar != null) {
+            turnOnLocationSnackbar.dismiss();
+            turnOnLocationSnackbar = null;
+        }
+        trackingButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+        trackingButton.setImageResource(R.drawable.ic_on);
+        locationButton.show();
+        shareButton.setEnabled(true);
+        trackingButtonTips.setVisibility(View.GONE);
+        getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+                updateMap(googleMap);
+                if (TextUtils.isEmpty(hyperTrackPublicKey) || !AppUtils.isNetworkConnected(getActivity())) {
+                    myLocationGoogleMap.addTo(googleMap);
+                } else {
+                    myLocationGoogleMap.addTo(googleMap, new ViewsSdkMyLocationProvider(getContext(), hyperTrackPublicKey));
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onTrackingStop() {
+        trackingButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
+        trackingButton.setImageResource(R.drawable.ic_on_disabled);
+        locationButton.hide();
+        shareButton.setEnabled(false);
+        trackingButtonTips.setVisibility(View.VISIBLE);
+        getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mMap = googleMap;
+                myLocationGoogleMap.removeFrom(googleMap);
+                updateMap(googleMap);
+            }
+        });
     }
 
     private void updateMap(GoogleMap googleMap) {
         UiSettings uiSettings = googleMap.getUiSettings();
         uiSettings.setMapToolbarEnabled(false);
-        uiSettings.setCompassEnabled(HyperTrack.isTracking());
         if (getActivity() != null) {
-            int mapStyle = gpsWorkStatusObserver.isGpsEnabled() ? R.raw.style_map : R.raw.style_map_silver;
+            int mapStyle = turnOnLocationSnackbar == null ? R.raw.style_map : R.raw.style_map_silver;
             try {
                 // Customise the styling of the base map using a JSON object defined
                 // in a raw resource file.
@@ -192,117 +224,7 @@ public class TrackingFragment extends SupportMapFragment
         }
     }
 
-    private void onStartTracking() {
-        Log.e("onStartTracking", "call");
-        trackingButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
-        trackingButton.setImageResource(R.drawable.ic_on);
-        locationButton.show();
-        shareButton.setEnabled(true);
-        trackingButtonTips.setVisibility(View.GONE);
-        getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                updateMap(googleMap);
-                if (TextUtils.isEmpty(hyperTrackPublicKey)) {
-                    myLocationGoogleMap.addTo(googleMap);
-                } else {
-                    myLocationGoogleMap.addTo(googleMap, new ViewsSdkMyLocationProvider(getContext(), hyperTrackPublicKey));
-                }
-            }
-        });
-    }
-
-    private void onStopTracking() {
-        Log.e("onStopTracking", "call");
-        trackingButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-        trackingButton.setImageResource(R.drawable.ic_on_disabled);
-        locationButton.hide();
-        shareButton.setEnabled(false);
-        trackingButtonTips.setVisibility(View.VISIBLE);
-        getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                mMap = googleMap;
-                myLocationGoogleMap.removeFrom(googleMap);
-                updateMap(googleMap);
-            }
-        });
-    }
-
-    private void shareTracking() {
-        loader.start();
-        // Instantiate the RequestQueue.
-        RequestQueue queue = Volley.newRequestQueue(getContext());
-        final String shareUrl = "https://trck.at/%s";
-        String url = "https://7kcobbjpavdyhcxfvxrnktobjm.appsync-api.us-west-2.amazonaws.com/graphql";
-
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject("{\n" +
-                    "  \"query\": \"query getPublicTrackingIdQuery($publishableKey: String!, $deviceId: String!){\\\\\n  getPublicTrackingId(publishable_key: $publishableKey, device_id: $deviceId){\\\\\n    tracking_id\\\\\n  }\\\\\n}\"," +
-                    "  \"variables\": {" +
-                    "    \"publishableKey\": \"" + hyperTrackPublicKey + "\",\n" +
-                    "    \"deviceId\": \"" + HyperTrack.getDeviceId() + "\"" +
-                    "  }," +
-                    "  \"operationName\": \"getPublicTrackingIdQuery\"" +
-                    "}");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        // Request a json response from the provided URL.
-        JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, url, jsonObject,
-                new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        loader.stop();
-                        // Display the first 500 characters of the response string.
-                        try {
-                            String trackingId = response.getJSONObject("data")
-                                    .getJSONObject("getPublicTrackingId")
-                                    .getString("tracking_id");
-                            Intent sendIntent = new Intent();
-                            sendIntent.setAction(Intent.ACTION_SEND);
-                            sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(shareUrl, trackingId));
-                            sendIntent.setType("text/plain");
-                            startActivity(sendIntent);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                loader.stop();
-                error.printStackTrace();
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("X-Api-Key", "da2-nt5vwlflmngjfbe6cbsone4emm");
-                headers.put("Content-Type", "application/json; charset=utf-8");
-                return headers;
-            }
-        };
-
-        // Add the request to the RequestQueue.
-        queue.add(jsonRequest);
-    }
-
-    @Override
-    public void onGpsStarted() {
-        if (getActivity() != null && getActivity().getSharedPreferences(getString(R.string.app_name), Activity.MODE_PRIVATE)
-                .getBoolean("is_tracking", false)) {
-            HyperTrack.startTracking(true, trackingInitDelegate);
-        }
-        if (turnOnLocationSnackbar != null) turnOnLocationSnackbar.dismiss();
-    }
-
-    @Override
-    public void onGpsStopped() {
-        HyperTrack.stopTracking();
-        onStopTracking();
+    private void showTurnOnLocationSnackbar() {
         trackingButtonTips.setVisibility(View.GONE);
         turnOnLocationSnackbar = Snackbar.make(trackingButton, "", Snackbar.LENGTH_INDEFINITE)
                 .setAction("Tap to turn on location in settings", new View.OnClickListener() {
@@ -313,12 +235,76 @@ public class TrackingFragment extends SupportMapFragment
                 });
         turnOnLocationSnackbar.setActionTextColor(Color.WHITE);
         turnOnLocationSnackbar.show();
+        trackingButtonTips.setVisibility(View.GONE);
+    }
+
+    private void shareTracking() {
+        if (getContext() != null && !TextUtils.isEmpty(hyperTrackPublicKey)) {
+            loader.start();
+            // Instantiate the RequestQueue.
+            RequestQueue queue = Volley.newRequestQueue(getContext());
+            final String shareUrl = "https://trck.at/%s";
+            String url = "https://7kcobbjpavdyhcxfvxrnktobjm.appsync-api.us-west-2.amazonaws.com/graphql";
+
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject("{\n" +
+                        "  \"query\": \"query getPublicTrackingIdQuery($publishableKey: String!, $deviceId: String!){\\\\\n  getPublicTrackingId(publishable_key: $publishableKey, device_id: $deviceId){\\\\\n    tracking_id\\\\\n  }\\\\\n}\"," +
+                        "  \"variables\": {" +
+                        "    \"publishableKey\": \"" + hyperTrackPublicKey + "\",\n" +
+                        "    \"deviceId\": \"" + HyperTrack.getDeviceId() + "\"" +
+                        "  }," +
+                        "  \"operationName\": \"getPublicTrackingIdQuery\"" +
+                        "}");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            // Request a json response from the provided URL.
+            JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, url, jsonObject,
+                    new Response.Listener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject response) {
+                            loader.stop();
+                            // Display the first 500 characters of the response string.
+                            try {
+                                String trackingId = response.getJSONObject("data")
+                                        .getJSONObject("getPublicTrackingId")
+                                        .getString("tracking_id");
+                                Intent sendIntent = new Intent();
+                                sendIntent.setAction(Intent.ACTION_SEND);
+                                sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(shareUrl, trackingId));
+                                sendIntent.setType("text/plain");
+                                startActivity(sendIntent);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    loader.stop();
+                    error.printStackTrace();
+                }
+            }) {
+                @Override
+                public Map<String, String> getHeaders() throws AuthFailureError {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("X-Api-Key", "da2-nt5vwlflmngjfbe6cbsone4emm");
+                    headers.put("Content-Type", "application/json; charset=utf-8");
+                    return headers;
+                }
+            };
+
+
+            // Add the request to the RequestQueue.
+            queue.add(jsonRequest);
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        gpsWorkStatusObserver.unregister(this);
         myLocationGoogleMap.removeFrom(mMap);
+        HyperTrack.removeTrackingStateListener(this);
     }
 }
