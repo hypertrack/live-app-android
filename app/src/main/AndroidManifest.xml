@@ -56,6 +56,14 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name=".TrackingErrorReceiver" android:permission="" 
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.hypertrack.sdk.TRACKING_ERROR" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />

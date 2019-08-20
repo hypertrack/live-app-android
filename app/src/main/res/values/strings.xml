@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">Live</string>
+    <string name="default_notification_channel_id" translatable="false">4857</string>
+
     <string name="welcome_to_hypertrack_live">Welcome to HyperTrack Live!</string>
     <string name="i_m_ready">I\'m ready!</string>
     <string name="welcome_steps">
@@ -21,4 +23,5 @@
     <string name="you_can_allow">You can allow HyperTrack Live to access this device\'s location in settings</string>
     <string name="share_live_location">Share live location</string>
     <string name="tap_to_restart_tracking">Tap to restart tracking</string>
+    <string name="tap_to_turn_location_settings">Tap to turn on location in settings</string>
 </resources>

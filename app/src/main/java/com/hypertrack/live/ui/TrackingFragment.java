@@ -36,7 +36,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.hypertrack.live.AppUtils;
+import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.R;
 import com.hypertrack.live.map.mylocation.MyLocationGoogleMap;
 import com.hypertrack.live.map.mylocation.ViewsSdkMyLocationProvider;
@@ -156,7 +156,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
 
     @Override
     public void onError(TrackingError trackingError) {
-        if (trackingError.getCode() == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
+        if (trackingError.code == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
             showTurnOnLocationSnackbar();
         }
     }
@@ -227,7 +227,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     private void showTurnOnLocationSnackbar() {
         trackingButtonTips.setVisibility(View.GONE);
         turnOnLocationSnackbar = Snackbar.make(trackingButton, "", Snackbar.LENGTH_INDEFINITE)
-                .setAction("Tap to turn on location in settings", new View.OnClickListener() {
+                .setAction(getString(R.string.tap_to_turn_location_settings), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));

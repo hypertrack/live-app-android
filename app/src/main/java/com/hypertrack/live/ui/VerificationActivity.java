@@ -16,9 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.airbnb.lottie.LottieAnimationView;
-import com.hypertrack.live.AppUtils;
-import com.hypertrack.live.BuildConfig;
+import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.R;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingInitDelegate;
@@ -42,9 +40,9 @@ public class VerificationActivity extends AppCompatActivity {
         verifyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                verifyButton.setEnabled(false);
                 final String verificationKey = verifyEditText.getText().toString();
                 if (!TextUtils.isEmpty(verificationKey)) {
+                    verifyButton.setEnabled(false);
                     loader.start();
                     HyperTrack.initialize(VerificationActivity.this, verificationKey,
                             false, false, new TrackingInitDelegate() {

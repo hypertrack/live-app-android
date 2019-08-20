@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onError(TrackingError trackingError) {
             loader.stop();
-            switch (trackingError.getCode()) {
+            switch (trackingError.code) {
                 case TrackingError.INVALID_PUBLISHABLE_KEY_ERROR:
                     Log.e(TAG, "Need to check publish key");
                     // Check your publishable key and initialize SDK once again.
@@ -202,9 +202,11 @@ public class MainActivity extends AppCompatActivity {
     private void initializeHyperTrack(final String hyperTrackPublicKey, boolean shouldStartTracking) {
         Config config = new Config.Builder()
                 .enableAutoStartTracking(shouldStartTracking)
-                .enableDebugLogging(BuildConfig.DEBUG)
                 .build();
         HyperTrack.initialize(this, hyperTrackPublicKey, config);
+        if (BuildConfig.DEBUG) {
+            HyperTrack.enableDebugLogging();
+        }
         HyperTrack.addTrackingStateListener(myTrackingStateListener);
         HyperTrack.addNotificationIconsAndTitle(
                 R.drawable.ic_status_bar,
