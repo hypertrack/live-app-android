@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
@@ -20,9 +21,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.crashlytics.android.Crashlytics;
+import com.hypertrack.live.App;
 import com.hypertrack.live.BuildConfig;
-import com.hypertrack.live.R;
 import com.hypertrack.live.MyTrackingStateListener;
+import com.hypertrack.live.R;
+import com.hypertrack.live.debug.DebugHelper;
 import com.hypertrack.sdk.Config;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
@@ -34,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     public static final int VERIFICATION_REQUEST = 414;
     public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 515;
     public static final int PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 616;
+    public static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1098;
 
     private LoaderDecorator loader;
 
@@ -92,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         Fabric.with(this, new Crashlytics());
+        DebugHelper.onMainActivity(this);
 
         loader = new LoaderDecorator(this);
 
@@ -119,6 +124,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ((App) getApplication()).setForeground(true);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ((App) getApplication()).setForeground(false);
+    }
+
     private void addFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_frame, fragment);
@@ -132,11 +149,19 @@ public class MainActivity extends AppCompatActivity {
         if ((requestCode & 0x0000ffff) == VERIFICATION_REQUEST) {
             if (resultCode == RESULT_OK) {
                 String hyperTrackPublicKey = data.getStringExtra(VerificationActivity.VERIFICATION_KEY);
-                getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE).edit()
+                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
+                boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
+                sharedPreferences.edit()
                         .putString("pub_key", hyperTrackPublicKey)
                         .putBoolean("is_tracking", true)
                         .apply();
-                addFragment(WelcomeFragment.newInstance(true));
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+                        || PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this,
+                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                } else {
+                    addFragment(WelcomeFragment.newInstance(true));
+                }
             }
         } else if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -200,19 +225,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeHyperTrack(final String hyperTrackPublicKey, boolean shouldStartTracking) {
-        Config config = new Config.Builder()
-                .enableAutoStartTracking(shouldStartTracking)
-                .build();
-        HyperTrack.initialize(this, hyperTrackPublicKey, config);
+        Config.Builder builder = new Config.Builder()
+                .enableAutoStartTracking(shouldStartTracking);
+
         if (BuildConfig.DEBUG) {
-            HyperTrack.enableDebugLogging();
+            String domain = DebugHelper.getSharedPreferences(this).getString(DebugHelper.DEV_DOMAIN_KEY, "");
+            builder.baseApiUrl(domain);
         }
+
+        HyperTrack.initialize(this, hyperTrackPublicKey, builder.build());
         HyperTrack.addTrackingStateListener(myTrackingStateListener);
         HyperTrack.addNotificationIconsAndTitle(
                 R.drawable.ic_status_bar,
                 R.drawable.ic_notification,
                 null, null);
         addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
+        Log.e("getDeviceId", HyperTrack.getDeviceId());
     }
 
     @Override

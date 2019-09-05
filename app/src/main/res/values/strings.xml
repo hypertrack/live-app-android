@@ -2,6 +2,12 @@
     <string name="app_name" translatable="false">Live</string>
     <string name="default_notification_channel_id" translatable="false">4857</string>
 
+    <array name="debug_menu">
+        <item>Change domain</item>
+        <item>Set device meta (name|data)</item>
+        <item>Reset</item>
+    </array>
+
     <string name="welcome_to_hypertrack_live">Welcome to HyperTrack Live!</string>
     <string name="i_m_ready">I\'m ready!</string>
     <string name="welcome_steps">

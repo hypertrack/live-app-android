@@ -1,4 +1,4 @@
-package com.hypertrack.live.map.mylocation;
+package com.hypertrack.live.map.htlocation;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -13,17 +13,17 @@ import com.hypertrack.live.map.util.NetworkLocationIgnorer;
 import java.util.HashSet;
 import java.util.Set;
 
-public class GpsMyLocationProvider implements MyLocationProvider, LocationListener {
+public class GpsHTLocationProvider implements HTLocationProvider, LocationListener {
     private LocationManager mLocationManager;
     private Location mLocation;
 
-    private MyLocationConsumer mMyLocationConsumer;
+    private HTLocationConsumer mMyLocationConsumer;
     private long mLocationUpdateMinTime = 0;
     private float mLocationUpdateMinDistance = 2.0f;
     private NetworkLocationIgnorer mIgnorer = new NetworkLocationIgnorer();
     private final Set<String> locationSources = new HashSet<>();
 
-    public GpsMyLocationProvider(Context context) {
+    public GpsHTLocationProvider(Context context) {
         mLocationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         locationSources.add(LocationManager.GPS_PROVIDER);
         locationSources.add(LocationManager.NETWORK_PROVIDER);
@@ -96,7 +96,7 @@ public class GpsMyLocationProvider implements MyLocationProvider, LocationListen
      */
     @SuppressLint("MissingPermission")
     @Override
-    public boolean startLocationProvider(MyLocationConsumer myLocationConsumer) {
+    public boolean startLocationProvider(HTLocationConsumer myLocationConsumer) {
         mMyLocationConsumer = myLocationConsumer;
         boolean result = false;
         for (final String provider : mLocationManager.getProviders(true)) {
@@ -112,7 +112,7 @@ public class GpsMyLocationProvider implements MyLocationProvider, LocationListen
                             mLocationUpdateMinDistance, this);
                     result = true;
                 } catch (Throwable ex) {
-                    Log.e(MyLocationGoogleMap.LOGTAG, "Unable to attach listener for location provider " + provider + " check permissions?", ex);
+                    Log.e(HTLocationGoogleMap.LOGTAG, "Unable to attach listener for location provider " + provider + " check permissions?", ex);
                 }
             }
         }
@@ -129,7 +129,7 @@ public class GpsMyLocationProvider implements MyLocationProvider, LocationListen
             try {
                 mLocationManager.removeUpdates(this);
             } catch (Throwable ex) {
-                Log.w(MyLocationGoogleMap.LOGTAG, "Unable to deattach location listener", ex);
+                Log.w(HTLocationGoogleMap.LOGTAG, "Unable to deattach location listener", ex);
             }
         }
     }
@@ -155,7 +155,7 @@ public class GpsMyLocationProvider implements MyLocationProvider, LocationListen
     @Override
     public void onLocationChanged(final Location location) {
         if (mIgnorer == null) {
-            Log.w(MyLocationGoogleMap.LOGTAG, "GpsMyLocation provider, mIgnore is null, unexpected. Location update will be ignored");
+            Log.w(HTLocationGoogleMap.LOGTAG, "GpsMyLocation provider, mIgnore is null, unexpected. Location update will be ignored");
             return;
         }
         if (location == null || location.getProvider() == null)

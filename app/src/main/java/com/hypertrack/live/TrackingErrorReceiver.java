@@ -14,27 +14,29 @@ public class TrackingErrorReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        int errorCode = intent.getIntExtra("code", 0);
-        switch (errorCode) {
-            case TrackingError.INVALID_PUBLISHABLE_KEY_ERROR:
-            case TrackingError.AUTHORIZATION_ERROR:
-                Log.e(TAG, "Authorization failed");
-                break;
-            case TrackingError.GPS_PROVIDER_DISABLED_ERROR:
-                Log.e(TAG, "Tracking failed");
-                // User disabled GPS in device settings.
-                NotificationUtils.sendGpsDisabledError(context);
-                HyperTrack.addTrackingStateListener(new MyTrackingStateListener() {
-                    @Override
-                    public void onTrackingStart() {
-                        NotificationUtils.cancelGpsDisabledError(context);
-                        HyperTrack.removeTrackingStateListener(this);
-                    }
-                });
-                break;
-            default:
-                // Some critical error in SDK.
-                break;
+        if (!((App)context.getApplicationContext()).isForeground()) {
+            int errorCode = intent.getIntExtra("code", 0);
+            switch (errorCode) {
+                case TrackingError.INVALID_PUBLISHABLE_KEY_ERROR:
+                case TrackingError.AUTHORIZATION_ERROR:
+                    Log.e(TAG, "Authorization failed");
+                    break;
+                case TrackingError.GPS_PROVIDER_DISABLED_ERROR:
+                    Log.e(TAG, "Tracking failed");
+                    // User disabled GPS in device settings.
+                    NotificationUtils.sendGpsDisabledError(context);
+                    HyperTrack.addTrackingStateListener(new MyTrackingStateListener() {
+                        @Override
+                        public void onTrackingStart() {
+                            NotificationUtils.cancelGpsDisabledError(context);
+                            HyperTrack.removeTrackingStateListener(this);
+                        }
+                    });
+                    break;
+                default:
+                    // Some critical error in SDK.
+                    break;
+            }
         }
     }
 }

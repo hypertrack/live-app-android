@@ -29,6 +29,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -36,10 +37,11 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.hypertrack.live.debug.DebugHelper;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.R;
-import com.hypertrack.live.map.mylocation.MyLocationGoogleMap;
-import com.hypertrack.live.map.mylocation.ViewsSdkMyLocationProvider;
+import com.hypertrack.live.map.htlocation.HTLocationGoogleMap;
+import com.hypertrack.live.map.htlocation.ViewsSdkHTLocationProvider;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
@@ -61,7 +63,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     private LoaderDecorator loader;
 
     private GoogleMap mMap;
-    private MyLocationGoogleMap myLocationGoogleMap;
+    private HTLocationGoogleMap myLocationGoogleMap;
 
     private String hyperTrackPublicKey;
 
@@ -86,9 +88,10 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View mapView = super.onCreateView(inflater, container, savedInstanceState);
         View fragmentLayout = inflater.inflate(R.layout.fragment_tracking, null);
         FrameLayout frameLayout = fragmentLayout.findViewById(R.id.content_frame);
-        frameLayout.addView(super.onCreateView(inflater, container, savedInstanceState));
+        frameLayout.addView(mapView);
         return fragmentLayout;
     }
 
@@ -96,7 +99,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        myLocationGoogleMap = new MyLocationGoogleMap(getActivity());
+        myLocationGoogleMap = new HTLocationGoogleMap(getActivity());
 
         trackingButton = view.findViewById(R.id.trackingButton);
         trackingButton.setOnClickListener(new View.OnClickListener() {
@@ -107,13 +110,13 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
                         .edit();
                 if (HyperTrack.isTracking()) {
                     HyperTrack.stopTracking();
-                    editor.putBoolean("is_tracking", false).commit();
+                    editor.putBoolean("is_tracking", false).apply();
                 } else {
                     if (AppUtils.isGpsProviderEnabled(getActivity())) {
                         HyperTrack.startTracking();
-                        editor.putBoolean("is_tracking", true).commit();
+                        editor.putBoolean("is_tracking", true).apply();
                     } else {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        actionLocationSourceSettings();
                     }
                 }
             }
@@ -137,25 +140,38 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
         loader = new LoaderDecorator(getContext());
 
         HyperTrack.addTrackingStateListener(this);
-        if (HyperTrack.isTracking()) {
-            onTrackingStart();
-        } else {
-            onTrackingStop();
-        }
 
         if (!AppUtils.isGpsProviderEnabled(getActivity())) {
             showTurnOnLocationSnackbar();
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        SharedPreferences sharedPreferences = getActivity()
+                .getSharedPreferences(getString(R.string.app_name), Activity.MODE_PRIVATE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                && !InstantApps.isInstantApp(getActivity())
+                && !sharedPreferences.getBoolean("ibo_requested", false)) {
             ActivityCompat.requestPermissions(getActivity(),
                     new String[]{Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS},
                     MainActivity.PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            sharedPreferences.edit().putBoolean("ibo_requested", true).apply();
+        }
+
+        DebugHelper.onTrackingFragment(getActivity());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (HyperTrack.isTracking()) {
+            onTrackingStart();
+        } else {
+            onTrackingStop();
         }
     }
 
     @Override
     public void onError(TrackingError trackingError) {
+        Log.e("onError", "code: "+trackingError.code);
         if (trackingError.code == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
             showTurnOnLocationSnackbar();
         }
@@ -177,10 +193,10 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 updateMap(googleMap);
-                if (TextUtils.isEmpty(hyperTrackPublicKey) || !AppUtils.isNetworkConnected(getActivity())) {
+                if (!AppUtils.isNetworkConnected(getActivity())) {
                     myLocationGoogleMap.addTo(googleMap);
                 } else {
-                    myLocationGoogleMap.addTo(googleMap, new ViewsSdkMyLocationProvider(getContext(), hyperTrackPublicKey));
+                    myLocationGoogleMap.addTo(googleMap, new ViewsSdkHTLocationProvider(getContext(), hyperTrackPublicKey));
                 }
             }
         });
@@ -225,17 +241,26 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     }
 
     private void showTurnOnLocationSnackbar() {
-        trackingButtonTips.setVisibility(View.GONE);
-        turnOnLocationSnackbar = Snackbar.make(trackingButton, "", Snackbar.LENGTH_INDEFINITE)
-                .setAction(getString(R.string.tap_to_turn_location_settings), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-                    }
-                });
-        turnOnLocationSnackbar.setActionTextColor(Color.WHITE);
-        turnOnLocationSnackbar.show();
-        trackingButtonTips.setVisibility(View.GONE);
+        if (getActivity() != null && !InstantApps.isInstantApp(getActivity())) {
+            trackingButtonTips.setVisibility(View.GONE);
+            turnOnLocationSnackbar = Snackbar.make(trackingButton, "", Snackbar.LENGTH_INDEFINITE)
+                    .setAction(getString(R.string.tap_to_turn_location_settings), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            actionLocationSourceSettings();
+                        }
+                    });
+            turnOnLocationSnackbar.setActionTextColor(Color.WHITE);
+            turnOnLocationSnackbar.show();
+            trackingButtonTips.setVisibility(View.GONE);
+        }
+    }
+
+    private void actionLocationSourceSettings() {
+        if (getActivity() != null && !InstantApps.isInstantApp(getActivity())) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);
+        }
     }
 
     private void shareTracking() {

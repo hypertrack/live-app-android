@@ -3,8 +3,11 @@ apply plugin: 'io.fabric'
 
 ext {
     versionNumber = computeVersionNumber()
-    versionName = (isSnapshot.toBoolean() ? rootProject.version + "-SNAPSHOT" : rootProject.version)
-    keystorePath = properties['keystore.path']
+    versionName = rootProject.version
+    keystorePath = properties['keystorePath']
+    storePassword = properties['storePassword']
+    keyAlias = properties['keyAlias']
+    keyPassword = properties['keyPassword']
     println "Live SDK version is " + versionName
     println "rootProject.properties is " + rootProject.properties
 }
@@ -23,25 +26,27 @@ android {
     signingConfigs {
 
         release {
-            storeFile file("/home/denis/Android/hypertrack-prod.jks")
-            storePassword "hyperTrack3"
-            keyAlias "live"
-            keyPassword "htLive3"
+            storeFile file(project.ext.keystorePath)
+            storePassword project.ext.storePassword
+            keyAlias project.ext.keyAlias
+            keyPassword project.ext.keyPassword
         }
     }
 
     buildTypes {
+
+        debug {
+            minifyEnabled false
+            debuggable true
+            signingConfig signingConfigs.release
+        }
+
         release {
             minifyEnabled true
             shrinkResources true
             debuggable false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
-        }
-
-        debug {
-            minifyEnabled false
-            debuggable true
         }
     }
 }
@@ -63,7 +68,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.0.0'
 
     implementation("com.hypertrack:hypertrack:3.5.0-SNAPSHOT@aar") {transitive = true}
-    implementation 'com.hypertrack:hypertrack-views:0.2.0'
+    implementation 'com.hypertrack:hypertrack-views:0.3.2'
 
     implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
         transitive = true
@@ -87,3 +92,5 @@ def computeVersionNumber() {
     }
     throw new Exception("Could not read version.properties!")
 }
+
+apply plugin: 'com.google.gms.google-services'  // Google Play services Gradle plugin
