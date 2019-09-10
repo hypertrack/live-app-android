@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:background="#f5f5f5"
         android:hint="Past domain"
-        android:text="v3.api.hypertrack.com"
         android:padding="8dp"
         android:textColorHint="#000000"
         tools:ignore="HardcodedText" />
@@ -25,7 +24,6 @@
         android:layout_marginBottom="6dp"
         android:background="#f5f5f5"
         android:hint="AccountId"
-        android:text="4IZ7fWXxRmmxFL4RWcAgxrPWBD8"
         android:inputType=""
         android:padding="8dp"
         android:textColorHint="#000000" />
@@ -38,7 +36,6 @@
         android:layout_marginBottom="6dp"
         android:background="#f5f5f5"
         android:hint="SecretKey"
-        android:text="rXc40pSVlYkhJsNkcQCncp-c5CVxQeRi6s6bAWXM6T76bWwUlaUMlQ"
         android:inputType=""
         android:padding="8dp"
         android:textColorHint="#000000" />
