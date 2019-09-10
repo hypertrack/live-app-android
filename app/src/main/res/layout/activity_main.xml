@@ -11,19 +11,40 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/debugButton"
+    <LinearLayout
+        android:id="@+id/debugLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
         android:layout_gravity="start|center_vertical"
-        app:backgroundTint="@color/colorFAButtonSecondary"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
+        android:orientation="vertical"
         android:visibility="gone"
-        app:maxImageSize="18dp"
-        app:rippleColor="@null"
-        app:srcCompat="@android:drawable/ic_menu_preferences"
-        tools:visibility="visible"/>
+        tools:visibility="visible">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/debugButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            app:backgroundTint="@color/colorFAButtonSecondary"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:maxImageSize="18dp"
+            app:rippleColor="@null"
+            app:srcCompat="@android:drawable/ic_menu_preferences" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/createTripButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:maxImageSize="18dp"
+            app:rippleColor="@null"
+            app:srcCompat="@android:drawable/ic_dialog_map" />
+
+    </LinearLayout>
 
 </FrameLayout>

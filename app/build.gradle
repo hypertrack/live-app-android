@@ -52,12 +52,12 @@ android {
 }
 
 repositories {
+    mavenLocal()
     maven {
         name 'hypertrack'
         url 'http://m2.hypertrack.com'
     }
     maven { url 'https://maven.fabric.io/public' }
-    mavenLocal()
 }
 
 dependencies {

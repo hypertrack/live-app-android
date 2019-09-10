@@ -25,8 +25,9 @@ public class DebugActivity extends Activity implements AdapterView.OnItemClickLi
     public static final String TAG = DebugActivity.class.getSimpleName();
 
     public static final int CHANGE_DOMAIN_KEY = 0;
-    public static final int SET_DEVICE_META_KEY = 1;
-    public static final int RESET_KEY = 2;
+    public static final int CHANGE_API_DOMAIN_KEY = 1;
+    public static final int SET_DEVICE_META_KEY = 2;
+    public static final int RESET_KEY = 3;
 
     private SharedPreferences sharedPreferences;
 
@@ -49,6 +50,9 @@ public class DebugActivity extends Activity implements AdapterView.OnItemClickLi
         switch(position) {
             case CHANGE_DOMAIN_KEY:
                 showDomainChooseDialog();
+                break;
+            case CHANGE_API_DOMAIN_KEY:
+                showApiDomainChooseDialog();
                 break;
             case SET_DEVICE_META_KEY:
                 showSetDeviceMetaDialog();
@@ -86,6 +90,33 @@ public class DebugActivity extends Activity implements AdapterView.OnItemClickLi
                     }
                 })
                 .setView(R.layout.dialog_debug_changedomain)
+                .show();
+    }
+
+    private void showApiDomainChooseDialog() {
+        new AlertDialog.Builder(this)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.paste, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        EditText debugApiDomainEditText = ((AlertDialog)dialogInterface).findViewById(R.id.debugApiDomainEditText);
+                        EditText debugAccountIdEditText = ((AlertDialog)dialogInterface).findViewById(R.id.debugAccountIdEditText);
+                        EditText debugSecretKeyEditText = ((AlertDialog)dialogInterface).findViewById(R.id.debugSecretKeyEditText);
+                        String domain = debugApiDomainEditText.getText().toString();
+                        String accountId = debugAccountIdEditText.getText().toString();
+                        String secretKey = debugSecretKeyEditText.getText().toString();
+
+                        sharedPreferences.edit()
+                                .putString(DebugHelper.DEV_API_DOMAIN, domain)
+                                .putString(DebugHelper.DEV_ACCOUNTID_KEY, accountId)
+                                .putString(DebugHelper.DEV_SECRETKEY_KEY, secretKey)
+                                .apply();
+
+                        restart();
+                        dialogInterface.dismiss();
+                    }
+                })
+                .setView(R.layout.dialog_debug_changeapidomain)
                 .show();
     }
 

@@ -4,6 +4,7 @@
 
     <array name="debug_menu">
         <item>Change domain</item>
+        <item>Change api domain</item>
         <item>Set device meta (name|data)</item>
         <item>Reset</item>
     </array>

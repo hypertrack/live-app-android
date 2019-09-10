@@ -22,13 +22,8 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -37,20 +32,16 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.hypertrack.live.debug.DebugHelper;
-import com.hypertrack.live.utils.AppUtils;
+import com.hypertrack.live.ApiHelper;
 import com.hypertrack.live.R;
+import com.hypertrack.live.debug.DebugHelper;
+import com.hypertrack.live.map.TripsManager;
 import com.hypertrack.live.map.htlocation.HTLocationGoogleMap;
 import com.hypertrack.live.map.htlocation.ViewsSdkHTLocationProvider;
+import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TrackingFragment extends SupportMapFragment implements TrackingStateObserver.OnTrackingStateChangeListener {
     private static final String TAG = TrackingFragment.class.getSimpleName();
@@ -66,6 +57,20 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     private HTLocationGoogleMap myLocationGoogleMap;
 
     private String hyperTrackPublicKey;
+    private ApiHelper apiHelper;
+    private TripsManager tripsManager;
+
+    public LoaderDecorator getLoader() {
+        return loader;
+    }
+
+    public ApiHelper getApiHelper() {
+        return apiHelper;
+    }
+
+    public TripsManager getTripsManager() {
+        return tripsManager;
+    }
 
     public static Fragment newInstance(String hyperTrackPublicKey) {
         TrackingFragment fragment = new TrackingFragment();
@@ -99,7 +104,9 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        apiHelper = new ApiHelper(getContext(), hyperTrackPublicKey);
         myLocationGoogleMap = new HTLocationGoogleMap(getActivity());
+        tripsManager = new TripsManager(getActivity());
 
         trackingButton = view.findViewById(R.id.trackingButton);
         trackingButton.setOnClickListener(new View.OnClickListener() {
@@ -156,7 +163,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
             sharedPreferences.edit().putBoolean("ibo_requested", true).apply();
         }
 
-        DebugHelper.onTrackingFragment(getActivity());
+        DebugHelper.onTrackingFragment(this);
     }
 
     @Override
@@ -171,7 +178,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
 
     @Override
     public void onError(TrackingError trackingError) {
-        Log.e("onError", "code: "+trackingError.code);
+        Log.e("onError", "code: " + trackingError.code);
         if (trackingError.code == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
             showTurnOnLocationSnackbar();
         }
@@ -198,6 +205,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
                 } else {
                     myLocationGoogleMap.addTo(googleMap, new ViewsSdkHTLocationProvider(getContext(), hyperTrackPublicKey));
                 }
+                tripsManager.addTo(googleMap);
             }
         });
     }
@@ -213,7 +221,9 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
+                mMap.clear();
                 myLocationGoogleMap.removeFrom(googleMap);
+                tripsManager.removeFrom(googleMap);
                 updateMap(googleMap);
             }
         });
@@ -266,63 +276,24 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
     private void shareTracking() {
         if (getContext() != null && !TextUtils.isEmpty(hyperTrackPublicKey)) {
             loader.start();
-            // Instantiate the RequestQueue.
-            RequestQueue queue = Volley.newRequestQueue(getContext());
             final String shareUrl = "https://trck.at/%s";
-            String url = "https://7kcobbjpavdyhcxfvxrnktobjm.appsync-api.us-west-2.amazonaws.com/graphql";
 
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = new JSONObject("{\n" +
-                        "  \"query\": \"query getPublicTrackingIdQuery($publishableKey: String!, $deviceId: String!){\\\\\n  getPublicTrackingId(publishable_key: $publishableKey, device_id: $deviceId){\\\\\n    tracking_id\\\\\n  }\\\\\n}\"," +
-                        "  \"variables\": {" +
-                        "    \"publishableKey\": \"" + hyperTrackPublicKey + "\",\n" +
-                        "    \"deviceId\": \"" + HyperTrack.getDeviceId() + "\"" +
-                        "  }," +
-                        "  \"operationName\": \"getPublicTrackingIdQuery\"" +
-                        "}");
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            // Request a json response from the provided URL.
-            JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.POST, url, jsonObject,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            loader.stop();
-                            // Display the first 500 characters of the response string.
-                            try {
-                                String trackingId = response.getJSONObject("data")
-                                        .getJSONObject("getPublicTrackingId")
-                                        .getString("tracking_id");
-                                Intent sendIntent = new Intent();
-                                sendIntent.setAction(Intent.ACTION_SEND);
-                                sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(shareUrl, trackingId));
-                                sendIntent.setType("text/plain");
-                                startActivity(sendIntent);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }, new Response.ErrorListener() {
+            apiHelper.getTrackingId(new Response.Listener<String>() {
+                @Override
+                public void onResponse(String trackingId) {
+                    loader.stop();
+                    Intent sendIntent = new Intent();
+                    sendIntent.setAction(Intent.ACTION_SEND);
+                    sendIntent.putExtra(Intent.EXTRA_TEXT, String.format(shareUrl, trackingId));
+                    sendIntent.setType("text/plain");
+                    startActivity(sendIntent);
+                }
+            }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     loader.stop();
-                    error.printStackTrace();
                 }
-            }) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("X-Api-Key", "da2-nt5vwlflmngjfbe6cbsone4emm");
-                    headers.put("Content-Type", "application/json; charset=utf-8");
-                    return headers;
-                }
-            };
-
-
-            // Add the request to the RequestQueue.
-            queue.add(jsonRequest);
+            });
         }
     }
 

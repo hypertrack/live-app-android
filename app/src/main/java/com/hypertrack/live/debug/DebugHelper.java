@@ -8,16 +8,24 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
+import android.location.Location;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.hypertrack.live.BuildConfig;
@@ -27,12 +35,19 @@ import com.hypertrack.live.ui.TrackingFragment;
 import com.hypertrack.sdk.Config;
 import com.hypertrack.sdk.HyperTrack;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.Timer;
 
 public class DebugHelper {
     private static final String TAG = TrackingFragment.class.getSimpleName();
 
     public static final String DEV_DOMAIN_KEY = "DEV_DOMAIN";
+    public static final String DEV_API_DOMAIN = "DEV_API_DOMAIN";
+    public static final String DEV_ACCOUNTID_KEY = "DEV_ACCOUNTID_KEY";
+    public static final String DEV_SECRETKEY_KEY = "DEV_SECRETKEY_KEY";
 
     public static final String RESTART_ACTION = "com.hypertrack.live.debug.RESTART_ACTION";
 
@@ -56,8 +71,8 @@ public class DebugHelper {
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MainActivity.PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
             }
 
+            activity.findViewById(R.id.debugLayout).setVisibility(View.VISIBLE);
             View debugButton = activity.findViewById(R.id.debugButton);
-            debugButton.setVisibility(View.VISIBLE);
             debugButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -101,8 +116,112 @@ public class DebugHelper {
         }
     }
 
-    public static void onTrackingFragment(final Activity activity) {
+    public static void onTrackingFragment(final TrackingFragment fragment) {
         if (BuildConfig.DEBUG) {
+            final SharedPreferences sharedPreferences = DebugHelper.getSharedPreferences(fragment.getActivity());
+            final FloatingActionButton createTripButton = fragment.getActivity().findViewById(R.id.createTripButton);
+
+            String apiDomain = sharedPreferences.getString(DebugHelper.DEV_API_DOMAIN, "");
+            String accountid = sharedPreferences.getString(DebugHelper.DEV_ACCOUNTID_KEY, "");
+            String secretkey = sharedPreferences.getString(DebugHelper.DEV_SECRETKEY_KEY, "");
+            if (TextUtils.isEmpty(apiDomain) || TextUtils.isEmpty(accountid) || TextUtils.isEmpty(secretkey)) {
+                fragment.getActivity().startActivity(new Intent(fragment.getActivity(), DebugActivity.class));
+                Toast.makeText(fragment.getActivity(), "You need to provide all data in change api domain", Toast.LENGTH_LONG).show();
+            }
+
+            String currentTripId = "";
+            try {
+                JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));
+                currentTripId = currentTrip.getString("trip_id");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if (TextUtils.isEmpty(currentTripId)) {
+                createTripButton.setBackgroundTintList(
+                        ColorStateList.valueOf(fragment.getActivity().getResources().getColor(R.color.colorPrimary)));
+            } else {
+                createTripButton.setBackgroundTintList(
+                        ColorStateList.valueOf(fragment.getActivity().getResources().getColor(R.color.colorAccent)));
+            }
+            createTripButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String currentTripId = "";
+                    try {
+                        JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));
+                        currentTripId = currentTrip.getString("trip_id");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    if (TextUtils.isEmpty(currentTripId)) {
+                        LatLng dest = fragment.getTripsManager().getDestLatLng();
+                        try {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("device_id", HyperTrack.getDeviceId());
+
+                            if (dest != null) {
+                                JSONArray coordinates = new JSONArray();
+                                coordinates.put(dest.longitude);
+                                coordinates.put(dest.latitude);
+
+                                JSONObject geometry = new JSONObject();
+                                geometry.put("type", "Point");
+                                geometry.put("coordinates", coordinates);
+
+                                JSONObject destination = new JSONObject();
+                                destination.put("geometry", geometry);
+                                destination.put("radius", 100);
+
+                                jsonObject.put("destination", destination);
+                            }
+
+                            fragment.getLoader().start();
+                            fragment.getApiHelper().createTrip(jsonObject, new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    sharedPreferences.edit().putString("current_trip", response.toString()).commit();
+                                    if (fragment.getActivity() != null) {
+                                        fragment.getLoader().stop();
+                                        createTripButton.setBackgroundTintList(
+                                                ColorStateList.valueOf(fragment.getActivity().getResources().getColor(R.color.colorAccent)));
+                                        Toast.makeText(fragment.getActivity(), "Trip is created", Toast.LENGTH_SHORT).show();
+                                        fragment.onTrackingStart();
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    if (fragment.getActivity() != null) {
+                                        fragment.getLoader().stop();
+                                    }
+                                }
+                            });
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        fragment.getLoader().start();
+                        final Response.Listener<String> listener = new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                sharedPreferences.edit().putString("current_trip", "").apply();
+                                if (fragment.getActivity() != null) {
+                                    fragment.getLoader().stop();
+                                    createTripButton.setBackgroundTintList(
+                                            ColorStateList.valueOf(fragment.getActivity().getResources().getColor(R.color.colorPrimary)));
+                                    Toast.makeText(fragment.getActivity(), "Trip is completed", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        };
+                        fragment.getApiHelper().completeTrip(currentTripId, listener, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                listener.onResponse("");
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
 }
