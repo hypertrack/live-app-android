@@ -11,40 +11,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#f5f5f5"
-        android:hint="Past device name"
+        android:hint="Device name"
         android:padding="8dp"
         android:textColorHint="#000000"
         tools:ignore="HardcodedText" />
 
-    <LinearLayout
+
+    <EditText
+        android:id="@+id/debugDataEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:orientation="horizontal"
-        android:paddingBottom="4dp"
-        android:weightSum="2">
-
-        <EditText
-            android:id="@+id/debugKeyEditText"
-            android:layout_width="0dp"
-            android:layout_height="38dp"
-            android:layout_marginEnd="4dp"
-            android:layout_weight="1"
-            android:background="#f5f5f5"
-            android:hint="Past key"
-            android:textColorHint="#000000"
-            tools:ignore="HardcodedText" />
-
-        <EditText
-            android:id="@+id/debugValueEditText"
-            android:layout_width="0dp"
-            android:layout_height="38dp"
-            android:layout_marginStart="4dp"
-            android:layout_weight="1"
-            android:background="#f5f5f5"
-            android:hint="Past value"
-            android:textColorHint="#000000"
-            tools:ignore="HardcodedText" />
-
-    </LinearLayout>
+        android:background="#f5f5f5"
+        android:minHeight="140dp"
+        android:gravity="top"
+        android:padding="8dp"
+        android:paddingBottom="8dp"
+        android:text="{}"
+        android:textColorHint="#000000"
+        tools:ignore="HardcodedText" />
 </LinearLayout>

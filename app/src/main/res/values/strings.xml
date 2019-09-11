@@ -3,8 +3,8 @@
     <string name="default_notification_channel_id" translatable="false">4857</string>
 
     <array name="debug_menu">
-        <item>Change domain</item>
-        <item>Change api domain</item>
+        <item>Set tracking API</item>
+        <item>Set REST API</item>
         <item>Set device meta (name|data)</item>
         <item>Reset</item>
     </array>

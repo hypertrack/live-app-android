@@ -1,7 +1,6 @@
 package com.hypertrack.live.debug;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
-import android.location.Location;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -45,9 +43,9 @@ public class DebugHelper {
     private static final String TAG = TrackingFragment.class.getSimpleName();
 
     public static final String DEV_DOMAIN_KEY = "DEV_DOMAIN";
-    public static final String DEV_API_DOMAIN = "DEV_API_DOMAIN";
-    public static final String DEV_ACCOUNTID_KEY = "DEV_ACCOUNTID_KEY";
-    public static final String DEV_SECRETKEY_KEY = "DEV_SECRETKEY_KEY";
+    public static final String DEV_API_DOMAIN_KEY = "DEV_API_DOMAIN";
+    public static final String DEV_ACCOUNTID_KEY = "DEV_ACCOUNTID";
+    public static final String DEV_SECRETKEY_KEY = "DEV_SECRETKEY";
 
     public static final String RESTART_ACTION = "com.hypertrack.live.debug.RESTART_ACTION";
 
@@ -55,6 +53,21 @@ public class DebugHelper {
 
     public static SharedPreferences getSharedPreferences(final Context context) {
         return context.getSharedPreferences(context.getPackageName() + "-debug", Context.MODE_PRIVATE);
+    }
+
+    public static String getDomain(final Context context) {
+        return getSharedPreferences(context).getString(DebugHelper.DEV_DOMAIN_KEY, "live-api.htprod.hypertrack.com");
+    }
+
+    public static String getApiDomain(final Context context) {
+        return getSharedPreferences(context).getString(DebugHelper.DEV_API_DOMAIN_KEY, "v3.api.hypertrack.com");
+    }
+
+    public static boolean isAlive(final Context context) {
+        if (BuildConfig.DEBUG) {
+            return "live-api.htprod.hypertrack.com".equals(getDomain(context));
+        }
+        return true;
     }
 
     public static void start(final Context context) {
@@ -121,14 +134,6 @@ public class DebugHelper {
             final SharedPreferences sharedPreferences = DebugHelper.getSharedPreferences(fragment.getActivity());
             final FloatingActionButton createTripButton = fragment.getActivity().findViewById(R.id.createTripButton);
 
-            String apiDomain = sharedPreferences.getString(DebugHelper.DEV_API_DOMAIN, "");
-            String accountid = sharedPreferences.getString(DebugHelper.DEV_ACCOUNTID_KEY, "");
-            String secretkey = sharedPreferences.getString(DebugHelper.DEV_SECRETKEY_KEY, "");
-            if (TextUtils.isEmpty(apiDomain) || TextUtils.isEmpty(accountid) || TextUtils.isEmpty(secretkey)) {
-                fragment.getActivity().startActivity(new Intent(fragment.getActivity(), DebugActivity.class));
-                Toast.makeText(fragment.getActivity(), "You need to provide all data in change api domain", Toast.LENGTH_LONG).show();
-            }
-
             String currentTripId = "";
             try {
                 JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));
@@ -146,6 +151,14 @@ public class DebugHelper {
             createTripButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    String accountid = sharedPreferences.getString(DebugHelper.DEV_ACCOUNTID_KEY, "");
+                    String secretkey = sharedPreferences.getString(DebugHelper.DEV_SECRETKEY_KEY, "");
+                    if (TextUtils.isEmpty(accountid) || TextUtils.isEmpty(secretkey)) {
+                        fragment.getActivity().startActivity(new Intent(fragment.getActivity(), DebugActivity.class));
+                        Toast.makeText(fragment.getActivity(), "You need to provide all data in \"Set REST API\"", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
                     String currentTripId = "";
                     try {
                         JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));

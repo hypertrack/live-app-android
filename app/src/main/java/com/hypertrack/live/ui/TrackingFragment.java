@@ -200,7 +200,7 @@ public class TrackingFragment extends SupportMapFragment implements TrackingStat
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 updateMap(googleMap);
-                if (!AppUtils.isNetworkConnected(getActivity())) {
+                if (!AppUtils.isNetworkConnected(getActivity()) || !DebugHelper.isAlive(getActivity())) {
                     myLocationGoogleMap.addTo(googleMap);
                 } else {
                     myLocationGoogleMap.addTo(googleMap, new ViewsSdkHTLocationProvider(getContext(), hyperTrackPublicKey));

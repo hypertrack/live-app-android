@@ -26,9 +26,12 @@ import com.hypertrack.live.BuildConfig;
 import com.hypertrack.live.MyTrackingStateListener;
 import com.hypertrack.live.R;
 import com.hypertrack.live.debug.DebugHelper;
+import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.sdk.Config;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
+
+import java.util.Collections;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -239,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
                 R.drawable.ic_status_bar,
                 R.drawable.ic_notification,
                 null, null);
+        HyperTrack.setNameAndMetadataForDevice(AppUtils.getDeviceName(), Collections.<String, Object>emptyMap());
         addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
         Log.e("getDeviceId", HyperTrack.getDeviceId());
     }

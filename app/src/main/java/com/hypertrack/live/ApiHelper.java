@@ -37,7 +37,7 @@ public class ApiHelper {
         this.hyperTrackPublicKey = hyperTrackPublicKey;
         baseHeaders.put("Content-Type", "application/json; charset=utf-8");
 
-        apiDomain = DebugHelper.getSharedPreferences(context).getString(DebugHelper.DEV_API_DOMAIN, "");
+        apiDomain = DebugHelper.getApiDomain(context);
         String accountid = DebugHelper.getSharedPreferences(context).getString(DebugHelper.DEV_ACCOUNTID_KEY, "");
         String secretkey = DebugHelper.getSharedPreferences(context).getString(DebugHelper.DEV_SECRETKEY_KEY, "");
         tripsHeaders = new HashMap<>(baseHeaders);

@@ -31,4 +31,4 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }
 
-version = "3.0.8"
+version = "3.10.1"

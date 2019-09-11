@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -58,6 +59,7 @@ public class HTLocationGoogleMap {
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
                 googleMap.animateCamera(cameraUpdate, 1000, null);
+                isMyLocationCentered = true;
             }
         }
     }
@@ -67,6 +69,8 @@ public class HTLocationGoogleMap {
     }
 
     public void addTo(final GoogleMap googleMap, HTLocationProvider myCustomLocationProvider) {
+        removeFrom(googleMap);
+
         mLocationProvider = myCustomLocationProvider;
         mLocationProvider.startLocationProvider(new HTLocationConsumer() {
             @Override
@@ -74,6 +78,7 @@ public class HTLocationGoogleMap {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        Log.e("onLocationChanged", "call");
                         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
                         final float radius = location.getAccuracy()
                                 / (float) TileSystem.GroundResolution(location.getLatitude(),
@@ -124,7 +129,6 @@ public class HTLocationGoogleMap {
                         }
 
                         if(!isMyLocationCentered) {
-                            isMyLocationCentered = true;
                             moveToMyLocation(googleMap);
                         }
                     }

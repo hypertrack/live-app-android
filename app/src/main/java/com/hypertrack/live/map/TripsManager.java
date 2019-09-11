@@ -38,12 +38,10 @@ public class TripsManager {
     }
 
     public void addTo(final GoogleMap googleMap) {
-        if (destMarker != null) {
-            destMarker.remove();
-            destMarker = null;
-        }
+        removeFrom(googleMap);
+
         if (destLatLng != null) {
-            googleMap.addMarker(new MarkerOptions()
+            destMarker = googleMap.addMarker(new MarkerOptions()
                     .position(destLatLng)
                     .draggable(true));
         }
@@ -68,13 +66,12 @@ public class TripsManager {
             @Override
             public void onMapLongClick(LatLng latLng) {
                 destLatLng = latLng;
-                if (destMarker != null) {
-                    destMarker.remove();
-                    destMarker = null;
+                if (destMarker == null) {
+                    destMarker = googleMap.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .draggable(true));
                 }
-                destMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(latLng)
-                        .draggable(true));
+                destMarker.setPosition(latLng);
             }
         });
 
