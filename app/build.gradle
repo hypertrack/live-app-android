@@ -18,7 +18,7 @@ android {
     defaultConfig {
         applicationId "com.hypertrack.live"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode project.ext.versionNumber
         versionName project.ext.versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

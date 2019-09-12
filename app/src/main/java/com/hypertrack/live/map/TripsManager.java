@@ -10,6 +10,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.hypertrack.live.BuildConfig;
 import com.hypertrack.live.R;
 import com.hypertrack.live.debug.DebugHelper;
 
@@ -38,60 +39,62 @@ public class TripsManager {
     }
 
     public void addTo(final GoogleMap googleMap) {
-        removeFrom(googleMap);
+        if (BuildConfig.DEBUG) {
+            removeFrom(googleMap);
 
-        if (destLatLng != null) {
-            destMarker = googleMap.addMarker(new MarkerOptions()
-                    .position(destLatLng)
-                    .draggable(true));
-        }
-        googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
-            @Override
-            public void onMarkerDragStart(Marker marker) {
-
+            if (destLatLng != null) {
+                destMarker = googleMap.addMarker(new MarkerOptions()
+                        .position(destLatLng)
+                        .draggable(true));
             }
+            googleMap.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
+                @Override
+                public void onMarkerDragStart(Marker marker) {
 
-            @Override
-            public void onMarkerDrag(Marker marker) {
-
-            }
-
-            @Override
-            public void onMarkerDragEnd(Marker marker) {
-                destLatLng = marker.getPosition();
-            }
-        });
-        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                destLatLng = latLng;
-                if (destMarker == null) {
-                    destMarker = googleMap.addMarker(new MarkerOptions()
-                            .position(latLng)
-                            .draggable(true));
                 }
-                destMarker.setPosition(latLng);
+
+                @Override
+                public void onMarkerDrag(Marker marker) {
+
+                }
+
+                @Override
+                public void onMarkerDragEnd(Marker marker) {
+                    destLatLng = marker.getPosition();
+                }
+            });
+            googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+
+                @Override
+                public void onMapLongClick(LatLng latLng) {
+                    destLatLng = latLng;
+                    if (destMarker == null) {
+                        destMarker = googleMap.addMarker(new MarkerOptions()
+                                .position(latLng)
+                                .draggable(true));
+                    }
+                    destMarker.setPosition(latLng);
+                }
+            });
+
+
+            try {
+                JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));
+                JSONArray destination = currentTrip.getJSONObject("destination").getJSONObject("geometry").getJSONArray("coordinates");
+                tripDestMarker = googleMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(destination.getDouble(1), destination.getDouble(0)))
+                        .icon(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_menu_myplaces)));
+
+                List<LatLng> latLngs = new ArrayList<>();
+                JSONArray coordinates = currentTrip.getJSONObject("estimate").getJSONObject("route").getJSONObject("polyline").getJSONArray("coordinates");
+                for (int i = 0; i < coordinates.length(); i++) {
+                    JSONArray lonLat = coordinates.getJSONArray(i);
+                    latLngs.add(new LatLng(lonLat.getDouble(1), lonLat.getDouble(0)));
+                }
+                tripRoutPolyline = googleMap.addPolyline(new PolylineOptions().width(7).color(polylineColor).addAll(latLngs));
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        });
-
-
-        try {
-            JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));
-            JSONArray destination = currentTrip.getJSONObject("destination").getJSONObject("geometry").getJSONArray("coordinates");
-            tripDestMarker = googleMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(destination.getDouble(1), destination.getDouble(0)))
-                    .icon(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_menu_myplaces)));
-
-            List<LatLng> latLngs = new ArrayList<>();
-            JSONArray coordinates = currentTrip.getJSONObject("estimate").getJSONObject("route").getJSONObject("polyline").getJSONArray("coordinates");
-            for (int i = 0; i < coordinates.length(); i++) {
-                JSONArray lonLat = coordinates.getJSONArray(i);
-                latLngs.add(new LatLng(lonLat.getDouble(1), lonLat.getDouble(0)));
-            }
-            tripRoutPolyline = googleMap.addPolyline(new PolylineOptions().width(7).color(polylineColor).addAll(latLngs));
-        } catch (JSONException e) {
-            e.printStackTrace();
         }
     }
 
