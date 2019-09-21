@@ -2,7 +2,6 @@ package com.hypertrack.live.map.htlocation;
 
 import android.content.Context;
 import android.location.Location;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Consumer;
@@ -41,7 +40,6 @@ public class ViewsSdkHTLocationProvider implements HTLocationProvider {
         hypertrackView.getDeviceMovementStatus(HyperTrack.getDeviceId(), new Consumer<MovementStatus>() {
             @Override
             public void accept(MovementStatus movementStatus) {
-                Log.e("accept", "call");
                 if (movementStatus != null && movementStatus.location != null) {
                     lastKnownLocation = convertFrom(movementStatus.location);
                     myLocationConsumer.onLocationChanged(lastKnownLocation,
@@ -52,7 +50,6 @@ public class ViewsSdkHTLocationProvider implements HTLocationProvider {
         hypertrackView.subscribeToDeviceUpdates(HyperTrack.getDeviceId(), new DeviceUpdatesHandler() {
             @Override
             public void onLocationUpdateReceived(@NonNull com.hypertrack.sdk.views.dao.Location location) {
-                Log.e("onLocationUpdateReceived", "call");
                 lastKnownLocation = convertFrom(location);
                 if (hypertrackView != null) {
                     myLocationConsumer.onLocationChanged(lastKnownLocation,

@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 null, null);
         HyperTrack.setNameAndMetadataForDevice(AppUtils.getDeviceName(), Collections.<String, Object>emptyMap());
         addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
-        Log.e("getDeviceId", HyperTrack.getDeviceId());
+        Log.i("getDeviceId", HyperTrack.getDeviceId());
     }
 
     @Override

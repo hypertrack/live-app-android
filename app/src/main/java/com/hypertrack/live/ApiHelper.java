@@ -55,7 +55,6 @@ public class ApiHelper {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.e("response", response.toString());
                         if (listener != null) {
                             listener.onResponse(response);
                         }
@@ -77,7 +76,6 @@ public class ApiHelper {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Log.e("response", response.toString());
                         if (listener != null) {
                             listener.onResponse("");
                         }

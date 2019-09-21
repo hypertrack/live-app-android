@@ -79,19 +79,22 @@ public class TripsManager {
 
 
             try {
-                JSONObject currentTrip = new JSONObject(sharedPreferences.getString("current_trip", ""));
-                JSONArray destination = currentTrip.getJSONObject("destination").getJSONObject("geometry").getJSONArray("coordinates");
-                tripDestMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(destination.getDouble(1), destination.getDouble(0)))
-                        .icon(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_menu_myplaces)));
+                String tripData = sharedPreferences.getString("current_trip", null);
+                if (tripData != null) {
+                    JSONObject currentTrip = new JSONObject(tripData);
+                    JSONArray destination = currentTrip.getJSONObject("destination").getJSONObject("geometry").getJSONArray("coordinates");
+                    tripDestMarker = googleMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(destination.getDouble(1), destination.getDouble(0)))
+                            .icon(BitmapDescriptorFactory.fromResource(android.R.drawable.ic_menu_myplaces)));
 
-                List<LatLng> latLngs = new ArrayList<>();
-                JSONArray coordinates = currentTrip.getJSONObject("estimate").getJSONObject("route").getJSONObject("polyline").getJSONArray("coordinates");
-                for (int i = 0; i < coordinates.length(); i++) {
-                    JSONArray lonLat = coordinates.getJSONArray(i);
-                    latLngs.add(new LatLng(lonLat.getDouble(1), lonLat.getDouble(0)));
+                    List<LatLng> latLngs = new ArrayList<>();
+                    JSONArray coordinates = currentTrip.getJSONObject("estimate").getJSONObject("route").getJSONObject("polyline").getJSONArray("coordinates");
+                    for (int i = 0; i < coordinates.length(); i++) {
+                        JSONArray lonLat = coordinates.getJSONArray(i);
+                        latLngs.add(new LatLng(lonLat.getDouble(1), lonLat.getDouble(0)));
+                    }
+                    tripRoutPolyline = googleMap.addPolyline(new PolylineOptions().width(7).color(polylineColor).addAll(latLngs));
                 }
-                tripRoutPolyline = googleMap.addPolyline(new PolylineOptions().width(7).color(polylineColor).addAll(latLngs));
             } catch (JSONException e) {
                 e.printStackTrace();
             }

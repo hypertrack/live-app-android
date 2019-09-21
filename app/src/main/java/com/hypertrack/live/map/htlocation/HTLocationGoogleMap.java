@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.TypedValue;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -78,7 +77,6 @@ public class HTLocationGoogleMap {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Log.e("onLocationChanged", "call");
                         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
                         final float radius = location.getAccuracy()
                                 / (float) TileSystem.GroundResolution(location.getLatitude(),

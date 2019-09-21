@@ -96,7 +96,6 @@ public class AppUtils {
                 }
             }
         }
-        Log.e("getSystemProperty", "call");
         return line;
     }
 }
