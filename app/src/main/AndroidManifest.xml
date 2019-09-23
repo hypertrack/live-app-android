@@ -23,8 +23,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:taskAffinity="com.hypertrack.live"
         android:theme="@style/AppTheme"
+        android:name=".App"
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
@@ -46,6 +46,16 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".debug.DebugActivity"
+            android:launchMode="singleInstance"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <service android:name="com.hypertrack.sdk.HyperTrackMessagingService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <receiver
             android:name=".InstallReferrerReceiver"
@@ -53,6 +63,14 @@
             android:permission="android.permission.INSTALL_PACKAGES">
             <intent-filter>
                 <action android:name="com.android.vending.INSTALL_REFERRER" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".TrackingErrorReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.hypertrack.sdk.TRACKING_ERROR" />
             </intent-filter>
         </receiver>
 

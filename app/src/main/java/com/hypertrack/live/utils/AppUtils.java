@@ -1,4 +1,4 @@
-package com.hypertrack.live;
+package com.hypertrack.live.utils;
 
 import android.content.Context;
 import android.location.LocationManager;
@@ -96,7 +96,6 @@ public class AppUtils {
                 }
             }
         }
-        Log.e("getSystemProperty", "call");
         return line;
     }
 }

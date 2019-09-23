@@ -36,7 +36,7 @@
             android:layout_marginBottom="6dp"
             android:background="#f5f5f5"
             android:hint="@string/paste_key_here"
-            android:padding="8dp"
+            android:inputType="" android:padding="8dp"
             android:textColorHint="#000000" />
 
         <TextView

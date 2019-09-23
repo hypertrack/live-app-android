@@ -1,4 +1,4 @@
-package com.hypertrack.live.map.mylocation;
+package com.hypertrack.live.map.htlocation;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.util.TypedValue;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -23,7 +22,7 @@ import com.hypertrack.live.R;
 import com.hypertrack.live.map.util.TileSystem;
 
 
-public class MyLocationGoogleMap {
+public class HTLocationGoogleMap {
     public static final String LOGTAG = "Tracking";
 
     public static final String ACCURACY_COLOR = "#1800ce5b";
@@ -31,7 +30,7 @@ public class MyLocationGoogleMap {
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Context mContext;
-    private MyLocationProvider mLocationProvider;
+    private HTLocationProvider mLocationProvider;
     private boolean isMyLocationCentered = false;
     private final float accuracyStrokeWidth;
 
@@ -39,7 +38,7 @@ public class MyLocationGoogleMap {
     private Marker locationMarker;
     private Marker bearingMarker;
 
-    public MyLocationGoogleMap(Context context) {
+    public HTLocationGoogleMap(Context context) {
         mContext = context;
         Resources r = context.getResources();
         float density = r.getDisplayMetrics().density;
@@ -59,27 +58,25 @@ public class MyLocationGoogleMap {
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 17);
                 googleMap.animateCamera(cameraUpdate, 1000, null);
+                isMyLocationCentered = true;
             }
         }
     }
 
     public void addTo(final GoogleMap googleMap) {
-        addTo(googleMap, new GpsMyLocationProvider(mContext));
+        addTo(googleMap, new GpsHTLocationProvider(mContext));
     }
 
-    public void addTo(final GoogleMap googleMap, MyLocationProvider myCustomLocationProvider) {
+    public void addTo(final GoogleMap googleMap, HTLocationProvider myCustomLocationProvider) {
+        removeFrom(googleMap);
+
         mLocationProvider = myCustomLocationProvider;
-        mLocationProvider.startLocationProvider(new MyLocationConsumer() {
+        mLocationProvider.startLocationProvider(new HTLocationConsumer() {
             @Override
-            public void onLocationChanged(final Location location, MyLocationProvider source) {
+            public void onLocationChanged(final Location location, HTLocationProvider source) {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Log.e("VSDK.onLocationChanged",
-                                location.getLatitude()+" | "+
-                                location.getLongitude()+" | "+
-                                location.getBearing());
-
                         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
                         final float radius = location.getAccuracy()
                                 / (float) TileSystem.GroundResolution(location.getLatitude(),
@@ -130,7 +127,6 @@ public class MyLocationGoogleMap {
                         }
 
                         if(!isMyLocationCentered) {
-                            isMyLocationCentered = true;
                             moveToMyLocation(googleMap);
                         }
                     }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/debugNameEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#f5f5f5"
+        android:hint="Device name"
+        android:padding="8dp"
+        android:textColorHint="#000000"
+        tools:ignore="HardcodedText" />
+
+
+    <EditText
+        android:id="@+id/debugDataEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="#f5f5f5"
+        android:minHeight="140dp"
+        android:gravity="top"
+        android:padding="8dp"
+        android:paddingBottom="8dp"
+        android:text="{}"
+        android:textColorHint="#000000"
+        tools:ignore="HardcodedText" />
+</LinearLayout>
