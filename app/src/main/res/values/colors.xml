@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#00ce5b</color>
+    <color name="colorPrimary">#ffffff</color>
     <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+    <color name="colorAction">#fe4d5f</color>
+    <color name="colorHyperTrack">#00ce5b</color>
     <color name="colorBackground">#ffffff</color>
     <color name="colorFAButtonSecondary">#ffffff</color>
     <color name="textColorPrimary">#000000</color>

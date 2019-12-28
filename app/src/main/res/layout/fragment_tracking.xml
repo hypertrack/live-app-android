@@ -10,7 +10,8 @@
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@id/bottomSearch"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -57,24 +58,52 @@
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
+        android:layout_marginBottom="16dp"
         android:background="@drawable/elevation"
+        app:layout_constraintBottom_toTopOf="@id/bottomSearch" />
+
+    <include
+        android:id="@+id/bottomSearch"
+        layout="@layout/search_destination"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toTopOf="@id/bottomNavigation" />
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:padding="@dimen/content_padding"
+        android:weightSum="2"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <Button
             android:id="@+id/shareButton"
             style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
             android:background="@drawable/button"
-            android:text="@string/share_live_location"
+            android:text="@string/share_live"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
-    </FrameLayout>
+
+        <Button
+            android:id="@+id/tripButton"
+            style="@style/ButtonStyle"
+            android:layout_width="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/button"
+            android:text="@string/start_trip"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

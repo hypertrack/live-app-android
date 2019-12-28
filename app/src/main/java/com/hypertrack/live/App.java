@@ -2,7 +2,7 @@ package com.hypertrack.live;
 
 import android.app.Application;
 
-import com.hypertrack.live.debug.DebugHelper;
+import com.google.android.libraries.places.api.Places;
 
 
 public class App extends Application {
@@ -20,6 +20,9 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        DebugHelper.start(this);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyDlJnfZX9OsayqA3EtVtUI-yGa-OBRoseU");
+        }
     }
 }

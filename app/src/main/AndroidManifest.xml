@@ -46,10 +46,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity
-            android:name=".debug.DebugActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar" />
 
         <service android:name="com.hypertrack.sdk.HyperTrackMessagingService" android:exported="false">
             <intent-filter>
@@ -80,7 +76,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBckOZNwmofhaLs9spRv40suiVGlSv1liA" />
+            android:value="AIzaSyDlJnfZX9OsayqA3EtVtUI-yGa-OBRoseU" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
