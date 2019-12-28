@@ -42,66 +42,13 @@ public class VerificationActivity extends AppCompatActivity {
             public void onClick(View view) {
                 final String verificationKey = verifyEditText.getText().toString();
                 if (!TextUtils.isEmpty(verificationKey)) {
-                    verifyButton.setEnabled(false);
-                    loader.start();
-                    HyperTrack.initialize(VerificationActivity.this, verificationKey,
-                            false, false, new TrackingInitDelegate() {
-                        @Override
-                        public void onError(@NonNull TrackingInitError error) {
-                            Log.e(TAG, "Initialization failed with error");
-                            error.printStackTrace();
-
-                            loader.stop();
-                            verifyButton.setEnabled(true);
-                            if (AppUtils.isNetworkConnected(VerificationActivity.this)) {
-                                initializationFailed();
-                            } else {
-                                networkNotConnected();
-                            }
-                        }
-
-                        @Override
-                        public void onSuccess() {
-                            verifyButton.setEnabled(true);
-                            loader.stop();
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra(VERIFICATION_KEY, verificationKey);
-                            setResult(Activity.RESULT_OK, returnIntent);
-                            finish();
-                        }
-                    });
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(VERIFICATION_KEY, verificationKey);
+                    setResult(Activity.RESULT_OK, returnIntent);
+                    finish();
                 }
             }
         });
         loader = new LoaderDecorator(this);
-    }
-
-    private void initializationFailed() {
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        verifyEditText.setText("");
-                    }
-                })
-                .setTitle(R.string.valid_publishable_key_required)
-                .setMessage(R.string.publishable_key_you_entered_is_invalid)
-                .create();
-        alertDialog.show();
-    }
-
-    private void networkNotConnected() {
-        AlertDialog alertDialog = new AlertDialog.Builder(this)
-                .setNegativeButton(R.string.app_settings, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        Intent intent=new Intent(Settings.ACTION_WIFI_SETTINGS);
-                        startActivity(intent);
-                    }
-                })
-                .setTitle(R.string.valid_publishable_key_required)
-                .setMessage(R.string.check_your_network_connection)
-                .create();
-        alertDialog.show();
     }
 }
