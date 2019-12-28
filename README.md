@@ -33,6 +33,11 @@ $ git clone https://github.com/hypertrack/live-app-android.git
 
 # Go into the repository
 $ cd live-app-android
+
+# Change com.google.android.geo.API_KEY on yours in AndroidManifest.xml
+<meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="<you_google_maps_key>" />
 ```
 
 Get your HyperTrack Publishable Key [here](https://dashboard.hypertrack.com/signup) and type it in the Publishable Key screen in the app.
