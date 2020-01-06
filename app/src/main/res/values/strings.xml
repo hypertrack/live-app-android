@@ -28,7 +28,10 @@
     <string name="app_settings">App settings</string>
     <string name="wireless_settings">Wireless settings</string>
     <string name="you_can_allow">You can allow HyperTrack Live to access this device\'s location in settings</string>
-    <string name="share_live_location">Share live location</string>
+    <string name="share_live">Share</string>
+    <string name="start_trip">Start trip</string>
+    <string name="end_trip">End trip</string>
     <string name="tap_to_restart_tracking">Tap to restart tracking</string>
     <string name="tap_to_turn_location_settings">Tap to turn on location in settings</string>
+    <string name="search_for_the_destination">Search for the destination</string>
 </resources>

@@ -24,11 +24,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".App"
+        android:name="com.hypertrack.live.App"
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name=".LaunchActivity"
+            android:name="com.hypertrack.live.LaunchActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -38,18 +38,14 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.hypertrack.live.ui.MainActivity"
             android:launchMode="singleInstance"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".ui.VerificationActivity"
+            android:name="com.hypertrack.live.ui.VerificationActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
-        <activity
-            android:name=".debug.DebugActivity"
-            android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar" />
 
         <service android:name="com.hypertrack.sdk.HyperTrackMessagingService" android:exported="false">
             <intent-filter>
@@ -58,7 +54,7 @@
         </service>
 
         <receiver
-            android:name=".InstallReferrerReceiver"
+            android:name="com.hypertrack.live.InstallReferrerReceiver"
             android:exported="true"
             android:permission="android.permission.INSTALL_PACKAGES">
             <intent-filter>
@@ -67,7 +63,7 @@
         </receiver>
 
         <receiver
-            android:name=".TrackingErrorReceiver"
+            android:name="com.hypertrack.live.TrackingErrorReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.hypertrack.sdk.TRACKING_ERROR" />
@@ -80,7 +76,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyBckOZNwmofhaLs9spRv40suiVGlSv1liA" />
+            android:value="AIzaSyDlJnfZX9OsayqA3EtVtUI-yGa-OBRoseU" />
 
         <meta-data
             android:name="io.fabric.ApiKey"

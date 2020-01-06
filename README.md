@@ -33,6 +33,11 @@ $ git clone https://github.com/hypertrack/live-app-android.git
 
 # Go into the repository
 $ cd live-app-android
+
+# Change com.google.android.geo.API_KEY on yours in AndroidManifest.xml
+<meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="<you_google_maps_key>" />
 ```
 
 Get your HyperTrack Publishable Key [here](https://dashboard.hypertrack.com/signup) and type it in the Publishable Key screen in the app.
@@ -40,12 +45,16 @@ Get your HyperTrack Publishable Key [here](https://dashboard.hypertrack.com/sign
 ## Documentation
 For detailed documentation of the APIs, customizations and what all you can build using HyperTrack, please visit the official [docs](https://docs.hypertrack.com/).
 
+[HyperTrack Quickstart](https://github.com/hypertrack/quickstart-android),
+[HyperTrack Views Sample](https://github.com/hypertrack/views-android),
+[HyperTrack Maps SDK](https://github.com/hypertrack/sdk-maps-google-android)
+
 ## Contribute
 Feel free to clone, use, and contribute back via [pull requests](https://help.github.com/articles/about-pull-requests/). We'd love to see your pull requests - send them in! Please use the [issues tracker](https://github.com/hypertrack/live-app-android/issues) to raise bug reports and feature requests.
 
 We are excited to see what Live Location feature you build in your app using this project. Do ping us at help@hypertrack.com once you build one, and we would love to feature your app on our blog!
 
 ## Support
-Join our [Slack community](http://slack.hypertrack.com) for instant responses. You can also email us at help@hypertrack.com.
+Join our [Slack community](https://join.slack.com/t/hypertracksupport/shared_invite/enQtNDA0MDYxMzY1MDMxLTdmNDQ1ZDA1MTQxOTU2NTgwZTNiMzUyZDk0OThlMmJkNmE0ZGI2NGY2ZGRhYjY0Yzc0NTJlZWY2ZmE5ZTA2NjI) for instant responses. You can also email us at help@hypertrack.com.
 
 

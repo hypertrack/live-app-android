@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 
 ext {
     versionNumber = computeVersionNumber()
@@ -21,11 +20,13 @@ android {
         targetSdkVersion 29
         versionCode project.ext.versionNumber
         versionName project.ext.versionName
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner
+        multiDexEnabled true
     }
+
     signingConfigs {
 
-        if (project.ext.hasProperty("keystorePath")) {
+        if (project.ext.keystorePath != null) {
             release {
                 storeFile file(project.ext.keystorePath)
                 storePassword project.ext.storePassword
@@ -40,16 +41,15 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-            if (signingConfigs.hasProperty("release")) {
-                signingConfig signingConfigs.release
-            }
+            applicationIdSuffix ".android.github"
         }
 
         release {
             minifyEnabled true
             shrinkResources true
             debuggable false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            applicationIdSuffix ".android.playmarket"
+
             if (signingConfigs.hasProperty("release")) {
                 signingConfig signingConfigs.release
             }
@@ -70,16 +70,19 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.google.android.gms:play-services-maps:17.0.0'
+    implementation 'com.google.android.libraries.places:places:2.1.0'
+
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.material:material:1.0.0'
 
-    implementation("com.hypertrack:hypertrack:3.4.6@aar") {transitive = true}
-    implementation 'com.hypertrack:hypertrack-views:0.3.3'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.14'
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
-        transitive = true
-    }
-    implementation 'com.airbnb.android:lottie:3.0.7'
+    implementation 'com.hypertrack:hypertrack:3.8.0-SNAPSHOT'
+    implementation 'com.hypertrack:hypertrack-views:0.6.0'
+    implementation 'com.hypertrack:maps-google:0.1.1'
+
+    implementation 'com.airbnb.android:lottie:3.1.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'
@@ -88,7 +91,7 @@ dependencies {
 
 def computeVersionNumber() {
 
-    def versionString =  rootProject.version
+    def versionString = rootProject.version
     def match = (versionString =~ /(\d+)\.(\d+)\.(\d+)/)
     if (match) {
         def versionMajor = match.group(1).toInteger()

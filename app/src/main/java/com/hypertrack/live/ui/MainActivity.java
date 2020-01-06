@@ -1,6 +1,7 @@
 package com.hypertrack.live.ui;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,30 +20,22 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.crashlytics.android.Crashlytics;
 import com.hypertrack.live.App;
-import com.hypertrack.live.BuildConfig;
 import com.hypertrack.live.MyTrackingStateListener;
 import com.hypertrack.live.R;
-import com.hypertrack.live.debug.DebugHelper;
+import com.hypertrack.live.ui.tracking.TrackingFragment;
 import com.hypertrack.live.utils.AppUtils;
-import com.hypertrack.sdk.Config;
 import com.hypertrack.sdk.HyperTrack;
+import com.hypertrack.sdk.ServiceNotificationConfig;
 import com.hypertrack.sdk.TrackingError;
 
-import java.util.Collections;
-
-import io.fabric.sdk.android.Fabric;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     public static final int VERIFICATION_REQUEST = 414;
     public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 515;
-    public static final int PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 616;
-    public static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1098;
 
-    private LoaderDecorator loader;
-
+    private HyperTrack hyperTrack;
     private MyTrackingStateListener myTrackingStateListener = new MyTrackingStateListener() {
         @Override
         public void onError(TrackingError trackingError) {
@@ -52,12 +44,11 @@ public class MainActivity extends AppCompatActivity {
                 case TrackingError.INVALID_PUBLISHABLE_KEY_ERROR:
                     Log.e(TAG, "Need to check publish key");
                     // Check your publishable key and initialize SDK once again.
-                    SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                    sharedPreferences.edit()
-                            .remove("pub_key")
-                            .remove("is_tracking")
-                            .commit();
-                    addFragment(WelcomeFragment.newInstance(false));
+                    if (AppUtils.isNetworkConnected(MainActivity.this)) {
+                        initializationFailed();
+                    } else {
+                        networkNotConnected();
+                    }
                     break;
                 case TrackingError.AUTHORIZATION_ERROR:
                     Log.e(TAG, "Need to check account or renew subscription");
@@ -92,14 +83,12 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+    private LoaderDecorator loader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Fabric.with(this, new Crashlytics());
-        DebugHelper.onMainActivity(this);
 
         loader = new LoaderDecorator(this);
 
@@ -176,26 +165,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
-                    String packageName = getPackageName();
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        Intent intent = new Intent();
-                        intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                        Uri uri = Uri.parse("package:" + packageName);
-                        intent.setData(uri);
-                        startActivityForResult(intent, MainActivity.PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                    }
-                }
-                break;
-            }
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
@@ -228,28 +203,62 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeHyperTrack(final String hyperTrackPublicKey, boolean shouldStartTracking) {
-        Config.Builder builder = new Config.Builder()
-                .enableAutoStartTracking(shouldStartTracking);
 
-        if (BuildConfig.DEBUG) {
-            String domain = DebugHelper.getSharedPreferences(this).getString(DebugHelper.DEV_DOMAIN_KEY, "");
-            builder.baseApiUrl(domain);
+        if (!TextUtils.isEmpty(hyperTrackPublicKey)) {
+            HyperTrack.enableDebugLogging();
+            ServiceNotificationConfig notificationConfig = new ServiceNotificationConfig.Builder()
+                    .setSmallIcon(R.drawable.ic_status_bar)
+                    .setLargeIcon(R.drawable.ic_notification)
+                    .build();
+            hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
+                    .setTrackingNotificationConfig(notificationConfig)
+                    .addTrackingListener(myTrackingStateListener)
+                    .setDeviceName(AppUtils.getDeviceName());
+            if (shouldStartTracking) {
+                hyperTrack.start();
+            }
+            addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
+            Log.i("getDeviceId", hyperTrack.getDeviceID());
         }
-
-        HyperTrack.initialize(this, hyperTrackPublicKey, builder.build());
-        HyperTrack.addTrackingStateListener(myTrackingStateListener);
-        HyperTrack.addNotificationIconsAndTitle(
-                R.drawable.ic_status_bar,
-                R.drawable.ic_notification,
-                null, null);
-        HyperTrack.setNameAndMetadataForDevice(AppUtils.getDeviceName(), Collections.<String, Object>emptyMap());
-        addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
-        Log.i("getDeviceId", HyperTrack.getDeviceId());
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        HyperTrack.removeTrackingStateListener(myTrackingStateListener);
+        hyperTrack.removeTrackingListener(myTrackingStateListener);
+    }
+
+    private void initializationFailed() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
+                        sharedPreferences.edit()
+                                .remove("pub_key")
+                                .remove("is_tracking")
+                                .commit();
+                        addFragment(WelcomeFragment.newInstance(false));
+                    }
+                })
+                .setTitle(R.string.valid_publishable_key_required)
+                .setMessage(R.string.publishable_key_you_entered_is_invalid)
+                .create();
+        alertDialog.show();
+    }
+
+    private void networkNotConnected() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setNegativeButton(R.string.app_settings, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                        startActivity(intent);
+                    }
+                })
+                .setTitle(R.string.valid_publishable_key_required)
+                .setMessage(R.string.check_your_network_connection)
+                .create();
+        alertDialog.show();
     }
 }
