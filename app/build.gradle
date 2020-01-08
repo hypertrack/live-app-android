@@ -48,7 +48,6 @@ android {
             minifyEnabled true
             shrinkResources true
             debuggable false
-            applicationIdSuffix ".android.playmarket"
 
             if (signingConfigs.hasProperty("release")) {
                 signingConfig signingConfigs.release

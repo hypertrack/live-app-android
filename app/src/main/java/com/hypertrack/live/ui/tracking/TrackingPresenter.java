@@ -186,17 +186,18 @@ public class TrackingPresenter implements DeviceUpdatesHandler {
                 view.hideProgressBar();
 
                 state.setTripId(trip.getTripId());
+                state.setShareableUrl(trip.getShareableUrl());
+                if (destinationMarker != null) {
+                    destinationMarker.remove();
+                }
+                if (state.getDestination() == null) {
+                    shareUrl(trip.getShareableUrl());
+                }
+
                 hyperTrackMap.subscribeTrip(trip.getTripId());
                 hyperTrackViews.getTrip(trip.getTripId(), new QueryResultHandler<Trip>() {
                     @Override
                     public void onQueryResult(Trip trip) {
-                        if (destinationMarker != null) {
-                            destinationMarker.remove();
-                        }
-                        state.setShareableUrl(trip.getViews().getSharedUrl());
-                        if (state.getDestination() == null) {
-                            shareUrl(trip.getViews().getSharedUrl());
-                        }
                         view.onTripChanged(trip);
                         hyperTrackMap.moveToTrip(trip);
                     }
