@@ -30,6 +30,7 @@ import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
 import com.hypertrack.sdk.trip.CreateTripRequest;
+import com.hypertrack.sdk.trip.ShareableTrip;
 import com.hypertrack.sdk.views.DeviceUpdatesHandler;
 import com.hypertrack.sdk.views.HyperTrackViews;
 import com.hypertrack.sdk.views.QueryResultHandler;
@@ -179,9 +180,9 @@ public class TrackingPresenter implements DeviceUpdatesHandler {
     public void startTrip() {
         view.showProgressBar();
 
-        AsyncResultHandler<com.hypertrack.sdk.trip.Trip> resultHandler = new AsyncResultHandler<com.hypertrack.sdk.trip.Trip>() {
+        AsyncResultHandler<ShareableTrip> resultHandler = new AsyncResultHandler<ShareableTrip>() {
             @Override
-            public void onResultReceived(@NonNull com.hypertrack.sdk.trip.Trip trip) {
+            public void onResultReceived(@NonNull ShareableTrip trip) {
                 view.hideProgressBar();
 
                 state.setTripId(trip.getTripId());
