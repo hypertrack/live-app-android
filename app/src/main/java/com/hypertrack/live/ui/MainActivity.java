@@ -225,7 +225,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        hyperTrack.removeTrackingListener(myTrackingStateListener);
+        if (hyperTrack != null) {
+            hyperTrack.removeTrackingListener(myTrackingStateListener);
+        }
     }
 
     private void initializationFailed() {
