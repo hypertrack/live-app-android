@@ -41,7 +41,7 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-            applicationIdSuffix ".android.github"
+//            applicationIdSuffix ".android.github"
         }
 
         release {
@@ -77,9 +77,9 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.14'
 
-    implementation 'com.hypertrack:hypertrack:3.8.0'
-    implementation 'com.hypertrack:hypertrack-views:0.6.0'
-    implementation 'com.hypertrack:maps-google:0.1.1'
+    implementation 'com.hypertrack:hypertrack:8.8.8-SNAPSHOT'
+    implementation 'com.hypertrack:hypertrack-views:0.8.0-SNAPSHOT'
+    implementation 'com.hypertrack:maps-google:0.1.2-SNAPSHOT'
 
     implementation 'com.airbnb.android:lottie:3.1.0'
 
@@ -96,7 +96,7 @@ def computeVersionNumber() {
         def versionMajor = match.group(1).toInteger()
         def versionMinor = match.group(2).toInteger()
         def versionPatch = match.group(3).toInteger()
-        return versionMajor * 1000000 + versionMinor * 1000 + versionPatch
+        return versionMajor * 1010000 + versionMinor * 1000 + versionPatch
     }
     throw new Exception("Could not read version.properties!")
 }

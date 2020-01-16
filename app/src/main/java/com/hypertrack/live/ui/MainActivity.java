@@ -130,12 +130,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void addFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_frame, fragment);
+        transaction.replace(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName());
         transaction.commitAllowingStateLoss();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if ((requestCode & 0x0000ffff) == VERIFICATION_REQUEST) {
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
             hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
                     .setTrackingNotificationConfig(notificationConfig)
                     .addTrackingListener(myTrackingStateListener)
-                    .setDeviceName(AppUtils.getDeviceName());
+                    .setDeviceName(AppUtils.getDeviceName(this));
             if (shouldStartTracking) {
                 hyperTrack.start();
             }

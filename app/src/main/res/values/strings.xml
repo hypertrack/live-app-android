@@ -30,8 +30,18 @@
     <string name="you_can_allow">You can allow HyperTrack Live to access this device\'s location in settings</string>
     <string name="share_live">Share</string>
     <string name="start_trip">Start trip</string>
-    <string name="end_trip">End trip</string>
+    <string name="end_trip">Stop trip</string>
     <string name="tap_to_restart_tracking">Tap to restart tracking</string>
     <string name="tap_to_turn_location_settings">Tap to turn on location in settings</string>
     <string name="search_for_the_destination">Search for the destination</string>
+    <string name="where_are_you_going">Where are you going?</string>
+    <string name="i_m_going_to">I’m going to</string>
+    <string name="set_on_map">Set on map</string>
+    <string name="share_eta">Share ETA</string>
+    <string name="not_decided_yet">Not decided yet</string>
+    <string name="_away">%d minutes away</string>
+    <string name="arriving_now">Arriving now</string>
+    <string name="arrived">Arrived</string>
+    <string name="close">Close</string>
+    <string name="miles_mins">%.2f miles • %d mins</string>
 </resources>

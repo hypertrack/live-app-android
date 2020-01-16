@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -15,10 +14,12 @@ import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -32,32 +33,37 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.widget.Autocomplete;
-import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
+import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.views.dao.Trip;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class TrackingFragment extends SupportMapFragment
         implements TrackingPresenter.View, OnMapReadyCallback {
 
     public static final int PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 616;
     public static final int AUTOCOMPLETE_REQUEST_CODE = 111;
+    public static final int SET_ON_MAP_REQUEST_CODE = 112;
 
     private Snackbar turnOnLocationSnackbar;
-    private FloatingActionButton trackingButton;
+    private View blockingView;
     private FloatingActionButton locationButton;
-    private View trackingButtonTips;
+    private View tripInfo;
+    private View tripSummaryInfo;
+    private View share;
+    private TextView destinationStatus;
+    private TextView destinationAddress;
+    private TextView stats;
+    private TextView destination;
     private Button shareButton;
-    private Button tripButton;
+    private Button endTripButton;
+    private Button closeButton;
     private LoaderDecorator loader;
 
     private GoogleMap mGoogleMap;
@@ -67,7 +73,6 @@ public class TrackingFragment extends SupportMapFragment
     private TrackingPresenter presenter;
 
     private boolean isMapStyleChanged = false;
-    private TextView destination;
 
     public static Fragment newInstance(String hyperTrackPublicKey) {
         TrackingFragment fragment = new TrackingFragment();
@@ -81,7 +86,7 @@ public class TrackingFragment extends SupportMapFragment
     @SuppressLint("InflateParams")
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View mapView = super.onCreateView(inflater, container, savedInstanceState);
-        View fragmentLayout = inflater.inflate(R.layout.fragment_tracking, null);
+        View fragmentLayout = inflater.inflate(R.layout.fragment_tracking, container, false);
         FrameLayout frameLayout = fragmentLayout.findViewById(R.id.content_frame);
         frameLayout.addView(mapView);
         return fragmentLayout;
@@ -102,45 +107,63 @@ public class TrackingFragment extends SupportMapFragment
         mapStyleOptions = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map);
         mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map_silver);
 
-        trackingButton = view.findViewById(R.id.trackingButton);
-        trackingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                presenter.performTracking();
-            }
-        });
-        locationButton = view.findViewById(R.id.locationButton);
+        blockingView = view.findViewById(R.id.blocking_view);
+        locationButton = view.findViewById(R.id.location_button);
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.moveToMyLocation();
+
+                presenter.setCameraFixedEnabled(true);
+                blockingView.setOnTouchListener(new android.view.View.OnTouchListener() {
+
+                    @Override
+                    public boolean onTouch(android.view.View view, MotionEvent motionEvent) {
+                        presenter.setCameraFixedEnabled(false);
+                        blockingView.setOnTouchListener(null);
+                        return false;
+                    }
+                });
             }
         });
-        trackingButtonTips = view.findViewById(R.id.trackingButtonTips);
 
-        view.findViewById(R.id.bottomSearch).setOnClickListener(new View.OnClickListener() {
+        share = view.findViewById(R.id.share);
+        share.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                openPlaceSearch();
+                presenter.share();
             }
         });
-        destination = view.findViewById(R.id.destination_address);
+
+        tripInfo = view.findViewById(R.id.trip_info);
+        destinationStatus = view.findViewById(R.id.destination_status);
+        destinationAddress = view.findViewById(R.id.destination_address);
+        tripSummaryInfo = view.findViewById(R.id.trip_summary_info);
+        stats = view.findViewById(R.id.stats);
+        destination = view.findViewById(R.id.destination);
 
         shareButton = view.findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.shareTracking();
+                presenter.shareHyperTrackUrl();
             }
         });
-        tripButton = view.findViewById(R.id.tripButton);
-        tripButton.setOnClickListener(new View.OnClickListener() {
+        endTripButton = view.findViewById(R.id.endTripButton);
+        endTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.startTrip();
+                presenter.endTrip();
             }
         });
-        turnOnLocationSnackbar = Snackbar.make(trackingButton, "", Snackbar.LENGTH_INDEFINITE)
+        closeButton = view.findViewById(R.id.close_button);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.removeTrip();
+            }
+        });
+
+        turnOnLocationSnackbar = Snackbar.make(locationButton, "", Snackbar.LENGTH_INDEFINITE)
                 .setAction(getString(R.string.tap_to_turn_location_settings), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -189,12 +212,9 @@ public class TrackingFragment extends SupportMapFragment
             mGoogleMap.setMapStyle(mapStyleOptions);
             isMapStyleChanged = false;
         }
-        trackingButton.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorHyperTrack)));
-        trackingButton.setImageResource(R.drawable.ic_on);
         locationButton.show();
         shareButton.setEnabled(true);
-        tripButton.setEnabled(true);
-        trackingButtonTips.setVisibility(View.GONE);
+        endTripButton.setEnabled(true);
 
         presenter.setMyLocationEnabled(true);
     }
@@ -202,12 +222,9 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void onTrackingStop() {
-        trackingButton.setBackgroundTintList(ColorStateList.valueOf(Color.WHITE));
-        trackingButton.setImageResource(R.drawable.ic_on_disabled);
         locationButton.hide();
         shareButton.setEnabled(false);
-        tripButton.setEnabled(false);
-        trackingButtonTips.setVisibility(View.VISIBLE);
+        endTripButton.setEnabled(false);
 
         presenter.setMyLocationEnabled(false);
     }
@@ -225,36 +242,85 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void onDestinationChanged(String address) {
-        if (TextUtils.isEmpty(address)) {
-            tripButton.setVisibility(View.INVISIBLE);
-        } else {
-            tripButton.setVisibility(View.VISIBLE);
+        if (getActivity() != null) {
+            SearchPlaceFragment fragment = (SearchPlaceFragment) getActivity().getSupportFragmentManager().findFragmentByTag(SearchPlaceFragment.class.getSimpleName());
+            if (fragment != null) {
+                fragment.updateAddress(address);
+            }
         }
-        destination.setText(address);
     }
 
     @Override
-    public void onTripChanged(Trip trip) {
-        if (trip == null || !"active".equals(trip.getStatus())) {
-            tripButton.setText(R.string.start_trip);
-            tripButton.setBackgroundResource(R.drawable.button);
-            tripButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    presenter.startTrip();
-                }
-            });
+    public void showTripInfo(Trip trip) {
+        if (trip.getDestination() == null) {
+
+            destinationStatus.setVisibility(View.GONE);
+            destinationAddress.setVisibility(View.GONE);
         } else {
-            tripButton.setVisibility(View.VISIBLE);
-            tripButton.setText(R.string.end_trip);
-            tripButton.setBackgroundResource(R.drawable.button_cancel);
-            tripButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    presenter.endTrip();
+
+            if (trip.getDestination().getArrivedDate() != null) {
+                destinationStatus.setText(R.string.arrived);
+            } else if (trip.getEstimate() != null && trip.getEstimate().getRoute() != null
+                    && trip.getEstimate().getRoute().getDuration() != null) {
+                int remainingDuration = trip.getEstimate().getRoute().getDuration();
+                if (remainingDuration < 120) {
+                    destinationStatus.setText(getString(R.string.arriving_now));
+                } else {
+                    destinationStatus.setText(
+                            String.format(getString(R.string._away), TimeUnit.SECONDS.toMinutes(remainingDuration))
+                    );
                 }
-            });
+            } else {
+                destinationStatus.setText("");
+            }
+            destinationAddress.setText(trip.getDestination().getAddress());
+
+            destinationStatus.setVisibility(View.VISIBLE);
+            destinationAddress.setVisibility(View.VISIBLE);
         }
+
+        share.setVisibility(View.GONE);
+        tripSummaryInfo.setVisibility(View.GONE);
+
+        tripInfo.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void showTripSummaryInfo(Trip trip) {
+        if (trip.getDestination() == null && trip.getSummary() == null) {
+
+            stats.setVisibility(View.GONE);
+            destination.setVisibility(View.GONE);
+        } else {
+
+            if (trip.getSummary() != null) {
+                double miles = trip.getSummary().getDistance() * 0.000621371;
+                long mins = TimeUnit.SECONDS.toMinutes(trip.getSummary().getDuration());
+                String statsText = String.format(getString(R.string.miles_mins), miles, mins);
+                stats.setText(statsText);
+            }
+            if (trip.getDestination() != null) {
+                destination.setText(trip.getDestination().getAddress());
+            }
+
+            stats.setVisibility(View.VISIBLE);
+            destination.setVisibility(View.VISIBLE);
+        }
+
+        share.setVisibility(View.GONE);
+        tripInfo.setVisibility(View.GONE);
+
+        tripSummaryInfo.setVisibility(View.VISIBLE);
+        closeButton.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void dismissTrip() {
+        share.setVisibility(View.VISIBLE);
+
+        tripInfo.setVisibility(View.GONE);
+        tripSummaryInfo.setVisibility(View.GONE);
+        closeButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -267,14 +333,21 @@ public class TrackingFragment extends SupportMapFragment
         loader.stop();
     }
 
-    private void openPlaceSearch() {
-        List<Place.Field> fields = Arrays.asList(
-                Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS
-        );
-        Intent intent = new Autocomplete.IntentBuilder(
-                AutocompleteActivityMode.FULLSCREEN, fields)
-                .build(getActivity());
-        startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
+    @Override
+    public void addFragment(Fragment fragment) {
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .add(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName())
+                    .addToBackStack(fragment.getClass().getSimpleName())
+                    .commitAllowingStateLoss();
+        }
+    }
+
+    @Override
+    public void popBackStack() {
+        if (getActivity() != null) {
+            getActivity().getSupportFragmentManager().popBackStack();
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -310,7 +383,6 @@ public class TrackingFragment extends SupportMapFragment
 
     private void showTurnOnLocationSnackbar() {
         if (getActivity() != null && !InstantApps.isInstantApp(getActivity())) {
-            trackingButtonTips.setVisibility(View.GONE);
             turnOnLocationSnackbar.show();
         }
     }

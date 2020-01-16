@@ -10,100 +10,144 @@
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomSearch"
+        android:layout_marginBottom="-16dp"
+        app:layout_constraintBottom_toTopOf="@id/bottom_holder"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/blocking_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/content_frame"
+        app:layout_constraintTop_toTopOf="@id/content_frame" />
+
+    <Button
+        android:id="@+id/close_button"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_margin="@dimen/content_padding"
+        android:background="@drawable/bg_button_black"
+        android:paddingStart="@dimen/content_padding"
+        android:paddingEnd="@dimen/content_padding"
+        android:text="@string/close"
+        android:visibility="gone"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/trackingButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
+        android:id="@+id/location_button"
+        style="@style/FloatingActionButtonSmall"
+        app:layout_constraintBottom_toTopOf="@id/share"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:maxImageSize="18dp"
-        app:rippleColor="@null"
-        app:srcCompat="@drawable/ic_on" />
-
-    <TextView
-        android:id="@+id/trackingButtonTips"
-        style="@style/TipsStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="4dp"
-        android:gravity="center"
-        android:padding="8dp"
-        android:text="@string/tap_to_restart_tracking"
-        app:layout_constraintBottom_toBottomOf="@+id/trackingButton"
-        app:layout_constraintRight_toLeftOf="@+id/trackingButton"
-        app:layout_constraintTop_toTopOf="@+id/trackingButton" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/locationButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/fab_margin"
-        app:backgroundTint="@color/colorFAButtonSecondary"
-        app:borderWidth="0dp"
-        app:elevation="6dp"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="@id/content_frame"
-        app:layout_constraintRight_toRightOf="parent"
-        app:maxImageSize="16dp"
-        app:rippleColor="@null"
         app:srcCompat="@drawable/ic_location" />
+
+    <Button
+        android:id="@+id/share"
+        style="@style/ActionButtonStyle"
+        android:layout_margin="24dp"
+        android:text="@string/share_live"
+        app:layout_constraintBottom_toTopOf="@id/bottom_holder"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:layout_marginBottom="16dp"
-        android:background="@drawable/elevation"
-        app:layout_constraintBottom_toTopOf="@id/bottomSearch" />
+        android:background="@drawable/elevation_bottom"
+        app:layout_constraintBottom_toBottomOf="@id/content_frame" />
 
-    <include
-        android:id="@+id/bottomSearch"
-        layout="@layout/search_destination"
-        android:layout_width="match_parent"
-        android:layout_height="44dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintBottom_toTopOf="@id/bottomNavigation" />
-
-    <LinearLayout
-        android:id="@+id/bottomNavigation"
+    <FrameLayout
+        android:id="@+id/bottom_holder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="@dimen/content_padding"
-        android:weightSum="2"
+        android:background="@color/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <Button
-            android:id="@+id/shareButton"
-            style="@style/ButtonStyle"
-            android:layout_width="0dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/button"
-            android:text="@string/share_live"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/trip_summary_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/content_padding"
+            android:visibility="gone">
 
-        <Button
-            android:id="@+id/tripButton"
-            style="@style/ButtonStyle"
-            android:layout_width="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_weight="1"
-            android:background="@drawable/button"
-            android:text="@string/start_trip"
-            android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/destination"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/arrival_sd_c"
+                android:drawablePadding="8dp"
+                android:gravity="center_vertical"
+                app:layout_constraintTop_toBottomOf="@id/stats" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/trip_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/content_padding"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/destination_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/eta"
+                android:drawablePadding="8dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/destination_address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/destination"
+                android:drawablePadding="8dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@id/destination_status" />
+
+            <Button
+                android:id="@+id/shareButton"
+                style="@style/ButtonStyle"
+                android:layout_width="0dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/button"
+                android:text="@string/share_eta"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toLeftOf="@id/endTripButton"
+                app:layout_constraintTop_toBottomOf="@id/destination_address" />
+
+            <Button
+                android:id="@+id/endTripButton"
+                style="@style/ButtonStyle"
+                android:layout_width="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/button_cancel"
+                android:text="@string/end_trip"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintLeft_toRightOf="@id/shareButton"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/destination_address" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

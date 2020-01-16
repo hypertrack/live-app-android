@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorHyperTrack</item>
         <item name="android:windowBackground">@color/colorBackground</item>
         <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:homeAsUpIndicator">@drawable/arrow_left</item>
 
         <item name="actionBarTheme">@style/ToolbarStyle</item>
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
@@ -15,6 +16,8 @@
 
         <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
         <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
+
+        <item name="android:listDivider">@drawable/divider</item>
 
         <!--<item name="hyperTrackMapStyle">@style/HyperTrackMap</item>-->
     </style>
@@ -81,7 +84,7 @@
 
     <style name="ButtonStyle">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:background">@drawable/bg_button</item>
         <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">16sp</item>
@@ -95,12 +98,34 @@
         <item name="android:textSize">16sp</item>
     </style>
 
+    <style name="ActionButtonStyle">
+        <item name="android:layout_width">232dp</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:background">@drawable/bg_button</item>
+        <item name="android:textColor">#ffffff</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
     <style name="TipsStyle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:background">@drawable/bg_tips</item>
         <item name="android:textColor">#ffffff</item>
         <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="FloatingActionButtonSmall">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">@dimen/fab_margin</item>
+        <item name="backgroundTint">@color/colorFAButtonSecondary</item>
+        <item name="borderWidth">0dp</item>
+        <item name="elevation">6dp</item>
+        <item name="fabSize">mini</item>
+        <item name="maxImageSize">16dp</item>
+        <item name="rippleColor">@null</item>
+        <item name="srcCompat">@null</item>
     </style>
 
 </resources>
