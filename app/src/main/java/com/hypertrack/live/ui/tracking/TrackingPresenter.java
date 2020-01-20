@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.hypertrack.live.BuildConfig;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
@@ -71,6 +73,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private boolean mapDestinationMode = false;
 
     protected final CompositeDisposable disposables = new CompositeDisposable();
+    private GoogleMapAdapter mapAdapter;
 
     public TrackingPresenter(@NonNull Context context, @NonNull final View view, @NonNull String hyperTrackPubKey) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
@@ -115,16 +118,13 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         hyperTrack.addTrackingListener(onTrackingStateChangeListener);
         hyperTrackViews.subscribeToDeviceUpdates(hyperTrack.getDeviceID(), this);
 
-        GoogleMapAdapter mapAdapter = new GoogleMapAdapter(googleMap, mapConfig);
+        mapAdapter = new GoogleMapAdapter(googleMap, mapConfig);
         mapAdapter.addTripFilter(new Predicate<Trip>() {
             @Override
             public boolean apply(Trip trip) {
                 return trip.getTripId().equals(state.getTripId());
             }
         });
-        hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter)
-                .bind(new GpsLocationProvider(context))
-                .bind(hyperTrackViews, hyperTrack.getDeviceID());
 
         if (TextUtils.isEmpty(state.getTripId())) {
             hyperTrackMap.setLocationUpdatesListener(new SimpleLocationListener() {
@@ -136,6 +136,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             });
         } else {
             view.showProgressBar();
+
             hyperTrackViews.getTrip(state.getTripId(), new com.hypertrack.sdk.views.QueryResultHandler<Trip>() {
                 @Override
                 public void onQueryResult(Trip trip) {
@@ -145,6 +146,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     tripSubscription = hyperTrackMap.subscribeTrip(state.getTripId());
                     hyperTrackMap.moveToTrip(trip);
                     if (trip.getStatus().equals("active")) {
+                        startTracking();
                         view.showTripInfo(trip);
                     } else {
                         view.showTripSummaryInfo(trip);
@@ -157,6 +159,12 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     view.hideProgressBar();
                 }
             });
+
+            hyperTrack.start();
+        }
+
+        if (BuildConfig.DEBUG) {
+            hyperTrack.start();
         }
     }
 
@@ -184,20 +192,25 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
     }
 
-    public void performTracking() {
-        SharedPreferences.Editor editor = context.getSharedPreferences(context.getString(R.string.app_name), Activity.MODE_PRIVATE)
-                .edit();
-        if (hyperTrack.isRunning()) {
-            hyperTrack.stop();
-            editor.putBoolean("is_tracking", false).apply();
-        } else {
-            if (AppUtils.isGpsProviderEnabled(context)) {
-                hyperTrack.start();
-                editor.putBoolean("is_tracking", true).apply();
-            } else {
-                actionLocationSourceSettings();
-            }
+    private void startTracking() {
+        if (hyperTrackMap == null) {
+            hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter)
+                    .bind(new GpsLocationProvider(context));
         }
+        if (AppUtils.isGpsProviderEnabled(context)) {
+            hyperTrackMap.bind(hyperTrackViews, hyperTrack.getDeviceID());
+            hyperTrack.start();
+        } else {
+            actionLocationSourceSettings();
+        }
+    }
+
+    private void stopTracking() {
+        if (hyperTrackMap != null) {
+            hyperTrackMap.destroy();
+            hyperTrackMap = null;
+        }
+        hyperTrack.stop();
     }
 
     public void share() {
@@ -300,6 +313,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
         hyperTrackMap.adapter().notifyDataSetChanged();
         view.dismissTrip();
+        hyperTrack.stop();
     }
 
     public void actionLocationSourceSettings() {
@@ -382,11 +396,13 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     }
 
     public void destroy() {
-        if (hyperTrackMap != null) {
-            hyperTrackMap.destroy();
-            hyperTrackMap = null;
-        }
+        stopTracking();
+
         hyperTrack.removeTrackingListener(onTrackingStateChangeListener);
+        if (TextUtils.isEmpty(state.getTripId()) && !BuildConfig.DEBUG) {
+            hyperTrack.stop();
+        }
+
         hyperTrackViews.stopAllUpdates();
         disposables.clear();
     }

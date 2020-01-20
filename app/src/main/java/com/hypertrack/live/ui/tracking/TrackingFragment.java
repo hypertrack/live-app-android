@@ -114,11 +114,13 @@ public class TrackingFragment extends SupportMapFragment
             public void onClick(View view) {
 
                 presenter.setCameraFixedEnabled(true);
+                locationButton.hide();
                 blockingView.setOnTouchListener(new android.view.View.OnTouchListener() {
 
                     @Override
                     public boolean onTouch(android.view.View view, MotionEvent motionEvent) {
                         presenter.setCameraFixedEnabled(false);
+                        locationButton.show();
                         blockingView.setOnTouchListener(null);
                         return false;
                     }

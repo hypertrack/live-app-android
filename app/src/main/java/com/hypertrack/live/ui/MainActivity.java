@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private HyperTrack hyperTrack;
     private MyTrackingStateListener myTrackingStateListener = new MyTrackingStateListener() {
+
         @Override
         public void onError(TrackingError trackingError) {
             loader.stop();
@@ -214,9 +215,6 @@ public class MainActivity extends AppCompatActivity {
                     .setTrackingNotificationConfig(notificationConfig)
                     .addTrackingListener(myTrackingStateListener)
                     .setDeviceName(AppUtils.getDeviceName(this));
-            if (shouldStartTracking) {
-                hyperTrack.start();
-            }
             addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
             Log.i("getDeviceId", hyperTrack.getDeviceID());
         }
