@@ -3,13 +3,9 @@ package com.hypertrack.live.ui.tracking;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -73,7 +69,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private boolean mapDestinationMode = false;
 
     protected final CompositeDisposable disposables = new CompositeDisposable();
-    private GoogleMapAdapter mapAdapter;
 
     public TrackingPresenter(@NonNull Context context, @NonNull final View view, @NonNull String hyperTrackPubKey) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
@@ -117,14 +112,15 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         };
         hyperTrack.addTrackingListener(onTrackingStateChangeListener);
         hyperTrackViews.subscribeToDeviceUpdates(hyperTrack.getDeviceID(), this);
-
-        mapAdapter = new GoogleMapAdapter(googleMap, mapConfig);
+        GoogleMapAdapter mapAdapter = new GoogleMapAdapter(googleMap, mapConfig);
         mapAdapter.addTripFilter(new Predicate<Trip>() {
             @Override
             public boolean apply(Trip trip) {
                 return trip.getTripId().equals(state.getTripId());
             }
         });
+        hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter)
+                .bind(new GpsLocationProvider(context));
 
         if (TextUtils.isEmpty(state.getTripId())) {
             hyperTrackMap.setLocationUpdatesListener(new SimpleLocationListener() {
@@ -146,7 +142,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     tripSubscription = hyperTrackMap.subscribeTrip(state.getTripId());
                     hyperTrackMap.moveToTrip(trip);
                     if (trip.getStatus().equals("active")) {
-                        startTracking();
+                        startHyperTrackTracking();
                         view.showTripInfo(trip);
                     } else {
                         view.showTripSummaryInfo(trip);
@@ -159,8 +155,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     view.hideProgressBar();
                 }
             });
-
-            hyperTrack.start();
         }
 
         if (BuildConfig.DEBUG) {
@@ -169,7 +163,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     }
 
     public void resume() {
-        if (hyperTrack.isRunning()) {
+        if (AppUtils.isGpsProviderEnabled(context)) {
             view.onTrackingStart();
         } else {
             view.onTrackingStop();
@@ -192,25 +186,13 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
     }
 
-    private void startTracking() {
-        if (hyperTrackMap == null) {
-            hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter)
-                    .bind(new GpsLocationProvider(context));
-        }
+    private void startHyperTrackTracking() {
         if (AppUtils.isGpsProviderEnabled(context)) {
             hyperTrackMap.bind(hyperTrackViews, hyperTrack.getDeviceID());
             hyperTrack.start();
         } else {
             actionLocationSourceSettings();
         }
-    }
-
-    private void stopTracking() {
-        if (hyperTrackMap != null) {
-            hyperTrackMap.destroy();
-            hyperTrackMap = null;
-        }
-        hyperTrack.stop();
     }
 
     public void share() {
@@ -260,6 +242,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                         view.hideProgressBar();
                         view.showTripInfo(trip);
                         hyperTrackMap.moveToTrip(trip);
+                        startHyperTrackTracking();
                     }
 
                     @Override
@@ -294,6 +277,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             @Override
             public void onResultReceived(@NonNull String s) {
                 view.hideProgressBar();
+                hyperTrack.stop();
             }
 
             @Override
@@ -313,7 +297,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
         hyperTrackMap.adapter().notifyDataSetChanged();
         view.dismissTrip();
-        hyperTrack.stop();
     }
 
     public void actionLocationSourceSettings() {
@@ -396,7 +379,10 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     }
 
     public void destroy() {
-        stopTracking();
+        if (hyperTrackMap != null) {
+            hyperTrackMap.destroy();
+            hyperTrackMap = null;
+        }
 
         hyperTrack.removeTrackingListener(onTrackingStateChangeListener);
         if (TextUtils.isEmpty(state.getTripId()) && !BuildConfig.DEBUG) {

@@ -44,4 +44,29 @@
     <string name="arrived">Arrived</string>
     <string name="close">Close</string>
     <string name="miles_mins">%.2f miles • %d mins</string>
+    <string name="sign_in_to_your_account">Sign in to your account</string>
+    <string name="email_address">Email address</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="incorrect_username_or_pass">Incorrect username or password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="don_t_have_an_account">Don’t have an account?</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="sign_up_a_new_account">Sign up a new account</string>
+    <string name="_14_day_free_trial_no_credit_card_required">14 day free trial. No Credit card required</string>
+    <string name="company_or_product_name">Company or product name</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="accept_continue"><![CDATA[Accept & Continue]]></string>
+    <string name="i_agree_to_terms_of_service"><![CDATA[By clicking on the Accept & Continue button I agree to <a href="https://www.hypertrack.com/terms">Terms of Service</a> and <a href="https://www.hypertrack.com/agreement">HyperTrack SaaS Agreement</a>]]></string>
+    <string name="all_fields_required">All fields required</string>
+    <string name="my_app_manages">My app manages</string>
+
+    <array name="categories">
+        <item>Gig economy</item>
+        <item>On-demand delivery</item>
+        <item>Logistics</item>
+        <item>Workforce</item>
+        <item>Other</item>
+    </array>
 </resources>

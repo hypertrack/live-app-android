@@ -94,26 +94,14 @@ public class MainActivity extends AppCompatActivity {
         loader = new LoaderDecorator(this);
 
         final SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        String installReferrer = sharedPreferences.getString("_install_referrer", "");
         String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-        boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-
-        if (!TextUtils.isEmpty(installReferrer)) {
-            hyperTrackPublicKey = installReferrer;
-            shouldStartTracking = true;
-            sharedPreferences.edit()
-                    .remove("_install_referrer")
-                    .putString("pub_key", hyperTrackPublicKey)
-                    .putBoolean("is_tracking", true)
-                    .apply();
-        }
 
         if (TextUtils.isEmpty(hyperTrackPublicKey) ||
                 PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
             addFragment(WelcomeFragment.newInstance(!TextUtils.isEmpty(hyperTrackPublicKey)));
         } else {
-            initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+            initializeHyperTrack(hyperTrackPublicKey);
         }
     }
 
@@ -143,15 +131,13 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 String hyperTrackPublicKey = data.getStringExtra(VerificationActivity.VERIFICATION_KEY);
                 SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
                 sharedPreferences.edit()
                         .putString("pub_key", hyperTrackPublicKey)
-                        .putBoolean("is_tracking", true)
                         .apply();
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
                         || PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                    initializeHyperTrack(hyperTrackPublicKey);
                 } else {
                     addFragment(WelcomeFragment.newInstance(true));
                 }
@@ -160,8 +146,7 @@ public class MainActivity extends AppCompatActivity {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
                 String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-                boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-                initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                initializeHyperTrack(hyperTrackPublicKey);
             }
         }
     }
@@ -178,8 +163,7 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
                     String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-                    boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-                    initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                    initializeHyperTrack(hyperTrackPublicKey);
                 } else {
                     AlertDialog alertDialog = new AlertDialog.Builder(this)
                             .setNegativeButton(android.R.string.cancel, null)
@@ -203,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeHyperTrack(final String hyperTrackPublicKey, boolean shouldStartTracking) {
+    private void initializeHyperTrack(final String hyperTrackPublicKey) {
 
         if (!TextUtils.isEmpty(hyperTrackPublicKey)) {
             HyperTrack.enableDebugLogging();
