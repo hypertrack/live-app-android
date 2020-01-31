@@ -139,7 +139,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     view.hideProgressBar();
 
                     state.setShareableUrl(trip.getViews().getSharedUrl());
-                    tripSubscription = hyperTrackMap.subscribeTrip(state.getTripId());
                     hyperTrackMap.moveToTrip(trip);
                     if (trip.getStatus().equals("active")) {
                         startHyperTrackTracking();
@@ -147,6 +146,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     } else {
                         view.showTripSummaryInfo(trip);
                     }
+                    tripSubscription = hyperTrackMap.subscribeTrip(state.getTripId());
                 }
 
                 @Override
@@ -195,6 +195,11 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
     }
 
+    private void stopHyperTrackTracking() {
+        hyperTrackMap.unbindHyperTrackViews();
+        hyperTrack.stop();
+    }
+
     public void share() {
         if (mapDestinationMode) {
             stopMapDestinationMode();
@@ -240,6 +245,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     @Override
                     public void onQueryResult(Trip trip) {
                         view.hideProgressBar();
+
                         view.showTripInfo(trip);
                         hyperTrackMap.moveToTrip(trip);
                         startHyperTrackTracking();
@@ -248,6 +254,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                     @Override
                     public void onQueryFailure(Exception e) {
                         Log.e(TAG, "start trip failure", e);
+                        view.hideProgressBar();
                     }
                 });
             }
@@ -277,7 +284,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             @Override
             public void onResultReceived(@NonNull String s) {
                 view.hideProgressBar();
-                hyperTrack.stop();
+                stopHyperTrackTracking();
             }
 
             @Override
@@ -385,10 +392,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
 
         hyperTrack.removeTrackingListener(onTrackingStateChangeListener);
-        if (TextUtils.isEmpty(state.getTripId()) && !BuildConfig.DEBUG) {
-            hyperTrack.stop();
-        }
-
         hyperTrackViews.stopAllUpdates();
         disposables.clear();
     }

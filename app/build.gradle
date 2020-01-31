@@ -41,12 +41,12 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-//            applicationIdSuffix ".android.github"
+            applicationIdSuffix ".android.github"
         }
 
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             debuggable false
 
             if (signingConfigs.hasProperty("release")) {
@@ -79,9 +79,9 @@ dependencies {
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
-    implementation 'com.hypertrack:hypertrack:3.8.3'
+    implementation 'com.hypertrack:hypertrack:8.8.8-SNAPSHOT'
     implementation 'com.hypertrack:hypertrack-views:0.8.0-SNAPSHOT'
-    implementation 'com.hypertrack:maps-google:0.1.1'
+    implementation 'com.hypertrack:maps-google:0.1.2-SNAPSHOT'
 
     implementation 'com.airbnb.android:lottie:3.1.0'
 

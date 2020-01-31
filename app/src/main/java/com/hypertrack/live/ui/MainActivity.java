@@ -220,8 +220,7 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
                         sharedPreferences.edit()
                                 .remove("pub_key")
-                                .remove("is_tracking")
-                                .commit();
+                                .apply();
                         addFragment(WelcomeFragment.newInstance(false));
                     }
                 })
@@ -234,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
     private void networkNotConnected() {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setNegativeButton(R.string.app_settings, new DialogInterface.OnClickListener() {
+
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);

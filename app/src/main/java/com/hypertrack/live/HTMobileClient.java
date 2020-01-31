@@ -1,8 +1,11 @@
 package com.hypertrack.live;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -39,8 +42,17 @@ public class HTMobileClient {
     private RequestQueue mRequestQueue;
     private final Map<String, String> headers = new HashMap<>();
 
-    public static HTMobileClient getInstance(Context context) {
-        return new HTMobileClient(context);
+    private String signUpEmail;
+    private String signUpPassword;
+
+    @SuppressLint("StaticFieldLeak")
+    private static HTMobileClient client;
+
+    public synchronized static HTMobileClient getInstance(Context context) {
+        if (client == null) {
+            client = new HTMobileClient(context);
+        }
+        return client;
     }
 
     private HTMobileClient(Context context) {
@@ -59,21 +71,17 @@ public class HTMobileClient {
     }
 
     public void initialize(@NonNull final Callback callback) {
-        AWSMobileClient.getInstance().initialize(mContext, new com.amazonaws.mobile.client.Callback<UserStateDetails>() {
+        AWSMobileClient.getInstance().initialize(mContext, new InnerCallback<UserStateDetails>(callback) {
             @Override
             public void onResult(UserStateDetails userStateDetails) {
-                callback.onSuccess(HTMobileClient.this);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                callback.onError(e.getMessage());
+                onSuccessHidden(HTMobileClient.this);
             }
         });
     }
 
-    public void signIn(String email, final String password, @NonNull final Callback callback) {
-        AWSMobileClient.getInstance().signIn(email, password, null, new com.amazonaws.mobile.client.Callback<SignInResult>() {
+    public void signIn(final String email, final String password, @NonNull final Callback callback) {
+        AWSMobileClient.getInstance().signIn(email, password, null, new InnerCallback<SignInResult>(callback) {
+
             @Override
             public void onResult(SignInResult result) {
                 updatePublishableKey(callback);
@@ -81,24 +89,44 @@ public class HTMobileClient {
 
             @Override
             public void onError(Exception e) {
-                callback.onError(e.getMessage());
+                super.onError(e);
+                signUpEmail = email;
+                signUpPassword = password;
             }
         });
-
     }
 
-    public void signUp(String email, final String password, Map<String, String> attributes, @NonNull final Callback callback) {
-        AWSMobileClient.getInstance().signUp(email, password, attributes, null, new com.amazonaws.mobile.client.Callback<SignUpResult>() {
+    public void signUp(final String email, final String password, Map<String, String> attributes, @NonNull final Callback callback) {
+        AWSMobileClient.getInstance().signUp(email, password, attributes, null, new InnerCallback<SignUpResult>(callback) {
             @Override
             public void onResult(SignUpResult result) {
-                callback.onSuccess(HTMobileClient.this);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                callback.onError(e.getMessage());
+                signUpEmail = email;
+                signUpPassword = password;
+                onSuccessHidden(HTMobileClient.this);
             }
         });
+    }
+
+    public void resendSignUp(@NonNull final Callback callback) {
+        if (!TextUtils.isEmpty(signUpEmail)) {
+            AWSMobileClient.getInstance().resendSignUp(signUpEmail, new InnerCallback<SignUpResult>(callback) {
+                @Override
+                public void onResult(SignUpResult result) {
+                    onSuccessHidden(HTMobileClient.this);
+                }
+            });
+        }
+    }
+
+    public void confirmSignIn(@NonNull final Callback callback) {
+        AWSMobileClient.getInstance().signIn(signUpEmail, signUpPassword, null, new InnerCallback<SignInResult>(callback) {
+
+            @Override
+            public void onResult(SignInResult result) {
+                updatePublishableKey(callback);
+            }
+        });
+
     }
 
     public void updatePublishableKey(@NonNull final Callback callback) {
@@ -122,7 +150,8 @@ public class HTMobileClient {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                callback.onError(error.getMessage());
+                Log.e(TAG, "onErrorResponse: " + error.getMessage());
+                callback.onError(error.getMessage(), null);
             }
         });
 
@@ -135,6 +164,7 @@ public class HTMobileClient {
         AWSMobileClient.getInstance().getTokens(new com.amazonaws.mobile.client.Callback<Tokens>() {
             @Override
             public void onResult(Tokens result) {
+                Log.d(TAG, "IdToken: " + result.getIdToken().getTokenString());
                 headers.put("Authorization", result.getIdToken().getTokenString());
                 request.headers.putAll(headers);
                 mRequestQueue.add(request);
@@ -142,7 +172,7 @@ public class HTMobileClient {
 
             @Override
             public void onError(Exception e) {
-                Log.e(TAG, e.getMessage() + "");
+                Log.e(TAG, "request onError: " + e.getMessage());
                 if (request.getErrorListener() != null) {
                     request.getErrorListener().onErrorResponse(new VolleyError(e.getMessage()));
                 }
@@ -193,9 +223,45 @@ public class HTMobileClient {
 
     }
 
+    private static abstract class InnerCallback<T> implements com.amazonaws.mobile.client.Callback<T> {
+
+        private Handler handler = new Handler();
+        private final Callback callback;
+
+        InnerCallback(Callback callback) {
+            this.callback = callback;
+        }
+
+        public abstract void onResult(T result);
+
+        @Override
+        public void onError(Exception e) {
+            Log.e(TAG, "onError: " + e.getMessage());
+            onErrorHidden(e.getLocalizedMessage(), e);
+        }
+
+        protected void onSuccessHidden(final HTMobileClient mobileClient) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onSuccess(mobileClient);
+                }
+            });
+        }
+
+        protected void onErrorHidden(final String message, final Exception e) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    callback.onError(message, e);
+                }
+            });
+        }
+    }
+
     public interface Callback {
         void onSuccess(HTMobileClient mobileClient);
 
-        void onError(String message);
+        void onError(String message, Exception e);
     }
 }

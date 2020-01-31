@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Live</string>
     <string name="default_notification_channel_id" translatable="false">4857</string>
 
@@ -61,12 +61,38 @@
     <string name="i_agree_to_terms_of_service"><![CDATA[By clicking on the Accept & Continue button I agree to <a href="https://www.hypertrack.com/terms">Terms of Service</a> and <a href="https://www.hypertrack.com/agreement">HyperTrack SaaS Agreement</a>]]></string>
     <string name="all_fields_required">All fields required</string>
     <string name="my_app_manages">My app manages</string>
+    <string name="my_app_would_track">My app would track</string>
+    <string name="my_app_is">My app is</string>
+    <string name="verify_your_email">Verify your email</string>
+    <string name="we_have_sent_you_an_email">We have sent you an email with verification link. Please click on the link in the email to continue</string>
+    <string name="i_have_verified">I have verified</string>
+    <string name="resend_verification_link">Resend verification link</string>
+    <string name="user_does_not_exist" tools:ignore="PrivateResource">User does not exist</string>
+    <string name="user_is_not_confirmed">User is not confirmed</string>
+    <string name="an_account_exists">An account with the given email already exists</string>
 
     <array name="categories">
+        <item></item>
         <item>Gig economy</item>
         <item>On-demand delivery</item>
         <item>Logistics</item>
         <item>Workforce</item>
         <item>Other</item>
     </array>
+
+    <array name="devices">
+        <item></item>
+        <item>Less than 100 devices</item>
+        <item>100s of devices</item>
+        <item>1,000s of device</item>
+        <item>More than 10,000 devices</item>
+    </array>
+
+    <array name="stage">
+        <item></item>
+        <item>Being prototyped</item>
+        <item>In pilot</item>
+        <item>In production</item>
+    </array>
+
 </resources>

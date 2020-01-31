@@ -4,10 +4,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentTransaction;
 
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.hypertrack.live.auth.ConfirmFragment;
 import com.hypertrack.live.auth.SignInFragment;
 import com.hypertrack.live.ui.MainActivity;
 
@@ -24,10 +27,18 @@ public class LaunchActivity extends AppCompatActivity {
         HTMobileClient.getInstance(this).initialize(new HTMobileClient.Callback() {
             @Override
             public void onSuccess(HTMobileClient mobileClient) {
+                Log.e("getUsername()", AWSMobileClient.getInstance().getUsername() + "");
+                Log.e("isSignedIn()", AWSMobileClient.getInstance().isSignedIn() + "");
                 if (!mobileClient.isAuthorized() || TextUtils.isEmpty(hyperTrackPublicKey)) {
-                    FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                    transaction.add(R.id.fragment_frame, new SignInFragment(), SignInFragment.class.getSimpleName());
-                    transaction.commitAllowingStateLoss();
+                    if (mobileClient.isAuthorized() && TextUtils.isEmpty(hyperTrackPublicKey)) {
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_frame, new ConfirmFragment(), ConfirmFragment.class.getSimpleName())
+                                .commitAllowingStateLoss();
+                    } else {
+                        getSupportFragmentManager().beginTransaction()
+                                .add(R.id.fragment_frame, new SignInFragment(), SignInFragment.class.getSimpleName())
+                                .commitAllowingStateLoss();
+                    }
                 } else {
                     startActivity(new Intent(LaunchActivity.this, MainActivity.class));
                     finish();
@@ -35,8 +46,8 @@ public class LaunchActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(String message) {
-
+            public void onError(String message, Exception e) {
+                Toast.makeText(LaunchActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }

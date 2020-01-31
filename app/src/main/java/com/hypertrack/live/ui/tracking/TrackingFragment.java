@@ -254,66 +254,70 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void showTripInfo(Trip trip) {
-        if (trip.getDestination() == null) {
+        if (getActivity() != null) {
+            if (trip.getDestination() == null) {
 
-            destinationStatus.setVisibility(View.GONE);
-            destinationAddress.setVisibility(View.GONE);
-        } else {
-
-            if (trip.getDestination().getArrivedDate() != null) {
-                destinationStatus.setText(R.string.arrived);
-            } else if (trip.getEstimate() != null && trip.getEstimate().getRoute() != null
-                    && trip.getEstimate().getRoute().getDuration() != null) {
-                int remainingDuration = trip.getEstimate().getRoute().getDuration();
-                if (remainingDuration < 120) {
-                    destinationStatus.setText(getString(R.string.arriving_now));
-                } else {
-                    destinationStatus.setText(
-                            String.format(getString(R.string._away), TimeUnit.SECONDS.toMinutes(remainingDuration))
-                    );
-                }
+                destinationStatus.setVisibility(View.GONE);
+                destinationAddress.setVisibility(View.GONE);
             } else {
-                destinationStatus.setText("");
+
+                if (trip.getDestination().getArrivedDate() != null) {
+                    destinationStatus.setText(R.string.arrived);
+                } else if (trip.getEstimate() != null && trip.getEstimate().getRoute() != null
+                        && trip.getEstimate().getRoute().getDuration() != null) {
+                    int remainingDuration = trip.getEstimate().getRoute().getDuration();
+                    if (remainingDuration < 120) {
+                        destinationStatus.setText(getString(R.string.arriving_now));
+                    } else {
+                        destinationStatus.setText(
+                                String.format(getString(R.string._away), TimeUnit.SECONDS.toMinutes(remainingDuration))
+                        );
+                    }
+                } else {
+                    destinationStatus.setText("");
+                }
+                destinationAddress.setText(trip.getDestination().getAddress());
+
+                destinationStatus.setVisibility(View.VISIBLE);
+                destinationAddress.setVisibility(View.VISIBLE);
             }
-            destinationAddress.setText(trip.getDestination().getAddress());
 
-            destinationStatus.setVisibility(View.VISIBLE);
-            destinationAddress.setVisibility(View.VISIBLE);
+            share.setVisibility(View.GONE);
+            tripSummaryInfo.setVisibility(View.GONE);
+
+            tripInfo.setVisibility(View.VISIBLE);
         }
-
-        share.setVisibility(View.GONE);
-        tripSummaryInfo.setVisibility(View.GONE);
-
-        tripInfo.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void showTripSummaryInfo(Trip trip) {
-        if (trip.getDestination() == null && trip.getSummary() == null) {
+        if (getActivity() != null) {
+            if (trip.getDestination() == null && trip.getSummary() == null) {
 
-            stats.setVisibility(View.GONE);
-            destination.setVisibility(View.GONE);
-        } else {
+                stats.setVisibility(View.GONE);
+                destination.setVisibility(View.GONE);
+            } else {
 
-            if (trip.getSummary() != null) {
-                double miles = trip.getSummary().getDistance() * 0.000621371;
-                long mins = TimeUnit.SECONDS.toMinutes(trip.getSummary().getDuration());
-                String statsText = String.format(getString(R.string.miles_mins), miles, mins);
-                stats.setText(statsText);
+                if (trip.getSummary() != null) {
+                    double miles = trip.getSummary().getDistance() * 0.000621371;
+                    long mins = TimeUnit.SECONDS.toMinutes(trip.getSummary().getDuration());
+                    String statsText = String.format(getString(R.string.miles_mins), miles, mins);
+                    stats.setText(statsText);
+                }
+                if (trip.getDestination() != null) {
+                    destination.setText(trip.getDestination().getAddress());
+                }
+
+                stats.setVisibility(View.VISIBLE);
+                destination.setVisibility(View.VISIBLE);
             }
-            if (trip.getDestination() != null) {
-                destination.setText(trip.getDestination().getAddress());
-            }
 
-            stats.setVisibility(View.VISIBLE);
-            destination.setVisibility(View.VISIBLE);
+            share.setVisibility(View.GONE);
+            tripInfo.setVisibility(View.GONE);
+
+            tripSummaryInfo.setVisibility(View.VISIBLE);
+            closeButton.setVisibility(View.VISIBLE);
         }
-
-        share.setVisibility(View.GONE);
-        tripInfo.setVisibility(View.GONE);
-
-        tripSummaryInfo.setVisibility(View.VISIBLE);
-        closeButton.setVisibility(View.VISIBLE);
     }
 
     @Override

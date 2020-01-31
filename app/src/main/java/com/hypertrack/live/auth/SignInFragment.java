@@ -8,11 +8,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
+import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
+import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException;
 import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
@@ -26,7 +31,7 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
     private EditText emailAddressEditText;
     private EditText passwordEditText;
     private View passwordClear;
-    private View incorrect;
+    private TextView incorrect;
 
     private LoaderDecorator loader;
 
@@ -62,7 +67,7 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
         view.findViewById(R.id.sign_in).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                incorrect.setVisibility(View.INVISIBLE);
+                incorrect.setText("");
 
                 String email = emailAddressEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
@@ -85,21 +90,35 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
             }
         });
 
+//        emailAddressEditText.setText("eugene+uber@hypertrack.io");
+//        passwordEditText.setText("Hyp3rTr@ck321");
     }
 
     @Override
     public void onSuccess(HTMobileClient mobileClient) {
-        loader.stop();
-
         if (getActivity() != null) {
+            loader.stop();
             startActivity(new Intent(getActivity(), MainActivity.class));
             getActivity().finish();
         }
     }
 
     @Override
-    public void onError(String message) {
-        loader.stop();
-        incorrect.setVisibility(View.VISIBLE);
+    public void onError(String message, Exception e) {
+        if (getActivity() != null) {
+            loader.stop();
+
+            if (e instanceof UserNotConfirmedException) {
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_frame, new ConfirmFragment(), ConfirmFragment.class.getSimpleName())
+                        .commitAllowingStateLoss();
+            } else if (e instanceof UserNotFoundException) {
+                incorrect.setText(R.string.user_does_not_exist);
+            } else if (e instanceof NotAuthorizedException) {
+                incorrect.setText(R.string.incorrect_username_or_pass);
+            } else {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
+            }
+        }
     }
 }
