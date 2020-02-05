@@ -10,6 +10,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.Callback;
+import com.amazonaws.mobile.client.results.Tokens;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
@@ -32,8 +35,6 @@ import com.hypertrack.sdk.AsyncResultHandler;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
-import com.hypertrack.sdk.trip.CreateTripRequest;
-import com.hypertrack.sdk.trip.ShareableTrip;
 import com.hypertrack.sdk.views.DeviceUpdatesHandler;
 import com.hypertrack.sdk.views.HyperTrackViews;
 import com.hypertrack.sdk.views.QueryResultHandler;
@@ -44,6 +45,11 @@ import com.hypertrack.sdk.views.maps.GpsLocationProvider;
 import com.hypertrack.sdk.views.maps.HyperTrackMap;
 import com.hypertrack.sdk.views.maps.Predicate;
 import com.hypertrack.sdk.views.maps.TripSubscription;
+import com.hypertrack.trips.AsyncTokenProvider;
+import com.hypertrack.trips.ResultHandler;
+import com.hypertrack.trips.ShareableTrip;
+import com.hypertrack.trips.TripConfig;
+import com.hypertrack.trips.TripsManager;
 
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -57,6 +63,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private final Handler handler = new Handler();
     private final Context context;
     private final HyperTrack hyperTrack;
+    private final TripsManager tripsManager;
     private final HyperTrackViews hyperTrackViews;
     private GoogleMap googleMap;
     private HyperTrackMap hyperTrackMap;
@@ -77,6 +84,18 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
         hyperTrack = HyperTrack.getInstance(context, hyperTrackPubKey);
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
+        tripsManager = TripsManager.getInstance(context, new AsyncTokenProvider() {
+            @Override
+            public void getAuthenticationToken(@NonNull final ResultHandler<String> resultHandler) {
+                AWSMobileClient.getInstance().getTokens(new Callback<Tokens>() {
+                    @Override public void onResult(Tokens result) {
+                        resultHandler.onResult(result.getIdToken().getTokenString());
+                    }
+
+                    @Override public void onError(Exception e) { resultHandler.onError(e); }
+                });
+            }
+        });
 
         mapConfig = MapUtils.getBuilder(context).build();
     }
@@ -231,19 +250,18 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     public void startTrip() {
         view.showProgressBar();
 
-        AsyncResultHandler<ShareableTrip> resultHandler = new AsyncResultHandler<ShareableTrip>() {
+        ResultHandler<ShareableTrip> resultHandler = new ResultHandler<ShareableTrip>() {
             @Override
-            public void onResultReceived(@NonNull ShareableTrip trip) {
+            public void onResult(@NonNull ShareableTrip trip) {
                 updateDestination(null);
 
                 state.setTripId(trip.getTripId());
-                state.setShareableUrl(trip.getShareableUrl());
+                state.setShareableUrl(trip.getShareUrl());
                 shareHyperTrackUrl();
 
                 tripSubscription = hyperTrackMap.subscribeTrip(trip.getTripId());
                 hyperTrackViews.getTrip(trip.getTripId(), new QueryResultHandler<Trip>() {
-                    @Override
-                    public void onQueryResult(Trip trip) {
+                    @Override public void onQueryResult(Trip trip) {
                         view.hideProgressBar();
 
                         view.showTripInfo(trip);
@@ -251,44 +269,44 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                         startHyperTrackTracking();
                     }
 
-                    @Override
-                    public void onQueryFailure(Exception e) {
+                    @Override public void onQueryFailure(Exception e) {
                         Log.e(TAG, "start trip failure", e);
                         view.hideProgressBar();
                     }
                 });
+
             }
 
             @Override
-            public void onFailure(@NonNull Error error) {
+            public void onError(@NonNull Exception error) {
                 Log.e(TAG, "start trip failure", error);
                 view.hideProgressBar();
+
             }
+
         };
-        CreateTripRequest tripRequest;
+        TripConfig tripRequest;
         if (state.getDestination() == null) {
-            tripRequest = new CreateTripRequest.Builder().build();
+            tripRequest = new TripConfig.Builder().build();
         } else {
-            tripRequest = new CreateTripRequest.Builder()
+            tripRequest = new TripConfig.Builder()
                     .setDestinationLatitude(state.getDestination().latitude)
                     .setDestinationLongitude(state.getDestination().longitude)
                     .build();
         }
-        hyperTrack.createTrip(tripRequest, resultHandler);
+        tripsManager.createTrip(tripRequest, resultHandler);
     }
 
     public void endTrip() {
         view.showProgressBar();
 
-        hyperTrack.completeTrip(state.getTripId(), new AsyncResultHandler<String>() {
-            @Override
-            public void onResultReceived(@NonNull String s) {
+        tripsManager.completeTrip(state.getTripId(), new ResultHandler<String>() {
+
+            @Override public void onResult(@NonNull String result) {
                 view.hideProgressBar();
                 stopHyperTrackTracking();
             }
-
-            @Override
-            public void onFailure(@NonNull Error error) {
+            @Override public void onError(@NonNull Exception error) {
                 view.hideProgressBar();
                 Log.e(TAG, "complete trip failure", error);
             }
@@ -424,12 +442,12 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     }
 
     @Override
-    public void onError(Exception e, String s) {
+    public void onError(@NonNull Exception e, @NonNull String s) {
 
     }
 
     @Override
-    public void onCompleted(String s) {
+    public void onCompleted(@NonNull String s) {
 
     }
 
