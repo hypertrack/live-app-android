@@ -34,7 +34,7 @@
             android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="24dp"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -74,11 +74,11 @@
             android:id="@+id/agree_to_terms_of_service"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_horizontal"
             android:textColor="@color/textColorSecondary"
             android:textColorLink="#0a84ff"
-            android:textSize="14sp"
+            android:textSize="12sp"
             android:visibility="invisible"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -107,7 +107,7 @@
                 android:id="@+id/sign_in"
                 style="@style/ActionButtonStyle"
                 android:background="@drawable/bg_button_light"
-                android:text="@string/sign_up"
+                android:text="@string/sign_in"
                 android:textColor="@color/colorHyperTrack" />
         </LinearLayout>
 

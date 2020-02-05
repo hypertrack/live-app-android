@@ -72,7 +72,7 @@
     <string name="an_account_exists">An account with the given email already exists</string>
 
     <array name="categories">
-        <item></item>
+        <item>not selected</item>
         <item>Gig economy</item>
         <item>On-demand delivery</item>
         <item>Logistics</item>
@@ -81,7 +81,7 @@
     </array>
 
     <array name="devices">
-        <item></item>
+        <item>not selected</item>
         <item>Less than 100 devices</item>
         <item>100s of devices</item>
         <item>1,000s of device</item>
@@ -89,7 +89,7 @@
     </array>
 
     <array name="stage">
-        <item></item>
+        <item>not selected</item>
         <item>Being prototyped</item>
         <item>In pilot</item>
         <item>In production</item>
