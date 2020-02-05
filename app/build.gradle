@@ -41,7 +41,6 @@ android {
         debug {
             minifyEnabled false
             debuggable true
-            applicationIdSuffix ".android.github"
         }
 
         release {
@@ -79,9 +78,9 @@ dependencies {
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
-    implementation 'com.hypertrack:hypertrack:4.0.0-SNAPSHOT'
+    implementation 'com.hypertrack:hypertrack:8.8.8-SNAPSHOT'
     implementation 'com.hypertrack:hypertrack-views:0.8.0-SNAPSHOT'
-    implementation 'com.hypertrack:maps-google:0.1.1'
+    implementation 'com.hypertrack:maps-google:0.1.2-SNAPSHOT'
     implementation project(':hypertrack-trips')
 
     implementation 'com.hypertrack:maps-google:0.1.1'
@@ -107,4 +106,4 @@ def computeVersionNumber() {
 }
 
 // Google Play services Gradle plugin. Add google-services.json and uncomment
-// apply plugin: 'com.google.gms.google-services'
+ apply plugin: 'com.google.gms.google-services'

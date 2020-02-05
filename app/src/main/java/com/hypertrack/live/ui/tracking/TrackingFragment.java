@@ -53,6 +53,7 @@ public class TrackingFragment extends SupportMapFragment
 
     private Snackbar turnOnLocationSnackbar;
     private View blockingView;
+    private FloatingActionButton trackingStatusButton;
     private FloatingActionButton locationButton;
     private View tripInfo;
     private View tripSummaryInfo;
@@ -108,6 +109,7 @@ public class TrackingFragment extends SupportMapFragment
         mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map_silver);
 
         blockingView = view.findViewById(R.id.blocking_view);
+        trackingStatusButton = view.findViewById(R.id.tracking_status_button);
         locationButton = view.findViewById(R.id.location_button);
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -207,6 +209,25 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void onTrackingStart() {
+        trackingStatusButton.setImageResource(R.drawable.sharing_status);
+    }
+
+
+    @Override
+    public void onTrackingStop() {
+        trackingStatusButton.setImageResource(R.drawable.sharing_status_disable);
+    }
+
+    @Override
+    public void onError(TrackingError trackingError) {
+        if (trackingError.code == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
+            showTurnOnLocationSnackbar();
+        }
+        onDisabled();
+    }
+
+    @Override
+    public void onActive() {
         if (turnOnLocationSnackbar.isShown()) {
             turnOnLocationSnackbar.dismiss();
         }
@@ -214,32 +235,19 @@ public class TrackingFragment extends SupportMapFragment
             mGoogleMap.setMapStyle(mapStyleOptions);
             isMapStyleChanged = false;
         }
-        locationButton.show();
         shareButton.setEnabled(true);
         endTripButton.setEnabled(true);
 
-        presenter.setMyLocationEnabled(true);
     }
 
-
     @Override
-    public void onTrackingStop() {
-        locationButton.hide();
+    public void onDisabled() {
+        if (mGoogleMap != null) {
+            mGoogleMap.setMapStyle(mapStyleOptionsSilver);
+            isMapStyleChanged = true;
+        }
         shareButton.setEnabled(false);
         endTripButton.setEnabled(false);
-
-        presenter.setMyLocationEnabled(false);
-    }
-
-    @Override
-    public void onError(TrackingError trackingError) {
-        if (trackingError.code == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
-            showTurnOnLocationSnackbar();
-            if (mGoogleMap != null) {
-                mGoogleMap.setMapStyle(mapStyleOptionsSilver);
-                isMapStyleChanged = true;
-            }
-        }
     }
 
     @Override

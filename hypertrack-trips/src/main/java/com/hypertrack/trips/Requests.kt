@@ -1,5 +1,6 @@
 package com.hypertrack.trips
 
+import android.util.Log
 import com.android.volley.NetworkResponse
 import com.android.volley.Response
 import com.android.volley.VolleyError
@@ -19,16 +20,15 @@ class CreateTripRequest(
         private val gson: Gson,
         private val tokenString: String,
         responseListener: Response.Listener<ShareableTrip>,
-        errorListener : Response.ErrorListener
+        errorListener: Response.ErrorListener
 ) :
         JsonRequest<ShareableTrip>(
-        Method.POST,
-        liveAppBackendTripsEndpoint,
-        "{\"destination\":{\"geometry\":{\"coordinates\":[${tripConfig.longitude},${tripConfig.latitude}],\"type\":\"Point\"}},\"metadata\":{},\"device_id\":\"${tripConfig.deviceId}\"}",
-        responseListener,
+                Method.POST,
+                liveAppBackendTripsEndpoint,
+                tripConfig.getRequestBody(),
+                responseListener,
                 errorListener
-        )
-{
+        ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<ShareableTrip> {
         response?.let {
 
@@ -43,10 +43,11 @@ class CreateTripRequest(
                     return Response.error(VolleyError("Can't create trip from empty response"))
                 }
                 val parsedTrip = gson.fromJson<Trip>(responseBody, Trip::class.java)
-                parsedTrip?.let { trip -> return Response.success(
-                        ShareableTrip(trip.views.shareUrl, trip.views.embedUrl, trip.tripId),
-                        HttpHeaderParser.parseCacheHeaders(response)
-                )
+                parsedTrip?.let { trip ->
+                    return Response.success(
+                            ShareableTrip(trip.views.shareUrl, trip.views.embedUrl, trip.tripId),
+                            HttpHeaderParser.parseCacheHeaders(response)
+                    )
                 }
             } catch (error: UnsupportedEncodingException) {
                 return Response.error(VolleyError(error))
@@ -70,7 +71,7 @@ class CompleteTripRequest(
         tripId: String,
         private val tokenString: String,
         responseListener: Response.Listener<Void>,
-        errorListener : Response.ErrorListener
+        errorListener: Response.ErrorListener
 ) : JsonRequest<Void>(
         Method.POST, liveAppBackendTripsEndpoint + "$tripId/complete", "",
         responseListener, errorListener

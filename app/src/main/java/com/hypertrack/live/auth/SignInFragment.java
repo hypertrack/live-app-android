@@ -89,7 +89,6 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
                 }
             }
         });
-
     }
 
     @Override

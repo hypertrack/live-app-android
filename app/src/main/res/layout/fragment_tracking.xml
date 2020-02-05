@@ -36,6 +36,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/tracking_status_button"
+        style="@style/FloatingActionButtonSmall"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/sharing_status_disable" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/location_button"
         style="@style/FloatingActionButtonSmall"
         app:layout_constraintBottom_toTopOf="@id/share"

@@ -4,10 +4,18 @@ import androidx.annotation.FloatRange
 import java.lang.NullPointerException
 
 class TripConfig internal constructor(
-        val latitude: Double,
-        val longitude: Double,
+        val latitude: Double?,
+        val longitude: Double?,
         val deviceId: String
 ) {
+
+    fun getRequestBody(): String {
+        return if (latitude == null || longitude == null) {
+            "{\"device_id\":\"${deviceId}\"}"
+        } else {
+            "{\"destination\":{\"geometry\":{\"coordinates\":[${longitude},${latitude}],\"type\":\"Point\"}},\"device_id\":\"${deviceId}\"}"
+        }
+    }
 
     class Builder {
         private var destinationLatitude: Double? = null
@@ -40,12 +48,10 @@ class TripConfig internal constructor(
         }
 
         fun build(): TripConfig {
-            requireNotNull(destinationLatitude)
-            requireNotNull(destinationLongitude)
             requireNotNull(deviceId)
             return TripConfig(
-                    destinationLatitude ?: throw NullPointerException("latitude can't be null"),
-                    destinationLongitude ?: throw NullPointerException("longitude can't be null"),
+                    destinationLatitude,
+                    destinationLongitude,
                     deviceId ?: throw NullPointerException("device id can't be null")
             )
         }

@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.AutocompleteActivity;
-import com.hypertrack.live.BuildConfig;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
@@ -31,7 +30,6 @@ import com.hypertrack.live.utils.MapUtils;
 import com.hypertrack.live.utils.SimpleLocationListener;
 import com.hypertrack.maps.google.widget.GoogleMapAdapter;
 import com.hypertrack.maps.google.widget.GoogleMapConfig;
-import com.hypertrack.sdk.AsyncResultHandler;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
@@ -88,11 +86,15 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             @Override
             public void getAuthenticationToken(@NonNull final ResultHandler<String> resultHandler) {
                 AWSMobileClient.getInstance().getTokens(new Callback<Tokens>() {
-                    @Override public void onResult(Tokens result) {
+                    @Override
+                    public void onResult(Tokens result) {
                         resultHandler.onResult(result.getIdToken().getTokenString());
                     }
 
-                    @Override public void onError(Exception e) { resultHandler.onError(e); }
+                    @Override
+                    public void onError(Exception e) {
+                        resultHandler.onError(e);
+                    }
                 });
             }
         });
@@ -175,17 +177,13 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                 }
             });
         }
-
-        if (BuildConfig.DEBUG) {
-            hyperTrack.start();
-        }
     }
 
     public void resume() {
         if (AppUtils.isGpsProviderEnabled(context)) {
-            view.onTrackingStart();
+            view.onActive();
         } else {
-            view.onTrackingStop();
+            view.onDisabled();
         }
     }
 
@@ -208,7 +206,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private void startHyperTrackTracking() {
         if (AppUtils.isGpsProviderEnabled(context)) {
             hyperTrackMap.bind(hyperTrackViews, hyperTrack.getDeviceID());
-            hyperTrack.start();
         } else {
             actionLocationSourceSettings();
         }
@@ -216,7 +213,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
     private void stopHyperTrackTracking() {
         hyperTrackMap.unbindHyperTrackViews();
-        hyperTrack.stop();
     }
 
     public void share() {
@@ -259,17 +255,19 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                 state.setShareableUrl(trip.getShareUrl());
                 shareHyperTrackUrl();
 
+                startHyperTrackTracking();
                 tripSubscription = hyperTrackMap.subscribeTrip(trip.getTripId());
                 hyperTrackViews.getTrip(trip.getTripId(), new QueryResultHandler<Trip>() {
-                    @Override public void onQueryResult(Trip trip) {
+                    @Override
+                    public void onQueryResult(Trip trip) {
                         view.hideProgressBar();
 
                         view.showTripInfo(trip);
                         hyperTrackMap.moveToTrip(trip);
-                        startHyperTrackTracking();
                     }
 
-                    @Override public void onQueryFailure(Exception e) {
+                    @Override
+                    public void onQueryFailure(Exception e) {
                         Log.e(TAG, "start trip failure", e);
                         view.hideProgressBar();
                     }
@@ -287,11 +285,14 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         };
         TripConfig tripRequest;
         if (state.getDestination() == null) {
-            tripRequest = new TripConfig.Builder().build();
+            tripRequest = new TripConfig.Builder()
+                    .setDeviceId(hyperTrack.getDeviceID())
+                    .build();
         } else {
             tripRequest = new TripConfig.Builder()
                     .setDestinationLatitude(state.getDestination().latitude)
                     .setDestinationLongitude(state.getDestination().longitude)
+                    .setDeviceId(hyperTrack.getDeviceID())
                     .build();
         }
         tripsManager.createTrip(tripRequest, resultHandler);
@@ -302,11 +303,14 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
         tripsManager.completeTrip(state.getTripId(), new ResultHandler<String>() {
 
-            @Override public void onResult(@NonNull String result) {
+            @Override
+            public void onResult(@NonNull String result) {
                 view.hideProgressBar();
                 stopHyperTrackTracking();
             }
-            @Override public void onError(@NonNull Exception error) {
+
+            @Override
+            public void onError(@NonNull Exception error) {
                 view.hideProgressBar();
                 Log.e(TAG, "complete trip failure", error);
             }
@@ -452,6 +456,10 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     }
 
     public interface View extends TrackingStateObserver.OnTrackingStateChangeListener {
+
+        void onActive();
+
+        void onDisabled();
 
         void onDestinationChanged(String address);
 
