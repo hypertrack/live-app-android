@@ -11,6 +11,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.amazonaws.mobile.client.AWSMobileClient;
+import com.amazonaws.mobile.client.Callback;
 import com.amazonaws.mobile.client.UserStateDetails;
 import com.amazonaws.mobile.client.results.SignInResult;
 import com.amazonaws.mobile.client.results.SignUpResult;
@@ -29,6 +30,9 @@ import com.google.gson.JsonSyntaxException;
 import com.hypertrack.sdk.BuildConfig;
 import com.hypertrack.sdk.logger.HTLogger;
 import com.hypertrack.sdk.utils.StaticUtilsAdapter;
+import com.hypertrack.trips.AsyncTokenProvider;
+import com.hypertrack.trips.ResultHandler;
+import com.hypertrack.trips.TripsManager;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -53,6 +57,24 @@ public class HTMobileClient {
             client = new HTMobileClient(context);
         }
         return client;
+    }
+    public static TripsManager getTripsManager(Context context) {
+        return TripsManager.getInstance(context, new AsyncTokenProvider() {
+            @Override
+            public void getAuthenticationToken(@NonNull final ResultHandler<String> resultHandler) {
+                AWSMobileClient.getInstance().getTokens(new com.amazonaws.mobile.client.Callback<Tokens>() {
+                    @Override
+                    public void onResult(Tokens result) {
+                        resultHandler.onResult(result.getIdToken().getTokenString());
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        resultHandler.onError(e);
+                    }
+                });
+            }
+        });
     }
 
     private HTMobileClient(Context context) {

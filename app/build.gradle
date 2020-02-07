@@ -78,9 +78,9 @@ dependencies {
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
-    implementation 'com.hypertrack:hypertrack:8.8.8-SNAPSHOT'
+    implementation 'com.hypertrack:hypertrack:4.0.0-SNAPSHOT'
     implementation 'com.hypertrack:hypertrack-views:0.8.0-SNAPSHOT'
-    implementation 'com.hypertrack:maps-google:0.1.2-SNAPSHOT'
+    implementation 'com.hypertrack:maps-google:0.1.3-SNAPSHOT'
     implementation project(':hypertrack-trips')
 
     implementation 'com.hypertrack:maps-google:0.1.1'
@@ -100,7 +100,7 @@ def computeVersionNumber() {
         def versionMajor = match.group(1).toInteger()
         def versionMinor = match.group(2).toInteger()
         def versionPatch = match.group(3).toInteger()
-        return versionMajor * 1010000 + versionMinor * 1000 + versionPatch
+        return versionMajor * 1000000 + versionMinor * 10000 + versionPatch
     }
     throw new Exception("Could not read version.properties!")
 }

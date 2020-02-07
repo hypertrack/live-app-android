@@ -6,11 +6,19 @@ import android.content.SharedPreferences;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.live.R;
+import com.hypertrack.sdk.views.maps.TripSubscription;
+import com.hypertrack.sdk.views.maps.models.MapTrip;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class TrackingState {
 
     private final SharedPreferences preferences;
     private final String hyperTrackPubKey;
+    private final Map<String, TripSubscription> outerTrips = new HashMap<>();
     private String tripId;
     private LatLng destination;
     private String shareableUrl;
@@ -26,6 +34,10 @@ public class TrackingState {
     public void setTripId(String tripId) {
         this.tripId = tripId;
         preferences.edit().putString("trip_id", tripId).apply();
+    }
+
+    public Map<String, TripSubscription> getOuterTrips() {
+        return outerTrips;
     }
 
     public LatLng getDestination() {
