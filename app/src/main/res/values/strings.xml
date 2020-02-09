@@ -52,7 +52,7 @@
     <string name="sign_up">Sign up</string>
     <string name="don_t_have_an_account">Don’t have an account?</string>
     <string name="already_have_an_account">Already have an account?</string>
-    <string name="sign_up_a_new_account">Sign up a new account</string>
+    <string name="sign_up_a_new_account">Create a new account</string>
     <string name="_14_day_free_trial_no_credit_card_required">14 day free trial. No Credit card required</string>
     <string name="company_or_product_name">Company or product name</string>
     <string name="next">Next</string>
@@ -70,6 +70,9 @@
     <string name="user_does_not_exist" tools:ignore="PrivateResource">User does not exist</string>
     <string name="user_is_not_confirmed">User is not confirmed</string>
     <string name="an_account_exists">An account with the given email already exists</string>
+    <string name="tracking_is">Tracking is %s</string>
+    <string name="searching_">Searching…</string>
+    <string name="status_stopped">stopped</string>
 
     <array name="categories">
         <item>not selected</item>

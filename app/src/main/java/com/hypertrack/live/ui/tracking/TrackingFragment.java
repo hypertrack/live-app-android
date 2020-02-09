@@ -40,6 +40,7 @@ import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.sdk.TrackingError;
+import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
 
 import java.util.concurrent.TimeUnit;
@@ -55,6 +56,7 @@ public class TrackingFragment extends SupportMapFragment
     private View blockingView;
     private FloatingActionButton trackingStatusButton;
     private FloatingActionButton locationButton;
+    private TextView trackingStatusText;
     private View tripInfo;
     private View tripSummaryInfo;
     private View share;
@@ -110,6 +112,12 @@ public class TrackingFragment extends SupportMapFragment
 
         blockingView = view.findViewById(R.id.blocking_view);
         trackingStatusButton = view.findViewById(R.id.tracking_status_button);
+        trackingStatusButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                trackingStatusText.setVisibility(View.VISIBLE);
+            }
+        });
         locationButton = view.findViewById(R.id.location_button);
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -127,6 +135,13 @@ public class TrackingFragment extends SupportMapFragment
                         return false;
                     }
                 });
+            }
+        });
+        trackingStatusText = view.findViewById(R.id.tracking_status_text);
+        trackingStatusText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                trackingStatusText.setVisibility(View.GONE);
             }
         });
 
@@ -210,12 +225,14 @@ public class TrackingFragment extends SupportMapFragment
     @Override
     public void onTrackingStart() {
         trackingStatusButton.setImageResource(R.drawable.sharing_status);
+        trackingStatusText.setVisibility(View.GONE);
     }
 
 
     @Override
     public void onTrackingStop() {
         trackingStatusButton.setImageResource(R.drawable.sharing_status_disable);
+        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.status_stopped)));
     }
 
     @Override
@@ -251,7 +268,12 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     @Override
-    public void onDestinationChanged(String address) {
+    public void onStatusUpdateReceived(@NonNull String statusText) {
+        trackingStatusText.setText(statusText);
+    }
+
+    @Override
+    public void onDestinationChanged(@NonNull String address) {
         if (getActivity() != null) {
             SearchPlaceFragment fragment = (SearchPlaceFragment) getActivity().getSupportFragmentManager().findFragmentByTag(SearchPlaceFragment.class.getSimpleName());
             if (fragment != null) {
@@ -261,7 +283,7 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     @Override
-    public void showTripInfo(Trip trip) {
+    public void showTripInfo(@NonNull Trip trip) {
         if (getActivity() != null) {
             if (trip.getDestination() == null) {
 
@@ -298,7 +320,7 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     @Override
-    public void showTripSummaryInfo(Trip trip) {
+    public void showTripSummaryInfo(@NonNull Trip trip) {
         if (getActivity() != null) {
             if (trip.getDestination() == null && trip.getSummary() == null) {
 
@@ -348,7 +370,7 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     @Override
-    public void addFragment(Fragment fragment) {
+    public void addFragment(@NonNull Fragment fragment) {
         if (getActivity() != null) {
             getActivity().getSupportFragmentManager().beginTransaction()
                     .add(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName())

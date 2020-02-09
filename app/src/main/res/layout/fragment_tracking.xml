@@ -31,9 +31,9 @@
         android:paddingEnd="@dimen/content_padding"
         android:text="@string/close"
         android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottom_holder"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintRight_toRightOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/tracking_status_button"
@@ -41,6 +41,18 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/sharing_status_disable" />
+
+    <TextView
+        android:id="@+id/tracking_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_tracking_status"
+        android:padding="11dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tracking_status_button"
+        app:layout_constraintRight_toLeftOf="@id/tracking_status_button"
+        app:layout_constraintTop_toTopOf="@id/tracking_status_button" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/location_button"
