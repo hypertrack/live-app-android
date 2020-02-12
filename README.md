@@ -9,12 +9,6 @@ This open source app for Live Location Sharing is built with [HyperTrack](https:
 
 The app demonstrates a simple flow for users to share their live location with friends through their favorite messaging app when on the way to meet up. The convenient 23-character secure short-URL displays live location with accuracy, speed, bearing and recency. The view highlights the ongoing activity (walk, drive, stop, etc.). Device getting inactive due to permissions or other reasons, or disconnected due to unknown reasons is highlighted in the tracking experience. Battery charing and low battery states are flagged as well.
 
-- [Live Location Sharing](#live-location-sharing)
-- [Usage](#usage)
-- [Documentation](#documentation)
-- [Contribute](#contribute)
-- [Support](#support)
-
 ## Live Location Sharing
 The primary feature of Hypertrack Live is Live Location Sharing. Live Location Sharing is useful for:
 - Workforce productivity apps with messaging and customer support capabilities
@@ -23,6 +17,16 @@ The primary feature of Hypertrack Live is Live Location Sharing. Live Location S
 - Consumer apps like messengers and social apps
 
 It helps solve the user's anxiety of “where are you⁉️”.
+
+## Architecture
+
+![Architecture](images/ArchitectureLiveApp.png)
+
+## How HyperTrack Live App uses HyperTrack Trips API
+
+HyperTrack Live App uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) to [create](https://docs.hypertrack.com/#references-apis-trips-post-trips) and [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) trips by using Live App Backend. Live App Backend allows to integrate with [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) via backend server integration.
+
+Once the trip is created in the HyperTrack Live App, the Live App calls Live App Backend which in turn creates a trip via [Trips API](https://docs.hypertrack.com/#references-apis-trips-post-trips). Once the trip is completed, the app notifies Live App Backend, which in turn calls HyperTrack Trips API to [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) the trip.
 
 ## Usage
 #### To use this app
