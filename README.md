@@ -9,12 +9,6 @@ This open source app for Live Location Sharing is built with [HyperTrack](https:
 
 The app demonstrates a simple flow for users to share their live location with friends through their favorite messaging app when on the way to meet up. The convenient 23-character secure short-URL displays live location with accuracy, speed, bearing and recency. The view highlights the ongoing activity (walk, drive, stop, etc.). Device getting inactive due to permissions or other reasons, or disconnected due to unknown reasons is highlighted in the tracking experience. Battery charing and low battery states are flagged as well.
 
-- [Live Location Sharing](#live-location-sharing)
-- [Usage](#usage)
-- [Documentation](#documentation)
-- [Contribute](#contribute)
-- [Support](#support)
-
 ## Live Location Sharing
 The primary feature of Hypertrack Live is Live Location Sharing. Live Location Sharing is useful for:
 - Workforce productivity apps with messaging and customer support capabilities
