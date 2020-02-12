@@ -24,6 +24,10 @@ The primary feature of Hypertrack Live is Live Location Sharing. Live Location S
 
 It helps solve the user's anxiety of “where are you⁉️”.
 
+## Architecture
+
+![Architecture](Images/ArchitectureLiveApp.png)
+
 ## Usage
 #### To use this app
 
