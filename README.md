@@ -26,7 +26,7 @@ It helps solve the user's anxiety of “where are you⁉️”.
 
 ## Architecture
 
-![Architecture](Images/ArchitectureLiveApp.png)
+![Architecture](images/ArchitectureLiveApp.png)
 
 ## Usage
 #### To use this app
