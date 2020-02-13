@@ -125,6 +125,8 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
 
         if (TextUtils.isEmpty(state.getTripId())) {
+
+            view.showSearch();
             hyperTrackMap.setLocationUpdatesListener(new SimpleLocationListener() {
                 @Override
                 public void onLocationChanged(android.location.Location location) {
@@ -133,6 +135,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                 }
             });
         } else {
+
             // CRUTCH it should be hyperTrackViews.subscribeToTripUpdates(tripId, this);
             hyperTrackViews.getTrip(state.getTripId(), new QueryResultHandler<Trip>() {
                 @Override
@@ -177,8 +180,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             stopMapDestinationMode();
             updateDestination(googleMap.getCameraPosition().target);
             view.popBackStack();
-            startTrip();
-            return;
         }
 
         if (state.getDestination() == null) {
@@ -299,6 +300,8 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             }
         } else if (requestCode == TrackingFragment.SET_ON_MAP_REQUEST_CODE) {
             startMapDestinationMode();
+        } else if (requestCode == TrackingFragment.SHARE_REQUEST_CODE) {
+            share();
         }
     }
 
@@ -436,6 +439,8 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         void onStatusUpdateReceived(@NonNull String statusText);
 
         void onDestinationChanged(@NonNull String address);
+
+        void showSearch();
 
         void showTripInfo(@NonNull Trip trip);
 

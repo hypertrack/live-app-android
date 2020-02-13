@@ -110,6 +110,10 @@ class SearchPlacePresenter {
         });
     }
 
+    public void share() {
+        view.onResult(TrackingFragment.SHARE_REQUEST_CODE, null);
+    }
+
     public interface View {
 
         void onResult(int requestCode, @Nullable Intent data);

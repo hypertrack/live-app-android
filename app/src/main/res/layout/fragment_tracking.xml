@@ -57,15 +57,17 @@
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/location_button"
         style="@style/FloatingActionButtonSmall"
-        app:layout_constraintBottom_toTopOf="@id/share"
+        app:layout_constraintBottom_toTopOf="@id/where_are_you"
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/ic_location" />
 
-    <Button
-        android:id="@+id/share"
-        style="@style/ActionButtonStyle"
-        android:layout_margin="24dp"
-        android:text="@string/share_live"
+    <include
+        android:id="@+id/where_are_you"
+        layout="@layout/where_are_you_going"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/bottom_holder"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

@@ -3,6 +3,7 @@ package com.hypertrack.live.ui.tracking;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -13,19 +14,20 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
@@ -40,17 +42,17 @@ import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.sdk.TrackingError;
-import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
 
 import java.util.concurrent.TimeUnit;
 
 public class TrackingFragment extends SupportMapFragment
-        implements TrackingPresenter.View, OnMapReadyCallback {
+        implements TrackingPresenter.View, OnMapReadyCallback, FragmentManager.OnBackStackChangedListener {
 
     public static final int PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 616;
     public static final int AUTOCOMPLETE_REQUEST_CODE = 111;
     public static final int SET_ON_MAP_REQUEST_CODE = 112;
+    public static final int SHARE_REQUEST_CODE = 113;
 
     private Snackbar turnOnLocationSnackbar;
     private View blockingView;
@@ -59,7 +61,7 @@ public class TrackingFragment extends SupportMapFragment
     private TextView trackingStatusText;
     private View tripInfo;
     private View tripSummaryInfo;
-    private View share;
+    private View whereAreYouGoing;
     private TextView destinationStatus;
     private TextView destinationAddress;
     private TextView stats;
@@ -105,7 +107,7 @@ public class TrackingFragment extends SupportMapFragment
         }
 
         presenter = new TrackingPresenter(view.getContext(), this, hyperTrackPublicKey);
-        loader = new LoaderDecorator(getContext());
+        loader = new LoaderDecorator(view.getContext());
 
         mapStyleOptions = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map);
         mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map_silver);
@@ -145,10 +147,11 @@ public class TrackingFragment extends SupportMapFragment
             }
         });
 
-        share = view.findViewById(R.id.share);
-        share.setOnClickListener(new View.OnClickListener() {
+        whereAreYouGoing = view.findViewById(R.id.where_are_you);
+        whereAreYouGoing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                whereAreYouGoing.setVisibility(View.INVISIBLE);
                 presenter.share();
             }
         });
@@ -190,6 +193,8 @@ public class TrackingFragment extends SupportMapFragment
                     }
                 })
                 .setActionTextColor(Color.WHITE);
+
+        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(this);
 
         getMapAsync(this);
 
@@ -254,7 +259,6 @@ public class TrackingFragment extends SupportMapFragment
         }
         shareButton.setEnabled(true);
         endTripButton.setEnabled(true);
-
     }
 
     @Override
@@ -280,6 +284,11 @@ public class TrackingFragment extends SupportMapFragment
                 fragment.updateAddress(address);
             }
         }
+    }
+
+    @Override
+    public void showSearch() {
+        whereAreYouGoing.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -312,7 +321,7 @@ public class TrackingFragment extends SupportMapFragment
                 destinationAddress.setVisibility(View.VISIBLE);
             }
 
-            share.setVisibility(View.GONE);
+            whereAreYouGoing.setVisibility(View.GONE);
             tripSummaryInfo.setVisibility(View.GONE);
 
             tripInfo.setVisibility(View.VISIBLE);
@@ -342,7 +351,7 @@ public class TrackingFragment extends SupportMapFragment
                 destination.setVisibility(View.VISIBLE);
             }
 
-            share.setVisibility(View.GONE);
+            whereAreYouGoing.setVisibility(View.GONE);
             tripInfo.setVisibility(View.GONE);
 
             tripSummaryInfo.setVisibility(View.VISIBLE);
@@ -352,7 +361,7 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void dismissTrip() {
-        share.setVisibility(View.VISIBLE);
+        showSearch();
 
         tripInfo.setVisibility(View.GONE);
         tripSummaryInfo.setVisibility(View.GONE);
@@ -376,6 +385,13 @@ public class TrackingFragment extends SupportMapFragment
                     .add(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName())
                     .addToBackStack(fragment.getClass().getSimpleName())
                     .commitAllowingStateLoss();
+        }
+    }
+
+    @Override
+    public void onBackStackChanged() {
+        if (getActivity() != null && getActivity().getSupportFragmentManager().getBackStackEntryCount() == 0) {
+            showSearch();
         }
     }
 

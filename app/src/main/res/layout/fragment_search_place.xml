@@ -99,6 +99,15 @@
         android:background="@drawable/elevation_bottom"
         app:layout_constraintBottom_toTopOf="@id/set_on_map" />
 
+    <Button
+        android:id="@+id/share"
+        style="@style/ActionButtonStyle"
+        android:layout_margin="24dp"
+        android:text="@string/share_live"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent" />
+
     <FrameLayout
         android:id="@+id/set_on_map"
         android:layout_width="match_parent"

@@ -34,6 +34,7 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
     private EditText search;
     private View destinationOnMap;
     private View setOnMap;
+    private View share;
     private PlacesAdapter placesAdapter;
     private LoaderDecorator loader;
 
@@ -93,6 +94,13 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
                 presenter.setMapDestinationModeEnable(true);
                 destinationOnMap.setVisibility(View.VISIBLE);
                 onResult(TrackingFragment.SET_ON_MAP_REQUEST_CODE, new Intent());
+            }
+        });
+        share = view.findViewById(R.id.share);
+        share.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.share();
             }
         });
 

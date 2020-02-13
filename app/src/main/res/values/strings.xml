@@ -73,6 +73,7 @@
     <string name="tracking_is">Tracking is %s</string>
     <string name="searching_">Searching…</string>
     <string name="status_stopped">stopped</string>
+    <string name="yes_i_m_going_to">Yes, I’m going to…</string>
 
     <array name="categories">
         <item>not selected</item>
