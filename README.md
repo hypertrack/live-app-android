@@ -25,7 +25,7 @@ It helps solve the user's anxiety of “where are you⁉️”.
 <details>
     <summary>Step by step process of communication:</summary>
             
-1. **User makes a request go to destination at  location X**
+1. **User makes a request to go to destination at  location X**
    - Prior to creating a trip to go to destination X, the user signs in into HyperTrack Live App using a HyperTrack account. HyperTrack Live App authenticates the user to Live App Backend and obtains a JWT auth token to access it. Live App Backend serves as a backend platform example for HyperTrack Live App to demonstrate the following:
      - Performs as HyperTrack Live App user management service. For this example, we use HyperTrack dashboard account user management as the way to perform HyperTrack Live App user management. You may wish to use your own user management setup for the app you are building.
      - Performs as HypeTrack Live App backend server performing HyperTrack APIs calls which require authentication via AccountId and SecretKey available in the [setup page](https://dashboard.hypertrack.com/setup).
