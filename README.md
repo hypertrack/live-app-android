@@ -48,9 +48,9 @@ It helps solve the user's anxiety of “where are you⁉️”.
 
 ## How HyperTrack Live App uses HyperTrack Trips API
 
-HyperTrack Live App uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination) to [create](https://docs.hypertrack.com/#references-apis-trips-post-trips) and [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) trips by using Live App Backend. Live App Backend allows to integrate with [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) via backend server integration.
+HyperTrack Live App uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination) to [create](https://docs.hypertrack.com/#references-apis-trips-post-trips) and [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) trips by using Live App Backend. Live App Backend allows to integrate with [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination) via backend server integration.
 
-Once the trip is created in the HyperTrack Live App, the Live App calls Live App Backend which in turn creates a trip via [Trips API](https://docs.hypertrack.com/#references-apis-trips-post-trips). Once the trip is completed, the app notifies Live App Backend, which in turn calls HyperTrack Trips API to [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) the trip.
+Once the trip is created in the HyperTrack Live App, the Live App calls Live App Backend which in turn creates a trip via [Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination). Once the trip is completed, the app notifies Live App Backend, which in turn calls HyperTrack Trips API to [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) the trip.
 
 ## Usage
 #### To use this app
@@ -73,9 +73,9 @@ Get your HyperTrack Publishable Key [here](https://dashboard.hypertrack.com/sign
 ## Documentation
 For detailed documentation of the APIs, customizations and what all you can build using HyperTrack, please visit the official [docs](https://docs.hypertrack.com/).
 
-[HyperTrack Quickstart](https://github.com/hypertrack/quickstart-android),
-[HyperTrack Views Sample](https://github.com/hypertrack/views-android),
-[HyperTrack Maps SDK](https://github.com/hypertrack/sdk-maps-google-android)
+- [HyperTrack Quickstart](https://github.com/hypertrack/quickstart-android)
+- [HyperTrack Views Sample](https://github.com/hypertrack/views-android)
+- [HyperTrack Maps SDK](https://github.com/hypertrack/sdk-maps-google-android)
 
 ## Contribute
 Feel free to clone, use, and contribute back via [pull requests](https://help.github.com/articles/about-pull-requests/). We'd love to see your pull requests - send them in! Please use the [issues tracker](https://github.com/hypertrack/live-app-android/issues) to raise bug reports and feature requests.
