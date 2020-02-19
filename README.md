@@ -31,7 +31,7 @@ It helps solve the user's anxiety of “where are you⁉️”.
      - Performs as HypeTrack Live App backend server performing HyperTrack APIs calls which require authentication via AccountId and SecretKey available in the [setup page](https://dashboard.hypertrack.com/setup).
    - Once the user picks a location in the app and creates a trip with a destination to it, HyperTrack Live App performs a call to Live App Backend with the JWT token from the above.  
 2. **Create trip to destination at location X via Trips API**
-   - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) to create a trip with destination X. In order to authenticate to use the API, Live App Backend uses AccountId and SecretKey.
+   - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination) to create a trip with destination X. In order to authenticate to use the API, Live App Backend uses AccountId and SecretKey.
 3. **Show trip route with ETA with live updates to the user**
    - HyperTrack Views SDK queries the new trip information and provides trip information to HyperTrack Live App user. In addition, HyperTrack Views SDK receives realtime updates from HyperTrack platform and provides them as callbacks to HyperTrack Live App.
 4. **User shares public short URL for the trip to locaton X with live ETA**
@@ -41,14 +41,14 @@ It helps solve the user's anxiety of “where are you⁉️”.
 6. **User ends live location sharing**
    - HyperTrack Live App user may end the trip upon reaching the destination. HyperTrack Live App notifies Live App Backend while authenticating with the JWT token from above. 
 7. **Complete trip to destination at location X via Trips API**
-   - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) to complete the trip with destination X.
+   - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination-start-and-complete-trips) to complete the trip with destination X.
    - HyperTrack Trips API updates HyperTrack Views SDK in HyperTrack Live App with a completed trip summary to be displayed to the user. Additionally, recipients of publicly visible trip URL receive a live update about the trip completion and are displayed a completed trip summary as well.
    
 </details>
 
 ## How HyperTrack Live App uses HyperTrack Trips API
 
-HyperTrack Live App uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) to [create](https://docs.hypertrack.com/#references-apis-trips-post-trips) and [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) trips by using Live App Backend. Live App Backend allows to integrate with [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) via backend server integration.
+HyperTrack Live App uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination) to [create](https://docs.hypertrack.com/#references-apis-trips-post-trips) and [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) trips by using Live App Backend. Live App Backend allows to integrate with [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) via backend server integration.
 
 Once the trip is created in the HyperTrack Live App, the Live App calls Live App Backend which in turn creates a trip via [Trips API](https://docs.hypertrack.com/#references-apis-trips-post-trips). Once the trip is completed, the app notifies Live App Backend, which in turn calls HyperTrack Trips API to [complete](https://docs.hypertrack.com/#references-apis-trips-post-trips-trip_id-complete) the trip.
 
