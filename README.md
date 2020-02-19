@@ -31,7 +31,7 @@ It helps solve the user's anxiety of “where are you⁉️”.
      - Performs as HypeTrack Live App backend server performing HyperTrack APIs calls which require authentication via AccountId and SecretKey available in the [setup page](https://dashboard.hypertrack.com/setup).
    - Once the user picks a location in the app and creates a trip with a destination to it, HyperTrack Live App performs a call to Live App Backend with the JWT token from the above.  
 2. **Create trip to destination at location X via Trips API**
-   - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) to create a trip with destination X.
+   - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-apis-usage-trips) to create a trip with destination X. In order to authenticate to use the API, Live App Backend uses AccountId and SecretKey.
 3. **Show trip route with ETA with live updates to the user**
    - HyperTrack Views SDK queries the new trip information and provides trip information to HyperTrack Live App user. In addition, HyperTrack Views SDK receives realtime updates from HyperTrack platform and provides them as callbacks to HyperTrack Live App.
 4. **User shares public short URL for the trip to locaton X with live ETA**
