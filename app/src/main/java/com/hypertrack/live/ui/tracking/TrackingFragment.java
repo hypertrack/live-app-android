@@ -1,33 +1,31 @@
 package com.hypertrack.live.ui.tracking;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
@@ -35,6 +33,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.hypertrack.live.R;
@@ -44,6 +43,12 @@ import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.views.dao.Trip;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class TrackingFragment extends SupportMapFragment
@@ -54,21 +59,30 @@ public class TrackingFragment extends SupportMapFragment
     public static final int SET_ON_MAP_REQUEST_CODE = 112;
     public static final int SHARE_REQUEST_CODE = 113;
 
+    private static final DateFormat DATE_FORMAT = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+
     private Snackbar turnOnLocationSnackbar;
     private View blockingView;
-    private FloatingActionButton trackingStatusButton;
+    private TextView trackingStatus;
     private FloatingActionButton locationButton;
     private TextView trackingStatusText;
+    private View bottomHolder;
+    private BottomSheetBehavior bottomHolderSheetBehavior;
+    private RecyclerView tripsRecyclerView;
     private View tripInfo;
     private View tripSummaryInfo;
     private View whereAreYouGoing;
-    private TextView destinationStatus;
+    private TextView tripsCount;
+    private TextView tripTo;
+    private ImageView destinationIcon;
     private TextView destinationAddress;
+    private TextView destinationArrival;
+    private TextView destinationArrivalTitle;
+    private TextView destinationAway;
     private TextView stats;
     private TextView destination;
     private Button shareButton;
     private Button endTripButton;
-    private Button closeButton;
     private LoaderDecorator loader;
 
     private GoogleMap mGoogleMap;
@@ -76,8 +90,11 @@ public class TrackingFragment extends SupportMapFragment
     private MapStyleOptions mapStyleOptionsSilver;
 
     private TrackingPresenter presenter;
+    private TripsAdapter tripsAdapter;
 
     private boolean isMapStyleChanged = false;
+
+    private Timer tripInfoUpdater;
 
     public static Fragment newInstance(String hyperTrackPublicKey) {
         TrackingFragment fragment = new TrackingFragment();
@@ -113,11 +130,15 @@ public class TrackingFragment extends SupportMapFragment
         mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map_silver);
 
         blockingView = view.findViewById(R.id.blocking_view);
-        trackingStatusButton = view.findViewById(R.id.tracking_status_button);
-        trackingStatusButton.setOnClickListener(new View.OnClickListener() {
+        trackingStatus = view.findViewById(R.id.tracking_status);
+        trackingStatus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                trackingStatusText.setVisibility(View.VISIBLE);
+                if (trackingStatusText.getVisibility() == View.VISIBLE) {
+                    trackingStatusText.setVisibility(View.GONE);
+                } else {
+                    trackingStatusText.setVisibility(View.VISIBLE);
+                }
             }
         });
         locationButton = view.findViewById(R.id.location_button);
@@ -152,17 +173,51 @@ public class TrackingFragment extends SupportMapFragment
             @Override
             public void onClick(View view) {
                 whereAreYouGoing.setVisibility(View.INVISIBLE);
-                presenter.share();
+                addFragment(new SearchPlaceFragment());
             }
         });
 
+        bottomHolder = view.findViewById(R.id.bottom_holder);
+        bottomHolderSheetBehavior = BottomSheetBehavior.from(bottomHolder);
+        tripsRecyclerView = view.findViewById(R.id.recycler_view);
         tripInfo = view.findViewById(R.id.trip_info);
-        destinationStatus = view.findViewById(R.id.destination_status);
+        tripsCount = view.findViewById(R.id.trips_count);
+        tripTo = view.findViewById(R.id.trip_to);
+        destinationIcon = view.findViewById(R.id.destination_icon);
         destinationAddress = view.findViewById(R.id.destination_address);
+        destinationArrival = view.findViewById(R.id.destination_arrival);
+        destinationArrivalTitle = view.findViewById(R.id.destination_arrival_title);
+        destinationAway = view.findViewById(R.id.destination_away);
         tripSummaryInfo = view.findViewById(R.id.trip_summary_info);
         stats = view.findViewById(R.id.stats);
         destination = view.findViewById(R.id.destination);
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        tripsRecyclerView.setHasFixedSize(true);
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(view.getContext(),
+                layoutManager.getOrientation());
+        tripsRecyclerView.addItemDecoration(dividerItemDecoration);
+        tripsRecyclerView.setLayoutManager(layoutManager);
+        tripsAdapter = new TripsAdapter();
+        tripsAdapter.setOnItemClickListener(new TripsAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(RecyclerView.Adapter<?> adapter, View view, int position) {
+                presenter.selectTrip(tripsAdapter.getItem(position));
+            }
+        });
+        tripsRecyclerView.setAdapter(tripsAdapter);
+
+        bottomHolder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (bottomHolderSheetBehavior.getState() != BottomSheetBehavior.STATE_EXPANDED) {
+                    bottomHolderSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                } else {
+                    bottomHolderSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
+            }
+        });
         shareButton = view.findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -175,13 +230,6 @@ public class TrackingFragment extends SupportMapFragment
             @Override
             public void onClick(View view) {
                 presenter.endTrip();
-            }
-        });
-        closeButton = view.findViewById(R.id.close_button);
-        closeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                presenter.removeTrip();
             }
         });
 
@@ -201,16 +249,6 @@ public class TrackingFragment extends SupportMapFragment
         if (!AppUtils.isGpsProviderEnabled(getActivity())) {
             showTurnOnLocationSnackbar();
         }
-
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.app_name), Activity.MODE_PRIVATE);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && !InstantApps.isInstantApp(getActivity())
-                && !sharedPreferences.getBoolean("ibo_requested", false)) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS},
-                    PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-            sharedPreferences.edit().putBoolean("ibo_requested", true).apply();
-        }
     }
 
     @Override
@@ -229,15 +267,18 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void onTrackingStart() {
-        trackingStatusButton.setImageResource(R.drawable.sharing_status);
+        trackingStatus.setActivated(true);
+        trackingStatus.setText(R.string.active);
         trackingStatusText.setVisibility(View.GONE);
+        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.active).toLowerCase()));
     }
 
 
     @Override
     public void onTrackingStop() {
-        trackingStatusButton.setImageResource(R.drawable.sharing_status_disable);
-        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.status_stopped)));
+        trackingStatus.setActivated(false);
+        trackingStatus.setText(R.string.inactive);
+        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.disabled).toLowerCase()));
     }
 
     @Override
@@ -273,13 +314,13 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void onStatusUpdateReceived(@NonNull String statusText) {
-        trackingStatusText.setText(statusText);
     }
 
     @Override
     public void onDestinationChanged(@NonNull String address) {
         if (getActivity() != null) {
-            SearchPlaceFragment fragment = (SearchPlaceFragment) getActivity().getSupportFragmentManager().findFragmentByTag(SearchPlaceFragment.class.getSimpleName());
+            SearchPlaceFragment fragment = (SearchPlaceFragment) getActivity().getSupportFragmentManager()
+                    .findFragmentByTag(SearchPlaceFragment.class.getSimpleName());
             if (fragment != null) {
                 fragment.updateAddress(address);
             }
@@ -289,61 +330,153 @@ public class TrackingFragment extends SupportMapFragment
     @Override
     public void showSearch() {
         whereAreYouGoing.setVisibility(View.VISIBLE);
+        bottomHolder.setVisibility(View.INVISIBLE);
+        presenter.stopMapDestinationMode();
+    }
+
+    @Override
+    public void updateTripsMenu(@NonNull List<Trip> trips, int selectedTrip) {
+        if (getActivity() != null) {
+            if (trips.isEmpty()) {
+
+                if (bottomHolder.getVisibility() == View.VISIBLE) {
+                    bottomHolder.setVisibility(View.INVISIBLE);
+                    whereAreYouGoing.setVisibility(View.VISIBLE);
+                }
+                stopTripInfoUpdating();
+            } else {
+
+                if (getActivity().getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
+                whereAreYouGoing.setVisibility(View.INVISIBLE);
+                bottomHolder.setVisibility(View.VISIBLE);
+
+                String tripsCountText = String.format(getString(R.string.you_have_ongoing_trips), trips.size());
+                tripsCount.setText(tripsCountText);
+
+                tripsAdapter.update(trips);
+                tripsAdapter.setSelection(selectedTrip);
+            }
+        }
+    }
+
+    private void startTripInfoUpdating(final Trip trip) {
+
+        stopTripInfoUpdating();
+
+        tripInfoUpdater = new Timer();
+        tripInfoUpdater.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            showTripInfo(trip);
+                        }
+                    });
+                }
+            }
+        }, 60000, 60000);
+    }
+
+    private void stopTripInfoUpdating() {
+        if (tripInfoUpdater != null) {
+            tripInfoUpdater.cancel();
+            tripInfoUpdater = null;
+        }
     }
 
     @Override
     public void showTripInfo(@NonNull Trip trip) {
         if (getActivity() != null) {
+            int origin = R.drawable.starting_position;
+            int destination = R.drawable.destination;
             if (trip.getDestination() == null) {
 
-                destinationStatus.setVisibility(View.GONE);
-                destinationAddress.setVisibility(View.GONE);
+                tripTo.setText(R.string.trip_started_from);
+                String valueText = getString(R.string.unknown);
+                if (trip.getStartDate() != null) {
+                    valueText = DATE_FORMAT.format(trip.getStartDate());
+                }
+                destinationIcon.setImageResource(origin);
+                destinationAddress.setText(valueText);
+
+                destinationArrival.setVisibility(View.INVISIBLE);
+                destinationAway.setVisibility(View.INVISIBLE);
+                stopTripInfoUpdating();
             } else {
 
-                if (trip.getDestination().getArrivedDate() != null) {
-                    destinationStatus.setText(R.string.arrived);
-                } else if (trip.getEstimate() != null && trip.getEstimate().getRoute() != null
-                        && trip.getEstimate().getRoute().getDuration() != null) {
-                    int remainingDuration = trip.getEstimate().getRoute().getDuration();
-                    if (remainingDuration < 120) {
-                        destinationStatus.setText(getString(R.string.arriving_now));
-                    } else {
-                        destinationStatus.setText(
-                                String.format(getString(R.string._away), TimeUnit.SECONDS.toMinutes(remainingDuration))
-                        );
-                    }
+                tripTo.setText(R.string.trip_to);
+                destinationIcon.setImageResource(destination);
+                if (!TextUtils.isEmpty(trip.getDestination().getAddress())) {
+                    destinationAddress.setText(trip.getDestination().getAddress());
                 } else {
-                    destinationStatus.setText("");
+                    String latLng = String.format(getString(R.string.lat_lng),
+                            trip.getDestination().getLatitude(), trip.getDestination().getLongitude()
+                    );
+                    destinationAddress.setText(latLng);
                 }
-                destinationAddress.setText(trip.getDestination().getAddress());
 
-                destinationStatus.setVisibility(View.VISIBLE);
-                destinationAddress.setVisibility(View.VISIBLE);
+                if (trip.getDestination().getArrivedDate() == null) {
+                    if (trip.getEstimate() != null && trip.getEstimate().getRoute() != null
+                            && trip.getEstimate().getRoute().getDuration() != null) {
+
+                        int remainingDuration = trip.getEstimate().getRoute().getDuration();
+                        Date arriveDate = new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(remainingDuration));
+                        destinationArrival.setText(DATE_FORMAT.format(arriveDate));
+                        if (remainingDuration < 120) {
+                            destinationAway.setText(getString(R.string.arriving_now));
+                        } else {
+                            destinationAway.setText(
+                                    String.format(getString(R.string._away), TimeUnit.SECONDS.toMinutes(remainingDuration))
+                            );
+                        }
+
+                        startTripInfoUpdating(trip);
+                    } else {
+
+                        destinationArrival.setText("-");
+                        destinationAway.setText("-");
+                    }
+                    destinationArrivalTitle.setText(R.string.arrival);
+                } else {
+
+                    destinationArrival.setText(DATE_FORMAT.format(trip.getDestination().getArrivedDate()));
+                    destinationAway.setText("");
+                    destinationArrivalTitle.setText(R.string.arrived);
+                }
+
+                destinationArrival.setVisibility(View.VISIBLE);
+                destinationAway.setVisibility(View.VISIBLE);
             }
 
-            whereAreYouGoing.setVisibility(View.GONE);
             tripSummaryInfo.setVisibility(View.GONE);
-
             tripInfo.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void showTripSummaryInfo(@NonNull Trip trip) {
+
+        stopTripInfoUpdating();
+
         if (getActivity() != null) {
             if (trip.getDestination() == null && trip.getSummary() == null) {
 
                 stats.setVisibility(View.GONE);
                 destination.setVisibility(View.GONE);
             } else {
-
                 if (trip.getSummary() != null) {
+
                     double miles = trip.getSummary().getDistance() * 0.000621371;
                     long mins = TimeUnit.SECONDS.toMinutes(trip.getSummary().getDuration());
                     String statsText = String.format(getString(R.string.miles_mins), miles, mins);
                     stats.setText(statsText);
                 }
                 if (trip.getDestination() != null) {
+
                     destination.setText(trip.getDestination().getAddress());
                 }
 
@@ -351,21 +484,10 @@ public class TrackingFragment extends SupportMapFragment
                 destination.setVisibility(View.VISIBLE);
             }
 
-            whereAreYouGoing.setVisibility(View.GONE);
             tripInfo.setVisibility(View.GONE);
 
             tripSummaryInfo.setVisibility(View.VISIBLE);
-            closeButton.setVisibility(View.VISIBLE);
         }
-    }
-
-    @Override
-    public void dismissTrip() {
-        showSearch();
-
-        tripInfo.setVisibility(View.GONE);
-        tripSummaryInfo.setVisibility(View.GONE);
-        closeButton.setVisibility(View.GONE);
     }
 
     @Override
@@ -443,5 +565,6 @@ public class TrackingFragment extends SupportMapFragment
     public void onDestroy() {
         super.onDestroy();
         presenter.destroy();
+        stopTripInfoUpdating();
     }
 }

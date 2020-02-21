@@ -96,7 +96,8 @@ class SearchPlacePresenter {
                 Intent intent = new Intent();
                 intent.putExtra(SearchPlaceFragment.SELECTED_PLACE_KEY, fetchPlaceResponse.getPlace());
                 view.onResult(TrackingFragment.AUTOCOMPLETE_REQUEST_CODE, intent);
-                view.close();
+                view.updateAddress(fetchPlaceResponse.getPlace().getAddress());
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

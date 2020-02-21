@@ -33,7 +33,6 @@ import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
 import com.hypertrack.sdk.views.DeviceUpdatesHandler;
 import com.hypertrack.sdk.views.HyperTrackViews;
-import com.hypertrack.sdk.views.QueryResultHandler;
 import com.hypertrack.sdk.views.dao.Location;
 import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
@@ -44,6 +43,11 @@ import com.hypertrack.trips.ResultHandler;
 import com.hypertrack.trips.ShareableTrip;
 import com.hypertrack.trips.TripConfig;
 import com.hypertrack.trips.TripsManager;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -113,6 +117,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         };
         hyperTrack.addTrackingListener(onTrackingStateChangeListener);
         hyperTrack.syncDeviceSettings();
+//        hyperTrack.start();
         hyperTrackViews.subscribeToDeviceUpdates(hyperTrack.getDeviceID(), this);
         GoogleMapAdapter mapAdapter = new GoogleMapAdapter(googleMap, mapConfig);
         hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter)
@@ -124,31 +129,14 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             onTrackingStateChangeListener.onTrackingStop();
         }
 
-        if (TextUtils.isEmpty(state.getTripId())) {
-
-            view.showSearch();
-            hyperTrackMap.setLocationUpdatesListener(new SimpleLocationListener() {
-                @Override
-                public void onLocationChanged(android.location.Location location) {
-                    hyperTrackMap.moveToMyLocation();
-                    hyperTrackMap.setLocationUpdatesListener(null);
-                }
-            });
-        } else {
-
-            // CRUTCH it should be hyperTrackViews.subscribeToTripUpdates(tripId, this);
-            hyperTrackViews.getTrip(state.getTripId(), new QueryResultHandler<Trip>() {
-                @Override
-                public void onQueryResult(Trip trip) {
-                    onTripUpdateReceived(trip);
-                }
-
-                @Override
-                public void onQueryFailure(Exception e) {
-                    Log.e(TAG, "getTrip failure", e);
-                }
-            });
-        }
+        view.showSearch();
+        hyperTrackMap.setLocationUpdatesListener(new SimpleLocationListener() {
+            @Override
+            public void onLocationChanged(android.location.Location location) {
+                hyperTrackMap.moveToMyLocation();
+                hyperTrackMap.setLocationUpdatesListener(null);
+            }
+        });
     }
 
     public void resume() {
@@ -182,23 +170,40 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             view.popBackStack();
         }
 
-        if (state.getDestination() == null) {
-            view.addFragment(new SearchPlaceFragment());
-        } else {
+        if (state.getDestination() != null) {
             startTrip();
+
+            // TEST
+//            state.setDestination(new LatLng(state.getDestination().latitude + 0.005, state.getDestination().longitude + 0.005));
+//            startTrip();
         }
     }
 
     public void shareHyperTrackUrl() {
-        String url = state.getShareableUrl();
-        if (!TextUtils.isEmpty(url)) {
-            Intent sendIntent = new Intent();
-            sendIntent.setAction(Intent.ACTION_SEND);
-            sendIntent.putExtra(Intent.EXTRA_TEXT, url);
-            sendIntent.setType("text/plain");
-            sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(sendIntent);
+        Trip trip = state.trips.get(state.getTripId());
+        if (trip != null) {
+            shareHyperTrackUrl(trip.getViews().getSharedUrl());
         }
+    }
+
+    public void shareHyperTrackUrl(String url) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, url);
+        sendIntent.setType("text/plain");
+        sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(sendIntent);
+    }
+
+    public void selectTrip(Trip trip) {
+        state.setTripId(trip.getTripId());
+
+        if (trip.getStatus().equals("completed")) {
+            view.showTripSummaryInfo(trip);
+        } else {
+            view.showTripInfo(trip);
+        }
+        hyperTrackMap.moveToTrip(trip);
     }
 
     public void startTrip() {
@@ -207,11 +212,11 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         ResultHandler<ShareableTrip> resultHandler = new ResultHandler<ShareableTrip>() {
             @Override
             public void onResult(@NonNull ShareableTrip trip) {
+                Log.d(TAG, "trip is created: " + trip);
                 view.hideProgressBar();
 
                 state.setTripId(trip.getTripId());
-                state.setShareableUrl(trip.getShareUrl());
-                shareHyperTrackUrl();
+                shareHyperTrackUrl(trip.getShareUrl());
                 updateDestination(null);
             }
 
@@ -248,6 +253,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
             @Override
             public void onResult(@NonNull String result) {
+                Log.d(TAG, "trip is ended: " + result);
                 view.hideProgressBar();
             }
 
@@ -257,17 +263,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                 Log.e(TAG, "complete trip failure", error);
             }
         });
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public void removeTrip() {
-        if (state.getOuterTrips().containsKey(state.getTripId())) {
-            state.getOuterTrips().remove(state.getTripId()).remove();
-        }
-        state.setTripId(null);
-        state.setShareableUrl(null);
-        hyperTrackMap.adapter().notifyDataSetChanged();
-        view.dismissTrip();
     }
 
     public void actionLocationSourceSettings() {
@@ -323,7 +318,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         }
     }
 
-    private void startMapDestinationMode() {
+    public void startMapDestinationMode() {
         mapDestinationMode = true;
         final Runnable runnable = new Runnable() {
             @Override
@@ -347,9 +342,9 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         });
     }
 
-    private void stopMapDestinationMode() {
+    public void stopMapDestinationMode() {
         mapDestinationMode = false;
-        googleMap.setOnCameraMoveCanceledListener(null);
+        googleMap.setOnCameraMoveListener(null);
     }
 
     public void destroy() {
@@ -387,39 +382,60 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void onTripUpdateReceived(@NonNull Trip trip) {
+        Log.d(TAG, "onTripUpdateReceived: " + trip);
 
-        boolean isNewTrip = !state.getOuterTrips().containsKey(trip.getTripId());
+        state.trips.put(trip.getTripId(), trip);
+        boolean isNewTrip = !state.tripSubscription.containsKey(trip.getTripId());
         boolean isActive = !trip.getStatus().equals("completed");
 
-        if (trip.getTripId().equals(state.getTripId())) {
+        if (isActive) {
             if (isNewTrip) {
-                TripSubscription tripSubscription = hyperTrackMap.subscribeTrip(state.getTripId());
-                state.getOuterTrips().put(trip.getTripId(), tripSubscription);
+                TripSubscription tripSubscription = hyperTrackMap.subscribeTrip(trip.getTripId());
+                state.tripSubscription.put(trip.getTripId(), tripSubscription);
                 hyperTrackMap.moveToTrip(trip);
             }
-
-            if (isActive) {
+            if (trip.getTripId().equals(state.getTripId())) {
                 view.showTripInfo(trip);
-            } else {
-                hyperTrackViews.getTrip(trip.getTripId(), new QueryResultHandler<Trip>() {
-                    @Override
-                    public void onQueryResult(Trip trip) {
-                        view.showTripSummaryInfo(trip);
-                    }
-
-                    @Override
-                    public void onQueryFailure(Exception e) {
-                        Log.e(TAG, "complete trip failure", e);
-                    }
-                });
             }
         } else {
-            if (!isNewTrip && !isActive) {
-                state.getOuterTrips().remove(trip.getTripId()).remove();
+            state.trips.remove(trip.getTripId());
+//            if (trip.getTripId().equals(state.getTripId())) {
+//                hyperTrackViews.getTrip(trip.getTripId(), new QueryResultHandler<Trip>() {
+//                    @Override
+//                    public void onQueryResult(Trip trip) {
+//                        state.trips.put(trip.getTripId(), trip);
+//                        view.showTripSummaryInfo(trip);
+//                    }
+//
+//                    @Override
+//                    public void onQueryFailure(Exception e) {
+//                        Log.e(TAG, "complete trip failure", e);
+//                    }
+//                });
+//            }
+            if (!isNewTrip) {
+                state.tripSubscription.remove(trip.getTripId()).remove();
             }
         }
 
-        hyperTrack.syncDeviceSettings();
+        List<Trip> trips = new ArrayList<>(state.trips.values());
+        int selectedTripIndex = 0;
+        if (!trips.isEmpty()) {
+            Collections.sort(trips, new Comparator<Trip>() {
+                @Override
+                public int compare(Trip trip1, Trip trip2) {
+                    return trip1.getStartDate().compareTo(trip2.getStartDate());
+                }
+            });
+            Trip selectedTrip = state.trips.get(state.getTripId());
+            if (selectedTrip == null) {
+                selectedTrip = trips.get(0);
+                state.setTripId(selectedTrip.getTripId());
+                view.showTripInfo(selectedTrip);
+            }
+            selectedTripIndex = trips.indexOf(selectedTrip);
+        }
+        view.updateTripsMenu(trips, selectedTripIndex);
     }
 
     @Override
@@ -442,11 +458,11 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
         void showSearch();
 
+        void updateTripsMenu(@NonNull List<Trip> trips, int selectedTripIndex);
+
         void showTripInfo(@NonNull Trip trip);
 
         void showTripSummaryInfo(@NonNull Trip trip);
-
-        void dismissTrip();
 
         void showProgressBar();
 

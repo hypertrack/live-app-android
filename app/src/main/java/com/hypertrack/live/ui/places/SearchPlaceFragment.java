@@ -115,6 +115,7 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         placesAdapter.setOnItemClickListener(new PlacesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.Adapter<?> adapter, View view, int position) {
+                setOnMap.setVisibility(View.GONE);
                 presenter.selectPlace(placesAdapter.getItem(position).getPlaceId());
             }
         });

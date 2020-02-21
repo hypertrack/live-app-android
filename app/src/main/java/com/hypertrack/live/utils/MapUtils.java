@@ -22,7 +22,7 @@ public class MapUtils {
         int width = context.getResources().getDisplayMetrics().widthPixels;
         int height = context.getResources().getDisplayMetrics().heightPixels;
         return GoogleMapConfig.newBuilder(context)
-                .boundingBoxDimensions(width, (int) (height / 1.5));
+                .boundingBoxDimensions(width, (int) (height / 1.9));
     }
 
     public static Single<String> getAddress(Context context, final LatLng latLng) {

@@ -53,12 +53,26 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case TrackingError.AUTHORIZATION_ERROR:
                     Log.e(TAG, "Need to check account or renew subscription");
-                    // Handle this error if needed.
+                    AlertDialog billingAlertDialog = new AlertDialog.Builder(MainActivity.this)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    String url = "https://dashboard.hypertrack.com/billing";
+                                    intent.setData(Uri.parse(url));
+                                    startActivity(intent);
+                                }
+                            })
+                            .setTitle(getString(R.string.events_expired_this_month))
+                            .setMessage(getString(R.string.upgrade_to_prod))
+                            .create();
+                    billingAlertDialog.show();
                     break;
                 case TrackingError.PERMISSION_DENIED_ERROR:
                     // User refused permission or they were not requested.
                     // Request permission from the user yourself or leave it to SDK.
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
+                    AlertDialog settingsAlertDialog = new AlertDialog.Builder(MainActivity.this)
                             .setNegativeButton(android.R.string.cancel, null)
                             .setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
                                 @Override
@@ -73,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle(R.string.app_settings)
                             .setMessage(R.string.you_can_allow)
                             .create();
-                    alertDialog.show();
+                    settingsAlertDialog.show();
                     break;
                 case TrackingError.GPS_PROVIDER_DISABLED_ERROR:
                     // User disabled GPS in device settings.
