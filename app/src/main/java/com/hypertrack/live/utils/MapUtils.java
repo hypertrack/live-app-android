@@ -5,6 +5,7 @@ import android.location.Address;
 import android.location.Geocoder;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.hypertrack.maps.google.widget.GoogleMapConfig;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,6 +17,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 public class MapUtils {
+
+    public static GoogleMapConfig.Builder getBuilder(Context context) {
+        int width = context.getResources().getDisplayMetrics().widthPixels;
+        int height = context.getResources().getDisplayMetrics().heightPixels;
+        return GoogleMapConfig.newBuilder(context)
+                .boundingBoxDimensions(width, (int) (height / 1.9));
+    }
 
     public static Single<String> getAddress(Context context, final LatLng latLng) {
         final Geocoder geocoder = new Geocoder(context, Locale.getDefault());

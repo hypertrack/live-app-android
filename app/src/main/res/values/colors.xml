@@ -6,6 +6,8 @@
     <color name="colorHyperTrack">#00ce5b</color>
     <color name="colorBackground">#ffffff</color>
     <color name="colorFAButtonSecondary">#ffffff</color>
-    <color name="textColorPrimary">#000000</color>
+    <color name="textColorPrimary">#4c4b5d</color>
+    <color name="textColorSecondary">#94929d</color>
     <color name="colorTips">#3391ff</color>
+    <color name="highlight">#14000000</color>
 </resources>

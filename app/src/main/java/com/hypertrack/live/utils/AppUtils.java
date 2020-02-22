@@ -3,11 +3,10 @@ package com.hypertrack.live.utils;
 import android.content.Context;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,13 +15,20 @@ import java.io.InputStreamReader;
 public class AppUtils {
     public static final String SYS_PROP_VERSION_NAME = "ro.miui.ui.version.name";
 
-    public static String getDeviceName() {
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.startsWith(manufacturer)) {
-            return capitalize(model);
+    public static String getDeviceName(Context context) {
+
+        String deviceName = Settings.Global.getString(context.getContentResolver(), Settings.Global.DEVICE_NAME);
+        if (TextUtils.isEmpty(deviceName)) {
+            String manufacturer = Build.MANUFACTURER;
+            String model = Build.MODEL;
+            if (model.startsWith(manufacturer)) {
+                deviceName = capitalize(model);
+            } else {
+                deviceName = capitalize(manufacturer) + " " + model;
+            }
         }
-        return capitalize(manufacturer) + " " + model;
+
+        return deviceName;
     }
 
     private static String capitalize(String str) {

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/my_app_manages"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/categories"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/categories" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/my_app_would_track"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/devices"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/devices" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/my_app_is"
+        android:textColor="@color/textColorSecondary"
+        android:textSize="14sp" />
+
+    <Spinner
+        android:id="@+id/stage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/stage" />
+
+</LinearLayout>

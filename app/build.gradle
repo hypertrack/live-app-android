@@ -3,12 +3,11 @@ apply plugin: 'com.android.application'
 ext {
     versionNumber = computeVersionNumber()
     versionName = rootProject.version
-    keystorePath = properties['keystorePath']
-    storePassword = properties['storePassword']
-    keyAlias = properties['keyAlias']
-    keyPassword = properties['keyPassword']
+    keystorePath = properties.keystorePath
+    storePassword = properties.storePassword
+    keyAlias = properties.keyAlias
+    keyPassword = properties.keyPassword
     println "Live SDK version is " + versionName
-    println "rootProject.properties is " + rootProject.properties
 }
 
 android {
@@ -27,6 +26,12 @@ android {
     signingConfigs {
 
         if (project.ext.keystorePath != null) {
+            debug {
+                storeFile file(project.ext.keystorePath)
+                storePassword project.ext.storePassword
+                keyAlias project.ext.keyAlias
+                keyPassword project.ext.keyPassword
+            }
             release {
                 storeFile file(project.ext.keystorePath)
                 storePassword project.ext.storePassword
@@ -41,11 +46,14 @@ android {
         debug {
             minifyEnabled false
             debuggable true
+            if (signingConfigs.hasProperty("debug")) {
+                signingConfig signingConfigs.release
+            }
         }
 
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             debuggable false
 
             if (signingConfigs.hasProperty("release")) {
@@ -76,9 +84,12 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.14'
 
-    implementation 'com.hypertrack:hypertrack:3.8.0-SNAPSHOT'
-    implementation 'com.hypertrack:hypertrack-views:0.6.0'
-    implementation 'com.hypertrack:maps-google:0.1.1'
+    implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
+
+    implementation 'com.hypertrack:hypertrack:4.0.0-SNAPSHOT'
+    implementation 'com.hypertrack:hypertrack-views:0.8.2'
+    implementation("com.hypertrack:maps-google:0.1.4") {transitive = false}
+    implementation project(':hypertrack-trips')
 
     implementation 'com.airbnb.android:lottie:3.1.0'
 
@@ -95,10 +106,10 @@ def computeVersionNumber() {
         def versionMajor = match.group(1).toInteger()
         def versionMinor = match.group(2).toInteger()
         def versionPatch = match.group(3).toInteger()
-        return versionMajor * 1000000 + versionMinor * 1000 + versionPatch
+        return versionMajor * 1000000 + versionMinor * 10000 + versionPatch
     }
     throw new Exception("Could not read version.properties!")
 }
 
 // Google Play services Gradle plugin. Add google-services.json and uncomment
-// apply plugin: 'com.google.gms.google-services'
+ apply plugin: 'com.google.gms.google-services'

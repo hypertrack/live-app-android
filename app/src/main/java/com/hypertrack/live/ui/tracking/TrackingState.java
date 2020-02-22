@@ -6,14 +6,20 @@ import android.content.SharedPreferences;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.live.R;
+import com.hypertrack.sdk.views.dao.Trip;
+import com.hypertrack.sdk.views.maps.TripSubscription;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class TrackingState {
 
     private final SharedPreferences preferences;
     private final String hyperTrackPubKey;
+    public final Map<String, Trip> trips = new HashMap<>();
+    public final Map<String, TripSubscription> tripSubscription = new HashMap<>();
     private String tripId;
     private LatLng destination;
-    private String shareableUrl;
 
     public String getHyperTrackPubKey() {
         return hyperTrackPubKey;
@@ -34,14 +40,6 @@ public class TrackingState {
 
     public void setDestination(LatLng destination) {
         this.destination = destination;
-    }
-
-    public String getShareableUrl() {
-        return shareableUrl;
-    }
-
-    public void setShareableUrl(String shareableUrl) {
-        this.shareableUrl = shareableUrl;
     }
 
     public TrackingState(Context context, String hyperTrackPubKey) {

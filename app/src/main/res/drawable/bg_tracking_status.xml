@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/bg_inactive_14" android:state_activated="false" />
+
+    <item android:drawable="@drawable/bg_active_14" />
+</selector>

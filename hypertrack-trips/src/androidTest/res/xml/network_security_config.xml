@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="true">hypertrack.com</domain>
+        <trust-anchors>
+            <certificates src="user" />
+            <certificates src="system"/>
+        </trust-anchors>
+    </domain-config>
+</network-security-config>

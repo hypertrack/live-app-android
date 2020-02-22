@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private HyperTrack hyperTrack;
     private MyTrackingStateListener myTrackingStateListener = new MyTrackingStateListener() {
+
         @Override
         public void onError(TrackingError trackingError) {
             loader.stop();
@@ -52,12 +53,26 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case TrackingError.AUTHORIZATION_ERROR:
                     Log.e(TAG, "Need to check account or renew subscription");
-                    // Handle this error if needed.
+                    AlertDialog billingAlertDialog = new AlertDialog.Builder(MainActivity.this)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                                    String url = "https://dashboard.hypertrack.com/billing";
+                                    intent.setData(Uri.parse(url));
+                                    startActivity(intent);
+                                }
+                            })
+                            .setTitle(getString(R.string.events_expired_this_month))
+                            .setMessage(getString(R.string.upgrade_to_prod))
+                            .create();
+                    billingAlertDialog.show();
                     break;
                 case TrackingError.PERMISSION_DENIED_ERROR:
                     // User refused permission or they were not requested.
                     // Request permission from the user yourself or leave it to SDK.
-                    AlertDialog alertDialog = new AlertDialog.Builder(MainActivity.this)
+                    AlertDialog settingsAlertDialog = new AlertDialog.Builder(MainActivity.this)
                             .setNegativeButton(android.R.string.cancel, null)
                             .setPositiveButton(R.string.open, new DialogInterface.OnClickListener() {
                                 @Override
@@ -72,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
                             .setTitle(R.string.app_settings)
                             .setMessage(R.string.you_can_allow)
                             .create();
-                    alertDialog.show();
+                    settingsAlertDialog.show();
                     break;
                 case TrackingError.GPS_PROVIDER_DISABLED_ERROR:
                     // User disabled GPS in device settings.
@@ -93,26 +108,14 @@ public class MainActivity extends AppCompatActivity {
         loader = new LoaderDecorator(this);
 
         final SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        String installReferrer = sharedPreferences.getString("_install_referrer", "");
         String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-        boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-
-        if (!TextUtils.isEmpty(installReferrer)) {
-            hyperTrackPublicKey = installReferrer;
-            shouldStartTracking = true;
-            sharedPreferences.edit()
-                    .remove("_install_referrer")
-                    .putString("pub_key", hyperTrackPublicKey)
-                    .putBoolean("is_tracking", true)
-                    .apply();
-        }
 
         if (TextUtils.isEmpty(hyperTrackPublicKey) ||
                 PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
             addFragment(WelcomeFragment.newInstance(!TextUtils.isEmpty(hyperTrackPublicKey)));
         } else {
-            initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+            initializeHyperTrack(hyperTrackPublicKey);
         }
     }
 
@@ -130,27 +133,25 @@ public class MainActivity extends AppCompatActivity {
 
     private void addFragment(Fragment fragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_frame, fragment);
+        transaction.replace(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName());
         transaction.commitAllowingStateLoss();
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if ((requestCode & 0x0000ffff) == VERIFICATION_REQUEST) {
             if (resultCode == RESULT_OK) {
                 String hyperTrackPublicKey = data.getStringExtra(VerificationActivity.VERIFICATION_KEY);
                 SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
                 sharedPreferences.edit()
                         .putString("pub_key", hyperTrackPublicKey)
-                        .putBoolean("is_tracking", true)
                         .apply();
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
                         || PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                    initializeHyperTrack(hyperTrackPublicKey);
                 } else {
                     addFragment(WelcomeFragment.newInstance(true));
                 }
@@ -159,8 +160,7 @@ public class MainActivity extends AppCompatActivity {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
                 String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-                boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-                initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                initializeHyperTrack(hyperTrackPublicKey);
             }
         }
     }
@@ -177,8 +177,7 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
                     String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-                    boolean shouldStartTracking = sharedPreferences.getBoolean("is_tracking", true);
-                    initializeHyperTrack(hyperTrackPublicKey, shouldStartTracking);
+                    initializeHyperTrack(hyperTrackPublicKey);
                 } else {
                     AlertDialog alertDialog = new AlertDialog.Builder(this)
                             .setNegativeButton(android.R.string.cancel, null)
@@ -202,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeHyperTrack(final String hyperTrackPublicKey, boolean shouldStartTracking) {
+    private void initializeHyperTrack(final String hyperTrackPublicKey) {
 
         if (!TextUtils.isEmpty(hyperTrackPublicKey)) {
             HyperTrack.enableDebugLogging();
@@ -213,10 +212,7 @@ public class MainActivity extends AppCompatActivity {
             hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
                     .setTrackingNotificationConfig(notificationConfig)
                     .addTrackingListener(myTrackingStateListener)
-                    .setDeviceName(AppUtils.getDeviceName());
-            if (shouldStartTracking) {
-                hyperTrack.start();
-            }
+                    .setDeviceName(AppUtils.getDeviceName(this));
             addFragment(TrackingFragment.newInstance(hyperTrackPublicKey));
             Log.i("getDeviceId", hyperTrack.getDeviceID());
         }
@@ -225,7 +221,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        hyperTrack.removeTrackingListener(myTrackingStateListener);
+        if (hyperTrack != null) {
+            hyperTrack.removeTrackingListener(myTrackingStateListener);
+        }
     }
 
     private void initializationFailed() {
@@ -236,8 +234,7 @@ public class MainActivity extends AppCompatActivity {
                         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
                         sharedPreferences.edit()
                                 .remove("pub_key")
-                                .remove("is_tracking")
-                                .commit();
+                                .apply();
                         addFragment(WelcomeFragment.newInstance(false));
                     }
                 })
@@ -250,6 +247,7 @@ public class MainActivity extends AppCompatActivity {
     private void networkNotConnected() {
         AlertDialog alertDialog = new AlertDialog.Builder(this)
                 .setNegativeButton(R.string.app_settings, new DialogInterface.OnClickListener() {
+
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         Intent intent = new Intent(Settings.ACTION_WIFI_SETTINGS);

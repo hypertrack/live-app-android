@@ -17,25 +17,26 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/welcome_to_hypertrack_live"
             android:layout_gravity="center_horizontal"
+            android:text="@string/welcome_to_hypertrack_live"
             android:textSize="22sp"
             android:textStyle="bold" />
 
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_height="240dp"
             android:layout_gravity="center_horizontal"
-            android:contentDescription="TODO" android:src="@drawable/illustrations" />
+            android:layout_marginTop="30dp"
+            android:contentDescription="TODO"
+            android:src="@drawable/illustrations" />
 
 
         <TextView
             android:id="@+id/contentText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="34dp"
             android:layout_marginStart="48dp"
+            android:layout_marginTop="34dp"
             android:text="@string/welcome_steps" />
 
     </LinearLayout>

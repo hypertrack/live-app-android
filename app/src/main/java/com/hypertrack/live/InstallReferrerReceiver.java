@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.text.TextUtils;
-import android.util.Log;
 
 public class InstallReferrerReceiver extends BroadcastReceiver {
     @SuppressLint("ApplySharedPref")
@@ -19,7 +18,7 @@ public class InstallReferrerReceiver extends BroadcastReceiver {
             String htlink = uri.getQueryParameter("htlink");
             if (!TextUtils.isEmpty(htlink)) {
                 context.getSharedPreferences(context.getString(R.string.app_name), Activity.MODE_PRIVATE).edit()
-                        .putString("_install_referrer", referrer)
+                        .putString("pub_key", htlink)
                         .commit();
             }
         }

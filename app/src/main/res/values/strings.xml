@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Live</string>
     <string name="default_notification_channel_id" translatable="false">4857</string>
 
@@ -30,8 +30,86 @@
     <string name="you_can_allow">You can allow HyperTrack Live to access this device\'s location in settings</string>
     <string name="share_live">Share</string>
     <string name="start_trip">Start trip</string>
-    <string name="end_trip">End trip</string>
+    <string name="end_trip">End</string>
     <string name="tap_to_restart_tracking">Tap to restart tracking</string>
     <string name="tap_to_turn_location_settings">Tap to turn on location in settings</string>
     <string name="search_for_the_destination">Search for the destination</string>
+    <string name="where_are_you_going">Where are you going?</string>
+    <string name="i_m_going_to">I’m going to</string>
+    <string name="set_on_map">Set on map</string>
+    <string name="share_eta">Share ETA</string>
+    <string name="share_trip">Share trip</string>
+    <string name="not_decided_yet">Not decided yet</string>
+    <string name="_away">%d min</string>
+    <string name="arriving_now">Arriving now</string>
+    <string name="arrived">Arrived</string>
+    <string name="close">Close</string>
+    <string name="miles_mins">%.2f miles • %d mins</string>
+    <string name="sign_in_to_your_account">Sign in to your account</string>
+    <string name="email_address">Email address</string>
+    <string name="password">Password</string>
+    <string name="sign_in">Sign in</string>
+    <string name="incorrect_username_or_pass">Incorrect username or password</string>
+    <string name="sign_up">Sign up</string>
+    <string name="don_t_have_an_account">Don’t have an account?</string>
+    <string name="already_have_an_account">Already have an account?</string>
+    <string name="sign_up_a_new_account">Create a new account</string>
+    <string name="_14_day_free_trial_no_credit_card_required">Free 100k events per month. No credit card required.</string>
+    <string name="company_or_product_name">Company or product name</string>
+    <string name="next">Next</string>
+    <string name="back">Back</string>
+    <string name="accept_continue"><![CDATA[Accept & Continue]]></string>
+    <string name="i_agree_to_terms_of_service"><![CDATA[By clicking on the Accept & Continue button I agree to <a href="https://www.hypertrack.com/terms">Terms of Service</a> and <a href="https://www.hypertrack.com/agreement">HyperTrack SaaS Agreement</a>]]></string>
+    <string name="all_fields_required">All fields required</string>
+    <string name="my_app_manages">My app manages</string>
+    <string name="my_app_would_track">My app would track</string>
+    <string name="my_app_is">My app is</string>
+    <string name="verify_your_email">Verify your email</string>
+    <string name="we_have_sent_you_an_email">We have sent you an email with verification link. Please click on the link in the email to continue</string>
+    <string name="i_have_verified">I have verified</string>
+    <string name="resend_verification_link">Resend verification link</string>
+    <string name="user_does_not_exist" tools:ignore="PrivateResource">User does not exist</string>
+    <string name="user_is_not_confirmed">User is not confirmed</string>
+    <string name="an_account_exists">An account with the given email already exists</string>
+    <string name="tracking_is">Tracking is %s</string>
+    <string name="searching_">Searching…</string>
+    <string name="status_stopped">stopped</string>
+    <string name="yes_i_m_going_to">Yes, I’m going to…</string>
+    <string name="trip_to">Trip to</string>
+    <string name="arrival">Arrival</string>
+    <string name="away">Away</string>
+    <string name="you_have_ongoing_trips">You have %d ongoing trips</string>
+    <string name="trip_started_from">Trip started from</string>
+    <string name="lat_lng">%.4f, %.4f</string>
+    <string name="active">Active</string>
+    <string name="inactive">Inactive</string>
+    <string name="disabled">Disabled</string>
+    <string name="unknown">Unknown</string>
+    <string name="events_expired_this_month">Free events expired this month</string>
+    <string name="upgrade_to_prod">Upgrade to production plan</string>
+
+    <array name="categories">
+        <item>not selected</item>
+        <item>Gig economy</item>
+        <item>On-demand delivery</item>
+        <item>Logistics</item>
+        <item>Workforce</item>
+        <item>Other</item>
+    </array>
+
+    <array name="devices">
+        <item>not selected</item>
+        <item>Less than 100 devices</item>
+        <item>100s of devices</item>
+        <item>1,000s of device</item>
+        <item>More than 10,000 devices</item>
+    </array>
+
+    <array name="stage">
+        <item>not selected</item>
+        <item>Being prototyped</item>
+        <item>In pilot</item>
+        <item>In production</item>
+    </array>
+
 </resources>

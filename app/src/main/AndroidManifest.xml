@@ -4,13 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.hypertrack.live">
 
-    <uses-feature android:name="android.hardware.bluetooth" android:required="false"/>
-    <uses-feature android:name="android.hardware.camera" android:required="false"/>
-    <uses-feature android:name="android.hardware.nfc" android:required="false"/>
-    <uses-feature android:name="android.hardware.wifi" android:required="false"/>
-    <uses-feature android:name="android.hardware.telephony" android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
-    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -19,18 +29,20 @@
     <dist:module dist:instant="true" />
 
     <application
+        android:name="com.hypertrack.live.App"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:name=".App"
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name=".LaunchActivity"
+            android:name="com.hypertrack.live.LaunchActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -38,23 +50,27 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.MainActivity"
+            android:name="com.hypertrack.live.ui.MainActivity"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="adjustPan|stateHidden" />
         <activity
-            android:name=".ui.VerificationActivity"
+            android:name="com.hypertrack.live.ui.VerificationActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <service android:name="com.hypertrack.sdk.HyperTrackMessagingService" android:exported="false">
-            <intent-filter>
+        <service
+            android:name="com.hypertrack.sdk.HyperTrackMessagingService"
+            android:exported="false">
+            <intent-filter android:priority="500">
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 
         <receiver
-            android:name=".InstallReferrerReceiver"
+            android:name="com.hypertrack.live.InstallReferrerReceiver"
             android:exported="true"
             android:permission="android.permission.INSTALL_PACKAGES">
             <intent-filter>
@@ -63,7 +79,7 @@
         </receiver>
 
         <receiver
-            android:name=".TrackingErrorReceiver"
+            android:name="com.hypertrack.live.TrackingErrorReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.hypertrack.sdk.TRACKING_ERROR" />
