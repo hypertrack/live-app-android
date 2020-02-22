@@ -33,7 +33,7 @@ class CreateTripRequest(
         response?.let {
 
             // Expired token etc.
-            if (response.statusCode != HttpURLConnection.HTTP_CREATED) {
+            if (isSuccessFamilyStatus(response)) {
                 return Response.error(VolleyError(response))
             }
 
@@ -57,6 +57,8 @@ class CreateTripRequest(
         }
         return Response.error(VolleyError("Can't create shareable trip without response"))
     }
+    private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
+
 
     override fun getHeaders(): MutableMap<String, String> {
         val defaultHeaders = super.getHeaders()
@@ -77,9 +79,12 @@ class CompleteTripRequest(
         responseListener, errorListener
 ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
-        response?.let { if (it.statusCode == HttpURLConnection.HTTP_ACCEPTED) return Response.success(null, null) }
+        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()}")
         return Response.error(VolleyError(response))
     }
+
+    private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
 
     override fun getHeaders(): MutableMap<String, String> {
         val defaultHeaders = super.getHeaders()
@@ -87,6 +92,10 @@ class CompleteTripRequest(
         headers.putAll(defaultHeaders)
         headers["Authorization"] = "Bearer $tokenString"
         return headers
+    }
+
+    companion object {
+        const val TAG = "Requests"
     }
 }
 
