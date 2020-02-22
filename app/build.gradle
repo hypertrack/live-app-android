@@ -7,7 +7,7 @@ ext {
     storePassword = properties.storePassword
     keyAlias = properties.keyAlias
     keyPassword = properties.keyPassword
-    println "Live SDK version is " + versionName
+    println "HyperTrack Live version is " + versionName
 }
 
 android {
