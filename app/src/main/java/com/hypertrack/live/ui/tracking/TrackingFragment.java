@@ -2,6 +2,7 @@ package com.hypertrack.live.ui.tracking;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -21,6 +22,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -229,7 +231,15 @@ public class TrackingFragment extends SupportMapFragment
         endTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.endTrip();
+                final TripEndConfirmDialog dialog = new TripEndConfirmDialog(getActivity());
+                dialog.setEndTripButton(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        presenter.endTrip();
+                        dialog.dismiss();
+                    }
+                });
+                dialog.show();
             }
         });
 
@@ -390,6 +400,8 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void showTripInfo(@NonNull Trip trip) {
+        popBackStack();
+
         if (getActivity() != null) {
             int origin = R.drawable.starting_position;
             int destination = R.drawable.destination;
@@ -459,6 +471,7 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void showTripSummaryInfo(@NonNull Trip trip) {
+        popBackStack();
 
         stopTripInfoUpdating();
 
@@ -566,5 +579,23 @@ public class TrackingFragment extends SupportMapFragment
         super.onDestroy();
         presenter.destroy();
         stopTripInfoUpdating();
+    }
+
+    private static class TripEndConfirmDialog extends AppCompatDialog {
+
+        public TripEndConfirmDialog(Context context) {
+            super(context);
+            setContentView(R.layout.dialog_trip_confirm);
+            findViewById(R.id.resume).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dismiss();
+                }
+            });
+        }
+
+        void setEndTripButton(View.OnClickListener onClickListener) {
+            findViewById(R.id.end_trip).setOnClickListener(onClickListener);
+        }
     }
 }

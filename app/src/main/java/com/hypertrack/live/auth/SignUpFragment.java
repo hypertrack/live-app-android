@@ -258,8 +258,8 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                         @Override
                         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                             if (actionId == EditorInfo.IME_ACTION_NEXT) {
-                                v.clearFocus();
                                 nextPage();
+                                v.clearFocus();
                                 return true;
                             }
                             return false;

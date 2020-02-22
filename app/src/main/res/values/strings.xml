@@ -30,7 +30,8 @@
     <string name="you_can_allow">You can allow HyperTrack Live to access this device\'s location in settings</string>
     <string name="share_live">Share</string>
     <string name="start_trip">Start trip</string>
-    <string name="end_trip">End</string>
+    <string name="end">End</string>
+    <string name="end_trip">End trip</string>
     <string name="tap_to_restart_tracking">Tap to restart tracking</string>
     <string name="tap_to_turn_location_settings">Tap to turn on location in settings</string>
     <string name="search_for_the_destination">Search for the destination</string>
@@ -74,7 +75,7 @@
     <string name="tracking_is">Tracking is %s</string>
     <string name="searching_">Searching…</string>
     <string name="status_stopped">stopped</string>
-    <string name="yes_i_m_going_to">Yes, I’m going to…</string>
+    <string name="yes_i_m_going_to">I’m going to…</string>
     <string name="trip_to">Trip to</string>
     <string name="arrival">Arrival</string>
     <string name="away">Away</string>
@@ -87,6 +88,8 @@
     <string name="unknown">Unknown</string>
     <string name="events_expired_this_month">Free events expired this month</string>
     <string name="upgrade_to_prod">Upgrade to production plan</string>
+    <string name="resume">Resume</string>
+    <string name="trip_will_be_ended_are_you_sure">Trip will be ended. Are you sure?</string>
 
     <array name="categories">
         <item>not selected</item>

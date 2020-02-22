@@ -89,9 +89,6 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
                 }
             }
         });
-
-        emailAddressEditText.setText("team@hypertrack.com");
-        passwordEditText.setText("Hyp3rTr@ck321");
     }
 
     @Override

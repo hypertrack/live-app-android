@@ -91,6 +91,7 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         setOnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                presenter.search("");
                 presenter.setMapDestinationModeEnable(true);
                 destinationOnMap.setVisibility(View.VISIBLE);
                 onResult(TrackingFragment.SET_ON_MAP_REQUEST_CODE, new Intent());

@@ -194,7 +194,7 @@
                     android:layout_width="84dp"
                     android:layout_height="40dp"
                     android:background="@drawable/button_end"
-                    android:text="@string/end_trip"
+                    android:text="@string/end"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:layout_constraintRight_toRightOf="parent"
