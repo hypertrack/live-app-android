@@ -41,7 +41,7 @@
     <string name="share_eta">Share ETA</string>
     <string name="share_trip">Share trip</string>
     <string name="not_decided_yet">Not decided yet</string>
-    <string name="_away">%d min</string>
+    <string name="_min">%d min</string>
     <string name="arriving_now">Arriving now</string>
     <string name="arrived">Arrived</string>
     <string name="close">Close</string>
@@ -72,6 +72,7 @@
     <string name="user_does_not_exist" tools:ignore="PrivateResource">User does not exist</string>
     <string name="user_is_not_confirmed">User is not confirmed</string>
     <string name="an_account_exists">An account with the given email already exists</string>
+    <string name="tracking">Tracking</string>
     <string name="tracking_is">Tracking is %s</string>
     <string name="searching_">Searching…</string>
     <string name="status_stopped">stopped</string>
@@ -79,7 +80,9 @@
     <string name="trip_to">Trip to</string>
     <string name="arrival">Arrival</string>
     <string name="away">Away</string>
-    <string name="you_have_ongoing_trips">You have %d ongoing trips</string>
+    <string name="you_have_ongoing_trips">You have %d ongoing %s</string>
+    <string name="trip">Trip</string>
+    <string name="trips">Trips</string>
     <string name="trip_started_from">Trip started from</string>
     <string name="lat_lng">%.4f, %.4f</string>
     <string name="active">Active</string>
@@ -89,7 +92,8 @@
     <string name="events_expired_this_month">Free events expired this month</string>
     <string name="upgrade_to_prod">Upgrade to production plan</string>
     <string name="resume">Resume</string>
-    <string name="trip_will_be_ended_are_you_sure">Trip will be ended. Are you sure?</string>
+    <string name="end_sharing__">End sharing?</string>
+    <string name="trip_will_be_ended_are_you_sure">You haven\'t reach the destination yet, end sharing will end this trip.</string>
 
     <array name="categories">
         <item>not selected</item>

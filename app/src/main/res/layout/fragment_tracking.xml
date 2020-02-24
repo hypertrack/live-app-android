@@ -74,6 +74,7 @@
         android:background="@drawable/bg_info_bottom"
         android:elevation="6dp"
         android:orientation="vertical"
+        android:visibility="invisible"
         app:behavior_hideable="false"
         app:behavior_peekHeight="140dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -180,6 +181,7 @@
                     app:layout_constraintTop_toBottomOf="@id/destination_address" />
 
                 <TextView
+                    android:id="@+id/destination_away_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/away"

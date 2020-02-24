@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.util.Consumer;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.common.api.Status;
@@ -34,10 +35,12 @@ import com.hypertrack.sdk.TrackingStateObserver;
 import com.hypertrack.sdk.views.DeviceUpdatesHandler;
 import com.hypertrack.sdk.views.HyperTrackViews;
 import com.hypertrack.sdk.views.dao.Location;
+import com.hypertrack.sdk.views.dao.MovementStatus;
 import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.sdk.views.maps.GpsLocationProvider;
 import com.hypertrack.sdk.views.maps.HyperTrackMap;
+import com.hypertrack.sdk.views.maps.Predicate;
 import com.hypertrack.sdk.views.maps.TripSubscription;
 import com.hypertrack.trips.ResultHandler;
 import com.hypertrack.trips.ShareableTrip;
@@ -68,8 +71,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private GoogleMapConfig mapConfig;
     private TrackingStateObserver.OnTrackingStateChangeListener onTrackingStateChangeListener;
 
-    private Marker destinationMarker;
-
     private boolean mapDestinationMode = false;
 
     protected final CompositeDisposable disposables = new CompositeDisposable();
@@ -89,15 +90,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     public void initMap(@NonNull GoogleMap googleMap) {
 
         this.googleMap = googleMap;
-        googleMap.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-
-            @Override
-            public void onMapLongClick(final LatLng latLng) {
-                if (!mapDestinationMode) {
-                    updateDestination(latLng);
-                }
-            }
-        });
 
         onTrackingStateChangeListener = new TrackingStateObserver.OnTrackingStateChangeListener() {
             @Override
@@ -117,9 +109,14 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         };
         hyperTrack.addTrackingListener(onTrackingStateChangeListener);
         hyperTrack.syncDeviceSettings();
-//        hyperTrack.start();
         hyperTrackViews.subscribeToDeviceUpdates(hyperTrack.getDeviceID(), this);
         GoogleMapAdapter mapAdapter = new GoogleMapAdapter(googleMap, mapConfig);
+        mapAdapter.addTripFilter(new Predicate<Trip>() {
+            @Override
+            public boolean apply(Trip trip) {
+                return trip.getTripId().equals(state.getTripId());
+            }
+        });
         hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter)
                 .bind(new GpsLocationProvider(context))
                 .bind(hyperTrackViews, hyperTrack.getDeviceID());
@@ -166,16 +163,12 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     public void share() {
         if (mapDestinationMode) {
             stopMapDestinationMode();
-            updateDestination(googleMap.getCameraPosition().target);
+            state.setDestination(googleMap.getCameraPosition().target);
             view.popBackStack();
         }
 
         if (state.getDestination() != null) {
             startTrip();
-
-            // TEST
-//            state.setDestination(new LatLng(state.getDestination().latitude + 0.005, state.getDestination().longitude + 0.005));
-//            startTrip();
         }
     }
 
@@ -203,6 +196,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         } else {
             view.showTripInfo(trip);
         }
+        hyperTrackMap.adapter().notifyDataSetChanged();
         hyperTrackMap.moveToTrip(trip);
     }
 
@@ -217,7 +211,9 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
                 state.setTripId(trip.getTripId());
                 shareHyperTrackUrl(trip.getShareUrl());
-                updateDestination(null);
+                state.setDestination(null);
+
+                hyperTrackMap.adapter().notifyDataSetChanged();
             }
 
             @Override
@@ -280,12 +276,12 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
                 if (data.getExtras() != null && data.getExtras().get(SearchPlaceFragment.SELECTED_PLACE_KEY) != null) {
                     Place place = (Place) data.getExtras().get(SearchPlaceFragment.SELECTED_PLACE_KEY);
-                    updateDestination(place.getLatLng());
+                    state.setDestination(place.getLatLng());
                     if (hyperTrackMap != null && place.getLatLng() != null) {
                         hyperTrackMap.moveToLocation(place.getLatLng().latitude, place.getLatLng().longitude);
                     }
                 } else {
-                    updateDestination(null);
+                    state.setDestination(null);
                     startTrip();
                 }
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
@@ -297,24 +293,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             startMapDestinationMode();
         } else if (requestCode == TrackingFragment.SHARE_REQUEST_CODE) {
             share();
-        }
-    }
-
-    private void updateDestination(LatLng latLng) {
-        state.setDestination(latLng);
-        if (latLng == null) {
-            if (destinationMarker != null) {
-                destinationMarker.remove();
-            }
-        } else {
-            if (destinationMarker == null) {
-                destinationMarker = googleMap.addMarker(new MarkerOptions()
-                        .position(latLng)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.destination))
-                );
-            } else {
-                destinationMarker.setPosition(latLng);
-            }
         }
     }
 
@@ -399,20 +377,6 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             }
         } else {
             state.trips.remove(trip.getTripId());
-//            if (trip.getTripId().equals(state.getTripId())) {
-//                hyperTrackViews.getTrip(trip.getTripId(), new QueryResultHandler<Trip>() {
-//                    @Override
-//                    public void onQueryResult(Trip trip) {
-//                        state.trips.put(trip.getTripId(), trip);
-//                        view.showTripSummaryInfo(trip);
-//                    }
-//
-//                    @Override
-//                    public void onQueryFailure(Exception e) {
-//                        Log.e(TAG, "complete trip failure", e);
-//                    }
-//                });
-//            }
             if (!isNewTrip) {
                 state.tripSubscription.remove(trip.getTripId()).remove();
             }
@@ -430,8 +394,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             Trip selectedTrip = state.trips.get(state.getTripId());
             if (selectedTrip == null) {
                 selectedTrip = trips.get(0);
-                state.setTripId(selectedTrip.getTripId());
-                view.showTripInfo(selectedTrip);
+                selectTrip(selectedTrip);
             }
             selectedTripIndex = trips.indexOf(selectedTrip);
         }

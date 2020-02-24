@@ -81,6 +81,7 @@ public class TrackingFragment extends SupportMapFragment
     private TextView destinationArrival;
     private TextView destinationArrivalTitle;
     private TextView destinationAway;
+    private TextView destinationAwayTitle;
     private TextView stats;
     private TextView destination;
     private Button shareButton;
@@ -190,6 +191,7 @@ public class TrackingFragment extends SupportMapFragment
         destinationArrival = view.findViewById(R.id.destination_arrival);
         destinationArrivalTitle = view.findViewById(R.id.destination_arrival_title);
         destinationAway = view.findViewById(R.id.destination_away);
+        destinationAwayTitle = view.findViewById(R.id.destination_away_title);
         tripSummaryInfo = view.findViewById(R.id.trip_summary_info);
         stats = view.findViewById(R.id.stats);
         destination = view.findViewById(R.id.destination);
@@ -349,10 +351,8 @@ public class TrackingFragment extends SupportMapFragment
         if (getActivity() != null) {
             if (trips.isEmpty()) {
 
-                if (bottomHolder.getVisibility() == View.VISIBLE) {
-                    bottomHolder.setVisibility(View.INVISIBLE);
-                    whereAreYouGoing.setVisibility(View.VISIBLE);
-                }
+                bottomHolder.setVisibility(View.INVISIBLE);
+                whereAreYouGoing.setVisibility(View.VISIBLE);
                 stopTripInfoUpdating();
             } else {
 
@@ -362,7 +362,10 @@ public class TrackingFragment extends SupportMapFragment
                 whereAreYouGoing.setVisibility(View.INVISIBLE);
                 bottomHolder.setVisibility(View.VISIBLE);
 
-                String tripsCountText = String.format(getString(R.string.you_have_ongoing_trips), trips.size());
+                String text = getString(R.string.you_have_ongoing_trips);
+                String tripValue = trips.size() == 1 ?
+                        getString(R.string.trip).toLowerCase() : getString(R.string.trips).toLowerCase();
+                String tripsCountText = String.format(text, trips.size(), tripValue);
                 tripsCount.setText(tripsCountText);
 
                 tripsAdapter.update(trips);
@@ -415,8 +418,14 @@ public class TrackingFragment extends SupportMapFragment
                 destinationIcon.setImageResource(origin);
                 destinationAddress.setText(valueText);
 
-                destinationArrival.setVisibility(View.INVISIBLE);
-                destinationAway.setVisibility(View.INVISIBLE);
+                String arrivalText = trip.getSummary() == null ?
+                        "-"
+                        : String.format(getString(R.string._min), TimeUnit.SECONDS.toMinutes(trip.getSummary().getDuration()));
+                destinationArrival.setText(arrivalText);
+                destinationArrivalTitle.setText(R.string.tracking);
+
+                destinationAway.setText("");
+                destinationAwayTitle.setVisibility(View.INVISIBLE);
                 stopTripInfoUpdating();
             } else {
 
@@ -442,7 +451,7 @@ public class TrackingFragment extends SupportMapFragment
                             destinationAway.setText(getString(R.string.arriving_now));
                         } else {
                             destinationAway.setText(
-                                    String.format(getString(R.string._away), TimeUnit.SECONDS.toMinutes(remainingDuration))
+                                    String.format(getString(R.string._min), TimeUnit.SECONDS.toMinutes(remainingDuration))
                             );
                         }
 
@@ -460,8 +469,7 @@ public class TrackingFragment extends SupportMapFragment
                     destinationArrivalTitle.setText(R.string.arrived);
                 }
 
-                destinationArrival.setVisibility(View.VISIBLE);
-                destinationAway.setVisibility(View.VISIBLE);
+                destinationAwayTitle.setVisibility(View.VISIBLE);
             }
 
             tripSummaryInfo.setVisibility(View.GONE);

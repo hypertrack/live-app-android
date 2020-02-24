@@ -35,6 +35,9 @@ public class MainActivity extends AppCompatActivity {
     public static final int VERIFICATION_REQUEST = 414;
     public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 515;
 
+    public static final String PUBLISHABLE_KEY = "PUBLISHABLE_KEY";
+
+    private String hyperTrackPublicKey;
     private HyperTrack hyperTrack;
     private MyTrackingStateListener myTrackingStateListener = new MyTrackingStateListener() {
 
@@ -108,12 +111,12 @@ public class MainActivity extends AppCompatActivity {
         loader = new LoaderDecorator(this);
 
         final SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
+        hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
 
         if (TextUtils.isEmpty(hyperTrackPublicKey) ||
                 PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
-            addFragment(WelcomeFragment.newInstance(!TextUtils.isEmpty(hyperTrackPublicKey)));
+            addFragment(WelcomeFragment.newInstance(hyperTrackPublicKey));
         } else {
             initializeHyperTrack(hyperTrackPublicKey);
         }
@@ -153,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
                     initializeHyperTrack(hyperTrackPublicKey);
                 } else {
-                    addFragment(WelcomeFragment.newInstance(true));
+                    addFragment(WelcomeFragment.newInstance(hyperTrackPublicKey));
                 }
             }
         } else if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
@@ -235,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
                         sharedPreferences.edit()
                                 .remove("pub_key")
                                 .apply();
-                        addFragment(WelcomeFragment.newInstance(false));
+                        addFragment(WelcomeFragment.newInstance(hyperTrackPublicKey));
                     }
                 })
                 .setTitle(R.string.valid_publishable_key_required)

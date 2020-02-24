@@ -3,7 +3,9 @@ package com.hypertrack.live.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +24,12 @@ public class WelcomeFragment extends Fragment {
     private TextView contentText;
     private Button startButton;
 
-    private boolean isInitialized = false;
+    private String pubKey;
 
-    public static Fragment newInstance(boolean isInitialized) {
+    public static Fragment newInstance(String pubKey) {
         WelcomeFragment fragment = new WelcomeFragment();
         Bundle bundle = new Bundle();
-        bundle.putBoolean("SDK_STATE", isInitialized);
+        bundle.putString(MainActivity.PUBLISHABLE_KEY, pubKey);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -37,7 +39,7 @@ public class WelcomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            isInitialized = bundle.getBoolean("SDK_STATE");
+            pubKey = bundle.getString(MainActivity.PUBLISHABLE_KEY);
         }
     }
 
@@ -57,15 +59,21 @@ public class WelcomeFragment extends Fragment {
     }
 
     private void updateUI() {
-        if (isInitialized) {
+        if (!TextUtils.isEmpty(pubKey)) {
             contentText.setText(R.string.we_need_your_permission);
             startButton.setText(R.string.allow_access);
             startButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ActivityCompat.requestPermissions(getActivity(),
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                            MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    if (Build.VERSION.SDK_INT < 29) {
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    } else {
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION},
+                                MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                    }
                 }
             });
         } else {
@@ -86,7 +94,7 @@ public class WelcomeFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MainActivity.VERIFICATION_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
-                isInitialized = true;
+                pubKey = data.getStringExtra(MainActivity.PUBLISHABLE_KEY);
                 updateUI();
             }
         }

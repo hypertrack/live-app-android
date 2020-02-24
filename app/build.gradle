@@ -88,7 +88,7 @@ dependencies {
 
     implementation 'com.hypertrack:hypertrack:4.0.0-SNAPSHOT'
     implementation 'com.hypertrack:hypertrack-views:0.8.2'
-    implementation("com.hypertrack:maps-google:0.1.4") {transitive = false}
+    implementation 'com.hypertrack:maps-google:0.1.5'
     implementation project(':hypertrack-trips')
 
     implementation 'com.airbnb.android:lottie:3.1.0'
