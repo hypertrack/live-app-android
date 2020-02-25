@@ -74,7 +74,7 @@ $ cd live-app-android
 
 3. Download `google-services.json` file and copy it to `app/` folder.
 
-  <img src="Images/download-google-config.png"/>
+  <img src="images/download-google-config.png"/>
 
 ##### Run app on device
 
