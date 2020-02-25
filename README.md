@@ -1,5 +1,5 @@
 # Live Location Sharing
-[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/licenses/MIT) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/licenses/MIT) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This open source app for Live Location Sharing is built with [HyperTrack](https://www.hypertrack.com). Developers can now build live location sharing into their apps within minutes by using HyperTrack Live source code. For iOS, refer to our open source [iOS repository](https://github.com/hypertrack/live-app-ios).
 
@@ -24,7 +24,7 @@ It helps solve the user's anxiety of “where are you⁉️”.
 
 <details>
     <summary>Step by step process of communication:</summary>
-            
+
 1. **User makes a request to go to destination at  location X**
    - Prior to creating a trip to go to destination X, the user signs in into HyperTrack Live App using a HyperTrack account. HyperTrack Live App authenticates the user to Live App Backend and obtains a JWT auth token to access it. Live App Backend serves as a backend platform example for HyperTrack Live App to demonstrate the following:
      - Performs as HyperTrack Live App user management service. For this example, we use HyperTrack dashboard account user management as the way to perform HyperTrack Live App user management. You may wish to use your own user management setup for the app you are building.
@@ -35,15 +35,15 @@ It helps solve the user's anxiety of “where are you⁉️”.
 3. **Show trip route with ETA with live updates to the user**
    - HyperTrack Views SDK queries the new trip information and provides trip information to HyperTrack Live App user. In addition, HyperTrack Views SDK receives realtime updates from HyperTrack platform and provides them as callbacks to HyperTrack Live App.
 4. **User shares public short URL for the trip to locaton X with live ETA**
-   - HyperTrack Live App user can share a publicly visible trip URL for the trip with anyone on the internet with a browser. 
+   - HyperTrack Live App user can share a publicly visible trip URL for the trip with anyone on the internet with a browser.
 5. **Short URL recipient tracks user with live ETA to destination at location X**
    - The recipient or multiple recipients of the publicly visible trip URL can view HyperTrack Live App user ETA and location in realtime.
 6. **User ends live location sharing**
-   - HyperTrack Live App user may end the trip upon reaching the destination. HyperTrack Live App notifies Live App Backend while authenticating with the JWT token from above. 
+   - HyperTrack Live App user may end the trip upon reaching the destination. HyperTrack Live App notifies Live App Backend while authenticating with the JWT token from above.
 7. **Complete trip to destination at location X via Trips API**
    - Live App Backend uses [HyperTrack Trips API](https://docs.hypertrack.com/#guides-track-trips-with-destination-start-and-complete-trips) to complete the trip with destination X.
    - HyperTrack Trips API updates HyperTrack Views SDK in HyperTrack Live App with a completed trip summary to be displayed to the user. Additionally, recipients of publicly visible trip URL receive a live update about the trip completion and are displayed a completed trip summary as well.
-   
+
 </details>
 
 ## How HyperTrack Live App uses HyperTrack Trips API
@@ -55,20 +55,41 @@ Once the trip is created in the HyperTrack Live App, the Live App calls Live App
 ## Usage
 #### To use this app
 
+##### Clone this repository
 ```bash
-# Clone this repository
 $ git clone https://github.com/hypertrack/live-app-android.git
 
-# Go into the repository
 $ cd live-app-android
-
-# Change com.google.android.geo.API_KEY on yours in AndroidManifest.xml
-<meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="<you_google_maps_key>" />
 ```
 
-Get your HyperTrack Publishable Key [here](https://dashboard.hypertrack.com/signup) and type it in the Publishable Key screen in the app.
+##### Register app in Firebase
+
+1. Goto <a href="https://console.firebase.google.com/">Firebase Console</a> and create test project (or you can reuse existing one)
+
+  <img src="https://github.com/hypertrack/quickstart-android/blob/master/Images/add-app-to-test-project.png?raw=true"/>
+
+2. Register new Android application using `com.hypertrack.live` package name.
+
+  <img src="images/register-app-in-firebase.png"/>
+
+3. Download `google-services.json` file and copy it to `app/` folder.
+
+  <img src="images/download-google-config.png"/>
+
+##### Run app on device
+
+Go through one-time registration flow in the app.
+
+<img src="images/register-account.png"/>
+
+##### Finish setup
+
+Verify your email and proceed to <a href="https://dashboard.hypertrack.com/setup#server_device_communication">setup page</a>.
+where you should fill FCM Key section in Android paragraph obtained from <i>Firebase Developer console > Project Settings (gear icon at top left) > Cloud Messaging tab.</i></p>
+<img src="https://github.com/hypertrack/quickstart-android/blob/master/Images/copy-server-key.png?raw=true"/>
+
+
+
 
 ## Documentation
 For detailed documentation of the APIs, customizations and what all you can build using HyperTrack, please visit the official [docs](https://docs.hypertrack.com/).
@@ -84,5 +105,3 @@ We are excited to see what Live Location feature you build in your app using thi
 
 ## Support
 Join our [Slack community](https://join.slack.com/t/hypertracksupport/shared_invite/enQtNDA0MDYxMzY1MDMxLTdmNDQ1ZDA1MTQxOTU2NTgwZTNiMzUyZDk0OThlMmJkNmE0ZGI2NGY2ZGRhYjY0Yzc0NTJlZWY2ZmE5ZTA2NjI) for instant responses. You can also email us at help@hypertrack.com.
-
-
