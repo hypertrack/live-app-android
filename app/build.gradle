@@ -87,7 +87,7 @@ dependencies {
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
     implementation 'com.hypertrack:hypertrack:4.0.0'
-    implementation 'com.hypertrack:hypertrack-views:0.8.3'
+    implementation 'com.hypertrack:hypertrack-views:0.8.4'
     implementation 'com.hypertrack:maps-google:0.1.5'
     implementation project(':hypertrack-trips')
 
