@@ -54,9 +54,9 @@ public class TripModelTest {
 
     @Test
     public void itShouldCreateShareMessageWithEtaIfRemainingDurationWasReceivedOnUpdate() {
-        String someRandomStuff = "dead-beef-1234";
+        String someRandomId = "dead-beef-1234";
         ShareableTrip shareableTrip =
-                new ShareableTrip("https://trck.at/someSubUrl", "", someRandomStuff, null);
+                new ShareableTrip("https://trck.at/someSubUrl", "", someRandomId, null);
 
         TripModel model = TripModel.fromShareableTrip(shareableTrip);
 
@@ -66,9 +66,36 @@ public class TripModelTest {
         when(route.getRemainingDuration()).thenReturn(42);
         when(estimate.getRoute()).thenReturn(route);
         when(trip.getEstimate()).thenReturn(estimate);
-        when(trip.getTripId()).thenReturn(someRandomStuff);
+        when(trip.getTripId()).thenReturn(someRandomId);
 
         model.update(trip);
+
+        Pattern pattern = Pattern.compile("Will be there by \\d\\d?:\\d\\d\\w{2}. Track my live location here https://trck.at/someSubUrl");
+
+        String got = model.getShareableMessage();
+        Log.d(TAG, "Got message " + got);
+        Matcher matcher = pattern.matcher(got);
+        assertTrue(matcher.matches());
+    }
+
+    @Test
+    public void itShouldCreateShareMessageWithEtaIfRemainingDurationWasPresentWhenInitializedFromTrip() {
+
+        String someRandomId = "dead-beef-1234";
+
+        Trip trip = mock(Trip.class);
+        Trip.Estimate estimate = mock(Trip.Estimate.class);
+        Trip.Route route = mock(Trip.Route.class);
+        when(route.getRemainingDuration()).thenReturn(42);
+        when(estimate.getRoute()).thenReturn(route);
+        when(trip.getEstimate()).thenReturn(estimate);
+        when(trip.getTripId()).thenReturn(someRandomId);
+        Trip.Views views = mock(Trip.Views.class);
+        when(views.getSharedUrl()).thenReturn("https://trck.at/someSubUrl");
+        when(trip.getViews()).thenReturn(views);
+
+        TripModel model = TripModel.fromTrip(trip);
+        assertNotNull(model);
 
         Pattern pattern = Pattern.compile("Will be there by \\d\\d?:\\d\\d\\w{2}. Track my live location here https://trck.at/someSubUrl");
 

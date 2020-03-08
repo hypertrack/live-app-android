@@ -28,6 +28,14 @@ public class TripModel {
 
     }
 
+    public static TripModel fromTrip(@NonNull Trip trip) {
+        Trip.Views views = trip.getViews();
+        if (views.getSharedUrl() == null) return null;
+        TripModel model = new TripModel(trip.getTripId(), views.getSharedUrl());
+        model.update(trip);
+        return model;
+    }
+
     private TripModel(@NonNull String tripId, @NonNull String shareableUrl) {
         this.tripId = tripId;
         this.shareableUrl = shareableUrl;
@@ -39,7 +47,7 @@ public class TripModel {
         return new ShareableMessage(shareableUrl, mRemainingDuration, tripReceived).getShareMessage();
     }
 
-    public void update(@Nullable Trip trip) {
+    void update(@Nullable Trip trip) {
         if (trip == null || !tripId.equals(trip.getTripId())) return;
         mTrip = trip;
         tripReceived = LocalTime.now();
