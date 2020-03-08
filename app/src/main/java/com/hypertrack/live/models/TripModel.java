@@ -18,12 +18,20 @@ public class TripModel {
     @Nullable private LocalTime tripReceived;
 
     public static TripModel fromShareableTrip(@NonNull ShareableTrip shareableTrip) {
-        return new TripModel(shareableTrip.getTripId(), shareableTrip.getShareUrl());
+        TripModel model = new TripModel(shareableTrip.getTripId(), shareableTrip.getShareUrl());
+        Integer remainingDuration = shareableTrip.getRemainingDuration();
+        if (null != remainingDuration) {
+            model.mRemainingDuration = remainingDuration;
+            model.tripReceived = LocalTime.now();
+        }
+        return model;
+
     }
 
     private TripModel(@NonNull String tripId, @NonNull String shareableUrl) {
         this.tripId = tripId;
         this.shareableUrl = shareableUrl;
+
     }
 
     @NonNull
