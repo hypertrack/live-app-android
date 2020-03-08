@@ -100,5 +100,5 @@ interface ResultHandler<T> {
     fun onError(error: Exception)
 }
 
-class ShareableTrip (val shareUrl: String, val embedUrl: String, val tripId: String)
+class ShareableTrip (val shareUrl: String, val embedUrl: String, val tripId: String, val remainingDuration: Int?)
 

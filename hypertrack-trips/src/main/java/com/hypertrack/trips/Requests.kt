@@ -12,6 +12,7 @@ import com.google.gson.annotations.SerializedName
 import java.io.UnsupportedEncodingException
 import java.net.HttpURLConnection
 import java.nio.charset.Charset
+import java.time.Duration
 
 private const val liveAppBackendTripsEndpoint = "https://live-app-backend.htprod.hypertrack.com/trips/"
 
@@ -45,7 +46,7 @@ class CreateTripRequest(
                 val parsedTrip = gson.fromJson<Trip>(responseBody, Trip::class.java)
                 parsedTrip?.let { trip ->
                     return Response.success(
-                            ShareableTrip(trip.views.shareUrl, trip.views.embedUrl, trip.tripId),
+                            ShareableTrip(trip.views.shareUrl, trip.views.embedUrl, trip.tripId, trip.estimate?.route?.remainingDuration),
                             HttpHeaderParser.parseCacheHeaders(response)
                     )
                 }
@@ -106,5 +107,14 @@ private data class Views(
 
 private data class Trip(
         @SerializedName("trip_id") val tripId: String,
-        @SerializedName("views") val views: Views
+        @SerializedName("views") val views: Views,
+        @SerializedName("estimate") val estimate: Estimate?
+)
+
+private data class Estimate(
+        @SerializedName("route") val route: Route?
+)
+
+private data class Route(
+        @SerializedName("remaining_duration") val remainingDuration: Int?
 )
