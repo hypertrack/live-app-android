@@ -85,9 +85,10 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxjava:2.2.14'
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
+    implementation 'com.google.firebase:firebase-messaging:18.0.0'
 
-    implementation 'com.hypertrack:hypertrack:4.0.0'
-    implementation 'com.hypertrack:hypertrack-views:0.8.5'
+    implementation 'com.hypertrack:hypertrack:4.1.0'
+    implementation 'com.hypertrack:hypertrack-views:0.8.6'
     implementation 'com.hypertrack:maps-google:0.1.5'
     implementation project(':hypertrack-trips')
 
