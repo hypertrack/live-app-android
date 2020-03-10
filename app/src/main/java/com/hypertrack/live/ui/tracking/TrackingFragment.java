@@ -226,7 +226,7 @@ public class TrackingFragment extends SupportMapFragment
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.shareHyperTrackUrl();
+                presenter.shareTrackMessage();
             }
         });
         endTripButton = view.findViewById(R.id.endTripButton);
