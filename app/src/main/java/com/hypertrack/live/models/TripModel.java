@@ -83,7 +83,7 @@ public class TripModel {
             }
 
             return String.format("Will be there by %s. Track my live location here %s",
-                    arriveTime.format(DateTimeFormatter.ofPattern("h:ma")), mShareableUrl
+                    arriveTime.format(DateTimeFormatter.ofPattern("h:mma")), mShareableUrl
             );
         }
     }
