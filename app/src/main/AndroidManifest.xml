@@ -54,7 +54,7 @@
             android:launchMode="singleInstance"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustPan|stateHidden" />
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="com.hypertrack.live.ui.VerificationActivity"
             android:screenOrientation="portrait"
@@ -93,10 +93,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_api_key" />
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="9edfb246c6078a42caf8249e414e4f8b7f6c1dc0" />
 
         <uses-library
             android:name="org.apache.http.legacy"

@@ -279,7 +279,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                     Spinner devicesSpinner = view.findViewById(R.id.devices);
                     Spinner stageSpinner = view.findViewById(R.id.stage);
                     final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.categories));
-                    final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">1000");
+                    final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
                     final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
 
                     categoriesSpinner.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));

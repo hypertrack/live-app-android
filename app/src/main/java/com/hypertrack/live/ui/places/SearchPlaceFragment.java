@@ -1,11 +1,14 @@
 package com.hypertrack.live.ui.places;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -65,12 +68,12 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         });
 
         search = view.findViewById(R.id.search);
-        search.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        search.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View view, boolean b) {
-                if (b) {
-                    presenter.setMapDestinationModeEnable(false);
-                }
+            public void onClick(View view) {
+                setOnMap.setVisibility(View.VISIBLE);
+                destinationOnMap.setVisibility(View.GONE);
+                presenter.setMapDestinationModeEnable(false);
             }
         });
         search.addTextChangedListener(new HTTextWatcher() {
@@ -79,6 +82,10 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
                 presenter.search(charSequence.toString());
             }
         });
+        search.requestFocus();
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(search, InputMethodManager.SHOW_IMPLICIT);
+
         view.findViewById(R.id.no_destination).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -106,21 +113,32 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         });
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        RecyclerView locations = view.findViewById(R.id.locations);
-        locations.setHasFixedSize(true);
+        RecyclerView locationsRecyclerView = view.findViewById(R.id.locations);
+        locationsRecyclerView.setHasFixedSize(true);
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(view.getContext(),
                 layoutManager.getOrientation());
-        locations.addItemDecoration(dividerItemDecoration);
-        locations.setLayoutManager(layoutManager);
+        locationsRecyclerView.addItemDecoration(dividerItemDecoration);
+        locationsRecyclerView.setLayoutManager(layoutManager);
         placesAdapter = new PlacesAdapter();
         placesAdapter.setOnItemClickListener(new PlacesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.Adapter<?> adapter, View view, int position) {
-                setOnMap.setVisibility(View.GONE);
                 presenter.selectPlace(placesAdapter.getItem(position).getPlaceId());
             }
         });
-        locations.setAdapter(placesAdapter);
+        locationsRecyclerView.setAdapter(placesAdapter);
+
+        View.OnTouchListener hideSoftInputOnTouchListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+                search.clearFocus();
+                return false;
+            }
+        };
+        view.setOnTouchListener(hideSoftInputOnTouchListener);
+        locationsRecyclerView.setOnTouchListener(hideSoftInputOnTouchListener);
     }
 
     @SuppressWarnings("ConstantConditions")

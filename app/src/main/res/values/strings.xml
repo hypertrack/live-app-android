@@ -94,6 +94,7 @@
     <string name="resume">Resume</string>
     <string name="end_sharing__">End sharing?</string>
     <string name="trip_will_be_ended_are_you_sure">You haven\'t reach the destination yet, end sharing will end this trip.</string>
+    <string name="confirm">Confirm</string>
 
     <array name="categories">
         <item>not selected</item>

@@ -103,7 +103,7 @@
         android:id="@+id/share"
         style="@style/ActionButtonStyle"
         android:layout_margin="24dp"
-        android:text="@string/share_live"
+        android:text="@string/confirm"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />

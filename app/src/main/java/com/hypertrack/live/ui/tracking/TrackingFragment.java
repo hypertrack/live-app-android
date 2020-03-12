@@ -2,10 +2,8 @@ package com.hypertrack.live.ui.tracking;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.PowerManager;
@@ -22,7 +20,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -37,11 +34,11 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
+import com.hypertrack.live.views.Snackbar;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.views.dao.Trip;
 
@@ -63,6 +60,7 @@ public class TrackingFragment extends SupportMapFragment
 
     private static final DateFormat DATE_FORMAT = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
 
+    private Snackbar tripConfirmSnackbar;
     private Snackbar turnOnLocationSnackbar;
     private View blockingView;
     private TextView trackingStatus;
@@ -70,7 +68,6 @@ public class TrackingFragment extends SupportMapFragment
     private TextView trackingStatusText;
     private View bottomHolder;
     private BottomSheetBehavior bottomHolderSheetBehavior;
-    private RecyclerView tripsRecyclerView;
     private View tripInfo;
     private View tripSummaryInfo;
     private View whereAreYouGoing;
@@ -182,7 +179,7 @@ public class TrackingFragment extends SupportMapFragment
 
         bottomHolder = view.findViewById(R.id.bottom_holder);
         bottomHolderSheetBehavior = BottomSheetBehavior.from(bottomHolder);
-        tripsRecyclerView = view.findViewById(R.id.recycler_view);
+        RecyclerView tripsRecyclerView = view.findViewById(R.id.recycler_view);
         tripInfo = view.findViewById(R.id.trip_info);
         tripsCount = view.findViewById(R.id.trips_count);
         tripTo = view.findViewById(R.id.trip_to);
@@ -233,26 +230,31 @@ public class TrackingFragment extends SupportMapFragment
         endTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final TripEndConfirmDialog dialog = new TripEndConfirmDialog(getActivity());
-                dialog.setEndTripButton(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        presenter.endTrip();
-                        dialog.dismiss();
-                    }
-                });
-                dialog.show();
+                tripConfirmSnackbar.show();
             }
         });
 
-        turnOnLocationSnackbar = Snackbar.make(locationButton, "", Snackbar.LENGTH_INDEFINITE)
-                .setAction(getString(R.string.tap_to_turn_location_settings), new View.OnClickListener() {
+        tripConfirmSnackbar = Snackbar.make(view.getRootView(), R.layout.snackbar_trip_confirm, Snackbar.LENGTH_INDEFINITE)
+                .setAction(R.id.resume, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        tripConfirmSnackbar.dismiss();
+                    }
+                })
+                .setAction(R.id.end_trip, new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        presenter.endTrip();
+                        tripConfirmSnackbar.dismiss();
+                    }
+                });
+        turnOnLocationSnackbar = Snackbar.make(locationButton, R.layout.snackbar_gps_enable, Snackbar.LENGTH_INDEFINITE)
+                .setAction(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         presenter.actionLocationSourceSettings();
                     }
-                })
-                .setActionTextColor(Color.WHITE);
+                });
 
         getActivity().getSupportFragmentManager().addOnBackStackChangedListener(this);
 
@@ -403,7 +405,6 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void showTripInfo(@NonNull Trip trip) {
-        popBackStack();
 
         if (getActivity() != null) {
             int origin = R.drawable.starting_position;
@@ -479,9 +480,9 @@ public class TrackingFragment extends SupportMapFragment
 
     @Override
     public void showTripSummaryInfo(@NonNull Trip trip) {
-        popBackStack();
 
         stopTripInfoUpdating();
+        tripConfirmSnackbar.dismiss();
 
         if (getActivity() != null) {
             if (trip.getDestination() == null && trip.getSummary() == null) {
@@ -587,23 +588,5 @@ public class TrackingFragment extends SupportMapFragment
         super.onDestroy();
         presenter.destroy();
         stopTripInfoUpdating();
-    }
-
-    private static class TripEndConfirmDialog extends AppCompatDialog {
-
-        public TripEndConfirmDialog(Context context) {
-            super(context);
-            setContentView(R.layout.dialog_trip_confirm);
-            findViewById(R.id.resume).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    dismiss();
-                }
-            });
-        }
-
-        void setEndTripButton(View.OnClickListener onClickListener) {
-            findViewById(R.id.end_trip).setOnClickListener(onClickListener);
-        }
     }
 }

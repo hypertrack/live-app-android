@@ -58,12 +58,12 @@
 
     <!-- snackbar style -->
     <style name="SnackBarStyle" parent="Widget.MaterialComponents.Snackbar">
-        <item name="android:background">#c83391ff</item>
+        <item name="android:background">@android:color/transparent</item>
         <item name="android:layout_margin">0dp</item>
-        <item name="android:paddingLeft">20dp</item>
-        <item name="android:paddingRight">20dp</item>
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
     </style>
 
     <style name="NegativeButtonStyle" parent="Widget.AppCompat.Button.ButtonBar.AlertDialog">

@@ -139,9 +139,8 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         if (hyperTrackMap != null) {
             if (TextUtils.isEmpty(state.getCurrentTripId())) {
                 hyperTrackMap.moveToMyLocation();
-            } else {
-                hyperTrackMap.adapter().setCameraFixedEnabled(enabled);
             }
+            hyperTrackMap.adapter().setCameraFixedEnabled(enabled);
         }
     }
 
@@ -267,13 +266,10 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                 if (data.getExtras() != null && data.getExtras().get(SearchPlaceFragment.SELECTED_PLACE_KEY) != null) {
                     Place place = (Place) data.getExtras().get(SearchPlaceFragment.SELECTED_PLACE_KEY);
                     state.setDestination(place.getLatLng());
-                    if (hyperTrackMap != null && place.getLatLng() != null) {
-                        hyperTrackMap.moveToLocation(place.getLatLng().latitude, place.getLatLng().longitude);
-                    }
                 } else {
                     state.setDestination(null);
-                    startTrip();
                 }
+                startTrip();
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
 
                 Status status = Autocomplete.getStatusFromIntent(data);
@@ -381,6 +377,8 @@ class TrackingPresenter implements DeviceUpdatesHandler {
                 selectTrip(selectedTrip);
             }
             selectedTripIndex = trips.indexOf(selectedTrip);
+        } else {
+//            state.setCurrentTrip(null);
         }
         view.updateTripsMenu(trips, selectedTripIndex);
     }
