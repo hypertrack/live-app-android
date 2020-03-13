@@ -90,9 +90,8 @@ dependencies {
 
     implementation 'com.hypertrack:hypertrack:4.1.2'
     // hypertrack could work with different version of play services
-    // so lets choose latest
-    implementation 'com.google.android.gms:play-services-location:17.0.0'
-    implementation 'com.google.firebase:firebase-messaging:20.1.2'
+    implementation 'com.google.android.gms:play-services-location:16.0.0'
+    implementation 'com.google.firebase:firebase-messaging:18.0.0'
 
     implementation 'com.hypertrack:hypertrack-views:0.8.6'
     implementation 'com.hypertrack:maps-google:0.1.7'
