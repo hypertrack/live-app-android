@@ -243,7 +243,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                     emailAddressEditText.addTextChangedListener(new HTTextWatcher() {
                         @Override
                         public void afterTextChanged(Editable editable) {
-                            email = editable.toString();
+                            email = editable.toString().toLowerCase();
                         }
                     });
                     passwordEditText.setText(password);

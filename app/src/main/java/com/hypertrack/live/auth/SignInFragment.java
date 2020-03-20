@@ -69,7 +69,7 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
             public void onClick(View view) {
                 incorrect.setText("");
 
-                String email = emailAddressEditText.getText().toString();
+                String email = emailAddressEditText.getText().toString().toLowerCase();
                 String password = passwordEditText.getText().toString();
                 if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
                     loader.start();
