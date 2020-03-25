@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.hypertrack.live.R;
 
 public class VerificationActivity extends AppCompatActivity {
-    private static final String TAG = VerificationActivity.class.getSimpleName();
     public static final String VERIFICATION_KEY = "VERIFICATION_KEY";
 
     private LoaderDecorator loader;

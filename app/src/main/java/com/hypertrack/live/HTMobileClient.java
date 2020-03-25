@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 public class HTMobileClient {
-    private static final String TAG = "HTMobileClient";
+    private static final String TAG = App.TAG + "HTMobileClient";
 
     private final Context mContext;
     private RequestQueue mRequestQueue;

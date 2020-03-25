@@ -6,7 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorHyperTrack</item>
-        <item name="android:windowBackground">@color/colorBackground</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
         <item name="android:textColor">@color/textColorPrimary</item>
         <item name="android:homeAsUpIndicator">@drawable/arrow_left</item>
 

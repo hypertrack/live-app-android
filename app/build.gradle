@@ -78,6 +78,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation 'com.google.android.libraries.places:places:2.2.0'
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
@@ -88,13 +89,9 @@ dependencies {
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
-    implementation 'com.hypertrack:hypertrack:4.1.2'
-    // hypertrack could work with different version of play services
-    implementation 'com.google.android.gms:play-services-location:16.0.0'
-    implementation 'com.google.firebase:firebase-messaging:18.0.0'
-
+    implementation 'com.hypertrack:hypertrack:4.1.3'
     implementation 'com.hypertrack:hypertrack-views:0.8.6'
-    implementation 'com.hypertrack:maps-google:0.1.7'
+    implementation 'com.hypertrack:maps-google:0.1.8'
     implementation project(':hypertrack-trips')
 
     implementation 'com.airbnb.android:lottie:3.1.0'

@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
+import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
@@ -19,7 +20,7 @@ import com.hypertrack.live.ui.MainActivity;
 
 public class ConfirmFragment extends Fragment implements HTMobileClient.Callback {
 
-    private static final String TAG = "ConfirmFragment";
+    private static final String TAG = App.TAG + "ConfirmFragment";
 
     private LoaderDecorator loader;
 

@@ -1,17 +1,13 @@
 package com.hypertrack.live.ui.tracking;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
-import com.google.android.gms.maps.model.LatLng;
-import com.hypertrack.live.R;
 import com.hypertrack.live.models.TripModel;
+import com.hypertrack.live.ui.BaseState;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.sdk.views.maps.TripSubscription;
-import com.hypertrack.trips.ShareableTrip;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,58 +16,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class TrackingState {
-
-    private final SharedPreferences preferences;
-    private final String hyperTrackPubKey;
-    private final Map<String, Trip> trips = new HashMap<>();
-    final Map<String, TripSubscription> tripSubscription = new HashMap<>();
+class TrackingState extends BaseState {
     private String tripId;
-    private LatLng destination;
     private TripModel mTripModel;
+    final Map<String, Trip> trips = new HashMap<>();
+    final Map<String, TripSubscription> tripSubscription = new HashMap<>();
 
-    String getHyperTrackPubKey() {
-        return hyperTrackPubKey;
-    }
-
-    String getCurrentTripId() {
+    String getSelectedTripId() {
         return tripId;
     }
 
-    void setCurrentTrip(ShareableTrip trip) {
-        this.tripId = trip.getTripId();
-        preferences.edit().putString("trip_id", tripId).apply();
-        mTripModel = TripModel.fromShareableTrip(trip);
+    void setSelectedTrip(Trip trip) {
+        if (trip != null) {
+            this.tripId = trip.getTripId();
+            preferences.edit().putString("selected_trip_id", tripId).apply();
+            mTripModel = TripModel.fromTrip(trip);
+        } else {
+            tripId = null;
+            mTripModel = null;
+            preferences.edit().remove("selected_trip_id").apply();
+        }
     }
 
-    void setCurrentTrip(Trip trip) {
-        this.tripId = trip.getTripId();
-        preferences.edit().putString("trip_id", tripId).apply();
-        mTripModel = TripModel.fromTrip(trip);
+    TrackingState(Context context) {
+        super(context);
+        tripId = preferences.getString("selected_trip_id", null);
     }
-
-    LatLng getDestination() {
-        return destination;
-    }
-
-    void setDestination(LatLng destination) {
-        this.destination = destination;
-    }
-
-    TrackingState(Context context, String hyperTrackPubKey) {
-        this.hyperTrackPubKey = hyperTrackPubKey;
-        preferences = context.getSharedPreferences(context.getString(R.string.app_name), Activity.MODE_PRIVATE);
-        tripId = preferences.getString("trip_id", null);
-    }
-
-    Trip getCurrentTrip() { return trips.get(tripId); }
-
-    void addTrip(Trip trip) {
-        trips.put(trip.getTripId(), trip);
-        mTripModel = TripModel.fromTrip(trip);
-    }
-
-    void delete(Trip trip) { trips.remove(trip.getTripId()); }
 
     List<Trip> getAllTripsStartingFromLatest() {
         ArrayList<Trip> result = new ArrayList<>(this.trips.values());

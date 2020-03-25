@@ -1,20 +1,13 @@
 package com.hypertrack.live.ui.tracking;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.PowerManager;
-import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -26,46 +19,30 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
+import com.hypertrack.live.ui.MainActivity;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
-import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.views.Snackbar;
-import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.views.dao.Trip;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class TrackingFragment extends SupportMapFragment
-        implements TrackingPresenter.View, OnMapReadyCallback, FragmentManager.OnBackStackChangedListener {
-
-    public static final int PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = 616;
-    public static final int AUTOCOMPLETE_REQUEST_CODE = 111;
-    public static final int SET_ON_MAP_REQUEST_CODE = 112;
-    public static final int SHARE_REQUEST_CODE = 113;
+public class TrackingFragment extends Fragment implements OnMapReadyCallback, TrackingPresenter.View {
 
     private static final DateFormat DATE_FORMAT = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
 
     private Snackbar tripConfirmSnackbar;
-    private Snackbar turnOnLocationSnackbar;
     private View blockingView;
-    private TextView trackingStatus;
     private FloatingActionButton locationButton;
-    private TextView trackingStatusText;
     private View bottomHolder;
     private BottomSheetBehavior bottomHolderSheetBehavior;
     private View tripInfo;
@@ -81,66 +58,24 @@ public class TrackingFragment extends SupportMapFragment
     private TextView destinationAwayTitle;
     private TextView stats;
     private TextView destination;
-    private Button shareButton;
-    private Button endTripButton;
     private LoaderDecorator loader;
-
-    private GoogleMap mGoogleMap;
-    private MapStyleOptions mapStyleOptions;
-    private MapStyleOptions mapStyleOptionsSilver;
 
     private TrackingPresenter presenter;
     private TripsAdapter tripsAdapter;
 
-    private boolean isMapStyleChanged = false;
-
-    private Timer tripInfoUpdater;
-
-    public static Fragment newInstance(String hyperTrackPublicKey) {
-        TrackingFragment fragment = new TrackingFragment();
-        Bundle bundle = new Bundle();
-        bundle.putString("HYPER_TRACK_PUBLIC_KEY", hyperTrackPublicKey);
-        fragment.setArguments(bundle);
-        return fragment;
-    }
-
     @Override
-    @SuppressLint("InflateParams")
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View mapView = super.onCreateView(inflater, container, savedInstanceState);
-        View fragmentLayout = inflater.inflate(R.layout.fragment_tracking, container, false);
-        FrameLayout frameLayout = fragmentLayout.findViewById(R.id.content_frame);
-        frameLayout.addView(mapView);
-        return fragmentLayout;
+        return inflater.inflate(R.layout.fragment_tracking, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        String hyperTrackPublicKey = getArguments() != null ?
-                getArguments().getString("HYPER_TRACK_PUBLIC_KEY") : null;
-        if (TextUtils.isEmpty(hyperTrackPublicKey)) {
-            return;
-        }
 
-        presenter = new TrackingPresenter(view.getContext(), this, hyperTrackPublicKey);
+        presenter = new TrackingPresenter(view.getContext(), this);
         loader = new LoaderDecorator(view.getContext());
 
-        mapStyleOptions = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map);
-        mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(view.getContext(), R.raw.style_map_silver);
-
         blockingView = view.findViewById(R.id.blocking_view);
-        trackingStatus = view.findViewById(R.id.tracking_status);
-        trackingStatus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (trackingStatusText.getVisibility() == View.VISIBLE) {
-                    trackingStatusText.setVisibility(View.GONE);
-                } else {
-                    trackingStatusText.setVisibility(View.VISIBLE);
-                }
-            }
-        });
         locationButton = view.findViewById(R.id.location_button);
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -160,20 +95,14 @@ public class TrackingFragment extends SupportMapFragment
                 });
             }
         });
-        trackingStatusText = view.findViewById(R.id.tracking_status_text);
-        trackingStatusText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                trackingStatusText.setVisibility(View.GONE);
-            }
-        });
 
         whereAreYouGoing = view.findViewById(R.id.where_are_you);
         whereAreYouGoing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                whereAreYouGoing.setVisibility(View.INVISIBLE);
-                addFragment(new SearchPlaceFragment());
+                ((MainActivity) getActivity()).beginFragmentTransaction(new SearchPlaceFragment())
+                        .addToBackStack(null)
+                        .commitAllowingStateLoss();
             }
         });
 
@@ -219,14 +148,14 @@ public class TrackingFragment extends SupportMapFragment
                 }
             }
         });
-        shareButton = view.findViewById(R.id.shareButton);
+        Button shareButton = view.findViewById(R.id.shareButton);
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 presenter.shareTrackMessage();
             }
         });
-        endTripButton = view.findViewById(R.id.endTripButton);
+        Button endTripButton = view.findViewById(R.id.endTripButton);
         endTripButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -248,82 +177,23 @@ public class TrackingFragment extends SupportMapFragment
                         tripConfirmSnackbar.dismiss();
                     }
                 });
-        turnOnLocationSnackbar = Snackbar.make(locationButton, R.layout.snackbar_gps_enable, Snackbar.LENGTH_INDEFINITE)
-                .setAction(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        presenter.actionLocationSourceSettings();
-                    }
-                });
-
-        getActivity().getSupportFragmentManager().addOnBackStackChangedListener(this);
-
-        getMapAsync(this);
-
-        if (!AppUtils.isGpsProviderEnabled(getActivity())) {
-            showTurnOnLocationSnackbar();
-        }
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mGoogleMap = googleMap;
-        presenter.initMap(googleMap);
-        UiSettings uiSettings = googleMap.getUiSettings();
-        uiSettings.setMapToolbarEnabled(false);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        presenter.resume();
+        ((MainActivity) getActivity()).getMapAsync(this);
     }
 
     @Override
-    public void onTrackingStart() {
-        trackingStatus.setActivated(true);
-        trackingStatus.setText(R.string.active);
-        trackingStatusText.setVisibility(View.GONE);
-        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.active).toLowerCase()));
-    }
-
-
-    @Override
-    public void onTrackingStop() {
-        trackingStatus.setActivated(false);
-        trackingStatus.setText(R.string.inactive);
-        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.disabled).toLowerCase()));
+    public void onPause() {
+        super.onPause();
+        presenter.pause();
     }
 
     @Override
-    public void onError(TrackingError trackingError) {
-        if (trackingError.code == TrackingError.GPS_PROVIDER_DISABLED_ERROR) {
-            showTurnOnLocationSnackbar();
-        }
-        onDisabled();
-    }
-
-    @Override
-    public void onActive() {
-        if (turnOnLocationSnackbar.isShown()) {
-            turnOnLocationSnackbar.dismiss();
-        }
-        if (isMapStyleChanged && mGoogleMap != null) {
-            mGoogleMap.setMapStyle(mapStyleOptions);
-            isMapStyleChanged = false;
-        }
-        shareButton.setEnabled(true);
-        endTripButton.setEnabled(true);
-    }
-
-    @Override
-    public void onDisabled() {
-        if (mGoogleMap != null) {
-            mGoogleMap.setMapStyle(mapStyleOptionsSilver);
-            isMapStyleChanged = true;
-        }
-        shareButton.setEnabled(false);
-        endTripButton.setEnabled(false);
+    public void onMapReady(GoogleMap googleMap) {
+        presenter.subscribeUpdates(googleMap);
     }
 
     @Override
@@ -331,21 +201,9 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     @Override
-    public void onDestinationChanged(@NonNull String address) {
-        if (getActivity() != null) {
-            SearchPlaceFragment fragment = (SearchPlaceFragment) getActivity().getSupportFragmentManager()
-                    .findFragmentByTag(SearchPlaceFragment.class.getSimpleName());
-            if (fragment != null) {
-                fragment.updateAddress(address);
-            }
-        }
-    }
-
-    @Override
     public void showSearch() {
         whereAreYouGoing.setVisibility(View.VISIBLE);
         bottomHolder.setVisibility(View.INVISIBLE);
-        presenter.stopMapDestinationMode();
     }
 
     @Override
@@ -353,14 +211,13 @@ public class TrackingFragment extends SupportMapFragment
         if (getActivity() != null) {
             if (trips.isEmpty()) {
 
-                bottomHolder.setVisibility(View.INVISIBLE);
-                whereAreYouGoing.setVisibility(View.VISIBLE);
-                stopTripInfoUpdating();
+                if (bottomHolder.getVisibility() == View.VISIBLE) {
+                    bottomHolder.setVisibility(View.INVISIBLE);
+                    whereAreYouGoing.setVisibility(View.VISIBLE);
+                }
+                presenter.stopTripInfoUpdating();
             } else {
 
-                if (getActivity().getSupportFragmentManager().getBackStackEntryCount() > 0) {
-                    getActivity().getSupportFragmentManager().popBackStack();
-                }
                 whereAreYouGoing.setVisibility(View.INVISIBLE);
                 bottomHolder.setVisibility(View.VISIBLE);
 
@@ -373,33 +230,6 @@ public class TrackingFragment extends SupportMapFragment
                 tripsAdapter.update(trips);
                 tripsAdapter.setSelection(selectedTrip);
             }
-        }
-    }
-
-    private void startTripInfoUpdating(final Trip trip) {
-
-        stopTripInfoUpdating();
-
-        tripInfoUpdater = new Timer();
-        tripInfoUpdater.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showTripInfo(trip);
-                        }
-                    });
-                }
-            }
-        }, 60000, 60000);
-    }
-
-    private void stopTripInfoUpdating() {
-        if (tripInfoUpdater != null) {
-            tripInfoUpdater.cancel();
-            tripInfoUpdater = null;
         }
     }
 
@@ -427,7 +257,7 @@ public class TrackingFragment extends SupportMapFragment
 
                 destinationAway.setText("");
                 destinationAwayTitle.setVisibility(View.INVISIBLE);
-                stopTripInfoUpdating();
+                presenter.stopTripInfoUpdating();
             } else {
 
                 tripTo.setText(R.string.trip_to);
@@ -456,7 +286,7 @@ public class TrackingFragment extends SupportMapFragment
                             );
                         }
 
-                        startTripInfoUpdating(trip);
+                        presenter.startTripInfoUpdating(trip);
                     } else {
 
                         destinationArrival.setText("-");
@@ -481,7 +311,7 @@ public class TrackingFragment extends SupportMapFragment
     @Override
     public void showTripSummaryInfo(@NonNull Trip trip) {
 
-        stopTripInfoUpdating();
+        presenter.stopTripInfoUpdating();
         tripConfirmSnackbar.dismiss();
 
         if (getActivity() != null) {
@@ -523,70 +353,8 @@ public class TrackingFragment extends SupportMapFragment
     }
 
     @Override
-    public void addFragment(@NonNull Fragment fragment) {
-        if (getActivity() != null) {
-            getActivity().getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_frame, fragment, fragment.getClass().getSimpleName())
-                    .addToBackStack(fragment.getClass().getSimpleName())
-                    .commitAllowingStateLoss();
-        }
-    }
-
-    @Override
-    public void onBackStackChanged() {
-        if (getActivity() != null && getActivity().getSupportFragmentManager().getBackStackEntryCount() == 0) {
-            showSearch();
-        }
-    }
-
-    @Override
-    public void popBackStack() {
-        if (getActivity() != null) {
-            getActivity().getSupportFragmentManager().popBackStack();
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @SuppressLint({"NewApi", "BatteryLife"})
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (getActivity() != null) {
-            switch (requestCode) {
-                case TrackingFragment.PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS: {
-                    if (grantResults.length > 0
-                            && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        PowerManager pm = (PowerManager) getActivity().getSystemService(Activity.POWER_SERVICE);
-                        String packageName = getActivity().getPackageName();
-                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                            Intent intent = new Intent();
-                            intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                            Uri uri = Uri.parse("package:" + packageName);
-                            intent.setData(uri);
-                            getActivity().startActivityForResult(intent, TrackingFragment.PERMISSIONS_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        presenter.onActivityResult(requestCode, resultCode, data);
-    }
-
-    private void showTurnOnLocationSnackbar() {
-        if (getActivity() != null && !InstantApps.isInstantApp(getActivity())) {
-            turnOnLocationSnackbar.show();
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onDestroyView() {
+        super.onDestroyView();
         presenter.destroy();
-        stopTripInfoUpdating();
     }
 }

@@ -1,8 +1,5 @@
 package com.hypertrack.live.ui.places;
 
-import android.graphics.Typeface;
-import android.text.style.CharacterStyle;
-import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,8 +8,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
 import com.hypertrack.live.R;
+import com.hypertrack.live.models.PlaceModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,9 +17,8 @@ import java.util.List;
 
 public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.MyViewHolder> {
 
-    private static final CharacterStyle STYLE_NORMAL = new StyleSpan(Typeface.NORMAL);
 
-    private List<AutocompletePrediction> dataset = new ArrayList<>();
+    private List<PlaceModel> dataset = new ArrayList<>();
     private OnItemClickListener onItemClickListener;
 
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -57,10 +53,11 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.MyViewHold
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        final AutocompletePrediction item = dataset.get(position);
+        final PlaceModel item = dataset.get(position);
 
-        holder.name.setText(item.getPrimaryText(STYLE_NORMAL));
-        holder.address.setText(item.getSecondaryText(STYLE_NORMAL));
+        holder.icon.setImageResource(item.isRecent ? R.drawable.history : R.drawable.ic_place);
+        holder.name.setText(item.primaryText);
+        holder.address.setText(item.secondaryText);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,11 +75,11 @@ public class PlacesAdapter extends RecyclerView.Adapter<PlacesAdapter.MyViewHold
         return dataset.size();
     }
 
-    public AutocompletePrediction getItem(int position) {
+    public PlaceModel getItem(int position) {
         return dataset.isEmpty() ? null : dataset.get(position);
     }
 
-    public void addAll(Collection<AutocompletePrediction> items) {
+    public void addAll(Collection<PlaceModel> items) {
         dataset.addAll(items);
     }
 

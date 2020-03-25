@@ -20,24 +20,25 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.hypertrack.live.R;
+import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.LoaderDecorator;
-import com.hypertrack.live.ui.tracking.TrackingFragment;
+import com.hypertrack.live.ui.MainActivity;
+import com.hypertrack.live.ui.share.ShareTripFragment;
 import com.hypertrack.live.utils.HTTextWatcher;
 
 import java.util.List;
 
-public class SearchPlaceFragment extends Fragment implements SearchPlacePresenter.View {
-
-    public static final String SELECTED_PLACE_KEY = "selected_place";
+public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback, SearchPlacePresenter.View {
 
     private SearchPlacePresenter presenter;
 
     private EditText search;
     private View destinationOnMap;
     private View setOnMap;
-    private View share;
+    private View confirm;
     private PlacesAdapter placesAdapter;
     private LoaderDecorator loader;
 
@@ -71,8 +72,6 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setOnMap.setVisibility(View.VISIBLE);
-                destinationOnMap.setVisibility(View.GONE);
                 presenter.setMapDestinationModeEnable(false);
             }
         });
@@ -89,8 +88,8 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         view.findViewById(R.id.no_destination).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onResult(TrackingFragment.AUTOCOMPLETE_REQUEST_CODE, new Intent());
-                close();
+                presenter.setMapDestinationModeEnable(false);
+                presenter.startTrip();
             }
         });
         destinationOnMap = view.findViewById(R.id.destination_on_map);
@@ -98,17 +97,14 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         setOnMap.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.search("");
                 presenter.setMapDestinationModeEnable(true);
-                destinationOnMap.setVisibility(View.VISIBLE);
-                onResult(TrackingFragment.SET_ON_MAP_REQUEST_CODE, new Intent());
             }
         });
-        share = view.findViewById(R.id.share);
-        share.setOnClickListener(new View.OnClickListener() {
+        confirm = view.findViewById(R.id.confirm);
+        confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                presenter.share();
+                presenter.confirm();
             }
         });
 
@@ -123,7 +119,7 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         placesAdapter.setOnItemClickListener(new PlacesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.Adapter<?> adapter, View view, int position) {
-                presenter.selectPlace(placesAdapter.getItem(position).getPlaceId());
+                presenter.selectPlace(placesAdapter.getItem(position));
             }
         });
         locationsRecyclerView.setAdapter(placesAdapter);
@@ -131,22 +127,26 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
         View.OnTouchListener hideSoftInputOnTouchListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
-                search.clearFocus();
+                hideSoftInput();
                 return false;
             }
         };
         view.setOnTouchListener(hideSoftInputOnTouchListener);
         locationsRecyclerView.setOnTouchListener(hideSoftInputOnTouchListener);
+
+        presenter.search(null);
+        ((MainActivity) getActivity()).getMapAsync(this);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public void onResult(int requestCode, @Nullable Intent data) {
-        setOnMap.setVisibility(View.GONE);
-        (getActivity().getSupportFragmentManager().findFragmentByTag(TrackingFragment.class.getSimpleName()))
-                .onActivityResult(requestCode, Activity.RESULT_OK, data);
+    public void onMapReady(GoogleMap googleMap) {
+        presenter.initMap(googleMap);
+    }
+
+    private void hideSoftInput() {
+        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(search.getWindowToken(), 0);
+        search.clearFocus();
     }
 
     @Override
@@ -155,26 +155,53 @@ public class SearchPlaceFragment extends Fragment implements SearchPlacePresente
     }
 
     @Override
-    public void updateList(List<AutocompletePrediction> list) {
+    public void updateList(List<PlaceModel> list) {
         placesAdapter.clear();
         placesAdapter.addAll(list);
         placesAdapter.notifyDataSetChanged();
     }
 
     @Override
+    public void showSetOnMap() {
+        hideSoftInput();
+        setOnMap.setVisibility(View.GONE);
+        destinationOnMap.setVisibility(View.VISIBLE);
+        confirm.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideSetOnMap() {
+        setOnMap.setVisibility(View.VISIBLE);
+        destinationOnMap.setVisibility(View.GONE);
+        confirm.setVisibility(View.GONE);
+    }
+
+    @Override
     public void showProgressBar() {
-        loader.start();
+        if (getActivity() != null) {
+            loader.start();
+        }
     }
 
     @Override
     public void hideProgressBar() {
-        loader.stop();
+        if (getActivity() != null) {
+            loader.stop();
+        }
     }
 
     @Override
-    public void close() {
+    public void addShareTripFragment(String tripId, String shareUrl) {
         if (getActivity() != null) {
-            getActivity().onBackPressed();
+            ((MainActivity) getActivity()).beginFragmentTransaction(ShareTripFragment.newInstance(tripId, shareUrl))
+                    .addToBackStack(null)
+                    .commitAllowingStateLoss();
         }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        presenter.destroy();
     }
 }

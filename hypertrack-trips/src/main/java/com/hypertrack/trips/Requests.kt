@@ -34,7 +34,7 @@ class CreateTripRequest(
         response?.let {
 
             // Expired token etc.
-            if (isSuccessFamilyStatus(response)) {
+            if (!isSuccessFamilyStatus(response)) {
                 return Response.error(VolleyError(response))
             }
 
