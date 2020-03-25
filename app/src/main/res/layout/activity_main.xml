@@ -1,50 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.MainActivity">
 
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.MainActivity" />
+
+    <TextView
+        android:id="@+id/tracking_status"
+        android:layout_width="60dp"
+        android:layout_height="20dp"
+        android:layout_margin="@dimen/fab_margin"
+        android:background="@drawable/bg_tracking_status"
+        android:elevation="@dimen/elevation"
+        android:gravity="center"
+        android:textColor="@color/colorPrimary"
+        android:textSize="12sp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tracking_status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_tracking_status_desc"
+        android:elevation="@dimen/elevation"
+        android:padding="11dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tracking_status"
+        app:layout_constraintRight_toLeftOf="@id/tracking_status"
+        app:layout_constraintTop_toTopOf="@id/tracking_status" />
+
     <FrameLayout
         android:id="@+id/fragment_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:elevation="@dimen/elevation" />
 
-    <LinearLayout
-        android:id="@+id/debugLayout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/debugButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            app:backgroundTint="@color/colorFAButtonSecondary"
-            app:borderWidth="0dp"
-            app:elevation="6dp"
-            app:maxImageSize="18dp"
-            app:rippleColor="@null"
-            app:srcCompat="@android:drawable/ic_menu_preferences" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/createTripButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="16dp"
-            app:borderWidth="0dp"
-            app:elevation="6dp"
-            app:maxImageSize="18dp"
-            app:rippleColor="@null"
-            app:srcCompat="@android:drawable/ic_dialog_map" />
-
-    </LinearLayout>
-
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

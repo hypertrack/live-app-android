@@ -29,6 +29,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
 import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsException;
+import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
@@ -42,7 +43,7 @@ import java.util.Map;
 @SuppressWarnings("ConstantConditions")
 public class SignUpFragment extends Fragment implements HTMobileClient.Callback {
 
-    private static final String TAG = "SignInFragment";
+    private static final String TAG = App.TAG + "SignInFragment";
 
     private static final int PAGES_COUNT = 2;
     private static final int PAGE_USER = 0;

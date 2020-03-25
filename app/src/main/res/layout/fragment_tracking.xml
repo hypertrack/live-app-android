@@ -23,30 +23,6 @@
             app:layout_constraintBottom_toBottomOf="@id/content_frame"
             app:layout_constraintTop_toTopOf="@id/content_frame" />
 
-        <TextView
-            android:id="@+id/tracking_status"
-            android:layout_width="60dp"
-            android:layout_height="20dp"
-            android:layout_margin="@dimen/fab_margin"
-            android:background="@drawable/bg_tracking_status"
-            android:gravity="center"
-            android:textColor="@color/colorPrimary"
-            android:textSize="12sp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/tracking_status_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:background="@drawable/bg_tracking_status_desc"
-            android:padding="11dp"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="@id/tracking_status"
-            app:layout_constraintRight_toLeftOf="@id/tracking_status"
-            app:layout_constraintTop_toTopOf="@id/tracking_status" />
-
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/location_button"
             style="@style/FloatingActionButtonSmall"

@@ -82,7 +82,7 @@
             android:name="com.hypertrack.live.TrackingErrorReceiver"
             android:exported="true">
             <intent-filter>
-                <action android:name="com.hypertrack.sdk.TRACKING_ERROR" />
+                <action android:name="com.hypertrack.sdk.TRACKING_STATE" />
             </intent-filter>
         </receiver>
 

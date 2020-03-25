@@ -3,6 +3,7 @@ package com.hypertrack.live.models;
 import android.service.autofill.RegexValidator;
 import android.util.Log;
 
+import com.hypertrack.live.App;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.trips.ShareableTrip;
 
@@ -19,7 +20,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(RobolectricTestRunner.class)
 public class TripModelTest {
-    private static final String TAG = "TripModelTest";
+    private static final String TAG = App.TAG + "TripModelTest";
 
     @Test
     public void itShouldCreateShareMessageWithoutEtaIfNoRemainingDurationWasSet() {

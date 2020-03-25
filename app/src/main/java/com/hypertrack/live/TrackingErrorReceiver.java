@@ -8,15 +8,19 @@ import android.util.Log;
 import com.hypertrack.live.utils.NotificationUtils;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
+import com.hypertrack.sdk.TrackingStateObserver;
 
 public class TrackingErrorReceiver extends BroadcastReceiver {
-    private static final String TAG = TrackingErrorReceiver.class.getSimpleName();
+    private static final String TAG = App.TAG + TrackingErrorReceiver.class.getSimpleName();
 
     @Override
     public void onReceive(final Context context, Intent intent) {
         if (!((App)context.getApplicationContext()).isForeground()) {
-            int errorCode = intent.getIntExtra("code", 0);
-            switch (errorCode) {
+            int code = intent.getIntExtra(TrackingStateObserver.EXTRA_KEY_CODE_, 0);
+            switch (code) {
+                case TrackingStateObserver.EXTRA_EVENT_CODE_START:
+                    NotificationUtils.cancelGpsDisabledError(context);
+                    break;
                 case TrackingError.INVALID_PUBLISHABLE_KEY_ERROR:
                 case TrackingError.AUTHORIZATION_ERROR:
                     Log.e(TAG, "Authorization failed");
@@ -25,17 +29,9 @@ public class TrackingErrorReceiver extends BroadcastReceiver {
                     Log.e(TAG, "Tracking failed");
                     // User disabled GPS in device settings.
                     NotificationUtils.sendGpsDisabledError(context);
-                    HyperTrack.addTrackingStateListener(new MyTrackingStateListener() {
-                        @Override
-                        public void onTrackingStart() {
-                            NotificationUtils.cancelGpsDisabledError(context);
-                            HyperTrack.removeTrackingStateListener(this);
-                        }
-                    });
                     break;
                 default:
                     // Some critical error in SDK.
-                    break;
             }
         }
     }

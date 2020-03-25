@@ -61,12 +61,6 @@
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:background="@drawable/elevation_top"
-        app:layout_constraintTop_toBottomOf="@id/search_layout" />
-
     <ImageView
         android:id="@+id/destination_on_map"
         android:layout_width="wrap_content"
@@ -79,53 +73,58 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <FrameLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/set_on_map"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/search_layout">
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/set_on_map"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@color/colorPrimary"
+            app:elevation="6dp"
+            app:layout_scrollFlags="snap">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:background="@color/colorPrimary"
+                android:drawableStart="@drawable/set_on_map"
+                android:gravity="center"
+                android:text="@string/set_on_map"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/locations"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/colorPrimary" />
+            android:background="@color/colorPrimary"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-    </FrameLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
 
     <View
         android:layout_width="match_parent"
         android:layout_height="6dp"
-        android:background="@drawable/elevation_bottom"
-        app:layout_constraintBottom_toTopOf="@id/set_on_map" />
+        android:background="@drawable/elevation_top"
+        app:layout_constraintTop_toBottomOf="@id/search_layout" />
 
     <Button
-        android:id="@+id/share"
+        android:id="@+id/confirm"
         style="@style/ActionButtonStyle"
         android:layout_margin="24dp"
         android:text="@string/confirm"
+        android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
-
-    <FrameLayout
-        android:id="@+id/set_on_map"
-        android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:background="@color/colorPrimary"
-        app:layout_constraintBottom_toBottomOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:background="@color/colorPrimary"
-            android:drawableStart="@drawable/set_on_map"
-            android:gravity="center"
-            android:text="@string/set_on_map"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-    </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

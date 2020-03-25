@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException;
+import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
@@ -26,7 +27,7 @@ import com.hypertrack.live.utils.HTTextWatcher;
 
 public class SignInFragment extends Fragment implements HTMobileClient.Callback {
 
-    private static final String TAG = "SignInFragment";
+    private static final String TAG = App.TAG + "SignInFragment";
 
     private EditText emailAddressEditText;
     private EditText passwordEditText;

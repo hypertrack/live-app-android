@@ -1,6 +1,8 @@
 package com.hypertrack.live.utils;
 
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -8,12 +10,39 @@ import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
+
+import com.hypertrack.live.R;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class AppUtils {
-    public static final String SYS_PROP_VERSION_NAME = "ro.miui.ui.version.name";
+
+    public static final String SHARE_BROADCAST_ACTION = "com.hypertrack.live.SHARE_TRIP";
+
+    public static void shareTrackMessage(@NonNull Context context, String shareableMessage) {
+        if (shareableMessage.isEmpty()) return;
+
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, shareableMessage);
+        sendIntent.setType("text/plain");
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+            Intent intent = new Intent(SHARE_BROADCAST_ACTION);
+            intent.setPackage(context.getPackageName());
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent chooser = Intent.createChooser(sendIntent, context.getString(R.string.share_trip_via), pendingIntent.getIntentSender());
+            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(chooser);
+        } else {
+            sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(sendIntent);
+            Intent intent = new Intent(SHARE_BROADCAST_ACTION);
+            context.sendBroadcast(intent);
+        }
+    }
 
     public static String getDeviceName(Context context) {
 
