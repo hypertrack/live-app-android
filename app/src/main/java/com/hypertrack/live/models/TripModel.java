@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hypertrack.sdk.views.dao.Trip;
-import com.hypertrack.trips.ShareableTrip;
+import com.hypertrack.backend.ShareableTrip;
 
 import org.threeten.bp.LocalTime;
 import org.threeten.bp.format.DateTimeFormatter;

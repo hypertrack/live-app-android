@@ -18,6 +18,8 @@ import java.util.Map;
 
 class TrackingState extends BaseState {
     private String tripId;
+    private final boolean isCovid19;
+    private final boolean isHomeLatLngAdded;
     private TripModel mTripModel;
     final Map<String, Trip> trips = new HashMap<>();
     final Map<String, TripSubscription> tripSubscription = new HashMap<>();
@@ -38,9 +40,19 @@ class TrackingState extends BaseState {
         }
     }
 
+    public boolean isCovid19() {
+        return isCovid19;
+    }
+
+    public boolean isHomeLatLngAdded() {
+        return isHomeLatLngAdded;
+    }
+
     TrackingState(Context context) {
         super(context);
         tripId = preferences.getString("selected_trip_id", null);
+        isCovid19 = preferences.getBoolean("COVID-19", false);
+        isHomeLatLngAdded = preferences.contains("home_latlng");
     }
 
     List<Trip> getAllTripsStartingFromLatest() {

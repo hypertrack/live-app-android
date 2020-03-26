@@ -11,6 +11,7 @@
         <item name="android:homeAsUpIndicator">@drawable/arrow_left</item>
 
         <item name="actionBarTheme">@style/ToolbarStyle</item>
+        <item name="actionMenuTextColor">@color/colorTips</item>
         <item name="alertDialogTheme">@style/AlertDialogTheme</item>
         <item name="snackbarStyle">@style/SnackBarStyle</item>
 

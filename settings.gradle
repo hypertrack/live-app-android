@@ -1,1 +1,1 @@
-include ':app', ':hypertrack-trips'
+include ':app', ':hypertrack-backend'

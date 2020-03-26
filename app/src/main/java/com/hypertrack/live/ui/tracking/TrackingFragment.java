@@ -100,9 +100,7 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
         whereAreYouGoing.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) getActivity()).beginFragmentTransaction(new SearchPlaceFragment())
-                        .addToBackStack(null)
-                        .commitAllowingStateLoss();
+                presenter.openSearch();
             }
         });
 
@@ -350,6 +348,15 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
     @Override
     public void hideProgressBar() {
         loader.stop();
+    }
+
+    @Override
+    public void addSearchPlaceFragment(SearchPlaceFragment.Config config) {
+        if (getActivity() != null) {
+            ((MainActivity) getActivity()).beginFragmentTransaction(SearchPlaceFragment.newInstance(config))
+                    .addToBackStack(null)
+                    .commitAllowingStateLoss();
+        }
     }
 
     @Override

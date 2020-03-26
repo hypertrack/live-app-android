@@ -1,6 +1,5 @@
 package com.hypertrack.live.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,9 +13,9 @@ import androidx.fragment.app.Fragment;
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
-import com.hypertrack.live.ui.MainActivity;
 
 public class ConfirmFragment extends Fragment implements HTMobileClient.Callback {
 
@@ -39,7 +38,7 @@ public class ConfirmFragment extends Fragment implements HTMobileClient.Callback
             @Override
             public void onClick(View view) {
                 loader.start();
-                HTMobileClient.getInstance(getContext()).confirmSignIn(ConfirmFragment.this);
+                HTMobileClient.getInstance(getContext()).confirmSignUp(ConfirmFragment.this);
             }
         });
 
@@ -72,8 +71,7 @@ public class ConfirmFragment extends Fragment implements HTMobileClient.Callback
     public void onSuccess(HTMobileClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+            ((LaunchActivity)getActivity()).onLoginCompleted();
         }
     }
 

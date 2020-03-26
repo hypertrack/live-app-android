@@ -20,6 +20,7 @@ import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedExce
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
@@ -90,14 +91,16 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
                 }
             }
         });
+
+        emailAddressEditText.setText("eugene+uber@hypertrack.io");
+        passwordEditText.setText("Hyp3rTr@ck321");
     }
 
     @Override
     public void onSuccess(HTMobileClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+            ((LaunchActivity)getActivity()).onLoginCompleted();
         }
     }
 

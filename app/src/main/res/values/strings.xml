@@ -56,12 +56,13 @@
     <string name="already_have_an_account">Already have an account?</string>
     <string name="sign_up_a_new_account">Create a new account</string>
     <string name="_14_day_free_trial_no_credit_card_required">Free 100k events per month. No credit card required.</string>
-    <string name="company_or_product_name">Company or product name</string>
+    <string name="company_or_product_name">Company or product name(Optional)</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
     <string name="accept_continue"><![CDATA[Accept & Continue]]></string>
     <string name="i_agree_to_terms_of_service"><![CDATA[By clicking on the Accept & Continue button I agree to <a href="https://www.hypertrack.com/terms">Terms of Service</a> and <a href="https://www.hypertrack.com/agreement">HyperTrack SaaS Agreement</a>]]></string>
     <string name="all_fields_required">All fields required</string>
+    <string name="email_password_fields_required">Email and password fields are required</string>
     <string name="my_app_manages">My app manages</string>
     <string name="my_app_would_track">My app would track</string>
     <string name="my_app_is">My app is</string>
@@ -96,6 +97,10 @@
     <string name="trip_will_be_ended_are_you_sure">You haven\'t reach the destination yet, end sharing will end this trip.</string>
     <string name="confirm">Confirm</string>
     <string name="share_trip_via">Share trip via</string>
+    <string name="service_worker_for_covid_19">I am/represent an essential service worker for COVID-19 in my region</string>
+    <string name="add_home_address">Add home address</string>
+    <string name="search_address">Search address</string>
+    <string name="skip">SKIP</string>
 
     <array name="categories">
         <item>not selected</item>

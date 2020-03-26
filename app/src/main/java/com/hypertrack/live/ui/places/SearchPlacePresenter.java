@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
@@ -30,10 +31,10 @@ import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.MapUtils;
 import com.hypertrack.sdk.HyperTrack;
-import com.hypertrack.trips.ResultHandler;
-import com.hypertrack.trips.ShareableTrip;
-import com.hypertrack.trips.TripConfig;
-import com.hypertrack.trips.TripsManager;
+import com.hypertrack.backend.ResultHandler;
+import com.hypertrack.backend.ShareableTrip;
+import com.hypertrack.backend.TripConfig;
+import com.hypertrack.backend.BackendProvider;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,7 +52,7 @@ class SearchPlacePresenter {
 
     private final HyperTrack hyperTrack;
     private final PlacesClient placesClient;
-    private final TripsManager tripsManager;
+    private final BackendProvider tripsManager;
     private AutocompleteSessionToken token;
 
     private GoogleMap googleMap;
@@ -59,14 +60,18 @@ class SearchPlacePresenter {
     private final Handler handler = new Handler();
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public SearchPlacePresenter(Context context, View view) {
+    public SearchPlacePresenter(Context context, String mode, View view) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
-        this.state = new SearchPlaceState(context);
+        this.state = new SearchPlaceState(context, mode);
 
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         placesClient = Places.createClient(context);
-        tripsManager = HTMobileClient.getTripsManager(context);
+        tripsManager = HTMobileClient.getBackendProvider(context);
+
+        if ("home".equals(mode)) {
+            state.saveHomeLatLng(null);
+        }
     }
 
     public void initMap(@NonNull GoogleMap googleMap) {
@@ -81,6 +86,7 @@ class SearchPlacePresenter {
                     @Override
                     public void run() {
                         if (googleMap != null) {
+                            state.setDestination(null);
                             view.updateAddress(context.getString(R.string.searching_));
                             disposables.add(MapUtils.getAddress(context, googleMap.getCameraPosition().target)
                                     .subscribe(new io.reactivex.functions.Consumer<String>() {
@@ -148,11 +154,11 @@ class SearchPlacePresenter {
 
     public void confirm() {
         if (state.getDestination() != null) {
-            startTrip();
+            providePlace();
         }
     }
 
-    public void selectPlace(PlaceModel placeModel) {
+    public void selectItem(PlaceModel placeModel) {
         view.showProgressBar();
 
         if (!placeModel.isRecent) {
@@ -172,7 +178,7 @@ class SearchPlacePresenter {
                         view.hideProgressBar();
 
                         state.setDestination(fetchPlaceResponse.getPlace().getLatLng());
-                        startTrip();
+                        providePlace();
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -186,7 +192,26 @@ class SearchPlacePresenter {
         });
     }
 
-    public void startTrip() {
+    public void skip() {
+        state.saveHomeLatLng(null);
+        view.finish();
+    }
+
+    public void providePlace() {
+
+        switch (state.getMode()) {
+            case "home":
+                state.saveHomeLatLng(state.getDestination());
+                view.finish();
+                break;
+            case "search":
+                startTrip();
+                break;
+            default:
+        }
+    }
+
+    private void startTrip() {
         view.showProgressBar();
 
         ResultHandler<ShareableTrip> resultHandler = new ResultHandler<ShareableTrip>() {
@@ -194,8 +219,6 @@ class SearchPlacePresenter {
             public void onResult(@NonNull ShareableTrip trip) {
                 Log.d(TAG, "trip is created: " + trip);
                 view.hideProgressBar();
-
-                state.setDestination(null);
 
                 view.addShareTripFragment(trip.getTripId(), trip.getShareUrl());
             }
@@ -256,5 +279,7 @@ class SearchPlacePresenter {
         void hideProgressBar();
 
         void addShareTripFragment(String tripId, String shareUrl);
+
+        void finish();
     }
 }

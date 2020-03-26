@@ -11,7 +11,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.mobile.client.Callback;
 import com.amazonaws.mobile.client.UserStateDetails;
 import com.amazonaws.mobile.client.results.SignInResult;
 import com.amazonaws.mobile.client.results.SignUpResult;
@@ -30,9 +29,9 @@ import com.google.gson.JsonSyntaxException;
 import com.hypertrack.sdk.BuildConfig;
 import com.hypertrack.sdk.logger.HTLogger;
 import com.hypertrack.sdk.utils.StaticUtilsAdapter;
-import com.hypertrack.trips.AsyncTokenProvider;
-import com.hypertrack.trips.ResultHandler;
-import com.hypertrack.trips.TripsManager;
+import com.hypertrack.backend.AsyncTokenProvider;
+import com.hypertrack.backend.ResultHandler;
+import com.hypertrack.backend.BackendProvider;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
@@ -58,8 +57,8 @@ public class HTMobileClient {
         }
         return client;
     }
-    public static TripsManager getTripsManager(Context context) {
-        return TripsManager.getInstance(context, new AsyncTokenProvider() {
+    public static BackendProvider getBackendProvider(Context context) {
+        return BackendProvider.getInstance(context, new AsyncTokenProvider() {
             @Override
             public void getAuthenticationToken(@NonNull final ResultHandler<String> resultHandler) {
                 AWSMobileClient.getInstance().getTokens(new com.amazonaws.mobile.client.Callback<Tokens>() {
@@ -140,7 +139,7 @@ public class HTMobileClient {
         }
     }
 
-    public void confirmSignIn(@NonNull final Callback callback) {
+    public void confirmSignUp(@NonNull final Callback callback) {
         AWSMobileClient.getInstance().signIn(signUpEmail, signUpPassword, null, new InnerCallback<SignInResult>(callback) {
 
             @Override
@@ -164,7 +163,6 @@ public class HTMobileClient {
                 SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getString(R.string.app_name), Context.MODE_PRIVATE);
                 sharedPreferences.edit()
                         .putString("pub_key", hyperTrackPublicKey)
-                        .putBoolean("is_tracking", true)
                         .apply();
 
                 callback.onSuccess(HTMobileClient.this);

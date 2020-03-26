@@ -1,4 +1,4 @@
-package com.hypertrack.trips
+package com.hypertrack.backend
 
 import android.util.Log
 import com.android.volley.NetworkResponse
@@ -10,11 +10,75 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import java.io.UnsupportedEncodingException
-import java.net.HttpURLConnection
 import java.nio.charset.Charset
-import java.time.Duration
 
-private const val liveAppBackendTripsEndpoint = "https://live-app-backend.htprod.hypertrack.com/trips/"
+private const val ADDRESS = "https://live-app-backend.htprod.hypertrack.com/"
+private const val LIVE_APP_BACKEND_DEVICES_ENDPOINT = ADDRESS + "devices/"
+private const val LIVE_APP_BACKEND_TRIPS_ENDPOINT = ADDRESS + "trips/"
+
+private const val TAG = "Requests"
+
+class StartTrackingRequest(
+        deviceId: String,
+        private val tokenString: String,
+        responseListener: Response.Listener<Void>,
+        errorListener: Response.ErrorListener
+) : JsonRequest<Void>(
+        Method.POST, "$LIVE_APP_BACKEND_DEVICES_ENDPOINT$deviceId/start", "",
+        responseListener, errorListener
+) {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
+        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()}")
+        return Response.error(VolleyError(response))
+    }
+
+    override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+        volleyError?.networkResponse?.let { Log.e(TAG, String(it.data)) }
+        return super.parseNetworkError(volleyError)
+    }
+
+    private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
+
+    override fun getHeaders(): MutableMap<String, String> {
+        val defaultHeaders = super.getHeaders()
+        val headers = HashMap<String, String>(defaultHeaders.size + 1)
+        headers.putAll(defaultHeaders)
+        headers["Authorization"] = "Bearer $tokenString"
+        return headers
+    }
+}
+
+class StopTrackingRequest(
+        deviceId: String,
+        private val tokenString: String,
+        responseListener: Response.Listener<Void>,
+        errorListener: Response.ErrorListener
+) : JsonRequest<Void>(
+        Method.POST, "$LIVE_APP_BACKEND_DEVICES_ENDPOINT$deviceId/stop", "",
+        responseListener, errorListener
+) {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
+        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()}")
+        return Response.error(VolleyError(response))
+    }
+
+    override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+        volleyError?.networkResponse?.let { Log.e(TAG, String(it.data)) }
+        return super.parseNetworkError(volleyError)
+    }
+
+    private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
+
+    override fun getHeaders(): MutableMap<String, String> {
+        val defaultHeaders = super.getHeaders()
+        val headers = HashMap<String, String>(defaultHeaders.size + 1)
+        headers.putAll(defaultHeaders)
+        headers["Authorization"] = "Bearer $tokenString"
+        return headers
+    }
+}
 
 class CreateTripRequest(
         tripConfig: TripConfig,
@@ -25,7 +89,7 @@ class CreateTripRequest(
 ) :
         JsonRequest<ShareableTrip>(
                 Method.POST,
-                liveAppBackendTripsEndpoint,
+                LIVE_APP_BACKEND_TRIPS_ENDPOINT,
                 tripConfig.getRequestBody(),
                 responseListener,
                 errorListener
@@ -60,6 +124,10 @@ class CreateTripRequest(
     }
     private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
 
+    override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+        volleyError?.networkResponse?.let { Log.e(TAG, String(it.data)) }
+        return super.parseNetworkError(volleyError)
+    }
 
     override fun getHeaders(): MutableMap<String, String> {
         val defaultHeaders = super.getHeaders()
@@ -76,7 +144,7 @@ class CompleteTripRequest(
         responseListener: Response.Listener<Void>,
         errorListener: Response.ErrorListener
 ) : JsonRequest<Void>(
-        Method.POST, liveAppBackendTripsEndpoint + "$tripId/complete", "",
+        Method.POST, "$LIVE_APP_BACKEND_TRIPS_ENDPOINT$tripId/complete", "",
         responseListener, errorListener
 ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
@@ -87,16 +155,17 @@ class CompleteTripRequest(
 
     private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
 
+    override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+        volleyError?.networkResponse?.let { Log.e(TAG, String(it.data)) }
+        return super.parseNetworkError(volleyError)
+    }
+
     override fun getHeaders(): MutableMap<String, String> {
         val defaultHeaders = super.getHeaders()
         val headers = HashMap<String, String>(defaultHeaders.size + 1)
         headers.putAll(defaultHeaders)
         headers["Authorization"] = "Bearer $tokenString"
         return headers
-    }
-
-    companion object {
-        const val TAG = "Requests"
     }
 }
 

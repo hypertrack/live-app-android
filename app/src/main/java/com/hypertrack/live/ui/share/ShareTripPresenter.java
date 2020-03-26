@@ -20,8 +20,8 @@ import com.hypertrack.sdk.views.dao.Location;
 import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.sdk.views.maps.HyperTrackMap;
-import com.hypertrack.trips.ResultHandler;
-import com.hypertrack.trips.TripsManager;
+import com.hypertrack.backend.ResultHandler;
+import com.hypertrack.backend.BackendProvider;
 
 class ShareTripPresenter implements DeviceUpdatesHandler {
     private static final String TAG = App.TAG + "ShTripPresenter";
@@ -32,7 +32,7 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
 
     private final HyperTrack hyperTrack;
     private final HyperTrackViews hyperTrackViews;
-    private final TripsManager tripsManager;
+    private final BackendProvider backendProvider;
     private HyperTrackMap hyperTrackMap;
 
     public ShareTripPresenter(Context context, View view, String shareUrl) {
@@ -43,7 +43,7 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
 
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
-        tripsManager = HTMobileClient.getTripsManager(context);
+        backendProvider = HTMobileClient.getBackendProvider(context);
     }
 
     public void subscribeTripUpdates(GoogleMap googleMap, String tripId) {
@@ -71,7 +71,7 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
     public void endTrip() {
         if (!TextUtils.isEmpty(state.getCurrentTripId())) {
 
-            tripsManager.completeTrip(state.getCurrentTripId(), new ResultHandler<String>() {
+            backendProvider.completeTrip(state.getCurrentTripId(), new ResultHandler<String>() {
 
                 @Override
                 public void onResult(@NonNull String result) {

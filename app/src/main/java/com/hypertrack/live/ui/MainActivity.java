@@ -31,6 +31,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.hypertrack.live.App;
 import com.hypertrack.live.R;
@@ -123,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        registerReceiver(trackingStateReceiver, new IntentFilter(TrackingStateObserver.ACTION_TRACKING_STATE));
         registerReceiver(shareBroadcastReceiver, new IntentFilter(AppUtils.SHARE_BROADCAST_ACTION));
 
         if (!AppUtils.isGpsProviderEnabled(this)) {
@@ -237,7 +239,6 @@ public class MainActivity extends AppCompatActivity {
                     .setTrackingNotificationConfig(notificationConfig)
                     .setDeviceName(AppUtils.getDeviceName(this));
 
-            registerReceiver(trackingStateReceiver, new IntentFilter(TrackingStateObserver.ACTION_TRACKING_STATE));
             if (hyperTrack.isRunning()) {
                 onTrackingStart();
             } else {

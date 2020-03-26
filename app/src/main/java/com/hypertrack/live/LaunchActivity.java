@@ -1,25 +1,34 @@
 package com.hypertrack.live;
 
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.auth.ConfirmFragment;
 import com.hypertrack.live.auth.SignInFragment;
 import com.hypertrack.live.ui.MainActivity;
+import com.hypertrack.sdk.HyperTrack;
+
 
 public class LaunchActivity extends AppCompatActivity {
+
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         final String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
 
         HTMobileClient.getInstance(this).initialize(new HTMobileClient.Callback() {
@@ -44,6 +53,27 @@ public class LaunchActivity extends AppCompatActivity {
             @Override
             public void onError(String message, Exception e) {
                 Toast.makeText(LaunchActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    public void onLoginCompleted() {
+
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+
+        final String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
+        final HyperTrack hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey);
+        BackendProvider backendProvider = HTMobileClient.getBackendProvider(this);
+        backendProvider.start(hyperTrack.getDeviceID(), new ResultHandler<String>() {
+            @Override
+            public void onResult(String result) {
+                hyperTrack.syncDeviceSettings();
+            }
+
+            @Override
+            public void onError(@NonNull Exception error) {
+                Log.e("Sign in", "login completed error:" + error.getMessage());
             }
         });
     }
