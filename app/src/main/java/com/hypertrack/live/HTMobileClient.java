@@ -47,6 +47,7 @@ public class HTMobileClient {
 
     private String signUpEmail;
     private String signUpPassword;
+    private String deviceId;
 
     @SuppressLint("StaticFieldLeak")
     private static HTMobileClient client;
@@ -199,6 +200,10 @@ public class HTMobileClient {
             }
         });
     }
+
+    public String getDeviceId() { return deviceId; }
+
+    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
 
     public static class Request extends JsonRequest<JsonObject> {
 

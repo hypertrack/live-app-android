@@ -81,16 +81,29 @@ class BackendProvider private constructor(
         })
     }
 
-    fun sendGeofenceTransition(transitionType: String) {
+    fun sendGeofenceTransition(deviceId: String, transitionType: String) {
         Log.i(TAG, "sendGeofenceTransition  $transitionType")
 
-//        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
-//            override fun onResult(result: String) =
-//                    scheduleAuthenticatedCompletionTripRequest(transitionType, result, callback)
-//
-//            override fun onError(error: Exception) = callback.onError(error)
+        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
+            override fun onResult(result: String) =
+                    scheduleGeofenceEventRequest(deviceId, transitionType, result)
 
-//        })
+            override fun onError(error: Exception) {
+                Log.w(TAG, "Can't fetch token due to error $error")
+            }
+        })
+    }
+
+    private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String) {
+        val request = GeofenceEventRequest(
+                deviceId,
+                transitionType,
+                tokenString
+        )
+        request.retryPolicy = defaultRetryPolicy
+        Log.d(TAG, "Adding start request to queue")
+        queue.add(request)
+
     }
 
     private fun scheduleAuthenticatedStartTrackingRequest(deviceId: String, tokenString: String, callback: ResultHandler<String>) {

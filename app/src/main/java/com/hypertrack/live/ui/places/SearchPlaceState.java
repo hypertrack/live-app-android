@@ -1,7 +1,9 @@
 package com.hypertrack.live.ui.places;
 
 import android.content.Context;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
@@ -46,13 +48,13 @@ class SearchPlaceState extends BaseState {
         this.destination = destination;
     }
 
-    void saveHomeLatLng(LatLng latLng) {
+    void saveHomeLatLng(@Nullable LatLng latLng, @NonNull String deviceId) {
         String homeJson = gson.toJson(latLng);
         preferences.edit()
                 .putString("home_latlng", homeJson)
                 .apply();
         if (latLng != null) {
-            OnDeviceGeofence.addGeofence(mContext, latLng.latitude, latLng.longitude);
+            OnDeviceGeofence.addGeofence(mContext, latLng.latitude, latLng.longitude, deviceId);
         }
     }
 

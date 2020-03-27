@@ -24,6 +24,7 @@ import com.hypertrack.live.HTMobileClient;
 public class OnDeviceGeofence extends BroadcastReceiver {
     private static final String TAG = "OnDeviceGeofence";
     public static final float GEOFENCE_RADIUS = 100.0f;
+    private static final String DEVICE_ID = "device_id";
 
     private static GeofencingRequest  getGeofencingRequest(double latitude, double longitude) {
         Log.d(TAG, String.format("addGeofence: lat %f, long %f", latitude, longitude));
@@ -34,19 +35,19 @@ public class OnDeviceGeofence extends BroadcastReceiver {
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
                 .build();
 
-        GeofencingRequest request = new GeofencingRequest.Builder()
+        return new GeofencingRequest.Builder()
                 .addGeofence(geofence)
                 .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_EXIT)
                 .build();
-        return request;
 
     }
 
-    private static PendingIntent getGeofencePendingIntent(Context context) {
+    private static PendingIntent getGeofencePendingIntent(Context context, String deviceId) {
         // Reuse the PendingIntent if we already have it.
         PendingIntent mGeofencePendingIntent;
 
         Intent intent = new Intent(context, OnDeviceGeofence.class);
+        intent.putExtra(DEVICE_ID, deviceId);
         // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
         // calling addGeofences() and removeGeofences().
         mGeofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.
@@ -54,11 +55,11 @@ public class OnDeviceGeofence extends BroadcastReceiver {
         return mGeofencePendingIntent;
     }
 
-    public static void addGeofence(@NonNull final Context context, double latitude, double longitude) {
+    public static void addGeofence(@NonNull final Context context, double latitude, double longitude, String deviceId) {
 
         GeofencingClient geofencingClient = LocationServices.getGeofencingClient(context);
 
-        geofencingClient.addGeofences(getGeofencingRequest(latitude, longitude), getGeofencePendingIntent(context))
+        geofencingClient.addGeofences(getGeofencingRequest(latitude, longitude), getGeofencePendingIntent(context, deviceId))
                 .addOnSuccessListener(
                         new OnSuccessListener<Void>() {
                             @Override
@@ -98,6 +99,11 @@ public class OnDeviceGeofence extends BroadcastReceiver {
         }
 
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
+        String deviceId = intent.getStringExtra(DEVICE_ID);
+        if (deviceId == null || deviceId.isEmpty()) {
+            Log.w(TAG, "Can't get device id from string extra");
+            return;
+        }
 
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
                 geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -105,7 +111,7 @@ public class OnDeviceGeofence extends BroadcastReceiver {
                     ? "enter"
                     : "exit";
             HTMobileClient.getBackendProvider(context)
-                    .sendGeofenceTransition(transitionType);
+                    .sendGeofenceTransition(deviceId, transitionType);
         } else {
             // Log the error.
             Log.w(TAG, String.format("Unexpected geofence transition type %d. Ignoring.",

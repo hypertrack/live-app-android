@@ -12,7 +12,6 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
@@ -70,7 +69,7 @@ class SearchPlacePresenter {
         tripsManager = HTMobileClient.getBackendProvider(context);
 
         if ("home".equals(mode)) {
-            state.saveHomeLatLng(null);
+            state.saveHomeLatLng(null, hyperTrack.getDeviceID());
         }
     }
 
@@ -193,7 +192,7 @@ class SearchPlacePresenter {
     }
 
     public void skip() {
-        state.saveHomeLatLng(null);
+        state.saveHomeLatLng(null, hyperTrack.getDeviceID());
         view.finish();
     }
 
@@ -201,7 +200,7 @@ class SearchPlacePresenter {
 
         switch (state.getMode()) {
             case "home":
-                state.saveHomeLatLng(state.getDestination());
+                state.saveHomeLatLng(state.getDestination(), hyperTrack.getDeviceID());
                 view.finish();
                 break;
             case "search":

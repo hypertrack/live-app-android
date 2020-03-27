@@ -169,6 +169,36 @@ class CompleteTripRequest(
     }
 }
 
+class GeofenceEventRequest(
+        eventName: String, deviceId: String,
+        private val tokenString: String
+) : JsonRequest<Void>(
+        Method.POST, "$LIVE_APP_BACKEND_TRIPS_ENDPOINT/geofence",
+        "{\"device_id\": \"$deviceId\", \"geofence_name\": \"Home\", \"geofence_action\": \"$eventName\"}" ,
+        null, null
+) {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
+        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()}")
+        return Response.error(VolleyError(response))
+    }
+
+    private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
+
+    override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+        volleyError?.networkResponse?.let { Log.e(TAG, String(it.data)) }
+        return super.parseNetworkError(volleyError)
+    }
+
+    override fun getHeaders(): MutableMap<String, String> {
+        val defaultHeaders = super.getHeaders()
+        val headers = HashMap<String, String>(defaultHeaders.size + 1)
+        headers.putAll(defaultHeaders)
+        headers["Authorization"] = "Bearer $tokenString"
+        return headers
+    }
+}
+
 private data class Views(
         @SerializedName("share_url") val shareUrl: String,
         @SerializedName("embed_url") val embedUrl: String
