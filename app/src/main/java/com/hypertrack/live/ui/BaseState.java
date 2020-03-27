@@ -8,11 +8,13 @@ import com.hypertrack.sdk.HyperTrack;
 
 public class BaseState {
 
+    protected final Context mContext;
     protected final SharedHelper sharedHelper;
     private final String hyperTrackPublicKey;
     protected final HyperTrack hyperTrack;
 
     protected BaseState(Context context) {
+        mContext = context;
         sharedHelper = SharedHelper.getInstance(context);
         hyperTrackPublicKey = sharedHelper.sharedPreferences().getString(SharedHelper.PUB_KEY, "");
         hyperTrack = HyperTrack.getInstance(context, hyperTrackPublicKey);

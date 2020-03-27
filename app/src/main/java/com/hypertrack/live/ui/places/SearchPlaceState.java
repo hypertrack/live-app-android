@@ -1,13 +1,11 @@
 package com.hypertrack.live.ui.places;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
+import com.hypertrack.live.utils.OnDeviceGeofence;
 import com.hypertrack.live.utils.SharedHelper;
 
 import java.lang.reflect.Type;
@@ -50,6 +48,13 @@ class SearchPlaceState extends BaseState {
                 .putString(SharedHelper.HOME_PLACE, homeJson)
                 .apply();
         hyperTrack.setDeviceMetadata(sharedHelper.getDeviceMetadata());
+
+        if (home != null) {
+            OnDeviceGeofence.addGeofence(mContext,
+                    home.latLng.latitude, home.latLng.longitude,
+                    hyperTrack.getDeviceID()
+            );
+        }
     }
 
     List<PlaceModel> getRecentPlaces() {
