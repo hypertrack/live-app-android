@@ -134,6 +134,8 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                         next.setVisibility(View.INVISIBLE);
                         if (COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
                             viewPager.setVisibility(View.INVISIBLE);
+                        } else {
+                            viewPager.setVisibility(View.VISIBLE);
                         }
                         break;
                 }
@@ -151,7 +153,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
             @Override
             public void onClick(View view) {
                 if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(CUSTOM_USE_CASE, CUSTOM_SCALE, CUSTOM_STATE))
-                        && COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
+                        && !COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
                     showError(getString(R.string.all_fields_required));
                     return;
                 }
@@ -302,61 +304,61 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
 
                 case PAGE_INFO:
                     view = inflater.inflate(R.layout.view_pager_signup_info, collection, false);
-                    Spinner categoriesSpinner = view.findViewById(R.id.categories);
-                    Spinner devicesSpinner = view.findViewById(R.id.devices);
-                    Spinner stageSpinner = view.findViewById(R.id.stage);
-                    final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.categories));
-                    final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
-                    final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
+                        Spinner categoriesSpinner = view.findViewById(R.id.categories);
+                        Spinner devicesSpinner = view.findViewById(R.id.devices);
+                        Spinner stageSpinner = view.findViewById(R.id.stage);
+                        final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.categories));
+                        final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
+                        final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
 
-                    categoriesSpinner.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
-                    categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            incorrect.setVisibility(View.INVISIBLE);
-                            if (i == 0) {
-                                cognitoUserAttributes.remove(CUSTOM_USE_CASE);
-                            } else {
-                                cognitoUserAttributes.put(CUSTOM_USE_CASE, categories.get(i));
+                        categoriesSpinner.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
+                        categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                incorrect.setVisibility(View.INVISIBLE);
+                                if (i == 0) {
+                                    cognitoUserAttributes.remove(CUSTOM_USE_CASE);
+                                } else {
+                                    cognitoUserAttributes.put(CUSTOM_USE_CASE, categories.get(i));
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-                    devicesSpinner.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
-                    devicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            incorrect.setVisibility(View.INVISIBLE);
-                            if (i == 0) {
-                                cognitoUserAttributes.remove(CUSTOM_SCALE);
-                            } else {
-                                cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
                             }
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-                    stageSpinner.setSelection(stage.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
-                    stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            incorrect.setVisibility(View.INVISIBLE);
-                            if (i == 0) {
-                                cognitoUserAttributes.remove(CUSTOM_STATE);
-                            } else {
-                                cognitoUserAttributes.put(CUSTOM_STATE, stage.get(i));
+                        });
+                        devicesSpinner.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
+                        devicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                incorrect.setVisibility(View.INVISIBLE);
+                                if (i == 0) {
+                                    cognitoUserAttributes.remove(CUSTOM_SCALE);
+                                } else {
+                                    cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
+                        stageSpinner.setSelection(stage.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
+                        stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                incorrect.setVisibility(View.INVISIBLE);
+                                if (i == 0) {
+                                    cognitoUserAttributes.remove(CUSTOM_STATE);
+                                } else {
+                                    cognitoUserAttributes.put(CUSTOM_STATE, stage.get(i));
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
                     break;
             }
             collection.addView(view);

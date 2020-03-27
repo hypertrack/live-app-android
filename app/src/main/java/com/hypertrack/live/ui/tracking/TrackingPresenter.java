@@ -86,7 +86,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             hyperTrackMap.moveToTrip(selectedTrip);
         }
 
-        if (state.isCovid19() && !state.isHomeLatLngAdded()) {
+        if (!state.isHomeLatLngAdded()) {
             view.addSearchPlaceFragment(SearchPlaceFragment.Config.HOME_ADDRESS);
         }
     }
@@ -127,8 +127,10 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         } else {
             view.showTripInfo(trip);
         }
-        hyperTrackMap.adapter().notifyDataSetChanged();
-        hyperTrackMap.moveToTrip(trip);
+        if (hyperTrackMap != null) {
+            hyperTrackMap.adapter().notifyDataSetChanged();
+            hyperTrackMap.moveToTrip(trip);
+        }
     }
 
     public void endTrip() {
@@ -213,42 +215,44 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     public void onTripUpdateReceived(@NonNull Trip trip) {
         Log.d(TAG, "onTripUpdateReceived: " + trip);
 
-        state.trips.put(trip.getTripId(), trip);
-        boolean isNewTrip = !state.tripSubscription.containsKey(trip.getTripId());
-        boolean isActive = !trip.getStatus().equals("completed");
+        if (hyperTrackMap != null) {
+            state.trips.put(trip.getTripId(), trip);
+            boolean isNewTrip = !state.tripSubscription.containsKey(trip.getTripId());
+            boolean isActive = !trip.getStatus().equals("completed");
 
-        if (isActive) {
-            if (isNewTrip) {
-                TripSubscription tripSubscription = hyperTrackMap.subscribeTrip(trip.getTripId());
-                state.tripSubscription.put(trip.getTripId(), tripSubscription);
-                hyperTrackMap.moveToTrip(trip);
-            }
-            if (trip.getTripId().equals(state.getSelectedTripId())) {
-                view.showTripInfo(trip);
-            }
-        } else {
-
-            state.trips.remove(trip.getTripId());
-            if (!isNewTrip) {
-                state.tripSubscription.remove(trip.getTripId()).remove();
-            }
-        }
-
-        List<Trip> trips = state.getAllTripsStartingFromLatest();
-        int selectedTripIndex = 0;
-        if (!trips.isEmpty()) {
-            Trip selectedTrip = state.trips.get(state.getSelectedTripId());
-            if (selectedTrip == null) {
-                selectedTrip = trips.get(0);
-                selectTrip(selectedTrip);
+            if (isActive) {
+                if (isNewTrip) {
+                    TripSubscription tripSubscription = hyperTrackMap.subscribeTrip(trip.getTripId());
+                    state.tripSubscription.put(trip.getTripId(), tripSubscription);
+                    hyperTrackMap.moveToTrip(trip);
+                }
+                if (trip.getTripId().equals(state.getSelectedTripId())) {
+                    view.showTripInfo(trip);
+                }
             } else {
-                state.setSelectedTrip(selectedTrip);
+
+                state.trips.remove(trip.getTripId());
+                if (!isNewTrip) {
+                    state.tripSubscription.remove(trip.getTripId()).remove();
+                }
             }
-            selectedTripIndex = trips.indexOf(selectedTrip);
-        } else {
-            state.setSelectedTrip(null);
+
+            List<Trip> trips = state.getAllTripsStartingFromLatest();
+            int selectedTripIndex = 0;
+            if (!trips.isEmpty()) {
+                Trip selectedTrip = state.trips.get(state.getSelectedTripId());
+                if (selectedTrip == null) {
+                    selectedTrip = trips.get(0);
+                    selectTrip(selectedTrip);
+                } else {
+                    state.setSelectedTrip(selectedTrip);
+                }
+                selectedTripIndex = trips.indexOf(selectedTrip);
+            } else {
+                state.setSelectedTrip(null);
+            }
+            view.updateTripsMenu(trips, selectedTripIndex);
         }
-        view.updateTripsMenu(trips, selectedTripIndex);
     }
 
     @Override

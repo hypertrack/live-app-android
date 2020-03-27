@@ -110,7 +110,9 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
 
     @Override
     public void onTripUpdateReceived(@NonNull Trip trip) {
-        hyperTrackMap.moveToTrip(trip);
+        if (hyperTrackMap != null) {
+            hyperTrackMap.moveToTrip(trip);
+        }
         state.updateTrip(trip);
         view.onTripUpdate(trip);
     }
