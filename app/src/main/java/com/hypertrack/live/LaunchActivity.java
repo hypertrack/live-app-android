@@ -16,20 +16,21 @@ import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.auth.ConfirmFragment;
 import com.hypertrack.live.auth.SignInFragment;
 import com.hypertrack.live.ui.MainActivity;
+import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.HyperTrack;
 
 
 public class LaunchActivity extends AppCompatActivity {
 
-    private SharedPreferences sharedPreferences;
+    private SharedHelper sharedHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-        sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        final String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
+        sharedHelper = SharedHelper.getInstance(this);
+        final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
         HTMobileClient.getInstance(this).initialize(new HTMobileClient.Callback() {
             @Override
@@ -62,7 +63,7 @@ public class LaunchActivity extends AppCompatActivity {
         startActivity(new Intent(this, MainActivity.class));
         finish();
 
-        final String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
+        final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
         final HyperTrack hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey);
         BackendProvider backendProvider = HTMobileClient.getBackendProvider(this);
         backendProvider.start(hyperTrack.getDeviceID(), new ResultHandler<String>() {

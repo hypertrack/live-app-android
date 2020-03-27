@@ -17,7 +17,7 @@ class ShareTripState extends BaseState {
 
     void setCurrentTripId(String tripId) {
         this.tripId = tripId;
-        preferences.edit().putString("created_trip_id", tripId).apply();
+        preferences().edit().putString("created_trip_id", tripId).apply();
     }
 
     public String getShareUrl() {
@@ -26,13 +26,13 @@ class ShareTripState extends BaseState {
 
     public void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
-        preferences.edit().putString("created_trip_share_url", shareUrl).apply();
+        preferences().edit().putString("created_trip_share_url", shareUrl).apply();
     }
 
     ShareTripState(Context context) {
         super(context);
-        tripId = preferences.getString("created_trip_id", null);
-        shareUrl = preferences.getString("created_trip_share_url", null);
+        tripId = preferences().getString("created_trip_id", null);
+        shareUrl = preferences().getString("created_trip_share_url", null);
     }
 
     void updateTrip(Trip trip) {

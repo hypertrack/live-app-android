@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.hypertrack.live.models.TripModel;
 import com.hypertrack.live.ui.BaseState;
+import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.sdk.views.maps.TripSubscription;
 
@@ -31,12 +32,12 @@ class TrackingState extends BaseState {
     void setSelectedTrip(Trip trip) {
         if (trip != null) {
             this.tripId = trip.getTripId();
-            preferences.edit().putString("selected_trip_id", tripId).apply();
+            preferences().edit().putString("selected_trip_id", tripId).apply();
             mTripModel = TripModel.fromTrip(trip);
         } else {
             tripId = null;
             mTripModel = null;
-            preferences.edit().remove("selected_trip_id").apply();
+            preferences().edit().remove("selected_trip_id").apply();
         }
     }
 
@@ -50,9 +51,9 @@ class TrackingState extends BaseState {
 
     TrackingState(Context context) {
         super(context);
-        tripId = preferences.getString("selected_trip_id", null);
-        isCovid19 = preferences.getBoolean("COVID-19", false);
-        isHomeLatLngAdded = preferences.contains("home_latlng");
+        tripId = preferences().getString("selected_trip_id", null);
+        isCovid19 = preferences().getBoolean(SharedHelper.COVID_19, false);
+        isHomeLatLngAdded = preferences().contains(SharedHelper.HOME_PLACE);
     }
 
     List<Trip> getAllTripsStartingFromLatest() {

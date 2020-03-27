@@ -2,6 +2,7 @@ package com.hypertrack.live.ui.places;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,7 +39,9 @@ import com.hypertrack.backend.BackendProvider;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -70,7 +73,7 @@ class SearchPlacePresenter {
         tripsManager = HTMobileClient.getBackendProvider(context);
 
         if ("home".equals(mode)) {
-            state.saveHomeLatLng(null);
+            state.saveHomePlace(null);
         }
     }
 
@@ -92,7 +95,10 @@ class SearchPlacePresenter {
                                     .subscribe(new io.reactivex.functions.Consumer<String>() {
                                         @Override
                                         public void accept(String s) {
-                                            state.setDestination(googleMap.getCameraPosition().target);
+                                            PlaceModel destination = new PlaceModel();
+                                            destination.address = s;
+                                            destination.latLng = googleMap.getCameraPosition().target;
+                                            state.setDestination(destination);
                                             view.updateAddress(s);
                                         }
                                     }));
@@ -154,7 +160,7 @@ class SearchPlacePresenter {
 
     public void confirm() {
         if (state.getDestination() != null) {
-            providePlace();
+            providePlace(state.getDestination());
         }
     }
 
@@ -177,8 +183,11 @@ class SearchPlacePresenter {
                     public void onSuccess(FetchPlaceResponse fetchPlaceResponse) {
                         view.hideProgressBar();
 
-                        state.setDestination(fetchPlaceResponse.getPlace().getLatLng());
-                        providePlace();
+                        PlaceModel destination = new PlaceModel();
+                        destination.address = fetchPlaceResponse.getPlace().getAddress();
+                        destination.latLng = fetchPlaceResponse.getPlace().getLatLng();
+                        state.setDestination(destination);
+                        providePlace(destination);
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -193,25 +202,25 @@ class SearchPlacePresenter {
     }
 
     public void skip() {
-        state.saveHomeLatLng(null);
+        state.saveHomePlace(null);
         view.finish();
     }
 
-    public void providePlace() {
+    public void providePlace(PlaceModel placeModel) {
 
         switch (state.getMode()) {
             case "home":
-                state.saveHomeLatLng(state.getDestination());
+                state.saveHomePlace(placeModel);
                 view.finish();
                 break;
             case "search":
-                startTrip();
+                startTrip(placeModel.latLng);
                 break;
             default:
         }
     }
 
-    private void startTrip() {
+    private void startTrip(LatLng destination) {
         view.showProgressBar();
 
         ResultHandler<ShareableTrip> resultHandler = new ResultHandler<ShareableTrip>() {
@@ -233,14 +242,14 @@ class SearchPlacePresenter {
 
         };
         TripConfig tripRequest;
-        if (state.getDestination() == null) {
+        if (destination == null) {
             tripRequest = new TripConfig.Builder()
                     .setDeviceId(hyperTrack.getDeviceID())
                     .build();
         } else {
             tripRequest = new TripConfig.Builder()
-                    .setDestinationLatitude(state.getDestination().latitude)
-                    .setDestinationLongitude(state.getDestination().longitude)
+                    .setDestinationLatitude(destination.latitude)
+                    .setDestinationLongitude(destination.longitude)
                     .setDeviceId(hyperTrack.getDeviceID())
                     .build();
         }

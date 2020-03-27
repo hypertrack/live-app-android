@@ -31,7 +31,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.hypertrack.live.App;
 import com.hypertrack.live.R;
@@ -131,6 +130,11 @@ public class MainActivity extends AppCompatActivity {
             showTurnOnLocationSnackbar();
         }
 
+        onStateUpdate();
+    }
+
+    public void onStateUpdate() {
+
         final SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
         hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
 
@@ -138,6 +142,9 @@ public class MainActivity extends AppCompatActivity {
                 PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
+                    .commitAllowingStateLoss();
+        } else if (!sharedPreferences.contains("user_name")) {
+            beginFragmentTransaction(Covid19Fragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
             initializeHyperTrack(hyperTrackPublicKey);
@@ -178,20 +185,11 @@ public class MainActivity extends AppCompatActivity {
                 sharedPreferences.edit()
                         .putString("pub_key", hyperTrackPublicKey)
                         .apply();
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M
-                        || PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)) {
-                    initializeHyperTrack(hyperTrackPublicKey);
-                } else {
-                    beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
-                            .commitAllowingStateLoss();
-                }
+                onStateUpdate();
             }
         } else if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-                initializeHyperTrack(hyperTrackPublicKey);
+                onStateUpdate();
             }
         }
     }
@@ -204,9 +202,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                String hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
-                initializeHyperTrack(hyperTrackPublicKey);
+                onStateUpdate();
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setNegativeButton(android.R.string.cancel, null)
@@ -236,8 +232,8 @@ public class MainActivity extends AppCompatActivity {
                     .setLargeIcon(R.drawable.ic_notification)
                     .build();
             HyperTrack hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
-                    .setTrackingNotificationConfig(notificationConfig)
-                    .setDeviceName(AppUtils.getDeviceName(this));
+                    .setTrackingNotificationConfig(notificationConfig);
+            hyperTrack.requestPermissionsIfNecessary();
 
             if (hyperTrack.isRunning()) {
                 onTrackingStart();
@@ -246,7 +242,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             beginFragmentTransaction(new TrackingFragment()).commitAllowingStateLoss();
-            Log.i("getDeviceId", hyperTrack.getDeviceID());
+            Log.i("deviceId", hyperTrack.getDeviceID());
         }
     }
 

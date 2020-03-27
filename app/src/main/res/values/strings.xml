@@ -97,10 +97,6 @@
     <string name="trip_will_be_ended_are_you_sure">You haven\'t reach the destination yet, end sharing will end this trip.</string>
     <string name="confirm">Confirm</string>
     <string name="share_trip_via">Share trip via</string>
-    <string name="service_worker_for_covid_19">I am/represent an essential service worker for COVID-19 in my region</string>
-    <string name="add_home_address">Add home address</string>
-    <string name="search_address">Search address</string>
-    <string name="skip">SKIP</string>
 
     <array name="categories">
         <item>not selected</item>
@@ -125,5 +121,14 @@
         <item>In pilot</item>
         <item>In production</item>
     </array>
+
+    <string name="service_worker_for_covid_19">I am/represent an essential service worker for COVID-19 in my region</string>
+    <string name="add_home_address">Add home address</string>
+    <string name="search_address">Search address</string>
+    <string name="skip">SKIP</string>
+    <string name="username_phone">User Name / Phone # (+9111&#8230;)</string>
+    <string name="phone">Phone number</string>
+    <string name="name">Name</string>
+    <string name="phone_number_user_name">%s (%s)</string>
 
 </resources>

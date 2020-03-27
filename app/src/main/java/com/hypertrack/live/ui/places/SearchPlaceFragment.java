@@ -116,7 +116,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onClick(View view) {
                 presenter.setMapDestinationModeEnable(false);
-                presenter.providePlace();
+                presenter.providePlace(null);
             }
         });
         destinationOnMap = view.findViewById(R.id.destination_on_map);
