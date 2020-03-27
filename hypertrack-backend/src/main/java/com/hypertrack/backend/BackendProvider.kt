@@ -101,7 +101,7 @@ class BackendProvider private constructor(
                 tokenString
         )
         request.retryPolicy = defaultRetryPolicy
-        Log.d(TAG, "Adding start request to queue")
+        Log.d(TAG, "Adding geofence request to queue")
         queue.add(request)
 
     }
