@@ -37,7 +37,7 @@ import com.hypertrack.backend.BackendProvider;
 import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
-import com.hypertrack.live.LaunchActivity;
+import com.hypertrack.live.PermissionsManager;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.tracking.TrackingFragment;
 import com.hypertrack.live.utils.AppUtils;
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = App.TAG + "MainActivity";
 
     public static final int VERIFICATION_REQUEST = 414;
-    public static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 515;
+    public static final int PERMISSIONS_REQUEST = 515;
 
     public static final String PUBLISHABLE_KEY = "publishable_key";
 
@@ -145,9 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
-        if (TextUtils.isEmpty(hyperTrackPublicKey) ||
-                PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (TextUtils.isEmpty(hyperTrackPublicKey) || !PermissionsManager.isAllPermissionsApproved(this)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else if (!sharedHelper.sharedPreferences().contains("user_name")) {
@@ -194,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                         .apply();
                 onStateUpdate();
             }
-        } else if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+        } else if (requestCode == PERMISSIONS_REQUEST) {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 onStateUpdate();
             }
@@ -206,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
+        if (requestCode == PERMISSIONS_REQUEST) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 startTrackingByDefault(sharedHelper.getHyperTrackPubKey());
@@ -221,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                 Uri uri = Uri.parse("package:" + getPackageName());
                                 intent.setData(uri);
-                                startActivityForResult(intent, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                                startActivityForResult(intent, PERMISSIONS_REQUEST);
                             }
                         })
                         .setTitle(R.string.app_settings)
@@ -328,7 +326,7 @@ public class MainActivity extends AppCompatActivity {
                                 intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                                 Uri uri = Uri.fromParts("package", getPackageName(), null);
                                 intent.setData(uri);
-                                startActivityForResult(intent, PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+                                startActivityForResult(intent, PERMISSIONS_REQUEST);
                             }
                         })
                         .setTitle(R.string.app_settings)
