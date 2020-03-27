@@ -170,10 +170,10 @@ class CompleteTripRequest(
 }
 
 class GeofenceEventRequest(
-        eventName: String, deviceId: String,
+        deviceId: String, eventName: String,
         private val tokenString: String
 ) : JsonRequest<Void>(
-        Method.POST, "$LIVE_APP_BACKEND_TRIPS_ENDPOINT/geofence",
+        Method.POST, "${ADDRESS}geofence",
         "{\"device_id\": \"$deviceId\", \"geofence_name\": \"Home\", \"geofence_action\": \"$eventName\"}" ,
         null, null
 ) {
