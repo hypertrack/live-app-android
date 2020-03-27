@@ -21,6 +21,7 @@
         android:required="false" />
 
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -85,6 +86,7 @@
                 <action android:name="com.hypertrack.sdk.TRACKING_STATE" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".utils.OnDeviceGeofence"/>
 
         <meta-data
             android:name="com.google.android.gms.version"

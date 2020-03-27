@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
+import com.hypertrack.live.utils.OnDeviceGeofence;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -22,9 +23,11 @@ class SearchPlaceState extends BaseState {
     private Gson gson = new Gson();
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
+    private final Context mContext;
 
     SearchPlaceState(Context context, String mode) {
         super(context);
+        mContext = context;
         this.mode = mode;
         String recentJson = preferences.getString("recent", "[]");
         Type listType = new TypeToken<HashSet<PlaceModel>>() {}.getType();
@@ -48,6 +51,7 @@ class SearchPlaceState extends BaseState {
         preferences.edit()
                 .putString("home_latlng", homeJson)
                 .apply();
+        OnDeviceGeofence.addGeofence(mContext, latLng.latitude, latLng.longitude);
     }
 
     List<PlaceModel> getRecentPlaces() {
