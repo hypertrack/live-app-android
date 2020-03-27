@@ -112,6 +112,8 @@ class SearchPlacePresenter {
                         handler.postDelayed(runnable, 500);
                     }
                 });
+                runnable.run();
+
                 view.updateList(Collections.<PlaceModel>emptyList());
                 view.showSetOnMap();
             } else {

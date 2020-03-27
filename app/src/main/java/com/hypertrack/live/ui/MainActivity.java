@@ -17,6 +17,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -32,10 +33,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.App;
+import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.tracking.TrackingFragment;
 import com.hypertrack.live.utils.AppUtils;
+import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.live.views.Snackbar;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.ServiceNotificationConfig;
@@ -51,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String PUBLISHABLE_KEY = "publishable_key";
 
-    private String hyperTrackPublicKey;
+    private SharedHelper sharedHelper;
 
     private BroadcastReceiver trackingStateReceiver = new BroadcastReceiver() {
         @Override
@@ -90,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sharedHelper = SharedHelper.getInstance(this);
 
         mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.style_map);
         mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(this, R.raw.style_map_silver);
@@ -135,15 +143,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onStateUpdate() {
 
-        final SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-        hyperTrackPublicKey = sharedPreferences.getString("pub_key", "");
+        String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
         if (TextUtils.isEmpty(hyperTrackPublicKey) ||
                 PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
-        } else if (!sharedPreferences.contains("user_name")) {
+        } else if (!sharedHelper.sharedPreferences().contains("user_name")) {
             beginFragmentTransaction(Covid19Fragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
@@ -202,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startTrackingByDefault(sharedHelper.getHyperTrackPubKey());
                 onStateUpdate();
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
@@ -246,11 +254,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void startTrackingByDefault(String hyperTrackPublicKey) {
+        final HyperTrack hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey);
+        BackendProvider backendProvider = HTMobileClient.getBackendProvider(this);
+        backendProvider.start(hyperTrack.getDeviceID(), new ResultHandler<String>() {
+            @Override
+            public void onResult(String result) {
+                Toast.makeText(MainActivity.this, getString(R.string.tracking_is_started), Toast.LENGTH_LONG)
+                        .show();
+            }
+
+            @Override
+            public void onError(@NonNull Exception error) {
+                Log.e("Sign in", "login completed error:" + error.getMessage());
+            }
+        });
+    }
+
     public void onTrackingStart() {
         trackingStatus.setActivated(true);
         trackingStatus.setText(R.string.active);
         trackingStatusText.setVisibility(View.GONE);
-        trackingStatusText.setText(String.format(getString(R.string.tracking_is), getString(R.string.active).toLowerCase()));
+        trackingStatusText.setText(
+                String.format(getString(R.string.tracking_is), getString(R.string.active).toLowerCase())
+        );
     }
 
 
@@ -362,11 +389,10 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                        sharedPreferences.edit()
+                        sharedHelper.sharedPreferences().edit()
                                 .remove("pub_key")
                                 .apply();
-                        beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
+                        beginFragmentTransaction(WelcomeFragment.newInstance(sharedHelper.getHyperTrackPubKey()))
                                 .commitAllowingStateLoss();
                     }
                 })
