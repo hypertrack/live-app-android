@@ -81,6 +81,18 @@ class BackendProvider private constructor(
         })
     }
 
+    fun sendGeofenceTransition(transitionType: String) {
+        Log.i(TAG, "sendGeofenceTransition  $transitionType")
+
+//        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
+//            override fun onResult(result: String) =
+//                    scheduleAuthenticatedCompletionTripRequest(transitionType, result, callback)
+//
+//            override fun onError(error: Exception) = callback.onError(error)
+
+//        })
+    }
+
     private fun scheduleAuthenticatedStartTrackingRequest(deviceId: String, tokenString: String, callback: ResultHandler<String>) {
         val request = StartTrackingRequest(
                 deviceId, tokenString,

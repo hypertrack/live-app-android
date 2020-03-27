@@ -11,11 +11,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofenceStatusCodes;
 import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingEvent;
 import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.hypertrack.live.HTMobileClient;
+
 
 public class OnDeviceGeofence extends BroadcastReceiver {
     private static final String TAG = "OnDeviceGeofence";
@@ -86,6 +90,27 @@ public class OnDeviceGeofence extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d(TAG, "onReceive: ");
+        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
+        if (geofencingEvent.hasError()) {
+            String errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.getErrorCode());
+            Log.e(TAG, errorMessage);
+            return;
+        }
+
+        int geofenceTransition = geofencingEvent.getGeofenceTransition();
+
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER ||
+                geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            String transitionType = geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER
+                    ? "enter"
+                    : "exit";
+            HTMobileClient.getBackendProvider(context)
+                    .sendGeofenceTransition(transitionType);
+        } else {
+            // Log the error.
+            Log.w(TAG, String.format("Unexpected geofence transition type %d. Ignoring.",
+                    geofenceTransition));
+        }
 
     }
 }

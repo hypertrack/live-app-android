@@ -51,7 +51,9 @@ class SearchPlaceState extends BaseState {
         preferences.edit()
                 .putString("home_latlng", homeJson)
                 .apply();
-        OnDeviceGeofence.addGeofence(mContext, latLng.latitude, latLng.longitude);
+        if (latLng != null) {
+            OnDeviceGeofence.addGeofence(mContext, latLng.latitude, latLng.longitude);
+        }
     }
 
     List<PlaceModel> getRecentPlaces() {
