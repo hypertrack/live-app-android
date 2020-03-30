@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SharedHelper sharedHelper;
 
+    private HyperTrack hyperTrack;
     private BroadcastReceiver trackingStateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -152,7 +153,17 @@ public class MainActivity extends AppCompatActivity {
             beginFragmentTransaction(Covid19Fragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
-            initializeHyperTrack(hyperTrackPublicKey);
+            beginFragmentTransaction(new TrackingFragment()).commitAllowingStateLoss();
+        }
+
+        initializeHyperTrack(hyperTrackPublicKey);
+
+        if (hyperTrack != null) {
+            if (hyperTrack.isRunning()) {
+                onTrackingStart();
+            } else {
+                onTrackingStop();
+            }
         }
     }
 
@@ -207,8 +218,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == PERMISSIONS_REQUEST) {// If request is cancelled, the result arrays are empty.
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startTrackingByDefault(sharedHelper.getHyperTrackPubKey());
                 onStateUpdate();
+                startTrackingByDefault();
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setNegativeButton(android.R.string.cancel, null)
@@ -232,28 +243,18 @@ public class MainActivity extends AppCompatActivity {
 
     private void initializeHyperTrack(final String hyperTrackPublicKey) {
 
-        if (!TextUtils.isEmpty(hyperTrackPublicKey)) {
+        if (hyperTrack == null && !TextUtils.isEmpty(hyperTrackPublicKey)) {
             ServiceNotificationConfig notificationConfig = new ServiceNotificationConfig.Builder()
                     .setSmallIcon(R.drawable.ic_status_bar)
                     .setLargeIcon(R.drawable.ic_notification)
                     .build();
-            HyperTrack hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
+            hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
                     .setTrackingNotificationConfig(notificationConfig);
-            hyperTrack.requestPermissionsIfNecessary();
-
-            if (hyperTrack.isRunning()) {
-                onTrackingStart();
-            } else {
-                onTrackingStop();
-            }
-
-            beginFragmentTransaction(new TrackingFragment()).commitAllowingStateLoss();
             Log.i("deviceId", hyperTrack.getDeviceID());
         }
     }
 
-    private void startTrackingByDefault(String hyperTrackPublicKey) {
-        final HyperTrack hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey);
+    private void startTrackingByDefault() {
         BackendProvider backendProvider = HTMobileClient.getBackendProvider(this);
         backendProvider.start(hyperTrack.getDeviceID(), new ResultHandler<String>() {
             @Override
