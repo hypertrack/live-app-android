@@ -1,7 +1,5 @@
 package com.hypertrack.live.ui;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +12,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.hypertrack.live.R;
-import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.HyperTrack;
 
@@ -36,7 +33,7 @@ public class Covid19Fragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_covid19, null);
+        return inflater.inflate(R.layout.fragment_essential_service, null);
     }
 
     @Override

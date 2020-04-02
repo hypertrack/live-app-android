@@ -68,6 +68,6 @@
         android:id="@+id/service_worker"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/service_worker_for_covid_19"/>
+        android:text="@string/essential_service_worker"/>
 
 </LinearLayout>
