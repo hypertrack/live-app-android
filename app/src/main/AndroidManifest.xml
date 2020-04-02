@@ -41,14 +41,31 @@
         <activity
             android:name="com.hypertrack.live.LaunchActivity"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustPan|stateHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <!-- Branch URI Scheme -->
+            <intent-filter>
+                <data android:scheme="hypertrack-live" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+            <!-- Branch App Links (optional) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="hypertrack-live.app.link" />
+                <data android:scheme="https" android:host="hypertrack-live.app.link" />
+            </intent-filter>
+
         </activity>
         <activity
             android:name="com.hypertrack.live.ui.MainActivity"
@@ -99,6 +116,11 @@
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
+
+        <!-- Branch init -->
+        <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_aiKNL9ITU9tljY2nYXSavgjhvyjhSk0I" />
+        <meta-data android:name="io.branch.sdk.BranchKey.test" android:value="key_test_cdTISZQLOWyhk70b5YSdTmbdAyngRaX8" />
+        <meta-data android:name="io.branch.sdk.TestMode" android:value="false" />
 
     </application>
 </manifest>
