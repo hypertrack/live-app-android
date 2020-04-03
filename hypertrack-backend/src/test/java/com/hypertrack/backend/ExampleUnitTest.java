@@ -1,4 +1,4 @@
-package com.hypertrack.trips;
+package com.hypertrack.backend;
 
 import org.junit.Test;
 

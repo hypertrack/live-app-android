@@ -1,11 +1,10 @@
 package com.hypertrack.live.models;
 
-import android.service.autofill.RegexValidator;
 import android.util.Log;
 
 import com.hypertrack.live.App;
 import com.hypertrack.sdk.views.dao.Trip;
-import com.hypertrack.trips.ShareableTrip;
+import com.hypertrack.backend.ShareableTrip;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

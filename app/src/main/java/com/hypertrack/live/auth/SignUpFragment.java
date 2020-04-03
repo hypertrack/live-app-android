@@ -1,11 +1,13 @@
 package com.hypertrack.live.auth;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,8 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,7 +31,6 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
 import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsException;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
@@ -53,6 +56,8 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
     private static final String CUSTOM_SCALE = "custom:scale";
     public static final String CUSTOM_STATE = "custom:state";
 
+    public static final String COVID_19 = "COVID-19";
+
     private ViewPager viewPager;
     private TextView incorrect;
     private Button next;
@@ -61,7 +66,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
 
     private LoaderDecorator loader;
 
-    private String company;
+    private String company = "";
     private String email;
     private String password;
     private Map<String, String> cognitoUserAttributes = new HashMap<>();
@@ -115,6 +120,8 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
         viewPager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
+                viewPager.setVisibility(View.VISIBLE);
+                incorrect.setVisibility(View.INVISIBLE);
                 switch (viewPager.getCurrentItem()) {
                     case PAGE_USER:
                         accept.setVisibility(View.INVISIBLE);
@@ -125,6 +132,11 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                         accept.setVisibility(View.VISIBLE);
                         agreeToTerms.setVisibility(View.VISIBLE);
                         next.setVisibility(View.INVISIBLE);
+                        if (COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
+                            viewPager.setVisibility(View.INVISIBLE);
+                        } else {
+                            viewPager.setVisibility(View.VISIBLE);
+                        }
                         break;
                 }
             }
@@ -140,7 +152,8 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(CUSTOM_USE_CASE, CUSTOM_SCALE, CUSTOM_STATE))) {
+                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(CUSTOM_USE_CASE, CUSTOM_SCALE, CUSTOM_STATE))
+                        && !COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
                     showError(getString(R.string.all_fields_required));
                     return;
                 }
@@ -160,16 +173,16 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
 
     private void nextPage() {
 
-        incorrect.setVisibility(View.INVISIBLE);
         switch (viewPager.getCurrentItem()) {
             case PAGE_USER:
-                if (TextUtils.isEmpty(company) || TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-                    showError(getString(R.string.all_fields_required));
+                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+                    showError(getString(R.string.email_password_fields_required));
                     return;
                 }
                 cognitoUserAttributes.put(CUSTOM_COMPANY, company);
                 break;
             case PAGE_INFO:
+                break;
         }
         View view = getActivity().getCurrentFocus();
         if (view != null) {
@@ -196,11 +209,14 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
     public void onSuccess(HTMobileClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
-            if (getActivity() != null) {
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_frame, new ConfirmFragment(), ConfirmFragment.class.getSimpleName())
-                        .commitAllowingStateLoss();
-            }
+            getActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_frame, new ConfirmFragment(), ConfirmFragment.class.getSimpleName())
+                    .commitAllowingStateLoss();
+
+            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
+            sharedPreferences.edit()
+                    .putBoolean(COVID_19, COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE)))
+                    .apply();
         }
     }
 
@@ -211,7 +227,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
 
             viewPager.setCurrentItem(PAGE_USER);
             if (e instanceof UsernameExistsException) {
-                incorrect.setText(R.string.an_account_exists);
+                showError(getString(R.string.an_account_exists));
             } else {
                 Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
@@ -224,14 +240,15 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
         @Override
         public Object instantiateItem(ViewGroup collection, int position) {
             LayoutInflater inflater = LayoutInflater.from(collection.getContext());
-            ViewGroup view = null;
+            View view = null;
             switch (position) {
                 case PAGE_USER:
-                    view = (ViewGroup) inflater.inflate(R.layout.view_pager_signup_user, collection, false);
+                    view = inflater.inflate(R.layout.view_pager_signup_user, collection, false);
                     EditText companyNameEditText = view.findViewById(R.id.company_name);
                     EditText emailAddressEditText = view.findViewById(R.id.email_address);
                     final EditText passwordEditText = view.findViewById(R.id.password);
                     final View passwordClear = view.findViewById(R.id.password_clear);
+                    final CheckBox serviceWorker = view.findViewById(R.id.service_worker);
 
                     companyNameEditText.setText(company);
                     companyNameEditText.addTextChangedListener(new HTTextWatcher() {
@@ -272,65 +289,76 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                             passwordEditText.setText("");
                         }
                     });
+                    serviceWorker.setChecked(COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
+                    serviceWorker.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                        @Override
+                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                            if (b) {
+                                cognitoUserAttributes.put(CUSTOM_USE_CASE, COVID_19);
+                            } else {
+                                cognitoUserAttributes.remove(CUSTOM_USE_CASE);
+                            }
+                        }
+                    });
                     break;
 
                 case PAGE_INFO:
-                    view = (ViewGroup) inflater.inflate(R.layout.view_pager_signup_info, collection, false);
-                    Spinner categoriesSpinner = view.findViewById(R.id.categories);
-                    Spinner devicesSpinner = view.findViewById(R.id.devices);
-                    Spinner stageSpinner = view.findViewById(R.id.stage);
-                    final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.categories));
-                    final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
-                    final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
+                    view = inflater.inflate(R.layout.view_pager_signup_info, collection, false);
+                        Spinner categoriesSpinner = view.findViewById(R.id.categories);
+                        Spinner devicesSpinner = view.findViewById(R.id.devices);
+                        Spinner stageSpinner = view.findViewById(R.id.stage);
+                        final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.categories));
+                        final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
+                        final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
 
-                    categoriesSpinner.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
-                    categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            incorrect.setVisibility(View.INVISIBLE);
-                            if (i == 0) {
-                                cognitoUserAttributes.remove(CUSTOM_USE_CASE);
-                            } else {
-                                cognitoUserAttributes.put(CUSTOM_USE_CASE, categories.get(i));
+                        categoriesSpinner.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
+                        categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                incorrect.setVisibility(View.INVISIBLE);
+                                if (i == 0) {
+                                    cognitoUserAttributes.remove(CUSTOM_USE_CASE);
+                                } else {
+                                    cognitoUserAttributes.put(CUSTOM_USE_CASE, categories.get(i));
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-                    devicesSpinner.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
-                    devicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            incorrect.setVisibility(View.INVISIBLE);
-                            if (i == 0) {
-                                cognitoUserAttributes.remove(CUSTOM_SCALE);
-                            } else {
-                                cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
                             }
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-                    stageSpinner.setSelection(stage.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
-                    stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            incorrect.setVisibility(View.INVISIBLE);
-                            if (i == 0) {
-                                cognitoUserAttributes.remove(CUSTOM_STATE);
-                            } else {
-                                cognitoUserAttributes.put(CUSTOM_STATE, stage.get(i));
+                        });
+                        devicesSpinner.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
+                        devicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                incorrect.setVisibility(View.INVISIBLE);
+                                if (i == 0) {
+                                    cognitoUserAttributes.remove(CUSTOM_SCALE);
+                                } else {
+                                    cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
+                        stageSpinner.setSelection(stage.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
+                        stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                incorrect.setVisibility(View.INVISIBLE);
+                                if (i == 0) {
+                                    cognitoUserAttributes.remove(CUSTOM_STATE);
+                                } else {
+                                    cognitoUserAttributes.put(CUSTOM_STATE, stage.get(i));
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
                     break;
             }
             collection.addView(view);

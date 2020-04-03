@@ -5,6 +5,8 @@ import android.app.Application;
 import com.google.android.libraries.places.api.Places;
 import com.hypertrack.sdk.HyperTrack;
 
+import io.branch.referral.Branch;
+
 
 public class App extends Application {
     public static final String TAG = "LApp:";
@@ -28,5 +30,10 @@ public class App extends Application {
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyBKZejrZNZpLlemrH28Nc46XzHsRSVRxKI");
         }
+
+        Branch.enableLogging();
+        Branch.enableDebugMode();
+        Branch.getAutoInstance(this);
+
     }
 }

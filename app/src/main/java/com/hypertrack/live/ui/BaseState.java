@@ -1,21 +1,30 @@
 package com.hypertrack.live.ui;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.hypertrack.live.R;
+import com.hypertrack.live.utils.SharedHelper;
+import com.hypertrack.sdk.HyperTrack;
 
 public class BaseState {
-    protected final SharedPreferences preferences;
+
+    protected final Context mContext;
+    protected final SharedHelper sharedHelper;
     private final String hyperTrackPublicKey;
+    protected final HyperTrack hyperTrack;
 
     protected BaseState(Context context) {
-        preferences = context.getSharedPreferences(context.getString(R.string.app_name), Activity.MODE_PRIVATE);
-        hyperTrackPublicKey = preferences.getString("pub_key", "");
+        mContext = context;
+        sharedHelper = SharedHelper.getInstance(context);
+        hyperTrackPublicKey = sharedHelper.sharedPreferences().getString(SharedHelper.PUB_KEY, "");
+        hyperTrack = HyperTrack.getInstance(context, hyperTrackPublicKey);
     }
 
     public String getHyperTrackPubKey() {
         return hyperTrackPublicKey;
+    }
+
+    protected SharedPreferences preferences() {
+        return sharedHelper.sharedPreferences();
     }
 }

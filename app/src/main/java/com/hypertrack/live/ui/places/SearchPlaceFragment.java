@@ -1,10 +1,13 @@
 package com.hypertrack.live.ui.places;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +36,8 @@ import java.util.List;
 
 public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback, SearchPlacePresenter.View {
 
+    private Config config;
+
     private SearchPlacePresenter presenter;
 
     private EditText search;
@@ -41,6 +46,24 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     private View confirm;
     private PlacesAdapter placesAdapter;
     private LoaderDecorator loader;
+
+    public static SearchPlaceFragment newInstance(Config config) {
+        SearchPlaceFragment fragment = new SearchPlaceFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("config", config);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() == null) {
+            config = new Config("");
+        } else {
+            config = getArguments().getParcelable("config");
+        }
+    }
 
     @Nullable
     @Override
@@ -53,22 +76,24 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        presenter = new SearchPlacePresenter(getActivity(), this);
+        presenter = new SearchPlacePresenter(getActivity(), config.key, this);
         loader = new LoaderDecorator(getContext());
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getActivity().setTitle(R.string.where_are_you_going);
+        getActivity().setTitle(config.titleResId);
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getActivity().onBackPressed();
             }
         });
+        setHasOptionsMenu(true);
 
         search = view.findViewById(R.id.search);
+        search.setHint(config.hintResId);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -85,11 +110,13 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.showSoftInput(search, InputMethodManager.SHOW_IMPLICIT);
 
-        view.findViewById(R.id.no_destination).setOnClickListener(new View.OnClickListener() {
+        View noDestination = view.findViewById(R.id.no_destination);
+        noDestination.setVisibility(config.isNotDecidedEnabled ? View.VISIBLE : View.INVISIBLE);
+        noDestination.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 presenter.setMapDestinationModeEnable(false);
-                presenter.startTrip();
+                presenter.providePlace(null);
             }
         });
         destinationOnMap = view.findViewById(R.id.destination_on_map);
@@ -119,7 +146,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         placesAdapter.setOnItemClickListener(new PlacesAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(RecyclerView.Adapter<?> adapter, View view, int position) {
-                presenter.selectPlace(placesAdapter.getItem(position));
+                presenter.selectItem(placesAdapter.getItem(position));
             }
         });
         locationsRecyclerView.setAdapter(placesAdapter);
@@ -141,6 +168,24 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onMapReady(GoogleMap googleMap) {
         presenter.initMap(googleMap);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_search_place, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(@NonNull Menu menu) {
+        menu.findItem(R.id.skip).setVisible(config.isSkipEnabled);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.skip) {
+            presenter.skip();
+        }
+        return false;
     }
 
     private void hideSoftInput() {
@@ -200,8 +245,93 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
+    public void finish() {
+        if (getActivity() != null) {
+            getActivity().onBackPressed();
+        }
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         presenter.destroy();
+    }
+
+    @SuppressWarnings("WeakerAccess")
+    public static class Config implements Parcelable {
+
+        public static final Config HOME_ADDRESS = new Config("home")
+                .setTitle(R.string.add_home_address)
+                .setHint(R.string.search_address)
+                .setSkipEnabled(true);
+
+        public static final Config SEARCH_PLACE = new Config("search")
+                .setTitle(R.string.where_are_you_going)
+                .setHint(R.string.i_m_going_to)
+                .setNotDecidedEnabled(true);
+
+        public final String key;
+        private int titleResId;
+        private int hintResId;
+        private boolean isSkipEnabled = false;
+        private boolean isNotDecidedEnabled = false;
+
+        private Config(String key) {
+            this.key = key;
+        }
+
+        public Config setTitle(int titleResId) {
+            this.titleResId = titleResId;
+            return this;
+        }
+
+        public Config setHint(int hintResId) {
+            this.hintResId = hintResId;
+            return this;
+        }
+
+        public Config setSkipEnabled(boolean skipEnabled) {
+            isSkipEnabled = skipEnabled;
+            return this;
+        }
+
+        public Config setNotDecidedEnabled(boolean notDecidedEnabled) {
+            isNotDecidedEnabled = notDecidedEnabled;
+            return this;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(this.key);
+            dest.writeInt(this.titleResId);
+            dest.writeInt(this.hintResId);
+            dest.writeByte(this.isSkipEnabled ? (byte) 1 : (byte) 0);
+            dest.writeByte(this.isNotDecidedEnabled ? (byte) 1 : (byte) 0);
+        }
+
+        protected Config(Parcel in) {
+            this.key = in.readString();
+            this.titleResId = in.readInt();
+            this.hintResId = in.readInt();
+            this.isSkipEnabled = in.readByte() != 0;
+            this.isNotDecidedEnabled = in.readByte() != 0;
+        }
+
+        public static final Parcelable.Creator<Config> CREATOR = new Parcelable.Creator<Config>() {
+            @Override
+            public Config createFromParcel(Parcel source) {
+                return new Config(source);
+            }
+
+            @Override
+            public Config[] newArray(int size) {
+                return new Config[size];
+            }
+        };
     }
 }
