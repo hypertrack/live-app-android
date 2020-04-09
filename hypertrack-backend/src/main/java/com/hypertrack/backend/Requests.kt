@@ -1,5 +1,6 @@
 package com.hypertrack.backend
 
+import android.os.Build
 import android.util.Log
 import com.android.volley.NetworkResponse
 import com.android.volley.Response
@@ -192,9 +193,30 @@ class GeofenceEventRequest(
 
     override fun getHeaders(): MutableMap<String, String> {
         val defaultHeaders = super.getHeaders()
-        val headers = HashMap<String, String>(defaultHeaders.size + 1)
+        val headers = HashMap<String, String>(defaultHeaders.size + 2)
         headers.putAll(defaultHeaders)
         headers["Authorization"] = "Bearer $tokenString"
+        return headers
+    }
+}
+
+abstract class LiveAppBackendRequest<T>(private val tokenString: String, url:String, requestBody:String, responseListener: Response.Listener<T>,
+                               errorListener: Response.ErrorListener) : JsonRequest<T>(Method.POST, url, requestBody, responseListener, errorListener) {
+    private fun isSuccessFamilyStatus(networkResponse:NetworkResponse) = networkResponse.statusCode / 100 == 2
+
+    override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
+        volleyError?.networkResponse?.let { Log.e(TAG, String(it.data)) }
+        return super.parseNetworkError(volleyError)
+    }
+
+    override fun getHeaders(): MutableMap<String, String> {
+        val defaultHeaders = super.getHeaders()
+        val headers = HashMap<String, String>(defaultHeaders.size + 2)
+        headers.putAll(defaultHeaders)
+        headers["Authorization"] = "Bearer $tokenString"
+        val appVersion = BuildConfig.VERSION_NAME
+        val androidVersion = Build.VERSION.RELEASE
+        headers["User-Agent"] = "LiveApp/$appVersion Volley/1.1.1 Android/$androidVersion"
         return headers
     }
 }
