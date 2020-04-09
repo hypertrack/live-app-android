@@ -5,7 +5,6 @@ import android.app.Application;
 import com.google.android.libraries.places.api.Places;
 import com.hypertrack.sdk.HyperTrack;
 
-import io.branch.referral.Branch;
 
 
 public class App extends Application {
@@ -31,9 +30,6 @@ public class App extends Application {
             Places.initialize(getApplicationContext(), "AIzaSyBKZejrZNZpLlemrH28Nc46XzHsRSVRxKI");
         }
 
-        Branch.enableLogging();
-        Branch.enableDebugMode();
-        Branch.getAutoInstance(this);
 
     }
 }
