@@ -21,7 +21,7 @@ private const val TAG = "Requests"
 
 class StartTrackingRequest(
         deviceId: String,
-        private val tokenString: String,
+        tokenString: String,
         responseListener: Response.Listener<Void>,
         errorListener: Response.ErrorListener
 ) : LiveAppBackendRequest<Void>(
@@ -38,7 +38,7 @@ class StartTrackingRequest(
 
 class StopTrackingRequest(
         deviceId: String,
-        private val tokenString: String,
+        tokenString: String,
         responseListener: Response.Listener<Void>,
         errorListener: Response.ErrorListener
 ) : LiveAppBackendRequest<Void>(
