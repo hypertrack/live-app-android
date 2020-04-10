@@ -1,6 +1,5 @@
 package com.hypertrack.live.auth;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -20,9 +19,9 @@ import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedExce
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
-import com.hypertrack.live.ui.MainActivity;
 import com.hypertrack.live.utils.HTTextWatcher;
 
 public class SignInFragment extends Fragment implements HTMobileClient.Callback {
@@ -73,8 +72,7 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
                 String email = emailAddressEditText.getText().toString().toLowerCase();
                 String password = passwordEditText.getText().toString();
                 if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
-                    loader.start();
-                    HTMobileClient.getInstance(getContext()).signIn(email, password, SignInFragment.this);
+                    startSignIn(email, password);
                 }
             }
         });
@@ -90,14 +88,19 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
                 }
             }
         });
+
+    }
+
+    public void startSignIn(String email, String password) {
+        loader.start();
+        HTMobileClient.getInstance(getContext()).signIn(email, password, SignInFragment.this);
     }
 
     @Override
     public void onSuccess(HTMobileClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+            ((LaunchActivity)getActivity()).onLoginCompleted();
         }
     }
 

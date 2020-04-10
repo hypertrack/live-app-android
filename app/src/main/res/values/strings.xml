@@ -56,12 +56,13 @@
     <string name="already_have_an_account">Already have an account?</string>
     <string name="sign_up_a_new_account">Create a new account</string>
     <string name="_14_day_free_trial_no_credit_card_required">Free 100k events per month. No credit card required.</string>
-    <string name="company_or_product_name">Company or product name</string>
+    <string name="company_or_product_name">Company or product name(Optional)</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
     <string name="accept_continue"><![CDATA[Accept & Continue]]></string>
     <string name="i_agree_to_terms_of_service"><![CDATA[By clicking on the Accept & Continue button I agree to <a href="https://www.hypertrack.com/terms">Terms of Service</a> and <a href="https://www.hypertrack.com/agreement">HyperTrack SaaS Agreement</a>]]></string>
     <string name="all_fields_required">All fields required</string>
+    <string name="email_password_fields_required">Email and password fields are required</string>
     <string name="my_app_manages">My app manages</string>
     <string name="my_app_would_track">My app would track</string>
     <string name="my_app_is">My app is</string>
@@ -120,5 +121,15 @@
         <item>In pilot</item>
         <item>In production</item>
     </array>
+
+    <string name="essential_service_worker">I am/represent an essential service worker in my region</string>
+    <string name="add_home_address">Add home address</string>
+    <string name="search_address">Search address</string>
+    <string name="skip">SKIP</string>
+    <string name="username_phone">User Name / Phone # (+9111&#8230;)</string>
+    <string name="phone">Phone number</string>
+    <string name="name">Name</string>
+    <string name="phone_number_user_name">%s (%s)</string>
+    <string name="tracking_is_started">Tracking is started</string>
 
 </resources>

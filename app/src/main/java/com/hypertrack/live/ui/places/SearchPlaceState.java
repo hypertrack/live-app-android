@@ -1,13 +1,12 @@
 package com.hypertrack.live.ui.places;
 
 import android.content.Context;
-import android.util.Log;
-
-import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
+import com.hypertrack.live.utils.OnDeviceGeofence;
+import com.hypertrack.live.utils.SharedHelper;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -17,24 +16,45 @@ import java.util.List;
 import java.util.Set;
 
 class SearchPlaceState extends BaseState {
-    private LatLng destination;
+    private final String mode;
+    private PlaceModel destination;
     private Gson gson = new Gson();
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
 
-    SearchPlaceState(Context context) {
+    SearchPlaceState(Context context, String mode) {
         super(context);
-        String recentJson = preferences.getString("recent", "[]");
+        this.mode = mode;
+        String recentJson = preferences().getString("recent", "[]");
         Type listType = new TypeToken<HashSet<PlaceModel>>() {}.getType();
         recentPlaces = gson.fromJson(recentJson, listType);
     }
 
-    LatLng getDestination() {
+    public String getMode() {
+        return mode;
+    }
+
+    PlaceModel getDestination() {
         return destination;
     }
 
-    void setDestination(LatLng destination) {
+    void setDestination(PlaceModel destination) {
         this.destination = destination;
+    }
+
+    void saveHomePlace(PlaceModel home) {
+        String homeJson = gson.toJson(home);
+        preferences().edit()
+                .putString(SharedHelper.HOME_PLACE, homeJson)
+                .apply();
+        hyperTrack.setDeviceMetadata(sharedHelper.getDeviceMetadata());
+
+        if (home != null) {
+            OnDeviceGeofence.addGeofence(mContext,
+                    home.latLng.latitude, home.latLng.longitude,
+                    hyperTrack.getDeviceID()
+            );
+        }
     }
 
     List<PlaceModel> getRecentPlaces() {
@@ -49,6 +69,6 @@ class SearchPlaceState extends BaseState {
         placeModel.isRecent = true;
         recentPlaces.add(placeModel);
         String recentJson = gson.toJson(recentPlaces);
-        preferences.edit().putString("recent", recentJson).apply();
+        preferences().edit().putString("recent", recentJson).apply();
     }
 }

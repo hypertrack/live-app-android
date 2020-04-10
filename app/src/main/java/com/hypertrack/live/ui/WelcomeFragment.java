@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import com.hypertrack.live.PermissionsManager;
 import com.hypertrack.live.R;
 
 public class WelcomeFragment extends Fragment {
@@ -65,15 +66,7 @@ public class WelcomeFragment extends Fragment {
             startButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (Build.VERSION.SDK_INT < 29) {
-                        ActivityCompat.requestPermissions(getActivity(),
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                    } else {
-                        ActivityCompat.requestPermissions(getActivity(),
-                                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACTIVITY_RECOGNITION},
-                                MainActivity.PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-                    }
+                    PermissionsManager.requestPermissions(getActivity(), MainActivity.PERMISSIONS_REQUEST);
                 }
             });
         } else {

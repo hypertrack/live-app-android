@@ -1,4 +1,4 @@
-package com.hypertrack.trips
+package com.hypertrack.backend
 
 import android.content.Context
 import android.util.Log
@@ -23,7 +23,7 @@ class TripsManagerTest {
     lateinit var awsMobileClient: AWSMobileClient
     lateinit var appContext : Context
     lateinit var awsAsyncTokenProvider: AsyncTokenProvider
-    lateinit var tripManager: TripsManager
+    lateinit var tripManager: BackendProvider
 
 
     @Before
@@ -63,7 +63,7 @@ class TripsManagerTest {
                 })
             }
         }
-        tripManager = TripsManager.getInstance(appContext, awsAsyncTokenProvider)
+        tripManager = BackendProvider.getInstance(appContext, awsAsyncTokenProvider)
     }
 
     private fun signIn(countDownLatch: CountDownLatch) {

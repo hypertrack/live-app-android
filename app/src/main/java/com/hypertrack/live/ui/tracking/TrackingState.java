@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.hypertrack.live.models.TripModel;
 import com.hypertrack.live.ui.BaseState;
+import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.sdk.views.maps.TripSubscription;
 
@@ -18,6 +19,8 @@ import java.util.Map;
 
 class TrackingState extends BaseState {
     private String tripId;
+    private final boolean isCovid19;
+    private final boolean isHomeLatLngAdded;
     private TripModel mTripModel;
     final Map<String, Trip> trips = new HashMap<>();
     final Map<String, TripSubscription> tripSubscription = new HashMap<>();
@@ -29,18 +32,28 @@ class TrackingState extends BaseState {
     void setSelectedTrip(Trip trip) {
         if (trip != null) {
             this.tripId = trip.getTripId();
-            preferences.edit().putString("selected_trip_id", tripId).apply();
+            preferences().edit().putString("selected_trip_id", tripId).apply();
             mTripModel = TripModel.fromTrip(trip);
         } else {
             tripId = null;
             mTripModel = null;
-            preferences.edit().remove("selected_trip_id").apply();
+            preferences().edit().remove("selected_trip_id").apply();
         }
+    }
+
+    public boolean isCovid19() {
+        return isCovid19;
+    }
+
+    public boolean isHomeLatLngAdded() {
+        return isHomeLatLngAdded;
     }
 
     TrackingState(Context context) {
         super(context);
-        tripId = preferences.getString("selected_trip_id", null);
+        tripId = preferences().getString("selected_trip_id", null);
+        isCovid19 = preferences().getBoolean(SharedHelper.COVID_19, false);
+        isHomeLatLngAdded = preferences().contains(SharedHelper.HOME_PLACE);
     }
 
     List<Trip> getAllTripsStartingFromLatest() {

@@ -1,4 +1,4 @@
-package com.hypertrack.trips
+package com.hypertrack.backend
 
 import androidx.annotation.FloatRange
 import java.lang.NullPointerException
