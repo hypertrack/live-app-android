@@ -18,6 +18,7 @@ import java.util.Set;
 class SearchPlaceState extends BaseState {
     private final String mode;
     private PlaceModel destination;
+    private PlaceModel home;
     private Gson gson = new Gson();
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
@@ -25,6 +26,9 @@ class SearchPlaceState extends BaseState {
     SearchPlaceState(Context context, String mode) {
         super(context);
         this.mode = mode;
+        String homeJson = preferences().getString(SharedHelper.HOME_PLACE_KEY, null);
+        Type homeType = new TypeToken<PlaceModel>() {}.getType();
+        home = gson.fromJson(homeJson, homeType);
         String recentJson = preferences().getString("recent", "[]");
         Type listType = new TypeToken<HashSet<PlaceModel>>() {}.getType();
         recentPlaces = gson.fromJson(recentJson, listType);
@@ -42,10 +46,14 @@ class SearchPlaceState extends BaseState {
         this.destination = destination;
     }
 
+    public PlaceModel getHome() {
+        return home;
+    }
+
     void saveHomePlace(PlaceModel home) {
         String homeJson = gson.toJson(home);
         preferences().edit()
-                .putString(SharedHelper.HOME_PLACE, homeJson)
+                .putString(SharedHelper.HOME_PLACE_KEY, homeJson)
                 .apply();
         hyperTrack.setDeviceMetadata(sharedHelper.getDeviceMetadata());
 

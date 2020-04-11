@@ -7,7 +7,8 @@
     <color name="colorFAButtonSecondary">#ffffff</color>
     <color name="textColorPrimary">#4c4b5d</color>
     <color name="textColorSecondary">#94929d</color>
-    <color name="colorTips">#3391ff</color>
+    <color name="colorTips">#e60a84ff</color>
     <color name="highlight">#14000000</color>
     <color name="bgIcon">#c7c6cd</color>
+    <color name="cover">#6694929d</color>
 </resources>

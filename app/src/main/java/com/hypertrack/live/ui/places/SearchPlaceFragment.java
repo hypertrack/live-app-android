@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -42,6 +43,10 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
 
     private EditText search;
     private View destinationOnMap;
+    private View offlineView;
+    private View home;
+    private View setHome;
+    private View homeInfo;
     private View setOnMap;
     private View confirm;
     private PlacesAdapter placesAdapter;
@@ -75,9 +80,6 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        presenter = new SearchPlacePresenter(getActivity(), config.key, this);
-        loader = new LoaderDecorator(getContext());
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -120,6 +122,29 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
             }
         });
         destinationOnMap = view.findViewById(R.id.destination_on_map);
+
+        offlineView = view.findViewById(R.id.offline);
+        home = view.findViewById(R.id.home);
+        setHome = view.findViewById(R.id.set_home);
+        homeInfo = view.findViewById(R.id.home_info);
+        View.OnClickListener onHomeAddressClickListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity) getActivity())
+                        .beginFragmentTransaction(SearchPlaceFragment.newInstance(SearchPlaceFragment.Config.HOME_ADDRESS))
+                        .addToBackStack(null)
+                        .commitAllowingStateLoss();
+            }
+        };
+        setHome.setOnClickListener(onHomeAddressClickListener);
+        homeInfo.findViewById(R.id.home_edit).setOnClickListener(onHomeAddressClickListener);
+        homeInfo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                presenter.selectHome();
+            }
+        });
+
         setOnMap = view.findViewById(R.id.set_on_map);
         setOnMap.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,6 +186,9 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         view.setOnTouchListener(hideSoftInputOnTouchListener);
         locationsRecyclerView.setOnTouchListener(hideSoftInputOnTouchListener);
 
+        loader = new LoaderDecorator(getContext());
+        presenter = new SearchPlacePresenter(getActivity(), config.key, this);
+
         presenter.search(null);
         ((MainActivity) getActivity()).getMapAsync(this);
     }
@@ -195,8 +223,31 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     }
 
     @Override
+    public void updateConnectionStatus(boolean offline) {
+        if (offline) {
+            offlineView.setVisibility(View.VISIBLE);
+            confirm.setEnabled(false);
+        } else {
+            offlineView.setVisibility(View.GONE);
+            confirm.setEnabled(true);
+        }
+    }
+
+    @Override
     public void updateAddress(String address) {
         search.setText(address);
+    }
+
+    @Override
+    public void updateHomeAddress(PlaceModel home) {
+        if (home == null) {
+            setHome.setVisibility(View.VISIBLE);
+            homeInfo.setVisibility(View.GONE);
+        } else {
+            setHome.setVisibility(View.GONE);
+            homeInfo.setVisibility(View.VISIBLE);
+            ((TextView)homeInfo.findViewById(R.id.home_text)).setText(home.address);
+        }
     }
 
     @Override
@@ -204,6 +255,16 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         placesAdapter.clear();
         placesAdapter.addAll(list);
         placesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void showHomeAddress() {
+        home.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void hideHomeAddress() {
+        home.setVisibility(View.GONE);
     }
 
     @Override
@@ -254,6 +315,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        hideSoftInput();
         presenter.destroy();
     }
 

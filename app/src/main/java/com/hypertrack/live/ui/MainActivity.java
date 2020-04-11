@@ -1,6 +1,7 @@
 package com.hypertrack.live.ui;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -15,14 +16,15 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -33,10 +35,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
-import com.hypertrack.backend.BackendProvider;
-import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.PermissionsManager;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.tracking.TrackingFragment;
@@ -103,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         mapStyleOptions = MapStyleOptions.loadRawResourceStyle(this, R.raw.style_map);
         mapStyleOptionsSilver = MapStyleOptions.loadRawResourceStyle(this, R.raw.style_map_silver);
 
+        setupDrawerLayout();
+
         trackingStatusText = findViewById(R.id.tracking_status_text);
         trackingStatusText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,15 +145,38 @@ public class MainActivity extends AppCompatActivity {
         onStateUpdate();
     }
 
+    private void setupDrawerLayout() {
+
+        final DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
+        findViewById(R.id.menu).setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("WrongConstant")
+            @Override
+            public void onClick(View view) {
+                drawerLayout.openDrawer(Gravity.START);
+            }
+        });
+
+        String emailAddress = sharedHelper.sharedPreferences().getString(SharedHelper.USER_EMAIL_KEY, "");
+                ((TextView)drawerLayout.findViewById(R.id.email_address)).setText(emailAddress);
+        drawerLayout.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                HTMobileClient.getInstance(MainActivity.this).logout();
+                Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
+                intent.setAction(Intent.ACTION_MAIN);
+                intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(intent);
+                finish();
+            }
+        });
+    }
+
     public void onStateUpdate() {
 
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
         if (TextUtils.isEmpty(hyperTrackPublicKey) || !PermissionsManager.isAllPermissionsApproved(this)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
-                    .commitAllowingStateLoss();
-        } else if (!sharedHelper.sharedPreferences().contains("user_name")) {
-            beginFragmentTransaction(Covid19Fragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
             beginFragmentTransaction(new TrackingFragment()).commitAllowingStateLoss();
@@ -219,7 +245,6 @@ public class MainActivity extends AppCompatActivity {
             if (grantResults.length > 0
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 onStateUpdate();
-                startTrackingByDefault();
             } else {
                 AlertDialog alertDialog = new AlertDialog.Builder(this)
                         .setNegativeButton(android.R.string.cancel, null)
@@ -252,22 +277,6 @@ public class MainActivity extends AppCompatActivity {
                     .setTrackingNotificationConfig(notificationConfig);
             Log.i("deviceId", hyperTrack.getDeviceID());
         }
-    }
-
-    private void startTrackingByDefault() {
-        BackendProvider backendProvider = HTMobileClient.getBackendProvider(this);
-        backendProvider.start(hyperTrack.getDeviceID(), new ResultHandler<String>() {
-            @Override
-            public void onResult(String result) {
-                Toast.makeText(MainActivity.this, getString(R.string.tracking_is_started), Toast.LENGTH_LONG)
-                        .show();
-            }
-
-            @Override
-            public void onError(@NonNull Exception error) {
-                Log.e("Sign in", "login completed error:" + error.getMessage());
-            }
-        });
     }
 
     public void onTrackingStart() {

@@ -26,6 +26,7 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.BuildConfig;
 import com.hypertrack.sdk.logger.HTLogger;
 import com.hypertrack.sdk.utils.StaticUtilsAdapter;
@@ -43,6 +44,7 @@ public class HTMobileClient {
 
     private final Context mContext;
     private RequestQueue mRequestQueue;
+    private SharedHelper sharedHelper;
     private final Map<String, String> headers = new HashMap<>();
 
     private String signUpEmail;
@@ -80,6 +82,7 @@ public class HTMobileClient {
     private HTMobileClient(Context context) {
         mContext = context.getApplicationContext() == null ? context : context.getApplicationContext();
         mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
+        sharedHelper = SharedHelper.getInstance(context);
 
         headers.put("User-Agent", "HyperTrack " + "Android" + " " +
                 BuildConfig.VERSION_NAME + " (Android " + Build.VERSION.RELEASE + ")");
@@ -106,6 +109,9 @@ public class HTMobileClient {
 
             @Override
             public void onResult(SignInResult result) {
+                sharedHelper.sharedPreferences().edit()
+                        .putString(SharedHelper.USER_EMAIL_KEY, email)
+                        .apply();
                 updatePublishableKey(callback);
             }
 
@@ -122,6 +128,9 @@ public class HTMobileClient {
         AWSMobileClient.getInstance().signUp(email, password, attributes, null, new InnerCallback<SignUpResult>(callback) {
             @Override
             public void onResult(SignUpResult result) {
+                sharedHelper.sharedPreferences().edit()
+                        .putString(SharedHelper.USER_EMAIL_KEY, email)
+                        .apply();
                 signUpEmail = email;
                 signUpPassword = password;
                 onSuccessHidden(HTMobileClient.this);
@@ -201,9 +210,10 @@ public class HTMobileClient {
         });
     }
 
-    public String getDeviceId() { return deviceId; }
-
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public void logout() {
+        AWSMobileClient.getInstance().signOut();
+        sharedHelper.sharedPreferences().edit().clear().apply();
+    }
 
     public static class Request extends JsonRequest<JsonObject> {
 

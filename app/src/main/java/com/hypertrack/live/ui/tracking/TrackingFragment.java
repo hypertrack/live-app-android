@@ -42,8 +42,10 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
 
     private Snackbar tripConfirmSnackbar;
     private View blockingView;
+    private View offlineView;
     private FloatingActionButton locationButton;
     private View bottomHolder;
+    private View bottomHolderCover;
     private BottomSheetBehavior bottomHolderSheetBehavior;
     private View tripInfo;
     private View tripSummaryInfo;
@@ -72,9 +74,6 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        presenter = new TrackingPresenter(view.getContext(), this);
-        loader = new LoaderDecorator(view.getContext());
-
         blockingView = view.findViewById(R.id.blocking_view);
         locationButton = view.findViewById(R.id.location_button);
         locationButton.setOnClickListener(new View.OnClickListener() {
@@ -96,6 +95,8 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
             }
         });
 
+        offlineView = view.findViewById(R.id.offline);
+
         whereAreYouGoing = view.findViewById(R.id.where_are_you);
         whereAreYouGoing.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,6 +106,7 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
         });
 
         bottomHolder = view.findViewById(R.id.bottom_holder);
+        bottomHolderCover = view.findViewById(R.id.bottom_holder_cover);
         bottomHolderSheetBehavior = BottomSheetBehavior.from(bottomHolder);
         RecyclerView tripsRecyclerView = view.findViewById(R.id.recycler_view);
         tripInfo = view.findViewById(R.id.trip_info);
@@ -175,6 +177,9 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
                         tripConfirmSnackbar.dismiss();
                     }
                 });
+
+        loader = new LoaderDecorator(view.getContext());
+        presenter = new TrackingPresenter(view.getContext(), this);
     }
 
     @Override
@@ -192,6 +197,18 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
     @Override
     public void onMapReady(GoogleMap googleMap) {
         presenter.subscribeUpdates(googleMap);
+    }
+
+    @Override
+    public void updateConnectionStatus(boolean offline) {
+        if (offline) {
+            bottomHolderSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            offlineView.setVisibility(View.VISIBLE);
+            bottomHolderCover.setVisibility(View.VISIBLE);
+        } else {
+            offlineView.setVisibility(View.GONE);
+            bottomHolderCover.setVisibility(View.GONE);
+        }
     }
 
     @Override
