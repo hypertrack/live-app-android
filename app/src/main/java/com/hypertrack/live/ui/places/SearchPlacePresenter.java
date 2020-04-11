@@ -1,8 +1,10 @@
 package com.hypertrack.live.ui.places;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -25,6 +27,10 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.ResultHandler;
+import com.hypertrack.backend.ShareableTrip;
+import com.hypertrack.backend.TripConfig;
 import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
@@ -32,16 +38,10 @@ import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.MapUtils;
 import com.hypertrack.sdk.HyperTrack;
-import com.hypertrack.backend.ResultHandler;
-import com.hypertrack.backend.ShareableTrip;
-import com.hypertrack.backend.TripConfig;
-import com.hypertrack.backend.BackendProvider;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import io.reactivex.disposables.CompositeDisposable;
 
@@ -56,9 +56,17 @@ class SearchPlacePresenter {
     private final HyperTrack hyperTrack;
     private final PlacesClient placesClient;
     private final BackendProvider tripsManager;
-    private AutocompleteSessionToken token;
+
+    private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isOffline = !AppUtils.isNetworkConnected(context);
+            view.updateConnectionStatus(isOffline);
+        }
+    };
 
     private GoogleMap googleMap;
+    private AutocompleteSessionToken token;
 
     private final Handler handler = new Handler();
     private final CompositeDisposable disposables = new CompositeDisposable();
@@ -72,13 +80,21 @@ class SearchPlacePresenter {
         placesClient = Places.createClient(context);
         tripsManager = HTMobileClient.getBackendProvider(context);
 
-        if ("home".equals(mode)) {
-            state.saveHomePlace(null);
-        }
+        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        this.context.registerReceiver(connectivityReceiver, intentFilter);
     }
 
     public void initMap(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
+
+        if ("home".equals(state.getMode())) {
+            if (state.getHome() == null) {
+                state.saveHomePlace(null);
+            }
+            view.hideHomeAddress();
+        } else if ("search".equals(state.getMode())) {
+            view.updateHomeAddress(state.getHome());
+        }
     }
 
     public void setMapDestinationModeEnable(boolean enable) {
@@ -166,6 +182,10 @@ class SearchPlacePresenter {
         }
     }
 
+    public void selectHome() {
+        providePlace(state.getHome());
+    }
+
     public void selectItem(PlaceModel placeModel) {
         view.showProgressBar();
 
@@ -223,6 +243,10 @@ class SearchPlacePresenter {
     }
 
     private void startTrip(LatLng destination) {
+        if (!AppUtils.isNetworkConnected(context)) {
+            return;
+        }
+
         view.showProgressBar();
 
         ResultHandler<ShareableTrip> resultHandler = new ResultHandler<ShareableTrip>() {
@@ -273,13 +297,22 @@ class SearchPlacePresenter {
         googleMap.setOnCameraMoveListener(null);
         googleMap = null;
         disposables.clear();
+        context.unregisterReceiver(connectivityReceiver);
     }
 
     public interface View {
 
+        void updateConnectionStatus(boolean offline);
+
         void updateAddress(String address);
 
+        void updateHomeAddress(PlaceModel home);
+
         void updateList(List<PlaceModel> list);
+
+        void showHomeAddress();
+
+        void hideHomeAddress();
 
         void showSetOnMap();
 

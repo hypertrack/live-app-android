@@ -1,6 +1,10 @@
 package com.hypertrack.live.ui.tracking;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -48,6 +52,21 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private HyperTrackMap hyperTrackMap;
     private final BackendProvider tripsManager;
 
+    private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isOffline = !AppUtils.isNetworkConnected(context);
+            view.updateConnectionStatus(isOffline);
+            if (!isOffline) {
+                hyperTrackViews.subscribeToDeviceUpdates(
+                        hyperTrack.getDeviceID(),
+                        TrackingPresenter.this
+                );
+                hyperTrack.syncDeviceSettings();
+            }
+        }
+    };
+
     private Timer tripInfoUpdater;
 
     public TrackingPresenter(@NonNull Context context, @NonNull final View view) {
@@ -59,6 +78,9 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
 
         tripsManager = HTMobileClient.getBackendProvider(context);
+
+        IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        this.context.registerReceiver(connectivityReceiver, intentFilter);
     }
 
     public void subscribeUpdates(@NonNull GoogleMap googleMap) {
@@ -187,6 +209,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
             hyperTrackMap = null;
         }
         hyperTrackViews.unsubscribeFromDeviceUpdates(this);
+        context.unregisterReceiver(connectivityReceiver);
     }
 
     @Override
@@ -264,6 +287,8 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     }
 
     public interface View {
+
+        void updateConnectionStatus(boolean offline);
 
         void onStatusUpdateReceived(@NonNull String statusText);
 

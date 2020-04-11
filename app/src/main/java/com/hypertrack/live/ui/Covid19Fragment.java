@@ -58,8 +58,8 @@ public class Covid19Fragment extends Fragment {
 
                     SharedHelper sharedHelper = SharedHelper.getInstance(getActivity());
                     sharedHelper.sharedPreferences().edit()
-                            .putString(SharedHelper.USER_NAME, userName)
-                            .putString(SharedHelper.USER_PHONE, userPhone)
+                            .putString(SharedHelper.USER_NAME_KEY, userName)
+                            .putString(SharedHelper.USER_PHONE_KEY, userPhone)
                             .apply();
 
                     hyperTrack.setDeviceName(getString(R.string.phone_number_user_name, userPhone, userName))

@@ -88,7 +88,6 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
                 }
             }
         });
-
     }
 
     public void startSignIn(String email, String password) {

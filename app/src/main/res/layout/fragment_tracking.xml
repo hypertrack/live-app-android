@@ -30,6 +30,14 @@
             app:layout_constraintRight_toRightOf="parent"
             app:srcCompat="@drawable/ic_location" />
 
+        <TextView
+            android:id="@+id/offline"
+            style="@style/OfflineViewStyle"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/where_are_you"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"/>
+
         <include
             android:id="@+id/where_are_you"
             layout="@layout/where_are_you_going"
@@ -210,6 +218,14 @@
                 android:textColor="@color/textColorSecondary"
                 android:textSize="12sp"
                 tools:text="@string/you_have_ongoing_trips" />
+
+            <View
+                android:id="@+id/bottom_holder_cover"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:clickable="true"
+                android:background="@color/cover"/>
 
         </FrameLayout>
 

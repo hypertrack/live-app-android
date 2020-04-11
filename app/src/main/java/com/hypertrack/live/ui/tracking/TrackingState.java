@@ -53,7 +53,7 @@ class TrackingState extends BaseState {
         super(context);
         tripId = preferences().getString("selected_trip_id", null);
         isCovid19 = preferences().getBoolean(SharedHelper.COVID_19, false);
-        isHomeLatLngAdded = preferences().contains(SharedHelper.HOME_PLACE);
+        isHomeLatLngAdded = preferences().contains(SharedHelper.HOME_PLACE_KEY);
     }
 
     List<Trip> getAllTripsStartingFromLatest() {

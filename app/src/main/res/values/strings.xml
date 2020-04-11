@@ -131,5 +131,9 @@
     <string name="name">Name</string>
     <string name="phone_number_user_name">%s (%s)</string>
     <string name="tracking_is_started">Tracking is started</string>
+    <string name="set_home_address">Set home address</string>
+    <string name="home">Home</string>
+    <string name="sign_out">Sign out</string>
+    <string name="no_connection">No connection</string>
 
 </resources>

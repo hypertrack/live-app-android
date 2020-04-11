@@ -79,23 +79,115 @@
         app:layout_constraintTop_toBottomOf="@id/search_layout">
 
         <com.google.android.material.appbar.AppBarLayout
-            android:id="@+id/set_on_map"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:background="@color/colorPrimary"
+            android:orientation="vertical"
             app:elevation="6dp"
             app:layout_scrollFlags="snap">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:background="@color/colorPrimary"
-                android:drawableStart="@drawable/set_on_map"
-                android:gravity="center"
-                android:text="@string/set_on_map"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent" />
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/home"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:padding="@dimen/content_padding">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_button_round"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_home"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/set_home"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="46dp"
+                    android:gravity="center_vertical"
+                    android:text="@string/set_home_address"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/home_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="46dp"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent">
+
+                    <TextView
+                        android:id="@+id/home_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/home"
+                        app:layout_constraintBottom_toTopOf="@id/home_text"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/home_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:lines="1"
+                        android:textColor="@color/textColorSecondary"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toLeftOf="@id/home_edit"
+                        app:layout_constraintTop_toBottomOf="@id/home_title" />
+
+                    <ImageView
+                        android:id="@+id/home_edit"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/edit"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@drawable/divider" />
+
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/set_on_map"
+                android:layout_width="match_parent"
+                android:layout_height="64dp"
+                android:padding="@dimen/content_padding">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/set_on_map"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="46dp"
+                    android:text="@string/set_on_map"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
 
@@ -125,5 +217,13 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
+
+    <TextView
+        android:id="@+id/offline"
+        android:layout_width="match_parent"
+        style="@style/OfflineViewStyle"
+        android:background="@color/colorTips"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/search_layout"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
