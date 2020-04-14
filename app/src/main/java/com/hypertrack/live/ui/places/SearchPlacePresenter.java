@@ -236,13 +236,13 @@ class SearchPlacePresenter {
                 view.finish();
                 break;
             case "search":
-                startTrip(placeModel.latLng);
+                startTrip(placeModel);
                 break;
             default:
         }
     }
 
-    private void startTrip(LatLng destination) {
+    private void startTrip(PlaceModel destination) {
         if (!AppUtils.isNetworkConnected(context)) {
             return;
         }
@@ -274,8 +274,8 @@ class SearchPlacePresenter {
                     .build();
         } else {
             tripRequest = new TripConfig.Builder()
-                    .setDestinationLatitude(destination.latitude)
-                    .setDestinationLongitude(destination.longitude)
+                    .setDestinationLatitude(destination.latLng.latitude)
+                    .setDestinationLongitude(destination.latLng.longitude)
                     .setDeviceId(hyperTrack.getDeviceID())
                     .build();
         }
