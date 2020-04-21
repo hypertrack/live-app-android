@@ -132,11 +132,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                         accept.setVisibility(View.VISIBLE);
                         agreeToTerms.setVisibility(View.VISIBLE);
                         next.setVisibility(View.INVISIBLE);
-                        if (COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
-                            viewPager.setVisibility(View.INVISIBLE);
-                        } else {
-                            viewPager.setVisibility(View.VISIBLE);
-                        }
+                        viewPager.setVisibility(View.VISIBLE);
                         break;
                 }
             }
@@ -152,8 +148,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(CUSTOM_USE_CASE, CUSTOM_SCALE, CUSTOM_STATE))
-                        && !COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE))) {
+                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(CUSTOM_USE_CASE, CUSTOM_SCALE, CUSTOM_STATE))) {
                     showError(getString(R.string.all_fields_required));
                     return;
                 }
@@ -212,11 +207,6 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
             getActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_frame, new ConfirmFragment(), ConfirmFragment.class.getSimpleName())
                     .commitAllowingStateLoss();
-
-            SharedPreferences sharedPreferences = getActivity().getSharedPreferences(getString(R.string.app_name), Context.MODE_PRIVATE);
-            sharedPreferences.edit()
-                    .putBoolean(COVID_19, COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE)))
-                    .apply();
         }
     }
 
@@ -248,7 +238,6 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                     EditText emailAddressEditText = view.findViewById(R.id.email_address);
                     final EditText passwordEditText = view.findViewById(R.id.password);
                     final View passwordClear = view.findViewById(R.id.password_clear);
-                    final CheckBox serviceWorker = view.findViewById(R.id.service_worker);
 
                     companyNameEditText.setText(company);
                     companyNameEditText.addTextChangedListener(new HTTextWatcher() {
@@ -287,17 +276,6 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                         @Override
                         public void onClick(View view) {
                             passwordEditText.setText("");
-                        }
-                    });
-                    serviceWorker.setChecked(COVID_19.equals(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
-                    serviceWorker.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                        @Override
-                        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                            if (b) {
-                                cognitoUserAttributes.put(CUSTOM_USE_CASE, COVID_19);
-                            } else {
-                                cognitoUserAttributes.remove(CUSTOM_USE_CASE);
-                            }
                         }
                     });
                     break;
