@@ -6,17 +6,14 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,31 +26,24 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsException;
-import com.hypertrack.live.App;
 import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.utils.HTTextWatcher;
+import com.hypertrack.live.views.SignupInfoPage;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
 public class SignUpFragment extends Fragment implements HTMobileClient.Callback {
 
-    private static final String TAG = App.TAG + "SignInFragment";
 
     private static final int PAGES_COUNT = 2;
     private static final int PAGE_USER = 0;
     private static final int PAGE_INFO = 1;
-    private static final String CUSTOM_COMPANY = "custom:company";
-    private static final String CUSTOM_USE_CASE = "custom:use_case";
-    private static final String CUSTOM_SCALE = "custom:scale";
-    public static final String CUSTOM_STATE = "custom:state";
 
-    public static final String COVID_19 = "COVID-19";
 
     private ViewPager viewPager;
     private TextView incorrect;
@@ -145,7 +135,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(CUSTOM_USE_CASE, CUSTOM_SCALE, CUSTOM_STATE))) {
+                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(SignupInfoPage.CUSTOM_USE_CASE, SignupInfoPage.CUSTOM_SCALE, SignupInfoPage.CUSTOM_STATE))) {
                     showError(getString(R.string.all_fields_required));
                     return;
                 }
@@ -171,7 +161,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                     showError(getString(R.string.email_password_fields_required));
                     return;
                 }
-                cognitoUserAttributes.put(CUSTOM_COMPANY, company);
+                cognitoUserAttributes.put(SignupInfoPage.CUSTOM_COMPANY, company);
                 break;
             case PAGE_INFO:
                 break;
@@ -278,68 +268,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                     break;
 
                 case PAGE_INFO:
-                    view = inflater.inflate(R.layout.view_pager_signup_info, collection, false);
-                        Spinner useCaseSelector = view.findViewById(R.id.categories);
-                        Spinner scaleSelector = view.findViewById(R.id.scale);
-                        Spinner stateSelector = view.findViewById(R.id.state);
-                        final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.category_names));
-                        final List<String> scale = Arrays.asList(getResources().getStringArray(R.array.scale_names));
-                        final List<String> state = Arrays.asList(getResources().getStringArray(R.array.state_names));
-
-                        useCaseSelector.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
-                        useCaseSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                incorrect.setVisibility(View.INVISIBLE);
-                                if (i == 0) {
-                                    cognitoUserAttributes.remove(CUSTOM_USE_CASE);
-                                    Log.d(TAG, "use case unselected");
-                                } else {
-                                    cognitoUserAttributes.put(CUSTOM_USE_CASE, categories.get(i));
-                                    Log.d(TAG, "Selected use case " + categories.get(i));
-                                }
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
-                        scaleSelector.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
-                        scaleSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                incorrect.setVisibility(View.INVISIBLE);
-                                if (i == 0) {
-                                    cognitoUserAttributes.remove(CUSTOM_SCALE);
-                                    Log.d(TAG, "scale unselected");
-                                } else {
-                                    cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
-                                    Log.d(TAG, "scale selection: " + scale.get(i));
-                                }
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
-                        stateSelector.setSelection(state.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
-                        stateSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                incorrect.setVisibility(View.INVISIBLE);
-                                if (i == 0) {
-                                    cognitoUserAttributes.remove(CUSTOM_STATE);
-                                    Log.d(TAG, "state unselected");
-                                } else {
-                                    cognitoUserAttributes.put(CUSTOM_STATE, state.get(i));
-                                    Log.d(TAG, "state selected: " + state.get(i));
-                                }
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
+                    view = SignupInfoPage.getSignupInfoPageView(inflater, collection, getResources(), cognitoUserAttributes, incorrect);
                     break;
             }
             collection.addView(view);
