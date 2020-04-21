@@ -65,7 +65,7 @@
     <string name="email_password_fields_required">Email and password fields are required</string>
     <string name="my_app_manages">My app manages</string>
     <string name="my_app_would_track">My app would track</string>
-    <string name="my_app_is">My app is</string>
+    <string name="my_app_is_for">My app is for</string>
     <string name="verify_your_email">Verify your email</string>
     <string name="we_have_sent_you_an_email">We have sent you an email with verification link. Please click on the link in the email to continue</string>
     <string name="i_have_verified">I have verified</string>
@@ -117,19 +117,34 @@
         <item>other</item>
     </array>
 
-    <array name="devices">
+    <array name="scale">
         <item>not selected</item>
-        <item>Less than 100 devices</item>
-        <item>100s of devices</item>
-        <item>1,000s of device</item>
-        <item>More than 10,000 devices</item>
+        <item>Commercial use</item>
+        <item>COVID-19 response</item>
+        <item>Personal use</item>
+        <item>Public good</item>
     </array>
 
-    <array name="stage">
+    <array name="scale_names">
         <item>not selected</item>
-        <item>Being prototyped</item>
-        <item>In pilot</item>
-        <item>In production</item>
+        <item>commercial_use</item>
+        <item>covid_response</item>
+        <item>personal_use</item>
+        <item>public_good</item>
+    </array>
+
+    <array name="state">
+        <item>not selected</item>
+        <item>My workforce</item>
+        <item>My customer\'s workforce</item>
+        <item>Consumers</item>
+    </array>
+
+    <array name="state_names">
+        <item>not selected</item>
+        <item>my_workforce</item>
+        <item>my_customers</item>
+        <item>consumers</item>
     </array>
 
     <string name="essential_service_worker">I am/represent an essential service worker in my region</string>

@@ -279,15 +279,15 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
 
                 case PAGE_INFO:
                     view = inflater.inflate(R.layout.view_pager_signup_info, collection, false);
-                        Spinner categoriesSpinner = view.findViewById(R.id.categories);
-                        Spinner devicesSpinner = view.findViewById(R.id.devices);
-                        Spinner stageSpinner = view.findViewById(R.id.stage);
+                        Spinner useCaseSelector = view.findViewById(R.id.categories);
+                        Spinner scaleSelector = view.findViewById(R.id.scale);
+                        Spinner stateSelector = view.findViewById(R.id.state);
                         final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.category_names));
-                        final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
-                        final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
+                        final List<String> scale = Arrays.asList(getResources().getStringArray(R.array.scale_names));
+                        final List<String> state = Arrays.asList(getResources().getStringArray(R.array.state_names));
 
-                        categoriesSpinner.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
-                        categoriesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        useCaseSelector.setSelection(categories.indexOf(cognitoUserAttributes.get(CUSTOM_USE_CASE)));
+                        useCaseSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                                 incorrect.setVisibility(View.INVISIBLE);
@@ -304,15 +304,17 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                             public void onNothingSelected(AdapterView<?> adapterView) {
                             }
                         });
-                        devicesSpinner.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
-                        devicesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        scaleSelector.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
+                        scaleSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                                 incorrect.setVisibility(View.INVISIBLE);
                                 if (i == 0) {
                                     cognitoUserAttributes.remove(CUSTOM_SCALE);
+                                    Log.d(TAG, "scale unselected");
                                 } else {
                                     cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
+                                    Log.d(TAG, "scale selection: " + scale.get(i));
                                 }
                             }
 
@@ -320,15 +322,17 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                             public void onNothingSelected(AdapterView<?> adapterView) {
                             }
                         });
-                        stageSpinner.setSelection(stage.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
-                        stageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        stateSelector.setSelection(state.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
+                        stateSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                                 incorrect.setVisibility(View.INVISIBLE);
                                 if (i == 0) {
                                     cognitoUserAttributes.remove(CUSTOM_STATE);
+                                    Log.d(TAG, "state unselected");
                                 } else {
-                                    cognitoUserAttributes.put(CUSTOM_STATE, stage.get(i));
+                                    cognitoUserAttributes.put(CUSTOM_STATE, state.get(i));
+                                    Log.d(TAG, "state selected: " + state.get(i));
                                 }
                             }
 
