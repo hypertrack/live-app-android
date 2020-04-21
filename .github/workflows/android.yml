@@ -28,9 +28,11 @@ jobs:
     - name: Keystore credentials
       env:
           APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
-      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks    
+      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks
+    - name: Show environment
+      run: tree -L 3    
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew assembleDebug
     - name: Upload Release Asset
       id: upload-release-asset 
       uses: actions/upload-release-asset@v1
