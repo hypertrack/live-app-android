@@ -28,13 +28,10 @@ jobs:
     - name: Keystore credentials
       env:
           APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
-      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks
-    - name: Show environment
-      run: ls -R   
+      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks 
     - name: Build with Gradle
-      run: ./gradlew -v
-    - name: Upload Release Asset
-      id: upload-release-asset 
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: echo $GITHUB_TOKEN
+      run: ./gradlew assembleDebug
+    - uses: actions/upload-artifact@v1
+      with:
+        name: live-app-debug-latest.apk
+        path: app/build/outputs/apk/debug/app-debug.apk
