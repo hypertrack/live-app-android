@@ -30,7 +30,7 @@ jobs:
           APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
       run: echo $APP_KEYSTORE | base64 --decode > keystore.jks
     - name: Show environment
-      run: tree -L 3    
+      run: ls -R   
     - name: Build with Gradle
       run: ./gradlew assembleDebug
     - name: Upload Release Asset
