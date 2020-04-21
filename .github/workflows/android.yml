@@ -16,7 +16,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    # Add files
+    # Env and temp files setup
     - name: Decode google-services.json
       env:
           GOOGLE_SERVICES_CONFIG: ${{ secrets.GOOGLE_SERVICES_CONFIG }}
@@ -29,9 +29,13 @@ jobs:
       env:
           KEYSTORE_CREDENTIALS: ${{ secrets.KEYSTORE_CREDENTIALS }}
       run: echo $KEYSTORE_CREDENTIALS >> gradle.properties
+    - name: Check credentials
+      run: cat gradle.properties
+    # Build itself  
     - name: Build with Gradle
       run: ./gradlew assembleRelease
-    - uses: actions/upload-artifact@v1
-      with:
-        name: live-app-release-latest.apk
-        path: app/build/outputs/apk/debug/app-debug.apk
+    # Release artifact  
+    - name: Upload latest artifact
+      env: 
+        UPLOAD_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+      run: curl "https://uploads.github.com/repos/hypertrack/live-app-android-hidden/releases/25722501/assets?access_token=$UPLOAD_TOKEN&name=live-app-debug.apk" --data-binary @./app/build/outputs/apk/release/app-release.apk -H "Content-Type: application/zip"
