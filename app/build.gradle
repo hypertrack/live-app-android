@@ -49,7 +49,7 @@ android {
             minifyEnabled false
             debuggable true
             if (signingConfigs.hasProperty("debug")) {
-                signingConfig signingConfigs.release
+                signingConfig signingConfigs.debug
             }
         }
 
