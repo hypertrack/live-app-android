@@ -35,7 +35,7 @@ jobs:
     - name: Build with Gradle
       run: ./gradlew assembleRelease
     # Release artifact  
-    - name: Upload latest artifact
-      env: 
-        UPLOAD_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
-      run: 'curl --request POST "https://uploads.github.com/repos/hypertrack/live-app-android-hidden/releases/25722501/assets?access_token=$UPLOAD_TOKEN&name=live-app-release.apk" --data-binary @./app/build/outputs/apk/release/app-release.apk --header "Content-Type: application/zip"'
+    - uses: actions/upload-artifact@v1
+      with:
+        name: live-app-release-latest.apk
+        path: app/build/outputs/apk/release/app-release.apk
