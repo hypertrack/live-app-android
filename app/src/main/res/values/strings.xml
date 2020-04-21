@@ -100,11 +100,21 @@
 
     <array name="categories">
         <item>not selected</item>
-        <item>Gig economy</item>
-        <item>On-demand delivery</item>
-        <item>Logistics</item>
-        <item>Workforce</item>
-        <item>Other</item>
+        <item name="workforce">Workforce</item>
+        <item name="logistics">Logistics</item>
+        <item name="gig_work">Gig Work</item>
+        <item name="on_demand_delivery">On-Demand Delivery</item>
+        <item name="ridesharing">Ridesharing</item>
+        <item name="other">Other</item>
+    </array>
+    <array name="category_names">
+        <item>not selected</item>
+        <item>workforce</item>
+        <item>logistics</item>
+        <item>gig_work</item>
+        <item>on_demand_delivery</item>
+        <item>ridesharing</item>
+        <item>other</item>
     </array>
 
     <array name="devices">

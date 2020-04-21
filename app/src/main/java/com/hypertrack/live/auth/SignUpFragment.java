@@ -6,6 +6,7 @@ import android.text.Editable;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -281,7 +282,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                         Spinner categoriesSpinner = view.findViewById(R.id.categories);
                         Spinner devicesSpinner = view.findViewById(R.id.devices);
                         Spinner stageSpinner = view.findViewById(R.id.stage);
-                        final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.categories));
+                        final List<String> categories = Arrays.asList(getResources().getStringArray(R.array.category_names));
                         final List<String> scale = Arrays.asList("", "<100", "100", "1000", ">10000");
                         final List<String> stage = Arrays.asList(getResources().getStringArray(R.array.stage));
 
@@ -292,8 +293,10 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                                 incorrect.setVisibility(View.INVISIBLE);
                                 if (i == 0) {
                                     cognitoUserAttributes.remove(CUSTOM_USE_CASE);
+                                    Log.d(TAG, "use case unselected");
                                 } else {
                                     cognitoUserAttributes.put(CUSTOM_USE_CASE, categories.get(i));
+                                    Log.d(TAG, "Selected use case " + categories.get(i));
                                 }
                             }
 
