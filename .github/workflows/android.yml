@@ -38,4 +38,4 @@ jobs:
     - name: Upload latest artifact
       env: 
         UPLOAD_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
-      run: 'curl --request POST "https://uploads.github.com/repos/hypertrack/live-app-android-hidden/releases/25722501/assets?access_token=$UPLOAD_TOKEN&name=live-app-debug.apk" --data-binary @./app/build/outputs/apk/release/app-release.apk --header "Content-Type: application/zip"'
+      run: 'curl --request POST "https://uploads.github.com/repos/hypertrack/live-app-android-hidden/releases/25722501/assets?access_token=$UPLOAD_TOKEN&name=live-app-release.apk" --data-binary @./app/build/outputs/apk/release/app-release.apk --header "Content-Type: application/zip"'
