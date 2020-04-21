@@ -1,0 +1,43 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout & environment setup
+    - uses: actions/checkout@v2
+    - name: set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    # Add files
+    - name: Decode google-services.json
+      env:
+          GOOGLE_SERVICES_CONFIG: ${{ secrets.GOOGLE_SERVICES_CONFIG }}
+      run: echo $GOOGLE_SERVICES_CONFIG > app/google-services.json
+    - name: Decode release keystore
+      env:
+          APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
+      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks
+    - name: Keystore credentials
+      env:
+          APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
+      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks    
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: https://uploads.github.com/repos/hypertrack/live-app-android-hidder/releases/latest/assets
+          asset_path: ./app/build/outputs/apk/debug/app-debug.apk
+          asset_name: live-app-latest.zip
+          asset_content_type: 	application/zip
