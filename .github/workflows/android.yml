@@ -24,14 +24,14 @@ jobs:
     - name: Decode release keystore
       env:
           APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
-      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks
+      run: echo $APP_KEYSTORE | base64 --decode > app/keystore.jks
     - name: Keystore credentials
       env:
-          APP_KEYSTORE: ${{ secrets.APP_KEYSTORE }}
-      run: echo $APP_KEYSTORE | base64 --decode > keystore.jks 
+          KEYSTORE_CREDENTIALS: ${{ secrets.KEYSTORE_CREDENTIALS }}
+      run: echo $KEYSTORE_CREDENTIALS >> gradle.properties
     - name: Build with Gradle
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleRelease
     - uses: actions/upload-artifact@v1
       with:
-        name: live-app-debug-latest.apk
+        name: live-app-release-latest.apk
         path: app/build/outputs/apk/debug/app-debug.apk
