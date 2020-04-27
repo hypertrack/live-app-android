@@ -4,8 +4,10 @@ package com.hypertrack.live;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.hypertrack.live.auth.ConfirmFragment;
@@ -14,9 +16,15 @@ import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
 import com.hypertrack.live.utils.SharedHelper;
 
+import org.json.JSONObject;
+
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
+
 
 
 public class LaunchActivity extends AppCompatActivity {
+    private static final String TAG = "LaunchActivity";
     private LoaderDecorator mLoader;
 
     @Override
@@ -26,6 +34,9 @@ public class LaunchActivity extends AppCompatActivity {
 
         SharedHelper sharedHelper = SharedHelper.getInstance(this);
         final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
+        if (hyperTrackPublicKey.isEmpty()) {
+            Branch.getAutoInstance(getApplicationContext());
+        }
         HTMobileClient htMobileClient = HTMobileClient.getInstance(this);
 
         htMobileClient.initialize(new HTMobileClient.Callback() {
@@ -45,6 +56,40 @@ public class LaunchActivity extends AppCompatActivity {
 
             @Override public void onError(String message, Exception e) { showError(e); }
         });
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Branch.sessionBuilder(this)
+                .withCallback(getCallback())
+                .withData(getIntent() != null ? getIntent().getData() : null)
+                .init();
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        // if activity is in foreground (or in backstack but partially visible) launching the same
+        // activity will skip onStart, handle this case with reInitSession
+        Branch.sessionBuilder(this).withCallback(getCallback()).reInit();
+    }
+
+    private Branch.BranchReferralInitListener getCallback() {
+        return new Branch.BranchReferralInitListener() {
+            @Override
+            public void onInitFinished(@Nullable JSONObject referringParams, @Nullable BranchError error) {
+                Log.d(TAG, "onInitFinished: with params: " + (referringParams == null ? "null" : referringParams)
+                + ", with error " + (error == null ? "null" : error.getMessage()));
+                if (referringParams == null) return;
+                String key = referringParams.optString("publishable_key");
+                if (!key.isEmpty()) {
+                    Log.d(TAG, "Got publishable key " + key);
+                    // TODO - Complete init
+                }
+            }
+        };
     }
 
     public void showError(Exception e) {

@@ -3,6 +3,8 @@ package com.hypertrack.live.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.R;
@@ -44,6 +46,7 @@ public class SharedHelper {
         return preferences;
     }
 
+    @NonNull
     public String getHyperTrackPubKey() {
         return preferences.getString(PUB_KEY, "");
     }
