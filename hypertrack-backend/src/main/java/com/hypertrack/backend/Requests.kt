@@ -1,6 +1,7 @@
 package com.hypertrack.backend
 
 import android.os.Build
+import android.util.Base64
 import android.util.Log
 import com.android.volley.NetworkResponse
 import com.android.volley.Response
@@ -119,9 +120,55 @@ class GeofenceEventRequest(
 
 }
 
+class GetInternalTokenRequest(
+        private val gson: Gson,
+        deviceId: String,
+        val publishableKey: String,
+        responseListener: Response.Listener<String>,
+        errorListener: Response.ErrorListener
+) : JsonRequest<String>(
+        Method.POST, "https://live-api.htprod.hypertrack.com/authenticate",
+        """{"device_id":"$deviceId","scope":"generation"}""",
+        responseListener, errorListener
+) {
+    override fun getHeaders(): MutableMap<String, String> {
+        val genericHeaders = super.getHeaders()
+        val headers = HashMap<String, String>(genericHeaders.size + 2)
+        headers["User-Agent"] = getUserAgent()
+        headers["Authorization"] = "Basic ${Base64.encode("$publishableKey:".toByteArray(), Base64.NO_WRAP)}"
+        return headers
+    }
+
+    override fun parseNetworkResponse(networkResponse: NetworkResponse?): Response<String> {
+        networkResponse?.let {
+            response ->
+            if (isSuccessFamilyStatus(response)) {
+
+                try {
+                    val responseBody = String(response.data, Charset.forName(HttpHeaderParser.parseCharset(response.headers, Charsets.UTF_8.name())))
+                    if (responseBody.isEmpty()) {
+                        return Response.error(VolleyError("Can't get token from empty response"))
+                    }
+                    val tokenResponse = gson.fromJson<TokenResponse>(responseBody, TokenResponse::class.java)
+                    tokenResponse?.token?.let { token ->
+                        return Response.success(token, null)
+                    }
+                } catch (error: UnsupportedEncodingException) {
+                    return Response.error(VolleyError(error))
+                } catch (error: JsonSyntaxException) {
+                    return Response.error(VolleyError(error))
+                }
+            }
+        }
+        return Response.error(VolleyError("No response received"))
+    }
+}
+
+fun isSuccessFamilyStatus(networkResponse: NetworkResponse) = networkResponse.statusCode / 100 == 2
+fun getUserAgent() = "LiveApp/${BuildConfig.VERSION_NAME} Volley/1.1.1 Android/${Build.VERSION.RELEASE}"
+
 abstract class LiveAppBackendRequest<T>(private val tokenString: String, url: String, requestBody: String, responseListener: Response.Listener<T>?,
                                         errorListener: Response.ErrorListener?) : JsonRequest<T>(Method.POST, url, requestBody, responseListener, errorListener) {
-    protected fun isSuccessFamilyStatus(networkResponse: NetworkResponse) = networkResponse.statusCode / 100 == 2
 
     override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
         volleyError?.networkResponse?.let { Log.e(TAG, "Got error from url $url data ${String(it.data)}") }
@@ -133,10 +180,14 @@ abstract class LiveAppBackendRequest<T>(private val tokenString: String, url: St
         val headers = HashMap<String, String>(defaultHeaders.size + 2)
         headers.putAll(defaultHeaders)
         headers["Authorization"] = "Bearer $tokenString"
-        headers["User-Agent"] = "LiveApp/${BuildConfig.VERSION_NAME} Volley/1.1.1 Android/${Build.VERSION.RELEASE}"
+        headers["User-Agent"] = getUserAgent()
         return headers
     }
 }
+
+private data class TokenResponse(
+        @SerializedName("access_token") val token: String?
+)
 
 private data class Views(
         @SerializedName("share_url") val shareUrl: String,
