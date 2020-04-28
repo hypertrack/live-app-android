@@ -6,16 +6,99 @@ import androidx.annotation.GuardedBy
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.RequestQueue
 import com.android.volley.Response
+import com.android.volley.VolleyError
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
+import java.net.HttpURLConnection
 
 
-class BackendProvider private constructor(
-        context: Context,
+class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, deviceId: String) {
+
+    val queue = Volley.newRequestQueue(context)
+    val gson = Gson()
+    val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceId, publishableKey, gson)
+    val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider)
+
+    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
+        Log.i(TAG, "Creating trip with config $tripConfig")
+        val retryCallback = object : ResultHandler<ShareableTrip> {
+            override fun onResult(result: ShareableTrip) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<ShareableTrip>(error, callback) {
+                        backendProvider.createTrip(tripConfig, callback)
+                    }
+        }
+        backendProvider.createTrip(tripConfig, retryCallback)
+    }
+
+    fun completeTrip(tripId: String, callback: ResultHandler<String>) {
+        Log.i(TAG, "Complete trip $tripId")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.completeTrip(tripId, callback)
+                    }
+        }
+        backendProvider.completeTrip(tripId, retryCallback)
+
+    }
+
+    fun start(deviceId: String, callback: ResultHandler<String>) {
+        Log.i(TAG, "start $deviceId")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.start(deviceId, callback)
+                    }
+        }
+        backendProvider.start(deviceId, retryCallback)
+    }
+
+    fun stop(deviceId: String, callback: ResultHandler<String>) {
+        Log.i(TAG, "stop $deviceId")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.stop(deviceId, callback)
+                    }
+        }
+        backendProvider.stop(deviceId, retryCallback)
+
+    }
+
+    private fun <T> getErrorHandlerWithTokenAutoRefresh(
+            error: Exception,
+            callback: ResultHandler<T>,
+            retryCall: () -> Unit
+    ) {
+        when (error) {
+            is VolleyError -> {
+                if (error.networkResponse.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+                    internalApiIssuesTokenProvider.refreshToken { retryCall() }
+                    return
+                }
+            }
+        }
+        callback.onError(error)
+    }
+
+    companion object {
+        const val TAG = "PublicKeyAuthorizedBP"
+    }
+}
+
+class BackendProvider(
+        private val gson: Gson,
+        private val queue: RequestQueue,
         private val tokenProvider: AsyncTokenProvider
 ) {
-    private val gson: Gson = Gson()
-    private val queue: RequestQueue = Volley.newRequestQueue(context)
     private val defaultRetryPolicy: DefaultRetryPolicy = DefaultRetryPolicy(
             DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 2,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -163,13 +246,43 @@ class BackendProvider private constructor(
         fun getInstance(context: Context, tokenProvider: AsyncTokenProvider): BackendProvider {
             if (sInstance == null) {
                 synchronized(sInstanceLock) {
-                    if (sInstance == null) sInstance = BackendProvider(context, tokenProvider)
+                    if (sInstance == null) sInstance = BackendProvider(Gson(), Volley.newRequestQueue(context), tokenProvider)
                 }
             }
             return sInstance ?: throw IllegalStateException()
         }
     }
 
+}
+
+class InternalApiTokenProvider(
+        private val queue: RequestQueue,
+        private val deviceId: String,
+        private val publishableKey: String,
+        private val gson: Gson
+) : AsyncTokenProvider {
+    private var token: String = ""
+    override fun getAuthenticationToken(resultHandler: ResultHandler<String>) {
+        if (token.isNotEmpty()) {
+            resultHandler.onResult(token)
+            return
+        }
+        queue.add(getInternalTokenRequest(resultHandler))
+    }
+
+    private fun getInternalTokenRequest(resultHandler: ResultHandler<String>): GetInternalTokenRequest {
+        return GetInternalTokenRequest(gson, deviceId, publishableKey,
+                Response.Listener {
+                    token = it
+                    resultHandler.onResult(it)
+                },
+                Response.ErrorListener { resultHandler.onError(it) }
+        )
+    }
+
+    fun refreshToken(function: (String) -> Unit) {
+        TODO("Not yet implemented")
+    }
 }
 
 interface AsyncTokenProvider {
