@@ -32,32 +32,38 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-        SharedHelper sharedHelper = SharedHelper.getInstance(this);
-        final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
-        Branch.getAutoInstance(getApplicationContext());
-        CognitoClient cognitoClient = CognitoClient.getInstance(this);
-
-        cognitoClient.initialize(new CognitoClient.Callback() {
-            @Override
-            public void onSuccess(CognitoClient mobileClient) {
-                if (!mobileClient.isAuthorized() || TextUtils.isEmpty(hyperTrackPublicKey)) {
-                    if (mobileClient.isAuthorized() && TextUtils.isEmpty(hyperTrackPublicKey)) {
-                        addConfirmationFragment();
+        final String hyperTrackPublicKey = SharedHelper.getInstance(this).getHyperTrackPubKey();
+        if (hyperTrackPublicKey.isEmpty()) {
+            mLoader = new LoaderDecorator(this);
+            Branch.getAutoInstance(getApplicationContext());
+            CognitoClient cognitoClient = CognitoClient.getInstance(this);
+            cognitoClient.initialize(new CognitoClient.Callback() {
+                @Override
+                public void onSuccess(CognitoClient mobileClient) {
+                    if (!mobileClient.isAuthorized() || TextUtils.isEmpty(hyperTrackPublicKey)) {
+                        if (mobileClient.isAuthorized() && TextUtils.isEmpty(hyperTrackPublicKey)) {
+                            addConfirmationFragment();
+                        } else {
+                            addSigninFragment();
+                        }
                     } else {
-                        addSigninFragment();
+                        startActivity(new Intent(LaunchActivity.this, MainActivity.class));
+                        finish();
                     }
-                } else {
-                    startActivity(new Intent(LaunchActivity.this, MainActivity.class));
-                    finish();
                 }
-            }
 
-            @Override public void onError(String message, Exception e) { showError(e); }
-        });
+                @Override public void onError(String message, Exception e) { showError(e); }
+            });
+
+        } else {
+            onLoginCompleted();
+        }
     }
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d(TAG, "onStart: ");
+        mLoader.start();
         Branch.sessionBuilder(this)
                 .withCallback(getCallback())
                 .withData(getIntent() != null ? getIntent().getData() : null)
@@ -80,11 +86,15 @@ public class LaunchActivity extends AppCompatActivity {
             public void onInitFinished(@Nullable JSONObject referringParams, @Nullable BranchError error) {
                 Log.d(TAG, "onInitFinished: with params: " + (referringParams == null ? "null" : referringParams)
                 + ", with error " + (error == null ? "null" : error.getMessage()));
+                mLoader.stop();
                 if (referringParams == null) return;
                 String key = referringParams.optString("publishable_key");
                 if (!key.isEmpty()) {
-                    Log.d(TAG, "Got publishable key " + key);
-                    // TODO - Complete init
+                    Log.d(TAG, "Got publishable key from branch.io payload" + key);
+                    SharedHelper sharedHelper = SharedHelper.getInstance(LaunchActivity.this);
+                    sharedHelper.setHyperTrackPubKey(key);
+                    sharedHelper.setLoginType(SharedHelper.LOGIN_TYPE_DEEPLINK);
+                    LaunchActivity.this.onLoginCompleted();
                 }
             }
         };
@@ -95,7 +105,7 @@ public class LaunchActivity extends AppCompatActivity {
     }
 
     public void onLoginCompleted() {
-
+        Log.d(TAG, "onLoginCompleted: ");
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }

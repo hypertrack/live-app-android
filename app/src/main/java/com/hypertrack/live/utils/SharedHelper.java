@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringDef;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -12,6 +13,8 @@ import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.R;
 import com.hypertrack.live.models.PlaceModel;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Collections;
@@ -33,6 +36,13 @@ public class SharedHelper {
     private static final String SELECTED_TRIP_ID = "selected_trip_id";
     private static final String CREATED_TRIP_ID = "created_trip_id";
     private static final String CREATED_TRIP_SHARE_URL = "created_trip_share_url";
+    private static final String LOGIN_TYPE = "login_type";
+
+    public static final String LOGIN_TYPE_DEEPLINK = "com.hypertrack.live.utils.LOGIN_TYPE_DEEPLINK";
+    public static final String LOGIN_TYPE_COGNITO = "com.hypertrack.live.utils.LOGIN_TYPE_COGNITO";
+
+    @StringDef({LOGIN_TYPE_COGNITO, LOGIN_TYPE_DEEPLINK}) @Retention(RetentionPolicy.SOURCE)
+    public @interface LoginType {}
 
     private static SharedHelper instance;
 
@@ -157,6 +167,10 @@ public class SharedHelper {
 
     public void setShareUrl(@Nullable String shareUrl) {
         preferences.edit().putString(CREATED_TRIP_SHARE_URL, shareUrl).apply();
+    }
+
+    public void setLoginType(@LoginType String loginType) {
+        preferences.edit().putString(LOGIN_TYPE, loginType).apply();
     }
 
     public void logout() {

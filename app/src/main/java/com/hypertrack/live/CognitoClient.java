@@ -144,7 +144,7 @@ public class CognitoClient {
                 Log.d(TAG, "getPublishableKey onResponse: " + response);
                 String hyperTrackPublicKey = response.get("key").getAsString();
                 sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
-
+                sharedHelper.setLoginType(SharedHelper.LOGIN_TYPE_COGNITO);
                 callback.onSuccess(CognitoClient.this);
             }
         }, new Response.ErrorListener() {
