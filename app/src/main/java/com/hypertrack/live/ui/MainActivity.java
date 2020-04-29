@@ -157,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String emailAddress = sharedHelper.sharedPreferences().getString(SharedHelper.USER_EMAIL_KEY, "");
+        String emailAddress = sharedHelper.getAccountEmail();
                 ((TextView)drawerLayout.findViewById(R.id.email_address)).setText(emailAddress);
         drawerLayout.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
             @Override

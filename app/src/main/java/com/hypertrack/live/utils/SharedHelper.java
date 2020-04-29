@@ -21,17 +21,18 @@ import java.util.Set;
 
 public class SharedHelper {
 
-    public static final String PUB_KEY = "pub_key";
-    public static final String USER_EMAIL_KEY = "user_email";
+    private static final String PUB_KEY = "pub_key";
+    private static final String USER_EMAIL_KEY = "user_email";
     public static final String USER_NAME_KEY = "user_name";
     public static final String USER_PHONE_KEY = "user_phone";
-    public static final String HOME_PLACE_KEY = "home_place";
-    public static final String USER_HOME_ADDRESS_KEY = "user_home_address";
-    public static final String USER_HOME_LATLON_KEY = "user_home_latlon";
+    private static final String HOME_PLACE_KEY = "home_place";
+    private static final String USER_HOME_ADDRESS_KEY = "user_home_address";
+    private static final String USER_HOME_LATLON_KEY = "user_home_latlon";
 
-    public static final String COVID_19 = "COVID-19";
     private static final String RECENT = "recent";
     private static final String SELECTED_TRIP_ID = "selected_trip_id";
+    private static final String CREATED_TRIP_ID = "created_trip_id";
+    private static final String CREATED_TRIP_SHARE_URL = "created_trip_share_url";
 
     private static SharedHelper instance;
 
@@ -54,8 +55,23 @@ public class SharedHelper {
     }
 
     @NonNull
+    public String getAccountEmail() {
+        return preferences.getString(USER_EMAIL_KEY, "");
+    }
+
+    public void setAccountEmail(@NonNull String email) {
+        preferences.edit().putString(USER_EMAIL_KEY, email).apply();
+    }
+
+    @NonNull
     public String getHyperTrackPubKey() {
         return preferences.getString(PUB_KEY, "");
+    }
+
+    public void setHyperTrackPubKey(@NonNull String hyperTrackPubKey) {
+        preferences.edit()
+                .putString(SharedHelper.PUB_KEY, hyperTrackPubKey)
+                .apply();
     }
 
     public Map<String, Object> getDeviceMetadata() {
@@ -76,7 +92,8 @@ public class SharedHelper {
         return preferences.contains(HOME_PLACE_KEY);
     }
 
-    @Nullable public PlaceModel getHomePlace() {
+    @Nullable
+    public PlaceModel getHomePlace() {
         try {
             return gson.fromJson(
                     preferences.getString(HOME_PLACE_KEY, null),
@@ -94,7 +111,8 @@ public class SharedHelper {
                 .apply();
     }
 
-    @NonNull public Set<PlaceModel> getRecentPlaces() {
+    @NonNull
+    public Set<PlaceModel> getRecentPlaces() {
         String recentJson = preferences.getString(RECENT, "[]");
         Type listType = new TypeToken<Set<PlaceModel>>() {}.getType();
         try {
@@ -110,7 +128,8 @@ public class SharedHelper {
         preferences.edit().putString(RECENT, recentJson).apply();
     }
 
-    @Nullable public String getSelectedTripId() {
+    @Nullable
+    public String getSelectedTripId() {
         return preferences.getString(SELECTED_TRIP_ID, null);
     }
 
@@ -120,6 +139,24 @@ public class SharedHelper {
 
     public void clearSelectedTripId() {
         preferences.edit().remove(SELECTED_TRIP_ID).apply();
+    }
+
+    @Nullable
+    public String getCreatedTripId() {
+        return preferences.getString(CREATED_TRIP_ID, null);
+    }
+
+    public void setCreatedTripId(@Nullable String tripId) {
+        preferences.edit().putString(CREATED_TRIP_ID, tripId).apply();
+    }
+
+    @Nullable
+    public String getShareUrl() {
+        return preferences.getString(CREATED_TRIP_SHARE_URL, null);
+    }
+
+    public void setShareUrl(@Nullable String shareUrl) {
+        preferences.edit().putString(CREATED_TRIP_SHARE_URL, shareUrl).apply();
     }
 
     public void logout() {

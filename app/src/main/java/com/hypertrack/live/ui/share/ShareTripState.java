@@ -2,12 +2,15 @@ package com.hypertrack.live.ui.share;
 
 import android.content.Context;
 
+import androidx.annotation.Nullable;
+
 import com.hypertrack.live.models.TripModel;
 import com.hypertrack.live.ui.BaseState;
+import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.views.dao.Trip;
 
 class ShareTripState extends BaseState {
-    private String tripId;
+    @Nullable private String tripId;
     private String shareUrl;
     private TripModel mTripModel;
 
@@ -15,24 +18,20 @@ class ShareTripState extends BaseState {
         return tripId;
     }
 
-    void setCurrentTripId(String tripId) {
+    void setCurrentTripId(@Nullable String tripId) {
         this.tripId = tripId;
-        preferences().edit().putString("created_trip_id", tripId).apply();
+        sharedHelper.setCreatedTripId(tripId);
     }
 
-    public String getShareUrl() {
-        return shareUrl;
-    }
-
-    public void setShareUrl(String shareUrl) {
+    void setShareUrl(String shareUrl) {
         this.shareUrl = shareUrl;
-        preferences().edit().putString("created_trip_share_url", shareUrl).apply();
+        sharedHelper.setShareUrl(shareUrl);
     }
 
     ShareTripState(Context context) {
         super(context);
-        tripId = preferences().getString("created_trip_id", null);
-        shareUrl = preferences().getString("created_trip_share_url", null);
+        tripId = sharedHelper.getCreatedTripId();
+        shareUrl = sharedHelper.getShareUrl();
     }
 
     void updateTrip(Trip trip) {

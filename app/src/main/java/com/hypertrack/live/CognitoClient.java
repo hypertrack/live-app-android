@@ -2,7 +2,6 @@ package com.hypertrack.live;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -46,7 +45,6 @@ public class CognitoClient {
 
     private String signUpEmail;
     private String signUpPassword;
-    private String deviceId;
 
     @SuppressLint("StaticFieldLeak")
     private static CognitoClient client;
@@ -70,11 +68,11 @@ public class CognitoClient {
         headers.put("timezone", TimeZone.getDefault().getID());
     }
 
-    public boolean isAuthorized() {
+    boolean isAuthorized() {
         return AWSMobileClient.getInstance().isSignedIn();
     }
 
-    public void initialize(@NonNull final Callback callback) {
+    void initialize(@NonNull final Callback callback) {
         AWSMobileClient.getInstance().initialize(mContext, new InnerCallback<UserStateDetails>(callback) {
             @Override
             public void onResult(UserStateDetails userStateDetails) {
@@ -88,9 +86,7 @@ public class CognitoClient {
 
             @Override
             public void onResult(SignInResult result) {
-                sharedHelper.sharedPreferences().edit()
-                        .putString(SharedHelper.USER_EMAIL_KEY, email)
-                        .apply();
+                sharedHelper.setAccountEmail(email);
                 updatePublishableKey(callback);
             }
 
@@ -107,9 +103,7 @@ public class CognitoClient {
         AWSMobileClient.getInstance().signUp(email, password, attributes, null, new InnerCallback<SignUpResult>(callback) {
             @Override
             public void onResult(SignUpResult result) {
-                sharedHelper.sharedPreferences().edit()
-                        .putString(SharedHelper.USER_EMAIL_KEY, email)
-                        .apply();
+                sharedHelper.setAccountEmail(email);
                 signUpEmail = email;
                 signUpPassword = password;
                 onSuccessHidden(CognitoClient.this);
@@ -149,10 +143,7 @@ public class CognitoClient {
             public void onResponse(JsonObject response) {
                 Log.d(TAG, "getPublishableKey onResponse: " + response);
                 String hyperTrackPublicKey = response.get("key").getAsString();
-                SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getString(R.string.app_name), Context.MODE_PRIVATE);
-                sharedPreferences.edit()
-                        .putString(SharedHelper.PUB_KEY, hyperTrackPublicKey)
-                        .apply();
+                sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
 
                 callback.onSuccess(CognitoClient.this);
             }
@@ -251,7 +242,7 @@ public class CognitoClient {
             onErrorHidden(e.getLocalizedMessage(), e);
         }
 
-        protected void onSuccessHidden(final CognitoClient mobileClient) {
+        void onSuccessHidden(final CognitoClient mobileClient) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -260,7 +251,7 @@ public class CognitoClient {
             });
         }
 
-        protected void onErrorHidden(final String message, final Exception e) {
+        void onErrorHidden(final String message, final Exception e) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {

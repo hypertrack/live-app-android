@@ -24,7 +24,4 @@ public class BaseState {
         return hyperTrackPublicKey;
     }
 
-    protected SharedPreferences preferences() {
-        return sharedHelper.sharedPreferences();
-    }
 }
