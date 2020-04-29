@@ -107,12 +107,14 @@ class CompleteTripRequest(private val tripId: String, tokenString: String,
 
 class GeofenceEventRequest(
         deviceId: String, eventName: String,
-        tokenString: String
-) : LiveAppBackendRequest<Void>(tokenString, "${ADDRESS}geofence",
+        tokenString: String,
+        responseListener: Response.Listener<Unit>?,
+        errorListener: Response.ErrorListener?
+) : LiveAppBackendRequest<Unit>(tokenString, "${ADDRESS}geofence",
         "{\"device_id\": \"$deviceId\", \"geofence_name\": \"Home\", \"geofence_action\": \"$eventName\"}",
-        null, null
+        responseListener, errorListener
 ) {
-    override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<Unit> {
         response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
         Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url ${ADDRESS}geofence")
         return Response.error(VolleyError(response))

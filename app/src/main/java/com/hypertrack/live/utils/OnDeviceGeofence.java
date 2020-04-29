@@ -111,7 +111,7 @@ public class OnDeviceGeofence extends BroadcastReceiver {
                     ? "enter"
                     : "exit";
             HTMobileClient.getBackendProvider(context)
-                    .sendGeofenceTransition(deviceId, transitionType);
+                    .sendGeofenceTransition(deviceId, transitionType, null);
         } else {
             // Log the error.
             Log.w(TAG, String.format("Unexpected geofence transition type %d. Ignoring.",

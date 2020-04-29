@@ -19,33 +19,6 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
     val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceId, publishableKey, gson)
     val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider)
 
-    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
-        Log.i(TAG, "Creating trip with config $tripConfig")
-        val retryCallback = object : ResultHandler<ShareableTrip> {
-            override fun onResult(result: ShareableTrip) = callback.onResult(result)
-
-            override fun onError(error: Exception) =
-                    getErrorHandlerWithTokenAutoRefresh<ShareableTrip>(error, callback) {
-                        backendProvider.createTrip(tripConfig, callback)
-                    }
-        }
-        backendProvider.createTrip(tripConfig, retryCallback)
-    }
-
-    fun completeTrip(tripId: String, callback: ResultHandler<String>) {
-        Log.i(TAG, "Complete trip $tripId")
-        val retryCallback = object : ResultHandler<String> {
-            override fun onResult(result: String) = callback.onResult(result)
-
-            override fun onError(error: Exception) =
-                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
-                        backendProvider.completeTrip(tripId, callback)
-                    }
-        }
-        backendProvider.completeTrip(tripId, retryCallback)
-
-    }
-
     fun start(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "start $deviceId")
         val retryCallback = object : ResultHandler<String> {
@@ -73,9 +46,49 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
     }
 
+    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
+        Log.i(TAG, "Creating trip with config $tripConfig")
+        val retryCallback = object : ResultHandler<ShareableTrip> {
+            override fun onResult(result: ShareableTrip) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<ShareableTrip>(error, callback) {
+                        backendProvider.createTrip(tripConfig, callback)
+                    }
+        }
+        backendProvider.createTrip(tripConfig, retryCallback)
+    }
+
+    fun completeTrip(tripId: String, callback: ResultHandler<String>) {
+        Log.i(TAG, "Complete trip $tripId")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.completeTrip(tripId, callback)
+                    }
+        }
+        backendProvider.completeTrip(tripId, retryCallback)
+
+    }
+
+    fun sendGeofenceTransition(deviceId: String, transitionType: String) {
+        Log.i(TAG, "Sending geofence transition $transitionType for device $deviceId")
+        val retryCallback = object : ResultHandler<Unit> {
+            override fun onResult(result: Unit) { }
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<Unit>(error, null) {
+                        backendProvider.sendGeofenceTransition(deviceId, transitionType)
+                    }
+        }
+        backendProvider.sendGeofenceTransition(deviceId, transitionType, retryCallback)
+    }
+
     private fun <T> getErrorHandlerWithTokenAutoRefresh(
             error: Exception,
-            callback: ResultHandler<T>,
+            callback: ResultHandler<T>?,
             retryCall: () -> Unit
     ) {
         when (error) {
@@ -86,12 +99,10 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
                 }
             }
         }
-        callback.onError(error)
+        callback?.onError(error)
     }
 
-    companion object {
-        const val TAG = "PublicKeyAuthorizedBP"
-    }
+    companion object { const val TAG = "PublicKeyAuthorizedBP" }
 }
 
 class BackendProvider(
@@ -164,12 +175,12 @@ class BackendProvider(
         })
     }
 
-    fun sendGeofenceTransition(deviceId: String, transitionType: String) {
+    fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>? = null) {
         Log.i(TAG, "sendGeofenceTransition  $transitionType")
 
         tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
             override fun onResult(result: String) =
-                    scheduleGeofenceEventRequest(deviceId, transitionType, result)
+                    scheduleGeofenceEventRequest(deviceId, transitionType, result, callback)
 
             override fun onError(error: Exception) {
                 Log.w(TAG, "Can't fetch token due to error $error")
@@ -177,12 +188,12 @@ class BackendProvider(
         })
     }
 
-    private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String) {
-        val request = GeofenceEventRequest(
-                deviceId,
-                transitionType,
-                tokenString
-        )
+    private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String, callback: ResultHandler<Unit>?) {
+
+        val successListener:Response.Listener<Unit>? = if (callback != null) Response.Listener { callback.onResult(Unit) } else null
+        val errorListener:Response.ErrorListener? = if (callback != null) Response.ErrorListener { callback.onError(it) } else null
+
+        val request = GeofenceEventRequest(deviceId, transitionType, tokenString, successListener, errorListener)
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding geofence request to queue")
         queue.add(request)
@@ -193,7 +204,7 @@ class BackendProvider(
         val request = StartTrackingRequest(
                 deviceId, tokenString,
                 Response.Listener { callback.onResult(deviceId) },
-                Response.ErrorListener { error -> callback.onError(error as Exception) }
+                Response.ErrorListener { error -> callback.onError(error) }
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding start request to queue")
