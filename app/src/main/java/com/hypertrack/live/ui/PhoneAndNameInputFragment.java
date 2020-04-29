@@ -15,7 +15,7 @@ import com.hypertrack.live.R;
 import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.HyperTrack;
 
-public class Covid19Fragment extends Fragment {
+public class PhoneAndNameInputFragment extends Fragment {
 
     private TextView nameText;
     private TextView phoneText;
@@ -23,7 +23,7 @@ public class Covid19Fragment extends Fragment {
     private HyperTrack hyperTrack;
 
     public static Fragment newInstance(String pubKey) {
-        Covid19Fragment fragment = new Covid19Fragment();
+        PhoneAndNameInputFragment fragment = new PhoneAndNameInputFragment();
         Bundle bundle = new Bundle();
         bundle.putString(MainActivity.PUBLISHABLE_KEY, pubKey);
         fragment.setArguments(bundle);
@@ -33,7 +33,7 @@ public class Covid19Fragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_essential_service, null);
+        return inflater.inflate(R.layout.fragment_name_and_phone_input, null);
     }
 
     @Override
