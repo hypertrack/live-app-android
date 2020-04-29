@@ -4,15 +4,20 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.R;
 import com.hypertrack.live.models.PlaceModel;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class SharedHelper {
 
@@ -25,6 +30,8 @@ public class SharedHelper {
     public static final String USER_HOME_LATLON_KEY = "user_home_latlon";
 
     public static final String COVID_19 = "COVID-19";
+    private static final String RECENT = "recent";
+    private static final String SELECTED_TRIP_ID = "selected_trip_id";
 
     private static SharedHelper instance;
 
@@ -63,5 +70,59 @@ public class SharedHelper {
             map.put(USER_HOME_LATLON_KEY, placeModel.latLng.latitude +"," + placeModel.latLng.longitude);
         }
         return map;
+    }
+
+    public boolean isHomePlaceSet() {
+        return preferences.contains(HOME_PLACE_KEY);
+    }
+
+    @Nullable public PlaceModel getHomePlace() {
+        try {
+            return gson.fromJson(
+                    preferences.getString(HOME_PLACE_KEY, null),
+                    new TypeToken<PlaceModel>() {}.getType()
+            );
+        } catch (JsonSyntaxException ignored) { }
+        return null;
+    }
+
+    public void setHomePlace(@Nullable PlaceModel home) {
+        String homeJson = gson.toJson(home);
+        preferences
+                .edit()
+                .putString(SharedHelper.HOME_PLACE_KEY, homeJson)
+                .apply();
+    }
+
+    @NonNull public Set<PlaceModel> getRecentPlaces() {
+        String recentJson = preferences.getString(RECENT, "[]");
+        Type listType = new TypeToken<Set<PlaceModel>>() {}.getType();
+        try {
+            return gson.fromJson(recentJson, listType);
+        } catch (JsonSyntaxException ignored) { }
+
+        return Collections.emptySet();
+    }
+
+    public void setRecentPlaces(@Nullable Collection<PlaceModel> recentPlaces) {
+        if (recentPlaces == null) recentPlaces = Collections.emptySet();
+        String recentJson = gson.toJson(recentPlaces);
+        preferences.edit().putString(RECENT, recentJson).apply();
+    }
+
+    @Nullable public String getSelectedTripId() {
+        return preferences.getString(SELECTED_TRIP_ID, null);
+    }
+
+    public void setSelectedTripId(@NonNull String tripId) {
+        preferences.edit().putString(SELECTED_TRIP_ID, tripId).apply();
+    }
+
+    public void clearSelectedTripId() {
+        preferences.edit().remove(SELECTED_TRIP_ID).apply();
+    }
+
+    public void logout() {
+        preferences.edit().clear().apply();
     }
 }

@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void logout() {
         CognitoClient.getInstance(MainActivity.this).logout();
+        sharedHelper.logout();
         Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
         intent.setAction(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);

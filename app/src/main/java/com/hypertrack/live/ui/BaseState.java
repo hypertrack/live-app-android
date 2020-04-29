@@ -16,7 +16,7 @@ public class BaseState {
     protected BaseState(Context context) {
         mContext = context;
         sharedHelper = SharedHelper.getInstance(context);
-        hyperTrackPublicKey = sharedHelper.sharedPreferences().getString(SharedHelper.PUB_KEY, "");
+        hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
         hyperTrack = HyperTrack.getInstance(context, hyperTrackPublicKey);
     }
 

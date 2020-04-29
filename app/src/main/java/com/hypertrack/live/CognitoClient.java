@@ -189,10 +189,7 @@ public class CognitoClient {
         });
     }
 
-    public void logout() {
-        AWSMobileClient.getInstance().signOut();
-        sharedHelper.sharedPreferences().edit().clear().apply();
-    }
+    public void logout() { AWSMobileClient.getInstance().signOut(); }
 
     public static class Request extends JsonRequest<JsonObject> {
 

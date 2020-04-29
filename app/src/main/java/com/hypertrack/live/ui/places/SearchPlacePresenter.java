@@ -72,7 +72,7 @@ class SearchPlacePresenter {
     public SearchPlacePresenter(Context context, String mode, View view, @NonNull AbstractBackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
-        this.state = new SearchPlaceState(this.context, mode, backendProvider);
+        this.state = new SearchPlaceState(this.context, mode);
 
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         placesClient = Places.createClient(context);
