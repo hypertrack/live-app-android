@@ -50,7 +50,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private final HyperTrack hyperTrack;
     private final HyperTrackViews hyperTrackViews;
     private HyperTrackMap hyperTrackMap;
-    private final BackendProvider mBackendProvider;
+    @NonNull private final BackendProvider mBackendProvider;
 
     private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
         @Override
@@ -69,7 +69,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
     private Timer tripInfoUpdater;
 
-    public TrackingPresenter(@NonNull Context context, @NonNull final View view) {
+    public TrackingPresenter(@NonNull Context context, @NonNull final View view, @NonNull BackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
         state = new TrackingState(context);
@@ -77,7 +77,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
 
-        mBackendProvider = HTMobileClient.getBackendProvider(context);
+        mBackendProvider = backendProvider;
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         this.context.registerReceiver(connectivityReceiver, intentFilter);

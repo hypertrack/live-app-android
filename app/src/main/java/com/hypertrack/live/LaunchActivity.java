@@ -34,9 +34,7 @@ public class LaunchActivity extends AppCompatActivity {
 
         SharedHelper sharedHelper = SharedHelper.getInstance(this);
         final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
-        if (hyperTrackPublicKey.isEmpty()) {
-            Branch.getAutoInstance(getApplicationContext());
-        }
+        Branch.getAutoInstance(getApplicationContext());
         HTMobileClient htMobileClient = HTMobileClient.getInstance(this);
 
         htMobileClient.initialize(new HTMobileClient.Callback() {

@@ -1,6 +1,7 @@
 package com.hypertrack.live.ui.share;
 
 import android.os.Bundle;
+import android.text.method.BaseKeyListener;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.hypertrack.backend.BackendProvider;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
@@ -23,6 +25,7 @@ public class ShareTripFragment extends Fragment
 
     public static final String TRIP_ID_KEY = "trip_id";
     public static final String SHARE_URL_KEY = "share_url";
+    private final BackendProvider mBackendProvider;
 
     private ShareTripPresenter presenter;
 
@@ -31,13 +34,17 @@ public class ShareTripFragment extends Fragment
     private String tripId;
     private String shareUrl;
 
-    public static Fragment newInstance(String tripId, String shareUrl) {
-        ShareTripFragment fragment = new ShareTripFragment();
+    public static Fragment newInstance(String tripId, String shareUrl, @NonNull BackendProvider backendProvider) {
+        ShareTripFragment fragment = new ShareTripFragment(backendProvider);
         Bundle bundle = new Bundle();
         bundle.putString(TRIP_ID_KEY, tripId);
         bundle.putString(SHARE_URL_KEY, shareUrl);
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    private ShareTripFragment(@NonNull BackendProvider backendProvider) {
+        mBackendProvider = backendProvider;
     }
 
     @Override
@@ -61,7 +68,7 @@ public class ShareTripFragment extends Fragment
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        presenter = new ShareTripPresenter(getActivity(), this, shareUrl);
+        presenter = new ShareTripPresenter(getActivity(), this, shareUrl, mBackendProvider);
 
         loader = new LoaderDecorator(getContext());
         View back = view.findViewById(R.id.back);

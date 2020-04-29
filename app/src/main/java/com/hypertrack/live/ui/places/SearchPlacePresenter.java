@@ -31,7 +31,6 @@ import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.backend.ShareableTrip;
 import com.hypertrack.backend.TripConfig;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.utils.AppUtils;
@@ -70,14 +69,14 @@ class SearchPlacePresenter {
     private final Handler handler = new Handler();
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public SearchPlacePresenter(Context context, String mode, View view) {
+    public SearchPlacePresenter(Context context, String mode, View view, @NonNull BackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
-        this.state = new SearchPlaceState(this.context, mode);
+        this.state = new SearchPlaceState(this.context, mode, backendProvider);
 
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         placesClient = Places.createClient(context);
-        mBackendProvider = HTMobileClient.getBackendProvider(context);
+        mBackendProvider = backendProvider;
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         this.context.registerReceiver(connectivityReceiver, intentFilter);

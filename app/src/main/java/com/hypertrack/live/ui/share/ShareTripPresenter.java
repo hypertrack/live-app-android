@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.MapUtils;
 import com.hypertrack.maps.google.widget.GoogleMapAdapter;
@@ -32,10 +31,10 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
 
     private final HyperTrack hyperTrack;
     private final HyperTrackViews hyperTrackViews;
-    private final BackendProvider backendProvider;
+    private final BackendProvider mBackendProvider;
     private HyperTrackMap hyperTrackMap;
 
-    public ShareTripPresenter(Context context, View view, String shareUrl) {
+    ShareTripPresenter(Context context, View view, String shareUrl, @NonNull BackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
         this.state = new ShareTripState(context);
@@ -43,10 +42,10 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
 
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
-        backendProvider = HTMobileClient.getBackendProvider(context);
+        this.mBackendProvider = backendProvider;
     }
 
-    public void subscribeTripUpdates(GoogleMap googleMap, String tripId) {
+    void subscribeTripUpdates(GoogleMap googleMap, String tripId) {
         if (hyperTrackMap == null) {
             GoogleMapAdapter mapAdapter = new GoogleMapAdapter(googleMap, MapUtils.getBuilder(context).build());
             hyperTrackMap = HyperTrackMap.getInstance(context, mapAdapter);
@@ -59,19 +58,19 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
                 .subscribeTrip(tripId);
     }
 
-    public void pause() {
+    void pause() {
         hyperTrackViews.unsubscribeFromDeviceUpdates(this);
         hyperTrackMap.unbindHyperTrackViews();
     }
 
-    public void shareTrackMessage() {
+    void shareTrackMessage() {
         AppUtils.shareTrackMessage(context, state.getShareMessage());
     }
 
-    public void endTrip() {
+    void endTrip() {
         if (!TextUtils.isEmpty(state.getCurrentTripId())) {
 
-            backendProvider.completeTrip(state.getCurrentTripId(), new ResultHandler<String>() {
+            mBackendProvider.completeTrip(state.getCurrentTripId(), new ResultHandler<String>() {
 
                 @Override
                 public void onResult(@NonNull String result) {
@@ -88,7 +87,7 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
         }
     }
 
-    public void destroy() {
+    void destroy() {
         hyperTrackViews.unsubscribeFromDeviceUpdates(this);
         if (hyperTrackMap != null) {
             hyperTrackMap.destroy();

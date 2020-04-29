@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
-            beginFragmentTransaction(new TrackingFragment()).commitAllowingStateLoss();
+            beginFragmentTransaction(new TrackingFragment(HTMobileClient.getBackendProvider(this.getApplicationContext()))).commitAllowingStateLoss();
         }
 
         initializeHyperTrack(hyperTrackPublicKey);

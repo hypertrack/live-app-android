@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.hypertrack.backend.BackendProvider;
 import com.hypertrack.live.R;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.LoaderDecorator;
@@ -37,6 +38,7 @@ import java.util.List;
 
 public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback, SearchPlacePresenter.View {
 
+    private final BackendProvider mBackendProvider;
     private Config config;
 
     private SearchPlacePresenter presenter;
@@ -52,8 +54,8 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     private PlacesAdapter placesAdapter;
     private LoaderDecorator loader;
 
-    public static SearchPlaceFragment newInstance(Config config) {
-        SearchPlaceFragment fragment = new SearchPlaceFragment();
+    public static SearchPlaceFragment newInstance(Config config, @NonNull BackendProvider backendProvider) {
+        SearchPlaceFragment fragment = new SearchPlaceFragment(backendProvider);
         Bundle bundle = new Bundle();
         bundle.putParcelable("config", config);
         fragment.setArguments(bundle);
@@ -131,7 +133,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
             @Override
             public void onClick(View view) {
                 ((MainActivity) getActivity())
-                        .beginFragmentTransaction(SearchPlaceFragment.newInstance(SearchPlaceFragment.Config.HOME_ADDRESS))
+                        .beginFragmentTransaction(SearchPlaceFragment.newInstance(SearchPlaceFragment.Config.HOME_ADDRESS, mBackendProvider))
                         .addToBackStack(null)
                         .commitAllowingStateLoss();
             }
@@ -187,7 +189,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         locationsRecyclerView.setOnTouchListener(hideSoftInputOnTouchListener);
 
         loader = new LoaderDecorator(getContext());
-        presenter = new SearchPlacePresenter(getActivity(), config.key, this);
+        presenter = new SearchPlacePresenter(getActivity(), config.key, this, mBackendProvider);
 
         presenter.search(null);
         ((MainActivity) getActivity()).getMapAsync(this);
@@ -299,7 +301,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     @Override
     public void addShareTripFragment(String tripId, String shareUrl) {
         if (getActivity() != null) {
-            ((MainActivity) getActivity()).beginFragmentTransaction(ShareTripFragment.newInstance(tripId, shareUrl))
+            ((MainActivity) getActivity()).beginFragmentTransaction(ShareTripFragment.newInstance(tripId, shareUrl, mBackendProvider))
                     .addToBackStack(null)
                     .commitAllowingStateLoss();
         }
@@ -317,6 +319,10 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         super.onDestroyView();
         hideSoftInput();
         presenter.destroy();
+    }
+
+    private SearchPlaceFragment(@NonNull BackendProvider backendProvider) {
+        mBackendProvider = backendProvider;
     }
 
     @SuppressWarnings("WeakerAccess")
