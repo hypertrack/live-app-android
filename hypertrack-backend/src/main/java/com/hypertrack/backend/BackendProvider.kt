@@ -12,14 +12,14 @@ import com.google.gson.Gson
 import java.net.HttpURLConnection
 
 
-class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, deviceId: String) {
+class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, deviceId: String) : AbstractBackendProvider {
 
     val queue = Volley.newRequestQueue(context)
     val gson = Gson()
     val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceId, publishableKey, gson)
     val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider)
 
-    fun start(deviceId: String, callback: ResultHandler<String>) {
+    override fun start(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "start $deviceId")
         val retryCallback = object : ResultHandler<String> {
             override fun onResult(result: String) = callback.onResult(result)
@@ -32,7 +32,7 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         backendProvider.start(deviceId, retryCallback)
     }
 
-    fun stop(deviceId: String, callback: ResultHandler<String>) {
+    override fun stop(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "stop $deviceId")
         val retryCallback = object : ResultHandler<String> {
             override fun onResult(result: String) = callback.onResult(result)
@@ -46,7 +46,7 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
     }
 
-    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
+    override fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
         Log.i(TAG, "Creating trip with config $tripConfig")
         val retryCallback = object : ResultHandler<ShareableTrip> {
             override fun onResult(result: ShareableTrip) = callback.onResult(result)
@@ -59,7 +59,7 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         backendProvider.createTrip(tripConfig, retryCallback)
     }
 
-    fun completeTrip(tripId: String, callback: ResultHandler<String>) {
+    override fun completeTrip(tripId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "Complete trip $tripId")
         val retryCallback = object : ResultHandler<String> {
             override fun onResult(result: String) = callback.onResult(result)
@@ -73,7 +73,11 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
     }
 
-    fun sendGeofenceTransition(deviceId: String, transitionType: String) {
+    override fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>?) {
+        sendGeofenceTransition(deviceId, transitionType)
+    }
+
+    private fun sendGeofenceTransition(deviceId: String, transitionType: String) {
         Log.i(TAG, "Sending geofence transition $transitionType for device $deviceId")
         val retryCallback = object : ResultHandler<Unit> {
             override fun onResult(result: Unit) { }
@@ -105,17 +109,25 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
     companion object { const val TAG = "PublicKeyAuthorizedBP" }
 }
 
+interface AbstractBackendProvider {
+    fun start(deviceId: String, callback: ResultHandler<String>)
+    fun stop(deviceId: String, callback: ResultHandler<String>)
+    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
+    fun completeTrip(tripId: String, callback: ResultHandler<String>)
+    fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>? = null)
+}
+
 class BackendProvider(
         private val gson: Gson,
         private val queue: RequestQueue,
         private val tokenProvider: AsyncTokenProvider
-) {
+) : AbstractBackendProvider {
     private val defaultRetryPolicy: DefaultRetryPolicy = DefaultRetryPolicy(
             DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 2,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
             DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
 
-    fun start(deviceId: String, callback: ResultHandler<String>) {
+    override fun start(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "start $deviceId")
         if (deviceId.isEmpty()) {
             callback.onError(java.lang.Exception("Can't start with empty deviceId"))
@@ -131,7 +143,7 @@ class BackendProvider(
         })
     }
 
-    fun stop(deviceId: String, callback: ResultHandler<String>) {
+    override fun stop(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "stop $deviceId")
         if (deviceId.isEmpty()) {
             callback.onError(java.lang.Exception("Can't stop with empty deviceId"))
@@ -147,7 +159,7 @@ class BackendProvider(
         })
     }
 
-    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
+    override fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
         Log.i(TAG, "Create trip with config $tripConfig")
         tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
 
@@ -159,7 +171,7 @@ class BackendProvider(
 
     }
 
-    fun completeTrip(tripId: String, callback: ResultHandler<String>) {
+    override fun completeTrip(tripId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "Complete trip $tripId")
         if (tripId.isEmpty()) {
             callback.onError(java.lang.Exception("Can't complete trip with empty id"))
@@ -175,7 +187,7 @@ class BackendProvider(
         })
     }
 
-    fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>? = null) {
+    override fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>?) {
         Log.i(TAG, "sendGeofenceTransition  $transitionType")
 
         tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
@@ -236,6 +248,7 @@ class BackendProvider(
     }
 
     private fun scheduleAuthenticatedCompletionTripRequest(tripId: String, tokenString: String, callback: ResultHandler<String>) {
+        Log.d(TAG, "Scheduling Authentication request for trip $tripId with token $tokenString")
         val request = CompleteTripRequest(
                 tripId, tokenString,
                 Response.Listener { callback.onResult(tripId) },
@@ -273,11 +286,16 @@ class InternalApiTokenProvider(
         private val gson: Gson
 ) : AsyncTokenProvider {
     private var token: String = ""
+    companion object { const val TAG = "InternalTokenProvider" }
+
     override fun getAuthenticationToken(resultHandler: ResultHandler<String>) {
+        Log.d(TAG, "Getting Auth Token")
         if (token.isNotEmpty()) {
+            Log.d(TAG, "Proceeding with token $token")
             resultHandler.onResult(token)
             return
         }
+        Log.d(TAG, "No cached token present, requesting new one")
         queue.add(getInternalTokenRequest(resultHandler))
     }
 
@@ -287,11 +305,16 @@ class InternalApiTokenProvider(
                     token = it
                     resultHandler.onResult(it)
                 },
-                Response.ErrorListener { resultHandler.onError(it) }
+                Response.ErrorListener {
+                    Log.w(TAG, "Authentication request failed with error ${it.networkResponse.data}")
+                    resultHandler.onError(it)
+                }
         )
     }
 
     fun refreshToken(function: (String) -> Unit) {
+        Log.d(TAG, "Refreshing token")
+        throw NotImplementedError("RefreshToken isn't implememnted")
         TODO("Not yet implemented")
     }
 }

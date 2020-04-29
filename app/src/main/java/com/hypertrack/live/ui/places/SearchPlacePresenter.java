@@ -26,7 +26,7 @@ import com.google.android.libraries.places.api.net.FetchPlaceResponse;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
 import com.google.android.libraries.places.api.net.PlacesClient;
-import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.backend.ShareableTrip;
 import com.hypertrack.backend.TripConfig;
@@ -53,7 +53,7 @@ class SearchPlacePresenter {
 
     private final HyperTrack hyperTrack;
     private final PlacesClient placesClient;
-    private final BackendProvider mBackendProvider;
+    private final AbstractBackendProvider mBackendProvider;
 
     private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
         @Override
@@ -69,7 +69,7 @@ class SearchPlacePresenter {
     private final Handler handler = new Handler();
     private final CompositeDisposable disposables = new CompositeDisposable();
 
-    public SearchPlacePresenter(Context context, String mode, View view, @NonNull BackendProvider backendProvider) {
+    public SearchPlacePresenter(Context context, String mode, View view, @NonNull AbstractBackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
         this.state = new SearchPlaceState(this.context, mode, backendProvider);

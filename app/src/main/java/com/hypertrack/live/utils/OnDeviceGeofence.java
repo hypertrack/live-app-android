@@ -110,7 +110,7 @@ public class OnDeviceGeofence extends BroadcastReceiver {
             String transitionType = geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER
                     ? "enter"
                     : "exit";
-            HTMobileClient.getBackendProvider(context)
+            HTMobileClient.getBackendProvider(context, deviceId)
                     .sendGeofenceTransition(deviceId, transitionType, null);
         } else {
             // Log the error.

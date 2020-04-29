@@ -8,6 +8,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.App;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.MapUtils;
@@ -20,7 +21,6 @@ import com.hypertrack.sdk.views.dao.StatusUpdate;
 import com.hypertrack.sdk.views.dao.Trip;
 import com.hypertrack.sdk.views.maps.HyperTrackMap;
 import com.hypertrack.backend.ResultHandler;
-import com.hypertrack.backend.BackendProvider;
 
 class ShareTripPresenter implements DeviceUpdatesHandler {
     private static final String TAG = App.TAG + "ShTripPresenter";
@@ -31,10 +31,10 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
 
     private final HyperTrack hyperTrack;
     private final HyperTrackViews hyperTrackViews;
-    private final BackendProvider mBackendProvider;
+    private final AbstractBackendProvider mBackendProvider;
     private HyperTrackMap hyperTrackMap;
 
-    ShareTripPresenter(Context context, View view, String shareUrl, @NonNull BackendProvider backendProvider) {
+    ShareTripPresenter(Context context, View view, String shareUrl, @NonNull AbstractBackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
         this.state = new ShareTripState(context);

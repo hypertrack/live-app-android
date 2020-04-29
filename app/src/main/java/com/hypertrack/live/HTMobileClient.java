@@ -26,6 +26,8 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.hypertrack.backend.AbstractBackendProvider;
+import com.hypertrack.backend.PublicKeyAuthorizedBackendProvider;
 import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.BuildConfig;
 import com.hypertrack.sdk.logger.HTLogger;
@@ -41,6 +43,7 @@ import java.util.TimeZone;
 
 public class HTMobileClient {
     private static final String TAG = App.TAG + "HTMobileClient";
+    private static final String PUB_KEY = "pub_key";
 
     private final Context mContext;
     private RequestQueue mRequestQueue;
@@ -60,9 +63,16 @@ public class HTMobileClient {
         }
         return client;
     }
-    public static BackendProvider getBackendProvider(Context context) {
+    public static AbstractBackendProvider getBackendProvider(Context context, @NonNull String deviceId) {
 
-        return getCognitoAuthorizedBackendProvider(context);
+        @NonNull String publishableKey = SharedHelper.getInstance(context).sharedPreferences()
+                .getString(PUB_KEY, "");
+        if (publishableKey.isEmpty()) {
+            return getCognitoAuthorizedBackendProvider(context);
+        } else {
+            return new PublicKeyAuthorizedBackendProvider(context, publishableKey, deviceId);
+        }
+
     }
 
     private static BackendProvider getCognitoAuthorizedBackendProvider(Context context) {
@@ -75,10 +85,7 @@ public class HTMobileClient {
                         resultHandler.onResult(result.getIdToken().getTokenString());
                     }
 
-                    @Override
-                    public void onError(Exception e) {
-                        resultHandler.onError(e);
-                    }
+                    @Override public void onError(Exception e) { resultHandler.onError(e); }
                 });
             }
         });
@@ -177,7 +184,7 @@ public class HTMobileClient {
                 String hyperTrackPublicKey = response.get("key").getAsString();
                 SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getString(R.string.app_name), Context.MODE_PRIVATE);
                 sharedPreferences.edit()
-                        .putString("pub_key", hyperTrackPublicKey)
+                        .putString(PUB_KEY, hyperTrackPublicKey)
                         .apply();
 
                 callback.onSuccess(HTMobileClient.this);

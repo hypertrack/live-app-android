@@ -14,7 +14,7 @@ import com.google.gson.annotations.SerializedName
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
-private const val ADDRESS = "https://live-app-backend.htprod.hypertrack.com/"
+private const val ADDRESS = "https://live-app-backend.htprod.hypertrack.com/client/"
 private const val LIVE_APP_BACKEND_DEVICES_ENDPOINT = ADDRESS + "devices/"
 private const val LIVE_APP_BACKEND_TRIPS_ENDPOINT = ADDRESS + "trips/"
 
@@ -125,7 +125,7 @@ class GeofenceEventRequest(
 class GetInternalTokenRequest(
         private val gson: Gson,
         deviceId: String,
-        val publishableKey: String,
+        private val publishableKey: String,
         responseListener: Response.Listener<String>,
         errorListener: Response.ErrorListener
 ) : JsonRequest<String>(
@@ -137,13 +137,15 @@ class GetInternalTokenRequest(
         val genericHeaders = super.getHeaders()
         val headers = HashMap<String, String>(genericHeaders.size + 2)
         headers["User-Agent"] = getUserAgent()
-        headers["Authorization"] = "Basic ${Base64.encode("$publishableKey:".toByteArray(), Base64.NO_WRAP)}"
+        headers["Authorization"] = "Basic ${Base64.encodeToString("$publishableKey:".toByteArray(), Base64.NO_WRAP)}"
+        Log.d(TAG, "Authentication request headers are $headers")
         return headers
     }
 
     override fun parseNetworkResponse(networkResponse: NetworkResponse?): Response<String> {
         networkResponse?.let {
             response ->
+            Log.d(TAG, "Got auth response $response")
             if (isSuccessFamilyStatus(response)) {
 
                 try {
@@ -153,6 +155,7 @@ class GetInternalTokenRequest(
                     }
                     val tokenResponse = gson.fromJson<TokenResponse>(responseBody, TokenResponse::class.java)
                     tokenResponse?.token?.let { token ->
+                        Log.d(TAG, "Got token $token")
                         return Response.success(token, null)
                     }
                 } catch (error: UnsupportedEncodingException) {
@@ -183,6 +186,7 @@ abstract class LiveAppBackendRequest<T>(private val tokenString: String, url: St
         headers.putAll(defaultHeaders)
         headers["Authorization"] = "Bearer $tokenString"
         headers["User-Agent"] = getUserAgent()
+        Log.d(TAG, "Executing LiveBackend request with headers $headers")
         return headers
     }
 }

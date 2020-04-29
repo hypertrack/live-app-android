@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
 import com.hypertrack.live.utils.OnDeviceGeofence;
@@ -21,14 +21,14 @@ import java.util.Set;
 
 class SearchPlaceState extends BaseState {
     private final String mode;
-    private final BackendProvider mBackendProvider;
+    private final AbstractBackendProvider mBackendProvider;
     private PlaceModel destination;
     private PlaceModel home;
     private Gson gson = new Gson();
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
 
-    SearchPlaceState(Context context, String mode, @NonNull BackendProvider backendProvider) {
+    SearchPlaceState(Context context, String mode, @NonNull AbstractBackendProvider backendProvider) {
         super(context);
         this.mode = mode;
         String homeJson = preferences().getString(SharedHelper.HOME_PLACE_KEY, null);

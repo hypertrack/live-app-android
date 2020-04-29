@@ -13,8 +13,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.places.SearchPlaceFragment;
 import com.hypertrack.live.utils.AppUtils;
@@ -31,8 +31,6 @@ import com.hypertrack.sdk.views.maps.HyperTrackMap;
 import com.hypertrack.sdk.views.maps.Predicate;
 import com.hypertrack.sdk.views.maps.TripSubscription;
 import com.hypertrack.backend.ResultHandler;
-import com.hypertrack.backend.BackendProvider;
-
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -50,7 +48,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private final HyperTrack hyperTrack;
     private final HyperTrackViews hyperTrackViews;
     private HyperTrackMap hyperTrackMap;
-    @NonNull private final BackendProvider mBackendProvider;
+    @NonNull private final AbstractBackendProvider mBackendProvider;
 
     private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
         @Override
@@ -69,7 +67,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
 
     private Timer tripInfoUpdater;
 
-    public TrackingPresenter(@NonNull Context context, @NonNull final View view, @NonNull BackendProvider backendProvider) {
+    public TrackingPresenter(@NonNull Context context, @NonNull final View view, @NonNull AbstractBackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
         state = new TrackingState(context);

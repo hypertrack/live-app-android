@@ -13,7 +13,7 @@ import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
@@ -25,7 +25,7 @@ public class ShareTripFragment extends Fragment
 
     public static final String TRIP_ID_KEY = "trip_id";
     public static final String SHARE_URL_KEY = "share_url";
-    private final BackendProvider mBackendProvider;
+    private final AbstractBackendProvider mBackendProvider;
 
     private ShareTripPresenter presenter;
 
@@ -34,7 +34,7 @@ public class ShareTripFragment extends Fragment
     private String tripId;
     private String shareUrl;
 
-    public static Fragment newInstance(String tripId, String shareUrl, @NonNull BackendProvider backendProvider) {
+    public static Fragment newInstance(String tripId, String shareUrl, @NonNull AbstractBackendProvider backendProvider) {
         ShareTripFragment fragment = new ShareTripFragment(backendProvider);
         Bundle bundle = new Bundle();
         bundle.putString(TRIP_ID_KEY, tripId);
@@ -43,7 +43,7 @@ public class ShareTripFragment extends Fragment
         return fragment;
     }
 
-    private ShareTripFragment(@NonNull BackendProvider backendProvider) {
+    private ShareTripFragment(@NonNull AbstractBackendProvider backendProvider) {
         mBackendProvider = backendProvider;
     }
 

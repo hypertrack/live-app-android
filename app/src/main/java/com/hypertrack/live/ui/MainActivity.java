@@ -175,14 +175,17 @@ public class MainActivity extends AppCompatActivity {
 
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
+        initializeHyperTrack(hyperTrackPublicKey);
         if (TextUtils.isEmpty(hyperTrackPublicKey) || !PermissionsManager.isAllPermissionsApproved(this)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
-            beginFragmentTransaction(new TrackingFragment(HTMobileClient.getBackendProvider(this.getApplicationContext()))).commitAllowingStateLoss();
+            beginFragmentTransaction(
+                    new TrackingFragment(
+                            HTMobileClient.getBackendProvider(this.getApplicationContext(), hyperTrack.getDeviceID()))
+            ).commitAllowingStateLoss();
         }
 
-        initializeHyperTrack(hyperTrackPublicKey);
 
         if (hyperTrack != null) {
             if (hyperTrack.isRunning()) {

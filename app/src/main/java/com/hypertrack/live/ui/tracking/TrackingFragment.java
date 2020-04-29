@@ -23,7 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class TrackingFragment extends Fragment implements OnMapReadyCallback, TrackingPresenter.View {
 
     private static final DateFormat DATE_FORMAT = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
-    private final BackendProvider mBackendProvider;
+    private final AbstractBackendProvider mBackendProvider;
 
     private Snackbar tripConfirmSnackbar;
     private View blockingView;
@@ -67,7 +67,7 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
     @NonNull private TrackingPresenter presenter;
     private TripsAdapter tripsAdapter;
 
-    public TrackingFragment(@NonNull BackendProvider backendProvider) {
+    public TrackingFragment(@NonNull AbstractBackendProvider backendProvider) {
         mBackendProvider = backendProvider;
     }
 

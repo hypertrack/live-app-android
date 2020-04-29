@@ -26,7 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.hypertrack.backend.BackendProvider;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.R;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.LoaderDecorator;
@@ -38,7 +38,7 @@ import java.util.List;
 
 public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback, SearchPlacePresenter.View {
 
-    private final BackendProvider mBackendProvider;
+    private final AbstractBackendProvider mBackendProvider;
     private Config config;
 
     private SearchPlacePresenter presenter;
@@ -54,7 +54,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
     private PlacesAdapter placesAdapter;
     private LoaderDecorator loader;
 
-    public static SearchPlaceFragment newInstance(Config config, @NonNull BackendProvider backendProvider) {
+    public static SearchPlaceFragment newInstance(Config config, @NonNull AbstractBackendProvider backendProvider) {
         SearchPlaceFragment fragment = new SearchPlaceFragment(backendProvider);
         Bundle bundle = new Bundle();
         bundle.putParcelable("config", config);
@@ -321,7 +321,7 @@ public class SearchPlaceFragment extends Fragment implements OnMapReadyCallback,
         presenter.destroy();
     }
 
-    private SearchPlaceFragment(@NonNull BackendProvider backendProvider) {
+    private SearchPlaceFragment(@NonNull AbstractBackendProvider backendProvider) {
         mBackendProvider = backendProvider;
     }
 
