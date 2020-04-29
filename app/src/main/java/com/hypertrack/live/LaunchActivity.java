@@ -35,11 +35,11 @@ public class LaunchActivity extends AppCompatActivity {
         SharedHelper sharedHelper = SharedHelper.getInstance(this);
         final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
         Branch.getAutoInstance(getApplicationContext());
-        HTMobileClient htMobileClient = HTMobileClient.getInstance(this);
+        CognitoClient cognitoClient = CognitoClient.getInstance(this);
 
-        htMobileClient.initialize(new HTMobileClient.Callback() {
+        cognitoClient.initialize(new CognitoClient.Callback() {
             @Override
-            public void onSuccess(HTMobileClient mobileClient) {
+            public void onSuccess(CognitoClient mobileClient) {
                 if (!mobileClient.isAuthorized() || TextUtils.isEmpty(hyperTrackPublicKey)) {
                     if (mobileClient.isAuthorized() && TextUtils.isEmpty(hyperTrackPublicKey)) {
                         addConfirmationFragment();

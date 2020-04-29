@@ -36,13 +36,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.PermissionsManager;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.tracking.TrackingFragment;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.SharedHelper;
+import com.hypertrack.live.BackendClientFactory;
 import com.hypertrack.live.views.Snackbar;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.ServiceNotificationConfig;
@@ -160,15 +161,17 @@ public class MainActivity extends AppCompatActivity {
                 ((TextView)drawerLayout.findViewById(R.id.email_address)).setText(emailAddress);
         drawerLayout.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                HTMobileClient.getInstance(MainActivity.this).logout();
-                Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
-                intent.setAction(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                startActivity(intent);
-                finish();
-            }
+            public void onClick(View view) { logout(); }
         });
+    }
+
+    private void logout() {
+        CognitoClient.getInstance(MainActivity.this).logout();
+        Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        startActivity(intent);
+        finish();
     }
 
     public void onStateUpdate() {
@@ -182,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             beginFragmentTransaction(
                     new TrackingFragment(
-                            HTMobileClient.getBackendProvider(this.getApplicationContext(), hyperTrack.getDeviceID()))
+                            BackendClientFactory.getBackendProvider(this.getApplicationContext(), hyperTrack.getDeviceID()))
             ).commitAllowingStateLoss();
         }
 

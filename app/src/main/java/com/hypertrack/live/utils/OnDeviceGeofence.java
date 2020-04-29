@@ -18,18 +18,22 @@ import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.backend.AbstractBackendProvider;
+import com.hypertrack.live.BackendClientFactory;
+
+import java.util.Collections;
 
 
 public class OnDeviceGeofence extends BroadcastReceiver {
     private static final String TAG = "OnDeviceGeofence";
     public static final float GEOFENCE_RADIUS = 100.0f;
     private static final String DEVICE_ID = "device_id";
+    private static final String GEOFENCE_REQUEST_ID = "home";
 
     private static GeofencingRequest  getGeofencingRequest(double latitude, double longitude) {
         Log.d(TAG, String.format("addGeofence: lat %f, long %f", latitude, longitude));
         Geofence geofence = new Geofence.Builder()
-                .setRequestId("home")
+                .setRequestId(GEOFENCE_REQUEST_ID)
                 .setCircularRegion(latitude, longitude, GEOFENCE_RADIUS)
                 .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                 .setExpirationDuration(Geofence.NEVER_EXPIRE)
@@ -110,8 +114,15 @@ public class OnDeviceGeofence extends BroadcastReceiver {
             String transitionType = geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER
                     ? "enter"
                     : "exit";
-            HTMobileClient.getBackendProvider(context, deviceId)
-                    .sendGeofenceTransition(deviceId, transitionType, null);
+            AbstractBackendProvider backendProvider = BackendClientFactory.getBackendProvider(context, deviceId);
+            if (backendProvider != null) {
+                backendProvider.sendGeofenceTransition(deviceId, transitionType, null);
+            } else {
+                // We logged out disable geofence
+                LocationServices
+                        .getGeofencingClient(context)
+                        .removeGeofences(Collections.singletonList(GEOFENCE_REQUEST_ID));
+            }
         } else {
             // Log the error.
             Log.w(TAG, String.format("Unexpected geofence transition type %d. Ignoring.",

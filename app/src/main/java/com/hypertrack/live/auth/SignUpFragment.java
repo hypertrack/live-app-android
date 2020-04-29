@@ -26,7 +26,7 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsException;
-import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.utils.HTTextWatcher;
@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("ConstantConditions")
-public class SignUpFragment extends Fragment implements HTMobileClient.Callback {
+public class SignUpFragment extends Fragment implements CognitoClient.Callback {
 
 
     private static final int PAGES_COUNT = 2;
@@ -140,7 +140,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
                     return;
                 }
                 loader.start();
-                HTMobileClient.getInstance(getContext()).signUp(email, password, cognitoUserAttributes, SignUpFragment.this);
+                CognitoClient.getInstance(getContext()).signUp(email, password, cognitoUserAttributes, SignUpFragment.this);
             }
         });
 
@@ -188,7 +188,7 @@ public class SignUpFragment extends Fragment implements HTMobileClient.Callback 
     }
 
     @Override
-    public void onSuccess(HTMobileClient mobileClient) {
+    public void onSuccess(CognitoClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
             getActivity().getSupportFragmentManager().beginTransaction()
