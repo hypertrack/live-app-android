@@ -50,7 +50,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
     private final HyperTrack hyperTrack;
     private final HyperTrackViews hyperTrackViews;
     private HyperTrackMap hyperTrackMap;
-    private final BackendProvider tripsManager;
+    private final BackendProvider mBackendProvider;
 
     private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
         @Override
@@ -77,7 +77,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
 
-        tripsManager = HTMobileClient.getBackendProvider(context);
+        mBackendProvider = HTMobileClient.getBackendProvider(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         this.context.registerReceiver(connectivityReceiver, intentFilter);
@@ -159,7 +159,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         if (!TextUtils.isEmpty(state.getSelectedTripId())) {
             view.showProgressBar();
 
-            tripsManager.completeTrip(state.getSelectedTripId(), new ResultHandler<String>() {
+            mBackendProvider.completeTrip(state.getSelectedTripId(), new ResultHandler<String>() {
 
                 @Override
                 public void onResult(@NonNull String result) {

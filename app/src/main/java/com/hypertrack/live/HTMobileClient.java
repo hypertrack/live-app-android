@@ -61,6 +61,11 @@ public class HTMobileClient {
         return client;
     }
     public static BackendProvider getBackendProvider(Context context) {
+
+        return getCognitoAuthorizedBackendProvider(context);
+    }
+
+    private static BackendProvider getCognitoAuthorizedBackendProvider(Context context) {
         return BackendProvider.getInstance(context, new AsyncTokenProvider() {
             @Override
             public void getAuthenticationToken(@NonNull final ResultHandler<String> resultHandler) {
@@ -160,7 +165,7 @@ public class HTMobileClient {
 
     }
 
-    public void updatePublishableKey(@NonNull final Callback callback) {
+    private void updatePublishableKey(@NonNull final Callback callback) {
         if (!isAuthorized()) {
             return;
         }
@@ -190,7 +195,7 @@ public class HTMobileClient {
         request(request);
     }
 
-    public void request(@NonNull final Request request) {
+    private void request(@NonNull final Request request) {
         AWSMobileClient.getInstance().getTokens(new com.amazonaws.mobile.client.Callback<Tokens>() {
             @Override
             public void onResult(Tokens result) {

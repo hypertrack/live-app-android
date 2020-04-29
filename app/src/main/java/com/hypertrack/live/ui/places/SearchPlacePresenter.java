@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.wrappers.InstantApps;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
@@ -55,7 +54,7 @@ class SearchPlacePresenter {
 
     private final HyperTrack hyperTrack;
     private final PlacesClient placesClient;
-    private final BackendProvider tripsManager;
+    private final BackendProvider mBackendProvider;
 
     private final BroadcastReceiver connectivityReceiver = new BroadcastReceiver() {
         @Override
@@ -78,7 +77,7 @@ class SearchPlacePresenter {
 
         hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
         placesClient = Places.createClient(context);
-        tripsManager = HTMobileClient.getBackendProvider(context);
+        mBackendProvider = HTMobileClient.getBackendProvider(context);
 
         IntentFilter intentFilter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         this.context.registerReceiver(connectivityReceiver, intentFilter);
@@ -279,7 +278,7 @@ class SearchPlacePresenter {
                     .setDeviceId(hyperTrack.getDeviceID())
                     .build();
         }
-        tripsManager.createTrip(tripRequest, resultHandler);
+        mBackendProvider.createTrip(tripRequest, resultHandler);
         if (!AppUtils.isGpsProviderEnabled(context)) {
             actionLocationSourceSettings();
         }
