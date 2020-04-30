@@ -1,7 +1,6 @@
 package com.hypertrack.live.ui;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 
 import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.HyperTrack;

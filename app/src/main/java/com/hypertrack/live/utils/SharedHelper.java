@@ -176,6 +176,10 @@ public class SharedHelper {
         preferences.edit().putString(CREATED_TRIP_SHARE_URL, shareUrl).apply();
     }
 
+    @LoginType public String getLoginType() {
+        return preferences.getString(LOGIN_TYPE, LOGIN_TYPE_COGNITO);
+    }
+
     public void setLoginType(@LoginType String loginType) {
         preferences.edit().putString(LOGIN_TYPE, loginType).apply();
     }
