@@ -99,6 +99,19 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         backendProvider.getInviteLink(retryCallback)
     }
 
+    override fun getAccountName(callback: ResultHandler<String>) {
+        Log.d(TAG, "Requesting account email")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.getAccountEmail(callback)
+                    }
+        }
+        backendProvider.getAccountEmail(retryCallback)
+    }
+
     private fun <T> getErrorHandlerWithTokenAutoRefresh(
             error: Exception,
             callback: ResultHandler<T>?,
@@ -125,6 +138,7 @@ interface AbstractBackendProvider {
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
     fun sendGeofenceTransition(transitionType: String)
     fun getInviteLink(callback: ResultHandler<String>)
+    fun getAccountName(callback: ResultHandler<String>)
 }
 
 class BackendProvider(
@@ -221,6 +235,17 @@ class BackendProvider(
         })
     }
 
+    fun getAccountEmail(callback: ResultHandler<String>) {
+        Log.i(TAG, "getAccountEmail")
+        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
+            override fun onResult(result: String) =
+                    scheduleAuthenticatedGetAccountEmailRequest(result, callback)
+
+            override fun onError(error: Exception) = callback.onError(error)
+
+        })
+    }
+
     private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String, callback: ResultHandler<Unit>?) {
 
         val successListener:Response.Listener<Unit>? = if (callback != null) Response.Listener { callback.onResult(Unit) } else null
@@ -292,7 +317,23 @@ class BackendProvider(
                 Response.ErrorListener { error -> callback.onError(error as Exception) }
         )
         request.retryPolicy = defaultRetryPolicy
-        Log.d(TAG, "Adding complete trip request to queue")
+        Log.d(TAG, "Adding deeplink request to queue")
+        queue.add(request)
+
+    }
+
+    private fun scheduleAuthenticatedGetAccountEmailRequest(tokenString: String, callback: ResultHandler<String>) {
+        Log.d(TAG, "Requesting account email with token $tokenString")
+        val request = GetAccountEmailRequest(
+                tokenString, Response.Listener {
+            email ->
+            Log.d(TAG, "Got email $email")
+            callback.onResult(email)
+        },
+                Response.ErrorListener { error -> callback.onError(error as Exception) }
+        )
+        request.retryPolicy = defaultRetryPolicy
+        Log.d(TAG, "Adding account email request to queue")
         queue.add(request)
 
     }

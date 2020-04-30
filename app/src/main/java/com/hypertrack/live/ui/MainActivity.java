@@ -35,6 +35,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.hypertrack.backend.AbstractBackendProvider;
+import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.App;
 import com.hypertrack.live.BackendClientFactory;
 import com.hypertrack.live.CognitoClient;
@@ -191,6 +192,9 @@ public class MainActivity extends AppCompatActivity {
             //noinspection ConstantConditions
             beginFragmentTransaction(new TrackingFragment(mBackendProvider))
                     .commitAllowingStateLoss();
+            if (sharedHelper.getAccountEmail().isEmpty()) {
+                getAccountEmail(true);
+            }
         }
 
 
@@ -201,6 +205,20 @@ public class MainActivity extends AppCompatActivity {
                 onTrackingStop();
             }
         }
+    }
+
+    private void getAccountEmail(final boolean shouldRetry) {
+        mBackendProvider.getAccountName(new ResultHandler<String>() {
+            @Override
+            public void onResult(String result) { sharedHelper.setAccountEmail(result); }
+
+            @Override
+            public void onError(@NonNull Exception error) {
+                Log.w(TAG, "Error getting account email ", error);
+                if (shouldRetry)
+                    getAccountEmail(false);
+            }
+        });
     }
 
     @Override

@@ -4,11 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.amazonaws.mobile.client.AWSMobileClient
-import com.amazonaws.mobile.client.Callback
-import com.amazonaws.mobile.client.UserStateDetails
-import com.amazonaws.mobile.client.results.SignInResult
-import com.amazonaws.mobile.client.results.Tokens
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -113,6 +108,26 @@ class BackendProviderTest {
         })
         requestFinishedSignal.await(TEST_TIMEOUT, TimeUnit.SECONDS)
         assertTrue(deeplink.isNotEmpty())
+
+    }
+
+    @Test
+    fun test0060ItShouldGetDeeplinkWhenRequested() {
+        Log.d(TAG,"Getting accountEmail")
+        val requestFinishedSignal = CountDownLatch(1)
+        var accountName = "";
+        backendProvider.getAccountName(object : ResultHandler<String> {
+            override fun onResult(result: String) {
+                accountName = result;
+                requestFinishedSignal.countDown()
+            }
+
+            override fun onError(error: Exception) {
+                requestFinishedSignal.countDown()
+            }
+        })
+        requestFinishedSignal.await(TEST_TIMEOUT, TimeUnit.SECONDS)
+        assertTrue(accountName.isNotEmpty())
 
     }
 

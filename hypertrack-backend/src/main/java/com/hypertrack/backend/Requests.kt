@@ -118,6 +118,19 @@ class GetDeeplinkRequest(tokenString: String, responseListener: Response.Listene
     }
 }
 
+class GetAccountEmailRequest(tokenString: String, responseListener: Response.Listener<String>,
+                         errorListener: Response.ErrorListener) :
+        LiveAppBackendRequest<String>(tokenString,
+                "${ADDRESS}account_name/", "",
+                responseListener, errorListener, Method.GET) {
+
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
+        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(String(it.data), null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url ${ADDRESS}account_name/")
+        return Response.error(VolleyError(response))
+    }
+}
+
 class GeofenceEventRequest(
         deviceId: String, eventName: String,
         tokenString: String,
