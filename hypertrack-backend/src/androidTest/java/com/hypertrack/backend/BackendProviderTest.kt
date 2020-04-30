@@ -18,68 +18,17 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class TripsManagerTest {
+class BackendProviderTest {
 
-    lateinit var awsMobileClient: AWSMobileClient
     lateinit var appContext : Context
-    lateinit var awsAsyncTokenProvider: AsyncTokenProvider
-    lateinit var tripManager: BackendProvider
+    lateinit var backendProvider: AbstractBackendProvider
 
 
     @Before
     fun setup() {
-        val countDownLatch = CountDownLatch(1)
+
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        awsMobileClient = AWSMobileClient.getInstance()
-                awsMobileClient.initialize(appContext, object : Callback<UserStateDetails> {
-                    override fun onResult(result: UserStateDetails?) {
-                        Log.i(TAG, "Aws mobile client initialized")
-                        signIn(countDownLatch)
-                    }
-
-                    override fun onError(e: java.lang.Exception?) {
-                        Log.e(TAG, "AWS Client initialization failed with exception $e")
-                        countDownLatch.countDown()
-                    }
-                })
-        Log.i(TAG, "AWS client Setup finished")
-        countDownLatch.await(TEST_TIMEOUT, TimeUnit.SECONDS)
-
-        awsAsyncTokenProvider = object : AsyncTokenProvider {
-            override fun getAuthenticationToken(resultHandler: ResultHandler<String>) {
-                AWSMobileClient.getInstance().getTokens(object :Callback<Tokens> {
-                    override fun onResult(result: Tokens?) {
-                        val tokenString = result?.idToken?.tokenString
-                        tokenString?.let {
-                            resultHandler.onResult(tokenString)
-                            return
-                        }
-                        fail("Can't fetch AWS token")
-                    }
-
-                    override fun onError(e: java.lang.Exception?) {
-                        fail("Can't fetch AWS token $e")
-                    }
-                })
-            }
-        }
-        tripManager = BackendProvider.getInstance(appContext, awsAsyncTokenProvider)
-    }
-
-    private fun signIn(countDownLatch: CountDownLatch) {
-        awsMobileClient.signIn("team@hypertrack.com", "Hyp3rTr@ck321",
-                null, object : Callback<SignInResult> {
-            override fun onResult(result: SignInResult?) {
-                Log.i(TAG, "AWS signin finished with result $result")
-                countDownLatch.countDown()
-            }
-
-            override fun onError(e: java.lang.Exception?) {
-                Log.e(TAG, "AWS signing failed with exception $e")
-                countDownLatch.countDown()
-            }
-
-        })
+        backendProvider = PublicKeyAuthorizedBackendProvider(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
     }
 
     @Test @LargeTest
@@ -88,11 +37,11 @@ class TripsManagerTest {
         val request = TripConfig.Builder()
                 .setDestinationLatitude(35.120995)
                 .setDestinationLongitude(47.84918)
-                .setDeviceId("E15E21C3-C942-3FEA-B33B-16A58E291CD0")
+                .setDeviceId(DEVICE_ID)
                 .build()
 
         val latch = CountDownLatch(1)
-        tripManager.createTrip(request, object : ResultHandler<ShareableTrip> {
+        backendProvider.createTrip(request, object : ResultHandler<ShareableTrip> {
             override fun onResult(result: ShareableTrip) {
                 Log.i(TAG,"Got shareable trip ${result.tripId}")
                 assertNotNull(result)
@@ -129,7 +78,7 @@ class TripsManagerTest {
 
         var completedTripId:String? = null
 
-        testTrip?.let {  tripManager.completeTrip(it.tripId, object : ResultHandler<String> {
+        testTrip?.let {  backendProvider.completeTrip(it.tripId, object : ResultHandler<String> {
             override fun onResult(result: String) {
                 completedTripId = result
                 requestFinishedSignal.countDown()
@@ -149,6 +98,8 @@ class TripsManagerTest {
 
     companion object {
         var testTrip: ShareableTrip? = null
+        const val DEVICE_ID = "E15E21C3-C942-3FEA-B33B-16A58E291CD0"
+        const val PUBLISHABLE_KEY = "uvIAA8xJANxUxDgINOX62-LINLuLeymS6JbGieJ9PegAPITcr9fgUpROpfSMdL9kv-qFjl17NeAuBHse8Qu9sw"
         const val TAG = "TripsManagerTest"
         const val TEST_TIMEOUT = 10L
     }
