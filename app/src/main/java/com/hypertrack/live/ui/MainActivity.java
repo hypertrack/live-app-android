@@ -169,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void logout() {
 
-        mBackendProvider.stop(null);
+        mBackendProvider.stop();
         CognitoClient.getInstance(MainActivity.this).logout();
         sharedHelper.logout();
         Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     .commitAllowingStateLoss();
         } else {
             mBackendProvider = BackendClientFactory.getBackendProvider(this, hyperTrack.getDeviceID());
+            //noinspection ConstantConditions
             beginFragmentTransaction(new TrackingFragment(mBackendProvider))
                     .commitAllowingStateLoss();
         }

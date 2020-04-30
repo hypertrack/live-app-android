@@ -32,14 +32,14 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         backendProvider.start(deviceID, retryCallback)
     }
 
-    override fun stop(callback: ResultHandler<String>) {
+    override fun stop() {
         Log.i(TAG, "stop $deviceID")
         val retryCallback = object : ResultHandler<String> {
-            override fun onResult(result: String) = callback.onResult(result)
+            override fun onResult(result: String) {}
 
             override fun onError(error: Exception) =
-                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
-                        backendProvider.stop(deviceID, callback)
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, null) {
+                        backendProvider.stop(deviceID, null)
                     }
         }
         backendProvider.stop(deviceID, retryCallback)
@@ -120,7 +120,7 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
 interface AbstractBackendProvider {
     fun start(callback: ResultHandler<String>)
-    fun stop(callback: ResultHandler<String>)
+    fun stop()
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
     fun sendGeofenceTransition(transitionType: String)
@@ -153,10 +153,10 @@ class BackendProvider(
         })
     }
 
-    fun stop(deviceId: String, callback: ResultHandler<String>) {
+    fun stop(deviceId: String, callback: ResultHandler<String>?) {
         Log.i(TAG, "stop $deviceId")
         if (deviceId.isEmpty()) {
-            callback.onError(java.lang.Exception("Can't stop with empty deviceId"))
+            callback?.onError(java.lang.Exception("Can't stop with empty deviceId"))
             return
         }
 
@@ -164,7 +164,7 @@ class BackendProvider(
             override fun onResult(result: String) =
                     scheduleAuthenticatedStopTrackingRequest(deviceId, result, callback)
 
-            override fun onError(error: Exception) = callback.onError(error)
+            override fun onError(error: Exception) {callback?.onError(error)}
 
         })
     }
@@ -245,11 +245,11 @@ class BackendProvider(
 
     }
 
-    private fun scheduleAuthenticatedStopTrackingRequest(deviceId: String, tokenString: String, callback: ResultHandler<String>) {
+    private fun scheduleAuthenticatedStopTrackingRequest(deviceId: String, tokenString: String, callback: ResultHandler<String>?) {
         val request = StopTrackingRequest(
                 deviceId, tokenString,
-                Response.Listener { callback.onResult(deviceId) },
-                Response.ErrorListener { error -> callback.onError(error as Exception) }
+                Response.Listener { callback?.onResult(deviceId) },
+                Response.ErrorListener { error -> callback?.onError(error as Exception) }
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding stop request to queue")
