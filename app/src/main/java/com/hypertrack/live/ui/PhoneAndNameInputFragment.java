@@ -57,10 +57,7 @@ public class PhoneAndNameInputFragment extends Fragment {
                     String userPhone = phoneText.getText().toString();
 
                     SharedHelper sharedHelper = SharedHelper.getInstance(getActivity());
-                    sharedHelper.sharedPreferences().edit()
-                            .putString(SharedHelper.USER_NAME_KEY, userName)
-                            .putString(SharedHelper.USER_PHONE_KEY, userPhone)
-                            .apply();
+                    sharedHelper.setUserNameAndPhone(userName, userPhone);
 
                     hyperTrack.setDeviceName(getString(R.string.phone_number_user_name, userPhone, userName))
                             .setDeviceMetadata(sharedHelper.getDeviceMetadata());

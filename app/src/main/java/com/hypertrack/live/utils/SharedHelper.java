@@ -26,8 +26,8 @@ public class SharedHelper {
 
     private static final String PUB_KEY = "pub_key";
     private static final String USER_EMAIL_KEY = "user_email";
-    public static final String USER_NAME_KEY = "user_name";
-    public static final String USER_PHONE_KEY = "user_phone";
+    private static final String USER_NAME_KEY = "user_name";
+    private static final String USER_PHONE_KEY = "user_phone";
     private static final String HOME_PLACE_KEY = "home_place";
     private static final String USER_HOME_ADDRESS_KEY = "user_home_address";
     private static final String USER_HOME_LATLON_KEY = "user_home_latlon";
@@ -60,10 +60,6 @@ public class SharedHelper {
         preferences = context.getSharedPreferences(context.getString(R.string.app_name), Context.MODE_PRIVATE);
     }
 
-    public SharedPreferences sharedPreferences() {
-        return preferences;
-    }
-
     @NonNull
     public String getAccountEmail() {
         return preferences.getString(USER_EMAIL_KEY, "");
@@ -81,6 +77,17 @@ public class SharedHelper {
     public void setHyperTrackPubKey(@NonNull String hyperTrackPubKey) {
         preferences.edit()
                 .putString(SharedHelper.PUB_KEY, hyperTrackPubKey)
+                .apply();
+    }
+
+    public void removeHyperTrackPubKey() {
+        preferences.edit().remove(PUB_KEY).apply();
+    }
+
+    public void setUserNameAndPhone(@Nullable String name, @Nullable String phone) {
+        preferences.edit()
+                .putString(SharedHelper.USER_NAME_KEY, name)
+                .putString(SharedHelper.USER_PHONE_KEY, phone)
                 .apply();
     }
 

@@ -404,9 +404,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        sharedHelper.sharedPreferences().edit()
-                                .remove("pub_key")
-                                .apply();
+                        sharedHelper.removeHyperTrackPubKey();
                         beginFragmentTransaction(WelcomeFragment.newInstance(sharedHelper.getHyperTrackPubKey()))
                                 .commitAllowingStateLoss();
                     }
