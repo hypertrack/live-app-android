@@ -1,17 +1,14 @@
 package com.hypertrack.live.ui.places;
 
 import android.content.Context;
+
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
 import com.hypertrack.live.utils.OnDeviceGeofence;
-import com.hypertrack.live.utils.SharedHelper;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -19,42 +16,26 @@ class SearchPlaceState extends BaseState {
     private final String mode;
     private PlaceModel destination;
     private PlaceModel home;
-    private Gson gson = new Gson();
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
 
     SearchPlaceState(Context context, String mode) {
         super(context);
         this.mode = mode;
-        String homeJson = preferences().getString(SharedHelper.HOME_PLACE_KEY, null);
-        Type homeType = new TypeToken<PlaceModel>() {}.getType();
-        home = gson.fromJson(homeJson, homeType);
-        String recentJson = preferences().getString("recent", "[]");
-        Type listType = new TypeToken<HashSet<PlaceModel>>() {}.getType();
-        recentPlaces = gson.fromJson(recentJson, listType);
+        home = sharedHelper.getHomePlace();
+        recentPlaces = sharedHelper.getRecentPlaces();
     }
 
-    public String getMode() {
-        return mode;
-    }
+    String getMode() { return mode; }
 
-    PlaceModel getDestination() {
-        return destination;
-    }
+    PlaceModel getDestination() { return destination; }
 
-    void setDestination(PlaceModel destination) {
-        this.destination = destination;
-    }
+    PlaceModel getHome() { return home; }
 
-    public PlaceModel getHome() {
-        return home;
-    }
+    void setDestination(PlaceModel destination) { this.destination = destination; }
 
     void saveHomePlace(PlaceModel home) {
-        String homeJson = gson.toJson(home);
-        preferences().edit()
-                .putString(SharedHelper.HOME_PLACE_KEY, homeJson)
-                .apply();
+        sharedHelper.setHomePlace(home);
         hyperTrack.setDeviceMetadata(sharedHelper.getDeviceMetadata());
 
         if (home != null) {
@@ -76,7 +57,6 @@ class SearchPlaceState extends BaseState {
 
         placeModel.isRecent = true;
         recentPlaces.add(placeModel);
-        String recentJson = gson.toJson(recentPlaces);
-        preferences().edit().putString("recent", recentJson).apply();
+        sharedHelper.setRecentPlaces(recentPlaces);
     }
 }

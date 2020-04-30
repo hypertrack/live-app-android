@@ -4,8 +4,10 @@ package com.hypertrack.live;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.hypertrack.live.auth.ConfirmFragment;
@@ -14,9 +16,15 @@ import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
 import com.hypertrack.live.utils.SharedHelper;
 
+import org.json.JSONObject;
+
+import io.branch.referral.Branch;
+import io.branch.referral.BranchError;
+
 
 
 public class LaunchActivity extends AppCompatActivity {
+    private static final String TAG = "LaunchActivity";
     private LoaderDecorator mLoader;
 
     @Override
@@ -24,27 +32,72 @@ public class LaunchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
 
-        SharedHelper sharedHelper = SharedHelper.getInstance(this);
-        final String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
-        HTMobileClient htMobileClient = HTMobileClient.getInstance(this);
-
-        htMobileClient.initialize(new HTMobileClient.Callback() {
-            @Override
-            public void onSuccess(HTMobileClient mobileClient) {
-                if (!mobileClient.isAuthorized() || TextUtils.isEmpty(hyperTrackPublicKey)) {
-                    if (mobileClient.isAuthorized() && TextUtils.isEmpty(hyperTrackPublicKey)) {
-                        addConfirmationFragment();
+        final String hyperTrackPublicKey = SharedHelper.getInstance(this).getHyperTrackPubKey();
+        if (hyperTrackPublicKey.isEmpty()) {
+            mLoader = new LoaderDecorator(this);
+            Branch.getAutoInstance(getApplicationContext());
+            CognitoClient cognitoClient = CognitoClient.getInstance(this);
+            cognitoClient.initialize(new CognitoClient.Callback() {
+                @Override
+                public void onSuccess(CognitoClient mobileClient) {
+                    if (!mobileClient.isAuthorized() || TextUtils.isEmpty(hyperTrackPublicKey)) {
+                        if (mobileClient.isAuthorized() && TextUtils.isEmpty(hyperTrackPublicKey)) {
+                            addConfirmationFragment();
+                        } else {
+                            addSigninFragment();
+                        }
                     } else {
-                        addSigninFragment();
+                        startActivity(new Intent(LaunchActivity.this, MainActivity.class));
+                        finish();
                     }
-                } else {
-                    startActivity(new Intent(LaunchActivity.this, MainActivity.class));
-                    finish();
+                }
+
+                @Override public void onError(String message, Exception e) { showError(e); }
+            });
+
+        } else {
+            onLoginCompleted();
+        }
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "onStart: ");
+        mLoader.start();
+        Branch.sessionBuilder(this)
+                .withCallback(getCallback())
+                .withData(getIntent() != null ? getIntent().getData() : null)
+                .init();
+
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        // if activity is in foreground (or in backstack but partially visible) launching the same
+        // activity will skip onStart, handle this case with reInitSession
+        Branch.sessionBuilder(this).withCallback(getCallback()).reInit();
+    }
+
+    private Branch.BranchReferralInitListener getCallback() {
+        return new Branch.BranchReferralInitListener() {
+            @Override
+            public void onInitFinished(@Nullable JSONObject referringParams, @Nullable BranchError error) {
+                Log.d(TAG, "onInitFinished: with params: " + (referringParams == null ? "null" : referringParams)
+                + ", with error " + (error == null ? "null" : error.getMessage()));
+                mLoader.stop();
+                if (referringParams == null) return;
+                String key = referringParams.optString("publishable_key");
+                if (!key.isEmpty()) {
+                    Log.d(TAG, "Got publishable key from branch.io payload" + key);
+                    SharedHelper sharedHelper = SharedHelper.getInstance(LaunchActivity.this);
+                    sharedHelper.setHyperTrackPubKey(key);
+                    sharedHelper.setLoginType(SharedHelper.LOGIN_TYPE_DEEPLINK);
+                    LaunchActivity.this.onLoginCompleted();
                 }
             }
-
-            @Override public void onError(String message, Exception e) { showError(e); }
-        });
+        };
     }
 
     public void showError(Exception e) {
@@ -52,7 +105,7 @@ public class LaunchActivity extends AppCompatActivity {
     }
 
     public void onLoginCompleted() {
-
+        Log.d(TAG, "onLoginCompleted: ");
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }

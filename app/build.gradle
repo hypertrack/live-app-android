@@ -87,13 +87,17 @@ dependencies {
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
-    implementation 'com.hypertrack:hypertrack:4.2.0'
+    implementation 'com.hypertrack:hypertrack:4.3.0'
     implementation 'com.hypertrack:hypertrack-views:0.8.6'
     implementation 'com.hypertrack:maps-google:0.1.8'
     implementation project(':hypertrack-backend')
 
     implementation 'com.airbnb.android:lottie:3.1.0'
 
+    // branch.io
+    implementation 'io.branch.sdk.android:library:5.0.0'
+    implementation 'com.google.firebase:firebase-appindexing:19.0.0'
+    implementation 'com.google.android.gms:play-services-ads-identifier:17.0.0'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.robolectric:robolectric:4.3'

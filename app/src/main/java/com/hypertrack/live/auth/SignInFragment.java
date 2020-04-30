@@ -18,13 +18,13 @@ import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedExcepti
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.utils.HTTextWatcher;
 
-public class SignInFragment extends Fragment implements HTMobileClient.Callback {
+public class SignInFragment extends Fragment implements CognitoClient.Callback {
 
     private static final String TAG = App.TAG + "SignInFragment";
 
@@ -92,11 +92,11 @@ public class SignInFragment extends Fragment implements HTMobileClient.Callback 
 
     public void startSignIn(String email, String password) {
         loader.start();
-        HTMobileClient.getInstance(getContext()).signIn(email, password, SignInFragment.this);
+        CognitoClient.getInstance(getContext()).signIn(email, password, SignInFragment.this);
     }
 
     @Override
-    public void onSuccess(HTMobileClient mobileClient) {
+    public void onSuccess(CognitoClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
             ((LaunchActivity)getActivity()).onLoginCompleted();

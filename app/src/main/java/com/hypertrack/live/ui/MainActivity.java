@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -35,8 +34,11 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.hypertrack.backend.AbstractBackendProvider;
+import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.BackendClientFactory;
+import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.PermissionsManager;
 import com.hypertrack.live.R;
@@ -93,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     };
+    private AbstractBackendProvider mBackendProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,33 +159,44 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String emailAddress = sharedHelper.sharedPreferences().getString(SharedHelper.USER_EMAIL_KEY, "");
+        String emailAddress = sharedHelper.getAccountEmail();
                 ((TextView)drawerLayout.findViewById(R.id.email_address)).setText(emailAddress);
         drawerLayout.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                HTMobileClient.getInstance(MainActivity.this).logout();
-                Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
-                intent.setAction(Intent.ACTION_MAIN);
-                intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                startActivity(intent);
-                finish();
-            }
+            public void onClick(View view) { logout(); }
         });
+    }
+
+    private void logout() {
+
+        mBackendProvider.stop();
+        CognitoClient.getInstance(MainActivity.this).logout();
+        sharedHelper.logout();
+        Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        startActivity(intent);
+        finish();
     }
 
     public void onStateUpdate() {
 
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
+        initializeHyperTrack(hyperTrackPublicKey);
         if (TextUtils.isEmpty(hyperTrackPublicKey) || !PermissionsManager.isAllPermissionsApproved(this)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
-            beginFragmentTransaction(new TrackingFragment()).commitAllowingStateLoss();
+            mBackendProvider = BackendClientFactory.getBackendProvider(this, hyperTrack.getDeviceID());
+            //noinspection ConstantConditions
+            beginFragmentTransaction(new TrackingFragment(mBackendProvider))
+                    .commitAllowingStateLoss();
+            if (sharedHelper.getAccountEmail().isEmpty()) {
+                getAccountEmail(true);
+            }
         }
 
-        initializeHyperTrack(hyperTrackPublicKey);
 
         if (hyperTrack != null) {
             if (hyperTrack.isRunning()) {
@@ -191,6 +205,23 @@ public class MainActivity extends AppCompatActivity {
                 onTrackingStop();
             }
         }
+    }
+
+    private void getAccountEmail(final boolean shouldRetry) {
+        mBackendProvider.getAccountName(new ResultHandler<String>() {
+            @Override
+            public void onResult(String result) {
+                 sharedHelper.setAccountEmail(result);
+                 setupDrawerLayout();
+            }
+
+            @Override
+            public void onError(@NonNull Exception error) {
+                Log.w(TAG, "Error getting account email ", error);
+                if (shouldRetry)
+                    getAccountEmail(false);
+            }
+        });
     }
 
     @Override
@@ -223,10 +254,9 @@ public class MainActivity extends AppCompatActivity {
         if ((requestCode & 0x0000ffff) == VERIFICATION_REQUEST) {
             if (resultCode == RESULT_OK) {
                 String hyperTrackPublicKey = data.getStringExtra(VerificationActivity.VERIFICATION_KEY);
-                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                sharedPreferences.edit()
-                        .putString("pub_key", hyperTrackPublicKey)
-                        .apply();
+                if (hyperTrackPublicKey != null) {
+                    sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
+                }
                 onStateUpdate();
             }
         } else if (requestCode == PERMISSIONS_REQUEST) {
@@ -397,9 +427,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        sharedHelper.sharedPreferences().edit()
-                                .remove("pub_key")
-                                .apply();
+                        sharedHelper.removeHyperTrackPubKey();
                         beginFragmentTransaction(WelcomeFragment.newInstance(sharedHelper.getHyperTrackPubKey()))
                                 .commitAllowingStateLoss();
                     }

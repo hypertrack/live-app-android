@@ -19,7 +19,6 @@ import java.util.Map;
 
 class TrackingState extends BaseState {
     private String tripId;
-    private final boolean isCovid19;
     private final boolean isHomeLatLngAdded;
     private TripModel mTripModel;
     final Map<String, Trip> trips = new HashMap<>();
@@ -32,28 +31,23 @@ class TrackingState extends BaseState {
     void setSelectedTrip(Trip trip) {
         if (trip != null) {
             this.tripId = trip.getTripId();
-            preferences().edit().putString("selected_trip_id", tripId).apply();
+            sharedHelper.setSelectedTripId(tripId);
             mTripModel = TripModel.fromTrip(trip);
         } else {
             tripId = null;
             mTripModel = null;
-            preferences().edit().remove("selected_trip_id").apply();
+            sharedHelper.clearSelectedTripId();
         }
     }
 
-    public boolean isCovid19() {
-        return isCovid19;
-    }
-
-    public boolean isHomeLatLngAdded() {
+    boolean isHomeLatLngAdded() {
         return isHomeLatLngAdded;
     }
 
     TrackingState(Context context) {
         super(context);
-        tripId = preferences().getString("selected_trip_id", null);
-        isCovid19 = preferences().getBoolean(SharedHelper.COVID_19, false);
-        isHomeLatLngAdded = preferences().contains(SharedHelper.HOME_PLACE_KEY);
+        tripId = sharedHelper.getSelectedTripId();
+        isHomeLatLngAdded = sharedHelper.isHomePlaceSet();
     }
 
     List<Trip> getAllTripsStartingFromLatest() {

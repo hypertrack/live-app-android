@@ -23,6 +23,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 public class TrackingFragment extends Fragment implements OnMapReadyCallback, TrackingPresenter.View {
 
     private static final DateFormat DATE_FORMAT = SimpleDateFormat.getTimeInstance(DateFormat.SHORT);
+    private final AbstractBackendProvider mBackendProvider;
 
     private Snackbar tripConfirmSnackbar;
     private View blockingView;
@@ -62,8 +64,12 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
     private TextView destination;
     private LoaderDecorator loader;
 
-    private TrackingPresenter presenter;
+    @NonNull private TrackingPresenter presenter;
     private TripsAdapter tripsAdapter;
+
+    public TrackingFragment(@NonNull AbstractBackendProvider backendProvider) {
+        mBackendProvider = backendProvider;
+    }
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -179,7 +185,7 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
                 });
 
         loader = new LoaderDecorator(view.getContext());
-        presenter = new TrackingPresenter(view.getContext(), this);
+        presenter = new TrackingPresenter(view.getContext(), this, mBackendProvider);
     }
 
     @Override
@@ -370,7 +376,7 @@ public class TrackingFragment extends Fragment implements OnMapReadyCallback, Tr
     @Override
     public void addSearchPlaceFragment(SearchPlaceFragment.Config config) {
         if (getActivity() != null) {
-            ((MainActivity) getActivity()).beginFragmentTransaction(SearchPlaceFragment.newInstance(config))
+            ((MainActivity) getActivity()).beginFragmentTransaction(SearchPlaceFragment.newInstance(config, mBackendProvider))
                     .addToBackStack(null)
                     .commitAllowingStateLoss();
         }

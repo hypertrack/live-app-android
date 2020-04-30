@@ -12,12 +12,12 @@ import androidx.fragment.app.Fragment;
 
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
 import com.hypertrack.live.App;
-import com.hypertrack.live.HTMobileClient;
+import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 
-public class ConfirmFragment extends Fragment implements HTMobileClient.Callback {
+public class ConfirmFragment extends Fragment implements CognitoClient.Callback {
 
     private static final String TAG = App.TAG + "ConfirmFragment";
 
@@ -38,7 +38,7 @@ public class ConfirmFragment extends Fragment implements HTMobileClient.Callback
             @Override
             public void onClick(View view) {
                 loader.start();
-                HTMobileClient.getInstance(getContext()).confirmSignUp(ConfirmFragment.this);
+                CognitoClient.getInstance(getContext()).confirmSignUp(ConfirmFragment.this);
             }
         });
 
@@ -46,9 +46,9 @@ public class ConfirmFragment extends Fragment implements HTMobileClient.Callback
             @Override
             public void onClick(View view) {
                 loader.start();
-                HTMobileClient.getInstance(getContext()).resendSignUp(new HTMobileClient.Callback() {
+                CognitoClient.getInstance(getContext()).resendSignUp(new CognitoClient.Callback() {
                     @Override
-                    public void onSuccess(HTMobileClient mobileClient) {
+                    public void onSuccess(CognitoClient mobileClient) {
                         if (getActivity() != null) {
                             loader.stop();
                         }
@@ -68,7 +68,7 @@ public class ConfirmFragment extends Fragment implements HTMobileClient.Callback
     }
 
     @Override
-    public void onSuccess(HTMobileClient mobileClient) {
+    public void onSuccess(CognitoClient mobileClient) {
         if (getActivity() != null) {
             loader.stop();
             ((LaunchActivity)getActivity()).onLoginCompleted();

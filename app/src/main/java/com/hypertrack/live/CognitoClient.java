@@ -2,7 +2,6 @@ package com.hypertrack.live;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.text.TextUtils;
@@ -30,16 +29,13 @@ import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.BuildConfig;
 import com.hypertrack.sdk.logger.HTLogger;
 import com.hypertrack.sdk.utils.StaticUtilsAdapter;
-import com.hypertrack.backend.AsyncTokenProvider;
-import com.hypertrack.backend.ResultHandler;
-import com.hypertrack.backend.BackendProvider;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
 
-public class HTMobileClient {
+public class CognitoClient {
     private static final String TAG = App.TAG + "HTMobileClient";
 
     private final Context mContext;
@@ -49,37 +45,18 @@ public class HTMobileClient {
 
     private String signUpEmail;
     private String signUpPassword;
-    private String deviceId;
 
     @SuppressLint("StaticFieldLeak")
-    private static HTMobileClient client;
+    private static CognitoClient client;
 
-    public synchronized static HTMobileClient getInstance(Context context) {
+    public synchronized static CognitoClient getInstance(Context context) {
         if (client == null) {
-            client = new HTMobileClient(context);
+            client = new CognitoClient(context);
         }
         return client;
     }
-    public static BackendProvider getBackendProvider(Context context) {
-        return BackendProvider.getInstance(context, new AsyncTokenProvider() {
-            @Override
-            public void getAuthenticationToken(@NonNull final ResultHandler<String> resultHandler) {
-                AWSMobileClient.getInstance().getTokens(new com.amazonaws.mobile.client.Callback<Tokens>() {
-                    @Override
-                    public void onResult(Tokens result) {
-                        resultHandler.onResult(result.getIdToken().getTokenString());
-                    }
 
-                    @Override
-                    public void onError(Exception e) {
-                        resultHandler.onError(e);
-                    }
-                });
-            }
-        });
-    }
-
-    private HTMobileClient(Context context) {
+    private CognitoClient(Context context) {
         mContext = context.getApplicationContext() == null ? context : context.getApplicationContext();
         mRequestQueue = Volley.newRequestQueue(mContext.getApplicationContext());
         sharedHelper = SharedHelper.getInstance(context);
@@ -91,15 +68,15 @@ public class HTMobileClient {
         headers.put("timezone", TimeZone.getDefault().getID());
     }
 
-    public boolean isAuthorized() {
+    boolean isAuthorized() {
         return AWSMobileClient.getInstance().isSignedIn();
     }
 
-    public void initialize(@NonNull final Callback callback) {
+    void initialize(@NonNull final Callback callback) {
         AWSMobileClient.getInstance().initialize(mContext, new InnerCallback<UserStateDetails>(callback) {
             @Override
             public void onResult(UserStateDetails userStateDetails) {
-                onSuccessHidden(HTMobileClient.this);
+                onSuccessHidden(CognitoClient.this);
             }
         });
     }
@@ -109,9 +86,7 @@ public class HTMobileClient {
 
             @Override
             public void onResult(SignInResult result) {
-                sharedHelper.sharedPreferences().edit()
-                        .putString(SharedHelper.USER_EMAIL_KEY, email)
-                        .apply();
+                sharedHelper.setAccountEmail(email);
                 updatePublishableKey(callback);
             }
 
@@ -128,12 +103,10 @@ public class HTMobileClient {
         AWSMobileClient.getInstance().signUp(email, password, attributes, null, new InnerCallback<SignUpResult>(callback) {
             @Override
             public void onResult(SignUpResult result) {
-                sharedHelper.sharedPreferences().edit()
-                        .putString(SharedHelper.USER_EMAIL_KEY, email)
-                        .apply();
+                sharedHelper.setAccountEmail(email);
                 signUpEmail = email;
                 signUpPassword = password;
-                onSuccessHidden(HTMobileClient.this);
+                onSuccessHidden(CognitoClient.this);
             }
         });
     }
@@ -143,7 +116,7 @@ public class HTMobileClient {
             AWSMobileClient.getInstance().resendSignUp(signUpEmail, new InnerCallback<SignUpResult>(callback) {
                 @Override
                 public void onResult(SignUpResult result) {
-                    onSuccessHidden(HTMobileClient.this);
+                    onSuccessHidden(CognitoClient.this);
                 }
             });
         }
@@ -160,7 +133,7 @@ public class HTMobileClient {
 
     }
 
-    public void updatePublishableKey(@NonNull final Callback callback) {
+    private void updatePublishableKey(@NonNull final Callback callback) {
         if (!isAuthorized()) {
             return;
         }
@@ -170,12 +143,10 @@ public class HTMobileClient {
             public void onResponse(JsonObject response) {
                 Log.d(TAG, "getPublishableKey onResponse: " + response);
                 String hyperTrackPublicKey = response.get("key").getAsString();
-                SharedPreferences sharedPreferences = mContext.getSharedPreferences(mContext.getString(R.string.app_name), Context.MODE_PRIVATE);
-                sharedPreferences.edit()
-                        .putString("pub_key", hyperTrackPublicKey)
-                        .apply();
-
-                callback.onSuccess(HTMobileClient.this);
+                sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
+                sharedHelper.setLoginType(SharedHelper.LOGIN_TYPE_COGNITO);
+                AWSMobileClient.getInstance().signOut(); // We don't need to be signed in anymore
+                callback.onSuccess(CognitoClient.this);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -190,7 +161,7 @@ public class HTMobileClient {
         request(request);
     }
 
-    public void request(@NonNull final Request request) {
+    private void request(@NonNull final Request request) {
         AWSMobileClient.getInstance().getTokens(new com.amazonaws.mobile.client.Callback<Tokens>() {
             @Override
             public void onResult(Tokens result) {
@@ -211,8 +182,12 @@ public class HTMobileClient {
     }
 
     public void logout() {
-        AWSMobileClient.getInstance().signOut();
-        sharedHelper.sharedPreferences().edit().clear().apply();
+
+        try {
+            AWSMobileClient.getInstance().signOut();
+        } catch (Exception ignored) {
+            // AWS doesn't provide way of getting user state when their client wasn't initialized
+        }
     }
 
     public static class Request extends JsonRequest<JsonObject> {
@@ -275,7 +250,7 @@ public class HTMobileClient {
             onErrorHidden(e.getLocalizedMessage(), e);
         }
 
-        protected void onSuccessHidden(final HTMobileClient mobileClient) {
+        void onSuccessHidden(final CognitoClient mobileClient) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -284,7 +259,7 @@ public class HTMobileClient {
             });
         }
 
-        protected void onErrorHidden(final String message, final Exception e) {
+        void onErrorHidden(final String message, final Exception e) {
             handler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -295,7 +270,7 @@ public class HTMobileClient {
     }
 
     public interface Callback {
-        void onSuccess(HTMobileClient mobileClient);
+        void onSuccess(CognitoClient mobileClient);
 
         void onError(String message, Exception e);
     }
