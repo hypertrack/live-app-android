@@ -210,7 +210,10 @@ public class MainActivity extends AppCompatActivity {
     private void getAccountEmail(final boolean shouldRetry) {
         mBackendProvider.getAccountName(new ResultHandler<String>() {
             @Override
-            public void onResult(String result) { sharedHelper.setAccountEmail(result); }
+            public void onResult(String result) {
+                 sharedHelper.setAccountEmail(result);
+                 setupDrawerLayout();
+            }
 
             @Override
             public void onError(@NonNull Exception error) {
