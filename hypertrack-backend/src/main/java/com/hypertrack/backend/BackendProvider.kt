@@ -94,7 +94,7 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         when (error) {
             is VolleyError -> {
                 if (error.networkResponse.statusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-                    internalApiIssuesTokenProvider.refreshToken { retryCall() }
+                    internalApiIssuesTokenProvider.refreshToken(queue) { retryCall() }
                     return
                 }
             }
@@ -308,10 +308,15 @@ class InternalApiTokenProvider(
         )
     }
 
-    fun refreshToken(function: (String) -> Unit) {
+    fun refreshToken(queue: RequestQueue, retryCall: () -> Unit) {
         Log.d(TAG, "Refreshing token")
-        throw NotImplementedError("RefreshToken isn't implememnted")
-        TODO("Not yet implemented")
+        token = ""
+        queue.add(
+                GetInternalTokenRequest(gson, deviceId, publishableKey,
+                    Response.Listener { retryCall() },
+                    Response.ErrorListener { retryCall() }
+                )
+        )
     }
 }
 
