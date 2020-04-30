@@ -24,16 +24,21 @@ public class AppUtils {
 
     public static void shareTrackMessage(@NonNull Context context, String shareableMessage) {
         if (shareableMessage.isEmpty()) return;
+        String sharingTitle = context.getString(R.string.share_trip_via);
 
+        shareAction(context, shareableMessage, sharingTitle);
+    }
+
+    public static void shareAction(@NonNull Context context, String shareableMessage, String sharingTitle) {
         Intent sendIntent = new Intent();
         sendIntent.setAction(Intent.ACTION_SEND);
         sendIntent.putExtra(Intent.EXTRA_TEXT, shareableMessage);
         sendIntent.setType("text/plain");
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP_MR1) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
             Intent intent = new Intent(SHARE_BROADCAST_ACTION);
             intent.setPackage(context.getPackageName());
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            Intent chooser = Intent.createChooser(sendIntent, context.getString(R.string.share_trip_via), pendingIntent.getIntentSender());
+            Intent chooser = Intent.createChooser(sendIntent, sharingTitle, pendingIntent.getIntentSender());
             chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(chooser);
         } else {

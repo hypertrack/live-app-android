@@ -170,6 +170,20 @@ public class MainActivity extends AppCompatActivity {
         } else {
             logoutButton.setVisibility(View.INVISIBLE);
         }
+        View inviteButton = drawerLayout.findViewById(R.id.invite_member);
+        if (sharedHelper.getInviteLink().isEmpty()) {
+            inviteButton.setVisibility(View.GONE);
+
+        } else {
+            inviteButton.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View view) {
+                    AppUtils.shareAction(
+                            MainActivity.this,
+                            sharedHelper.getInviteLink(),
+                            getString(R.string.invite_via));
+                }
+            });
+        }
     }
 
     private void logout() {
@@ -200,6 +214,9 @@ public class MainActivity extends AppCompatActivity {
             if (sharedHelper.getAccountEmail().isEmpty()) {
                 getAccountEmail(true);
             }
+            if (sharedHelper.getInviteLink().isEmpty()) {
+                getInviteLink(true);
+            }
         }
 
 
@@ -225,6 +242,23 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Error getting account email ", error);
                 if (shouldRetry)
                     getAccountEmail(false);
+            }
+        });
+    }
+
+    private void getInviteLink(final boolean shouldRetry) {
+        mBackendProvider.getInviteLink(new ResultHandler<String>() {
+            @Override
+            public void onResult(String result) {
+                 sharedHelper.setInviteLink(result);
+                 setupDrawerLayout();
+            }
+
+            @Override
+            public void onError(@NonNull Exception error) {
+                Log.w(TAG, "Error getting account email ", error);
+                if (shouldRetry)
+                    getInviteLink(false);
             }
         });
     }

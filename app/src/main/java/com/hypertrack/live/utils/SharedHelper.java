@@ -40,6 +40,7 @@ public class SharedHelper {
 
     public static final String LOGIN_TYPE_DEEPLINK = "com.hypertrack.live.utils.LOGIN_TYPE_DEEPLINK";
     public static final String LOGIN_TYPE_COGNITO = "com.hypertrack.live.utils.LOGIN_TYPE_COGNITO";
+    private static final String INVITE_LINK_KEY = "com.hypertrack.live.utils.INVITE_LINK_KEY";
 
     @StringDef({LOGIN_TYPE_COGNITO, LOGIN_TYPE_DEEPLINK}) @Retention(RetentionPolicy.SOURCE)
     public @interface LoginType {}
@@ -67,6 +68,15 @@ public class SharedHelper {
 
     public void setAccountEmail(@NonNull String email) {
         preferences.edit().putString(USER_EMAIL_KEY, email).apply();
+    }
+
+    @NonNull
+    public String getInviteLink() {
+        return preferences.getString(INVITE_LINK_KEY, "");
+    }
+
+    public void setInviteLink(@NonNull String inviteLink) {
+        preferences.edit().putString(INVITE_LINK_KEY, inviteLink).apply();
     }
 
     @NonNull
