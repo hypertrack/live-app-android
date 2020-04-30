@@ -35,6 +35,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.App;
 import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
@@ -94,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     };
+    private AbstractBackendProvider mBackendProvider;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -166,6 +168,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void logout() {
+
+        mBackendProvider.stop(null);
         CognitoClient.getInstance(MainActivity.this).logout();
         sharedHelper.logout();
         Intent intent = new Intent(MainActivity.this, LaunchActivity.class);
@@ -184,10 +188,9 @@ public class MainActivity extends AppCompatActivity {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
-            beginFragmentTransaction(
-                    new TrackingFragment(
-                            BackendClientFactory.getBackendProvider(this.getApplicationContext(), hyperTrack.getDeviceID()))
-            ).commitAllowingStateLoss();
+            mBackendProvider = BackendClientFactory.getBackendProvider(this, hyperTrack.getDeviceID());
+            beginFragmentTransaction(new TrackingFragment(mBackendProvider))
+                    .commitAllowingStateLoss();
         }
 
 

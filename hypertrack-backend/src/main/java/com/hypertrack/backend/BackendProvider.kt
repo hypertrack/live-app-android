@@ -12,37 +12,37 @@ import com.google.gson.Gson
 import java.net.HttpURLConnection
 
 
-class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, deviceId: String) : AbstractBackendProvider {
+class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, private val deviceID: String) : AbstractBackendProvider {
 
     val queue = Volley.newRequestQueue(context)
     val gson = Gson()
-    val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceId, publishableKey, gson)
+    val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceID, publishableKey, gson)
     val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider)
 
-    override fun start(deviceId: String, callback: ResultHandler<String>) {
-        Log.i(TAG, "start $deviceId")
+    override fun start(callback: ResultHandler<String>) {
+        Log.i(TAG, "start $deviceID")
         val retryCallback = object : ResultHandler<String> {
             override fun onResult(result: String) = callback.onResult(result)
 
             override fun onError(error: Exception) =
                     getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
-                        backendProvider.start(deviceId, callback)
+                        backendProvider.start(deviceID, callback)
                     }
         }
-        backendProvider.start(deviceId, retryCallback)
+        backendProvider.start(deviceID, retryCallback)
     }
 
-    override fun stop(deviceId: String, callback: ResultHandler<String>) {
-        Log.i(TAG, "stop $deviceId")
+    override fun stop(callback: ResultHandler<String>) {
+        Log.i(TAG, "stop $deviceID")
         val retryCallback = object : ResultHandler<String> {
             override fun onResult(result: String) = callback.onResult(result)
 
             override fun onError(error: Exception) =
                     getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
-                        backendProvider.stop(deviceId, callback)
+                        backendProvider.stop(deviceID, callback)
                     }
         }
-        backendProvider.stop(deviceId, retryCallback)
+        backendProvider.stop(deviceID, retryCallback)
 
     }
 
@@ -73,21 +73,17 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
     }
 
-    override fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>?) {
-        sendGeofenceTransition(deviceId, transitionType)
-    }
-
-    private fun sendGeofenceTransition(deviceId: String, transitionType: String) {
-        Log.i(TAG, "Sending geofence transition $transitionType for device $deviceId")
+    override fun sendGeofenceTransition(transitionType: String) {
+        Log.i(TAG, "Sending geofence transition $transitionType for device $deviceID")
         val retryCallback = object : ResultHandler<Unit> {
             override fun onResult(result: Unit) { }
 
             override fun onError(error: Exception) =
                     getErrorHandlerWithTokenAutoRefresh<Unit>(error, null) {
-                        backendProvider.sendGeofenceTransition(deviceId, transitionType)
+                        backendProvider.sendGeofenceTransition(deviceID, transitionType, null)
                     }
         }
-        backendProvider.sendGeofenceTransition(deviceId, transitionType, retryCallback)
+        backendProvider.sendGeofenceTransition(deviceID, transitionType, retryCallback)
     }
 
     private fun <T> getErrorHandlerWithTokenAutoRefresh(
@@ -110,24 +106,24 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 }
 
 interface AbstractBackendProvider {
-    fun start(deviceId: String, callback: ResultHandler<String>)
-    fun stop(deviceId: String, callback: ResultHandler<String>)
+    fun start(callback: ResultHandler<String>)
+    fun stop(callback: ResultHandler<String>)
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
-    fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>? = null)
+    fun sendGeofenceTransition(transitionType: String)
 }
 
 class BackendProvider(
         private val gson: Gson,
         private val queue: RequestQueue,
         private val tokenProvider: AsyncTokenProvider
-) : AbstractBackendProvider {
+) {
     private val defaultRetryPolicy: DefaultRetryPolicy = DefaultRetryPolicy(
             DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 2,
             DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
             DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
 
-    override fun start(deviceId: String, callback: ResultHandler<String>) {
+    fun start(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "start $deviceId")
         if (deviceId.isEmpty()) {
             callback.onError(java.lang.Exception("Can't start with empty deviceId"))
@@ -143,7 +139,7 @@ class BackendProvider(
         })
     }
 
-    override fun stop(deviceId: String, callback: ResultHandler<String>) {
+    fun stop(deviceId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "stop $deviceId")
         if (deviceId.isEmpty()) {
             callback.onError(java.lang.Exception("Can't stop with empty deviceId"))
@@ -159,7 +155,7 @@ class BackendProvider(
         })
     }
 
-    override fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
+    fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>) {
         Log.i(TAG, "Create trip with config $tripConfig")
         tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
 
@@ -171,7 +167,7 @@ class BackendProvider(
 
     }
 
-    override fun completeTrip(tripId: String, callback: ResultHandler<String>) {
+    fun completeTrip(tripId: String, callback: ResultHandler<String>) {
         Log.i(TAG, "Complete trip $tripId")
         if (tripId.isEmpty()) {
             callback.onError(java.lang.Exception("Can't complete trip with empty id"))
@@ -187,7 +183,7 @@ class BackendProvider(
         })
     }
 
-    override fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>?) {
+    fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>?) {
         Log.i(TAG, "sendGeofenceTransition  $transitionType")
 
         tokenProvider.getAuthenticationToken(object : ResultHandler<String> {

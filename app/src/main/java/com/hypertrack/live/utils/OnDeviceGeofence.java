@@ -116,7 +116,7 @@ public class OnDeviceGeofence extends BroadcastReceiver {
                     : "exit";
             AbstractBackendProvider backendProvider = BackendClientFactory.getBackendProvider(context, deviceId);
             if (backendProvider != null) {
-                backendProvider.sendGeofenceTransition(deviceId, transitionType, null);
+                backendProvider.sendGeofenceTransition(transitionType);
             } else {
                 // We logged out disable geofence
                 LocationServices
