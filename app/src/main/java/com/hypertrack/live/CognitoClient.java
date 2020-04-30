@@ -82,7 +82,8 @@ public class CognitoClient {
     }
 
     public void signIn(final String email, final String password, @NonNull final Callback callback) {
-        AWSMobileClient.getInstance().signIn(email, password, null, new InnerCallback<SignInResult>(callback) {
+        final AWSMobileClient awsMobileClient = AWSMobileClient.getInstance();
+        awsMobileClient.signIn(email, password, null, new InnerCallback<SignInResult>(callback) {
 
             @Override
             public void onResult(SignInResult result) {
@@ -92,9 +93,21 @@ public class CognitoClient {
 
             @Override
             public void onError(Exception e) {
-                super.onError(e);
-                signUpEmail = email;
-                signUpPassword = password;
+                awsMobileClient.signIn(email.toLowerCase(), password, null, new InnerCallback<SignInResult>(callback) {
+
+                    @Override
+                    public void onResult(SignInResult result) {
+                        sharedHelper.setAccountEmail(email);
+                        updatePublishableKey(callback);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        super.onError(e);
+                        signUpEmail = email;
+                        signUpPassword = password;
+                    }
+                });
             }
         });
     }

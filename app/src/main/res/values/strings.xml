@@ -97,6 +97,7 @@
     <string name="trip_will_be_ended_are_you_sure">You haven\'t reach the destination yet, end sharing will end this trip.</string>
     <string name="confirm">Confirm</string>
     <string name="share_trip_via">Share trip via</string>
+    <string name="invite_via">Invite via</string>
 
     <array name="categories">
         <item>not selected</item>
@@ -160,5 +161,6 @@
     <string name="home">Home</string>
     <string name="sign_out">Sign out</string>
     <string name="no_connection">No connection</string>
+    <string name="invite">Invite</string>
 
 </resources>

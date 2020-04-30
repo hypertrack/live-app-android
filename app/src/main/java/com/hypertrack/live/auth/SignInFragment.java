@@ -69,7 +69,7 @@ public class SignInFragment extends Fragment implements CognitoClient.Callback {
             public void onClick(View view) {
                 incorrect.setText("");
 
-                String email = emailAddressEditText.getText().toString().toLowerCase();
+                String email = emailAddressEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
                 if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(password)) {
                     startSignIn(email, password);

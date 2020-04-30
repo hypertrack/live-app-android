@@ -11,4 +11,35 @@
     <color name="highlight">#14000000</color>
     <color name="bgIcon">#c7c6cd</color>
     <color name="cover">#6694929d</color>
+<!--    imported -->
+    <color name="primary_1">#00ce5b</color>
+    <color name="primary_2">#1dc28c</color>
+    <color name="secondary_2">#ffa800</color>
+    <color name="secondary_1">#6f4cff</color>
+    <color name="primary_1_2">#60ff8a</color>
+    <color name="primary_1_medium">#00b733</color>
+    <color name="primary_1_dark">#008a00</color>
+    <color name="primary_2_light">#64f6bc</color>
+    <color name="primary_2_medium">#00b2a2</color>
+    <color name="primary_2_dark">#00846d</color>
+    <color name="secondary_2_light">#ffd94a</color>
+    <color name="secondary_2_dark">#c67900</color>
+    <color name="secondary_1_xlight">#abc9ff</color>
+    <color name="secondary_1_light">#8d7bff</color>
+    <color name="tertiary_1_black">#000000</color>
+    <color name="tertiary_2_xdark">#4c4b5d</color>
+    <color name="tertiary_3_dark">#767381</color>
+    <color name="tertiary_6_mlight">#e0dfe6</color>
+    <color name="tertiary_4_mdark">#94929d</color>
+    <color name="tertiary_5_m">#c7c6cd</color>
+    <color name="tertiary_l_1">#f1f3f4</color>
+    <color name="tertiary_7_white">#ffffff</color>
+    <color name="tertiary_xl">#fafafa</color>
+    <color name="tertiary_l_2">#f3f5f4</color>
+    <color name="context_1">#0a84ff</color>
+    <color name="context_2">#0058cb</color>
+    <color name="context_3">#fe4d5f</color>
+    <color name="context_1_2">#6bb3ff</color>
+    <color name="context_2_2">#ec407a</color>
+    <color name="context_2_3">#ff5252</color>
 </resources>
