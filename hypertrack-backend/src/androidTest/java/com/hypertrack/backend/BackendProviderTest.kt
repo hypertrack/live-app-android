@@ -96,6 +96,26 @@ class BackendProviderTest {
         assertEquals(testTrip?.tripId, completedTripId)
     }
 
+    @Test
+    fun test0050ItShouldGetDeeplinkWhenRequested() {
+        Log.d(TAG,"Getting deeplink")
+        val requestFinishedSignal = CountDownLatch(1)
+        var deeplink = "";
+        backendProvider.getInviteLink(object : ResultHandler<String> {
+            override fun onResult(result: String) {
+                deeplink = result;
+                requestFinishedSignal.countDown()
+            }
+
+            override fun onError(error: Exception) {
+                requestFinishedSignal.countDown()
+            }
+        })
+        requestFinishedSignal.await(TEST_TIMEOUT, TimeUnit.SECONDS)
+        assertTrue(deeplink.isNotEmpty())
+
+    }
+
     companion object {
         var testTrip: ShareableTrip? = null
         const val DEVICE_ID = "E15E21C3-C942-3FEA-B33B-16A58E291CD0"

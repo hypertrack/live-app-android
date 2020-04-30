@@ -86,6 +86,19 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         backendProvider.sendGeofenceTransition(deviceID, transitionType, retryCallback)
     }
 
+    override fun getInviteLink(callback: ResultHandler<String>) {
+        Log.i(TAG, "getInviteLink")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.getInviteLink(callback)
+                    }
+        }
+        backendProvider.getInviteLink(retryCallback)
+    }
+
     private fun <T> getErrorHandlerWithTokenAutoRefresh(
             error: Exception,
             callback: ResultHandler<T>?,
@@ -111,6 +124,7 @@ interface AbstractBackendProvider {
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
     fun sendGeofenceTransition(transitionType: String)
+    fun getInviteLink(callback: ResultHandler<String>)
 }
 
 class BackendProvider(
@@ -196,6 +210,17 @@ class BackendProvider(
         })
     }
 
+    fun getInviteLink(callback: ResultHandler<String>) {
+        Log.i(TAG, "getInviteLink")
+        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
+            override fun onResult(result: String) =
+                    scheduleAuthenticatedGetInviteLinkRequest(result, callback)
+
+            override fun onError(error: Exception) = callback.onError(error)
+
+        })
+    }
+
     private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String, callback: ResultHandler<Unit>?) {
 
         val successListener:Response.Listener<Unit>? = if (callback != null) Response.Listener { callback.onResult(Unit) } else null
@@ -248,6 +273,22 @@ class BackendProvider(
         val request = CompleteTripRequest(
                 tripId, tokenString,
                 Response.Listener { callback.onResult(tripId) },
+                Response.ErrorListener { error -> callback.onError(error as Exception) }
+        )
+        request.retryPolicy = defaultRetryPolicy
+        Log.d(TAG, "Adding complete trip request to queue")
+        queue.add(request)
+
+    }
+
+    private fun scheduleAuthenticatedGetInviteLinkRequest(tokenString: String, callback: ResultHandler<String>) {
+        Log.d(TAG, "Requesting deeplink with token $tokenString")
+        val request = GetDeeplinkRequest(
+                tokenString, Response.Listener {
+            deeplink ->
+            Log.d(TAG, "Got deeplink $deeplink")
+            callback.onResult(deeplink)
+        },
                 Response.ErrorListener { error -> callback.onError(error as Exception) }
         )
         request.retryPolicy = defaultRetryPolicy

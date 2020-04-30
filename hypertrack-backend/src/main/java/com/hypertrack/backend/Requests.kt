@@ -105,6 +105,19 @@ class CompleteTripRequest(private val tripId: String, tokenString: String,
     }
 }
 
+class GetDeeplinkRequest(tokenString: String, responseListener: Response.Listener<String>,
+                         errorListener: Response.ErrorListener) :
+        LiveAppBackendRequest<String>(tokenString,
+                "${ADDRESS}deep_link/live", "",
+                responseListener, errorListener, Method.GET) {
+
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
+        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(String(it.data), null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url ${ADDRESS}deep_link/live")
+        return Response.error(VolleyError(response))
+    }
+}
+
 class GeofenceEventRequest(
         deviceId: String, eventName: String,
         tokenString: String,
@@ -173,7 +186,9 @@ fun isSuccessFamilyStatus(networkResponse: NetworkResponse) = networkResponse.st
 fun getUserAgent() = "LiveApp/${BuildConfig.VERSION_NAME} Volley/1.1.1 Android/${Build.VERSION.RELEASE}"
 
 abstract class LiveAppBackendRequest<T>(private val tokenString: String, url: String, requestBody: String, responseListener: Response.Listener<T>?,
-                                        errorListener: Response.ErrorListener?) : JsonRequest<T>(Method.POST, url, requestBody, responseListener, errorListener) {
+                                        errorListener: Response.ErrorListener?, requestMethod:Int = Method.POST
+) : JsonRequest<T>(requestMethod, url, requestBody, responseListener, errorListener
+) {
 
     override fun parseNetworkError(volleyError: VolleyError?): VolleyError {
         volleyError?.networkResponse?.let { Log.e(TAG, "Got error from url $url data ${String(it.data)}") }
