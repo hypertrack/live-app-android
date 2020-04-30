@@ -161,10 +161,15 @@ public class MainActivity extends AppCompatActivity {
 
         String emailAddress = sharedHelper.getAccountEmail();
                 ((TextView)drawerLayout.findViewById(R.id.email_address)).setText(emailAddress);
-        drawerLayout.findViewById(R.id.logout).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { logout(); }
-        });
+        View logoutButton = drawerLayout.findViewById(R.id.logout);
+        if (sharedHelper.getLoginType().equals(SharedHelper.LOGIN_TYPE_COGNITO)) {
+            logoutButton.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View view) { logout(); }
+            });
+
+        } else {
+            logoutButton.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void logout() {
