@@ -145,6 +145,7 @@ public class CognitoClient {
                 String hyperTrackPublicKey = response.get("key").getAsString();
                 sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
                 sharedHelper.setLoginType(SharedHelper.LOGIN_TYPE_COGNITO);
+                AWSMobileClient.getInstance().signOut(); // We don't need to be signed in anymore
                 callback.onSuccess(CognitoClient.this);
             }
         }, new Response.ErrorListener() {
@@ -180,7 +181,14 @@ public class CognitoClient {
         });
     }
 
-    public void logout() { AWSMobileClient.getInstance().signOut(); }
+    public void logout() {
+
+        try {
+            AWSMobileClient.getInstance().signOut();
+        } catch (Exception ignored) {
+            // AWS doesn't provide way of getting user state when their client wasn't initialized
+        }
+    }
 
     public static class Request extends JsonRequest<JsonObject> {
 
