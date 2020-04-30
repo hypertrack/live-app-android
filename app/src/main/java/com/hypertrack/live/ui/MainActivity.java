@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -37,6 +36,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.live.App;
+import com.hypertrack.live.BackendClientFactory;
 import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.PermissionsManager;
@@ -44,7 +44,6 @@ import com.hypertrack.live.R;
 import com.hypertrack.live.ui.tracking.TrackingFragment;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.SharedHelper;
-import com.hypertrack.live.BackendClientFactory;
 import com.hypertrack.live.views.Snackbar;
 import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.ServiceNotificationConfig;
@@ -234,10 +233,9 @@ public class MainActivity extends AppCompatActivity {
         if ((requestCode & 0x0000ffff) == VERIFICATION_REQUEST) {
             if (resultCode == RESULT_OK) {
                 String hyperTrackPublicKey = data.getStringExtra(VerificationActivity.VERIFICATION_KEY);
-                SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.app_name), MODE_PRIVATE);
-                sharedPreferences.edit()
-                        .putString("pub_key", hyperTrackPublicKey)
-                        .apply();
+                if (hyperTrackPublicKey != null) {
+                    sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
+                }
                 onStateUpdate();
             }
         } else if (requestCode == PERMISSIONS_REQUEST) {
