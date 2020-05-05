@@ -29,8 +29,6 @@ jobs:
       env:
           KEYSTORE_CREDENTIALS: ${{ secrets.KEYSTORE_CREDENTIALS }}
       run: echo $KEYSTORE_CREDENTIALS | base64 --decode >> gradle.properties
-    - name: Check credentials
-      run: cat gradle.properties
     # Build itself  
     - name: Build with Gradle
       run: ./gradlew assembleRelease
