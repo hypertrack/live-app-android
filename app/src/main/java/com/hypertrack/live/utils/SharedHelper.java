@@ -102,15 +102,10 @@ public class SharedHelper {
     }
 
     public Map<String, Object> getDeviceMetadata() {
-        Type listType = new TypeToken<PlaceModel>() {}.getType();
-        PlaceModel placeModel = gson.fromJson(preferences.getString(HOME_PLACE_KEY, null), listType);
 
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(2);
         map.put(USER_NAME_KEY, preferences.getString(USER_NAME_KEY, ""));
         map.put(USER_PHONE_KEY, preferences.getString(USER_PHONE_KEY, ""));
-        if (placeModel != null) {
-            map.put(USER_HOME_ADDRESS_KEY, placeModel.address);
-        }
         return map;
     }
 
