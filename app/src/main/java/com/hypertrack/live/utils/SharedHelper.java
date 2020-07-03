@@ -110,7 +110,6 @@ public class SharedHelper {
         map.put(USER_PHONE_KEY, preferences.getString(USER_PHONE_KEY, ""));
         if (placeModel != null) {
             map.put(USER_HOME_ADDRESS_KEY, placeModel.address);
-            map.put(USER_HOME_LATLON_KEY, placeModel.latLng.latitude +"," + placeModel.latLng.longitude);
         }
         return map;
     }
