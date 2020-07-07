@@ -6,7 +6,6 @@ import androidx.annotation.Nullable;
 
 import com.hypertrack.live.models.TripModel;
 import com.hypertrack.live.ui.BaseState;
-import com.hypertrack.live.utils.SharedHelper;
 import com.hypertrack.sdk.views.dao.Trip;
 
 class ShareTripState extends BaseState {

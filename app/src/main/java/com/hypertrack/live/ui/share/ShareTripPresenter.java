@@ -29,7 +29,7 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
     private final View view;
     private final ShareTripState state;
 
-    private final HyperTrack hyperTrack;
+    private final String hyperTrackDeviceId;
     private final HyperTrackViews hyperTrackViews;
     private final AbstractBackendProvider mBackendProvider;
     private HyperTrackMap hyperTrackMap;
@@ -40,7 +40,7 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
         this.state = new ShareTripState(context);
         state.setShareUrl(shareUrl);
 
-        hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
+        hyperTrackDeviceId = HyperTrack.getInstance(state.getHyperTrackPubKey()).getDeviceID();
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
         this.mBackendProvider = backendProvider;
     }
@@ -53,8 +53,8 @@ class ShareTripPresenter implements DeviceUpdatesHandler {
         }
 
         state.setCurrentTripId(tripId);
-        hyperTrackViews.subscribeToDeviceUpdates(hyperTrack.getDeviceID(), tripId, this);
-        hyperTrackMap.bind(hyperTrackViews, hyperTrack.getDeviceID())
+        hyperTrackViews.subscribeToDeviceUpdates(hyperTrackDeviceId, tripId, this);
+        hyperTrackMap.bind(hyperTrackViews, hyperTrackDeviceId)
                 .subscribeTrip(tripId);
     }
 

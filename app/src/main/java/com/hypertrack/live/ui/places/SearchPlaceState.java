@@ -2,10 +2,10 @@ package com.hypertrack.live.ui.places;
 
 import android.content.Context;
 
-import com.google.gson.Gson;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
 import com.hypertrack.live.utils.OnDeviceGeofence;
+import com.hypertrack.sdk.HyperTrack;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,12 +18,15 @@ class SearchPlaceState extends BaseState {
     private PlaceModel home;
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
+    private String mHypertrackDeviceID;
 
     SearchPlaceState(Context context, String mode) {
         super(context);
+        String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
         this.mode = mode;
         home = sharedHelper.getHomePlace();
         recentPlaces = sharedHelper.getRecentPlaces();
+        mHypertrackDeviceID = HyperTrack.getInstance(hyperTrackPublicKey).getDeviceID();
     }
 
     String getMode() { return mode; }
@@ -36,12 +39,11 @@ class SearchPlaceState extends BaseState {
 
     void saveHomePlace(PlaceModel home) {
         sharedHelper.setHomePlace(home);
-        hyperTrack.setDeviceMetadata(sharedHelper.getDeviceMetadata());
 
         if (home != null) {
             OnDeviceGeofence.addGeofence(mContext,
                     home.latLng.latitude, home.latLng.longitude,
-                    hyperTrack.getDeviceID()
+                    mHypertrackDeviceID
             );
         }
     }
