@@ -1,9 +1,7 @@
 package com.hypertrack.live.ui;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -14,7 +12,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import com.hypertrack.live.PermissionsManager;
@@ -22,6 +19,7 @@ import com.hypertrack.live.R;
 
 public class WelcomeFragment extends Fragment {
 
+    private static final String PUBLISHABLE_KEY = "publishable_key";
     private TextView contentText;
     private Button startButton;
 
@@ -30,7 +28,7 @@ public class WelcomeFragment extends Fragment {
     public static Fragment newInstance(String pubKey) {
         WelcomeFragment fragment = new WelcomeFragment();
         Bundle bundle = new Bundle();
-        bundle.putString(MainActivity.PUBLISHABLE_KEY, pubKey);
+        bundle.putString(PUBLISHABLE_KEY, pubKey);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -40,7 +38,7 @@ public class WelcomeFragment extends Fragment {
         super.onCreate(savedInstanceState);
         Bundle bundle = getArguments();
         if (bundle != null) {
-            pubKey = bundle.getString(MainActivity.PUBLISHABLE_KEY);
+            pubKey = bundle.getString(PUBLISHABLE_KEY);
         }
     }
 
@@ -87,7 +85,7 @@ public class WelcomeFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MainActivity.VERIFICATION_REQUEST) {
             if (resultCode == Activity.RESULT_OK) {
-                pubKey = data.getStringExtra(MainActivity.PUBLISHABLE_KEY);
+                pubKey = data.getStringExtra(PUBLISHABLE_KEY);
                 updateUI();
             }
         }

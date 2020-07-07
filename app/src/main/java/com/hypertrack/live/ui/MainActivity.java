@@ -58,8 +58,6 @@ public class MainActivity extends AppCompatActivity {
     public static final int VERIFICATION_REQUEST = 414;
     public static final int PERMISSIONS_REQUEST = 515;
 
-    public static final String PUBLISHABLE_KEY = "publishable_key";
-
     private SharedHelper sharedHelper;
 
     private HyperTrack hyperTrack;
@@ -202,11 +200,11 @@ public class MainActivity extends AppCompatActivity {
 
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
-        initializeHyperTrack(hyperTrackPublicKey);
         if (TextUtils.isEmpty(hyperTrackPublicKey) || !PermissionsManager.isAllPermissionsApproved(this)) {
             beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
                     .commitAllowingStateLoss();
         } else {
+            initializeHyperTrack(hyperTrackPublicKey);
             mBackendProvider = BackendClientFactory.getBackendProvider(this, hyperTrack.getDeviceID());
             //noinspection ConstantConditions
             beginFragmentTransaction(new TrackingFragment(mBackendProvider))
