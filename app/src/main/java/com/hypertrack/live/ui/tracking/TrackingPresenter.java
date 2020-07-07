@@ -72,7 +72,7 @@ class TrackingPresenter implements DeviceUpdatesHandler {
         this.view = view;
         state = new TrackingState(context);
 
-        hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
+        hyperTrack = HyperTrack.getInstance(state.getHyperTrackPubKey());
         hyperTrackViews = HyperTrackViews.getInstance(context, state.getHyperTrackPubKey());
 
         mBackendProvider = backendProvider;

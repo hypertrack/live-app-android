@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.hypertrack.live.utils.NotificationUtils;
-import com.hypertrack.sdk.HyperTrack;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
 

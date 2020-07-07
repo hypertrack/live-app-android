@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
                     .setSmallIcon(R.drawable.ic_status_bar)
                     .setLargeIcon(R.drawable.ic_notification)
                     .build();
-            hyperTrack = HyperTrack.getInstance(this, hyperTrackPublicKey)
+            hyperTrack = HyperTrack.getInstance(hyperTrackPublicKey)
                     .setTrackingNotificationConfig(notificationConfig);
             Log.i("deviceId", hyperTrack.getDeviceID());
         }
