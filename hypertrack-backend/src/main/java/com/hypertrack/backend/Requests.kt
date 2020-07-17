@@ -11,11 +11,13 @@ import com.android.volley.toolbox.JsonRequest
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
+import com.google.gson.reflect.TypeToken
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 
 private const val ADDRESS = "https://live-app-backend.htprod.hypertrack.com/client/"
 private const val LIVE_APP_BACKEND_DEVICES_ENDPOINT = ADDRESS + "devices/"
+private const val LIVE_APP_BACKEND_GEOFENCES_ENDPOINT = ADDRESS + "geofences/"
 private const val LIVE_APP_BACKEND_TRIPS_ENDPOINT = ADDRESS + "trips/"
 
 private const val TAG = "Requests"
@@ -48,6 +50,47 @@ class StopTrackingRequest(
 ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
         response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()}")
+        return Response.error(VolleyError(response))
+    }
+
+}
+
+class CreateGeofencesRequest(
+        location: GeofenceLocation,
+        deviceId: String,
+        private val gson: Gson,
+        tokenString: String,
+        responseListener: Response.Listener<String>,
+        errorListener: Response.ErrorListener
+) : LiveAppBackendRequest<String>(
+        tokenString, "$LIVE_APP_BACKEND_GEOFENCES_ENDPOINT?device_id=$deviceId", "{\"geofences\":[{\"radius\":50,\"geometry\":{\"type\":\"Point\",\"coordinates\":[${location.longitude},${location.latitude}]},\"metadata\":{\"name\":\"Home\"}}],\"device_id\":\"$deviceId\"}",
+        responseListener, errorListener
+) {
+    override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
+        response?.let {
+            // Expired token etc.
+            if (!isSuccessFamilyStatus(response)) {
+                return Response.error(VolleyError(response))
+            }
+            try {
+                val responseBody = String(it.data, Charset.forName(HttpHeaderParser.parseCharset(it.headers, Charsets.UTF_8.name())))
+                if (responseBody.isEmpty()) {
+                    return Response.error(VolleyError("Can't create trip from empty response"))
+                }
+                val result = gson.fromJson<List<GeofenceResponse>>(responseBody,
+                        object : TypeToken<List<GeofenceResponse>>(){}.type)
+                result?.let {geofences ->
+                    if (geofences.isNotEmpty())
+                        return Response.success(geofences[0].geofenceId, HttpHeaderParser.parseCacheHeaders(response))
+                }
+            } catch (error: UnsupportedEncodingException) {
+                return Response.error(VolleyError(error))
+            } catch (error: JsonSyntaxException) {
+                return Response.error(VolleyError(error))
+            }
+
+        }
         Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()}")
         return Response.error(VolleyError(response))
     }

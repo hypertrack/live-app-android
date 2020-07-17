@@ -86,6 +86,19 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
         backendProvider.sendGeofenceTransition(deviceID, transitionType, retryCallback)
     }
 
+    override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
+        Log.i(TAG, "Get geofences")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.createGeofence(location, deviceID, callback)
+                    }
+        }
+        backendProvider.createGeofence(location, deviceID, retryCallback)
+    }
+
     override fun getInviteLink(callback: ResultHandler<String>) {
         Log.i(TAG, "getInviteLink")
         val retryCallback = object : ResultHandler<String> {
@@ -137,6 +150,7 @@ interface AbstractBackendProvider {
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
     fun sendGeofenceTransition(transitionType: String)
+    fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>)
     fun getInviteLink(callback: ResultHandler<String>)
     fun getAccountName(callback: ResultHandler<String>)
 }
@@ -246,6 +260,22 @@ class BackendProvider(
         })
     }
 
+    fun createGeofence(location: GeofenceLocation, deviceId: String, callback: ResultHandler<String>) {
+        Log.i(TAG, "createGeofence $deviceId for location $location")
+        if (deviceId.isEmpty()) {
+            callback.onError(java.lang.Exception("Can't create geofences with empty deviceId"))
+            return
+        }
+
+        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
+            override fun onResult(result: String) =
+                    scheduleAuthenticatedCreateGeofenceRequest(location, deviceId, result, callback)
+
+            override fun onError(error: Exception) = callback.onError(error)
+
+        })
+    }
+
     private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String, callback: ResultHandler<Unit>?) {
 
         val successListener:Response.Listener<Unit>? = if (callback != null) Response.Listener { callback.onResult(Unit) } else null
@@ -334,6 +364,20 @@ class BackendProvider(
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding account email request to queue")
+        queue.add(request)
+
+    }
+
+    private fun scheduleAuthenticatedCreateGeofenceRequest(
+            location: GeofenceLocation, deviceId: String, tokenString: String, callback: ResultHandler<String>?
+    ) {
+        val request = CreateGeofencesRequest(location,
+                deviceId, gson, tokenString,
+                Response.Listener { callback?.onResult(deviceId) },
+                Response.ErrorListener { error -> callback?.onError(error as Exception) }
+        )
+        request.retryPolicy = defaultRetryPolicy
+        Log.d(TAG, "Adding get geofences request to queue")
         queue.add(request)
 
     }

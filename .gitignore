@@ -85,3 +85,5 @@ lint/tmp/
 # Mac OSX system files
 **.DS_Store
 
+/.idea/jarRepositories.xml
+/app/src/test/resources/robolectric.properties
