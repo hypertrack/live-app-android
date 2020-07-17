@@ -1,32 +1,38 @@
 package com.hypertrack.live.ui.places;
 
 import android.content.Context;
+import android.os.Handler;
+import android.util.Log;
 
+import androidx.annotation.NonNull;
+
+import com.hypertrack.backend.AbstractBackendProvider;
+import com.hypertrack.backend.GeofenceLocation;
+import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
-import com.hypertrack.live.utils.OnDeviceGeofence;
-import com.hypertrack.sdk.HyperTrack;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 class SearchPlaceState extends BaseState {
+    private static final String TAG = "SearchPlaceState";
     private final String mode;
     private PlaceModel destination;
     private PlaceModel home;
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
-    private String mHypertrackDeviceID;
+    @NonNull private final AbstractBackendProvider mAbstractBackendProvider;
 
-    SearchPlaceState(Context context, String mode) {
+    SearchPlaceState(Context context, String mode, @NonNull AbstractBackendProvider abstractBackendProvider) {
         super(context);
-        String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
+        mAbstractBackendProvider = abstractBackendProvider;
         this.mode = mode;
         home = sharedHelper.getHomePlace();
         recentPlaces = sharedHelper.getRecentPlaces();
-        mHypertrackDeviceID = HyperTrack.getInstance(hyperTrackPublicKey).getDeviceID();
     }
 
     String getMode() { return mode; }
@@ -40,12 +46,28 @@ class SearchPlaceState extends BaseState {
     void saveHomePlace(PlaceModel home) {
         sharedHelper.setHomePlace(home);
 
-        if (home != null) {
-            OnDeviceGeofence.addGeofence(mContext,
-                    home.latLng.latitude, home.latLng.longitude,
-                    mHypertrackDeviceID
-            );
-        }
+        if (home != null) createGeofenceOnPlatform(home); }
+
+    private void createGeofenceOnPlatform(final PlaceModel home) {
+        mAbstractBackendProvider.createGeofence(new GeofenceLocation(home.latLng.latitude, home.latLng.longitude),
+                new ResultHandler<String>() {
+                    @Override
+                    public void onResult(String result) {
+                        Log.d(TAG, "Created geofence " + result);
+                    }
+
+                    @Override
+                    public void onError(@NonNull Exception ignored) {
+                        final Handler handler = new Handler(mContext.getMainLooper());
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                createGeofenceOnPlatform(home);
+                            }
+                        }, TimeUnit.SECONDS.toMillis(5));
+                    }
+                }
+        );
     }
 
     List<PlaceModel> getRecentPlaces() {
