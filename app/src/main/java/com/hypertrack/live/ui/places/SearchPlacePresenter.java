@@ -51,7 +51,7 @@ class SearchPlacePresenter {
     private final View view;
     private final SearchPlaceState state;
 
-    private final HyperTrack hyperTrack;
+    private final String mHyperTrackDeviceId;
     private final PlacesClient placesClient;
     private final AbstractBackendProvider mBackendProvider;
 
@@ -72,9 +72,9 @@ class SearchPlacePresenter {
     public SearchPlacePresenter(Context context, String mode, View view, @NonNull AbstractBackendProvider backendProvider) {
         this.context = context.getApplicationContext() == null ? context : context.getApplicationContext();
         this.view = view;
-        this.state = new SearchPlaceState(this.context, mode);
+        this.state = new SearchPlaceState(this.context, mode, backendProvider);
 
-        hyperTrack = HyperTrack.getInstance(context, state.getHyperTrackPubKey());
+        mHyperTrackDeviceId = HyperTrack.getInstance(state.getHyperTrackPubKey()).getDeviceID();
         placesClient = Places.createClient(context);
         mBackendProvider = backendProvider;
 
@@ -268,13 +268,13 @@ class SearchPlacePresenter {
         TripConfig tripRequest;
         if (destination == null) {
             tripRequest = new TripConfig.Builder()
-                    .setDeviceId(hyperTrack.getDeviceID())
+                    .setDeviceId(mHyperTrackDeviceId)
                     .build();
         } else {
             tripRequest = new TripConfig.Builder()
                     .setDestinationLatitude(destination.latLng.latitude)
                     .setDestinationLongitude(destination.latLng.longitude)
-                    .setDeviceId(hyperTrack.getDeviceID())
+                    .setDeviceId(mHyperTrackDeviceId)
                     .build();
         }
         mBackendProvider.createTrip(tripRequest, resultHandler);

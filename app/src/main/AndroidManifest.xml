@@ -103,7 +103,6 @@
                 <action android:name="com.hypertrack.sdk.TRACKING_STATE" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".utils.OnDeviceGeofence"/>
 
         <meta-data
             android:name="com.google.android.gms.version"

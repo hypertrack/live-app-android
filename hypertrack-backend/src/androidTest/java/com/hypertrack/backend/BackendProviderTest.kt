@@ -131,11 +131,30 @@ class BackendProviderTest {
 
     }
 
+    @Test
+    fun test0070ItShouldGetGeofenceskWhenRequested() {
+        Log.d(TAG,"Create geofence")
+        val requestFinishedSignal = CountDownLatch(1)
+        var geofenceId = "";
+        backendProvider.createGeofence(GeofenceLocation(47.850388852921, 35.1206527856364), object : ResultHandler<String> {
+            override fun onResult(result: String) {
+                geofenceId = result;
+                requestFinishedSignal.countDown()
+            }
+
+            override fun onError(error: Exception) = requestFinishedSignal.countDown()
+        })
+        requestFinishedSignal.await(40, TimeUnit.SECONDS)
+        assertTrue(geofenceId.isNotEmpty())
+        Log.d(TAG, "Created geofence $geofenceId")
+
+    }
+
     companion object {
         var testTrip: ShareableTrip? = null
         const val DEVICE_ID = "E15E21C3-C942-3FEA-B33B-16A58E291CD0"
         const val PUBLISHABLE_KEY = "uvIAA8xJANxUxDgINOX62-LINLuLeymS6JbGieJ9PegAPITcr9fgUpROpfSMdL9kv-qFjl17NeAuBHse8Qu9sw"
-        const val TAG = "TripsManagerTest"
+        const val TAG = "BackendProviderTest"
         const val TEST_TIMEOUT = 10L
     }
 }
