@@ -73,19 +73,6 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
     }
 
-    override fun sendGeofenceTransition(transitionType: String) {
-        Log.i(TAG, "Sending geofence transition $transitionType for device $deviceID")
-        val retryCallback = object : ResultHandler<Unit> {
-            override fun onResult(result: Unit) { }
-
-            override fun onError(error: Exception) =
-                    getErrorHandlerWithTokenAutoRefresh<Unit>(error, null) {
-                        backendProvider.sendGeofenceTransition(deviceID, transitionType, null)
-                    }
-        }
-        backendProvider.sendGeofenceTransition(deviceID, transitionType, retryCallback)
-    }
-
     override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
         Log.i(TAG, "Get geofences")
         val retryCallback = object : ResultHandler<String> {
@@ -149,7 +136,6 @@ interface AbstractBackendProvider {
     fun stop()
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
-    fun sendGeofenceTransition(transitionType: String)
     fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>)
     fun getInviteLink(callback: ResultHandler<String>)
     fun getAccountName(callback: ResultHandler<String>)
@@ -225,19 +211,6 @@ class BackendProvider(
         })
     }
 
-    fun sendGeofenceTransition(deviceId: String, transitionType: String, callback: ResultHandler<Unit>?) {
-        Log.i(TAG, "sendGeofenceTransition  $transitionType")
-
-        tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
-            override fun onResult(result: String) =
-                    scheduleGeofenceEventRequest(deviceId, transitionType, result, callback)
-
-            override fun onError(error: Exception) {
-                Log.w(TAG, "Can't fetch token due to error $error")
-            }
-        })
-    }
-
     fun getInviteLink(callback: ResultHandler<String>) {
         Log.i(TAG, "getInviteLink")
         tokenProvider.getAuthenticationToken(object : ResultHandler<String> {
@@ -274,18 +247,6 @@ class BackendProvider(
             override fun onError(error: Exception) = callback.onError(error)
 
         })
-    }
-
-    private fun scheduleGeofenceEventRequest(deviceId: String, transitionType: String, tokenString: String, callback: ResultHandler<Unit>?) {
-
-        val successListener:Response.Listener<Unit>? = if (callback != null) Response.Listener { callback.onResult(Unit) } else null
-        val errorListener:Response.ErrorListener? = if (callback != null) Response.ErrorListener { callback.onError(it) } else null
-
-        val request = GeofenceEventRequest(deviceId, transitionType, tokenString, successListener, errorListener)
-        request.retryPolicy = defaultRetryPolicy
-        Log.d(TAG, "Adding geofence request to queue")
-        queue.add(request)
-
     }
 
     private fun scheduleAuthenticatedStartTrackingRequest(deviceId: String, tokenString: String, callback: ResultHandler<String>) {
