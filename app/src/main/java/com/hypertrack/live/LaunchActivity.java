@@ -106,6 +106,7 @@ public class LaunchActivity extends AppCompatActivity {
 
     public void onLoginCompleted() {
         Log.d(TAG, "onLoginCompleted: ");
+        // TODO Denys: We need to start tracking via API after login
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }

@@ -14,9 +14,9 @@ import java.net.HttpURLConnection
 
 class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, private val deviceID: String) : AbstractBackendProvider {
 
-    val queue = Volley.newRequestQueue(context)
-    val gson = Gson()
-    val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceID, publishableKey, gson)
+    private val queue = Volley.newRequestQueue(context)
+    private val gson = Gson()
+    private val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceID, publishableKey, gson)
     val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider)
 
     override fun start(callback: ResultHandler<String>) {
