@@ -12,12 +12,17 @@ import com.google.gson.Gson
 import java.net.HttpURLConnection
 
 
-class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: String, private val deviceID: String) : AbstractBackendProvider {
+class PublicKeyAuthorizedBackendProvider(
+        context: Context, publishableKey: String,
+        private val deviceID: String,
+        baseUrl: String = "https://live-app-backend.htprod.hypertrack.com/",
+        authUrl: String = "https://live-api.htprod.hypertrack.com/authenticate"
+) : AbstractBackendProvider {
 
     private val queue = Volley.newRequestQueue(context)
     private val gson = Gson()
-    private val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceID, publishableKey, gson)
-    val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider)
+    private val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceID, publishableKey, gson, authUrl)
+    val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider, baseUrl)
 
     override fun start(callback: ResultHandler<String>) {
         Log.i(TAG, "start $deviceID")
@@ -73,19 +78,6 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
 
     }
 
-    override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
-        Log.i(TAG, "Get geofences")
-        val retryCallback = object : ResultHandler<String> {
-            override fun onResult(result: String) = callback.onResult(result)
-
-            override fun onError(error: Exception) =
-                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
-                        backendProvider.createGeofence(location, deviceID, callback)
-                    }
-        }
-        backendProvider.createGeofence(location, deviceID, retryCallback)
-    }
-
     override fun getInviteLink(callback: ResultHandler<String>) {
         Log.i(TAG, "getInviteLink")
         val retryCallback = object : ResultHandler<String> {
@@ -110,6 +102,23 @@ class PublicKeyAuthorizedBackendProvider(context: Context, publishableKey: Strin
                     }
         }
         backendProvider.getAccountEmail(retryCallback)
+    }
+
+    override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
+        Log.i(TAG, "Get geofences")
+        val retryCallback = object : ResultHandler<String> {
+            override fun onResult(result: String) = callback.onResult(result)
+
+            override fun onError(error: Exception) =
+                    getErrorHandlerWithTokenAutoRefresh<String>(error, callback) {
+                        backendProvider.createGeofence(location, deviceID, callback)
+                    }
+        }
+        backendProvider.createGeofence(location, deviceID, retryCallback)
+    }
+
+    override fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>) {
+        TODO("Not yet implemented")
     }
 
     private fun <T> getErrorHandlerWithTokenAutoRefresh(
@@ -139,12 +148,14 @@ interface AbstractBackendProvider {
     fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>)
     fun getInviteLink(callback: ResultHandler<String>)
     fun getAccountName(callback: ResultHandler<String>)
+    fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>)
 }
 
 class BackendProvider(
         private val gson: Gson,
         private val queue: RequestQueue,
-        private val tokenProvider: AsyncTokenProvider
+        private val tokenProvider: AsyncTokenProvider,
+        private val baseUrl: String
 ) {
     private val defaultRetryPolicy: DefaultRetryPolicy = DefaultRetryPolicy(
             DefaultRetryPolicy.DEFAULT_TIMEOUT_MS * 2,
@@ -253,7 +264,8 @@ class BackendProvider(
         val request = StartTrackingRequest(
                 deviceId, tokenString,
                 Response.Listener { callback.onResult(deviceId) },
-                Response.ErrorListener { error -> callback.onError(error) }
+                Response.ErrorListener { error -> callback.onError(error) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding start request to queue")
@@ -265,7 +277,8 @@ class BackendProvider(
         val request = StopTrackingRequest(
                 deviceId, tokenString,
                 Response.Listener { callback?.onResult(deviceId) },
-                Response.ErrorListener { error -> callback?.onError(error as Exception) }
+                Response.ErrorListener { error -> callback?.onError(error as Exception) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding stop request to queue")
@@ -277,7 +290,8 @@ class BackendProvider(
         val request = CreateTripRequest(
                 tripConfig, gson, tokenString,
                 Response.Listener { trip -> callback.onResult(trip) },
-                Response.ErrorListener { error -> callback.onError(error as Exception) }
+                Response.ErrorListener { error -> callback.onError(error as Exception) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding create trip request to queue")
@@ -289,7 +303,8 @@ class BackendProvider(
         val request = CompleteTripRequest(
                 tripId, tokenString,
                 Response.Listener { callback.onResult(tripId) },
-                Response.ErrorListener { error -> callback.onError(error as Exception) }
+                Response.ErrorListener { error -> callback.onError(error as Exception) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding complete trip request to queue")
@@ -305,7 +320,8 @@ class BackendProvider(
             Log.d(TAG, "Got deeplink $deeplink")
             callback.onResult(deeplink)
         },
-                Response.ErrorListener { error -> callback.onError(error as Exception) }
+                Response.ErrorListener { error -> callback.onError(error as Exception) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding deeplink request to queue")
@@ -321,7 +337,8 @@ class BackendProvider(
             Log.d(TAG, "Got email $email")
             callback.onResult(email)
         },
-                Response.ErrorListener { error -> callback.onError(error as Exception) }
+                Response.ErrorListener { error -> callback.onError(error as Exception) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding account email request to queue")
@@ -335,7 +352,8 @@ class BackendProvider(
         val request = CreateGeofencesRequest(location,
                 deviceId, gson, tokenString,
                 Response.Listener { callback?.onResult(deviceId) },
-                Response.ErrorListener { error -> callback?.onError(error as Exception) }
+                Response.ErrorListener { error -> callback?.onError(error as Exception) },
+                baseUrl
         )
         request.retryPolicy = defaultRetryPolicy
         Log.d(TAG, "Adding get geofences request to queue")
@@ -350,10 +368,10 @@ class BackendProvider(
         private val sInstanceLock = Any()
 
         @JvmStatic
-        fun getInstance(context: Context, tokenProvider: AsyncTokenProvider): BackendProvider {
+        fun getInstance(context: Context, tokenProvider: AsyncTokenProvider, baseUrl: String): BackendProvider {
             if (sInstance == null) {
                 synchronized(sInstanceLock) {
-                    if (sInstance == null) sInstance = BackendProvider(Gson(), Volley.newRequestQueue(context), tokenProvider)
+                    if (sInstance == null) sInstance = BackendProvider(Gson(), Volley.newRequestQueue(context), tokenProvider, baseUrl)
                 }
             }
             return sInstance ?: throw IllegalStateException()
@@ -366,7 +384,8 @@ class InternalApiTokenProvider(
         private val queue: RequestQueue,
         private val deviceId: String,
         private val publishableKey: String,
-        private val gson: Gson
+        private val gson: Gson,
+        private val authUrl: String
 ) : AsyncTokenProvider {
     private var token: String = ""
     companion object { const val TAG = "InternalTokenProvider" }
@@ -383,7 +402,7 @@ class InternalApiTokenProvider(
     }
 
     private fun getInternalTokenRequest(resultHandler: ResultHandler<String>): GetInternalTokenRequest {
-        return GetInternalTokenRequest(gson, deviceId, publishableKey,
+        return GetInternalTokenRequest(gson, deviceId, publishableKey, authUrl,
                 Response.Listener {
                     token = it
                     resultHandler.onResult(it)
@@ -399,9 +418,9 @@ class InternalApiTokenProvider(
         Log.d(TAG, "Refreshing token")
         token = ""
         queue.add(
-                GetInternalTokenRequest(gson, deviceId, publishableKey,
-                    Response.Listener { retryCall() },
-                    Response.ErrorListener { retryCall() }
+                GetInternalTokenRequest(gson, deviceId, publishableKey, authUrl,
+                        Response.Listener { retryCall() },
+                        Response.ErrorListener { retryCall() }
                 )
         )
     }

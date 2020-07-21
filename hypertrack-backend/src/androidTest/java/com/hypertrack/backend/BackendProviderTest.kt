@@ -15,8 +15,8 @@ import java.util.concurrent.TimeUnit
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class BackendProviderTest {
 
-    lateinit var appContext : Context
-    lateinit var backendProvider: AbstractBackendProvider
+    private lateinit var appContext : Context
+    private lateinit var backendProvider: AbstractBackendProvider
 
 
     @Before
@@ -95,10 +95,10 @@ class BackendProviderTest {
     fun test0050ItShouldGetDeeplinkWhenRequested() {
         Log.d(TAG,"Getting deeplink")
         val requestFinishedSignal = CountDownLatch(1)
-        var deeplink = "";
+        var deeplink = ""
         backendProvider.getInviteLink(object : ResultHandler<String> {
             override fun onResult(result: String) {
-                deeplink = result;
+                deeplink = result
                 requestFinishedSignal.countDown()
             }
 
@@ -115,10 +115,10 @@ class BackendProviderTest {
     fun test0060ItShouldGetDeeplinkWhenRequested() {
         Log.d(TAG,"Getting accountEmail")
         val requestFinishedSignal = CountDownLatch(1)
-        var accountName = "";
+        var accountName = ""
         backendProvider.getAccountName(object : ResultHandler<String> {
             override fun onResult(result: String) {
-                accountName = result;
+                accountName = result
                 requestFinishedSignal.countDown()
             }
 
@@ -135,10 +135,10 @@ class BackendProviderTest {
     fun test0070ItShouldGetGeofenceskWhenRequested() {
         Log.d(TAG,"Create geofence")
         val requestFinishedSignal = CountDownLatch(1)
-        var geofenceId = "";
+        var geofenceId = ""
         backendProvider.createGeofence(GeofenceLocation(47.850388852921, 35.1206527856364), object : ResultHandler<String> {
             override fun onResult(result: String) {
-                geofenceId = result;
+                geofenceId = result
                 requestFinishedSignal.countDown()
             }
 
