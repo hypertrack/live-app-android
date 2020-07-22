@@ -40,6 +40,7 @@ class SearchPlaceState extends BaseState {
                 @Override public void onResult(GeofenceLocation result) {
                     PlaceModel newPlace = new PlaceModel();
                     newPlace.latLng = new LatLng(result.getLatitude(), result.getLongitude());
+                    newPlace.populateAddressFromGeocoder(mContext);
                     home = newPlace;
                     sharedHelper.setHomePlace(home);
                 }
