@@ -200,21 +200,18 @@ public class MainActivity extends AppCompatActivity {
 
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
-        if (TextUtils.isEmpty(hyperTrackPublicKey) || !PermissionsManager.isAllPermissionsApproved(this)) {
-            beginFragmentTransaction(WelcomeFragment.newInstance(hyperTrackPublicKey))
-                    .commitAllowingStateLoss();
-        } else {
+        if (PermissionsManager.isAllPermissionsApproved(this)) {
             initializeHyperTrack(hyperTrackPublicKey);
             mBackendProvider = BackendClientFactory.getBackendProvider(this, hyperTrack.getDeviceID());
             //noinspection ConstantConditions
             beginFragmentTransaction(new TrackingFragment(mBackendProvider))
                     .commitAllowingStateLoss();
-            if (sharedHelper.getAccountEmail().isEmpty()) {
-                getAccountEmail(true);
-            }
-            if (sharedHelper.getInviteLink().isEmpty()) {
-                getInviteLink(true);
-            }
+
+            if (sharedHelper.getAccountEmail().isEmpty()) getAccountEmail(true);
+            if (sharedHelper.getInviteLink().isEmpty()) getInviteLink(true);
+
+        } else {
+            beginFragmentTransaction(new PermissionRationalFragment()).commitAllowingStateLoss();
         }
 
 
@@ -288,15 +285,7 @@ public class MainActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if ((requestCode & 0x0000ffff) == VERIFICATION_REQUEST) {
-            if (resultCode == RESULT_OK) {
-                String hyperTrackPublicKey = data.getStringExtra(VerificationActivity.VERIFICATION_KEY);
-                if (hyperTrackPublicKey != null) {
-                    sharedHelper.setHyperTrackPubKey(hyperTrackPublicKey);
-                }
-                onStateUpdate();
-            }
-        } else if (requestCode == PERMISSIONS_REQUEST) {
+        if (requestCode == PERMISSIONS_REQUEST) {
             if (PackageManager.PERMISSION_GRANTED == ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                 onStateUpdate();
             }
@@ -464,9 +453,8 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        sharedHelper.removeHyperTrackPubKey();
-                        beginFragmentTransaction(WelcomeFragment.newInstance(sharedHelper.getHyperTrackPubKey()))
-                                .commitAllowingStateLoss();
+                        // Navigate to login
+                        MainActivity.this.startActivity(new Intent(MainActivity.this, LaunchActivity.class));
                     }
                 })
                 .setTitle(R.string.valid_publishable_key_required)
