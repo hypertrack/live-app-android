@@ -12,11 +12,17 @@ data class GeofenceResponse(
 )
 
 data class GeofenceParams(
-        @SerializedName("geofences") val geofences: List<Geofence>,
+        @SerializedName("geofences") val geofences: Set<GeofenceProperties>,
         @SerializedName("device_id") val deviceId: String
 )
 
-data class Geofence (
+data class GeofenceProperties(
+        @SerializedName("geometry") val geometry: Geometry,
+        @SerializedName("metadata") val metadata: Map<String, Any>,
+        @SerializedName("radius") val radius: Int?
+)
+
+data class Geofence(
         @SerializedName("all_devices") val all_devices : Boolean?,
         @SerializedName("created_at") val created_at : String,
         @SerializedName("delete_at") val delete_at : String?,

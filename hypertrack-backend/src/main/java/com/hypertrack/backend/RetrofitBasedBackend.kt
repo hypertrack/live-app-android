@@ -14,10 +14,10 @@ import retrofit2.http.*
 interface ApiInterface {
 
     @GET("client/devices/{device_id}/geofences")
-    suspend fun getDeviceGeofences(@Path("device_id")deviceId : String) : List<Geofence>
+    suspend fun getDeviceGeofences(@Path("device_id")deviceId : String) : Set<Geofence>
 
     @POST("client/devices/{device_id}/geofences")
-    suspend fun createGeofences(@Path("device_id")deviceId : String, @Body params: GeofenceParams) : List<Geofence>
+    suspend fun createGeofences(@Path("device_id")deviceId : String, @Body params: GeofenceParams) : Set<Geofence>
 
     @DELETE("client/geofences/{geofence_id}")
     suspend fun deleteGeofence(@Path("geofence_id")geofence_id: String) : Response<Unit>
@@ -49,12 +49,24 @@ class ApiClient(
             )
             .build().create(ApiInterface::class.java)
 
-    fun getDeviceGeofences(callback: ResultHandler<List<Geofence>>) {
+    fun getDeviceGeofences(callback: ResultHandler<Set<Geofence>>) {
 
         GlobalScope.launch(Dispatchers.Default) {
             try {
                 val geofences = api.getDeviceGeofences(deviceId)
                 callback.onResult(geofences)
+            } catch (e: Exception) {
+                callback.onError(e)
+            }
+        }
+    }
+
+    fun createGeofences(geofencesProperties: Set<GeofenceProperties>, callback: ResultHandler<Set<Geofence>>) {
+        GlobalScope.launch {
+            try {
+                val params = GeofenceParams(geofencesProperties, deviceId)
+                val createdGeofenses = api.createGeofences(deviceId, params)
+                callback.onResult(createdGeofenses)
             } catch (e: Exception) {
                 callback.onError(e)
             }
