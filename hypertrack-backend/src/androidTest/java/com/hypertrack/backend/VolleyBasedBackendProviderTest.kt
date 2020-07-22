@@ -4,7 +4,6 @@ import android.content.Context
 import android.util.Log
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
-import com.hypertrack.backend.models.GeofenceLocation
 import com.hypertrack.backend.models.ShareableTrip
 import com.hypertrack.backend.models.TripConfig
 import org.junit.Assert.*
@@ -26,7 +25,7 @@ class VolleyBasedBackendProviderTest {
     fun setup() {
 
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        backendProvider = HybridBackendProvider.getInstance(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
+        backendProvider = HybridBackendProvider.getInstance(context = appContext, publishableKey = PUBLISHABLE_KEY, deviceID = DEVICE_ID)
     }
 
     @Test @LargeTest
@@ -131,25 +130,6 @@ class VolleyBasedBackendProviderTest {
         })
         requestFinishedSignal.await(TEST_TIMEOUT, TimeUnit.SECONDS)
         assertTrue(accountName.isNotEmpty())
-
-    }
-
-    @Test
-    fun test0070ItShouldGetGeofenceskWhenRequested() {
-        Log.d(TAG,"Create geofence")
-        val requestFinishedSignal = CountDownLatch(1)
-        var geofenceId = ""
-        backendProvider.createGeofence(GeofenceLocation(47.850388852921, 35.1206527856364), object : ResultHandler<String> {
-            override fun onResult(result: String) {
-                geofenceId = result
-                requestFinishedSignal.countDown()
-            }
-
-            override fun onError(error: Exception) = requestFinishedSignal.countDown()
-        })
-        requestFinishedSignal.await(40, TimeUnit.SECONDS)
-        assertTrue(geofenceId.isNotEmpty())
-        Log.d(TAG, "Created geofence $geofenceId")
 
     }
 

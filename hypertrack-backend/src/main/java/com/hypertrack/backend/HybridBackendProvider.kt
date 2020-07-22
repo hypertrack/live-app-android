@@ -12,12 +12,14 @@ import java.net.HttpURLConnection
 private const val TAG = "HybridBackendProvider"
 
 class HybridBackendProvider(
-        context: Context, publishableKey: String,
+        context: Context,
+        publishableKey: String,
         private val deviceID: String,
         baseUrl: String,
         authUrl: String,
         homeManagementApiProvider: HomeManagementApi
 ) : AbstractBackendProvider, HomeManagementApi by homeManagementApiProvider {
+    init { Log.d(TAG, "Initializing with deviceId $deviceID and publishableKey $publishableKey") }
 
     private val queue = Volley.newRequestQueue(context)
     private val gson = Injector.gson
@@ -47,7 +49,7 @@ class HybridBackendProvider(
         Log.i(TAG, "Creating trip with config $tripConfig")
         val retryCallback = wrapCallback<ShareableTrip>(
                 callback,
-                Runnable  { backendProvider.createTrip(tripConfig, callback) }
+                Runnable { backendProvider.createTrip(tripConfig, callback) }
         )
         backendProvider.createTrip(tripConfig, retryCallback)
     }
@@ -80,13 +82,11 @@ class HybridBackendProvider(
         backendProvider.getAccountEmail(retryCallback)
     }
 
-    override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
-        TODO("Not yet implemented")
-    }
-
     private fun <T> wrapCallback(callback: ResultHandler<T>?, actualCall: Runnable): ResultHandler<T> {
         return object : ResultHandler<T> {
-            override fun onResult(result: T) {callback?.onResult(result)}
+            override fun onResult(result: T) {
+                callback?.onResult(result)
+            }
 
             override fun onError(error: Exception) =
                     getErrorHandlerWithTokenAutoRefresh<T>(error, callback) { actualCall.run() }
@@ -113,16 +113,17 @@ class HybridBackendProvider(
         const val TAG = "HybridBackendProvider"
 
         @JvmStatic
-        fun getInstance(context: Context, deviceID: String, publishableKey: String) : HybridBackendProvider {
-            return HybridBackendProvider(context, publishableKey, deviceID, Injector.baseUrl, Injector.authUrl,
-            Injector.getHomeManagementApiProvider(deviceID, publishableKey))
+        fun getInstance(context: Context, publishableKey: String, deviceID: String): HybridBackendProvider {
+            return HybridBackendProvider(
+                    context = context, publishableKey = publishableKey, deviceID = deviceID,
+                    baseUrl = Injector.baseUrl, authUrl = Injector.authUrl,
+                    homeManagementApiProvider = Injector.getHomeManagementApiProvider(deviceID, publishableKey))
         }
     }
 }
 
-internal class GeofenceApiAdapter (
-        private val geofenceApiProvider: GeofencesApiProvider
-): HomeManagementApi {
+internal class GeofenceApiAdapter(private val geofenceApiProvider: GeofencesApiProvider) : HomeManagementApi {
+
     override fun getHomeGeofenceLocation(resultHandler: ResultHandler<GeofenceLocation?>) {
 
         // Get all geofences
@@ -139,8 +140,8 @@ internal class GeofenceApiAdapter (
                     }
                     else -> {
                         val home = homes.first()
-                        resultHandler.onResult(GeofenceLocation(home.latitude, home.longitude))
                         // return coordinates for latest
+                        resultHandler.onResult(GeofenceLocation(home.latitude, home.longitude))
                     }
                 }
                 if (homes.size > 1) {
@@ -163,9 +164,9 @@ internal class GeofenceApiAdapter (
                         .forEach { geofenceApiProvider.deleteGeofence(it.geofence_id) }
                 // create new geofence
                 geofenceApiProvider.createGeofences(setOf(GeofenceProperties(
-                                Point(listOf(homeLocation.longitude, homeLocation.latitude)),
-                                mapOf("name" to "Home"), 100
-                        )), object : ResultHandler<Set<Geofence>> {
+                        Point(listOf(homeLocation.longitude, homeLocation.latitude)),
+                        mapOf("name" to "Home"), 100
+                )), object : ResultHandler<Set<Geofence>> {
                     override fun onResult(result: Set<Geofence>) {
                         if (result.size == 1) resultHandler.onResult(null)
                         else resultHandler.onError(Exception("No geofence was received in server response"))

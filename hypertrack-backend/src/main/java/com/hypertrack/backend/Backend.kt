@@ -7,7 +7,6 @@ interface AbstractBackendProvider : HomeManagementApi {
     fun stop()
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
     fun completeTrip(tripId: String, callback: ResultHandler<String>)
-    fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>)
     fun getInviteLink(callback: ResultHandler<String>)
     fun getAccountName(callback: ResultHandler<String>)
 }
@@ -31,4 +30,3 @@ interface ResultHandler<T> {
     fun onResult(result: T)
     fun onError(error: Exception)
 }
-
