@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
-import com.hypertrack.backend.UserAgentInterceptor
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -87,12 +86,6 @@ class BasicAuthAccessTokenRepository(
     override fun getConfig() : BasicAuthAccessTokenConfig {
         return BasicAuthAccessTokenConfig(authUrl, deviceId, userName, userPwd, token)
     }
-
-    constructor(
-        config: BasicAuthAccessTokenConfig
-    ) : this(
-        config.authUrl, config.deviceId, config.userName, config.userPwd, config.token
-    )
 
     companion object {
         val MEDIA_TYPE_JSON = "application/json; charset=utf-8".toMediaType()

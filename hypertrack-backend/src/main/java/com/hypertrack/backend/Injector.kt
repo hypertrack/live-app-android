@@ -6,6 +6,7 @@ import com.google.gson.typeadapters.RuntimeTypeAdapterFactory
 import com.hypertrack.backend.models.Geometry
 import com.hypertrack.backend.models.Point
 import com.hypertrack.backend.models.Polygon
+import okhttp3.OkHttpClient
 
 object Injector {
 
@@ -29,4 +30,12 @@ object Injector {
             = RetrofitGeofencesApiClient(
             baseUrl, deviceId, gson, getBasicAccessTokenProvider(deviceId, publishableKey)
     )
+
+    fun okHttpClient(authorizer: AccessTokenRepository): OkHttpClient {
+        return OkHttpClient.Builder()
+                .authenticator(AccessTokenAuthenticator(authorizer))
+                .addInterceptor(AccessTokenInterceptor(authorizer))
+                .addInterceptor(UserAgentInterceptor())
+                .build()
+    }
 }

@@ -26,7 +26,7 @@ class VolleyBasedBackendProviderTest {
     fun setup() {
 
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        backendProvider = HybridBackendProvider(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
+        backendProvider = HybridBackendProvider.getInstance(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
     }
 
     @Test @LargeTest

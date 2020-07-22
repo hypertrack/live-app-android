@@ -17,7 +17,7 @@ public class BackendClientFactory {
 
         if (publishableKey.isEmpty()) return null;
 
-        return new HybridBackendProvider(context, publishableKey, deviceId);
+        return HybridBackendProvider.getInstance(context, publishableKey, deviceId);
 
     }
 

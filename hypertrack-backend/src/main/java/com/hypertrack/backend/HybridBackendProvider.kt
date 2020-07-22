@@ -12,11 +12,11 @@ import com.hypertrack.backend.models.TripConfig
 import java.net.HttpURLConnection
 
 
-class HybridBackendProvider @JvmOverloads constructor(
+class HybridBackendProvider(
         context: Context, publishableKey: String,
         private val deviceID: String,
-        baseUrl: String = Injector.baseUrl,
-        authUrl: String = Injector.authUrl
+        baseUrl: String,
+        authUrl: String
 ) : AbstractBackendProvider {
 
     private val queue = Volley.newRequestQueue(context)
@@ -81,7 +81,7 @@ class HybridBackendProvider @JvmOverloads constructor(
     }
 
     override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
-        Log.i(TAG, "Get geofences")
+        Log.i(TAG, "Create geofence Location")
         val retryCallback = wrapCallback<String>(
                 callback,
                 Runnable { backendProvider.createGeofence(location, deviceID, callback) }
@@ -95,7 +95,7 @@ class HybridBackendProvider @JvmOverloads constructor(
 
     private fun <T> wrapCallback(callback: ResultHandler<T>?, actualCall: Runnable): ResultHandler<T> {
         return object : ResultHandler<T> {
-            override fun onResult(result: T): Unit  {callback?.onResult(result)}
+            override fun onResult(result: T) {callback?.onResult(result)}
 
             override fun onError(error: Exception) =
                     getErrorHandlerWithTokenAutoRefresh<T>(error, callback) { actualCall.run() }
@@ -118,5 +118,12 @@ class HybridBackendProvider @JvmOverloads constructor(
         callback?.onError(error)
     }
 
-    companion object { const val TAG = "HybridBackendProvider" }
+    companion object {
+        const val TAG = "HybridBackendProvider"
+
+        @JvmStatic
+        fun getInstance(context: Context, deviceID: String, publishableKey: String) : HybridBackendProvider {
+            return HybridBackendProvider(context, publishableKey, deviceID, Injector.baseUrl, Injector.authUrl)
+        }
+    }
 }

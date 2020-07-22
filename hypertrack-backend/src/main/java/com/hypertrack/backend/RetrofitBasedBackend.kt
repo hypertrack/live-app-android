@@ -32,17 +32,11 @@ interface GeofencesApiInterface {
 class RetrofitGeofencesApiClient(baseUrl: String, private val deviceId: String, gson: Gson, authorizer: AccessTokenRepository)
     : GeofencesApiProvider {
 
-    val api = Retrofit.Builder()
+    val api: GeofencesApiInterface = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .addConverterFactory(ScalarsConverterFactory.create())
-            .client(
-                    OkHttpClient.Builder()
-                            .authenticator(AccessTokenAuthenticator(authorizer))
-                            .addInterceptor(AccessTokenInterceptor(authorizer))
-                            .addInterceptor(UserAgentInterceptor())
-                            .build()
-            )
+            .client(Injector.okHttpClient(authorizer))
             .build().create(GeofencesApiInterface::class.java)
 
     override fun getDeviceGeofences(callback: ResultHandler<Set<Geofence>>) {
@@ -58,7 +52,7 @@ class RetrofitGeofencesApiClient(baseUrl: String, private val deviceId: String, 
     }
 
     override fun createGeofences(geofencesProperties: Set<GeofenceProperties>, callback: ResultHandler<Set<Geofence>>) {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Default) {
             try {
                 val params = GeofenceParams(geofencesProperties, deviceId)
                 val createdGeofenses = api.createGeofences(deviceId, params)
@@ -70,7 +64,7 @@ class RetrofitGeofencesApiClient(baseUrl: String, private val deviceId: String, 
     }
 
     override fun deleteGeofence(geofence_id: String) {
-        GlobalScope.launch { api.deleteGeofence(geofence_id) }
+        GlobalScope.launch(Dispatchers.Default) { api.deleteGeofence(geofence_id) }
     }
 }
 
