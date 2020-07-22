@@ -7,7 +7,6 @@ import com.android.volley.toolbox.Volley
 import com.hypertrack.backend.deprecated.InternalApiTokenProvider
 import com.hypertrack.backend.deprecated.VolleyBasedProvider
 import com.hypertrack.backend.models.*
-import java.lang.Error
 import java.net.HttpURLConnection
 
 private const val TAG = "HybridBackendProvider"
@@ -16,8 +15,9 @@ class HybridBackendProvider(
         context: Context, publishableKey: String,
         private val deviceID: String,
         baseUrl: String,
-        authUrl: String
-) : AbstractBackendProvider {
+        authUrl: String,
+        homeManagementApiProvider: HomeManagementApi
+) : AbstractBackendProvider, HomeManagementApi by homeManagementApiProvider {
 
     private val queue = Volley.newRequestQueue(context)
     private val gson = Injector.gson
@@ -84,10 +84,6 @@ class HybridBackendProvider(
         TODO("Not yet implemented")
     }
 
-    override fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>) {
-        TODO("Not yet implemented")
-    }
-
     private fun <T> wrapCallback(callback: ResultHandler<T>?, actualCall: Runnable): ResultHandler<T> {
         return object : ResultHandler<T> {
             override fun onResult(result: T) {callback?.onResult(result)}
@@ -118,7 +114,8 @@ class HybridBackendProvider(
 
         @JvmStatic
         fun getInstance(context: Context, deviceID: String, publishableKey: String) : HybridBackendProvider {
-            return HybridBackendProvider(context, publishableKey, deviceID, Injector.baseUrl, Injector.authUrl)
+            return HybridBackendProvider(context, publishableKey, deviceID, Injector.baseUrl, Injector.authUrl,
+            Injector.getHomeManagementApiProvider(deviceID, publishableKey))
         }
     }
 }

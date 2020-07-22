@@ -38,4 +38,10 @@ object Injector {
                 .addInterceptor(UserAgentInterceptor())
                 .build()
     }
+
+    fun getHomeManagementApiProvider(deviceId: String, publishableKey: String): HomeManagementApi {
+        return GeofenceApiAdapter(
+                getRetrofitBasedGeofencesApiClient(deviceId, publishableKey)
+        )
+    }
 }

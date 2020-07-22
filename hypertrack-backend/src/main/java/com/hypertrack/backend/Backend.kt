@@ -2,7 +2,7 @@ package com.hypertrack.backend
 
 import com.hypertrack.backend.models.*
 
-interface AbstractBackendProvider {
+interface AbstractBackendProvider : HomeManagementApi {
     fun start(callback: ResultHandler<String>)
     fun stop()
     fun createTrip(tripConfig: TripConfig, callback: ResultHandler<ShareableTrip>)
@@ -10,7 +10,6 @@ interface AbstractBackendProvider {
     fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>)
     fun getInviteLink(callback: ResultHandler<String>)
     fun getAccountName(callback: ResultHandler<String>)
-    fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>)
 }
 
 interface HomeManagementApi {

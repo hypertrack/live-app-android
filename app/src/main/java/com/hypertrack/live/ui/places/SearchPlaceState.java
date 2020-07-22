@@ -6,11 +6,14 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.backend.models.GeofenceLocation;
 import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +35,17 @@ class SearchPlaceState extends BaseState {
         mAbstractBackendProvider = abstractBackendProvider;
         this.mode = mode;
         home = sharedHelper.getHomePlace();
+        if (home == null) {
+            mAbstractBackendProvider.getHomeGeofenceLocation(new ResultHandler<GeofenceLocation>() {
+                @Override public void onResult(GeofenceLocation result) {
+                    PlaceModel newPlace = new PlaceModel();
+                    newPlace.latLng = new LatLng(result.getLatitude(), result.getLongitude());
+                    home = newPlace;
+                    sharedHelper.setHomePlace(home);
+                }
+                @Override public void onError(@NotNull Exception error) { }
+            });
+        }
         recentPlaces = sharedHelper.getRecentPlaces();
     }
 
@@ -45,16 +59,14 @@ class SearchPlaceState extends BaseState {
 
     void saveHomePlace(PlaceModel home) {
         sharedHelper.setHomePlace(home);
-
-        if (home != null) createGeofenceOnPlatform(home); }
+        if (home != null) createGeofenceOnPlatform(home);
+    }
 
     private void createGeofenceOnPlatform(final PlaceModel home) {
-        mAbstractBackendProvider.createGeofence(new GeofenceLocation(home.latLng.latitude, home.latLng.longitude),
-                new ResultHandler<String>() {
+        mAbstractBackendProvider.updateHomeGeofence(new GeofenceLocation(home.latLng.latitude, home.latLng.longitude),
+                new ResultHandler<Void>() {
                     @Override
-                    public void onResult(String result) {
-                        Log.d(TAG, "Created geofence " + result);
-                    }
+                    public void onResult(Void result) { Log.d(TAG, "Geofence was created"); }
 
                     @Override
                     public void onError(@NonNull Exception ignored) {

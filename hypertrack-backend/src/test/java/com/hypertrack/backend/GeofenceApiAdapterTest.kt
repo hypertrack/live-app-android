@@ -138,7 +138,6 @@ class GeofenceApiAdapterTest {
         val oldGeofence1 = "99"
         val oldGeofence2 = "01"
         val actualHomeId = "02"
-        var createdProperties : Set<GeofenceProperties>? = null
         val geofenceApiAdapter = GeofenceApiAdapter(object : GeofencesApiProvider {
             override fun getDeviceGeofences(callback: ResultHandler<Set<Geofence>>) {
                 callback.onResult(setOf(
@@ -148,7 +147,7 @@ class GeofenceApiAdapterTest {
                 ))
             }
 
-            override fun createGeofences(geofencesProperties: Set<GeofenceProperties>, callback: ResultHandler<Set<Geofence>>) { createdProperties = geofencesProperties }
+            override fun createGeofences(geofencesProperties: Set<GeofenceProperties>, callback: ResultHandler<Set<Geofence>>) { }
             override fun deleteGeofence(geofence_id: String) {deleted.add(geofence_id)}
         })
 
