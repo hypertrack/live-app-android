@@ -5,15 +5,13 @@ import android.os.Handler;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.hypertrack.backend.AbstractBackendProvider;
-import com.hypertrack.backend.models.GeofenceLocation;
 import com.hypertrack.backend.ResultHandler;
+import com.hypertrack.backend.models.GeofenceLocation;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,28 +23,16 @@ class SearchPlaceState extends BaseState {
     private static final String TAG = "SearchPlaceState";
     private final String mode;
     private PlaceModel destination;
-    private PlaceModel home;
+    @Nullable private PlaceModel home;
     boolean mapDestinationMode = false;
     private final Set<PlaceModel> recentPlaces;
-    @NonNull private final AbstractBackendProvider mAbstractBackendProvider;
+    @NonNull private final AbstractBackendProvider mBackendProvider;
 
-    SearchPlaceState(Context context, String mode, @NonNull AbstractBackendProvider abstractBackendProvider) {
+    SearchPlaceState(Context context, String mode, @NonNull AbstractBackendProvider backendProvider) {
         super(context);
-        mAbstractBackendProvider = abstractBackendProvider;
+        mBackendProvider = backendProvider;
         this.mode = mode;
         home = sharedHelper.getHomePlace();
-        if (home == null) {
-            mAbstractBackendProvider.getHomeGeofenceLocation(new ResultHandler<GeofenceLocation>() {
-                @Override public void onResult(GeofenceLocation result) {
-                    PlaceModel newPlace = new PlaceModel();
-                    newPlace.latLng = new LatLng(result.getLatitude(), result.getLongitude());
-                    newPlace.populateAddressFromGeocoder(mContext);
-                    home = newPlace;
-                    sharedHelper.setHomePlace(home);
-                }
-                @Override public void onError(@NotNull Exception error) { }
-            });
-        }
         recentPlaces = sharedHelper.getRecentPlaces();
     }
 
@@ -54,7 +40,7 @@ class SearchPlaceState extends BaseState {
 
     PlaceModel getDestination() { return destination; }
 
-    PlaceModel getHome() { return home; }
+    @Nullable PlaceModel getHome() { return home; }
 
     void setDestination(PlaceModel destination) { this.destination = destination; }
 
@@ -64,7 +50,7 @@ class SearchPlaceState extends BaseState {
     }
 
     private void createGeofenceOnPlatform(final PlaceModel home) {
-        mAbstractBackendProvider.updateHomeGeofence(new GeofenceLocation(home.latLng.latitude, home.latLng.longitude),
+        mBackendProvider.updateHomeGeofence(new GeofenceLocation(home.latLng.latitude, home.latLng.longitude),
                 new ResultHandler<Void>() {
                     @Override
                     public void onResult(Void result) { Log.d(TAG, "Geofence was created"); }

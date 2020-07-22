@@ -33,15 +33,18 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.backend.ResultHandler;
+import com.hypertrack.backend.models.GeofenceLocation;
 import com.hypertrack.live.App;
 import com.hypertrack.live.BackendClientFactory;
 import com.hypertrack.live.CognitoClient;
 import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.PermissionsManager;
 import com.hypertrack.live.R;
+import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.tracking.TrackingFragment;
 import com.hypertrack.live.utils.AppUtils;
 import com.hypertrack.live.utils.SharedHelper;
@@ -51,11 +54,12 @@ import com.hypertrack.sdk.ServiceNotificationConfig;
 import com.hypertrack.sdk.TrackingError;
 import com.hypertrack.sdk.TrackingStateObserver;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = App.TAG + "MainActivity";
 
-    public static final int VERIFICATION_REQUEST = 414;
     public static final int PERMISSIONS_REQUEST = 515;
 
     private SharedHelper sharedHelper;
@@ -209,6 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (sharedHelper.getAccountEmail().isEmpty()) getAccountEmail(true);
             if (sharedHelper.getInviteLink().isEmpty()) getInviteLink(true);
+            if (!sharedHelper.isHomePlaceSet()) fetchHomeFromBackend();
 
         } else {
             beginFragmentTransaction(new PermissionRationalFragment()).commitAllowingStateLoss();
@@ -222,6 +227,18 @@ public class MainActivity extends AppCompatActivity {
                 onTrackingStop();
             }
         }
+    }
+
+    private void fetchHomeFromBackend() {
+        mBackendProvider.getHomeGeofenceLocation(new ResultHandler<GeofenceLocation>() {
+            @Override public void onResult(GeofenceLocation result) {
+                PlaceModel newPlace = new PlaceModel();
+                newPlace.latLng = new LatLng(result.getLatitude(), result.getLongitude());
+                newPlace.populateAddressFromGeocoder(MainActivity.this);
+                sharedHelper.setHomePlace(newPlace);
+            }
+            @Override public void onError(@NotNull Exception error) { }
+        });
     }
 
     private void getAccountEmail(final boolean shouldRetry) {
