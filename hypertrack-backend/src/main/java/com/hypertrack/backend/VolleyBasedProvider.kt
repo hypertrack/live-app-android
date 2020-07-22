@@ -22,7 +22,7 @@ class PublicKeyAuthorizedBackendProvider(
     private val queue = Volley.newRequestQueue(context)
     private val gson = Gson()
     private val internalApiIssuesTokenProvider = InternalApiTokenProvider(queue, deviceID, publishableKey, gson, authUrl)
-    val backendProvider = BackendProvider(gson, queue, internalApiIssuesTokenProvider, baseUrl)
+    val backendProvider = VolleyBasedProvider(gson, queue, internalApiIssuesTokenProvider, baseUrl)
 
     override fun start(callback: ResultHandler<String>) {
         Log.i(TAG, "start $deviceID")
@@ -151,7 +151,7 @@ interface AbstractBackendProvider {
     fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>)
 }
 
-class BackendProvider(
+class VolleyBasedProvider(
         private val gson: Gson,
         private val queue: RequestQueue,
         private val tokenProvider: AsyncTokenProvider,
@@ -364,14 +364,14 @@ class BackendProvider(
     companion object {
         const val TAG = "BackendProvider"
         @GuardedBy("sInstanceLock")
-        private var sInstance: BackendProvider? = null
+        private var sInstance: VolleyBasedProvider? = null
         private val sInstanceLock = Any()
 
         @JvmStatic
-        fun getInstance(context: Context, tokenProvider: AsyncTokenProvider, baseUrl: String): BackendProvider {
+        fun getInstance(context: Context, tokenProvider: AsyncTokenProvider, baseUrl: String): VolleyBasedProvider {
             if (sInstance == null) {
                 synchronized(sInstanceLock) {
-                    if (sInstance == null) sInstance = BackendProvider(Gson(), Volley.newRequestQueue(context), tokenProvider, baseUrl)
+                    if (sInstance == null) sInstance = VolleyBasedProvider(Gson(), Volley.newRequestQueue(context), tokenProvider, baseUrl)
                 }
             }
             return sInstance ?: throw IllegalStateException()

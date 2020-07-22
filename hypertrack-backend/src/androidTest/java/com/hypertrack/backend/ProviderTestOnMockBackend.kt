@@ -1,5 +1,6 @@
 package com.hypertrack.backend
 
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -8,7 +9,9 @@ import okhttp3.mockwebserver.RecordedRequest
 import org.junit.Test
 import java.net.HttpURLConnection
 
+private const val TAG = "ProviderTestOnMockBacke"
 class ProviderTestOnMockBackend {
+
 
     val stubTokenResponse = """{"access_token": "stub_token", "expires_in": 86400, "token_type": "Basic"}"""
     val stubGeofencesResponse = """{
@@ -61,10 +64,12 @@ class ProviderTestOnMockBackend {
         mockWebServer.setDispatcher(dispatcher)
         mockWebServer.start()
 
+        val  baseUrl = mockWebServer.url("").toString()
+        Log.d(TAG, "Base Url is $baseUrl")
         val backendProvider : AbstractBackendProvider = PublicKeyAuthorizedBackendProvider(
                 InstrumentationRegistry.getInstrumentation().targetContext,
 "some_publishable_key", "42",
-                mockWebServer.url("").toString(),
+                baseUrl,
                 mockWebServer.url("authenticate").toString()
         )
 

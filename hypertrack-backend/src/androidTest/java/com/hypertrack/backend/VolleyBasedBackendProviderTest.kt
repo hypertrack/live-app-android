@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class BackendProviderTest {
+class VolleyBasedBackendProviderTest {
 
     private lateinit var appContext : Context
     private lateinit var backendProvider: AbstractBackendProvider

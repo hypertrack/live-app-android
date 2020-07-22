@@ -74,7 +74,7 @@ class CreateGeofencesRequest(
             try {
                 val responseBody = String(it.data, Charset.forName(HttpHeaderParser.parseCharset(it.headers, Charsets.UTF_8.name())))
                 if (responseBody.isEmpty()) {
-                    return Response.error(VolleyError("Can't create trip from empty response"))
+                    return Response.error(VolleyError("Can't parse geofence from empty response"))
                 }
                 val result = gson.fromJson<List<GeofenceResponse>>(responseBody,
                         object : TypeToken<List<GeofenceResponse>>(){}.type)
@@ -132,7 +132,7 @@ class CreateTripRequest(tripConfig: TripConfig, private val gson: Gson, tokenStr
     }
 }
 
-class CompleteTripRequest(private val tripId: String, tokenString: String,
+class CompleteTripRequest(tripId: String, tokenString: String,
                           responseListener: Response.Listener<Void>,
                           errorListener: Response.ErrorListener,
                           baseUrl: String) :
@@ -163,7 +163,7 @@ class GetDeeplinkRequest(tokenString: String, responseListener: Response.Listene
 
 class GetAccountEmailRequest(tokenString: String, responseListener: Response.Listener<String>,
                              errorListener: Response.ErrorListener,
-                             private val baseUrl: String) :
+                             baseUrl: String) :
         LiveAppBackendRequest<String>(tokenString,
                 "${baseUrl}client/account_name/", "",
                 responseListener, errorListener, Method.GET) {
