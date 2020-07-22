@@ -6,10 +6,8 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.Volley
 import com.hypertrack.backend.deprecated.InternalApiTokenProvider
 import com.hypertrack.backend.deprecated.VolleyBasedProvider
-import com.hypertrack.backend.models.Geofence
-import com.hypertrack.backend.models.GeofenceLocation
-import com.hypertrack.backend.models.ShareableTrip
-import com.hypertrack.backend.models.TripConfig
+import com.hypertrack.backend.models.*
+import java.lang.Error
 import java.net.HttpURLConnection
 
 private const val TAG = "HybridBackendProvider"
@@ -83,12 +81,7 @@ class HybridBackendProvider(
     }
 
     override fun createGeofence(location: GeofenceLocation, callback: ResultHandler<String>) {
-        Log.i(TAG, "Create geofence Location")
-        val retryCallback = wrapCallback<String>(
-                callback,
-                Runnable { backendProvider.createGeofence(location, deviceID, callback) }
-        )
-        backendProvider.createGeofence(location, deviceID, retryCallback)
+        TODO("Not yet implemented")
     }
 
     override fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>) {
@@ -163,7 +156,29 @@ internal class GeofenceApiAdapter (
 
     }
 
-    override fun updateHomeGeofence() {
-        TODO("Not yet implemented")
+    override fun updateHomeGeofence(homeLocation: GeofenceLocation, resultHandler: ResultHandler<Void?>) {
+        // Get existing home geofences
+        geofenceApiProvider.getDeviceGeofences(object : ResultHandler<Set<Geofence>> {
+            override fun onResult(result: Set<Geofence>) {
+                // delete all if present
+                result
+                        .filter { it.metadata?.get("name") == "Home" }
+                        .forEach { geofenceApiProvider.deleteGeofence(it.geofence_id) }
+                // create new geofence
+                geofenceApiProvider.createGeofences(setOf(GeofenceProperties(
+                                Point(listOf(homeLocation.longitude, homeLocation.latitude)),
+                                mapOf("name" to "Home"), 100
+                        )), object : ResultHandler<Set<Geofence>> {
+                    override fun onResult(result: Set<Geofence>) {
+                        if (result.size == 1) resultHandler.onResult(null)
+                        else resultHandler.onError(Exception("No geofence was received in server response"))
+                    }
+
+                    override fun onError(error: Exception) = resultHandler.onError(error)
+                })
+            }
+
+            override fun onError(error: Exception) = resultHandler.onError(error)
+        })
     }
 }
