@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -248,7 +249,7 @@ public class CognitoClient {
 
     private static abstract class InnerCallback<T> implements com.amazonaws.mobile.client.Callback<T> {
 
-        private Handler handler = new Handler();
+        private Handler handler = new Handler(Looper.getMainLooper());
         private final Callback callback;
 
         InnerCallback(Callback callback) {
