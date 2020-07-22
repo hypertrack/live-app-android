@@ -4,6 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.hypertrack.backend.models.GeofenceLocation
+import com.hypertrack.backend.models.ShareableTrip
+import com.hypertrack.backend.models.TripConfig
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -23,7 +26,7 @@ class VolleyBasedBackendProviderTest {
     fun setup() {
 
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        backendProvider = PublicKeyAuthorizedBackendProvider(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
+        backendProvider = HybridBackendProvider(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
     }
 
     @Test @LargeTest

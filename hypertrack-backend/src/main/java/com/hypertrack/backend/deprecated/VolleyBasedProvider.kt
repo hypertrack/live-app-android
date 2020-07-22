@@ -1,4 +1,4 @@
-package com.hypertrack.backend
+package com.hypertrack.backend.deprecated
 
 import android.content.Context
 import android.util.Log
@@ -8,6 +8,11 @@ import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.Volley
 import com.google.gson.Gson
+import com.hypertrack.backend.AsyncTokenProvider
+import com.hypertrack.backend.ResultHandler
+import com.hypertrack.backend.models.GeofenceLocation
+import com.hypertrack.backend.models.ShareableTrip
+import com.hypertrack.backend.models.TripConfig
 
 
 class VolleyBasedProvider(
@@ -174,8 +179,7 @@ class VolleyBasedProvider(
     private fun scheduleAuthenticatedGetInviteLinkRequest(tokenString: String, callback: ResultHandler<String>) {
         Log.d(TAG, "Requesting deeplink with token $tokenString")
         val request = GetDeeplinkRequest(
-                tokenString, Response.Listener {
-            deeplink ->
+                tokenString, Response.Listener { deeplink ->
             Log.d(TAG, "Got deeplink $deeplink")
             callback.onResult(deeplink)
         },
@@ -191,8 +195,7 @@ class VolleyBasedProvider(
     private fun scheduleAuthenticatedGetAccountEmailRequest(tokenString: String, callback: ResultHandler<String>) {
         Log.d(TAG, "Requesting account email with token $tokenString")
         val request = GetAccountEmailRequest(
-                tokenString, Response.Listener {
-            email ->
+                tokenString, Response.Listener { email ->
             Log.d(TAG, "Got email $email")
             callback.onResult(email)
         },
@@ -233,7 +236,8 @@ class VolleyBasedProvider(
                     if (sInstance == null) sInstance = VolleyBasedProvider(Gson(), Volley.newRequestQueue(context), tokenProvider, baseUrl)
                 }
             }
-            return sInstance ?: throw IllegalStateException()
+            return sInstance
+                    ?: throw IllegalStateException()
         }
     }
 

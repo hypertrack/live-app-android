@@ -7,7 +7,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.hypertrack.backend.AbstractBackendProvider;
-import com.hypertrack.backend.GeofenceLocation;
+import com.hypertrack.backend.models.GeofenceLocation;
 import com.hypertrack.backend.ResultHandler;
 import com.hypertrack.live.models.PlaceModel;
 import com.hypertrack.live.ui.BaseState;

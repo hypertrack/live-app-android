@@ -1,4 +1,4 @@
-package com.hypertrack.backend
+package com.hypertrack.backend.models
 
 import com.google.gson.annotations.SerializedName
 

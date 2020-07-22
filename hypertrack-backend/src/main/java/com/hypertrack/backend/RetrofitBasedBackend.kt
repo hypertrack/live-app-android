@@ -1,6 +1,9 @@
 package com.hypertrack.backend
 
 import com.google.gson.Gson
+import com.hypertrack.backend.models.Geofence
+import com.hypertrack.backend.models.GeofenceParams
+import com.hypertrack.backend.models.GeofenceProperties
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -11,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.http.*
 
-interface ApiInterface {
+interface GeofencesApiInterface {
 
     @GET("client/devices/{device_id}/geofences")
     suspend fun getDeviceGeofences(@Path("device_id")deviceId : String) : Set<Geofence>
@@ -26,15 +29,8 @@ interface ApiInterface {
 
 }
 
-class ApiClient(
-        baseUrl:String,
-        authUrl: String,
-        private val deviceId: String,
-        publishableKey: String,
-        gson: Gson
-) {
-
-    private val accessTokenRepository = BasicAuthAccessTokenRepository(authUrl, deviceId, publishableKey)
+class RetrofitGeofencesApiClient(baseUrl: String, private val deviceId: String, gson: Gson, authorizer: AccessTokenRepository)
+    : GeofencesApiProvider {
 
     val api = Retrofit.Builder()
             .baseUrl(baseUrl)
@@ -42,14 +38,14 @@ class ApiClient(
             .addConverterFactory(ScalarsConverterFactory.create())
             .client(
                     OkHttpClient.Builder()
-                            .authenticator(AccessTokenAuthenticator(accessTokenRepository))
-                            .addInterceptor(AccessTokenInterceptor(accessTokenRepository))
+                            .authenticator(AccessTokenAuthenticator(authorizer))
+                            .addInterceptor(AccessTokenInterceptor(authorizer))
                             .addInterceptor(UserAgentInterceptor())
                             .build()
             )
-            .build().create(ApiInterface::class.java)
+            .build().create(GeofencesApiInterface::class.java)
 
-    fun getDeviceGeofences(callback: ResultHandler<Set<Geofence>>) {
+    override fun getDeviceGeofences(callback: ResultHandler<Set<Geofence>>) {
 
         GlobalScope.launch(Dispatchers.Default) {
             try {
@@ -61,7 +57,7 @@ class ApiClient(
         }
     }
 
-    fun createGeofences(geofencesProperties: Set<GeofenceProperties>, callback: ResultHandler<Set<Geofence>>) {
+    override fun createGeofences(geofencesProperties: Set<GeofenceProperties>, callback: ResultHandler<Set<Geofence>>) {
         GlobalScope.launch {
             try {
                 val params = GeofenceParams(geofencesProperties, deviceId)
@@ -73,7 +69,7 @@ class ApiClient(
         }
     }
 
-    fun deleteGeofence(geofence_id: String) {
+    override fun deleteGeofence(geofence_id: String) {
         GlobalScope.launch { api.deleteGeofence(geofence_id) }
     }
 }

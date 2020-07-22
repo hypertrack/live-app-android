@@ -1,4 +1,4 @@
-package com.hypertrack.backend
+package com.hypertrack.backend.deprecated
 
 import android.os.Build
 import android.util.Base64
@@ -12,6 +12,11 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.hypertrack.backend.BuildConfig
+import com.hypertrack.backend.models.GeofenceLocation
+import com.hypertrack.backend.models.GeofenceResponse
+import com.hypertrack.backend.models.ShareableTrip
+import com.hypertrack.backend.models.TripConfig
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
 

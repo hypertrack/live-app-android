@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.hypertrack.backend.AbstractBackendProvider;
-import com.hypertrack.backend.PublicKeyAuthorizedBackendProvider;
+import com.hypertrack.backend.HybridBackendProvider;
 import com.hypertrack.live.utils.SharedHelper;
 
 public class BackendClientFactory {
@@ -17,7 +17,7 @@ public class BackendClientFactory {
 
         if (publishableKey.isEmpty()) return null;
 
-        return new PublicKeyAuthorizedBackendProvider(context, publishableKey, deviceId);
+        return new HybridBackendProvider(context, publishableKey, deviceId);
 
     }
 

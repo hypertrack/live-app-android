@@ -2,6 +2,7 @@ package com.hypertrack.backend
 
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import com.hypertrack.backend.models.GeofenceLocation
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -66,7 +67,7 @@ class ProviderTestOnMockBackend {
 
         val  baseUrl = mockWebServer.url("").toString()
         Log.d(TAG, "Base Url is $baseUrl")
-        val backendProvider : AbstractBackendProvider = PublicKeyAuthorizedBackendProvider(
+        val backendProvider : AbstractBackendProvider = HybridBackendProvider(
                 InstrumentationRegistry.getInstrumentation().targetContext,
 "some_publishable_key", "42",
                 baseUrl,
