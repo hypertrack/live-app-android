@@ -13,6 +13,11 @@ interface AbstractBackendProvider {
     fun getHomeGeofence(callback: ResultHandler<GeofenceLocation>)
 }
 
+interface HomeManagementApi {
+    fun getHomeGeofenceLocation(resultHandler: ResultHandler<GeofenceLocation?>)
+    fun updateHomeGeofence()
+}
+
 interface AsyncTokenProvider {
     fun getAuthenticationToken(resultHandler: ResultHandler<String>)
 }

@@ -6,11 +6,13 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.Volley
 import com.hypertrack.backend.deprecated.InternalApiTokenProvider
 import com.hypertrack.backend.deprecated.VolleyBasedProvider
+import com.hypertrack.backend.models.Geofence
 import com.hypertrack.backend.models.GeofenceLocation
 import com.hypertrack.backend.models.ShareableTrip
 import com.hypertrack.backend.models.TripConfig
 import java.net.HttpURLConnection
 
+private const val TAG = "HybridBackendProvider"
 
 class HybridBackendProvider(
         context: Context, publishableKey: String,
@@ -125,5 +127,43 @@ class HybridBackendProvider(
         fun getInstance(context: Context, deviceID: String, publishableKey: String) : HybridBackendProvider {
             return HybridBackendProvider(context, publishableKey, deviceID, Injector.baseUrl, Injector.authUrl)
         }
+    }
+}
+
+internal class GeofenceApiAdapter (
+        private val geofenceApiProvider: GeofencesApiProvider
+): HomeManagementApi {
+    override fun getHomeGeofenceLocation(resultHandler: ResultHandler<GeofenceLocation?>) {
+
+        // Get all geofences
+        geofenceApiProvider.getDeviceGeofences(object : ResultHandler<Set<Geofence>> {
+            override fun onResult(result: Set<Geofence>) {
+                Log.d(TAG, "Got geofences $result")
+                val homes = result
+                        .filter { it.archived != true }
+                        .filter { it.metadata?.get("name") == "Home" }
+                        .sortedByDescending { it.created_at }
+                when {
+                    homes.isEmpty() -> {
+                        resultHandler.onResult(null)
+                    }
+                    else -> {
+                        val home = homes.first()
+                        resultHandler.onResult(GeofenceLocation(home.latitude, home.longitude))
+                        // return coordinates for latest
+                    }
+                }
+                if (homes.size > 1) {
+                    homes.subList(1, homes.size).forEach { geofenceApiProvider.deleteGeofence(it.geofence_id) }
+                }
+            }
+
+            override fun onError(error: Exception) = resultHandler.onError(error)
+        })
+
+    }
+
+    override fun updateHomeGeofence() {
+        TODO("Not yet implemented")
     }
 }
