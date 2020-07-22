@@ -47,8 +47,7 @@ public class LaunchActivity extends AppCompatActivity {
                             addSigninFragment();
                         }
                     } else {
-                        startActivity(new Intent(LaunchActivity.this, MainActivity.class));
-                        finish();
+                        LaunchActivity.this.onLoginCompleted();
                     }
                 }
 
