@@ -26,6 +26,7 @@ data class Geofence (
         @SerializedName("geometry") val geometry : Geometry,
         @SerializedName("metadata") val metadata : Map<String, Any>?,
         @SerializedName("radius") val radius : Int,
+        @SerializedName("archived") val archived : Boolean?,
         @SerializedName("single_use") val single_use : Boolean
 ) {
     val latitude: Double

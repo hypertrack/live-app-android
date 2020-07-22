@@ -48,6 +48,13 @@ class RetrofitApiClientTest {
         finishedSignal.await(30, TimeUnit.SECONDS)
         assert(testResult.isNotEmpty())
 
+        val activeGeofence = testResult.filter { it.archived == null }.last()
+
+        val deleteSignal = CountDownLatch(1)
+
+        retrofitApiClient.deleteGeofence(activeGeofence.geofence_id)
+        deleteSignal.await(10, TimeUnit.SECONDS)
+
 
     }
 }

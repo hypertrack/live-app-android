@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -19,7 +20,7 @@ interface ApiInterface {
     suspend fun createGeofences(@Path("device_id")deviceId : String, @Body params: GeofenceParams) : List<Geofence>
 
     @DELETE("client/geofences/{geofence_id}")
-    suspend fun deleteGeofence(@Path("geofence_id")geofence_id: String)
+    suspend fun deleteGeofence(@Path("geofence_id")geofence_id: String) : Response<Unit>
 
 
 
@@ -58,6 +59,10 @@ class ApiClient(
                 callback.onError(e)
             }
         }
+    }
+
+    fun deleteGeofence(geofence_id: String) {
+        GlobalScope.launch { api.deleteGeofence(geofence_id) }
     }
 }
 
