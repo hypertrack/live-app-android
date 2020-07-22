@@ -1,4 +1,4 @@
-package com.hypertrack.backend
+package com.hypertrack.backend.deprecated
 
 import android.os.Build
 import android.util.Base64
@@ -12,13 +12,13 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
+import com.hypertrack.backend.BuildConfig
+import com.hypertrack.backend.models.GeofenceLocation
+import com.hypertrack.backend.models.GeofenceResponse
+import com.hypertrack.backend.models.ShareableTrip
+import com.hypertrack.backend.models.TripConfig
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
-
-private const val ADDRESS = "https://live-app-backend.htprod.hypertrack.com/client/"
-private const val LIVE_APP_BACKEND_DEVICES_ENDPOINT = ADDRESS + "devices/"
-private const val LIVE_APP_BACKEND_GEOFENCES_ENDPOINT = ADDRESS + "geofences/"
-private const val LIVE_APP_BACKEND_TRIPS_ENDPOINT = ADDRESS + "trips/"
 
 private const val TAG = "Requests"
 
@@ -26,9 +26,10 @@ class StartTrackingRequest(
         deviceId: String,
         tokenString: String,
         responseListener: Response.Listener<Void>,
-        errorListener: Response.ErrorListener
+        errorListener: Response.ErrorListener,
+        baseUrl: String
 ) : LiveAppBackendRequest<Void>(
-        tokenString, "$LIVE_APP_BACKEND_DEVICES_ENDPOINT$deviceId/start", "",
+        tokenString, "${baseUrl}client/devices/$deviceId/start", "",
         responseListener, errorListener
 ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
@@ -43,9 +44,10 @@ class StopTrackingRequest(
         deviceId: String,
         tokenString: String,
         responseListener: Response.Listener<Void>,
-        errorListener: Response.ErrorListener
+        errorListener: Response.ErrorListener,
+        baseUrl: String
 ) : LiveAppBackendRequest<Void>(
-        tokenString, "$LIVE_APP_BACKEND_DEVICES_ENDPOINT$deviceId/stop", "",
+        tokenString, "${baseUrl}client/devices/$deviceId/stop", "",
         responseListener, errorListener
 ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
@@ -62,9 +64,10 @@ class CreateGeofencesRequest(
         private val gson: Gson,
         tokenString: String,
         responseListener: Response.Listener<String>,
-        errorListener: Response.ErrorListener
+        errorListener: Response.ErrorListener,
+        baseUrl: String
 ) : LiveAppBackendRequest<String>(
-        tokenString, "$LIVE_APP_BACKEND_GEOFENCES_ENDPOINT?device_id=$deviceId", "{\"geofences\":[{\"radius\":50,\"geometry\":{\"type\":\"Point\",\"coordinates\":[${location.longitude},${location.latitude}]},\"metadata\":{\"name\":\"Home\"}}],\"device_id\":\"$deviceId\"}",
+        tokenString, "${baseUrl}client/geofences/?device_id=$deviceId", "{\"geofences\":[{\"radius\":50,\"geometry\":{\"type\":\"Point\",\"coordinates\":[${location.longitude},${location.latitude}]},\"metadata\":{\"name\":\"Home\"}}],\"device_id\":\"$deviceId\"}",
         responseListener, errorListener
 ) {
     override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
@@ -76,7 +79,7 @@ class CreateGeofencesRequest(
             try {
                 val responseBody = String(it.data, Charset.forName(HttpHeaderParser.parseCharset(it.headers, Charsets.UTF_8.name())))
                 if (responseBody.isEmpty()) {
-                    return Response.error(VolleyError("Can't create trip from empty response"))
+                    return Response.error(VolleyError("Can't parse geofence from empty response"))
                 }
                 val result = gson.fromJson<List<GeofenceResponse>>(responseBody,
                         object : TypeToken<List<GeofenceResponse>>(){}.type)
@@ -98,9 +101,9 @@ class CreateGeofencesRequest(
 }
 
 class CreateTripRequest(tripConfig: TripConfig, private val gson: Gson, tokenString: String,
-                        responseListener: Response.Listener<ShareableTrip>, errorListener: Response.ErrorListener
+                        responseListener: Response.Listener<ShareableTrip>, errorListener: Response.ErrorListener, baseUrl: String
 ) :
-        LiveAppBackendRequest<ShareableTrip>(tokenString, LIVE_APP_BACKEND_TRIPS_ENDPOINT,
+        LiveAppBackendRequest<ShareableTrip>(tokenString, "${baseUrl}client/trips/",
                 tripConfig.getRequestBody(), responseListener, errorListener
         ) {
 
@@ -134,71 +137,59 @@ class CreateTripRequest(tripConfig: TripConfig, private val gson: Gson, tokenStr
     }
 }
 
-class CompleteTripRequest(private val tripId: String, tokenString: String,
+class CompleteTripRequest(tripId: String, tokenString: String,
                           responseListener: Response.Listener<Void>,
-                          errorListener: Response.ErrorListener) :
+                          errorListener: Response.ErrorListener,
+                          baseUrl: String) :
         LiveAppBackendRequest<Void>(tokenString,
-                "$LIVE_APP_BACKEND_TRIPS_ENDPOINT$tripId/complete", "",
+                "${baseUrl}client/trips/$tripId/complete", "",
                 responseListener, errorListener) {
 
     override fun parseNetworkResponse(response: NetworkResponse?): Response<Void> {
         response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
-        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url $LIVE_APP_BACKEND_TRIPS_ENDPOINT$tripId/complete")
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url $url")
         return Response.error(VolleyError(response))
     }
 }
 
 class GetDeeplinkRequest(tokenString: String, responseListener: Response.Listener<String>,
-                         errorListener: Response.ErrorListener) :
+                         errorListener: Response.ErrorListener,
+                         baseUrl: String) :
         LiveAppBackendRequest<String>(tokenString,
-                "${ADDRESS}deep_link/live", "",
+                "${baseUrl}client/deep_link/live", "",
                 responseListener, errorListener, Method.GET) {
 
     override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
         response?.let { if (isSuccessFamilyStatus(it)) return Response.success(String(it.data), null) }
-        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url ${ADDRESS}deep_link/live")
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url $url")
         return Response.error(VolleyError(response))
     }
 }
 
 class GetAccountEmailRequest(tokenString: String, responseListener: Response.Listener<String>,
-                         errorListener: Response.ErrorListener) :
+                             errorListener: Response.ErrorListener,
+                             baseUrl: String) :
         LiveAppBackendRequest<String>(tokenString,
-                "${ADDRESS}account_name/", "",
+                "${baseUrl}client/account_name/", "",
                 responseListener, errorListener, Method.GET) {
 
     override fun parseNetworkResponse(response: NetworkResponse?): Response<String> {
         response?.let { if (isSuccessFamilyStatus(it)) return Response.success(String(it.data), null) }
-        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url ${ADDRESS}account_name/")
+        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url $url")
         return Response.error(VolleyError(response))
     }
 }
 
-class GeofenceEventRequest(
-        deviceId: String, eventName: String,
-        tokenString: String,
-        responseListener: Response.Listener<Unit>?,
-        errorListener: Response.ErrorListener?
-) : LiveAppBackendRequest<Unit>(tokenString, "${ADDRESS}geofence",
-        "{\"device_id\": \"$deviceId\", \"geofence_name\": \"Home\", \"geofence_action\": \"$eventName\"}",
-        responseListener, errorListener
-) {
-    override fun parseNetworkResponse(response: NetworkResponse?): Response<Unit> {
-        response?.let { if (isSuccessFamilyStatus(it)) return Response.success(null, null) }
-        Log.e(TAG, "Got status code ${response?.statusCode}, body ${response?.toString()} url ${ADDRESS}geofence")
-        return Response.error(VolleyError(response))
-    }
-
-}
 
 class GetInternalTokenRequest(
         private val gson: Gson,
         deviceId: String,
         private val publishableKey: String,
+        authUrl: String,
         responseListener: Response.Listener<String>,
         errorListener: Response.ErrorListener
 ) : JsonRequest<String>(
-        Method.POST, "https://live-api.htprod.hypertrack.com/authenticate",
+        Method.POST, authUrl,
         """{"device_id":"$deviceId","scope":"generation"}""",
         responseListener, errorListener
 ) {
@@ -241,9 +232,9 @@ class GetInternalTokenRequest(
 fun isSuccessFamilyStatus(networkResponse: NetworkResponse) = networkResponse.statusCode / 100 == 2
 fun getUserAgent() = "LiveApp/${BuildConfig.VERSION_NAME} Volley/1.1.1 Android/${Build.VERSION.RELEASE}"
 
-abstract class LiveAppBackendRequest<T>(private val tokenString: String, url: String, requestBody: String, responseListener: Response.Listener<T>?,
+abstract class LiveAppBackendRequest<T>(private val tokenString: String, requestUrl: String, requestBody: String, responseListener: Response.Listener<T>?,
                                         errorListener: Response.ErrorListener?, requestMethod:Int = Method.POST
-) : JsonRequest<T>(requestMethod, url, requestBody, responseListener, errorListener
+) : JsonRequest<T>(requestMethod, requestUrl, requestBody, responseListener, errorListener
 ) {
 
     override fun parseNetworkError(volleyError: VolleyError?): VolleyError {

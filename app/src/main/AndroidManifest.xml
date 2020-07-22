@@ -79,14 +79,6 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
 
-        <service
-            android:name="com.hypertrack.sdk.HyperTrackMessagingService"
-            android:exported="false">
-            <intent-filter android:priority="500">
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <receiver
             android:name="com.hypertrack.live.InstallReferrerReceiver"
             android:exported="true"
@@ -118,7 +110,6 @@
 
         <!-- Branch init -->
         <meta-data android:name="io.branch.sdk.BranchKey" android:value="key_live_aiKNL9ITU9tljY2nYXSavgjhvyjhSk0I" />
-<!--        <meta-data android:name="io.branch.sdk.BranchKey.test" android:value="key_test_cdTISZQLOWyhk70b5YSdTmbdAyngRaX8" />-->
         <meta-data android:name="io.branch.sdk.TestMode" android:value="false" />
     </application>
 </manifest>

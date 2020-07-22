@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.test.filters.LargeTest
 import androidx.test.platform.app.InstrumentationRegistry
+import com.hypertrack.backend.models.ShareableTrip
+import com.hypertrack.backend.models.TripConfig
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -13,17 +15,17 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class BackendProviderTest {
+class VolleyBasedBackendProviderTest {
 
-    lateinit var appContext : Context
-    lateinit var backendProvider: AbstractBackendProvider
+    private lateinit var appContext : Context
+    private lateinit var backendProvider: AbstractBackendProvider
 
 
     @Before
     fun setup() {
 
         appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        backendProvider = PublicKeyAuthorizedBackendProvider(context = appContext, deviceID = DEVICE_ID, publishableKey = PUBLISHABLE_KEY)
+        backendProvider = HybridBackendProvider.getInstance(context = appContext, publishableKey = PUBLISHABLE_KEY, deviceID = DEVICE_ID)
     }
 
     @Test @LargeTest
@@ -95,10 +97,10 @@ class BackendProviderTest {
     fun test0050ItShouldGetDeeplinkWhenRequested() {
         Log.d(TAG,"Getting deeplink")
         val requestFinishedSignal = CountDownLatch(1)
-        var deeplink = "";
+        var deeplink = ""
         backendProvider.getInviteLink(object : ResultHandler<String> {
             override fun onResult(result: String) {
-                deeplink = result;
+                deeplink = result
                 requestFinishedSignal.countDown()
             }
 
@@ -115,10 +117,10 @@ class BackendProviderTest {
     fun test0060ItShouldGetDeeplinkWhenRequested() {
         Log.d(TAG,"Getting accountEmail")
         val requestFinishedSignal = CountDownLatch(1)
-        var accountName = "";
+        var accountName = ""
         backendProvider.getAccountName(object : ResultHandler<String> {
             override fun onResult(result: String) {
-                accountName = result;
+                accountName = result
                 requestFinishedSignal.countDown()
             }
 
@@ -128,25 +130,6 @@ class BackendProviderTest {
         })
         requestFinishedSignal.await(TEST_TIMEOUT, TimeUnit.SECONDS)
         assertTrue(accountName.isNotEmpty())
-
-    }
-
-    @Test
-    fun test0070ItShouldGetGeofenceskWhenRequested() {
-        Log.d(TAG,"Create geofence")
-        val requestFinishedSignal = CountDownLatch(1)
-        var geofenceId = "";
-        backendProvider.createGeofence(GeofenceLocation(47.850388852921, 35.1206527856364), object : ResultHandler<String> {
-            override fun onResult(result: String) {
-                geofenceId = result;
-                requestFinishedSignal.countDown()
-            }
-
-            override fun onError(error: Exception) = requestFinishedSignal.countDown()
-        })
-        requestFinishedSignal.await(40, TimeUnit.SECONDS)
-        assertTrue(geofenceId.isNotEmpty())
-        Log.d(TAG, "Created geofence $geofenceId")
 
     }
 

@@ -1,7 +1,10 @@
 package com.hypertrack.live.models;
 
 
+import android.content.Context;
 import android.graphics.Typeface;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.style.CharacterStyle;
@@ -11,7 +14,11 @@ import androidx.annotation.Nullable;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.model.AutocompletePrediction;
+import com.hypertrack.backend.models.GeofenceLocation;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +51,22 @@ public class PlaceModel implements Parcelable {
         return placeModelList;
     }
 
+
+    @NotNull
+    public static String getAddressFromGeocoder(LatLng latLng, Context context) {
+        if (!Geocoder.isPresent()) return "";
+        List<Address> results;
+        try {
+            results = new Geocoder(context).getFromLocation(latLng.latitude, latLng.longitude, 1);
+        } catch (IOException ignored) {
+            return "";
+        }
+        if (results == null || results.isEmpty()) return "";
+
+        String thoroughfare = results.get(0).getThoroughfare();
+        return thoroughfare != null ? thoroughfare : "";
+    }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         if (super.equals(obj)) {
@@ -72,6 +95,10 @@ public class PlaceModel implements Parcelable {
         dest.writeParcelable(this.latLng, flags);
         dest.writeString(this.address);
         dest.writeByte(this.isRecent ? (byte) 1 : (byte) 0);
+    }
+
+    public void populateAddressFromGeocoder(Context context) {
+        address = getAddressFromGeocoder(latLng, context);
     }
 
     public PlaceModel() {

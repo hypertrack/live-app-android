@@ -28,8 +28,8 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.hypertrack.backend.AbstractBackendProvider;
 import com.hypertrack.backend.ResultHandler;
-import com.hypertrack.backend.ShareableTrip;
-import com.hypertrack.backend.TripConfig;
+import com.hypertrack.backend.models.ShareableTrip;
+import com.hypertrack.backend.models.TripConfig;
 import com.hypertrack.live.App;
 import com.hypertrack.live.R;
 import com.hypertrack.live.models.PlaceModel;

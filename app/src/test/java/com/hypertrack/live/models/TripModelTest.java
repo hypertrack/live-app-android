@@ -4,7 +4,7 @@ import android.util.Log;
 
 import com.hypertrack.live.App;
 import com.hypertrack.sdk.views.dao.Trip;
-import com.hypertrack.backend.ShareableTrip;
+import com.hypertrack.backend.models.ShareableTrip;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

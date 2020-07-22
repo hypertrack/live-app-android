@@ -1,4 +1,4 @@
-package com.hypertrack.backend
+package com.hypertrack.backend.models
 
 import androidx.annotation.FloatRange
 import java.lang.NullPointerException
@@ -58,3 +58,5 @@ class TripConfig internal constructor(
     }
 
 }
+
+class ShareableTrip(val shareUrl: String, val embedUrl: String, val tripId: String, val remainingDuration: Int?)

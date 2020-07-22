@@ -47,8 +47,7 @@ public class LaunchActivity extends AppCompatActivity {
                             addSigninFragment();
                         }
                     } else {
-                        startActivity(new Intent(LaunchActivity.this, MainActivity.class));
-                        finish();
+                        LaunchActivity.this.onLoginCompleted();
                     }
                 }
 
@@ -106,6 +105,7 @@ public class LaunchActivity extends AppCompatActivity {
 
     public void onLoginCompleted() {
         Log.d(TAG, "onLoginCompleted: ");
+        // TODO Denys: We need to start tracking via API after login
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
