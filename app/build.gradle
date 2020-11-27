@@ -16,12 +16,12 @@ configurations.all {
 }
 
 android {
-    compileSdkVersion 29
-    buildToolsVersion "29.0.3"
+    compileSdkVersion 30
+    buildToolsVersion "30.0.2"
     defaultConfig {
         applicationId "com.hypertrack.live"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 30
         versionCode project.ext.versionNumber
         versionName project.ext.versionName
         testInstrumentationRunner
@@ -91,7 +91,7 @@ dependencies {
 
     implementation 'com.amazonaws:aws-android-sdk-mobile-client:2.16.7'
 
-    implementation 'com.hypertrack:hypertrack:4.5.3'
+    implementation 'com.hypertrack:hypertrack:4.8.0'
     implementation 'com.hypertrack:hypertrack-views:0.8.6'
     implementation 'com.hypertrack:maps-google:0.1.8'
     implementation project(':hypertrack-backend')

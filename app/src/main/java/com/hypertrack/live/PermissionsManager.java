@@ -25,22 +25,14 @@ public class PermissionsManager {
                 Manifest.permission.ACTIVITY_RECOGNITION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static boolean isBackgroundLocationPermissionApproved(Context context) {
-        return android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.Q
-                || ContextCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION) == PackageManager.PERMISSION_GRANTED;
-    }
-
     public static boolean isAllPermissionsApproved(Context context) {
         return isAccessFineLocationPermissionApproved(context)
-                && isActivityRecognitionPermissionApproved(context)
-                && isBackgroundLocationPermissionApproved(context);
+                && isActivityRecognitionPermissionApproved(context);
     }
 
     public static void requestPermissions(Activity activity, int requestCode) {
         boolean permissionAccessCoarseLocationApproved = isAccessFineLocationPermissionApproved(activity);
         boolean permissionActivityRecognitionApproved = isActivityRecognitionPermissionApproved(activity);
-        boolean permissionBackgroundLocationApproved = isBackgroundLocationPermissionApproved(activity);
 
         List<String> permissions = new ArrayList<>();
         if (!permissionAccessCoarseLocationApproved) {
@@ -49,9 +41,6 @@ public class PermissionsManager {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             if (!permissionActivityRecognitionApproved) {
                 permissions.add(Manifest.permission.ACTIVITY_RECOGNITION);
-            }
-            if (!permissionBackgroundLocationApproved) {
-                permissions.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION);
             }
         }
 

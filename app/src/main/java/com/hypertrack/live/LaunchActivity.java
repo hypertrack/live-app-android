@@ -10,11 +10,14 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.hypertrack.live.auth.ConfirmFragment;
 import com.hypertrack.live.auth.SignInFragment;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.ui.MainActivity;
 import com.hypertrack.live.utils.SharedHelper;
+import com.hypertrack.maps.google.widget.GoogleMapConfig;
 
 import org.json.JSONObject;
 
