@@ -101,21 +101,15 @@
 
     <array name="categories">
         <item>not selected</item>
-        <item name="workforce">Workforce</item>
-        <item name="logistics">Logistics</item>
-        <item name="gig_work">Gig Work</item>
-        <item name="on_demand_delivery">On-Demand Delivery</item>
-        <item name="ridesharing">Ridesharing</item>
-        <item name="other">Other</item>
+        <item name="deliveries">Deliveries</item>
+        <item name="visits">Visits</item>
+        <item name="rides">Rides</item>
     </array>
     <array name="category_names">
         <item>not selected</item>
-        <item>workforce</item>
-        <item>logistics</item>
-        <item>gig_work</item>
-        <item>on_demand_delivery</item>
-        <item>ridesharing</item>
-        <item>other</item>
+        <item>deliveries</item>
+        <item>visits</item>
+        <item>rides</item>
     </array>
 
     <array name="scale">
@@ -138,14 +132,12 @@
         <item>not selected</item>
         <item>My workforce</item>
         <item>My customer\'s workforce</item>
-        <item>Consumers</item>
     </array>
 
     <array name="state_names">
         <item>not selected</item>
         <item>my_workforce</item>
         <item>my_customers</item>
-        <item>consumers</item>
     </array>
 
     <string name="essential_service_worker">I am/represent an essential service worker in my region</string>
