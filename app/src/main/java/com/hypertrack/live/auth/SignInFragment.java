@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
 import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
@@ -43,6 +45,18 @@ public class SignInFragment extends Fragment implements CognitoClient.Callback {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getActivity().setTitle(R.string.sign_in_to_your_account);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
 
         loader = new LoaderDecorator(getContext());
 
@@ -81,10 +95,7 @@ public class SignInFragment extends Fragment implements CognitoClient.Callback {
             @Override
             public void onClick(View view) {
                 if (getActivity() != null) {
-                    getActivity().getSupportFragmentManager().beginTransaction()
-                            .add(R.id.fragment_frame, new SignUpFragment(), SignUpFragment.class.getSimpleName())
-                            .addToBackStack(SignUpFragment.class.getSimpleName())
-                            .commitAllowingStateLoss();
+                    onBackPressed();
                 }
             }
         });
@@ -120,5 +131,9 @@ public class SignInFragment extends Fragment implements CognitoClient.Callback {
                 Toast.makeText(getActivity(), message, Toast.LENGTH_LONG).show();
             }
         }
+    }
+
+    private void onBackPressed() {
+        getActivity().getSupportFragmentManager().popBackStack();
     }
 }

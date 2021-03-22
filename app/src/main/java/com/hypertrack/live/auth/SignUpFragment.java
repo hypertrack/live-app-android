@@ -27,6 +27,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.amazonaws.services.cognitoidentityprovider.model.UsernameExistsException;
 import com.hypertrack.live.CognitoClient;
+import com.hypertrack.live.LaunchActivity;
 import com.hypertrack.live.R;
 import com.hypertrack.live.ui.LoaderDecorator;
 import com.hypertrack.live.utils.HTTextWatcher;
@@ -69,15 +70,15 @@ public class SignUpFragment extends Fragment implements CognitoClient.Callback {
 
         Toolbar toolbar = view.findViewById(R.id.toolbar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
+//        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowHomeEnabled(true);
         getActivity().setTitle(R.string.sign_up_a_new_account);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onBackPressed();
-            }
-        });
+//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                onBackPressed();
+//            }
+//        });
 
         loader = new LoaderDecorator(getContext());
 
@@ -147,7 +148,7 @@ public class SignUpFragment extends Fragment implements CognitoClient.Callback {
         view.findViewById(R.id.sign_in).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                getActivity().getSupportFragmentManager().popBackStack();
+                ((LaunchActivity)getActivity()).addSignInFragment();
             }
         });
 
@@ -157,8 +158,11 @@ public class SignUpFragment extends Fragment implements CognitoClient.Callback {
 
         switch (viewPager.getCurrentItem()) {
             case PAGE_USER:
-                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-                    showError(getString(R.string.email_password_fields_required));
+                if (TextUtils.isEmpty(email)
+                        || TextUtils.isEmpty(password)
+                        || TextUtils.isEmpty(company)
+                ) {
+                    showError(getString(R.string.all_fields_required));
                     return;
                 }
                 cognitoUserAttributes.put(SignupInfoPage.CUSTOM_COMPANY, company);

@@ -47,7 +47,7 @@
     <string name="close">Close</string>
     <string name="miles_mins">%.2f miles • %d mins</string>
     <string name="sign_in_to_your_account">Sign in to your account</string>
-    <string name="email_address">Email address</string>
+    <string name="email_address">Business email</string>
     <string name="password">Password</string>
     <string name="sign_in">Sign in</string>
     <string name="incorrect_username_or_pass">Incorrect username or password</string>
@@ -56,7 +56,7 @@
     <string name="already_have_an_account">Already have an account?</string>
     <string name="sign_up_a_new_account">Create a new account</string>
     <string name="_14_day_free_trial_no_credit_card_required">Free 100k events per month. No credit card required.</string>
-    <string name="company_or_product_name">Company or product name(Optional)</string>
+    <string name="company_or_product_name">Business name</string>
     <string name="next">Next</string>
     <string name="back">Back</string>
     <string name="accept_continue"><![CDATA[Accept & Continue]]></string>
@@ -101,21 +101,15 @@
 
     <array name="categories">
         <item>not selected</item>
-        <item name="workforce">Workforce</item>
-        <item name="logistics">Logistics</item>
-        <item name="gig_work">Gig Work</item>
-        <item name="on_demand_delivery">On-Demand Delivery</item>
-        <item name="ridesharing">Ridesharing</item>
-        <item name="other">Other</item>
+        <item name="deliveries">Deliveries</item>
+        <item name="visits">Visits</item>
+        <item name="rides">Rides</item>
     </array>
     <array name="category_names">
         <item>not selected</item>
-        <item>workforce</item>
-        <item>logistics</item>
-        <item>gig_work</item>
-        <item>on_demand_delivery</item>
-        <item>ridesharing</item>
-        <item>other</item>
+        <item>deliveries</item>
+        <item>visits</item>
+        <item>rides</item>
     </array>
 
     <array name="scale">
@@ -138,14 +132,12 @@
         <item>not selected</item>
         <item>My workforce</item>
         <item>My customer\'s workforce</item>
-        <item>Consumers</item>
     </array>
 
     <array name="state_names">
         <item>not selected</item>
         <item>my_workforce</item>
         <item>my_customers</item>
-        <item>consumers</item>
     </array>
 
     <string name="essential_service_worker">I am/represent an essential service worker in my region</string>
