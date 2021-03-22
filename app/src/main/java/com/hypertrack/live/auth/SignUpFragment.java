@@ -158,8 +158,11 @@ public class SignUpFragment extends Fragment implements CognitoClient.Callback {
 
         switch (viewPager.getCurrentItem()) {
             case PAGE_USER:
-                if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
-                    showError(getString(R.string.email_password_fields_required));
+                if (TextUtils.isEmpty(email)
+                        || TextUtils.isEmpty(password)
+                        || TextUtils.isEmpty(company)
+                ) {
+                    showError(getString(R.string.all_fields_required));
                     return;
                 }
                 cognitoUserAttributes.put(SignupInfoPage.CUSTOM_COMPANY, company);
