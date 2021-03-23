@@ -136,7 +136,7 @@ public class SignUpFragment extends Fragment implements CognitoClient.Callback {
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(SignupInfoPage.CUSTOM_USE_CASE, SignupInfoPage.CUSTOM_SCALE, SignupInfoPage.CUSTOM_STATE))) {
+                if (!cognitoUserAttributes.keySet().containsAll(Arrays.asList(SignupInfoPage.CUSTOM_USE_CASE, SignupInfoPage.CUSTOM_STATE))) {
                     showError(getString(R.string.all_fields_required));
                     return;
                 }
