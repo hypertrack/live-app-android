@@ -21,7 +21,7 @@ public class SignupInfoPage {
     public static final String CUSTOM_STATE = "custom:state";
     public static final String CUSTOM_COMPANY = "custom:company";
     public static final String CUSTOM_USE_CASE = "custom:use_case";
-    public static final String CUSTOM_SCALE = "custom:scale";
+//    public static final String CUSTOM_SCALE = "custom:scale";
 
 
     public static View getSignupInfoPageView(
@@ -55,24 +55,24 @@ public class SignupInfoPage {
             public void onNothingSelected(AdapterView<?> adapterView) {
             }
         });
-        scaleSelector.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
-        scaleSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                incorrect.setVisibility(View.INVISIBLE);
-                if (i == 0) {
-                    cognitoUserAttributes.remove(CUSTOM_SCALE);
-                    Log.d(TAG, "scale unselected");
-                } else {
-                    cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
-                    Log.d(TAG, "scale selection: " + scale.get(i));
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
+//        scaleSelector.setSelection(scale.indexOf(cognitoUserAttributes.get(CUSTOM_SCALE)));
+//        scaleSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+//                incorrect.setVisibility(View.INVISIBLE);
+//                if (i == 0) {
+//                    cognitoUserAttributes.remove(CUSTOM_SCALE);
+//                    Log.d(TAG, "scale unselected");
+//                } else {
+//                    cognitoUserAttributes.put(CUSTOM_SCALE, scale.get(i));
+//                    Log.d(TAG, "scale selection: " + scale.get(i));
+//                }
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> adapterView) {
+//            }
+//        });
         stateSelector.setSelection(state.indexOf(cognitoUserAttributes.get(CUSTOM_STATE)));
         stateSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
