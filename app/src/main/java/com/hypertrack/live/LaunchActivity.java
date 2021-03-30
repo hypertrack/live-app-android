@@ -89,11 +89,15 @@ public class LaunchActivity extends AppCompatActivity {
                 mLoader.stop();
                 if (referringParams == null) return;
                 String key = referringParams.optString("publishable_key");
+                String userId = referringParams.optString("driver_id");
                 if (!key.isEmpty()) {
                     Log.d(TAG, "Got publishable key from branch.io payload" + key);
                     SharedHelper sharedHelper = SharedHelper.getInstance(LaunchActivity.this);
                     sharedHelper.setHyperTrackPubKey(key);
                     sharedHelper.setLoginType(SharedHelper.LOGIN_TYPE_DEEPLINK);
+                    if (!userId.isEmpty()) {
+                        sharedHelper.setUserNameAndPhone(userId, null);
+                    }
                     LaunchActivity.this.onLoginCompleted();
                 }
             }

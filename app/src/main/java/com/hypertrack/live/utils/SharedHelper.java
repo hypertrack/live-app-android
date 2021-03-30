@@ -26,7 +26,7 @@ public class SharedHelper {
 
     private static final String PUB_KEY = "pub_key";
     private static final String USER_EMAIL_KEY = "user_email";
-    private static final String USER_NAME_KEY = "user_name";
+    public static final String USER_NAME_KEY = "user_name";
     private static final String USER_PHONE_KEY = "user_phone";
     private static final String HOME_PLACE_KEY = "home_place";
     private static final String USER_HOME_ADDRESS_KEY = "user_home_address";
@@ -101,13 +101,15 @@ public class SharedHelper {
                 .apply();
     }
 
-    public Map<String, Object> getDeviceMetadata() {
+    @NonNull public Map<String, Object> getDeviceMetadata() {
 
         Map<String, Object> map = new HashMap<>(2);
         map.put(USER_NAME_KEY, preferences.getString(USER_NAME_KEY, ""));
         map.put(USER_PHONE_KEY, preferences.getString(USER_PHONE_KEY, ""));
         return map;
     }
+
+    @Nullable public String getUserName() { return preferences.getString(USER_NAME_KEY, null); }
 
     public boolean isHomePlaceSet() {
         return preferences.contains(HOME_PLACE_KEY);
