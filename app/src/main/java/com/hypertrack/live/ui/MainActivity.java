@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
         String hyperTrackPublicKey = sharedHelper.getHyperTrackPubKey();
 
         if (PermissionsManager.isAllPermissionsApproved(this)) {
-            initializeHyperTrack(hyperTrackPublicKey);
+            initializeHyperTrack(hyperTrackPublicKey, sharedHelper.getUserName());
             mBackendProvider = BackendClientFactory.getBackendProvider(this, hyperTrack.getDeviceID());
             //noinspection ConstantConditions
             beginFragmentTransaction(new TrackingFragment(mBackendProvider))
@@ -339,7 +340,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void initializeHyperTrack(final String hyperTrackPublicKey) {
+    private void initializeHyperTrack(@NonNull final String hyperTrackPublicKey, @Nullable String email) {
 
         if (hyperTrack == null && !TextUtils.isEmpty(hyperTrackPublicKey)) {
             ServiceNotificationConfig notificationConfig = new ServiceNotificationConfig.Builder()
@@ -347,7 +348,8 @@ public class MainActivity extends AppCompatActivity {
                     .setLargeIcon(R.drawable.ic_notification)
                     .build();
             hyperTrack = HyperTrack.getInstance(hyperTrackPublicKey)
-                    .setTrackingNotificationConfig(notificationConfig);
+                    .setTrackingNotificationConfig(notificationConfig)
+                    .setDeviceName(email);
             Log.i("deviceId", hyperTrack.getDeviceID());
         }
     }
