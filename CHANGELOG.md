@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.12.2] - 2023-02-16
+
+### Fixed
+
+- Http scheme for Branch.io deeplink
 
 ## [3.12.1] - 2023-02-16
 
