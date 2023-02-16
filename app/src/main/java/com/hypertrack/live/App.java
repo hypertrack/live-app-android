@@ -29,7 +29,7 @@ public class App extends Application {
 
         HyperTrack.enableDebugLogging();
         if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), "AIzaSyBKZejrZNZpLlemrH28Nc46XzHsRSVRxKI");
+            Places.initialize(getApplicationContext(), "AIzaSyDlJnfZX9OsayqA3EtVtUI-yGa-OBRoseU");
         }
 
         SharedHelper sharedHelper = SharedHelper.getInstance(this);
