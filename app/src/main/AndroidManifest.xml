@@ -64,7 +64,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="hypertrack-live.app.link" />
-                <data android:scheme="https" android:host="hypertrack-live.app.link" />
+                <data android:scheme="http" android:host="hypertrack-live.app.link" />
             </intent-filter>
 
         </activity>
